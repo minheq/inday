@@ -1,4 +1,4 @@
-import App from './mobile/app';
+import { App } from './web/app';
 import { AppRegistry } from 'react-native';
 
 AppRegistry.registerComponent('App', () => App);

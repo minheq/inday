@@ -1,5 +1,4 @@
 import path from 'path';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 module.exports = {
   entry: './index.web.ts',
@@ -18,6 +17,7 @@ module.exports = {
             '@babel/preset-react',
             '@babel/preset-typescript',
           ],
+          plugins: ['@babel/plugin-proposal-class-properties'],
         },
       },
     ],
@@ -32,5 +32,4 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname),
   },
-  plugins: [new BundleAnalyzerPlugin()],
 };

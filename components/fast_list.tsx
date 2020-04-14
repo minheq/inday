@@ -549,14 +549,13 @@ export type FastListProps = {
     wrapper: React.ReactNode,
   ) => React.ReactNode;
   actionSheetScrollRef?: { current?: React.ReactNode };
-  onScroll?: (event: ScrollEvent) => void;
   onScrollEnd?: (event: ScrollEvent) => void;
   onLayout?: (event: LayoutEvent) => void;
-  renderHeader: () => React.ReactElement;
-  renderFooter: () => React.ReactElement;
-  renderSection: (section: number) => React.ReactElement;
-  renderRow: (section: number, row: number) => React.ReactElement;
-  renderSectionFooter: (section: number) => React.ReactElement;
+  renderHeader: () => React.ReactElement | null;
+  renderFooter: () => React.ReactElement | null;
+  renderSection: (section: number) => React.ReactElement | null;
+  renderRow: (section: number, row: number) => React.ReactElement | null;
+  renderSectionFooter: (section: number) => React.ReactElement | null;
   renderAccessory?: (list: FastList) => React.ReactNode;
   renderEmpty?: () => React.ReactElement;
   headerHeight: HeaderHeight;
@@ -684,7 +683,6 @@ export default class FastList extends React.PureComponent<
   scrollTop: number = 0;
   scrollTopValue: Animated.Value =
     this.props.scrollTopValue || new Animated.Value(0);
-  scrollTopValueAttachment?: { detach: () => void };
   scrollView: { current: ScrollView | null } = React.createRef();
 
   state = getFastListState(
@@ -766,11 +764,6 @@ export default class FastList extends React.PureComponent<
       nextState.blockEnd !== this.state.blockEnd
     ) {
       this.setState(nextState);
-    }
-
-    const { onScroll } = this.props;
-    if (onScroll != null) {
-      onScroll(event);
     }
   };
 
@@ -909,26 +902,9 @@ export default class FastList extends React.PureComponent<
     return children;
   }
 
-  componentDidMount() {
-    if (this.scrollView.current != null) {
-      // @ts-ignore: Types for React Native doesn't include attachNativeEvent
-      this.scrollTopValueAttachment = Animated.attachNativeEvent(
-        this.scrollView.current,
-        'onScroll',
-        [{ nativeEvent: { contentOffset: { y: this.scrollTopValue } } }],
-      );
-    }
-  }
-
   componentDidUpdate(prevProps: FastListProps) {
     if (prevProps.scrollTopValue !== this.props.scrollTopValue) {
       throw new Error('scrollTopValue cannot changed after mounting');
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.scrollTopValueAttachment != null) {
-      this.scrollTopValueAttachment.detach();
     }
   }
 
@@ -952,8 +928,9 @@ export default class FastList extends React.PureComponent<
     // to wrap the scrollview in a NativeViewGestureHandler. This wrapper does that thing that need do
     const wrapper = renderActionSheetScrollViewWrapper || ((val) => val);
     const scrollView = wrapper(
-      <ScrollView
+      <Animated.ScrollView
         contentInset={contentInset}
+        // @ts-ignore no types
         ref={(ref) => {
           this.scrollView.current = ref;
           if (actionSheetScrollRef) {
@@ -962,13 +939,16 @@ export default class FastList extends React.PureComponent<
         }}
         removeClippedSubviews={false}
         scrollEventThrottle={16}
-        onScroll={this.handleScroll}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: this.scrollTopValue } } }],
+          { listener: this.handleScroll, useNativeDriver: true },
+        )}
         onLayout={this.handleLayout}
         onMomentumScrollEnd={this.handleScrollEnd}
         onScrollEndDrag={this.handleScrollEnd}
       >
         {this.renderItems()}
-      </ScrollView>,
+      </Animated.ScrollView>,
     );
     return (
       <React.Fragment>
