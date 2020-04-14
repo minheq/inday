@@ -923,8 +923,8 @@ export default class FastList extends React.PureComponent<
       renderAccessory,
       contentInset,
     } = this.props;
-    // what is this??
-    // well! in order to support continuous scrolling of a scrollview/list/whatever in an action sheet, we need
+
+    // in order to support continuous scrolling of a scrollview/list/whatever in an action sheet, we need
     // to wrap the scrollview in a NativeViewGestureHandler. This wrapper does that thing that need do
     const wrapper = renderActionSheetScrollViewWrapper || ((val) => val);
     const scrollView = wrapper(

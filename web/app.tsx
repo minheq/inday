@@ -50,10 +50,10 @@ function Footer() {
   );
 }
 
-function Section() {
+function Section(section: number) {
   return (
     <View style={styles.section}>
-      <Text>Section</Text>
+      <Text>Section {section}</Text>
     </View>
   );
 }
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: 'green',
     height: SECTION_HEIGHT,
+    willChange: 'transform',
   },
   row: {
     backgroundColor: 'yellow',
