@@ -85,8 +85,8 @@ class FastListItemRecycler {
   constructor(items: FastListItem[]) {
     items.forEach((item) => {
       const { type, section, row } = item;
-      const [items] = this._itemsForType(type);
-      items[`${type}:${section}:${row}`] = item;
+      const [subItems] = this._itemsForType(type);
+      subItems[`${type}:${section}:${row}`] = item;
     });
   }
 
@@ -468,7 +468,9 @@ class FastListComputer {
           }
         }
       }
-      if (!foundRow) scrollTop += this.getHeightForSectionFooter(section);
+      if (!foundRow) {
+        scrollTop += this.getHeightForSectionFooter(section);
+      }
       section += 1;
     }
 
@@ -547,16 +549,16 @@ export type FastListProps = {
     wrapper: React.ReactNode,
   ) => React.ReactNode;
   actionSheetScrollRef?: { current?: React.ReactNode };
-  onScroll?: (event: ScrollEvent) => any;
-  onScrollEnd?: (event: ScrollEvent) => any;
-  onLayout?: (event: LayoutEvent) => any;
-  renderHeader: () => React.ReactElement<any>;
-  renderFooter: () => React.ReactElement<any>;
-  renderSection: (section: number) => React.ReactElement<any>;
-  renderRow: (section: number, row: number) => React.ReactElement<any>;
-  renderSectionFooter: (section: number) => React.ReactElement<any>;
+  onScroll?: (event: ScrollEvent) => void;
+  onScrollEnd?: (event: ScrollEvent) => void;
+  onLayout?: (event: LayoutEvent) => void;
+  renderHeader: () => React.ReactElement;
+  renderFooter: () => React.ReactElement;
+  renderSection: (section: number) => React.ReactElement;
+  renderRow: (section: number, row: number) => React.ReactElement;
+  renderSectionFooter: (section: number) => React.ReactElement;
   renderAccessory?: (list: FastList) => React.ReactNode;
-  renderEmpty?: () => React.ReactElement<any>;
+  renderEmpty?: () => React.ReactElement;
   headerHeight: HeaderHeight;
   footerHeight: FooterHeight;
   sectionHeight: SectionHeight;
@@ -619,7 +621,7 @@ function getFastListState(
     batchSize,
     blockStart,
     blockEnd,
-    items: prevItems,
+    items: prevItems = [],
   }: {
     batchSize: number;
     blockStart: number;
@@ -654,7 +656,7 @@ function getFastListState(
     ...computer.compute(
       blockStart - batchSize,
       blockEnd + batchSize,
-      prevItems || [],
+      prevItems,
     ),
   };
 }
@@ -932,8 +934,8 @@ export default class FastList extends React.PureComponent<
 
   isEmpty = () => {
     const { sections } = this.props;
-    const length = sections.reduce((length, rowLength) => {
-      return length + rowLength;
+    const length = sections.reduce((prevLength, rowLength) => {
+      return prevLength + rowLength;
     }, 0);
     return length === 0;
   };
