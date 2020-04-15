@@ -9,7 +9,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx)$/,
+        test: /\.(js|ts|tsx)$/,
         loader: 'babel-loader',
         options: {
           presets: [
@@ -28,7 +28,7 @@ module.exports = {
     },
     extensions: ['.web.tsx', '.web.ts', '.tsx', '.ts', '.jsx', '.js', '.json'],
   },
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'cheap-module-source-map',
   devServer: {
     contentBase: path.join(__dirname),
   },
