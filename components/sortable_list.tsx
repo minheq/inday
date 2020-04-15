@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  InteractionManager,
   Platform,
   NativeSyntheticEvent,
   NativeScrollEvent,
   GestureResponderEvent,
+  LayoutChangeEvent,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -107,6 +107,8 @@ export class SortableList<T = any> extends React.Component<
     bottomViewHeight: 0,
   };
 
+  scrollRef: { current: ScrollView | null } = React.createRef();
+
   sortRefs = new Map<number, View>();
 
   isMovePanResponder: boolean = false;
@@ -131,6 +133,8 @@ export class SortableList<T = any> extends React.Component<
 
   autoInterval: number | null = null;
   isScaleRecovery: number | null = null;
+  contentHeight: number = 0;
+  frameHeight: number = 0;
 
   curScrollData: {
     totalHeight: number;
@@ -186,7 +190,7 @@ export class SortableList<T = any> extends React.Component<
       height: Math.ceil(dataSource.length / rowNum) * itemHeight,
       itemWidth,
       itemHeight,
-      scrollEnabled: false,
+      scrollEnabled: true,
     };
   }
 
@@ -242,10 +246,6 @@ export class SortableList<T = any> extends React.Component<
 
   componentDidMount() {
     this.initTag();
-    InteractionManager.runAfterInteractions(() => {
-      this.scrollTo(1, false);
-      this.scrollTo(0, false);
-    });
   }
 
   autoObj: {
@@ -356,8 +356,9 @@ export class SortableList<T = any> extends React.Component<
 
     if (this.sortRefs.has(touchIndex)) {
       // Initialization data
-      if (this.isStartupAuto() && this.curScrollData) {
-        this.autoObj.scrollDy = this.autoObj.hasScrollDy = this.curScrollData.offsetY;
+      if (this.curScrollData) {
+        this.autoObj.hasScrollDy = this.curScrollData.offsetY;
+        this.autoObj.scrollDy = this.curScrollData.offsetY;
       }
 
       this.setState({
@@ -408,7 +409,7 @@ export class SortableList<T = any> extends React.Component<
         } else if (this.touchCurItem.originLeft + dx > maxWidth) {
           dx = maxWidth - this.touchCurItem.originLeft;
         }
-        if (!this.isStartupAuto()) {
+        if (!this.curScrollData) {
           if (this.touchCurItem.originTop + dy < 0) {
             dy = -this.touchCurItem.originTop;
           } else if (this.touchCurItem.originTop + dy > maxHeight) {
@@ -417,7 +418,7 @@ export class SortableList<T = any> extends React.Component<
         }
       }
 
-      if (this.isStartupAuto()) {
+      if (this.curScrollData) {
         const curDis =
           this.touchCurItem.originTop + dy - this.autoObj.hasScrollDy;
         if (nativeEvent != null) {
@@ -584,7 +585,7 @@ export class SortableList<T = any> extends React.Component<
           this.touchCurItem.moveToIndex,
         );
       }
-      //this.state.dataSource[this.touchCurItem.index].scaleValue.setValue(1)
+
       Animated.timing(
         this.state.dataSource[this.touchCurItem.index].scaleValue,
         {
@@ -694,13 +695,6 @@ export class SortableList<T = any> extends React.Component<
     return this.state.dataSource.map((item) => item.data);
   }
 
-  isStartupAuto = () => {
-    if (this.curScrollData == null) {
-      return false;
-    }
-    return true;
-  };
-
   scrollTo = (height: number, animated = true) => {
     // Prevent iOS from sliding when elastically sliding negative numbers
     if (this.curScrollData) {
@@ -724,9 +718,7 @@ export class SortableList<T = any> extends React.Component<
     this.scrollRef.current?.scrollTo({ x: 0, y: height, animated });
   };
 
-  onScrollListener = ({
-    nativeEvent,
-  }: NativeSyntheticEvent<NativeScrollEvent>) => {
+  handleScroll = ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
     this.curScrollData = {
       totalHeight: nativeEvent.contentSize.height,
       windowHeight: nativeEvent.layoutMeasurement.height,
@@ -735,16 +727,38 @@ export class SortableList<T = any> extends React.Component<
     };
   };
 
-  scrollRef: { current: ScrollView | null } = React.createRef();
+  handleLayout = (event: LayoutChangeEvent) => {
+    this.frameHeight = event.nativeEvent.layout.height;
+    // const maxOffset = this.contentHeight - this.frameHeight;
+    // if (maxOffset < this.yOffset) {
+    //   this.yOffset = maxOffset;
+    // }
+    this.curScrollData = {
+      totalHeight: this.contentHeight,
+      windowHeight: this.frameHeight,
+      offsetY: 0,
+      hasScroll: true,
+    };
+  };
+
+  handleContentSizeChange = (contentWidth: number, contentHeight: number) => {
+    this.contentHeight = contentHeight;
+    // const maxOffset = this.contentHeight - this.frameHeight;
+    // if (maxOffset < this.yOffset) {
+    //   this.yOffset = maxOffset;
+    // }
+  };
 
   render() {
     return (
       <ScrollView
         bounces={false}
         scrollEventThrottle={1}
-        ref={(scrollRef) => (this.scrollRef.current = scrollRef)}
+        ref={(ref) => (this.scrollRef.current = ref)}
         scrollEnabled={this.state.scrollEnabled}
-        onScroll={this.onScrollListener}
+        onScroll={this.handleScroll}
+        onLayout={this.handleLayout}
+        onContentSizeChange={this.handleContentSizeChange}
         style={styles.container}
       >
         {this.props.renderHeaderView ? this.props.renderHeaderView : null}
@@ -756,7 +770,6 @@ export class SortableList<T = any> extends React.Component<
               height: this.state.height,
             },
           ]}
-          //onLayout={()=> {}}
         >
           {this._renderItemView()}
         </View>

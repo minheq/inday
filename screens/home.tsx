@@ -62,6 +62,7 @@ export class HomeScreen extends React.Component<any, any> {
           dataSource={this.state.data}
           parentWidth={parentWidth}
           childrenWidth={childrenWidth}
+          delayLongPress={200}
           marginChildrenBottom={10}
           marginChildrenRight={10}
           marginChildrenLeft={10}
