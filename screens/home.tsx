@@ -1,45 +1,48 @@
 import React from 'react';
 import { Dimensions, StyleSheet, Text, View, SafeAreaView } from 'react-native';
-import { SortableList } from '../components/sortable_list';
+import { SortableList, RenderItemProps } from '../components/sortable_list';
+import { ListItem } from '../components/list_item';
 
-interface Item {
-  txt: number;
+interface Block {
+  id: string;
+  title: string;
+  note: string;
 }
 
-const TEST_DATA: Item[] = [
-  { txt: 1 },
-  { txt: 2 },
-  { txt: 3 },
-  { txt: 4 },
-  { txt: 5 },
-  { txt: 6 },
-  { txt: 7 },
-  { txt: 8 },
-  { txt: 9 },
-  { txt: 10 },
-  { txt: 11 },
-  { txt: 12 },
-  { txt: 13 },
-  { txt: 14 },
-  { txt: 15 },
-  { txt: 16 },
-  { txt: 17 },
-  { txt: 18 },
-  { txt: 19 },
-  { txt: 20 },
-  { txt: 21 },
-  { txt: 22 },
-  { txt: 23 },
-  { txt: 24 },
-  { txt: 25 },
-  { txt: 26 },
+const TEST_DATA: Block[] = [
+  { id: '1', title: 'Title', note: 'Note' },
+  { id: '2', title: 'Title', note: 'Note' },
+  { id: '3', title: 'Title', note: 'Note' },
+  { id: '4', title: 'Title', note: 'Note' },
+  { id: '5', title: 'Title', note: 'Note' },
+  { id: '6', title: 'Title', note: 'Note' },
+  { id: '7', title: 'Title', note: 'Note' },
+  { id: '8', title: 'Title', note: 'Note' },
+  { id: '9', title: 'Title', note: 'Note' },
+  { id: '10', title: 'Title', note: 'Note' },
+  { id: '11', title: 'Title', note: 'Note' },
+  { id: '12', title: 'Title', note: 'Note' },
+  { id: '13', title: 'Title', note: 'Note' },
+  { id: '14', title: 'Title', note: 'Note' },
+  { id: '15', title: 'Title', note: 'Note' },
+  { id: '16', title: 'Title', note: 'Note' },
+  { id: '17', title: 'Title', note: 'Note' },
+  { id: '18', title: 'Title', note: 'Note' },
+  { id: '19', title: 'Title', note: 'Note' },
+  { id: '20', title: 'Title', note: 'Note' },
+  { id: '21', title: 'Title', note: 'Note' },
+  { id: '22', title: 'Title', note: 'Note' },
+  { id: '23', title: 'Title', note: 'Note' },
+  { id: '24', title: 'Title', note: 'Note' },
+  { id: '25', title: 'Title', note: 'Note' },
+  { id: '26', title: 'Title', note: 'Note' },
 ];
 
 const { width } = Dimensions.get('window');
 
 const parentWidth = width;
-const childrenWidth = width - 20;
-const childrenHeight = 48;
+const childrenWidth = width;
+const childrenHeight = 80;
 
 export class HomeScreen extends React.Component<any, any> {
   constructor(props: any) {
@@ -50,50 +53,42 @@ export class HomeScreen extends React.Component<any, any> {
     };
   }
 
+  handleDataChange = (data: Block[]) => {
+    if (data.length !== this.state.data.length) {
+      this.setState({
+        data: data,
+      });
+    }
+  };
+
   render() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.header}>
-          <Text style={styles.header_title}>
-            Automatic Sliding: Single Line
-          </Text>
-        </View>
-        <SortableList
+        <SortableList<Block>
           dataSource={this.state.data}
           parentWidth={parentWidth}
           childrenWidth={childrenWidth}
-          delayLongPress={200}
-          marginChildrenBottom={10}
-          marginChildrenRight={10}
-          marginChildrenLeft={10}
-          marginChildrenTop={10}
           childrenHeight={childrenHeight}
-          onDataChange={(data) => {
-            if (data.length !== this.state.data.length) {
-              this.setState({
-                data: data,
-              });
-            }
-          }}
-          keyExtractor={(item) => item.txt}
-          renderItem={(item) => {
-            return this.renderItem(item);
-          }}
+          keyExtractor={(item) => item.id}
+          onDataChange={this.handleDataChange}
+          renderItem={this.renderItem}
         />
       </SafeAreaView>
     );
   }
 
-  renderItem(item: Item) {
+  renderItem = (props: RenderItemProps<Block>) => {
+    const { item, onLongPress, onPressOut, isActive } = props;
+
     return (
-      <View style={styles.item}>
-        <View style={styles.item_icon_swipe}>
-          <View style={styles.item_icon} />
+      <ListItem item={item} onLongPress={onLongPress} onPressOut={onPressOut}>
+        <View style={[styles.block, isActive && styles.active]}>
+          <Text style={styles.blockTitle}>{item.title}</Text>
+          <Text style={styles.blockNote}>{item.note}</Text>
         </View>
-        <Text style={styles.item_text}>{item.txt}</Text>
-      </View>
+      </ListItem>
     );
-  }
+  };
 }
 
 const styles = StyleSheet.create({
@@ -101,45 +96,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
-  header: {
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomColor: '#2ecc71',
-    borderBottomWidth: 2,
-  },
-  header_title: {
-    color: '#333',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  item: {
+  block: {
     width: childrenWidth,
     height: childrenHeight,
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#2ecc71',
-    borderRadius: 4,
-  },
-  item_icon_swipe: {
-    width: childrenHeight - 10,
-    height: childrenHeight - 10,
     backgroundColor: '#fff',
-    borderRadius: (childrenHeight - 10) / 2,
-    marginLeft: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 16,
+    borderColor: '#f0f0f0',
+    borderBottomWidth: 1,
   },
-  item_icon: {
-    width: childrenHeight - 20,
-    height: childrenHeight - 20,
-    resizeMode: 'contain',
-  },
-  item_text: {
-    color: '#fff',
-    fontSize: 20,
-    marginRight: 20,
+  blockTitle: {
     fontWeight: 'bold',
   },
+  active: {
+    backgroundColor: 'green',
+  },
+  blockNote: {},
 });

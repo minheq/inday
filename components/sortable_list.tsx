@@ -5,7 +5,6 @@ import {
   Easing,
   PanResponder,
   StyleSheet,
-  TouchableOpacity,
   View,
   ScrollView,
   Platform,
@@ -22,16 +21,19 @@ const touchZIndex = 99;
 
 type ScaleStatus = 'scale' | 'scaleX' | 'scaleY';
 
+export interface RenderItemProps<T = any> {
+  item: T;
+  isActive: boolean;
+  index: number;
+  onLongPress: () => void;
+  onPressOut: () => void;
+}
+
 interface SortableListProps<T = any> {
   dataSource: T[];
   parentWidth: number;
   childrenHeight: number;
   childrenWidth: number;
-
-  marginChildrenTop: number;
-  marginChildrenBottom: number;
-  marginChildrenLeft: number;
-  marginChildrenRight: number;
 
   sortable: boolean;
 
@@ -39,11 +41,10 @@ interface SortableListProps<T = any> {
   onDragStart?: (touchIndex: number) => void;
   onDragEnd?: (index: number, toIndex: number) => void;
   onDataChange?: (data: T[]) => void;
-  renderItem: (data: T, index: number) => React.ReactElement;
+  renderItem: (props: RenderItemProps<T>) => React.ReactElement;
   scaleStatus: ScaleStatus;
   fixedItems: number[];
   keyExtractor?: (item: T, index: number) => string;
-  delayLongPress?: number;
   isDragFreely?: boolean;
   onDragging?: (
     gestureState: {
@@ -83,15 +84,19 @@ interface SortableListState<T = any> {
   scrollEnabled: boolean;
 }
 
+enum ForceScrollStatus {
+  None = 0,
+  Down = 1,
+  OnlyDown = 2,
+  Up = -1,
+  OnlyUp = -2,
+}
+
 export class SortableList<T = any> extends React.Component<
   SortableListProps<T>,
   SortableListState<T>
 > {
   public static defaultProps = {
-    marginChildrenTop: 0,
-    marginChildrenBottom: 0,
-    marginChildrenLeft: 0,
-    marginChildrenRight: 0,
     parentWidth: width,
     sortable: true,
     scaleStatus: 'scale',
@@ -156,14 +161,8 @@ export class SortableList<T = any> extends React.Component<
   constructor(props: SortableListProps<T>) {
     super(props);
 
-    const itemWidth =
-      props.childrenWidth +
-      props.marginChildrenLeft +
-      props.marginChildrenRight;
-    const itemHeight =
-      props.childrenHeight +
-      props.marginChildrenTop +
-      props.marginChildrenBottom;
+    const itemWidth = props.childrenWidth;
+    const itemHeight = props.childrenHeight;
 
     const rowNum = Math.floor(props.parentWidth / itemWidth);
 
@@ -185,7 +184,7 @@ export class SortableList<T = any> extends React.Component<
     });
 
     this.state = {
-      dataSource: dataSource,
+      dataSource,
       curPropsDataSource: props.dataSource,
       height: Math.ceil(dataSource.length / rowNum) * itemHeight,
       itemWidth,
@@ -198,14 +197,8 @@ export class SortableList<T = any> extends React.Component<
     nextProps: SortableListProps<T>,
     prevState: SortableListState<T>,
   ) {
-    const itemWidth =
-      nextProps.childrenWidth +
-      nextProps.marginChildrenLeft +
-      nextProps.marginChildrenRight;
-    const itemHeight =
-      nextProps.childrenHeight +
-      nextProps.marginChildrenTop +
-      nextProps.marginChildrenBottom;
+    const itemWidth = nextProps.childrenWidth;
+    const itemHeight = nextProps.childrenHeight;
     if (
       nextProps.dataSource !== prevState.curPropsDataSource ||
       itemWidth !== prevState.itemWidth ||
@@ -253,13 +246,13 @@ export class SortableList<T = any> extends React.Component<
     scrollDx: number;
     scrollDy: number;
     hasScrollDy: number;
-    forceScrollStatus: number;
+    forceScrollStatus: ForceScrollStatus;
   } = {
     curDy: 0,
     scrollDx: 0,
     scrollDy: 0,
     hasScrollDy: 0,
-    forceScrollStatus: 0, // 0: NONE 1: DOWN 2: ONLY_DOWN -1: UP -2: ONLY_UP
+    forceScrollStatus: ForceScrollStatus.None,
   };
 
   // Initialization tag
@@ -270,7 +263,7 @@ export class SortableList<T = any> extends React.Component<
       scrollDx: 0,
       scrollDy: 0,
       hasScrollDy: 0,
-      forceScrollStatus: 0, // 0: NONE 1: DOWN 2: ONLY_DOWN -1: UP -2: ONLY_UP
+      forceScrollStatus: ForceScrollStatus.None,
     };
   };
 
@@ -282,9 +275,9 @@ export class SortableList<T = any> extends React.Component<
     }
     const { totalHeight, windowHeight, offsetY } = scrollData;
     if (totalHeight <= windowHeight + offsetY) {
-      this.autoObj.forceScrollStatus = -2;
+      this.autoObj.forceScrollStatus = ForceScrollStatus.OnlyUp;
     } else if (offsetY <= 0) {
-      this.autoObj.forceScrollStatus = 2;
+      this.autoObj.forceScrollStatus = ForceScrollStatus.OnlyDown;
     }
   };
 
@@ -304,9 +297,9 @@ export class SortableList<T = any> extends React.Component<
     // Start automatic swipe
     this.autoInterval = setInterval(() => {
       if (
-        this.autoObj.forceScrollStatus === 0 ||
-        this.autoObj.forceScrollStatus === 2 ||
-        this.autoObj.forceScrollStatus === -2
+        this.autoObj.forceScrollStatus === ForceScrollStatus.None ||
+        this.autoObj.forceScrollStatus === ForceScrollStatus.OnlyDown ||
+        this.autoObj.forceScrollStatus === ForceScrollStatus.OnlyUp
       ) {
         this.clearAutoInterval();
         return;
@@ -315,9 +308,9 @@ export class SortableList<T = any> extends React.Component<
       if (this.curScrollData && !this.curScrollData.hasScroll) {
         return;
       }
-      if (this.autoObj.forceScrollStatus === 1) {
+      if (this.autoObj.forceScrollStatus === ForceScrollStatus.Down) {
         this.autoObj.scrollDy = this.autoObj.scrollDy + this.props.autoThrottle;
-      } else if (this.autoObj.forceScrollStatus === -1) {
+      } else if (this.autoObj.forceScrollStatus === ForceScrollStatus.Up) {
         this.autoObj.scrollDy = this.autoObj.scrollDy - this.props.autoThrottle;
       }
       this.scrollTo(this.autoObj.scrollDy, false);
@@ -372,13 +365,21 @@ export class SortableList<T = any> extends React.Component<
         duration: this.props.scaleDuration,
         useNativeDriver: false,
       }).start(() => {
+        let ref = this.sortRefs.get(touchIndex) as View;
+
         this.touchCurItem = {
-          ref: this.sortRefs.get(touchIndex) as View,
+          ref,
           index: touchIndex,
           originLeft: this.state.dataSource[touchIndex].originLeft,
           originTop: this.state.dataSource[touchIndex].originTop,
           moveToIndex: touchIndex,
         };
+
+        ref.setNativeProps({
+          style: {
+            zIndex: touchZIndex,
+          },
+        });
         this.isMovePanResponder = true;
       });
     }
@@ -422,33 +423,33 @@ export class SortableList<T = any> extends React.Component<
         const curDis =
           this.touchCurItem.originTop + dy - this.autoObj.hasScrollDy;
         if (nativeEvent != null) {
-          const tempStatus = this.autoObj.forceScrollStatus;
+          const tempForceScrollStatus = this.autoObj.forceScrollStatus;
           // Automatic sliding
           const minDownDiss =
             curDis +
             this.props.childrenHeight * (1 + (this.props.maxScale - 1) / 2) +
-            this.props.marginChildrenTop +
             this.props.headerViewHeight;
-          const maxUpDiss =
-            curDis + this.props.marginChildrenTop + this.props.headerViewHeight;
+          const maxUpDiss = curDis + this.props.headerViewHeight;
           if (
-            (tempStatus === 0 || tempStatus === 2) &&
+            (tempForceScrollStatus === ForceScrollStatus.None ||
+              tempForceScrollStatus === ForceScrollStatus.OnlyDown) &&
             vy &&
             vy > 0.01 &&
             this.curScrollData &&
             minDownDiss > this.curScrollData.windowHeight
           ) {
             this.autoObj.curDy = dy;
-            this.autoObj.forceScrollStatus = 1;
+            this.autoObj.forceScrollStatus = ForceScrollStatus.Down;
             this.startAutoScroll();
           } else if (
-            (tempStatus === 0 || tempStatus === -2) &&
+            (tempForceScrollStatus === ForceScrollStatus.None ||
+              tempForceScrollStatus === ForceScrollStatus.OnlyUp) &&
             vy &&
             -vy > 0.01 &&
             maxUpDiss < 0
           ) {
             this.autoObj.curDy = dy;
-            this.autoObj.forceScrollStatus = -1;
+            this.autoObj.forceScrollStatus = ForceScrollStatus.Up;
             this.startAutoScroll();
           }
         }
@@ -456,11 +457,19 @@ export class SortableList<T = any> extends React.Component<
         // Determine whether to change steering
         if (vy != null) {
           // Slide down 1、2
-          if (this.autoObj.forceScrollStatus >= 1 && -vy > 0.01) {
-            this.autoObj.forceScrollStatus = 0;
+          if (
+            (this.autoObj.forceScrollStatus === ForceScrollStatus.Down ||
+              this.autoObj.forceScrollStatus === ForceScrollStatus.OnlyDown) &&
+            -vy > 0.01
+          ) {
+            this.autoObj.forceScrollStatus = ForceScrollStatus.None;
             // Slide up -1、-2
-          } else if (this.autoObj.forceScrollStatus <= -1 && vy > 0.01) {
-            this.autoObj.forceScrollStatus = 0;
+          } else if (
+            (this.autoObj.forceScrollStatus === ForceScrollStatus.Up ||
+              this.autoObj.forceScrollStatus === ForceScrollStatus.OnlyUp) &&
+            vy > 0.01
+          ) {
+            this.autoObj.forceScrollStatus = ForceScrollStatus.None;
           }
         }
 
@@ -473,8 +482,8 @@ export class SortableList<T = any> extends React.Component<
           dy = dy + this.autoObj.scrollDy;
           // Prevent fingers from sliding when sliding automatically
           if (
-            this.autoObj.forceScrollStatus === 1 ||
-            this.autoObj.forceScrollStatus === -1
+            this.autoObj.forceScrollStatus === ForceScrollStatus.Down ||
+            this.autoObj.forceScrollStatus === ForceScrollStatus.Up
           ) {
             return;
           }
@@ -483,12 +492,6 @@ export class SortableList<T = any> extends React.Component<
 
       const left = this.touchCurItem.originLeft + dx;
       const top = this.touchCurItem.originTop + dy;
-
-      this.touchCurItem.ref.setNativeProps({
-        style: {
-          zIndex: touchZIndex,
-        },
-      });
 
       this.state.dataSource[this.touchCurItem.index].position.setValue({
         x: left,
@@ -699,13 +702,13 @@ export class SortableList<T = any> extends React.Component<
     // Prevent iOS from sliding when elastically sliding negative numbers
     if (this.curScrollData) {
       if (
-        this.autoObj.forceScrollStatus < 0 &&
+        this.autoObj.forceScrollStatus < ForceScrollStatus.None &&
         this.curScrollData.offsetY <= 0
       ) {
         this.autoObj.scrollDy = 0; // Correcting data system deviations
         return;
       } else if (
-        this.autoObj.forceScrollStatus > 0 &&
+        this.autoObj.forceScrollStatus > ForceScrollStatus.None &&
         this.curScrollData.windowHeight + this.curScrollData.offsetY >=
           this.curScrollData.totalHeight
       ) {
@@ -785,6 +788,7 @@ export class SortableList<T = any> extends React.Component<
       const key = this.props.keyExtractor
         ? this.props.keyExtractor(item.data, index)
         : item.originIndex;
+
       return (
         <Animated.View
           key={key}
@@ -794,10 +798,6 @@ export class SortableList<T = any> extends React.Component<
           style={[
             styles.item,
             {
-              marginTop: this.props.marginChildrenTop,
-              marginBottom: this.props.marginChildrenBottom,
-              marginLeft: this.props.marginChildrenLeft,
-              marginRight: this.props.marginChildrenRight,
               left: item.position.x,
               top: item.position.y,
               opacity: item.scaleValue.interpolate({
@@ -808,23 +808,13 @@ export class SortableList<T = any> extends React.Component<
             },
           ]}
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            delayLongPress={this.props.delayLongPress}
-            onPressOut={() => this.onPressOut()}
-            onLongPress={() => this.startTouch(index)}
-            onPress={() => {
-              if (this.props.onClickItem) {
-                this.props.onClickItem(
-                  this.getOriginalData(),
-                  item.data,
-                  index,
-                );
-              }
-            }}
-          >
-            {this.props.renderItem(item.data, index)}
-          </TouchableOpacity>
+          {this.props.renderItem({
+            isActive: false,
+            item: item.data,
+            index,
+            onPressOut: () => this.onPressOut(),
+            onLongPress: () => this.startTouch(index),
+          })}
         </Animated.View>
       );
     });
