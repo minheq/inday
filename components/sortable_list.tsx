@@ -99,10 +99,10 @@ export class SortableList<T = any> extends React.Component<
   public static defaultProps = {
     parentWidth: width,
     sortable: true,
-    scaleStatus: 'scale',
+    scaleStatus: 'scaleY',
     fixedItems: [],
     isDragFreely: false,
-    maxScale: 1.1,
+    maxScale: 1.05,
     minOpacity: 0.8,
     scaleDuration: 100,
     slideDuration: 300,
@@ -137,7 +137,7 @@ export class SortableList<T = any> extends React.Component<
   });
 
   autoInterval: number | null = null;
-  isScaleRecovery: number | null = null;
+  scaleRecoveryTimeout: number | null = null;
   contentHeight: number = 0;
   frameHeight: number = 0;
 
@@ -614,7 +614,7 @@ export class SortableList<T = any> extends React.Component<
   }
 
   onPressOut() {
-    this.isScaleRecovery = setTimeout(() => {
+    this.scaleRecoveryTimeout = setTimeout(() => {
       if (this.isMovePanResponder && !this.isHasMove) {
         this.endTouch();
       }
@@ -821,8 +821,8 @@ export class SortableList<T = any> extends React.Component<
   };
 
   componentWillUnmount() {
-    if (this.isScaleRecovery) {
-      clearTimeout(this.isScaleRecovery);
+    if (this.scaleRecoveryTimeout) {
+      clearTimeout(this.scaleRecoveryTimeout);
     }
     this.clearAutoInterval();
   }

@@ -1,7 +1,15 @@
 import React from 'react';
-import { Dimensions, StyleSheet, Text, View, SafeAreaView } from 'react-native';
-import { SortableList, RenderItemProps } from '../components/sortable_list';
-import { ListItem } from '../components/list_item';
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
+import { DragDropProvider } from '../components/drag_drop_context';
+import { useDrag } from '../components/use_drag';
 
 interface Block {
   id: string;
@@ -9,86 +17,68 @@ interface Block {
   note: string;
 }
 
-const TEST_DATA: Block[] = [
+const blocks: Block[] = [
   { id: '1', title: 'Title', note: 'Note' },
   { id: '2', title: 'Title', note: 'Note' },
   { id: '3', title: 'Title', note: 'Note' },
   { id: '4', title: 'Title', note: 'Note' },
   { id: '5', title: 'Title', note: 'Note' },
   { id: '6', title: 'Title', note: 'Note' },
-  { id: '7', title: 'Title', note: 'Note' },
-  { id: '8', title: 'Title', note: 'Note' },
-  { id: '9', title: 'Title', note: 'Note' },
-  { id: '10', title: 'Title', note: 'Note' },
-  { id: '11', title: 'Title', note: 'Note' },
-  { id: '12', title: 'Title', note: 'Note' },
-  { id: '13', title: 'Title', note: 'Note' },
-  { id: '14', title: 'Title', note: 'Note' },
-  { id: '15', title: 'Title', note: 'Note' },
-  { id: '16', title: 'Title', note: 'Note' },
-  { id: '17', title: 'Title', note: 'Note' },
-  { id: '18', title: 'Title', note: 'Note' },
-  { id: '19', title: 'Title', note: 'Note' },
-  { id: '20', title: 'Title', note: 'Note' },
-  { id: '21', title: 'Title', note: 'Note' },
-  { id: '22', title: 'Title', note: 'Note' },
-  { id: '23', title: 'Title', note: 'Note' },
-  { id: '24', title: 'Title', note: 'Note' },
-  { id: '25', title: 'Title', note: 'Note' },
-  { id: '26', title: 'Title', note: 'Note' },
 ];
 
-const { width } = Dimensions.get('window');
+export function HomeScreen() {
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <DragDropProvider>
+        <ScrollView bounces={false}>
+          {blocks.map((block) => (
+            <BlockItem block={block} />
+          ))}
+        </ScrollView>
+      </DragDropProvider>
+    </SafeAreaView>
+  );
+}
 
-const parentWidth = width;
-const childrenWidth = width;
-const childrenHeight = 80;
+interface BlockItemProps {
+  block: Block;
+}
 
-export class HomeScreen extends React.Component<any, any> {
-  constructor(props: any) {
-    super(props);
+function BlockItem(props: BlockItemProps) {
+  const { block } = props;
+  const opacity = React.useRef(new Animated.Value(1)).current;
+  const [viewProps, { isDragging, startDrag, endDrag }] = useDrag({});
 
-    this.state = {
-      data: TEST_DATA,
-    };
-  }
+  React.useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: isDragging ? 1 : 0.5,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [isDragging, opacity]);
 
-  handleDataChange = (data: Block[]) => {
-    if (data.length !== this.state.data.length) {
-      this.setState({
-        data: data,
-      });
-    }
-  };
-
-  render() {
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <SortableList<Block>
-          dataSource={this.state.data}
-          parentWidth={parentWidth}
-          childrenWidth={childrenWidth}
-          childrenHeight={childrenHeight}
-          keyExtractor={(item) => item.id}
-          onDataChange={this.handleDataChange}
-          renderItem={this.renderItem}
-        />
-      </SafeAreaView>
-    );
-  }
-
-  renderItem = (props: RenderItemProps<Block>) => {
-    const { item, onLongPress, onPressOut, isActive } = props;
-
-    return (
-      <ListItem item={item} onLongPress={onLongPress} onPressOut={onPressOut}>
-        <View style={[styles.block, isActive && styles.active]}>
-          <Text style={styles.blockTitle}>{item.title}</Text>
-          <Text style={styles.blockNote}>{item.note}</Text>
+  return (
+    <Animated.View
+      {...viewProps}
+      style={[
+        viewProps.style,
+        {
+          opacity,
+        },
+      ]}
+    >
+      <TouchableOpacity
+        activeOpacity={1}
+        onLongPress={startDrag}
+        onPressOut={endDrag}
+      >
+        <View style={[styles.block]}>
+          <Text style={styles.blockTitle}>{block.title}</Text>
+          <Text style={styles.blockNote}>{block.note}</Text>
         </View>
-      </ListItem>
-    );
-  };
+      </TouchableOpacity>
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -97,8 +87,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   block: {
-    width: childrenWidth,
-    height: childrenHeight,
     flexDirection: 'column',
     justifyContent: 'space-between',
     backgroundColor: '#fff',

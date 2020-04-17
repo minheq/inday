@@ -4,7 +4,7 @@
 
 - Add active prop
 - Fix opacity
-- Remove scale
+- Replace scale animation with shadow
 
 ```js
 $('[playsinline]').style = 'position:relative; z-index:99999';
