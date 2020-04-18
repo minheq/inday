@@ -175,24 +175,24 @@ export type EventHandlers = {
 };
 
 enum TouchState {
-  NotResponder,
-  ResponderInactivePressIn,
-  ResponderInactivePressOut,
-  ResponderActivePressIn,
-  ResponderActivePressOut,
-  ResponderActiveLongPressIn,
-  ResponderActiveLongPressOut,
-  Error,
+  NotResponder = 'NOT_RESPONDER',
+  ResponderInactivePressIn = 'RESPONDER_INACTIVE_PRESS_IN',
+  ResponderInactivePressOut = 'RESPONDER_INACTIVE_PRESS_OUT',
+  ResponderActivePressIn = 'RESPONDER_ACTIVE_PRESS_IN',
+  ResponderActivePressOut = 'RESPONDER_ACTIVE_PRESS_OUT',
+  ResponderActiveLongPressIn = 'RESPONDER_ACTIVE_LONG_PRESS_IN',
+  ResponderActiveLongPressOut = 'RESPONDER_ACTIVE_LONG_PRESS_OUT',
+  Error = 'ERROR',
 }
 
 enum TouchSignal {
-  Delay,
-  ResponderGrant,
-  ResponderRelease,
-  ResponderTerminated,
-  EnterPressRect,
-  LeavePressRect,
-  LongPressDetected,
+  Delay = 'DELAY',
+  ResponderGrant = 'RESPONDER_GRANT',
+  ResponderRelease = 'RESPONDER_RELEASE',
+  ResponderTerminated = 'RESPONDER_TERMINATED',
+  EnterPressRect = 'ENTER_PRESS_RECT',
+  LeavePressRect = 'LEAVE_PRESS_RECT',
+  LongPressDetected = 'LONG_PRESS_DETECTED',
 }
 
 const Transitions: {
@@ -520,13 +520,15 @@ export class Interactivity {
    * and stores the new state. Validates the transition as well.
    */
   _receiveSignal(signal: TouchSignal, event: GestureResponderEvent): void {
-    const prevState = this._touchState as TouchState;
-    const nextState = Transitions[prevState]?.[signal] as TouchState;
+    const prevState = this._touchState;
+    const nextState = Transitions[prevState][signal];
+    console.log(prevState, '--->', signal, '--->', nextState);
+
     if (this._responderID == null && signal === TouchSignal.ResponderRelease) {
       return;
     }
 
-    if (nextState != null && nextState !== TouchState.Error) {
+    if (nextState === null || nextState === TouchState.Error) {
       throw new Error(
         `Interactivity: Invalid signal '${signal}' for state '${prevState}' on responder: ${
           typeof this._responderID === 'number'

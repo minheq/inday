@@ -1,5 +1,6 @@
 import React from 'react';
 import { Animated, StyleSheet, View, Text } from 'react-native';
+import { Interactivity } from './interactivity';
 
 interface Block {
   id: string;
@@ -12,11 +13,13 @@ interface BlockListItemProps {
 }
 
 export class BlockListItem extends React.Component<BlockListItemProps> {
+  _interactivity: Interactivity = new Interactivity({});
+
   render() {
     const { block } = this.props;
 
     return (
-      <Animated.View>
+      <Animated.View {...this._interactivity.getEventHandlers()}>
         <View style={[styles.block]}>
           <Text style={styles.blockTitle}>{block.title}</Text>
           <Text style={styles.blockNote}>{block.note}</Text>
