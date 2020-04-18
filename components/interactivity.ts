@@ -174,115 +174,120 @@ export type EventHandlers = {
   onStartShouldSetResponder: () => boolean;
 };
 
-type TouchState =
-  | 'NOT_RESPONDER'
-  | 'RESPONDER_INACTIVE_PRESS_IN'
-  | 'RESPONDER_INACTIVE_PRESS_OUT'
-  | 'RESPONDER_ACTIVE_PRESS_IN'
-  | 'RESPONDER_ACTIVE_PRESS_OUT'
-  | 'RESPONDER_ACTIVE_LONG_PRESS_IN'
-  | 'RESPONDER_ACTIVE_LONG_PRESS_OUT'
-  | 'ERROR';
+enum TouchState {
+  NotResponder,
+  ResponderInactivePressIn,
+  ResponderInactivePressOut,
+  ResponderActivePressIn,
+  ResponderActivePressOut,
+  ResponderActiveLongPressIn,
+  ResponderActiveLongPressOut,
+  Error,
+}
 
-type TouchSignal =
-  | 'DELAY'
-  | 'RESPONDER_GRANT'
-  | 'RESPONDER_RELEASE'
-  | 'RESPONDER_TERMINATED'
-  | 'ENTER_PRESS_RECT'
-  | 'LEAVE_PRESS_RECT'
-  | 'LONG_PRESS_DETECTED';
+enum TouchSignal {
+  Delay,
+  ResponderGrant,
+  ResponderRelease,
+  ResponderTerminated,
+  EnterPressRect,
+  LeavePressRect,
+  LongPressDetected,
+}
 
-const Transitions = Object.freeze({
-  NOT_RESPONDER: {
-    DELAY: 'ERROR',
-    RESPONDER_GRANT: 'RESPONDER_INACTIVE_PRESS_IN',
-    RESPONDER_RELEASE: 'ERROR',
-    RESPONDER_TERMINATED: 'ERROR',
-    ENTER_PRESS_RECT: 'ERROR',
-    LEAVE_PRESS_RECT: 'ERROR',
-    LONG_PRESS_DETECTED: 'ERROR',
+const Transitions: {
+  [state in TouchState]: { [signal in TouchSignal]: TouchState };
+} = {
+  [TouchState.NotResponder]: {
+    [TouchSignal.Delay]: TouchState.Error,
+    [TouchSignal.ResponderGrant]: TouchState.ResponderInactivePressIn,
+    [TouchSignal.ResponderRelease]: TouchState.Error,
+    [TouchSignal.ResponderTerminated]: TouchState.Error,
+    [TouchSignal.EnterPressRect]: TouchState.Error,
+    [TouchSignal.LeavePressRect]: TouchState.Error,
+    [TouchSignal.LongPressDetected]: TouchState.Error,
   },
-  RESPONDER_INACTIVE_PRESS_IN: {
-    DELAY: 'RESPONDER_ACTIVE_PRESS_IN',
-    RESPONDER_GRANT: 'ERROR',
-    RESPONDER_RELEASE: 'NOT_RESPONDER',
-    RESPONDER_TERMINATED: 'NOT_RESPONDER',
-    ENTER_PRESS_RECT: 'RESPONDER_INACTIVE_PRESS_IN',
-    LEAVE_PRESS_RECT: 'RESPONDER_INACTIVE_PRESS_OUT',
-    LONG_PRESS_DETECTED: 'ERROR',
+  [TouchState.ResponderInactivePressIn]: {
+    [TouchSignal.Delay]: TouchState.ResponderActivePressIn,
+    [TouchSignal.ResponderGrant]: TouchState.Error,
+    [TouchSignal.ResponderRelease]: TouchState.NotResponder,
+    [TouchSignal.ResponderTerminated]: TouchState.NotResponder,
+    [TouchSignal.EnterPressRect]: TouchState.ResponderInactivePressIn,
+    [TouchSignal.LeavePressRect]: TouchState.ResponderInactivePressOut,
+    [TouchSignal.LongPressDetected]: TouchState.Error,
   },
-  RESPONDER_INACTIVE_PRESS_OUT: {
-    DELAY: 'RESPONDER_ACTIVE_PRESS_OUT',
-    RESPONDER_GRANT: 'ERROR',
-    RESPONDER_RELEASE: 'NOT_RESPONDER',
-    RESPONDER_TERMINATED: 'NOT_RESPONDER',
-    ENTER_PRESS_RECT: 'RESPONDER_INACTIVE_PRESS_IN',
-    LEAVE_PRESS_RECT: 'RESPONDER_INACTIVE_PRESS_OUT',
-    LONG_PRESS_DETECTED: 'ERROR',
+  [TouchState.ResponderInactivePressOut]: {
+    [TouchSignal.Delay]: TouchState.ResponderActivePressOut,
+    [TouchSignal.ResponderGrant]: TouchState.Error,
+    [TouchSignal.ResponderRelease]: TouchState.NotResponder,
+    [TouchSignal.ResponderTerminated]: TouchState.NotResponder,
+    [TouchSignal.EnterPressRect]: TouchState.ResponderInactivePressIn,
+    [TouchSignal.LeavePressRect]: TouchState.ResponderInactivePressOut,
+    [TouchSignal.LongPressDetected]: TouchState.Error,
   },
-  RESPONDER_ACTIVE_PRESS_IN: {
-    DELAY: 'ERROR',
-    RESPONDER_GRANT: 'ERROR',
-    RESPONDER_RELEASE: 'NOT_RESPONDER',
-    RESPONDER_TERMINATED: 'NOT_RESPONDER',
-    ENTER_PRESS_RECT: 'RESPONDER_ACTIVE_PRESS_IN',
-    LEAVE_PRESS_RECT: 'RESPONDER_ACTIVE_PRESS_OUT',
-    LONG_PRESS_DETECTED: 'RESPONDER_ACTIVE_LONG_PRESS_IN',
+  [TouchState.ResponderActivePressIn]: {
+    [TouchSignal.Delay]: TouchState.Error,
+    [TouchSignal.ResponderGrant]: TouchState.Error,
+    [TouchSignal.ResponderRelease]: TouchState.NotResponder,
+    [TouchSignal.ResponderTerminated]: TouchState.NotResponder,
+    [TouchSignal.EnterPressRect]: TouchState.ResponderActivePressIn,
+    [TouchSignal.LeavePressRect]: TouchState.ResponderActivePressOut,
+    [TouchSignal.LongPressDetected]: TouchState.ResponderActiveLongPressIn,
   },
-  RESPONDER_ACTIVE_PRESS_OUT: {
-    DELAY: 'ERROR',
-    RESPONDER_GRANT: 'ERROR',
-    RESPONDER_RELEASE: 'NOT_RESPONDER',
-    RESPONDER_TERMINATED: 'NOT_RESPONDER',
-    ENTER_PRESS_RECT: 'RESPONDER_ACTIVE_PRESS_IN',
-    LEAVE_PRESS_RECT: 'RESPONDER_ACTIVE_PRESS_OUT',
-    LONG_PRESS_DETECTED: 'ERROR',
+  [TouchState.ResponderActivePressOut]: {
+    [TouchSignal.Delay]: TouchState.Error,
+    [TouchSignal.ResponderGrant]: TouchState.Error,
+    [TouchSignal.ResponderRelease]: TouchState.NotResponder,
+    [TouchSignal.ResponderTerminated]: TouchState.NotResponder,
+    [TouchSignal.EnterPressRect]: TouchState.ResponderActivePressIn,
+    [TouchSignal.LeavePressRect]: TouchState.ResponderActivePressOut,
+    [TouchSignal.LongPressDetected]: TouchState.Error,
   },
-  RESPONDER_ACTIVE_LONG_PRESS_IN: {
-    DELAY: 'ERROR',
-    RESPONDER_GRANT: 'ERROR',
-    RESPONDER_RELEASE: 'NOT_RESPONDER',
-    RESPONDER_TERMINATED: 'NOT_RESPONDER',
-    ENTER_PRESS_RECT: 'RESPONDER_ACTIVE_LONG_PRESS_IN',
-    LEAVE_PRESS_RECT: 'RESPONDER_ACTIVE_LONG_PRESS_OUT',
-    LONG_PRESS_DETECTED: 'RESPONDER_ACTIVE_LONG_PRESS_IN',
+  [TouchState.ResponderActiveLongPressIn]: {
+    [TouchSignal.Delay]: TouchState.Error,
+    [TouchSignal.ResponderGrant]: TouchState.Error,
+    [TouchSignal.ResponderRelease]: TouchState.NotResponder,
+    [TouchSignal.ResponderTerminated]: TouchState.NotResponder,
+    [TouchSignal.EnterPressRect]: TouchState.ResponderActiveLongPressIn,
+    [TouchSignal.LeavePressRect]: TouchState.ResponderActiveLongPressOut,
+    [TouchSignal.LongPressDetected]: TouchState.ResponderActiveLongPressIn,
   },
-  RESPONDER_ACTIVE_LONG_PRESS_OUT: {
-    DELAY: 'ERROR',
-    RESPONDER_GRANT: 'ERROR',
-    RESPONDER_RELEASE: 'NOT_RESPONDER',
-    RESPONDER_TERMINATED: 'NOT_RESPONDER',
-    ENTER_PRESS_RECT: 'RESPONDER_ACTIVE_LONG_PRESS_IN',
-    LEAVE_PRESS_RECT: 'RESPONDER_ACTIVE_LONG_PRESS_OUT',
-    LONG_PRESS_DETECTED: 'ERROR',
+  [TouchState.ResponderActiveLongPressOut]: {
+    [TouchSignal.Delay]: TouchState.Error,
+    [TouchSignal.ResponderGrant]: TouchState.Error,
+    [TouchSignal.ResponderRelease]: TouchState.NotResponder,
+    [TouchSignal.ResponderTerminated]: TouchState.NotResponder,
+    [TouchSignal.EnterPressRect]: TouchState.ResponderActiveLongPressIn,
+    [TouchSignal.LeavePressRect]: TouchState.ResponderActiveLongPressOut,
+    [TouchSignal.LongPressDetected]: TouchState.Error,
   },
-  ERROR: {
-    DELAY: 'NOT_RESPONDER',
-    RESPONDER_GRANT: 'RESPONDER_INACTIVE_PRESS_IN',
-    RESPONDER_RELEASE: 'NOT_RESPONDER',
-    RESPONDER_TERMINATED: 'NOT_RESPONDER',
-    ENTER_PRESS_RECT: 'NOT_RESPONDER',
-    LEAVE_PRESS_RECT: 'NOT_RESPONDER',
-    LONG_PRESS_DETECTED: 'NOT_RESPONDER',
+  [TouchState.Error]: {
+    [TouchSignal.Delay]: TouchState.NotResponder,
+    [TouchSignal.ResponderGrant]: TouchState.ResponderInactivePressIn,
+    [TouchSignal.ResponderRelease]: TouchState.NotResponder,
+    [TouchSignal.ResponderTerminated]: TouchState.NotResponder,
+    [TouchSignal.EnterPressRect]: TouchState.NotResponder,
+    [TouchSignal.LeavePressRect]: TouchState.NotResponder,
+    [TouchSignal.LongPressDetected]: TouchState.NotResponder,
   },
-});
+};
 
-const isActiveSignal = (signal: TouchState) =>
-  signal === 'RESPONDER_ACTIVE_PRESS_IN' ||
-  signal === 'RESPONDER_ACTIVE_LONG_PRESS_IN';
+const isActiveSignal = (state: TouchState) =>
+  state === TouchState.ResponderActivePressIn ||
+  state === TouchState.ResponderActiveLongPressIn;
 
-const isActivationSignal = (signal: TouchState) =>
-  signal === 'RESPONDER_ACTIVE_PRESS_OUT' ||
-  signal === 'RESPONDER_ACTIVE_PRESS_IN';
+const isActivationSignal = (state: TouchState) =>
+  state === TouchState.ResponderActivePressOut ||
+  state === TouchState.ResponderActivePressIn;
 
-const isPressInSignal = (signal: TouchState) =>
-  signal === 'RESPONDER_INACTIVE_PRESS_IN' ||
-  signal === 'RESPONDER_ACTIVE_PRESS_IN' ||
-  signal === 'RESPONDER_ACTIVE_LONG_PRESS_IN';
+const isPressInSignal = (state: TouchState) =>
+  state === TouchState.ResponderInactivePressIn ||
+  state === TouchState.ResponderActivePressIn ||
+  state === TouchState.ResponderActiveLongPressIn;
 
 const isTerminalSignal = (signal: TouchSignal) =>
-  signal === 'RESPONDER_TERMINATED' || signal === 'RESPONDER_RELEASE';
+  signal === TouchSignal.ResponderTerminated ||
+  signal === TouchSignal.ResponderRelease;
 
 const DEFAULT_LONG_PRESS_DELAY_MS = 370; // 500 - 130
 const DEFAULT_PRESS_DELAY_MS = 130;
@@ -315,7 +320,7 @@ export class Interactivity {
     pageX: number;
     pageY: number;
   } | null = null;
-  _touchState: TouchState = 'NOT_RESPONDER';
+  _touchState: TouchState = TouchState.NotResponder;
 
   constructor(config: InteractivityConfig) {
     this._config = config;
@@ -375,8 +380,8 @@ export class Interactivity {
         this._cancelPressOutDelayTimeout();
 
         this._responderID = event.currentTarget;
-        this._touchState = 'NOT_RESPONDER';
-        this._receiveSignal('RESPONDER_GRANT', event);
+        this._touchState = TouchState.NotResponder;
+        this._receiveSignal(TouchSignal.ResponderGrant, event);
 
         const delayPressIn = normalizeDelay(
           this._config.delayPressIn,
@@ -386,10 +391,10 @@ export class Interactivity {
 
         if (delayPressIn > 0) {
           this._pressDelayTimeout = setTimeout(() => {
-            this._receiveSignal('DELAY', event);
+            this._receiveSignal(TouchSignal.Delay, event);
           }, delayPressIn);
         } else {
-          this._receiveSignal('DELAY', event);
+          this._receiveSignal(TouchSignal.Delay, event);
         }
 
         const delayLongPress = normalizeDelay(
@@ -416,7 +421,7 @@ export class Interactivity {
         const touch = getTouchFromGestureResponderEvent(event);
         if (touch == null) {
           this._cancelLongPressDelayTimeout();
-          this._receiveSignal('LEAVE_PRESS_RECT', event);
+          this._receiveSignal(TouchSignal.LeavePressRect, event);
           return;
         }
 
@@ -429,19 +434,19 @@ export class Interactivity {
         }
 
         if (this._isTouchWithinResponderRegion(touch, responderRegion)) {
-          this._receiveSignal('ENTER_PRESS_RECT', event);
+          this._receiveSignal(TouchSignal.EnterPressRect, event);
         } else {
           this._cancelLongPressDelayTimeout();
-          this._receiveSignal('LEAVE_PRESS_RECT', event);
+          this._receiveSignal(TouchSignal.LeavePressRect, event);
         }
       },
 
       onResponderRelease: (event: GestureResponderEvent): void => {
-        this._receiveSignal('RESPONDER_RELEASE', event);
+        this._receiveSignal(TouchSignal.ResponderRelease, event);
       },
 
       onResponderTerminate: (event: GestureResponderEvent): void => {
-        this._receiveSignal('RESPONDER_TERMINATED', event);
+        this._receiveSignal(TouchSignal.ResponderTerminated, event);
       },
 
       onResponderTerminationRequest: (): boolean => {
@@ -517,11 +522,11 @@ export class Interactivity {
   _receiveSignal(signal: TouchSignal, event: GestureResponderEvent): void {
     const prevState = this._touchState as TouchState;
     const nextState = Transitions[prevState]?.[signal] as TouchState;
-    if (this._responderID == null && signal === 'RESPONDER_RELEASE') {
+    if (this._responderID == null && signal === TouchSignal.ResponderRelease) {
       return;
     }
 
-    if (nextState != null && nextState !== 'ERROR') {
+    if (nextState != null && nextState !== TouchState.Error) {
       throw new Error(
         `Interactivity: Invalid signal '${signal}' for state '${prevState}' on responder: ${
           typeof this._responderID === 'number'
@@ -553,8 +558,8 @@ export class Interactivity {
     }
 
     const isInitialTransition =
-      prevState === 'NOT_RESPONDER' &&
-      nextState === 'RESPONDER_INACTIVE_PRESS_IN';
+      prevState === TouchState.NotResponder &&
+      nextState === TouchState.ResponderInactivePressIn;
 
     const isActivationTransiton =
       !isActivationSignal(prevState) && isActivationSignal(nextState);
@@ -563,7 +568,10 @@ export class Interactivity {
       this._measureResponderRegion();
     }
 
-    if (isPressInSignal(prevState) && signal === 'LONG_PRESS_DETECTED') {
+    if (
+      isPressInSignal(prevState) &&
+      signal === TouchSignal.LongPressDetected
+    ) {
       const { onLongPress } = this._config;
       if (onLongPress != null) {
         onLongPress(event);
@@ -579,11 +587,12 @@ export class Interactivity {
       this._deactivate(event);
     }
 
-    if (isPressInSignal(prevState) && signal === 'RESPONDER_RELEASE') {
+    if (isPressInSignal(prevState) && signal === TouchSignal.ResponderRelease) {
       const { onLongPress, onPress } = this._config;
       if (onPress != null) {
         const isPressCanceledByLongPress =
-          onLongPress != null && prevState === 'RESPONDER_ACTIVE_LONG_PRESS_IN';
+          onLongPress != null &&
+          prevState === TouchState.ResponderActiveLongPressIn;
         if (!isPressCanceledByLongPress) {
           // If we never activated (due to delays), activate and deactivate now.
           if (!isNextActive && !isPrevActive) {
@@ -704,10 +713,10 @@ export class Interactivity {
 
   _handleLongPress(event: GestureResponderEvent): void {
     if (
-      this._touchState === 'RESPONDER_ACTIVE_PRESS_IN' ||
-      this._touchState === 'RESPONDER_ACTIVE_LONG_PRESS_IN'
+      this._touchState === TouchState.ResponderActivePressIn ||
+      this._touchState === TouchState.ResponderActiveLongPressIn
     ) {
-      this._receiveSignal('LONG_PRESS_DETECTED', event);
+      this._receiveSignal(TouchSignal.LongPressDetected, event);
     }
   }
 
