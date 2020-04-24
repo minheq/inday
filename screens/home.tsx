@@ -42,7 +42,14 @@ export function HomeScreen() {
           </View>
         </Draggable>
         <View style={{ height: 400 }} />
-        <DropTarget>
+        <DropTarget
+          onAccept={() => {
+            console.log('onAccept');
+          }}
+          onHover={() => {
+            console.log('onHover');
+          }}
+        >
           <View style={{ width: 100, height: 100, backgroundColor: 'yellow' }}>
             <Text>Draggable!</Text>
           </View>

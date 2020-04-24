@@ -20,9 +20,9 @@ export interface DraggableConstructorProps extends DraggableCallbacks {
 
 let keySequence = 1;
 
-type DragEndCallback = () => void;
+type DragEndCallback = (state: DragState) => void;
 type DragCallback = (state: DragState) => void;
-type DragStartCallback = () => void;
+type DragStartCallback = (state: DragState) => void;
 
 interface DragState {
   dx: number;
@@ -58,26 +58,21 @@ export class Draggable {
     this._dragEndListeners.push(fn);
   };
 
-  startDrag = () => {
+  startDrag = (state: DragState) => {
     this._dragStartListeners.forEach((fn) => {
-      fn();
+      fn(state);
     });
   };
 
   drag = (state: DragState) => {
-    this.pan.setValue({
-      x: state.dx,
-      y: state.dy,
-    });
-
     this._dragListeners.forEach((fn) => {
       fn(state);
     });
   };
 
-  endDrag = () => {
+  endDrag = (state: DragState) => {
     this._dragEndListeners.forEach((fn) => {
-      fn();
+      fn(state);
     });
   };
 }

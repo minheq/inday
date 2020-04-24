@@ -1,9 +1,9 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useDropTarget } from './drag_drop/use_drop_target';
-import { DropTargetProps as ClassDropTargetProps } from './drag_drop/drop_target';
+import { DropTargetCallbacks } from './drag_drop/drop_target';
 
-interface DropTargetProps extends ClassDropTargetProps {
+interface DropTargetProps extends DropTargetCallbacks {
   children?: React.ReactNode;
 }
 

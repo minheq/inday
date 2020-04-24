@@ -1,9 +1,9 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useDragDrop } from './drag_drop_provider';
-import { DropTarget, DropTargetProps } from './drop_target';
+import { DropTarget, DropTargetCallbacks } from './drop_target';
 
-export function useDropTarget(props: DropTargetProps) {
+export function useDropTarget(props: DropTargetCallbacks) {
   const {
     onAccept = () => {},
     onHover = () => {},
@@ -16,20 +16,29 @@ export function useDropTarget(props: DropTargetProps) {
   const dropTarget = React.useRef(
     new DropTarget({
       ref: dropTargetRef,
-      onAccept,
-      onHover,
-      onLeave,
-      onWillAccept,
     }),
   ).current;
 
   React.useEffect(() => {
-    registerDropTarget(dropTarget);
+    registerDropTarget(dropTarget, {
+      onAccept,
+      onHover,
+      onLeave,
+      onWillAccept,
+    });
 
     return () => {
       unregisterDropTarget(dropTarget);
     };
-  }, [unregisterDropTarget, registerDropTarget, dropTarget]);
+  }, [
+    unregisterDropTarget,
+    registerDropTarget,
+    dropTarget,
+    onAccept,
+    onHover,
+    onLeave,
+    onWillAccept,
+  ]);
 
   return dropTarget;
 }

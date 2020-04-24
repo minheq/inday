@@ -23,17 +23,21 @@ export function Draggable(props: DraggableProps) {
     onDraggableCanceled,
   });
 
+  const zIndex = React.useRef(new Animated.Value(0));
+
   const panResponder = React.useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (event, state) => {
-        draggable.startDrag();
+        draggable.startDrag(state);
+        zIndex.current.setValue(999);
       },
       onPanResponderMove: (event, state) => {
         draggable.drag(state);
       },
       onPanResponderRelease: (event, state) => {
-        draggable.endDrag();
+        draggable.endDrag(state);
+        zIndex.current.setValue(0);
       },
     }),
   ).current;
@@ -47,6 +51,7 @@ export function Draggable(props: DraggableProps) {
           { translateX: draggable.pan.x },
           { translateY: draggable.pan.y },
         ],
+        zIndex: zIndex.current,
       }}
       {...panResponder.panHandlers}
     >

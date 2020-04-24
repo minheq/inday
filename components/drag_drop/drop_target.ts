@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-export interface DropTargetProps {
+export interface DropTargetCallbacks {
   /** Called when an acceptable piece of data was dropped over this drag target. */
   onAccept?: () => void;
 
@@ -14,7 +14,7 @@ export interface DropTargetProps {
   onWillAccept?: () => boolean;
 }
 
-export interface DropTargetConstructorProps extends DropTargetProps {
+export interface DropTargetConstructorProps {
   ref: React.MutableRefObject<View | null>;
 }
 
@@ -23,25 +23,11 @@ let keySequence = 1;
 export class DropTarget {
   key: string;
   ref: React.MutableRefObject<View | null>;
-  onAccept: () => void;
-  onLeave: () => void;
-  onHover: () => void;
-  onWillAccept: () => void;
 
   constructor(props: DropTargetConstructorProps) {
-    const {
-      ref,
-      onAccept = () => {},
-      onLeave = () => {},
-      onHover = () => {},
-      onWillAccept = () => {},
-    } = props;
+    const { ref } = props;
 
     this.key = `${keySequence++}`;
     this.ref = ref;
-    this.onAccept = onAccept;
-    this.onLeave = onLeave;
-    this.onHover = onHover;
-    this.onWillAccept = onWillAccept;
   }
 }
