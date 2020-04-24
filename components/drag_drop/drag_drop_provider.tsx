@@ -21,12 +21,13 @@ const DragDropContext = React.createContext<DragDropHandlers>({
 export function DragDropProvider(props: DragDropProviderProps) {
   const { children } = props;
 
+  const dragDrop = React.useRef(new DragDrop()).current;
   const {
     registerDraggable,
     unregisterDraggable,
     registerDropTarget,
     unregisterDropTarget,
-  } = React.useRef(new DragDrop()).current;
+  } = dragDrop;
 
   return (
     <DragDropContext.Provider

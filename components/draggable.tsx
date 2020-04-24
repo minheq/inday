@@ -1,9 +1,9 @@
 import React from 'react';
 import { Animated, PanResponder } from 'react-native';
 import { useDraggable } from './drag_drop/use_draggable';
-import { DraggableProps as ClassDraggableProps } from './drag_drop/draggable';
+import { DraggableCallbacks } from './drag_drop/draggable';
 
-interface DraggableProps extends ClassDraggableProps {
+interface DraggableProps extends DraggableCallbacks {
   children?: React.ReactNode;
 }
 
@@ -16,31 +16,24 @@ export function Draggable(props: DraggableProps) {
     onDraggableCanceled,
   } = props;
 
-  const { startDrag, drag, endDrag, draggableRef } = useDraggable({
+  const draggable = useDraggable({
     onDragCompleted,
     onDragEnd,
     onDragStarted,
     onDraggableCanceled,
   });
 
-  const pan = React.useRef(new Animated.ValueXY()).current;
   const panResponder = React.useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        startDrag();
-        // pan.setOffset({
-        //   x: pan.x._value,
-        //   y: pan.y._value,
-        // });
+      onPanResponderGrant: (event, state) => {
+        draggable.startDrag();
       },
-      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
-        listener: () => drag(),
-        useNativeDriver: true,
-      }),
-      onPanResponderRelease: () => {
-        pan.flattenOffset();
-        endDrag();
+      onPanResponderMove: (event, state) => {
+        draggable.drag(state);
+      },
+      onPanResponderRelease: (event, state) => {
+        draggable.endDrag();
       },
     }),
   ).current;
@@ -48,9 +41,12 @@ export function Draggable(props: DraggableProps) {
   return (
     <Animated.View
       // @ts-ignore
-      ref={draggableRef}
+      ref={draggable.ref}
       style={{
-        transform: [{ translateX: pan.x }, { translateY: pan.y }],
+        transform: [
+          { translateX: draggable.pan.x },
+          { translateY: draggable.pan.y },
+        ],
       }}
       {...panResponder.panHandlers}
     >

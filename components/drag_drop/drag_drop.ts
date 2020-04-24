@@ -1,52 +1,49 @@
-import { Draggable } from './draggable';
+import { Draggable, DraggableCallbacks } from './draggable';
 import { DropTarget } from './drop_target';
 
 export interface DragDropHandlers {
-  registerDraggable: (draggable: Draggable) => DraggableHandlers;
+  registerDraggable: (
+    draggable: Draggable,
+    callbacks: DraggableCallbacks,
+  ) => void;
   unregisterDraggable: (draggable: Draggable) => void;
   registerDropTarget: (dropTarget: DropTarget) => void;
   unregisterDropTarget: (dropTarget: DropTarget) => void;
 }
 
-export interface DraggableHandlers {
-  startDrag: () => void;
-  drag: () => void;
-  endDrag: () => void;
-}
-
 export class DragDrop implements DragDropHandlers {
-  _draggables: Draggable[] = [];
-  _dropTargets: DropTarget[] = [];
+  _draggables: { [key: string]: Draggable } = {};
+  _dropTargets: { [key: string]: DropTarget } = {};
 
-  registerDraggable = (draggable: Draggable): DraggableHandlers => {
-    this._draggables.push(draggable);
+  registerDraggable = (draggable: Draggable, callbacks: DraggableCallbacks) => {
+    const {
+      onDragCompleted = () => {},
+      onDragEnd = () => {},
+      onDragStarted = () => {},
+      onDraggableCanceled = () => {},
+    } = callbacks;
+    this._draggables[draggable.key] = draggable;
 
-    return {
-      startDrag: () => {
-        draggable.onDragStarted();
-      },
-      drag: () => {
-        // if ([x, y].indroptarget) {
-        //   willAccept;
-        // }
-      },
-      endDrag: () => {
-        draggable.onDragEnd();
-      },
-    };
+    draggable.onDragStart(() => {
+      onDragStarted();
+    });
+
+    draggable.onDragEnd(() => {
+      onDragEnd();
+      onDragCompleted();
+      onDraggableCanceled();
+    });
   };
 
   unregisterDraggable = (draggable: Draggable) => {
-    this._draggables = this._draggables.filter((d) => d.key === draggable.key);
+    delete this._draggables[draggable.key];
   };
 
   registerDropTarget = (dropTarget: DropTarget) => {
-    this._dropTargets.push(dropTarget);
+    this._dropTargets[dropTarget.key] = dropTarget;
   };
 
   unregisterDropTarget = (dropTarget: DropTarget) => {
-    this._dropTargets = this._dropTargets.filter(
-      (d) => d.key === dropTarget.key,
-    );
+    delete this._dropTargets[dropTarget.key];
   };
 }

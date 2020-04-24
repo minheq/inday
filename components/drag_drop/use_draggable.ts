@@ -1,39 +1,44 @@
 import React from 'react';
 import { View } from 'react-native';
-import { useDragDrop } from './drag_drop_context';
-import { Draggable, DraggableProps } from './draggable';
+import { useDragDrop } from './drag_drop_provider';
+import { Draggable, DraggableCallbacks } from './draggable';
 
-export function useDraggable(props: DraggableProps) {
+export function useDraggable(props: DraggableCallbacks) {
   const {
-    onDragCompleted = () => {},
+    onDragStarted = () => {},
     onDragEnd = () => {},
     onDraggableCanceled = () => {},
-    onDragStarted = () => {},
+    onDragCompleted = () => {},
   } = props;
 
   const { registerDraggable, unregisterDraggable } = useDragDrop();
   const draggableRef = React.useRef<View | null>(null);
   const draggable = React.useRef(
     new Draggable({
-      onDragCompleted,
-      onDragEnd,
-      onDraggableCanceled,
-      onDragStarted,
+      ref: draggableRef,
     }),
   ).current;
 
-  const { startDrag, drag, endDrag } = registerDraggable(draggable);
-
   React.useEffect(() => {
+    registerDraggable(draggable, {
+      onDragStarted,
+      onDragEnd,
+      onDraggableCanceled,
+      onDragCompleted,
+    });
+
     return () => {
       unregisterDraggable(draggable);
     };
-  }, [unregisterDraggable, draggable]);
+  }, [
+    unregisterDraggable,
+    registerDraggable,
+    draggable,
+    onDragStarted,
+    onDragEnd,
+    onDraggableCanceled,
+    onDragCompleted,
+  ]);
 
-  return {
-    startDrag,
-    drag,
-    endDrag,
-    draggableRef,
-  };
+  return draggable;
 }

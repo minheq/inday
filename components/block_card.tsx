@@ -16,11 +16,19 @@ interface BlockCardProps {
 export function BlockCard(props: BlockCardProps) {
   const { block } = props;
 
-  const pan = React.useRef(new Animated.ValueXY()).current;
-
-  const { startDrag, endDrag, draggableRef } = useDraggable({
-    onDraggableCanceled: () => {},
-    onDragCompleted: () => {},
+  const { startDrag, endDrag, drag, draggable } = useDraggable({
+    onDragStarted: () => {
+      console.log('BlockCard:onDragStarted');
+    },
+    onDragEnd: () => {
+      console.log('BlockCard:onDragEnd');
+    },
+    onDraggableCanceled: () => {
+      console.log('BlockCard:onDraggableCanceled');
+    },
+    onDragCompleted: () => {
+      console.log('BlockCard:onDragCompleted');
+    },
   });
 
   const config: GestureDetectorConfig = React.useMemo(() => {
@@ -28,13 +36,14 @@ export function BlockCard(props: BlockCardProps) {
 
     return {
       onPress: () => {
-        console.log('onPress');
+        // console.log('BlockCard:onPress');
       },
       onLongPress: () => {
-        console.log('onLongPress');
+        // console.log('BlockCard:onLongPress');
         isLongPress = true;
       },
       onDragStart: () => {
+        // console.log('BlockCard:onDragStart');
         startDrag();
         // pan.setOffset({
         //   x: pan.x._value,
@@ -42,36 +51,37 @@ export function BlockCard(props: BlockCardProps) {
         // });
       },
       onDragMove: (event, state) => {
+        // console.log('BlockCard:onDragMove');
         if (isLongPress) {
-          pan.setValue({
-            x: state.dx,
-            y: state.dy,
-          });
+          drag();
         } else {
-          pan.setValue({
+          draggable.pan.setValue({
             x: state.dx,
             y: 0,
           });
         }
       },
       onDragEnd: () => {
+        // console.log('BlockCard:onDragEnd');
         endDrag();
         isLongPress = false;
-        console.log('onDragEnd');
       },
     };
-  }, [pan, startDrag, endDrag]);
+  }, [startDrag, endDrag, drag, draggable]);
 
   const eventHandlers = useGestureDetector(config);
 
   return (
     <Animated.View
       // @ts-ignore
-      ref={draggableRef}
+      ref={draggable.ref}
       accessible
       style={[
         {
-          transform: [{ translateX: pan.x }, { translateY: pan.y }],
+          transform: [
+            { translateX: draggable.pan.x },
+            { translateY: draggable.pan.y },
+          ],
         },
       ]}
       {...eventHandlers}
