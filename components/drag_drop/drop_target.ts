@@ -18,14 +18,9 @@ export interface DropTargetCallbacks {
   onWillAccept?: () => boolean;
 }
 
-export interface DropTargetConstructorProps {
+export interface DropTargetConstructorProps extends DropTargetCallbacks {
   ref: React.MutableRefObject<View | null>;
 }
-
-export type EnterCallback = () => Promise<void>;
-export type HoverCallback = () => Promise<void>;
-export type LeaveCallback = () => Promise<void>;
-export type AcceptCallback = () => Promise<void>;
 
 let keySequence = 1;
 
@@ -34,57 +29,30 @@ export class DropTarget {
   ref: React.MutableRefObject<View | null>;
   measurements: Measurements | null = null;
 
+  onAccept: () => void = () => {};
+  onLeave: () => void = () => {};
+  onEnter: () => void = () => {};
+  onHover: () => void = () => {};
+  onWillAccept: () => boolean = () => true;
+
   constructor(props: DropTargetConstructorProps) {
-    const { ref } = props;
+    const {
+      ref,
+      onAccept = () => {},
+      onLeave = () => {},
+      onEnter = () => {},
+      onHover = () => {},
+      onWillAccept = () => true,
+    } = props;
 
     this.key = `${keySequence++}`;
     this.ref = ref;
+    this.onAccept = onAccept;
+    this.onLeave = onLeave;
+    this.onEnter = onEnter;
+    this.onHover = onHover;
+    this.onWillAccept = onWillAccept;
   }
-
-  _hoverListeners: HoverCallback[] = [];
-  _enterListeners: EnterCallback[] = [];
-  _leaveListeners: LeaveCallback[] = [];
-  _acceptListeners: AcceptCallback[] = [];
-
-  onLeave = (fn: LeaveCallback) => {
-    this._leaveListeners.push(fn);
-  };
-
-  onHover = (fn: HoverCallback) => {
-    this._hoverListeners.push(fn);
-  };
-
-  onAccept = (fn: AcceptCallback) => {
-    this._acceptListeners.push(fn);
-  };
-
-  onEnter = (fn: EnterCallback) => {
-    this._enterListeners.push(fn);
-  };
-
-  leave = () => {
-    this._leaveListeners.forEach(async (fn) => {
-      await fn();
-    });
-  };
-
-  hover = () => {
-    this._acceptListeners.forEach(async (fn) => {
-      await fn();
-    });
-  };
-
-  accept = () => {
-    this._acceptListeners.forEach(async (fn) => {
-      await fn();
-    });
-  };
-
-  enter = () => {
-    this._enterListeners.forEach(async (fn) => {
-      await fn();
-    });
-  };
 
   measure = async () => {
     this.measurements = await measure(this.ref);

@@ -27,20 +27,21 @@ function toDragState(
 }
 
 export function Draggable(props: DraggableProps) {
-  const {
-    children,
-    onDragCompleted,
-    onDragEnd,
-    onDragStarted,
-    onDraggableCanceled,
-    style,
-  } = props;
-
+  const { children, onComplete, onEnd, onStart, onCancel, style } = props;
+  const pan = React.useRef(new Animated.ValueXY()).current;
   const draggable = useDraggable({
-    onDragCompleted,
-    onDragEnd,
-    onDragStarted,
-    onDraggableCanceled,
+    onComplete: () => {
+      console.log('onComplete');
+    },
+    onEnd: () => {
+      console.log('onEnd');
+    },
+    onStart: () => {
+      console.log('onStart');
+    },
+    onCancel: () => {
+      console.log('onCancel');
+    },
   });
 
   const zIndex = React.useRef(new Animated.Value(0));
@@ -63,11 +64,19 @@ export function Draggable(props: DraggableProps) {
         //   `moveX=${state.moveX}`,
         //   `moveY=${state.moveY}`,
         // );
+        pan.setValue({
+          x: state.dx,
+          y: state.dy,
+        });
 
         draggable.drag(toDragState(event, state));
       },
       onPanResponderRelease: (event, state) => {
         draggable.endDrag(toDragState(event, state));
+        pan.setValue({
+          x: 0,
+          y: 0,
+        });
         zIndex.current.setValue(0);
       },
     }),
@@ -79,10 +88,7 @@ export function Draggable(props: DraggableProps) {
       ref={draggable.ref}
       style={[
         {
-          transform: [
-            { translateX: draggable.pan.x },
-            { translateY: draggable.pan.y },
-          ],
+          transform: [{ translateX: pan.x }, { translateY: pan.y }],
           zIndex: zIndex.current,
           width: 100,
           height: 100,

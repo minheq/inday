@@ -42,14 +42,7 @@ export function HomeScreen() {
               <Text>Draggable!</Text>
             </Draggable>
             <View style={{ height: 400 }} />
-            <DropTarget
-              onAccept={() => {
-                console.log('onAccept');
-              }}
-              onHover={() => {
-                console.log('onHover');
-              }}
-            >
+            <DropTarget>
               <Text>Draggable!</Text>
             </DropTarget>
           </DragDropProvider>

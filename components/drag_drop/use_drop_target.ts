@@ -5,6 +5,7 @@ import { DropTarget, DropTargetCallbacks } from './drop_target';
 
 export function useDropTarget(props: DropTargetCallbacks) {
   const {
+    onEnter = () => {},
     onAccept = () => {},
     onHover = () => {},
     onLeave = () => {},
@@ -16,16 +17,16 @@ export function useDropTarget(props: DropTargetCallbacks) {
   const dropTarget = React.useRef(
     new DropTarget({
       ref: dropTargetRef,
-    }),
-  ).current;
-
-  React.useEffect(() => {
-    registerDropTarget(dropTarget, {
+      onEnter,
       onAccept,
       onHover,
       onLeave,
       onWillAccept,
-    });
+    }),
+  ).current;
+
+  React.useEffect(() => {
+    registerDropTarget(dropTarget);
 
     return () => {
       unregisterDropTarget(dropTarget);

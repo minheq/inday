@@ -5,10 +5,10 @@ import { Draggable, DraggableCallbacks } from './draggable';
 
 export function useDraggable(props: DraggableCallbacks) {
   const {
-    onDragStarted = () => {},
-    onDragEnd = () => {},
-    onDraggableCanceled = () => {},
-    onDragCompleted = () => {},
+    onStart = () => {},
+    onEnd = () => {},
+    onCancel = () => {},
+    onComplete = () => {},
   } = props;
 
   const { registerDraggable, unregisterDraggable } = useDragDrop();
@@ -16,29 +16,20 @@ export function useDraggable(props: DraggableCallbacks) {
   const draggable = React.useRef(
     new Draggable({
       ref: draggableRef,
+      onStart,
+      onEnd,
+      onCancel,
+      onComplete,
     }),
   ).current;
 
   React.useEffect(() => {
-    registerDraggable(draggable, {
-      onDragStarted,
-      onDragEnd,
-      onDraggableCanceled,
-      onDragCompleted,
-    });
+    registerDraggable(draggable);
 
     return () => {
       unregisterDraggable(draggable);
     };
-  }, [
-    unregisterDraggable,
-    registerDraggable,
-    draggable,
-    onDragStarted,
-    onDragEnd,
-    onDraggableCanceled,
-    onDragCompleted,
-  ]);
+  }, [unregisterDraggable, registerDraggable, draggable]);
 
   return draggable;
 }

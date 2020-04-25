@@ -1,22 +1,19 @@
-import { Draggable, DraggableCallbacks, DragState } from './draggable';
-import { DropTarget, DropTargetCallbacks } from './drop_target';
+import { Draggable, DragState } from './draggable';
+import { DropTarget } from './drop_target';
 
 export interface DragDropHandlers {
-  registerDraggable: (
-    draggable: Draggable,
-    callbacks: DraggableCallbacks,
-  ) => void;
+  registerDraggable: (draggable: Draggable) => void;
   unregisterDraggable: (draggable: Draggable) => void;
-  registerDropTarget: (
-    dropTarget: DropTarget,
-    callbacks: DropTargetCallbacks,
-  ) => void;
+  registerDropTarget: (dropTarget: DropTarget) => void;
   unregisterDropTarget: (dropTarget: DropTarget) => void;
 }
 
 export class DragDrop implements DragDropHandlers {
   _draggables: { [key: string]: Draggable } = {};
   _dropTargets: { [key: string]: DropTarget } = {};
+
+  _activeDraggable: Draggable | null = null;
+  _activeDropTarget: DropTarget | null = null;
 
   get dropTargets(): DropTarget[] {
     return Object.values(this._dropTargets);
@@ -26,7 +23,7 @@ export class DragDrop implements DragDropHandlers {
     return Object.values(this._draggables);
   }
 
-  findDropTargetOverlap = (dragState: DragState): DropTarget | null => {
+  getDropTarget = (dragState: DragState): DropTarget | null => {
     for (let index = 0; index < this.dropTargets.length; index++) {
       const dropTarget = this.dropTargets[index];
 
@@ -39,8 +36,7 @@ export class DragDrop implements DragDropHandlers {
           pageY <= dragState.pageY && dragState.pageY <= pageY + height;
 
         if (isWithinHorizontalBound && isWithinVerticalBound) {
-          dropTarget.enter();
-          break;
+          return dropTarget;
         }
       }
     }
@@ -53,69 +49,68 @@ export class DragDrop implements DragDropHandlers {
       Promise.all(this.draggables.map((draggable) => draggable.measure())),
       Promise.all(this.dropTargets.map((dropTarget) => dropTarget.measure())),
     ]);
-
-    this.draggables.forEach((d) => console.log(d.measurements));
   };
 
-  registerDraggable = (draggable: Draggable, callbacks: DraggableCallbacks) => {
-    const {
-      onDragCompleted = () => {},
-      onDragEnd = () => {},
-      onDragStarted = () => {},
-      onDraggableCanceled = () => {},
-    } = callbacks;
+  _handleDragStart = async (draggable: Draggable) => {
+    await this._measureAll();
+    draggable.onStart();
+    this._activeDraggable = draggable;
+  };
+
+  _handleDrag = async (draggable: Draggable, dragState: DragState) => {
+    const dropTarget = this.getDropTarget(dragState);
+
+    if (dropTarget) {
+      if (!this._activeDropTarget) {
+        dropTarget.onEnter();
+        this._activeDropTarget = dropTarget;
+      } else if (this._activeDropTarget.key === dropTarget.key) {
+        dropTarget.onHover();
+      }
+    } else {
+      if (this._activeDropTarget) {
+        this._activeDropTarget.onLeave();
+        this._activeDropTarget = null;
+      }
+    }
+  };
+
+  _handleDragEnd = async (draggable: Draggable) => {
+    draggable.onEnd();
+
+    if (!this._activeDropTarget) {
+      draggable.onCancel();
+    } else {
+      if (this._activeDropTarget.onWillAccept()) {
+        this._activeDropTarget.onAccept();
+        draggable.onComplete();
+      } else {
+        draggable.onCancel();
+      }
+    }
+
+    this._activeDraggable = null;
+    this._activeDropTarget = null;
+  };
+
+  registerDraggable = (draggable: Draggable) => {
     this._draggables[draggable.key] = draggable;
 
-    draggable.onDragStart(async () => {
-      await this._measureAll();
-      onDragStarted();
-    });
+    draggable.addDragStartListener(() => this._handleDragStart(draggable));
 
-    draggable.onDrag(async (dragState) => {
-      draggable.pan.setValue({
-        x: dragState.dx,
-        y: dragState.dy,
-      });
+    draggable.addDragListener((dragState) =>
+      this._handleDrag(draggable, dragState),
+    );
 
-      const dropTarget = this.findDropTargetOverlap(dragState);
-    });
-
-    draggable.onDragEnd(async (dragState) => {
-      draggable.pan.setValue({
-        x: 0,
-        y: 0,
-      });
-      onDragEnd();
-      onDragCompleted();
-      onDraggableCanceled();
-    });
+    draggable.addDragEndListener(() => this._handleDragEnd(draggable));
   };
 
   unregisterDraggable = (draggable: Draggable) => {
     delete this._draggables[draggable.key];
   };
 
-  registerDropTarget = (
-    dropTarget: DropTarget,
-    callbacks: DropTargetCallbacks,
-  ) => {
-    const {
-      onAccept = () => {},
-      onLeave = () => {},
-      onHover = () => {},
-      onWillAccept = () => {},
-    } = callbacks;
+  registerDropTarget = (dropTarget: DropTarget) => {
     this._dropTargets[dropTarget.key] = dropTarget;
-
-    dropTarget.onLeave(async () => {
-      onLeave();
-    });
-    dropTarget.onHover(async () => {
-      onHover();
-    });
-    dropTarget.onAccept(async () => {
-      onAccept();
-    });
   };
 
   unregisterDropTarget = (dropTarget: DropTarget) => {

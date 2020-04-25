@@ -9,26 +9,38 @@ interface DropTargetProps extends DropTargetCallbacks {
 }
 
 export function DropTarget(props: DropTargetProps) {
-  const { children, onAccept, onHover, onLeave, onWillAccept, style } = props;
+  const {
+    children,
+    onEnter,
+    onAccept,
+    onHover,
+    onLeave,
+    onWillAccept,
+    style,
+  } = props;
 
   const backgroundColor = React.useRef(new Animated.Value(0)).current;
   const dropTarget = useDropTarget({
-    onAccept,
-    onHover: () => {
-      if (onHover) {
-        onHover();
-      }
-
+    onAccept: () => {
+      console.log('onAccept');
+      backgroundColor.setValue(0);
+    },
+    onEnter: () => {
+      console.log('onEnter');
       backgroundColor.setValue(1);
     },
+    onHover: () => {
+      console.log('onHover');
+    },
     onLeave: () => {
-      if (onLeave) {
-        onLeave();
-      }
+      console.log('onLeave');
 
       backgroundColor.setValue(0);
     },
-    onWillAccept,
+    onWillAccept: () => {
+      console.log('onWillAccept');
+      return true;
+    },
   });
 
   return (

@@ -1,18 +1,18 @@
-import { View, Animated } from 'react-native';
+import { View } from 'react-native';
 import { Measurements, measure } from './measurements';
 
 export interface DraggableCallbacks {
   /** Called when the draggable starts being dragged. */
-  onDragStarted?: () => void;
+  onStart?: () => void;
 
   /** Called when the draggable is dropped. */
-  onDragEnd?: () => void;
+  onEnd?: () => void;
 
   /** Called when the draggable is dropped without being accepted by a DragTarget. */
-  onDraggableCanceled?: () => void;
+  onCancel?: () => void;
 
   /** Called when the draggable is dropped and accepted by a DragTarget. */
-  onDragCompleted?: () => void;
+  onComplete?: () => void;
 }
 
 export interface DraggableConstructorProps extends DraggableCallbacks {
@@ -40,29 +40,43 @@ export class Draggable {
   key: string;
   ref: React.MutableRefObject<View | null>;
   measurements: Measurements | null = null;
-  pan: Animated.ValueXY = new Animated.ValueXY();
   isDragging: boolean = false;
 
+  onStart: () => void = () => {};
+  onEnd: () => void = () => {};
+  onCancel: () => void = () => {};
+  onComplete: () => void = () => {};
+
   constructor(props: DraggableConstructorProps) {
-    const { ref } = props;
+    const {
+      ref,
+      onStart = () => {},
+      onEnd = () => {},
+      onCancel = () => {},
+      onComplete = () => {},
+    } = props;
 
     this.key = `${keySequence++}`;
     this.ref = ref;
+    this.onStart = onStart;
+    this.onEnd = onEnd;
+    this.onCancel = onCancel;
+    this.onComplete = onComplete;
   }
 
   _dragStartListeners: DragStartCallback[] = [];
   _dragListeners: DragCallback[] = [];
   _dragEndListeners: DragEndCallback[] = [];
 
-  onDragStart = (fn: DragStartCallback) => {
+  addDragStartListener = (fn: DragStartCallback) => {
     this._dragStartListeners.push(fn);
   };
 
-  onDrag = (fn: DragCallback) => {
+  addDragListener = (fn: DragCallback) => {
     this._dragListeners.push(fn);
   };
 
-  onDragEnd = (fn: DragEndCallback) => {
+  addDragEndListener = (fn: DragEndCallback) => {
     this._dragEndListeners.push(fn);
   };
 
