@@ -38,21 +38,17 @@ export class DragDrop implements DragDropHandlers {
         if (isWithinHorizontalBound && isWithinVerticalBound) {
           return dropTarget;
         }
+      } else {
+        throw new Error(
+          `DragDrop: dropTarget(${dropTarget.key}) has not been provided measurements`,
+        );
       }
     }
 
     return null;
   };
 
-  _measureAll = async () => {
-    await Promise.all([
-      Promise.all(this.draggables.map((draggable) => draggable.measure())),
-      Promise.all(this.dropTargets.map((dropTarget) => dropTarget.measure())),
-    ]);
-  };
-
   _handleDragStart = async (draggable: Draggable) => {
-    await this._measureAll();
     draggable.onStart();
     this._activeDraggable = draggable;
   };
@@ -62,14 +58,14 @@ export class DragDrop implements DragDropHandlers {
 
     if (dropTarget) {
       if (!this._activeDropTarget) {
-        dropTarget.onEnter();
+        dropTarget.onEnter(draggable);
         this._activeDropTarget = dropTarget;
       } else if (this._activeDropTarget.key === dropTarget.key) {
-        dropTarget.onHover();
+        dropTarget.onHover(draggable, dragState);
       }
     } else {
       if (this._activeDropTarget) {
-        this._activeDropTarget.onLeave();
+        this._activeDropTarget.onLeave(draggable);
         this._activeDropTarget = null;
       }
     }
@@ -81,8 +77,8 @@ export class DragDrop implements DragDropHandlers {
     if (!this._activeDropTarget) {
       draggable.onCancel();
     } else {
-      if (this._activeDropTarget.onWillAccept()) {
-        this._activeDropTarget.onAccept();
+      if (this._activeDropTarget.onWillAccept(draggable)) {
+        this._activeDropTarget.onAccept(draggable);
         draggable.onComplete();
       } else {
         draggable.onCancel();

@@ -64,4 +64,5 @@ buck-out/
 
 # Web
 bundle.js
+*.map
 stats.json

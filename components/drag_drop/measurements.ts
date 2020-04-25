@@ -1,4 +1,4 @@
-import { View, UIManager, findNodeHandle } from 'react-native';
+import { UIManager, findNodeHandle } from 'react-native';
 
 export interface Measurements {
   x: number;
@@ -10,7 +10,7 @@ export interface Measurements {
 }
 
 export async function measure(
-  ref: React.MutableRefObject<View | null>,
+  ref: React.MutableRefObject<any>,
 ): Promise<Measurements> {
   return new Promise((resolve, reject) => {
     function measureOnSuccessCallback(

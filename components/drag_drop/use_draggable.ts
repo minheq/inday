@@ -1,9 +1,11 @@
 import React from 'react';
-import { View } from 'react-native';
 import { useDragDrop } from './drag_drop_provider';
-import { Draggable, DraggableCallbacks } from './draggable';
+import { Draggable, DraggableProps } from './draggable';
+import { measure } from './measurements';
 
-export function useDraggable(props: DraggableCallbacks) {
+export function useDraggable<TItem = any, TElement = any>(
+  props: DraggableProps<TItem>,
+): [Draggable<TItem>, React.RefObject<TElement>] {
   const {
     onStart = () => {},
     onEnd = () => {},
@@ -12,16 +14,21 @@ export function useDraggable(props: DraggableCallbacks) {
   } = props;
 
   const { registerDraggable, unregisterDraggable } = useDragDrop();
-  const draggableRef = React.useRef<View | null>(null);
+  const ref = React.useRef<TElement>(null);
   const draggable = React.useRef(
-    new Draggable({
-      ref: draggableRef,
+    new Draggable<TItem>({
       onStart,
       onEnd,
       onCancel,
       onComplete,
     }),
   ).current;
+
+  React.useEffect(() => {
+    measure(ref).then((measurements) => {
+      draggable.measurements = measurements;
+    });
+  });
 
   React.useEffect(() => {
     registerDraggable(draggable);
@@ -31,5 +38,5 @@ export function useDraggable(props: DraggableCallbacks) {
     };
   }, [unregisterDraggable, registerDraggable, draggable]);
 
-  return draggable;
+  return [draggable, ref];
 }

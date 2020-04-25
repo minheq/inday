@@ -1,9 +1,11 @@
 import React from 'react';
-import { View } from 'react-native';
 import { useDragDrop } from './drag_drop_provider';
-import { DropTarget, DropTargetCallbacks } from './drop_target';
+import { DropTarget, DropTargetProps } from './drop_target';
+import { measure } from './measurements';
 
-export function useDropTarget(props: DropTargetCallbacks) {
+export function useDropTarget<TElement = any>(
+  props: DropTargetProps,
+): [DropTarget, React.RefObject<TElement>] {
   const {
     onEnter = () => {},
     onAccept = () => {},
@@ -13,10 +15,9 @@ export function useDropTarget(props: DropTargetCallbacks) {
   } = props;
 
   const { registerDropTarget, unregisterDropTarget } = useDragDrop();
-  const dropTargetRef = React.useRef<View | null>(null);
+  const ref = React.useRef<TElement>(null);
   const dropTarget = React.useRef(
     new DropTarget({
-      ref: dropTargetRef,
       onEnter,
       onAccept,
       onHover,
@@ -24,6 +25,12 @@ export function useDropTarget(props: DropTargetCallbacks) {
       onWillAccept,
     }),
   ).current;
+
+  React.useEffect(() => {
+    measure(ref).then((measurements) => {
+      dropTarget.measurements = measurements;
+    });
+  });
 
   React.useEffect(() => {
     registerDropTarget(dropTarget);
@@ -41,5 +48,5 @@ export function useDropTarget(props: DropTargetCallbacks) {
     onWillAccept,
   ]);
 
-  return dropTarget;
+  return [dropTarget, ref];
 }

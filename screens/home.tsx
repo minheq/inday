@@ -10,26 +10,6 @@ interface Block {
   note: string;
 }
 
-const blocks: Block[] = [
-  { id: '1', title: 'Title', note: 'Note' },
-  { id: '2', title: 'Title', note: 'Note' },
-  { id: '3', title: 'Title', note: 'Note' },
-  { id: '4', title: 'Title', note: 'Note' },
-  { id: '5', title: 'Title', note: 'Note' },
-  // { id: '6', title: 'Title', note: 'Note' },
-  // { id: '7', title: 'Title', note: 'Note' },
-  // { id: '8', title: 'Title', note: 'Note' },
-  // { id: '9', title: 'Title', note: 'Note' },
-  // { id: '10', title: 'Title', note: 'Note' },
-  // { id: '11', title: 'Title', note: 'Note' },
-  // { id: '12', title: 'Title', note: 'Note' },
-  // { id: '13', title: 'Title', note: 'Note' },
-  // { id: '14', title: 'Title', note: 'Note' },
-  // { id: '15', title: 'Title', note: 'Note' },
-  // { id: '16', title: 'Title', note: 'Note' },
-  // { id: '17', title: 'Title', note: 'Note' },
-];
-
 export function HomeScreen() {
   // const scrollRef = React.useRef<ScrollView>(null);
 
@@ -38,13 +18,25 @@ export function HomeScreen() {
       <View style={{ padding: 16 }}>
         <View style={{ padding: 16 }}>
           <DragDropProvider>
-            <Draggable>
-              <Text>Draggable!</Text>
-            </Draggable>
-            <View style={{ height: 400 }} />
-            <DropTarget>
-              <Text>Draggable!</Text>
-            </DropTarget>
+            <View style={{ flexDirection: 'row' }}>
+              <Draggable>
+                <Text>Draggable!</Text>
+              </Draggable>
+              <View style={{ width: 100 }} />
+              <Draggable>
+                <Text>Draggable!</Text>
+              </Draggable>
+            </View>
+            <View style={{ height: 100 }} />
+            <View style={{ flexDirection: 'row' }}>
+              <DropTarget>
+                <Text>DropTarget!</Text>
+              </DropTarget>
+              <View style={{ width: 100 }} />
+              <DropTarget>
+                <Text>DropTarget!</Text>
+              </DropTarget>
+            </View>
           </DragDropProvider>
         </View>
       </View>

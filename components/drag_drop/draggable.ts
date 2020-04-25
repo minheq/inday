@@ -1,7 +1,9 @@
-import { View } from 'react-native';
-import { Measurements, measure } from './measurements';
+import { Measurements } from './measurements';
 
-export interface DraggableCallbacks {
+export interface DraggableProps<TItem = any> {
+  /** The item this draggable corresponds to */
+  item?: TItem;
+
   /** Called when the draggable starts being dragged. */
   onStart?: () => void;
 
@@ -13,10 +15,6 @@ export interface DraggableCallbacks {
 
   /** Called when the draggable is dropped and accepted by a DragTarget. */
   onComplete?: () => void;
-}
-
-export interface DraggableConstructorProps extends DraggableCallbacks {
-  ref: React.MutableRefObject<View | null>;
 }
 
 export type DragEndCallback = (dragState: DragState) => Promise<void>;
@@ -36,28 +34,27 @@ export interface DragState {
 
 let keySequence = 1;
 
-export class Draggable {
+export class Draggable<TItem = any> {
   key: string;
-  ref: React.MutableRefObject<View | null>;
+  item: TItem;
   measurements: Measurements | null = null;
-  isDragging: boolean = false;
 
   onStart: () => void = () => {};
   onEnd: () => void = () => {};
   onCancel: () => void = () => {};
   onComplete: () => void = () => {};
 
-  constructor(props: DraggableConstructorProps) {
+  constructor(props: DraggableProps) {
     const {
-      ref,
+      item,
       onStart = () => {},
       onEnd = () => {},
       onCancel = () => {},
       onComplete = () => {},
     } = props;
 
+    this.item = item;
     this.key = `${keySequence++}`;
-    this.ref = ref;
     this.onStart = onStart;
     this.onEnd = onEnd;
     this.onCancel = onCancel;
@@ -96,9 +93,5 @@ export class Draggable {
     this._dragEndListeners.forEach(async (fn) => {
       await fn(dragState);
     });
-  };
-
-  measure = async () => {
-    this.measurements = await measure(this.ref);
   };
 }

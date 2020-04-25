@@ -2,16 +2,16 @@ import React from 'react';
 import {
   Animated,
   PanResponder,
-  ViewStyle,
   PanResponderGestureState,
   GestureResponderEvent,
+  View,
 } from 'react-native';
 import { useDraggable } from './drag_drop/use_draggable';
-import { DraggableCallbacks, DragState } from './drag_drop/draggable';
+import { DraggableProps, DragState } from './drag_drop/draggable';
 
-interface DraggableProps extends DraggableCallbacks {
+interface DraggableComponentProps<TItem = any> extends DraggableProps<TItem> {
   children?: React.ReactNode;
-  style?: ViewStyle;
+  direction?: 'horizontal' | 'vertical' | 'any';
 }
 
 function toDragState(
@@ -26,22 +26,23 @@ function toDragState(
   };
 }
 
-export function Draggable(props: DraggableProps) {
-  const { children, onComplete, onEnd, onStart, onCancel, style } = props;
+export function Draggable<TItem = any>(props: DraggableComponentProps<TItem>) {
+  const {
+    children,
+    onComplete,
+    onEnd,
+    onStart,
+    onCancel,
+    item,
+    direction = 'any',
+  } = props;
   const pan = React.useRef(new Animated.ValueXY()).current;
-  const draggable = useDraggable({
-    onComplete: () => {
-      console.log('onComplete');
-    },
-    onEnd: () => {
-      console.log('onEnd');
-    },
-    onStart: () => {
-      console.log('onStart');
-    },
-    onCancel: () => {
-      console.log('onCancel');
-    },
+  const [draggable, ref] = useDraggable<TItem, View>({
+    item,
+    onComplete,
+    onEnd,
+    onStart,
+    onCancel,
   });
 
   const zIndex = React.useRef(new Animated.Value(0));
@@ -64,10 +65,22 @@ export function Draggable(props: DraggableProps) {
         //   `moveX=${state.moveX}`,
         //   `moveY=${state.moveY}`,
         // );
-        pan.setValue({
-          x: state.dx,
-          y: state.dy,
-        });
+        if (direction === 'vertical') {
+          pan.setValue({
+            x: 0,
+            y: state.dy,
+          });
+        } else if (direction === 'horizontal') {
+          pan.setValue({
+            x: state.dx,
+            y: 0,
+          });
+        } else {
+          pan.setValue({
+            x: state.dx,
+            y: state.dy,
+          });
+        }
 
         draggable.drag(toDragState(event, state));
       },
@@ -85,16 +98,13 @@ export function Draggable(props: DraggableProps) {
   return (
     <Animated.View
       // @ts-ignore
-      ref={draggable.ref}
+      ref={ref}
       style={[
         {
           transform: [{ translateX: pan.x }, { translateY: pan.y }],
           zIndex: zIndex.current,
-          width: 100,
-          height: 100,
-          backgroundColor: 'pink',
+          userSelect: 'none',
         },
-        style,
       ]}
       {...panResponder.panHandlers}
     >
