@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { Measurements, measure } from './measurements';
 
 export interface DropTargetCallbacks {
   /** Called when an acceptable piece of data was dropped over this drag target. */
@@ -23,6 +24,7 @@ let keySequence = 1;
 export class DropTarget {
   key: string;
   ref: React.MutableRefObject<View | null>;
+  measurements: Measurements | null = null;
 
   constructor(props: DropTargetConstructorProps) {
     const { ref } = props;
@@ -30,4 +32,8 @@ export class DropTarget {
     this.key = `${keySequence++}`;
     this.ref = ref;
   }
+
+  measure = async () => {
+    this.measurements = await measure(this.ref);
+  };
 }

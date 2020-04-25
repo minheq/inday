@@ -1,4 +1,5 @@
 import { View, Animated } from 'react-native';
+import { Measurements, measure } from './measurements';
 
 export interface DraggableCallbacks {
   /** Called when the draggable starts being dragged. */
@@ -18,20 +19,21 @@ export interface DraggableConstructorProps extends DraggableCallbacks {
   ref: React.MutableRefObject<View | null>;
 }
 
-let keySequence = 1;
-
-type DragEndCallback = (state: DragState) => void;
-type DragCallback = (state: DragState) => void;
-type DragStartCallback = (state: DragState) => void;
+export type DragEndCallback = (state: DragState) => Promise<void>;
+export type DragCallback = (state: DragState) => Promise<void>;
+export type DragStartCallback = (state: DragState) => Promise<void>;
 
 interface DragState {
   dx: number;
   dy: number;
 }
 
+let keySequence = 1;
+
 export class Draggable {
   key: string;
   ref: React.MutableRefObject<View | null>;
+  measurements: Measurements | null = null;
   pan: Animated.ValueXY = new Animated.ValueXY();
   isDragging: boolean = false;
 
@@ -59,20 +61,24 @@ export class Draggable {
   };
 
   startDrag = (state: DragState) => {
-    this._dragStartListeners.forEach((fn) => {
-      fn(state);
+    this._dragStartListeners.forEach(async (fn) => {
+      await fn(state);
     });
   };
 
   drag = (state: DragState) => {
-    this._dragListeners.forEach((fn) => {
-      fn(state);
+    this._dragListeners.forEach(async (fn) => {
+      await fn(state);
     });
   };
 
   endDrag = (state: DragState) => {
-    this._dragEndListeners.forEach((fn) => {
-      fn(state);
+    this._dragEndListeners.forEach(async (fn) => {
+      await fn(state);
     });
+  };
+
+  measure = async () => {
+    this.measurements = await measure(this.ref);
   };
 }

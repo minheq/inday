@@ -22,6 +22,31 @@ export class DragDrop implements DragDropHandlers {
     return Object.values(this._dropTargets);
   }
 
+  get draggables(): Draggable[] {
+    return Object.values(this._draggables);
+  }
+
+  findDropTargetOverlap = (draggable: Draggable): DropTarget | null => {
+    // for (let index = 0; index < this.dropTargets.length; index++) {
+    //   const dropTarget = this.dropTargets[index];
+
+    //   // if () {
+    //   //   break;
+    //   // }
+    // }
+
+    return null;
+  };
+
+  _measureAll = async () => {
+    await Promise.all([
+      Promise.all(this.draggables.map((draggable) => draggable.measure())),
+      Promise.all(this.dropTargets.map((dropTarget) => dropTarget.measure())),
+    ]);
+
+    this.draggables.forEach((d) => console.log(d.measurements));
+  };
+
   registerDraggable = (draggable: Draggable, callbacks: DraggableCallbacks) => {
     const {
       onDragCompleted = () => {},
@@ -31,16 +56,18 @@ export class DragDrop implements DragDropHandlers {
     } = callbacks;
     this._draggables[draggable.key] = draggable;
 
-    draggable.onDragStart((state) => {
+    draggable.onDragStart(async () => {
+      await this._measureAll();
       onDragStarted();
     });
 
     draggable.onDrag((state) => {
-      console.log(this.dropTargets);
       draggable.pan.setValue({
         x: state.dx,
         y: state.dy,
       });
+
+      const dropTarget = this.findDropTargetOverlap(draggable);
     });
 
     draggable.onDragEnd((state) => {

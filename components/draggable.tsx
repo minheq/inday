@@ -1,10 +1,11 @@
 import React from 'react';
-import { Animated, PanResponder } from 'react-native';
+import { Animated, PanResponder, ViewStyle } from 'react-native';
 import { useDraggable } from './drag_drop/use_draggable';
 import { DraggableCallbacks } from './drag_drop/draggable';
 
 interface DraggableProps extends DraggableCallbacks {
   children?: React.ReactNode;
+  style?: ViewStyle;
 }
 
 export function Draggable(props: DraggableProps) {
@@ -14,6 +15,7 @@ export function Draggable(props: DraggableProps) {
     onDragEnd,
     onDragStarted,
     onDraggableCanceled,
+    style,
   } = props;
 
   const draggable = useDraggable({
@@ -52,6 +54,7 @@ export function Draggable(props: DraggableProps) {
           { translateY: draggable.pan.y },
         ],
         zIndex: zIndex.current,
+        ...style,
       }}
       {...panResponder.panHandlers}
     >

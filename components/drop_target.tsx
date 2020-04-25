@@ -1,14 +1,15 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { useDropTarget } from './drag_drop/use_drop_target';
 import { DropTargetCallbacks } from './drag_drop/drop_target';
 
 interface DropTargetProps extends DropTargetCallbacks {
   children?: React.ReactNode;
+  style?: ViewStyle;
 }
 
 export function DropTarget(props: DropTargetProps) {
-  const { children, onAccept, onHover, onLeave, onWillAccept } = props;
+  const { children, onAccept, onHover, onLeave, onWillAccept, style } = props;
 
   const dropTarget = useDropTarget({
     onAccept,
@@ -17,5 +18,9 @@ export function DropTarget(props: DropTargetProps) {
     onWillAccept,
   });
 
-  return <View ref={dropTarget.ref}>{children}</View>;
+  return (
+    <View style={style} ref={dropTarget.ref}>
+      {children}
+    </View>
+  );
 }

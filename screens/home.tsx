@@ -35,26 +35,29 @@ export function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <DragDropProvider>
-        <Draggable>
-          <View style={{ width: 100, height: 100, backgroundColor: 'pink' }}>
-            <Text>Draggable!</Text>
-          </View>
-        </Draggable>
-        <View style={{ height: 400 }} />
-        <DropTarget
-          onAccept={() => {
-            console.log('onAccept');
-          }}
-          onHover={() => {
-            console.log('onHover');
-          }}
-        >
-          <View style={{ width: 100, height: 100, backgroundColor: 'yellow' }}>
-            <Text>Draggable!</Text>
-          </View>
-        </DropTarget>
-      </DragDropProvider>
+      <View style={{ padding: 16 }}>
+        <View style={{ padding: 16 }}>
+          <DragDropProvider>
+            <Draggable
+              style={{ width: 100, height: 100, backgroundColor: 'pink' }}
+            >
+              <Text>Draggable!</Text>
+            </Draggable>
+            <View style={{ height: 400 }} />
+            <DropTarget
+              onAccept={() => {
+                console.log('onAccept');
+              }}
+              onHover={() => {
+                console.log('onHover');
+              }}
+              style={{ width: 100, height: 100, backgroundColor: 'yellow' }}
+            >
+              <Text>Draggable!</Text>
+            </DropTarget>
+          </DragDropProvider>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
