@@ -38,9 +38,7 @@ export function HomeScreen() {
       <View style={{ padding: 16 }}>
         <View style={{ padding: 16 }}>
           <DragDropProvider>
-            <Draggable
-              style={{ width: 100, height: 100, backgroundColor: 'pink' }}
-            >
+            <Draggable>
               <Text>Draggable!</Text>
             </Draggable>
             <View style={{ height: 400 }} />
@@ -51,7 +49,6 @@ export function HomeScreen() {
               onHover={() => {
                 console.log('onHover');
               }}
-              style={{ width: 100, height: 100, backgroundColor: 'yellow' }}
             >
               <Text>Draggable!</Text>
             </DropTarget>

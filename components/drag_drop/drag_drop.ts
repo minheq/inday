@@ -1,4 +1,4 @@
-import { Draggable, DraggableCallbacks } from './draggable';
+import { Draggable, DraggableCallbacks, DragState } from './draggable';
 import { DropTarget, DropTargetCallbacks } from './drop_target';
 
 export interface DragDropHandlers {
@@ -26,14 +26,24 @@ export class DragDrop implements DragDropHandlers {
     return Object.values(this._draggables);
   }
 
-  findDropTargetOverlap = (draggable: Draggable): DropTarget | null => {
-    // for (let index = 0; index < this.dropTargets.length; index++) {
-    //   const dropTarget = this.dropTargets[index];
+  findDropTargetOverlap = (dragState: DragState): DropTarget | null => {
+    for (let index = 0; index < this.dropTargets.length; index++) {
+      const dropTarget = this.dropTargets[index];
 
-    //   // if () {
-    //   //   break;
-    //   // }
-    // }
+      if (dropTarget.measurements) {
+        const { width, height, pageX, pageY } = dropTarget.measurements;
+
+        const isWithinHorizontalBound =
+          pageX <= dragState.pageX && dragState.pageX <= pageX + width;
+        const isWithinVerticalBound =
+          pageY <= dragState.pageY && dragState.pageY <= pageY + height;
+
+        if (isWithinHorizontalBound && isWithinVerticalBound) {
+          dropTarget.enter();
+          break;
+        }
+      }
+    }
 
     return null;
   };
@@ -61,16 +71,16 @@ export class DragDrop implements DragDropHandlers {
       onDragStarted();
     });
 
-    draggable.onDrag((state) => {
+    draggable.onDrag(async (dragState) => {
       draggable.pan.setValue({
-        x: state.dx,
-        y: state.dy,
+        x: dragState.dx,
+        y: dragState.dy,
       });
 
-      const dropTarget = this.findDropTargetOverlap(draggable);
+      const dropTarget = this.findDropTargetOverlap(dragState);
     });
 
-    draggable.onDragEnd((state) => {
+    draggable.onDragEnd(async (dragState) => {
       draggable.pan.setValue({
         x: 0,
         y: 0,
@@ -96,6 +106,16 @@ export class DragDrop implements DragDropHandlers {
       onWillAccept = () => {},
     } = callbacks;
     this._dropTargets[dropTarget.key] = dropTarget;
+
+    dropTarget.onLeave(async () => {
+      onLeave();
+    });
+    dropTarget.onHover(async () => {
+      onHover();
+    });
+    dropTarget.onAccept(async () => {
+      onAccept();
+    });
   };
 
   unregisterDropTarget = (dropTarget: DropTarget) => {

@@ -19,13 +19,19 @@ export interface DraggableConstructorProps extends DraggableCallbacks {
   ref: React.MutableRefObject<View | null>;
 }
 
-export type DragEndCallback = (state: DragState) => Promise<void>;
-export type DragCallback = (state: DragState) => Promise<void>;
-export type DragStartCallback = (state: DragState) => Promise<void>;
+export type DragEndCallback = (dragState: DragState) => Promise<void>;
+export type DragCallback = (dragState: DragState) => Promise<void>;
+export type DragStartCallback = (dragState: DragState) => Promise<void>;
 
-interface DragState {
+export interface DragState {
+  /** Horizontal distance moved from original position */
   dx: number;
+  /** Vertical distance moved from original position */
   dy: number;
+  /** X coordinate relative to page */
+  pageX: number;
+  /** Y coordinate relative to page */
+  pageY: number;
 }
 
 let keySequence = 1;
@@ -44,9 +50,9 @@ export class Draggable {
     this.ref = ref;
   }
 
-  _dragEndListeners: DragEndCallback[] = [];
-  _dragListeners: DragCallback[] = [];
   _dragStartListeners: DragStartCallback[] = [];
+  _dragListeners: DragCallback[] = [];
+  _dragEndListeners: DragEndCallback[] = [];
 
   onDragStart = (fn: DragStartCallback) => {
     this._dragStartListeners.push(fn);
@@ -60,21 +66,21 @@ export class Draggable {
     this._dragEndListeners.push(fn);
   };
 
-  startDrag = (state: DragState) => {
+  startDrag = (dragState: DragState) => {
     this._dragStartListeners.forEach(async (fn) => {
-      await fn(state);
+      await fn(dragState);
     });
   };
 
-  drag = (state: DragState) => {
+  drag = (dragState: DragState) => {
     this._dragListeners.forEach(async (fn) => {
-      await fn(state);
+      await fn(dragState);
     });
   };
 
-  endDrag = (state: DragState) => {
+  endDrag = (dragState: DragState) => {
     this._dragEndListeners.forEach(async (fn) => {
-      await fn(state);
+      await fn(dragState);
     });
   };
 
