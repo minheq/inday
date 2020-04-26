@@ -147,14 +147,17 @@ export type GestureDetectorConfig = {
   onLongPress?: (event: GestureResponderEvent) => void;
 
   /**
-   * Called when a press gestute has been triggered.
+   * Called when a press gesture has been triggered.
    */
   onPress?: (event: GestureResponderEvent) => void;
 
   /**
    * Called when a drag gesture has started
    */
-  onDragStart?: (event: GestureResponderEvent) => void;
+  onDragStart?: (
+    event: GestureResponderEvent,
+    gestureState: PanResponderGestureState,
+  ) => void;
 
   /**
    * Called when a drag gesture has moved
@@ -167,7 +170,10 @@ export type GestureDetectorConfig = {
   /**
    * Called when a drag gesture has ended
    */
-  onDragEnd?: (event: GestureResponderEvent) => void;
+  onDragEnd?: (
+    event: GestureResponderEvent,
+    gestureState: PanResponderGestureState,
+  ) => void;
 
   /**
    * Called when the press is activated to provide visual feedback.
@@ -187,7 +193,6 @@ export type GestureDetectorConfig = {
 
 export interface EventHandlers extends GestureResponderHandlers {
   onBlur: (event: BlurEvent) => void;
-  onClick: (event: GestureResponderEvent) => void;
   onFocus: (event: FocusEvent) => void;
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
@@ -413,14 +418,17 @@ export class GestureDetector {
         return !disabled || true;
       },
 
-      onPanResponderGrant: (event: GestureResponderEvent): void => {
+      onPanResponderGrant: (
+        event: GestureResponderEvent,
+        state: PanResponderGestureState,
+      ): void => {
         event.persist();
 
         this._cancelPressOutDelayTimeout();
 
         this._responderID = event.currentTarget;
         this._touchState = TouchState.NotResponder;
-        this._receiveSignal(TouchSignal.ResponderGrant, event);
+        this._receiveSignal(TouchSignal.ResponderGrant, event, state);
 
         const delayPressIn = normalizeDelay(
           this._config.delayPressIn,
@@ -430,10 +438,10 @@ export class GestureDetector {
 
         if (delayPressIn > 0) {
           this._pressDelayTimeout = setTimeout(() => {
-            this._receiveSignal(TouchSignal.Delay, event);
+            this._receiveSignal(TouchSignal.Delay, event, state);
           }, delayPressIn);
         } else {
-          this._receiveSignal(TouchSignal.Delay, event);
+          this._receiveSignal(TouchSignal.Delay, event, state);
         }
 
         const delayLongPress = normalizeDelay(
@@ -442,11 +450,14 @@ export class GestureDetector {
           DEFAULT_LONG_PRESS_DELAY_MS,
         );
         this._longPressDelayTimeout = setTimeout(() => {
-          this._handleLongPress(event);
+          this._handleLongPress(event, state);
         }, delayLongPress + delayPressIn);
       },
 
-      onPanResponderMove: (event: GestureResponderEvent, state): void => {
+      onPanResponderMove: (
+        event: GestureResponderEvent,
+        state: PanResponderGestureState,
+      ): void => {
         if (this._config.onPressMove != null) {
           this._config.onPressMove(event);
         }
@@ -460,7 +471,7 @@ export class GestureDetector {
         const touch = getTouchFromGestureDetectorResponderEvent(event);
         if (touch == null) {
           this._cancelLongPressDelayTimeout();
-          this._receiveSignal(TouchSignal.LeavePressRect, event);
+          this._receiveSignal(TouchSignal.LeavePressRect, event, state);
           return;
         }
 
@@ -476,7 +487,7 @@ export class GestureDetector {
               this._touchState === TouchState.ResponderActivePressIn ||
               this._touchState === TouchState.ResponderActiveLongPressIn
             ) {
-              this._receiveSignal(TouchSignal.DragDetected, event);
+              this._receiveSignal(TouchSignal.DragDetected, event, state);
             }
           }
         }
@@ -491,19 +502,25 @@ export class GestureDetector {
         }
 
         if (this._isTouchWithinResponderRegion(touch, responderRegion)) {
-          this._receiveSignal(TouchSignal.EnterPressRect, event);
+          this._receiveSignal(TouchSignal.EnterPressRect, event, state);
         } else {
           this._cancelLongPressDelayTimeout();
-          this._receiveSignal(TouchSignal.LeavePressRect, event);
+          this._receiveSignal(TouchSignal.LeavePressRect, event, state);
         }
       },
 
-      onPanResponderRelease: (event: GestureResponderEvent): void => {
-        this._receiveSignal(TouchSignal.ResponderRelease, event);
+      onPanResponderRelease: (
+        event: GestureResponderEvent,
+        state: PanResponderGestureState,
+      ): void => {
+        this._receiveSignal(TouchSignal.ResponderRelease, event, state);
       },
 
-      onPanResponderTerminate: (event: GestureResponderEvent): void => {
-        this._receiveSignal(TouchSignal.ResponderTerminated, event);
+      onPanResponderTerminate: (
+        event: GestureResponderEvent,
+        state: PanResponderGestureState,
+      ): void => {
+        this._receiveSignal(TouchSignal.ResponderTerminated, event, state);
       },
 
       onPanResponderTerminationRequest: (): boolean => {
@@ -567,12 +584,6 @@ export class GestureDetector {
       ...focusEventHandlers,
       ...panResponder.panHandlers,
       ...mouseEventHandlers,
-      onClick: (event: GestureResponderEvent): void => {
-        const { onPress } = this._config;
-        if (onPress != null) {
-          onPress(event);
-        }
-      },
     };
   }
 
@@ -580,10 +591,15 @@ export class GestureDetector {
    * Receives a state machine signal, performs side effects of the transition
    * and stores the new state. Validates the transition as well.
    */
-  _receiveSignal(signal: TouchSignal, event: GestureResponderEvent): void {
+  _receiveSignal(
+    signal: TouchSignal,
+    event: GestureResponderEvent,
+    state: PanResponderGestureState,
+  ): void {
     const prevState = this._touchState;
     const nextState = Transitions[prevState][signal];
 
+    // console.log(prevState, '--->', signal, '--->', nextState);
     if (this._responderID == null && signal === TouchSignal.ResponderRelease) {
       return;
     }
@@ -599,7 +615,13 @@ export class GestureDetector {
     }
 
     if (prevState !== nextState) {
-      this._performTransitionSideEffects(prevState, nextState, signal, event);
+      this._performTransitionSideEffects(
+        prevState,
+        nextState,
+        signal,
+        event,
+        state,
+      );
       this._touchState = nextState;
     }
   }
@@ -613,6 +635,7 @@ export class GestureDetector {
     nextState: TouchState,
     signal: TouchSignal,
     event: GestureResponderEvent,
+    state: PanResponderGestureState,
   ): void {
     if (isTerminalSignal(signal)) {
       this._touchActivatePosition = null;
@@ -643,7 +666,7 @@ export class GestureDetector {
     if (nextState === TouchState.ResponderActiveDrag) {
       const { onDragStart } = this._config;
       if (onDragStart != null) {
-        onDragStart(event);
+        onDragStart(event, state);
       }
     }
 
@@ -662,7 +685,7 @@ export class GestureDetector {
     ) {
       const { onDragEnd } = this._config;
       if (onDragEnd != null) {
-        onDragEnd(event);
+        onDragEnd(event, state);
       }
     } else if (
       isPressInSignal(prevState) &&
@@ -719,11 +742,7 @@ export class GestureDetector {
       return;
     }
 
-    if (typeof this._responderID === 'number') {
-      UIManager.measure(this._responderID, this._measureCallback);
-    } else {
-      this._responderID.measure(this._measureCallback);
-    }
+    UIManager.measure(this._responderID, this._measureCallback);
   }
 
   _measureCallback = (
@@ -791,12 +810,15 @@ export class GestureDetector {
     );
   }
 
-  _handleLongPress(event: GestureResponderEvent): void {
+  _handleLongPress(
+    event: GestureResponderEvent,
+    state: PanResponderGestureState,
+  ): void {
     if (
       this._touchState === TouchState.ResponderActivePressIn ||
       this._touchState === TouchState.ResponderActiveLongPressIn
     ) {
-      this._receiveSignal(TouchSignal.LongPressDetected, event);
+      this._receiveSignal(TouchSignal.LongPressDetected, event, state);
     }
   }
 

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDragDrop } from './drag_drop_provider';
 import { DropTarget, DropTargetProps } from './drop_target';
-import { measure } from './measurements';
 
 export function useDropTarget<TElement = any>(
   props: DropTargetProps,
@@ -25,12 +24,6 @@ export function useDropTarget<TElement = any>(
       onWillAccept,
     }),
   ).current;
-
-  React.useEffect(() => {
-    measure(ref).then((measurements) => {
-      dropTarget.measurements = measurements;
-    });
-  });
 
   React.useEffect(() => {
     registerDropTarget(dropTarget);

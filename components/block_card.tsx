@@ -1,118 +1,149 @@
-export const helllllo = '';
-// import React from 'react';
-// import { Animated, StyleSheet, View, Text } from 'react-native';
-// import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
-// import { useDraggable } from './drag_drop/use_draggable';
+import React from 'react';
+import {
+  Animated,
+  StyleSheet,
+  View,
+  Text,
+  GestureResponderEvent,
+  PanResponderGestureState,
+  Platform,
+} from 'react-native';
+import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
+import { useDraggable } from './drag_drop/use_draggable';
+import { DragState } from './drag_drop/draggable';
+import { measure } from './drag_drop/measurements';
 
-// interface Block {
-//   id: string;
-//   title: string;
-//   note: string;
-// }
+export interface Block {
+  id: string;
+  title: string;
+  note: string;
+  height: number;
+}
 
-// interface BlockCardProps {
-//   block: Block;
-// }
+interface BlockCardProps {
+  block: Block;
+}
 
-// export function BlockCard(props: BlockCardProps) {
-//   const { block } = props;
+function toDragState(
+  event: GestureResponderEvent,
+  state: PanResponderGestureState,
+): DragState {
+  return {
+    dx: state.dx,
+    dy: state.dy,
+    pageX: event.nativeEvent.pageX,
+    pageY: event.nativeEvent.pageY,
+  };
+}
 
-//   const draggable = useDraggable({
-//     onDragStarted: () => {
-//       console.log('BlockCard:onDragStarted');
-//     },
-//     onDragEnd: () => {
-//       console.log('BlockCard:onDragEnd');
-//     },
-//     onDraggableCanceled: () => {
-//       console.log('BlockCard:onDraggableCanceled');
-//     },
-//     onDragCompleted: () => {
-//       console.log('BlockCard:onDragCompleted');
-//     },
-//   });
+export function BlockCard(props: BlockCardProps) {
+  const { block } = props;
+  const zIndex = React.useRef(new Animated.Value(0)).current;
+  const pan = React.useRef(new Animated.ValueXY()).current;
+  const [draggable, ref] = useDraggable<Block, View>({
+    item: block,
+  });
 
-//   const config: GestureDetectorConfig = React.useMemo(() => {
-//     let isLongPress = false;
+  const config: GestureDetectorConfig = React.useMemo(() => {
+    let isLongPress = false;
 
-//     return {
-//       onPress: () => {
-//         // console.log('BlockCard:onPress');
-//       },
-//       onLongPress: () => {
-//         // console.log('BlockCard:onLongPress');
-//         isLongPress = true;
-//       },
-//       onDragStart: () => {
-//         // console.log('BlockCard:onDragStart');
-//         draggable.startDrag();
-//         // pan.setOffset({
-//         //   x: pan.x._value,
-//         //   y: pan.y._value,
-//         // });
-//       },
-//       onDragMove: (event, state) => {
-//         // console.log('BlockCard:onDragMove');
-//         if (isLongPress) {
-//           draggable.drag();
-//         } else {
-//           draggable.pan.setValue({
-//             x: state.dx,
-//             y: 0,
-//           });
-//         }
-//       },
-//       onDragEnd: () => {
-//         // console.log('BlockCard:onDragEnd');
-//         draggable.endDrag();
-//         isLongPress = false;
-//       },
-//     };
-//   }, [draggable]);
+    return {
+      onPress: () => {
+        console.log('onPress');
+      },
+      onLongPress: () => {
+        console.log('onLongPress');
+        isLongPress = true;
+      },
+      onDragStart: (
+        event: GestureResponderEvent,
+        state: PanResponderGestureState,
+      ) => {
+        draggable.startDrag(toDragState(event, state));
+        zIndex.setValue(99);
+      },
+      onDragMove: (
+        event: GestureResponderEvent,
+        state: PanResponderGestureState,
+      ) => {
+        // console.log('BlockCard:onDragMove');
+        if (isLongPress) {
+          draggable.drag(toDragState(event, state));
+          pan.setValue({
+            x: 0,
+            y: state.dy,
+          });
+        } else {
+          pan.setValue({
+            x: state.dx,
+            y: 0,
+          });
+        }
+      },
+      onDragEnd: (
+        event: GestureResponderEvent,
+        state: PanResponderGestureState,
+      ) => {
+        // console.log('BlockCard:onDragEnd');
+        draggable.endDrag(toDragState(event, state));
+        isLongPress = false;
+        zIndex.setValue(0);
+      },
+    };
+  }, [draggable, pan, zIndex]);
 
-//   const eventHandlers = useGestureDetector(config);
+  const eventHandlers = useGestureDetector(config);
 
-//   return (
-//     <Animated.View
-//       // @ts-ignore
-//       ref={draggable.ref}
-//       accessible
-//       style={[
-//         {
-//           transform: [
-//             { translateX: draggable.pan.x },
-//             { translateY: draggable.pan.y },
-//           ],
-//         },
-//       ]}
-//       {...eventHandlers}
-//     >
-//       <View style={[styles.block]}>
-//         <Text style={styles.blockTitle}>{block.title}</Text>
-//         <Text style={styles.blockNote}>{block.note}</Text>
-//       </View>
-//     </Animated.View>
-//   );
-// }
+  const handleLayout = React.useCallback(() => {
+    measure(ref).then((measurements) => {
+      draggable.measurements = measurements;
+    });
+  }, [draggable, ref]);
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#f0f0f0',
-//   },
-//   block: {
-//     flexDirection: 'column',
-//     justifyContent: 'space-between',
-//     backgroundColor: '#fff',
-//     padding: 16,
-//     borderColor: '#f0f0f0',
-//     borderBottomWidth: 1,
-//   },
-//   blockTitle: {
-//     fontWeight: 'bold',
-//   },
-//   active: {
-//     backgroundColor: 'green',
-//   },
-//   blockNote: {},
-// });
+  return (
+    <Animated.View
+      // @ts-ignore
+      ref={ref}
+      accessible
+      onLayout={handleLayout}
+      style={[
+        {
+          transform: [{ translateX: pan.x }, { translateY: pan.y }],
+          zIndex,
+        },
+        styles.root,
+      ]}
+      {...eventHandlers}
+    >
+      <View style={[styles.block]}>
+        <Text style={styles.blockTitle}>{block.title}</Text>
+        <Text style={styles.blockNote}>{block.note}</Text>
+      </View>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root:
+    Platform.OS === 'web'
+      ? {
+          // @ts-ignore
+          userSelect: 'none',
+        }
+      : {},
+  block: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderColor: '#f0f0f0',
+    borderBottomWidth: 1,
+  },
+  blockTitle: {
+    fontWeight: 'bold',
+  },
+  active: {
+    backgroundColor: 'green',
+  },
+  blockNote: {},
+});

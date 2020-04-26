@@ -55,16 +55,6 @@ export function Draggable<TItem = any>(props: DraggableComponentProps<TItem>) {
         zIndex.current.setValue(999);
       },
       onPanResponderMove: (event, state) => {
-        // console.log(
-        //   `pageX=${event.nativeEvent.pageX}`,
-        //   `pageY=${event.nativeEvent.pageY}`,
-        //   `locationX=${event.nativeEvent.locationX}`,
-        //   `locationY=${event.nativeEvent.locationY}`,
-        //   `dx=${state.dx}`,
-        //   `dy=${state.dy}`,
-        //   `moveX=${state.moveX}`,
-        //   `moveY=${state.moveY}`,
-        // );
         if (direction === 'vertical') {
           pan.setValue({
             x: 0,
