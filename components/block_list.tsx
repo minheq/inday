@@ -4,27 +4,43 @@ import {
   LayoutChangeEvent,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Animated,
 } from 'react-native';
 import { useDropTarget } from '../components/drag_drop/use_drop_target';
 import { measure } from '../components/drag_drop/measurements';
-import { Block, BlockCard } from './block_card';
+import { Block, BlockCard, BlockWithData } from './block_card';
+import { Draggable } from './drag_drop/draggable';
 
 interface BlockListProps {
+  id: string;
   blocks: Block[];
 }
 
-const AUTOSCROLL_OFFSET = 50;
+function initBlocksData(blocks: Block[]): BlockWithData[] {
+  return blocks.map((block, index) => ({
+    ...block,
+    index,
+    measurements: null,
+    position: new Animated.ValueXY(),
+  }));
+}
+
+export interface ScrollViewState {
+  contentHeight: number;
+  height: number;
+  offsetY: number;
+}
 
 export function BlockList(props: BlockListProps) {
   const { blocks } = props;
-  const [scrollEnabled, setScrollEnabled] = React.useState(false);
-  const scrollViewState = React.useRef({
+  const [scrollEnabled, setScrollEnabled] = React.useState(true);
+  const scrollViewState = React.useRef<ScrollViewState>({
     contentHeight: 0,
     height: 0,
     offsetY: 0,
-    top: 0,
-    bottom: 0,
   }).current;
+
+  const blocksWithData = React.useRef(initBlocksData(blocks)).current;
 
   const [dropTarget, ref] = useDropTarget<ScrollView>({
     onAccept: () => {
@@ -35,11 +51,65 @@ export function BlockList(props: BlockListProps) {
 
       setScrollEnabled(false);
     },
-    onHover: (draggable, dragState) => {
-      if (dragState.pageY > scrollViewState.bottom - AUTOSCROLL_OFFSET) {
-        handleAutoScroll('down');
-      } else if (dragState.pageY < scrollViewState.top + AUTOSCROLL_OFFSET) {
-        handleAutoScroll('up');
+    onHover: (draggable: Draggable<BlockWithData>, dragState) => {
+      if (!draggable.measurements || !dropTarget.measurements) {
+        return;
+      }
+
+      // Get drag position within scroll view
+      const y =
+        dragState.pageY -
+        dropTarget.measurements.pageY +
+        scrollViewState.offsetY;
+
+      const draggedBlockIndex = draggable.item.index;
+
+      // Find the block that this drag is hovering over
+      let hoverIndex = 0;
+      for (let i = blocksWithData.length - 1; i >= 0; i--) {
+        const block = blocksWithData[i];
+
+        if (!block.measurements) {
+          return;
+        }
+
+        hoverIndex = i;
+
+        if (block.measurements.y + 0.5 * block.measurements.height < y) {
+          break;
+        }
+      }
+
+      if (hoverIndex === draggedBlockIndex) {
+        return;
+      }
+
+      // Shift items according to their indexes
+      for (let i = 0; i < blocksWithData.length; i++) {
+        const block = blocksWithData[i];
+
+        if (i > draggedBlockIndex && i <= hoverIndex) {
+          Animated.spring(block.position, {
+            toValue: {
+              x: 0,
+              y: -draggable.measurements.height,
+            },
+            bounciness: 0,
+            speed: 24,
+            useNativeDriver: false,
+          }).start();
+          continue;
+        }
+
+        Animated.spring(block.position, {
+          toValue: {
+            x: 0,
+            y: 0,
+          },
+          bounciness: 0,
+          speed: 24,
+          useNativeDriver: false,
+        }).start();
       }
     },
     onLeave: () => {
@@ -51,30 +121,6 @@ export function BlockList(props: BlockListProps) {
       return true;
     },
   });
-
-  const handleAutoScroll = React.useCallback(
-    (direction: 'up' | 'down') => {
-      if (direction === 'up') {
-        if (scrollViewState.offsetY === 0) {
-          return;
-        }
-        ref.current?.scrollTo({
-          x: 0,
-          y: scrollViewState.offsetY - 20,
-        });
-      } else {
-        if (scrollViewState.contentHeight === scrollViewState.offsetY) {
-          return;
-        }
-
-        ref.current?.scrollTo({
-          x: 0,
-          y: scrollViewState.offsetY + 20,
-        });
-      }
-    },
-    [scrollViewState, ref],
-  );
 
   const handleScroll = React.useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -96,16 +142,8 @@ export function BlockList(props: BlockListProps) {
 
       measure(ref).then((measurements) => {
         dropTarget.measurements = measurements;
-        scrollViewState.top = dropTarget.measurements.pageY;
-        scrollViewState.bottom =
-          dropTarget.measurements.pageY + scrollViewState.height;
       });
-
-      const maxOffset = scrollViewState.contentHeight - scrollViewState.height;
-
-      if (maxOffset < scrollViewState.offsetY) {
-        scrollViewState.offsetY = maxOffset;
-      }
+      // TODO: Handle device rotation
     },
     [scrollViewState, dropTarget, ref],
   );
@@ -113,29 +151,25 @@ export function BlockList(props: BlockListProps) {
   const handleContentSizeChange = React.useCallback(
     (contentWidth: number, contentHeight: number) => {
       scrollViewState.contentHeight = contentHeight;
-
-      const maxOffset = scrollViewState.contentHeight - scrollViewState.height;
-
-      if (maxOffset < scrollViewState.offsetY) {
-        scrollViewState.offsetY = maxOffset;
-      }
+      // TODO: Handle device rotation
     },
     [scrollViewState],
   );
 
   return (
-    <ScrollView
+    <Animated.ScrollView
+      // @ts-ignore
+      ref={ref}
       scrollEventThrottle={16}
       scrollEnabled={scrollEnabled}
-      ref={ref}
       onScroll={handleScroll}
       onScrollEndDrag={handleScrollEndDrag}
       onLayout={handleLayout}
       onContentSizeChange={handleContentSizeChange}
     >
-      {blocks.map((block) => (
+      {blocksWithData.map((block) => (
         <BlockCard key={block.id} block={block} />
       ))}
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }

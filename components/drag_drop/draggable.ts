@@ -22,13 +22,13 @@ export type DragCallback = (dragState: DragState) => Promise<void>;
 export type DragStartCallback = (dragState: DragState) => Promise<void>;
 
 export interface DragState {
-  /** Horizontal distance moved from original position */
+  /** X-coordinate delta moved from original position */
   dx: number;
-  /** Vertical distance moved from original position */
+  /** Y-coordinate delta moved from original position */
   dy: number;
-  /** X coordinate relative to page */
+  /** X-coordinate relative to page */
   pageX: number;
-  /** Y coordinate relative to page */
+  /** Y-coordinate relative to page */
   pageY: number;
 }
 

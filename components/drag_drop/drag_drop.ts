@@ -62,6 +62,11 @@ export class DragDrop implements DragDropHandlers {
         this._activeDropTarget = dropTarget;
       } else if (this._activeDropTarget.key === dropTarget.key) {
         dropTarget.onHover(draggable, dragState);
+      } else {
+        // Ensures that when drop targets are next to each other
+        // it will leave the first one first
+        this._activeDropTarget.onLeave(draggable);
+        this._activeDropTarget = null;
       }
     } else {
       if (this._activeDropTarget) {

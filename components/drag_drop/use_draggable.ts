@@ -11,12 +11,14 @@ export function useDraggable<TItem = any, TElement = any>(
     onEnd = () => {},
     onCancel = () => {},
     onComplete = () => {},
+    item,
   } = props;
 
   const { registerDraggable, unregisterDraggable } = useDragDrop();
   const ref = React.useRef<TElement>(null);
   const draggable = React.useRef(
     new Draggable<TItem>({
+      item,
       onStart,
       onEnd,
       onCancel,
