@@ -11,23 +11,27 @@ import {
 import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
 import { useDraggable } from './drag_drop/use_draggable';
 import { DragState } from './drag_drop/draggable';
-import { measure, Measurements } from './drag_drop/measurements';
+import { measure } from './drag_drop/measurements';
 
 export interface Block {
   id: string;
   title: string;
   note: string;
+  contentHeight: number;
+}
+
+export interface PositionedBlock extends Block {
+  index: number;
+  position: Animated.ValueXY;
+  y: number;
+  x: number;
   height: number;
 }
 
-export interface BlockWithData extends Block {
-  index: number;
-  position: Animated.ValueXY;
-  measurements: Measurements | null;
-}
-
 export interface BlockCardProps {
-  block: BlockWithData;
+  block: PositionedBlock;
+  onDragStart: (block: PositionedBlock) => void;
+  onDragEnd: (block: PositionedBlock) => void;
 }
 
 function toDragState(
@@ -43,12 +47,12 @@ function toDragState(
 }
 
 export function BlockCard(props: BlockCardProps) {
-  const { block } = props;
+  const { block, onDragStart, onDragEnd } = props;
 
   const { position } = block;
-  const isDragging = React.useRef(new Animated.Value(0)).current;
+  const [isDragging, setIsDragging] = React.useState(false);
 
-  const [draggable, ref] = useDraggable<BlockWithData, View>({
+  const [draggable, ref] = useDraggable<PositionedBlock, View>({
     item: block,
   });
 
@@ -67,8 +71,9 @@ export function BlockCard(props: BlockCardProps) {
         event: GestureResponderEvent,
         state: PanResponderGestureState,
       ) => {
+        onDragStart(block);
+        setIsDragging(true);
         draggable.startDrag(toDragState(event, state));
-        isDragging.setValue(1);
       },
       onDragMove: (
         event: GestureResponderEvent,
@@ -92,20 +97,22 @@ export function BlockCard(props: BlockCardProps) {
         event: GestureResponderEvent,
         state: PanResponderGestureState,
       ) => {
-        // console.log('BlockCard:onDragEnd');
+        onDragEnd(block);
+        setIsDragging(false);
         draggable.endDrag(toDragState(event, state));
         isLongPress = false;
-        isDragging.setValue(0);
       },
     };
-  }, [draggable, position, isDragging]);
+  }, [block, draggable, position, setIsDragging, onDragStart, onDragEnd]);
 
   const eventHandlers = useGestureDetector(config);
 
   const handleLayout = React.useCallback(() => {
     measure(ref).then((measurements) => {
       draggable.measurements = measurements;
-      block.measurements = measurements;
+      block.y = measurements.y;
+      block.x = measurements.x;
+      block.height = measurements.height;
     });
   }, [draggable, ref, block]);
 
@@ -119,12 +126,16 @@ export function BlockCard(props: BlockCardProps) {
         styles.root,
         {
           transform: [{ translateX: position.x }, { translateY: position.y }],
-          zIndex: isDragging,
+          zIndex: isDragging ? 1 : 0,
+          position: isDragging ? 'absolute' : 'relative',
+          top: isDragging ? block.y : undefined,
+          left: isDragging ? block.x : undefined,
+          width: '100%',
         },
       ]}
       {...eventHandlers}
     >
-      <View style={[styles.block, { height: block.height }]}>
+      <View style={[styles.block, { height: block.contentHeight }]}>
         <Text style={styles.blockTitle}>
           {block.id} {block.title}
         </Text>
