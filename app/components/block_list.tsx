@@ -6,8 +6,8 @@ import {
   NativeScrollEvent,
   Animated,
 } from 'react-native';
-import { useDropTarget } from '../components/drag_drop/use_drop_target';
-import { measure } from '../components/drag_drop/measurements';
+import { useDropTarget } from './drag_drop/use_drop_target';
+import { measure } from './drag_drop/measurements';
 import { Block, BlockCard, PositionedBlock } from './block_card';
 import { Draggable } from './drag_drop/draggable';
 

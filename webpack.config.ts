@@ -1,7 +1,7 @@
 import path from 'path';
 
 module.exports = {
-  entry: './index.web.ts',
+  entry: './index.web.tsx',
   output: {
     path: path.join(__dirname),
     filename: 'bundle.js',
