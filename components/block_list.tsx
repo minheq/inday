@@ -9,7 +9,7 @@ import {
 import { useDropTarget } from '../components/drag_drop/use_drop_target';
 import { measure } from '../components/drag_drop/measurements';
 import { Block, BlockCard, PositionedBlock } from './block_card';
-import { Draggable, DragState } from './drag_drop/draggable';
+import { Draggable } from './drag_drop/draggable';
 
 interface BlockListProps {
   id: string;
@@ -42,7 +42,7 @@ export interface ScrollViewState {
 export function BlockList(props: BlockListProps) {
   const { blocks } = props;
   const [scrollEnabled, setScrollEnabled] = React.useState(true);
-  const prevDragStateRef = React.useRef<DragState | null>(null);
+
   const scrollViewState = React.useRef<ScrollViewState>({
     contentHeight: 0,
     height: 0,
@@ -65,23 +65,6 @@ export function BlockList(props: BlockListProps) {
 
       const draggingBlock = draggable.item;
 
-      // Determine the direction of the drag based on previous dragState
-      const prevDragState = prevDragStateRef.current;
-      let dragDirection = DragDirection.None;
-      if (prevDragState) {
-        if (dragState.pageY - prevDragState.pageY > 0) {
-          dragDirection = DragDirection.Downwards;
-        } else if (dragState.pageY - prevDragState.pageY < 0) {
-          dragDirection = DragDirection.Upwards;
-        }
-      }
-      prevDragStateRef.current = dragState;
-
-      // Short circuit if there was not change in direction
-      if (dragDirection === DragDirection.None) {
-        return;
-      }
-
       // Get Y-coordinate within scroll view
       const y =
         dragState.pageY -
@@ -101,9 +84,16 @@ export function BlockList(props: BlockListProps) {
       }
 
       // Short circuit the hoverIndex if there was no change
-      const draggingBlockIndex = draggingBlock.index;
-      if (draggingBlockIndex === hoverIndex) {
+      if (draggingBlock.index === hoverIndex) {
         return;
+      }
+
+      let dragDirection = DragDirection.None;
+
+      if (draggingBlock.index < hoverIndex) {
+        dragDirection = DragDirection.Downwards;
+      } else {
+        dragDirection = DragDirection.Upwards;
       }
 
       // Determine whether to perform a swap or not
@@ -113,6 +103,7 @@ export function BlockList(props: BlockListProps) {
         dragDirection === DragDirection.Downwards &&
         y > draggingBlock.y + hoveredBlock.height
       ) {
+        console.log('DOWNWARD SWAP');
         // Perform change in the y of the blocks
         positionedBlocks[hoverIndex].y = draggingBlock.y;
         draggingBlock.y = draggingBlock.y + hoveredBlock.height;
@@ -120,6 +111,7 @@ export function BlockList(props: BlockListProps) {
         dragDirection === DragDirection.Upwards &&
         y < hoveredBlock.y + draggingBlock.height
       ) {
+        console.log('UPWARD SWAP');
         // Perform change in the y of the blocks
         draggingBlock.y = hoveredBlock.y;
         hoveredBlock.y = draggingBlock.y + draggingBlock.height;
