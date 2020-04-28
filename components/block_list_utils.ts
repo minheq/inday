@@ -21,6 +21,8 @@ export function debugIsValid(positionedBlocks: PositionedBlock[]): boolean {
 
     const nextBlock = positionedBlocks[i + 1];
     if (currentY + block.height !== nextBlock.y) {
+      console.log(`Expected ${nextBlock.y} to be ${currentY + block.height}`);
+
       return false;
     }
   }
@@ -28,23 +30,10 @@ export function debugIsValid(positionedBlocks: PositionedBlock[]): boolean {
   return true;
 }
 
-export function logIfFaulty(
-  positionedBlocks: PositionedBlock[],
-  before: PositionedBlock[],
-) {
-  let currentY = 0;
-
-  for (let i = 0; i < positionedBlocks.length - 1; i++) {
-    const block = positionedBlocks[i];
-    currentY = block.y;
-
-    const nextBlock = positionedBlocks[i + 1];
-    if (currentY + block.height !== nextBlock.y) {
-      console.log('BEFORE');
-      logTable(before);
-      console.log('AFTER');
-      logTable(positionedBlocks);
-      break;
-    }
+export function logIfFaulty(positionedBlocks: PositionedBlock[]) {
+  if (debugIsValid(positionedBlocks)) {
+    return;
   }
+
+  logTable(positionedBlocks);
 }

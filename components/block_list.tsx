@@ -83,19 +83,23 @@ export function BlockList(props: BlockListProps) {
         }
       }
 
-      // Short circuit the hoverIndex if there was no change
+      // Short circuit if there was no change
       if (draggingBlock.index === hoverIndex) {
         return;
       }
 
-      let dragDirection = DragDirection.None;
-
-      if (draggingBlock.index < hoverIndex) {
-        dragDirection = DragDirection.Downwards;
-      } else {
-        dragDirection = DragDirection.Upwards;
+      // During fast movements, hoverIndex may "jump" over next block, to 2nd next block.
+      // To keep sequential movement of the blocks we limit each swap to 2 consecutive blocks
+      if (Math.abs(draggingBlock.index - hoverIndex) > 1) {
+        return;
       }
 
+      const dragDirection =
+        draggingBlock.index < hoverIndex
+          ? DragDirection.Downwards
+          : DragDirection.Upwards;
+
+      // const before = positionedBlocks.slice();
       // Determine whether to perform a swap or not
       // And if there is a swap, amend their post-swap Y-coordinates
       const hoveredBlock = positionedBlocks[hoverIndex];
@@ -103,7 +107,6 @@ export function BlockList(props: BlockListProps) {
         dragDirection === DragDirection.Downwards &&
         y > draggingBlock.y + hoveredBlock.height
       ) {
-        console.log('DOWNWARD SWAP');
         // Perform change in the y of the blocks
         positionedBlocks[hoverIndex].y = draggingBlock.y;
         draggingBlock.y = draggingBlock.y + hoveredBlock.height;
@@ -111,7 +114,6 @@ export function BlockList(props: BlockListProps) {
         dragDirection === DragDirection.Upwards &&
         y < hoveredBlock.y + draggingBlock.height
       ) {
-        console.log('UPWARD SWAP');
         // Perform change in the y of the blocks
         draggingBlock.y = hoveredBlock.y;
         hoveredBlock.y = draggingBlock.y + draggingBlock.height;
@@ -123,6 +125,9 @@ export function BlockList(props: BlockListProps) {
       const tempIndex = positionedBlocks[hoverIndex].index;
       positionedBlocks[hoverIndex].index = draggable.item.index;
       draggable.item.index = tempIndex;
+
+      // Sort blocks according to their latest indexes
+      positionedBlocks.sort((a, b) => a.index - b.index);
 
       // Shift items according to their indexes
       for (let i = 0; i < positionedBlocks.length; i++) {
@@ -151,9 +156,6 @@ export function BlockList(props: BlockListProps) {
           useNativeDriver: false,
         }).start();
       }
-
-      // Sort blocks according to their latest indexes
-      positionedBlocks.sort((a, b) => a.index - b.index);
     },
     onLeave: () => {
       setScrollEnabled(true);
