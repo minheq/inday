@@ -1,14 +1,8 @@
-import React from 'react';
 import { AppRegistry } from 'react-native';
-import { TimelineScreen } from './app/screens/timeline';
-
-function App() {
-  return <TimelineScreen />;
-}
+import { App } from './app/index';
 
 AppRegistry.registerComponent('App', () => App);
 
 AppRegistry.runApplication('App', {
-  initialProps: {},
   rootTag: document.getElementById('root'),
 });
