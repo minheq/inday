@@ -34,7 +34,7 @@ export function TextInput(props: TextInputProps) {
           style={[
             styles.root,
             theme.container.shadow,
-            { backgroundColor: theme.container.color.content },
+            { backgroundColor: theme.container.color.darkTint },
           ]}
         >
           {icon && (

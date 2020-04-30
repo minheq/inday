@@ -26,12 +26,17 @@ interface ContainerColors {
   content: string;
   primary: string;
   tint: string;
+  darkTint: string;
+  hover: string;
 }
 
 export type ContainerColor = keyof ContainerColors;
 
 export const tokens = {
   radius: 8,
+  fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI",
+  "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+  "Helvetica Neue", sans-serif`,
 };
 
 interface Theme {
@@ -40,10 +45,6 @@ interface Theme {
     shadow: ViewStyle;
   };
   text: {
-    fontFamily: {
-      body: string;
-      heading: string;
-    };
     color: TextColors;
     size: TextSizes;
   };
@@ -67,7 +68,9 @@ const lightTheme: Theme = {
       default: 'transparent',
       content: '#ffffff',
       primary: 'string',
-      tint: '#f9f9fb',
+      tint: 'rgba(246, 246, 246, 1)',
+      darkTint: 'rgba(220, 220, 220, 1)',
+      hover: 'rgba(0, 0, 0, 0.05)',
     },
     shadow: {
       shadowColor: '#000',
@@ -80,12 +83,8 @@ const lightTheme: Theme = {
     },
   },
   text: {
-    fontFamily: {
-      body: 'string',
-      heading: 'string',
-    },
     color: {
-      default: 'string',
+      default: 'rgba(34, 34, 34, 1)',
       primary: 'string',
       muted: 'string',
       success: 'string',
@@ -122,8 +121,8 @@ const lightTheme: Theme = {
   },
   border: {
     color: {
-      default: 'rgba(0, 0, 0, 0.15)',
-      focus: 'rgba(0, 0, 0, 1)',
+      default: 'rgba(34, 34, 34, 0.15)',
+      focus: 'rgba(34, 34, 34, 1)',
     },
   },
 };

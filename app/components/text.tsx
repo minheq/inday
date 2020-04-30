@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as RNText, StyleSheet } from 'react-native';
-import { useTheme, TextSize, TextColor } from '../theme';
+import { useTheme, TextSize, TextColor, tokens } from '../theme';
 
 export interface TextProps {
   children?: React.ReactNode;
@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
     fontWeight: 'normal',
+    fontFamily: tokens.fontFamily,
   },
   left: {
     textAlign: 'left',
