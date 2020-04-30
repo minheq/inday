@@ -86,9 +86,9 @@ function Menu() {
       <Animated.View
         style={[
           styles.selection,
+          styles.hovered,
           {
             opacity: hoverOpacity,
-            backgroundColor: theme.container.color.hover,
             transform: [{ translateY: hoverY }],
           },
         ]}
@@ -162,6 +162,9 @@ const styles = StyleSheet.create({
     height: 40,
     width: '100%',
     borderRadius: tokens.radius,
+  },
+  hovered: {
+    backgroundColor: 'rgba(240, 240, 240, 1)',
   },
   menuItem: {
     borderRadius: tokens.radius,

@@ -27,7 +27,6 @@ interface ContainerColors {
   primary: string;
   tint: string;
   darkTint: string;
-  hover: string;
 }
 
 export type ContainerColor = keyof ContainerColors;
@@ -39,6 +38,12 @@ export const tokens = {
   "Helvetica Neue", sans-serif`,
 };
 
+interface ButtonAppearance {
+  backgroundDefault: string;
+  backgroundPressed: string;
+  backgroundHovered: string;
+}
+
 interface Theme {
   container: {
     color: ContainerColors;
@@ -49,10 +54,8 @@ interface Theme {
     size: TextSizes;
   };
   button: {
-    primary: {
-      textColor: string;
-      disabled: string;
-    };
+    primary: ButtonAppearance;
+    flat: ButtonAppearance;
   };
   border: {
     color: {
@@ -71,7 +74,6 @@ const lightTheme: Theme = {
       primary: 'rgba(34, 34, 34, 1)',
       tint: 'rgba(246, 246, 246, 1)',
       darkTint: 'rgba(230, 230, 230, 1)',
-      hover: 'rgba(245, 245, 245, 1)',
     },
     shadow: {
       shadowColor: '#000',
@@ -115,9 +117,15 @@ const lightTheme: Theme = {
     },
   },
   button: {
+    flat: {
+      backgroundDefault: 'rgba(255, 255, 255, 0)',
+      backgroundHovered: 'rgba(245, 245, 245, 1)',
+      backgroundPressed: 'rgba(230, 230, 230, 1)',
+    },
     primary: {
-      textColor: 'string',
-      disabled: 'string',
+      backgroundDefault: 'rgba(255, 255, 255, 0)',
+      backgroundHovered: 'rgba(245, 245, 245, 1)',
+      backgroundPressed: 'rgba(230, 230, 230, 1)',
     },
   },
   border: {

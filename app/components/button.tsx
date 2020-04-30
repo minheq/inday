@@ -30,9 +30,9 @@ export function Button(props: ButtonProps) {
             backgroundColor: background.interpolate({
               inputRange: [0, 0.5, 1],
               outputRange: [
-                theme.container.color.default,
-                theme.container.color.hover,
-                theme.container.color.darkTint,
+                theme.button.flat.backgroundDefault,
+                theme.button.flat.backgroundHovered,
+                theme.button.flat.backgroundPressed,
               ],
             }),
           },
