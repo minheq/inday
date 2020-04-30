@@ -10,3 +10,6 @@ export * from './content';
 export * from './interactive';
 export * from './icon';
 export * from './search_input';
+export * from './modal';
+export * from './close_button';
+export * from './hover';

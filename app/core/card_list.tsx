@@ -6,19 +6,20 @@ import {
   NativeScrollEvent,
   Animated,
 } from 'react-native';
-import { useDropTarget } from './drag_drop/use_drop_target';
-import { measure } from './drag_drop/measurements';
-import { Block, BlockCard, PositionedBlock } from './block_card';
-import { Draggable } from './drag_drop/draggable';
+import { useDropTarget } from '../modules/drag_drop/use_drop_target';
+import { measure } from '../modules/drag_drop/measurements';
+import { CardListItem } from './card_list_item';
+import { Draggable } from '../modules/drag_drop/draggable';
+import { Card } from '../domain/card';
 
-interface BlockListProps {
+interface CardListProps {
   id: string;
-  blocks: Block[];
+  cards: Card[];
 }
 
-function initBlocks(blocks: Block[]): PositionedBlock[] {
-  return blocks.map((block, index) => ({
-    ...block,
+function initCardListItems(cards: Card[]): CardListItem[] {
+  return cards.map((card, index) => ({
+    ...card,
     index,
     height: 0,
     y: 0,
@@ -39,8 +40,8 @@ export interface ScrollViewState {
   offsetY: number;
 }
 
-export function BlockList(props: BlockListProps) {
-  const { blocks } = props;
+export function CardList(props: CardListProps) {
+  const { cards } = props;
   const [scrollEnabled, setScrollEnabled] = React.useState(true);
 
   const scrollViewState = React.useRef<ScrollViewState>({
@@ -49,7 +50,7 @@ export function BlockList(props: BlockListProps) {
     offsetY: 0,
   }).current;
 
-  const positionedBlocks = React.useRef(initBlocks(blocks)).current;
+  const cardListItems = React.useRef(initCardListItems(cards)).current;
 
   const [dropTarget, ref] = useDropTarget<ScrollView>({
     onAccept: () => {
@@ -58,12 +59,12 @@ export function BlockList(props: BlockListProps) {
     onEnter: () => {
       setScrollEnabled(false);
     },
-    onHover: (draggable: Draggable<PositionedBlock>, dragState) => {
+    onHover: (draggable: Draggable<CardListItem>, dragState) => {
       if (!draggable.measurements || !dropTarget.measurements) {
         return;
       }
 
-      const draggingBlock = draggable.item;
+      const draggingCard = draggable.item;
 
       // Get Y-coordinate within scroll view
       const y =
@@ -71,70 +72,70 @@ export function BlockList(props: BlockListProps) {
         dropTarget.measurements.pageY +
         scrollViewState.offsetY;
 
-      // Find the block that this drag is hovering over
+      // Find the card that this drag is hovering over
       let hoverIndex = 0;
-      for (let i = 0; i < positionedBlocks.length; i++) {
-        const block = positionedBlocks[i];
+      for (let i = 0; i < cardListItems.length; i++) {
+        const card = cardListItems[i];
 
         hoverIndex = i;
 
-        if (block.y <= y && y <= block.y + block.height) {
+        if (card.y <= y && y <= card.y + card.height) {
           break;
         }
       }
 
       // Short circuit if there was no change
-      if (draggingBlock.index === hoverIndex) {
+      if (draggingCard.index === hoverIndex) {
         return;
       }
 
-      // During fast movements, hoverIndex may "jump" over next block, to 2nd next block.
-      // To keep sequential movement of the blocks we limit each swap to 2 consecutive blocks
-      if (Math.abs(draggingBlock.index - hoverIndex) > 1) {
+      // During fast movements, hoverIndex may "jump" over next card, to 2nd next card.
+      // To keep sequential movement of the cards we limit each swap to 2 consecutive cards
+      if (Math.abs(draggingCard.index - hoverIndex) > 1) {
         return;
       }
 
       const dragDirection =
-        draggingBlock.index < hoverIndex
+        draggingCard.index < hoverIndex
           ? DragDirection.Downwards
           : DragDirection.Upwards;
 
-      // const before = positionedBlocks.slice();
+      // const before = cardListItems.slice();
       // Determine whether to perform a swap or not
       // And if there is a swap, amend their post-swap Y-coordinates
-      const hoveredBlock = positionedBlocks[hoverIndex];
+      const hoveredCard = cardListItems[hoverIndex];
       if (
         dragDirection === DragDirection.Downwards &&
-        y > draggingBlock.y + hoveredBlock.height
+        y > draggingCard.y + hoveredCard.height
       ) {
-        // Perform change in the y of the blocks
-        positionedBlocks[hoverIndex].y = draggingBlock.y;
-        draggingBlock.y = draggingBlock.y + hoveredBlock.height;
+        // Perform change in the y of the cards
+        cardListItems[hoverIndex].y = draggingCard.y;
+        draggingCard.y = draggingCard.y + hoveredCard.height;
       } else if (
         dragDirection === DragDirection.Upwards &&
-        y < hoveredBlock.y + draggingBlock.height
+        y < hoveredCard.y + draggingCard.height
       ) {
-        // Perform change in the y of the blocks
-        draggingBlock.y = hoveredBlock.y;
-        hoveredBlock.y = draggingBlock.y + draggingBlock.height;
+        // Perform change in the y of the cards
+        draggingCard.y = hoveredCard.y;
+        hoveredCard.y = draggingCard.y + draggingCard.height;
       } else {
         return;
       }
 
-      // Perform change in the indexes of the blocks
-      const tempIndex = positionedBlocks[hoverIndex].index;
-      positionedBlocks[hoverIndex].index = draggable.item.index;
+      // Perform change in the indexes of the cards
+      const tempIndex = cardListItems[hoverIndex].index;
+      cardListItems[hoverIndex].index = draggable.item.index;
       draggable.item.index = tempIndex;
 
-      // Sort blocks according to their latest indexes
-      positionedBlocks.sort((a, b) => a.index - b.index);
+      // Sort cards according to their latest indexes
+      cardListItems.sort((a, b) => a.index - b.index);
 
       // Shift items according to their indexes
-      for (let i = 0; i < positionedBlocks.length; i++) {
-        const block = positionedBlocks[i];
+      for (let i = 0; i < cardListItems.length; i++) {
+        const card = cardListItems[i];
 
-        if (block.index > hoverIndex) {
-          Animated.spring(block.position, {
+        if (card.index > hoverIndex) {
+          Animated.spring(card.position, {
             toValue: {
               x: 0,
               y: draggable.item.height,
@@ -146,7 +147,7 @@ export function BlockList(props: BlockListProps) {
           continue;
         }
 
-        Animated.spring(block.position, {
+        Animated.spring(card.position, {
           toValue: {
             x: 0,
             y: 0,
@@ -200,21 +201,21 @@ export function BlockList(props: BlockListProps) {
   );
 
   const handleDragStart = React.useCallback(
-    (dragBlock: PositionedBlock) => {
-      for (let i = 0; i < positionedBlocks.length; i++) {
-        const block = positionedBlocks[i];
+    (dragCard: CardListItem) => {
+      for (let i = 0; i < cardListItems.length; i++) {
+        const card = cardListItems[i];
 
-        if (i <= dragBlock.index) {
+        if (i <= dragCard.index) {
           continue;
         }
 
-        block.position.setValue({
+        card.position.setValue({
           x: 0,
-          y: dragBlock.height,
+          y: dragCard.height,
         });
       }
     },
-    [positionedBlocks],
+    [cardListItems],
   );
 
   const handleDragEnd = React.useCallback(() => {}, []);
@@ -230,12 +231,12 @@ export function BlockList(props: BlockListProps) {
       onLayout={handleLayout}
       onContentSizeChange={handleContentSizeChange}
     >
-      {positionedBlocks.map((block) => (
-        <BlockCard
+      {cardListItems.map((card) => (
+        <CardListItem
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          key={block.id}
-          block={block}
+          key={card.id}
+          card={card}
         />
       ))}
     </Animated.ScrollView>

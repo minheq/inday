@@ -18,5 +18,7 @@ const styles = StyleSheet.create({
   root: {
     width: '100%',
     maxWidth: 1440,
+    paddingTop: 16,
+    paddingHorizontal: 16,
   },
 });

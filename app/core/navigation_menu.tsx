@@ -96,6 +96,7 @@ function Menu() {
       />
       {menuItems.map((item, index) => (
         <MenuItem
+          key={item.title}
           isSelected={index === selectedIndex}
           index={index}
           onHoverIn={handleHoverIn}

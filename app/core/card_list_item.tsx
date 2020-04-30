@@ -8,19 +8,16 @@ import {
   PanResponderGestureState,
   Platform,
 } from 'react-native';
-import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
-import { useDraggable } from './drag_drop/use_draggable';
-import { DragState } from './drag_drop/draggable';
-import { measure } from './drag_drop/measurements';
+import {
+  useGestureDetector,
+  GestureDetectorConfig,
+} from '../components/gesture_detector';
+import { useDraggable } from '../modules/drag_drop/use_draggable';
+import { DragState } from '../modules/drag_drop/draggable';
+import { measure } from '../modules/drag_drop/measurements';
+import { Card } from '../domain/card';
 
-export interface Block {
-  id: string;
-  title: string;
-  note: string;
-  contentHeight: number;
-}
-
-export interface PositionedBlock extends Block {
+export interface CardListItem extends Card {
   index: number;
   position: Animated.ValueXY;
   y: number;
@@ -28,10 +25,10 @@ export interface PositionedBlock extends Block {
   height: number;
 }
 
-export interface BlockCardProps {
-  block: PositionedBlock;
-  onDragStart: (block: PositionedBlock) => void;
-  onDragEnd: (block: PositionedBlock) => void;
+export interface CardListItemProps {
+  card: CardListItem;
+  onDragStart: (card: CardListItem) => void;
+  onDragEnd: (card: CardListItem) => void;
 }
 
 function toDragState(
@@ -46,14 +43,14 @@ function toDragState(
   };
 }
 
-export function BlockCard(props: BlockCardProps) {
-  const { block, onDragStart, onDragEnd } = props;
+export function CardListItem(props: CardListItemProps) {
+  const { card, onDragStart, onDragEnd } = props;
 
-  const { position } = block;
+  const { position } = card;
   const [isDragging, setIsDragging] = React.useState(false);
 
-  const [draggable, ref] = useDraggable<PositionedBlock, View>({
-    item: block,
+  const [draggable, ref] = useDraggable<CardListItem, View>({
+    item: card,
   });
 
   const config: GestureDetectorConfig = React.useMemo(() => {
@@ -71,7 +68,7 @@ export function BlockCard(props: BlockCardProps) {
         event: GestureResponderEvent,
         state: PanResponderGestureState,
       ) => {
-        onDragStart(block);
+        onDragStart(card);
         setIsDragging(true);
         draggable.startDrag(toDragState(event, state));
       },
@@ -97,24 +94,24 @@ export function BlockCard(props: BlockCardProps) {
         event: GestureResponderEvent,
         state: PanResponderGestureState,
       ) => {
-        onDragEnd(block);
+        onDragEnd(card);
         setIsDragging(false);
         draggable.endDrag(toDragState(event, state));
         isLongPress = false;
       },
     };
-  }, [block, draggable, position, setIsDragging, onDragStart, onDragEnd]);
+  }, [card, draggable, position, setIsDragging, onDragStart, onDragEnd]);
 
   const eventHandlers = useGestureDetector(config);
 
   const handleLayout = React.useCallback(() => {
     measure(ref).then((measurements) => {
       draggable.measurements = measurements;
-      block.y = measurements.y;
-      block.x = measurements.x;
-      block.height = measurements.height;
+      card.y = measurements.y;
+      card.x = measurements.x;
+      card.height = measurements.height;
     });
-  }, [draggable, ref, block]);
+  }, [draggable, ref, card]);
 
   return (
     <Animated.View
@@ -128,16 +125,16 @@ export function BlockCard(props: BlockCardProps) {
           transform: [{ translateX: position.x }, { translateY: position.y }],
           zIndex: isDragging ? 1 : 0,
           position: isDragging ? 'absolute' : 'relative',
-          top: isDragging ? block.y : undefined,
-          left: isDragging ? block.x : undefined,
+          top: isDragging ? card.y : undefined,
+          left: isDragging ? card.x : undefined,
           width: '100%',
         },
       ]}
       {...eventHandlers}
     >
-      <View style={[styles.block, { height: block.contentHeight }]}>
-        <Text style={styles.blockTitle}>
-          {block.id} {block.title}
+      <View style={[styles.card, { height: card.contentHeight }]}>
+        <Text style={styles.cardTitle}>
+          {card.id} {card.title}
         </Text>
       </View>
     </Animated.View>
@@ -152,7 +149,7 @@ const styles = StyleSheet.create({
           userSelect: 'none',
         }
       : {},
-  block: {
+  card: {
     flexDirection: 'column',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
@@ -160,11 +157,11 @@ const styles = StyleSheet.create({
     borderColor: '#f0f0f0',
     borderWidth: 1,
   },
-  blockTitle: {
+  cardTitle: {
     fontWeight: 'bold',
   },
   active: {
     backgroundColor: 'green',
   },
-  blockNote: {},
+  cardNote: {},
 });
