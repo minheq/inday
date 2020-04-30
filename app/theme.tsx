@@ -56,6 +56,7 @@ interface Theme {
   };
   border: {
     color: {
+      transparent: string;
       default: string;
       focus: string;
     };
@@ -65,12 +66,12 @@ interface Theme {
 const lightTheme: Theme = {
   container: {
     color: {
-      default: 'transparent',
-      content: '#ffffff',
-      primary: 'string',
+      default: 'rgba(255, 255, 255, 0)',
+      content: 'rgba(255, 255, 255, 1)',
+      primary: 'rgba(34, 34, 34, 1)',
       tint: 'rgba(246, 246, 246, 1)',
-      darkTint: 'rgba(220, 220, 220, 1)',
-      hover: 'rgba(0, 0, 0, 0.05)',
+      darkTint: 'rgba(230, 230, 230, 1)',
+      hover: 'rgba(245, 245, 245, 1)',
     },
     shadow: {
       shadowColor: '#000',
@@ -85,7 +86,7 @@ const lightTheme: Theme = {
   text: {
     color: {
       default: 'rgba(34, 34, 34, 1)',
-      primary: 'string',
+      primary: 'rgba(34, 34, 34, 1)',
       muted: 'string',
       success: 'string',
       error: 'string',
@@ -121,6 +122,7 @@ const lightTheme: Theme = {
   },
   border: {
     color: {
+      transparent: 'rgba(255, 255, 255, 0)',
       default: 'rgba(34, 34, 34, 0.15)',
       focus: 'rgba(34, 34, 34, 1)',
     },

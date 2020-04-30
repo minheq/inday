@@ -38,12 +38,14 @@ export function TimelineScreen() {
         </Content>
       </ScrollView>
       <Modal isOpen={isEditingCard} onRequestClose={handleCloseEditingCard}>
-        <Row>
-          <CloseButton onPress={handleCloseEditingCard} />
-        </Row>
-        <Text bold size="xl">
-          Add new card
-        </Text>
+        <Content>
+          <Row>
+            <CloseButton onPress={handleCloseEditingCard} />
+          </Row>
+          <Text bold size="xl" color="muted">
+            Write here
+          </Text>
+        </Content>
       </Modal>
     </Screen>
   );

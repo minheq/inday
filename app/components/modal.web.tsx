@@ -23,14 +23,12 @@ export function Modal(props: ModalProps) {
       Animated.spring(slide, {
         toValue: 0,
         bounciness: 0,
-        speed: 24,
         useNativeDriver: true,
       }).start();
     } else {
       Animated.spring(slide, {
         toValue: height,
         bounciness: 0,
-        speed: 24,
         useNativeDriver: true,
       }).start(() => {
         setInternalIsOpen(false);

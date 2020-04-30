@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { ScrollView, Animated, StyleSheet } from 'react-native';
 
 import {
   Text,
@@ -15,8 +9,8 @@ import {
   IconName,
   Icon,
   Column,
+  Pressable,
 } from '../components';
-import { Hoverable } from '../components/hoverable';
 import { useTheme, tokens } from '../theme';
 
 export function NavigationMenu() {
@@ -36,10 +30,16 @@ interface MenuItemData {
   title: string;
 }
 
+const menuItems: MenuItemData[] = [
+  { icon: 'list', title: 'Timeline' },
+  { icon: 'list', title: 'Inbox' },
+  { icon: 'list', title: 'List' },
+];
+
 function Menu() {
-  const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
   const hoverY = React.useRef(new Animated.Value(0)).current;
   const hoverOpacity = React.useRef(new Animated.Value(0)).current;
+  const selectedY = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
   const handleHoverIn = React.useCallback(
@@ -71,22 +71,21 @@ function Menu() {
 
   const handleOnPress = React.useCallback(
     (index: number) => {
-      setSelectedIndex(index);
+      Animated.spring(selectedY, {
+        toValue: index * 40,
+        useNativeDriver: true,
+        bounciness: 0,
+        speed: 40,
+      }).start();
     },
-    [setSelectedIndex],
+    [selectedY],
   );
-
-  const menuItems: MenuItemData[] = [
-    { icon: 'list', title: 'Timeline' },
-    { icon: 'list', title: 'Inbox' },
-    { icon: 'list', title: 'List' },
-  ];
 
   return (
     <Column>
       <Animated.View
         style={[
-          styles.hover,
+          styles.selection,
           {
             opacity: hoverOpacity,
             backgroundColor: theme.container.color.hover,
@@ -94,10 +93,19 @@ function Menu() {
           },
         ]}
       />
+      <Animated.View
+        style={[
+          styles.selection,
+          theme.container.shadow,
+          {
+            backgroundColor: theme.container.color.content,
+            transform: [{ translateY: selectedY }],
+          },
+        ]}
+      />
       {menuItems.map((item, index) => (
         <MenuItem
           key={item.title}
-          isSelected={index === selectedIndex}
           index={index}
           onHoverIn={handleHoverIn}
           onHoverOut={handleHoverOut}
@@ -112,7 +120,6 @@ function Menu() {
 
 interface MenuItemProps {
   index: number;
-  isSelected: boolean;
   icon: IconName;
   onPress: (index: number) => void;
   onHoverIn: (index: number) => void;
@@ -121,67 +128,48 @@ interface MenuItemProps {
 }
 
 function MenuItem(props: MenuItemProps) {
-  const {
-    icon,
-    onPress,
-    title,
-    index,
-    onHoverIn,
-    onHoverOut,
-    isSelected,
-  } = props;
-  const theme = useTheme();
-
-  const handleHoverIn = React.useCallback(() => {
-    if (isSelected === false) {
-      onHoverIn(index);
-    }
-  }, [onHoverIn, index, isSelected]);
-
-  const handleHoverOut = React.useCallback(() => {
-    onHoverOut(index);
-  }, [onHoverOut, index]);
+  const { icon, onPress, title, index, onHoverIn, onHoverOut } = props;
 
   const handleOnPress = React.useCallback(() => {
     onPress(index);
   }, [onPress, index]);
 
+  const handleHoverIn = React.useCallback(() => {
+    onHoverIn(index);
+  }, [onHoverIn, index]);
+
+  const handleHoverOut = React.useCallback(() => {
+    onHoverOut(index);
+  }, [onHoverOut, index]);
+
   return (
-    <Hoverable onHoverIn={handleHoverIn} onHoverOut={handleHoverOut}>
-      <TouchableOpacity onPress={handleOnPress} disabled={isSelected}>
-        <View
-          style={[
-            styles.menuItem,
-            isSelected && theme.container.shadow,
-            {
-              backgroundColor: isSelected
-                ? theme.container.color.content
-                : theme.container.color.default,
-            },
-          ]}
-        >
-          <Icon name={icon} />
-          <Spacing width={8} />
-          <Text>{title}</Text>
-        </View>
-      </TouchableOpacity>
-    </Hoverable>
+    <Pressable
+      onPress={handleOnPress}
+      onHoverIn={handleHoverIn}
+      onHoverOut={handleHoverOut}
+      style={[styles.menuItem]}
+    >
+      <Icon name={icon} />
+      <Spacing width={8} />
+      <Text>{title}</Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  menu: {},
-  hover: {
+  selection: {
     position: 'absolute',
     height: 40,
     width: '100%',
     borderRadius: tokens.radius,
   },
   menuItem: {
+    borderRadius: tokens.radius,
+    cursor: 'pointer',
     height: 40,
     padding: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: tokens.radius,
+    touchAction: 'manipulation',
   },
 });
