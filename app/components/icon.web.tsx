@@ -1,5 +1,7 @@
 import React from 'react';
 import * as Feather from 'react-icons/fi';
+import * as Octicon from 'react-icons/go';
+import * as FontAwesome from 'react-icons/fa';
 
 import { useTheme } from '../theme';
 
@@ -14,9 +16,33 @@ function convertToPascal(name: string) {
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
-export const Icon = ({ name, color = 'default', size = 'md' }: IconProps) => {
+function CustomIcon(props: IconProps) {
+  const { name, color = 'default', size = 'md' } = props;
   const theme = useTheme();
 
+  const iconColor = theme.text.color[color];
+  const iconSize = theme.text.size[size].fontSize;
+
+  switch (name) {
+    case 'quote':
+      return <Octicon.GoQuote color={iconColor} size={iconSize} />;
+    case 'font':
+      return <FontAwesome.FaFont color={iconColor} size={iconSize} />;
+
+    default:
+      return null;
+  }
+}
+
+export const Icon = (props: IconProps) => {
+  const { name, color = 'default', size = 'md' } = props;
+  const theme = useTheme();
+
+  const customIcon = CustomIcon(props);
+
+  if (customIcon) {
+    return customIcon;
+  }
   // @ts-ignore
   const IconTag = Feather[`Fi${convertToPascal(name)}`];
 

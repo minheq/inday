@@ -1,5 +1,7 @@
 import React from 'react';
 import Feather from 'react-native-vector-icons/Feather';
+import Octicon from 'react-native-vector-icons/Octicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import { TextColor, TextSize, useTheme } from '../theme';
 
@@ -22,7 +24,9 @@ export interface IconProps {
   size?: TextSize;
 }
 
-export type IconName =
+type CustomIconName = 'quote' | 'font';
+
+type FeatherIconName =
   | 'activity'
   | 'airplay'
   | 'alert-circle'
@@ -291,8 +295,34 @@ export type IconName =
   | 'zoom-in'
   | 'zoom-out';
 
-export const Icon = ({ name, color = 'default', size = 'md' }: IconProps) => {
+export type IconName = FeatherIconName | CustomIconName;
+
+function CustomIcon(props: IconProps) {
+  const { name, color = 'default', size = 'md' } = props;
   const theme = useTheme();
+
+  const iconColor = theme.text.color[color];
+  const iconSize = theme.text.size[size].fontSize;
+
+  switch (name) {
+    case 'quote':
+      return <Octicon name="quote" color={iconColor} size={iconSize} />;
+    case 'font':
+      return <FontAwesome name="font" color={iconColor} size={iconSize} />;
+    default:
+      return null;
+  }
+}
+
+export function Icon(props: IconProps) {
+  const { name, color = 'default', size = 'md' } = props;
+  const theme = useTheme();
+
+  const customIcon = CustomIcon(props);
+
+  if (customIcon) {
+    return customIcon;
+  }
 
   return (
     <Feather
@@ -301,4 +331,4 @@ export const Icon = ({ name, color = 'default', size = 'md' }: IconProps) => {
       size={theme.text.size[size].fontSize}
     />
   );
-};
+}

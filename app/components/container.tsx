@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { ContainerColor, useTheme } from '../theme';
 
 interface ContainerProps {
@@ -60,20 +60,22 @@ export function Container(props: ContainerProps) {
 
   const theme = useTheme();
 
+  const effectiveWidth = width ?? (expanded ? '100%' : undefined);
+  const effectiveHeight = height ?? (expanded ? '100%' : undefined);
+
   return (
     <View
       testID={testID}
       style={[
-        expanded && styles.expanded,
         shadow && theme.container.shadow,
         {
           borderWidth,
           backgroundColor: theme.container.color[color],
-          width,
+          width: effectiveWidth,
           maxWidth,
           minWidth,
           borderRadius,
-          height,
+          height: effectiveHeight,
           paddingRight,
           paddingLeft,
           paddingTop,
@@ -93,10 +95,3 @@ export function Container(props: ContainerProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  expanded: {
-    width: '100%',
-    height: '100%',
-  },
-});

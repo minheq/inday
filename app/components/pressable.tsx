@@ -8,13 +8,8 @@ interface PressableChildrenProps {
   focused: boolean;
 }
 
-interface PressableProps {
+interface PressableProps extends PressabilityConfig {
   children?: React.ReactNode;
-  onPress?: () => void;
-  onFocus?: () => void;
-  onBlur?: () => void;
-  onHoverIn?: () => void;
-  onHoverOut?: () => void;
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
     | ((
@@ -27,6 +22,11 @@ export function Pressable(props: PressableProps) {
     children,
     onPress = () => {},
     style,
+    delayHoverIn,
+    delayHoverOut,
+    delayLongPress,
+    delayPressIn,
+    delayPressOut,
     onHoverIn = () => {},
     onHoverOut = () => {},
     onFocus = () => {},
@@ -39,22 +39,27 @@ export function Pressable(props: PressableProps) {
 
   const config: PressabilityConfig = React.useMemo(
     () => ({
+      delayHoverIn,
+      delayHoverOut,
+      delayLongPress,
+      delayPressIn,
+      delayPressOut,
       onPress,
-      onHoverIn: () => {
+      onHoverIn: (e) => {
         setIsHovered(true);
-        onHoverIn();
+        onHoverIn(e);
       },
-      onHoverOut: () => {
+      onHoverOut: (e) => {
         setIsHovered(false);
-        onHoverOut();
+        onHoverOut(e);
       },
-      onFocus: () => {
+      onFocus: (e) => {
         setIsFocused(true);
-        onFocus();
+        onFocus(e);
       },
-      onBlur: () => {
+      onBlur: (e) => {
         setIsFocused(false);
-        onBlur();
+        onBlur(e);
       },
       onPressIn: () => {
         setIsPressed(true);
@@ -63,7 +68,18 @@ export function Pressable(props: PressableProps) {
         setIsPressed(false);
       },
     }),
-    [onPress, onHoverIn, onHoverOut, onFocus, onBlur],
+    [
+      delayHoverIn,
+      delayHoverOut,
+      delayLongPress,
+      delayPressIn,
+      delayPressOut,
+      onPress,
+      onHoverIn,
+      onHoverOut,
+      onFocus,
+      onBlur,
+    ],
   );
 
   const eventHandlers = usePressability(config);

@@ -3,6 +3,7 @@ export * from './text';
 export * from './column';
 export * from './container';
 export * from './stack';
+export * from './divider';
 export * from './spacing';
 export * from './row';
 export * from './center';

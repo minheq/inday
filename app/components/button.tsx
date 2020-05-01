@@ -21,7 +21,8 @@ export function Button(props: ButtonProps) {
           toValue: pressed ? 1 : hovered ? 0.5 : 0,
           useNativeDriver: true,
           bounciness: 0,
-          speed: 40,
+          tension: 40,
+          speed: 100,
         }).start();
 
         return [
