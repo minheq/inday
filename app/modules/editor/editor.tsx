@@ -1,9 +1,8 @@
 import Delta from 'quill-delta';
 import React from 'react';
-import { ScrollView, Animated, StyleSheet } from 'react-native';
+import { Animated, StyleSheet } from 'react-native';
 import { EditorContent, EditorContentInstance } from './editor_content';
 import {
-  Spacing,
   Pressable,
   IconName,
   Icon,
@@ -18,33 +17,18 @@ interface EditorProps {
   initialContent?: Delta;
 }
 
-const init = new Delta()
-  .insert('Hello ')
-  .insert('World!', { bold: true })
-  .insert('\n');
-
 export function Editor(props: EditorProps) {
-  const {} = props;
+  const { initialContent } = props;
   const editorContentRef = React.useRef<EditorContentInstance | null>(null);
-
-  const handleBold = React.useCallback(() => {
-    editorContentRef.current?.bold();
-  }, []);
 
   return (
     <Container expanded>
-      <Toolbar />
-      <Spacing height={16} />
-      <ScrollView>
-        <EditorContent initialContent={init} ref={editorContentRef} />
-      </ScrollView>
+      <EditorContent initialContent={initialContent} ref={editorContentRef} />
     </Container>
   );
 }
 
-interface ToolbarProps {}
-
-function Toolbar() {
+export function Toolbar() {
   return (
     <Column>
       <Row>
@@ -53,7 +37,10 @@ function Toolbar() {
         <ToolbarToggle icon="quote" onPress={() => {}} />
         <ToolbarToggle icon="font" size="sm" onPress={() => {}} />
         <ToolbarToggle icon="font" size="md" onPress={() => {}} />
-        <ToolbarToggle icon="font" size="md" onPress={() => {}} />
+        <ToolbarToggle icon="image" onPress={() => {}} />
+        <ToolbarToggle icon="video" onPress={() => {}} />
+        <ToolbarToggle icon="link" onPress={() => {}} />
+        <ToolbarToggle icon="code" onPress={() => {}} />
       </Row>
       <Divider />
     </Column>

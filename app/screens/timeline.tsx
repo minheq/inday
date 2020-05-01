@@ -11,7 +11,6 @@ import {
 } from '../components';
 import { ScrollView } from 'react-native';
 import { AddCard } from '../core/add_card';
-import { Editor } from '../modules/editor';
 
 export function TimelineScreen() {
   const [isEditingCard, setIsEditingCard] = React.useState(false);
@@ -23,8 +22,6 @@ export function TimelineScreen() {
   const handleCloseEditingCard = React.useCallback(() => {
     setIsEditingCard(false);
   }, []);
-
-  return <Editor />;
 
   return (
     <Screen>

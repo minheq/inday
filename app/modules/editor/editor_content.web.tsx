@@ -56,6 +56,7 @@ export const EditorContent = React.forwardRef(EditorContentBase);
 const styles = {
   iframe: {
     width: '100%',
+    height: '100%',
     borderWidth: 0,
   },
 };
