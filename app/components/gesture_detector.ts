@@ -599,7 +599,6 @@ export class GestureDetector {
     const prevState = this._touchState;
     const nextState = Transitions[prevState][signal];
 
-    // console.log(prevState, '--->', signal, '--->', nextState);
     if (this._responderID == null && signal === TouchSignal.ResponderRelease) {
       return;
     }

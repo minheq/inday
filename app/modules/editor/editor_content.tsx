@@ -1,14 +1,25 @@
-import Delta from 'quill-delta';
+import type Delta from 'quill-delta';
 import React from 'react';
 import { View } from 'react-native';
 import { Text } from '../../components/text';
+import type {
+  TextChangeEvent,
+  SelectionChangeEvent,
+  Bounds,
+  Range,
+  Line,
+} from './types';
 
 export interface EditorContentProps {
   initialContent?: Delta;
+  onTextChange?: (event: TextChangeEvent) => void;
+  onSelectionChange?: (event: SelectionChangeEvent) => void;
 }
 
 export interface EditorContentInstance {
   bold: () => void;
+  getBounds: (range: Range) => Promise<Bounds>;
+  getLine: (index: number) => Promise<Line | null>;
 }
 
 function EditorContentBase(
@@ -21,6 +32,13 @@ function EditorContentBase(
   const {} = props;
   React.useImperativeHandle(ref, () => ({
     bold: () => {},
+    getBounds: async () => ({
+      top: 0,
+      left: 0,
+      height: 0,
+      width: 0,
+    }),
+    getLine: async () => ({ isEmpty: true, offset: 0 }),
   }));
 
   return (

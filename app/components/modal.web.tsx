@@ -7,6 +7,7 @@ RModal.setAppElement('#root');
 
 export function Modal(props: ModalProps) {
   const {
+    animationType = 'none',
     isOpen,
     onRequestClose = () => {},
     children,
@@ -15,9 +16,47 @@ export function Modal(props: ModalProps) {
   } = props;
   const [internalIsOpen, setInternalIsOpen] = React.useState(isOpen);
   const { height } = useWindowDimensions();
-  const slide = React.useRef(new Animated.Value(height)).current;
+  const slide = React.useRef(
+    new Animated.Value(animationType === 'slide' ? height : 0),
+  ).current;
+  const fade = React.useRef(new Animated.Value(isOpen ? 1 : 0)).current;
 
   React.useEffect(() => {
+    if (animationType !== 'none') {
+      return;
+    }
+
+    setInternalIsOpen(isOpen);
+  }, [isOpen, internalIsOpen, fade, height, animationType, onRequestClose]);
+
+  React.useEffect(() => {
+    if (animationType !== 'fade') {
+      return;
+    }
+
+    if (isOpen) {
+      setInternalIsOpen(isOpen);
+      Animated.spring(fade, {
+        toValue: 0,
+        bounciness: 0,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.spring(fade, {
+        toValue: 1,
+        bounciness: 0,
+        useNativeDriver: true,
+      }).start(() => {
+        setInternalIsOpen(false);
+      });
+    }
+  }, [isOpen, internalIsOpen, fade, height, animationType, onRequestClose]);
+
+  React.useEffect(() => {
+    if (animationType !== 'slide') {
+      return;
+    }
+
     if (isOpen) {
       setInternalIsOpen(isOpen);
       Animated.spring(slide, {
@@ -34,7 +73,7 @@ export function Modal(props: ModalProps) {
         setInternalIsOpen(false);
       });
     }
-  }, [isOpen, internalIsOpen, slide, height, onRequestClose]);
+  }, [isOpen, internalIsOpen, slide, height, animationType, onRequestClose]);
 
   return (
     <RModal
@@ -78,11 +117,11 @@ const webStyles = {
 
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: 'rgba(255,255,255,1)',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     height: '100%',
     width: '100%',
   },
   transparent: {
-    backgroundColor: 'rgba(0,0,0,0)',
+    backgroundColor: 'rgba(255, 255, 255, 0)',
   },
 });

@@ -4,6 +4,7 @@ export * from './column';
 export * from './container';
 export * from './stack';
 export * from './divider';
+export * from './dialog';
 export * from './spacing';
 export * from './row';
 export * from './center';

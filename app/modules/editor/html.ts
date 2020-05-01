@@ -43,6 +43,7 @@ export function generateHTML(props: GenerateHTMLProps) {
           padding-bottom: 75px;
           outline: none;
           padding: 0;
+          overflow-y: initial;
         }
         .ql-editor > *:last-child {
           margin-bottom: 50px;
@@ -76,9 +77,7 @@ export function generateHTML(props: GenerateHTMLProps) {
 
       quill.setContents(${JSON.stringify(initialContent)})
 
-      function sendMessage(delta) {
-        let message = { source: 'editor', data: delta };
-        
+      function sendMessage(message) {
         if (window.ReactNativeWebView) {
           window.ReactNativeWebView.postMessage(message);
         } else {
@@ -86,18 +85,36 @@ export function generateHTML(props: GenerateHTMLProps) {
         }
       }
 
-      quill.on('text-change', sendMessage);
+      quill.on('text-change', function(delta, oldDelta, source) {
+        sendMessage({ type: 'text-change', delta, oldDelta, source });
+      });
+      
+      quill.on('selection-change', function(range, oldRange, source) {
+        sendMessage({ type: 'selection-change', range, oldRange, source });
+      });
 
       function receiveMessage(event) {
-        if (event.data.source !== 'app') {
-          return;
-        }
-
         switch(event.data.type) {
           case 'bold':
             const range = quill.getSelection();
             const current = quill.getFormat(range).bold;
             quill.format('bold', !current);
+            break;
+          case 'get-bounds':
+            const bounds = quill.getBounds(event.data.range.index, event.data.range.length);
+            sendMessage({ type: 'get-bounds', bounds });
+            break;
+          case 'get-line':
+            const [blot, offset] = quill.getLine(event.data.index);
+            if (!blot) {
+              sendMessage({ type: 'get-line', line: null });
+            } else {
+              const line = {
+                isEmpty: blot.domNode.firstChild instanceof HTMLBRElement,
+                offset,
+              }
+              sendMessage({ type: 'get-line', line });
+            }
             break;
           default:
             break;

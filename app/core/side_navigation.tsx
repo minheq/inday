@@ -10,6 +10,7 @@ import {
   Icon,
   Column,
   Pressable,
+  Button,
 } from '../components';
 import { useTheme, tokens } from '../theme';
 
@@ -41,9 +42,8 @@ interface MenuItemData {
 }
 
 const menuItems: MenuItemData[] = [
-  { icon: 'list', title: 'Timeline' },
-  { icon: 'list', title: 'Inbox' },
-  { icon: 'list', title: 'List' },
+  { icon: 'calendar', title: 'Timeline' },
+  { icon: 'inbox', title: 'Inbox' },
 ];
 
 function Menu() {
@@ -124,6 +124,8 @@ function Menu() {
           title={item.title}
         />
       ))}
+      <Spacing height={24} />
+      <AddPage />
     </Column>
   );
 }
@@ -159,14 +161,34 @@ function MenuItem(props: MenuItemProps) {
       onHoverOut={handleHoverOut}
       style={[styles.menuItem]}
     >
-      <Icon name={icon} />
-      <Spacing width={8} />
+      <Icon name={icon} size="lg" />
+      <Spacing width={16} />
       <Text>{title}</Text>
     </Pressable>
   );
 }
 
+interface AddPageProps {
+  onPress: () => void;
+}
+
+function AddPage(props: AddPageProps) {
+  const { onPress } = props;
+
+  return (
+    <Button style={styles.add} onPress={onPress}>
+      <Icon name="plus" size="lg" />
+      <Spacing width={8} />
+      <Text>Add page</Text>
+    </Button>
+  );
+}
+
 const styles = StyleSheet.create({
+  add: {
+    paddingLeft: 8,
+    paddingRight: 16,
+  },
   selection: {
     position: 'absolute',
     height: 40,

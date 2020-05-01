@@ -6,6 +6,7 @@ export interface ModalProps {
   onRequestClose?: () => void;
   children?: React.ReactNode;
   transparent?: boolean;
+  animationType?: 'none' | 'slide' | 'fade';
   onShow?: () => void;
 }
 
@@ -15,12 +16,13 @@ export function Modal(props: ModalProps) {
     isOpen,
     onRequestClose,
     onShow,
+    animationType,
     transparent = false,
   } = props;
 
   return (
     <RNModal
-      animationType="slide"
+      animationType={animationType}
       visible={isOpen}
       transparent={transparent}
       onRequestClose={onRequestClose}

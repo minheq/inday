@@ -4,13 +4,16 @@ import {
   Content,
   Text,
   Spacing,
-  Modal,
   Column,
   Row,
   CloseButton,
+  Dialog,
+  Container,
+  Button,
 } from '../components';
 import { ScrollView } from 'react-native';
 import { AddCard } from '../core/add_card';
+import { Editor } from '../modules/editor';
 
 export function TimelineScreen() {
   const [isEditingCard, setIsEditingCard] = React.useState(false);
@@ -38,16 +41,36 @@ export function TimelineScreen() {
           </Column>
         </Content>
       </ScrollView>
-      <Modal isOpen={isEditingCard} onRequestClose={handleCloseEditingCard}>
-        <Content>
-          <Row>
+      <Dialog
+        animationType="slide"
+        isOpen={isEditingCard}
+        onRequestClose={handleCloseEditingCard}
+      >
+        <Container width={800} padding={16}>
+          <Row justifyContent="space-between">
             <CloseButton onPress={handleCloseEditingCard} />
+            <Row>
+              <Button>
+                <Text>Turn into task</Text>
+              </Button>
+              <Button>
+                <Text>Add due date</Text>
+              </Button>
+              <Button>
+                <Text>Add properties</Text>
+              </Button>
+              <Button>
+                <Text>Add reminder</Text>
+              </Button>
+              <Button>
+                <Text>Add label</Text>
+              </Button>
+            </Row>
           </Row>
-          <Text bold size="xl" color="muted">
-            Write here
-          </Text>
-        </Content>
-      </Modal>
+          <Spacing height={40} />
+          <Editor />
+        </Container>
+      </Dialog>
     </Screen>
   );
 }
