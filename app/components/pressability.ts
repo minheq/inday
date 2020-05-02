@@ -411,12 +411,12 @@ export class Pressability {
         return cancelable || true;
       },
 
-      // onClick: (event: GestureResponderEvent): void => {
-      //   const { onPress } = this._config;
-      //   if (onPress != null) {
-      //     onPress(event);
-      //   }
-      // },
+      onClick: (event: GestureResponderEvent): void => {
+        const { onPress } = this._config;
+        if (onPress != null) {
+          onPress(event);
+        }
+      },
     };
 
     const mouseEventHandlers =

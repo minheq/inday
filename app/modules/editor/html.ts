@@ -73,7 +73,13 @@ export function generateHTML(props: GenerateHTMLProps) {
       <script>
         const observer = new ResizeObserver(entries => {
           const body = entries[0];
-          sendMessage({ type: 'resize', height: body.contentRect.height });
+          sendMessage({
+            type: 'resize', 
+            size: {
+              height: body.contentRect.height, 
+              width: body.contentRect.width, 
+            } 
+          });
         })
 
         observer.observe(document.querySelector('body'))
@@ -101,9 +107,33 @@ export function generateHTML(props: GenerateHTMLProps) {
         function receiveMessage(event) {
           switch(event.data.type) {
             case 'bold':
-              const range = quill.getSelection();
-              const current = quill.getFormat(range).bold;
-              quill.format('bold', !current);
+              const isBold = quill.getFormat().bold;
+              quill.format('bold', !isBold);
+              break;
+            case 'italic':
+              const isItalic = quill.getFormat().italic;
+              quill.format('italic', !isItalic);
+              break;
+            case 'strikethrough':
+              const isStriked = quill.getFormat().strike;
+              quill.format('strike', !isStriked);
+              break;
+            case 'inline-code':
+              const isCode = quill.getFormat().code;
+              quill.format('code', !isCode);
+              break;
+            case 'heading':
+              const header = quill.getFormat().header;
+              const headingSize = event.data.size;
+
+              if (header == headingSize) {
+                quill.format('header', false);
+              } else {
+                quill.format('header', headingSize);
+              }
+              break;
+            case 'focus':
+              quill.focus();
               break;
             case 'get-bounds':
               const bounds = quill.getBounds(event.data.range.index, event.data.range.length);
@@ -113,13 +143,17 @@ export function generateHTML(props: GenerateHTMLProps) {
               const selection = quill.getSelection();
               sendMessage({ type: 'get-selection', range: selection });
               break;
+            case 'get-formats':
+              const formats = quill.getFormat();
+              sendMessage({ type: 'get-formats', formats });
+              break;
             case 'get-line':
               const [blot, offset] = quill.getLine(event.data.index);
               if (!blot) {
                 sendMessage({ type: 'get-line', line: null });
               } else {
                 const line = {
-                  isEmpty: blot.domNode.firstChild instanceof HTMLBRElement,
+                  isEmpty: blot.domNode instanceof HTMLParagraphElement && blot.domNode.firstChild instanceof HTMLBRElement,
                   offset,
                 }
                 sendMessage({ type: 'get-line', line });

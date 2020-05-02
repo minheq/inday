@@ -16,7 +16,7 @@ import { AddCard } from '../core/add_card';
 import { Editor } from '../modules/editor';
 
 export function TimelineScreen() {
-  const [isEditingCard, setIsEditingCard] = React.useState(false);
+  const [isEditingCard, setIsEditingCard] = React.useState(true);
 
   const handleAddCard = React.useCallback(() => {
     setIsEditingCard(true);
@@ -66,10 +66,7 @@ export function TimelineScreen() {
             </Row>
           </Row>
           <View style={{ flex: 1, paddingBottom: 24 }}>
-            <ScrollView>
-              <Spacing height={40} />
-              <Editor />
-            </ScrollView>
+            <Editor />
           </View>
         </Container>
       </Dialog>

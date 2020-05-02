@@ -4,8 +4,8 @@ export type ChangeSource = 'user' | 'api' | 'silent';
 
 export interface SelectionChangeEvent {
   type: 'selection-change';
-  range: Range;
-  oldRange: Range;
+  range: Range | null;
+  oldRange: Range | null;
   source: ChangeSource;
 }
 
@@ -21,14 +21,32 @@ export interface GetBoundsEvent {
   bounds: Bounds;
 }
 
+export interface EditorContentSize {
+  height: number;
+  width: number;
+}
+
 export interface ResizeEvent {
   type: 'resize';
-  height: number;
+  size: EditorContentSize;
 }
 
 export interface GetSelectionEvent {
   type: 'get-selection';
   range: Range;
+}
+
+export type Formats = {
+  italic?: true;
+  bold?: true;
+  strike?: true;
+  header?: HeadingSize;
+  code?: true;
+};
+
+export interface GetFormatEvent {
+  type: 'get-format';
+  formats: Formats;
 }
 
 export interface GetLineEvent {
@@ -58,10 +76,6 @@ export type Bounds = {
   width: number;
 };
 
-export interface FormatBoldMessage {
-  type: 'bold';
-}
-
 export interface GetBoundsMessage {
   type: 'get-bounds';
   range: Range;
@@ -76,13 +90,53 @@ export interface GetSelectionMessage {
   type: 'get-selection';
 }
 
+export interface GetFormatsMessage {
+  type: 'get-formats';
+}
+
 export interface FocusMessage {
   type: 'focus';
 }
 
+// Formats
+
+export interface FormatBoldMessage {
+  type: 'bold';
+}
+
+export interface FormatItalicMessage {
+  type: 'italic';
+}
+
+export interface FormatStrikethroughMessage {
+  type: 'strikethrough';
+}
+
+export type HeadingSize = 1 | 2 | 3 | 4 | 5;
+
+export interface FormatHeadingMessage {
+  type: 'heading';
+  size: HeadingSize;
+}
+
+export interface FormatCodeMessage {
+  type: 'inline-code';
+}
+
+export interface FormatLinkMessage {
+  type: 'link';
+  url: string;
+}
+
 /** Messages sent to iframe */
 export type MessagePayload =
+  | GetFormatsMessage
   | FormatBoldMessage
+  | FormatItalicMessage
+  | FormatStrikethroughMessage
+  | FormatHeadingMessage
+  | FormatLinkMessage
+  | FormatCodeMessage
   | GetBoundsMessage
   | GetLineMessage
   | GetSelectionMessage

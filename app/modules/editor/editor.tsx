@@ -1,18 +1,25 @@
 import Delta from 'quill-delta';
 import React from 'react';
-import { Animated, StyleSheet } from 'react-native';
+import { Animated, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { EditorContent, EditorContentInstance } from './editor_content';
 import {
   IconName,
   Icon,
-  Divider,
   Container,
   Row,
   Button,
   Spacing,
+  CloseButton,
 } from '../../components';
-import { useTheme, tokens, TextSize } from '../../theme';
-import type { TextChangeEvent, SelectionChangeEvent, Range } from './types';
+import { useTheme, tokens } from '../../theme';
+import type {
+  TextChangeEvent,
+  SelectionChangeEvent,
+  Range,
+  ResizeEvent,
+  Formats,
+} from './types';
+import { between } from '../../utils/numbers';
 
 interface EditorProps {
   initialContent?: Delta;
@@ -32,6 +39,7 @@ export function Editor(props: EditorProps) {
   } = props;
   const theme = useTheme();
   const editorContentRef = React.useRef<EditorContentInstance | null>(null);
+  const scrollViewRef = React.useRef<ScrollView | null>(null);
   const toolbar = React.useRef({
     position: new Animated.ValueXY(),
     opacity: new Animated.Value(0),
@@ -42,10 +50,19 @@ export function Editor(props: EditorProps) {
   }).current;
   const [isToolbarVisible, setIsToolbarVisible] = React.useState(false);
   const [isAddBlockVisible, setIsAddBlockVisible] = React.useState(false);
+  const [activeFormats, setActiveFormats] = React.useState<Formats>({});
   const [
     isSidebarControlsVisible,
     setIsSidebarControlsVisible,
   ] = React.useState(false);
+
+  const handleHideSidebarControls = React.useCallback(() => {
+    setIsSidebarControlsVisible(false);
+  }, [setIsSidebarControlsVisible]);
+
+  const handleShowSidebarControls = React.useCallback(() => {
+    setIsSidebarControlsVisible(true);
+  }, [setIsSidebarControlsVisible]);
 
   const handleShowAddBlock = React.useCallback(
     async (index: number) => {
@@ -72,8 +89,8 @@ export function Editor(props: EditorProps) {
             }),
           ]).start();
         } else {
-          setIsAddBlockVisible(true);
           sidebar.position.setValue(value);
+          setIsAddBlockVisible(true);
           Animated.timing(sidebar.opacity, {
             toValue: 1,
             useNativeDriver: true,
@@ -85,26 +102,54 @@ export function Editor(props: EditorProps) {
     [sidebar, isAddBlockVisible],
   );
 
-  const handleHideAddBlock = React.useCallback(async () => {
+  const handleHideAddBlock = React.useCallback(() => {
     Animated.timing(sidebar.opacity, {
       toValue: 0,
       useNativeDriver: true,
       duration: 100,
     }).start(() => {
+      handleHideSidebarControls();
       setIsAddBlockVisible(false);
     });
-  }, [sidebar]);
+  }, [sidebar, handleHideSidebarControls]);
+
+  const getToolbarPosition = React.useCallback(async (range: Range) => {
+    if (editorContentRef.current) {
+      const rangeBounds = await editorContentRef.current.getBounds(range);
+      let y = 0;
+
+      if (rangeBounds.top - TOOLBAR_HEIGHT - 16 < 16) {
+        y = rangeBounds.top + TOOLBAR_HEIGHT - 14;
+      } else {
+        y = rangeBounds.top - TOOLBAR_HEIGHT - 8;
+      }
+
+      const x = between(
+        rangeBounds.left + rangeBounds.width / 2 - TOOLBAR_WIDTH / 2,
+        -40,
+        440,
+      );
+
+      return { x, y };
+    }
+
+    return null;
+  }, []);
 
   const handleShowToolbar = React.useCallback(
     async (range: Range) => {
       if (editorContentRef.current) {
-        const rangeBounds = await editorContentRef.current.getBounds(range);
+        const position = await getToolbarPosition(range);
+
+        if (!position) {
+          return;
+        }
+
+        const { x, y } = position;
+
         toolbar.position.setValue({
-          x: Math.max(
-            rangeBounds.left + rangeBounds.width / 2 - TOOLBAR_WIDTH / 2,
-            0,
-          ),
-          y: rangeBounds.top - TOOLBAR_HEIGHT - 16,
+          x,
+          y,
         });
 
         setIsToolbarVisible(true);
@@ -116,26 +161,47 @@ export function Editor(props: EditorProps) {
         }).start();
       }
     },
-    [toolbar],
+    [toolbar, getToolbarPosition],
   );
 
-  const handleHideSidebarControls = React.useCallback(() => {
-    setIsSidebarControlsVisible(false);
-  }, [setIsSidebarControlsVisible]);
+  const handleUpdateToolbarIfNeeded = React.useCallback(
+    async (range: Range) => {
+      const position = await getToolbarPosition(range);
 
-  const handleShowSidebarControls = React.useCallback(() => {
-    setIsSidebarControlsVisible(true);
-  }, [setIsSidebarControlsVisible]);
+      if (!position) {
+        return;
+      }
+
+      const { x, y } = position;
+      const prevX = (toolbar.position.x as any)._value;
+      const prevY = (toolbar.position.y as any)._value;
+
+      if (x !== prevX || y !== prevY) {
+        Animated.spring(toolbar.position, {
+          toValue: {
+            x,
+            y,
+          },
+          useNativeDriver: true,
+          bounciness: 0,
+          speed: 300,
+        }).start();
+      }
+    },
+    [toolbar, getToolbarPosition],
+  );
 
   const handleHideToolbar = React.useCallback(async () => {
-    Animated.timing(toolbar.opacity, {
-      toValue: 0,
-      useNativeDriver: true,
-      duration: 100,
-    }).start(() => {
-      setIsToolbarVisible(false);
-    });
-  }, [toolbar]);
+    if (isToolbarVisible) {
+      Animated.timing(toolbar.opacity, {
+        toValue: 0,
+        useNativeDriver: true,
+        duration: 100,
+      }).start(() => {
+        setIsToolbarVisible(false);
+      });
+    }
+  }, [toolbar, isToolbarVisible]);
 
   const handleTextChange = React.useCallback(
     async (_event: TextChangeEvent) => {
@@ -143,18 +209,38 @@ export function Editor(props: EditorProps) {
         const range = await editorContentRef.current.getSelection();
         const line = await editorContentRef.current.getLine(range.index);
 
+        if (range.length === 0) {
+          handleHideToolbar();
+        } else {
+          const formats = await editorContentRef.current.getFormats();
+          setActiveFormats(formats);
+          handleUpdateToolbarIfNeeded(range);
+        }
+
         if (line?.isEmpty) {
           handleShowAddBlock(range.index);
+        } else if (isAddBlockVisible) {
+          handleHideAddBlock();
         }
       }
     },
-    [handleShowAddBlock],
+    [
+      handleShowAddBlock,
+      handleHideAddBlock,
+      handleHideToolbar,
+      handleUpdateToolbarIfNeeded,
+      isAddBlockVisible,
+    ],
   );
 
   const handleSelectionChange = React.useCallback(
     async (event: SelectionChangeEvent) => {
-      console.log(event);
       const { range } = event;
+
+      if (range === null) {
+        handleHideAddBlock();
+        return;
+      }
 
       if (editorContentRef.current) {
         if (range.length === 0) {
@@ -169,6 +255,8 @@ export function Editor(props: EditorProps) {
           }
         } else {
           handleShowToolbar(range);
+          const formats = await editorContentRef.current.getFormats();
+          setActiveFormats(formats);
         }
       }
     },
@@ -182,49 +270,100 @@ export function Editor(props: EditorProps) {
     ],
   );
 
+  const handleResize = React.useCallback(
+    (event: ResizeEvent) => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({ y: event.size.height });
+      }
+    },
+    [scrollViewRef],
+  );
+
+  const handleBold = React.useCallback(() => {
+    editorContentRef.current?.bold();
+  }, []);
+
+  const handleItalic = React.useCallback(() => {
+    editorContentRef.current?.italic();
+  }, []);
+
+  const handleStrikethrough = React.useCallback(() => {
+    editorContentRef.current?.strikethrough();
+  }, []);
+
+  const handleLink = React.useCallback((url: string) => {
+    editorContentRef.current?.link(url);
+  }, []);
+
+  const handleHeadingMedium = React.useCallback(() => {
+    editorContentRef.current?.heading(2);
+  }, []);
+
+  const handleHeadingLarge = React.useCallback(() => {
+    editorContentRef.current?.heading(1);
+  }, []);
+
+  const handleCode = React.useCallback(() => {
+    editorContentRef.current?.code();
+  }, []);
+
   return (
-    <Container expanded paddingHorizontal={48}>
-      <Animated.View
-        style={[
-          styles.toolbar,
-          isToolbarVisible ? styles.visible : styles.invisible,
-          theme.container.shadow,
-          {
-            borderColor: theme.border.color.default,
-            backgroundColor: theme.container.color.content,
-            transform: [
-              { translateX: toolbar.position.x },
-              { translateY: toolbar.position.y },
-            ],
-            opacity: toolbar.opacity,
-          },
-        ]}
-      >
-        <Toolbar />
-      </Animated.View>
-      <Animated.View
-        style={[
-          styles.addBlockWrapper,
-          isAddBlockVisible ? styles.visible : styles.invisible,
-          {
-            transform: [{ translateY: sidebar.position }],
-            opacity: sidebar.opacity,
-          },
-        ]}
-      >
-        <AddBlock
-          onOpen={handleShowSidebarControls}
-          onClose={handleHideSidebarControls}
-          isSidebarControlsVisible={isSidebarControlsVisible}
+    <ScrollView ref={scrollViewRef}>
+      <Container expanded paddingHorizontal={48}>
+        {isToolbarVisible && (
+          <Animated.View
+            style={[
+              styles.toolbar,
+              theme.container.shadow,
+              {
+                borderColor: theme.border.color.default,
+                backgroundColor: theme.container.color.content,
+                transform: [
+                  { translateX: toolbar.position.x },
+                  { translateY: toolbar.position.y },
+                ],
+                opacity: toolbar.opacity,
+              },
+            ]}
+          >
+            <Toolbar
+              activeFormats={activeFormats}
+              onBold={handleBold}
+              onItalic={handleItalic}
+              onStrikethrough={handleStrikethrough}
+              onLink={handleLink}
+              onHeadingMedium={handleHeadingMedium}
+              onHeadingLarge={handleHeadingLarge}
+              onCode={handleCode}
+            />
+          </Animated.View>
+        )}
+        {isAddBlockVisible && (
+          <Animated.View
+            style={[
+              styles.addBlockWrapper,
+              {
+                transform: [{ translateY: sidebar.position }],
+                opacity: sidebar.opacity,
+              },
+            ]}
+          >
+            <AddBlock
+              onOpen={handleShowSidebarControls}
+              onClose={handleHideSidebarControls}
+              isSidebarControlsVisible={isSidebarControlsVisible}
+            />
+          </Animated.View>
+        )}
+        <EditorContent
+          ref={editorContentRef}
+          onTextChange={handleTextChange}
+          onSelectionChange={handleSelectionChange}
+          onResize={handleResize}
+          initialContent={initialContent}
         />
-      </Animated.View>
-      <EditorContent
-        ref={editorContentRef}
-        onTextChange={handleTextChange}
-        onSelectionChange={handleSelectionChange}
-        initialContent={initialContent}
-      />
-    </Container>
+      </Container>
+    </ScrollView>
   );
 }
 
@@ -245,8 +384,9 @@ function AddBlock(props: AddBlockProps) {
   const theme = useTheme();
 
   const controls = React.useRef<SidebarControl[]>([
-    { icon: 'bold' as const, onPress: () => {}, x: new Animated.Value(0) },
-    { icon: 'italic' as const, onPress: () => {}, x: new Animated.Value(0) },
+    { icon: 'image' as const, onPress: () => {}, x: new Animated.Value(0) },
+    { icon: 'video' as const, onPress: () => {}, x: new Animated.Value(0) },
+    { icon: 'quote' as const, onPress: () => {}, x: new Animated.Value(0) },
     { icon: 'code' as const, onPress: () => {}, x: new Animated.Value(0) },
   ]).current;
 
@@ -307,7 +447,9 @@ function AddBlock(props: AddBlockProps) {
                 { transform: [{ translateX: x }] },
               ]}
             >
-              <ToolbarButton icon={icon} onPress={onPress} />
+              <Button style={styles.toolbarButton} onPress={onPress}>
+                <Icon name={icon} />
+              </Button>
             </Animated.View>
           );
         })}
@@ -316,36 +458,125 @@ function AddBlock(props: AddBlockProps) {
   );
 }
 
-function Toolbar() {
+interface ToolbarProps {
+  activeFormats: Formats;
+  onBold: () => void;
+  onItalic: () => void;
+  onStrikethrough: () => void;
+  onLink: (url: string) => void;
+  onHeadingMedium: () => void;
+  onHeadingLarge: () => void;
+  onCode: () => void;
+}
+
+function Toolbar(props: ToolbarProps) {
+  const {
+    activeFormats,
+    onBold,
+    onItalic,
+    onStrikethrough,
+    onLink,
+    onHeadingMedium,
+    onHeadingLarge,
+    onCode,
+  } = props;
+  console.log(activeFormats, 'activeFormats');
+
+  const [isAddingLink, setIsAddingLink] = React.useState(false);
+  const [link, setLink] = React.useState('');
+
+  const handlePressLink = React.useCallback(() => {
+    setIsAddingLink(true);
+  }, []);
+
+  const handleCloseLink = React.useCallback(() => {
+    setIsAddingLink(false);
+  }, []);
+
+  const handleChangeLink = React.useCallback((url: string) => {
+    setLink(url);
+  }, []);
+
+  const handleSubmitLink = React.useCallback(() => {
+    onLink(link);
+  }, [link, onLink]);
+
   return (
     <Row>
-      <ToolbarButton icon="bold" onPress={() => {}} />
-      <ToolbarButton icon="italic" onPress={() => {}} />
-      <ToolbarButton icon="link" onPress={() => {}} />
-      <Divider orientation="vertical" />
-      <ToolbarButton icon="font" size="sm" onPress={() => {}} />
-      <ToolbarButton icon="font" size="md" onPress={() => {}} />
-      <ToolbarButton icon="quote" onPress={() => {}} />
-      <ToolbarButton icon="code" onPress={() => {}} />
+      {isAddingLink ? (
+        <>
+          <Container expanded flex={1}>
+            <TextInput
+              autoFocus
+              placeholder="Enter link"
+              value={link}
+              onChangeText={handleChangeLink}
+              style={[
+                styles.linkInput,
+                // @ts-ignore
+                webStyles.outline,
+              ]}
+            />
+          </Container>
+          <Button style={styles.linkSubmit} onPress={handleSubmitLink}>
+            <Icon name="check" size="lg" />
+          </Button>
+          <CloseButton onPress={handleCloseLink} />
+        </>
+      ) : (
+        <>
+          <Button style={styles.toolbarButton} onPress={onBold}>
+            <Icon
+              name="bold"
+              color={activeFormats.bold ? 'primary' : 'default'}
+            />
+          </Button>
+          <Button style={styles.toolbarButton} onPress={onItalic}>
+            <Icon
+              name="italic"
+              color={activeFormats.italic ? 'primary' : 'default'}
+            />
+          </Button>
+          <Button style={styles.toolbarButton} onPress={onStrikethrough}>
+            <Icon
+              name="strikethrough"
+              size="lg"
+              color={activeFormats.strike ? 'primary' : 'default'}
+            />
+          </Button>
+          <Button style={styles.toolbarButton} onPress={handlePressLink}>
+            <Icon name="link" />
+          </Button>
+          <Button style={styles.toolbarButton} onPress={onHeadingMedium}>
+            <Icon
+              name="font"
+              size="sm"
+              color={activeFormats.header === 2 ? 'primary' : 'default'}
+            />
+          </Button>
+          <Button style={styles.toolbarButton} onPress={onHeadingLarge}>
+            <Icon
+              name="font"
+              color={activeFormats.header === 1 ? 'primary' : 'default'}
+            />
+          </Button>
+          <Button style={styles.toolbarButton} onPress={onCode}>
+            <Icon
+              name="code"
+              color={activeFormats.code ? 'primary' : 'default'}
+            />
+          </Button>
+        </>
+      )}
     </Row>
   );
 }
 
-interface ToolbarToggleProps {
-  icon: IconName;
-  size?: TextSize;
-  onPress: () => void;
-}
-
-export function ToolbarButton(props: ToolbarToggleProps) {
-  const { onPress, icon, size } = props;
-
-  return (
-    <Button style={styles.toolbarButton} onPress={onPress}>
-      <Icon name={icon} size={size} />
-    </Button>
-  );
-}
+const webStyles = {
+  outline: {
+    outline: 'none',
+  },
+};
 
 const styles = StyleSheet.create({
   toolbar: {
@@ -367,11 +598,13 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     zIndex: 1,
   },
-  visible: {
-    display: 'flex',
+  linkInput: {
+    height: TOOLBAR_HEIGHT,
+    paddingHorizontal: 8,
   },
-  invisible: {
-    display: 'none',
+  linkSubmit: {
+    width: TOOLBAR_HEIGHT,
+    height: TOOLBAR_HEIGHT,
   },
   sidebarControlButton: {
     position: 'absolute',

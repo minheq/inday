@@ -29,8 +29,8 @@ export function Pressable(props: PressableProps) {
     delayPressOut,
     onHoverIn = () => {},
     onHoverOut = () => {},
-    onFocus = () => {},
-    onBlur = () => {},
+    onFocus: propOnFocus = () => {},
+    onBlur: propOnBlur = () => {},
   } = props;
 
   const [isFocused, setIsFocused] = React.useState(false);
@@ -55,11 +55,11 @@ export function Pressable(props: PressableProps) {
       },
       onFocus: (e) => {
         setIsFocused(true);
-        onFocus(e);
+        propOnFocus(e);
       },
       onBlur: (e) => {
         setIsFocused(false);
-        onBlur(e);
+        propOnBlur(e);
       },
       onPressIn: () => {
         setIsPressed(true);
@@ -77,12 +77,24 @@ export function Pressable(props: PressableProps) {
       onPress,
       onHoverIn,
       onHoverOut,
-      onFocus,
-      onBlur,
+      propOnFocus,
+      propOnBlur,
     ],
   );
 
-  const eventHandlers = usePressability(config);
+  const {
+    onBlur,
+    onFocus,
+    onMouseEnter,
+    onMouseLeave,
+    // onClick,
+    onResponderGrant,
+    onResponderMove,
+    onResponderRelease,
+    onResponderTerminate,
+    onResponderTerminationRequest,
+    onStartShouldSetResponder,
+  } = usePressability(config);
 
   return (
     <Animated.View
@@ -97,8 +109,19 @@ export function Pressable(props: PressableProps) {
             })
           : style,
       ]}
-      {...eventHandlers}
+      onResponderGrant={onResponderGrant}
+      onResponderMove={onResponderMove}
+      onResponderRelease={onResponderRelease}
+      onResponderTerminate={onResponderTerminate}
+      onResponderTerminationRequest={onResponderTerminationRequest}
+      onStartShouldSetResponder={onStartShouldSetResponder}
       accessible
+      // @ts-ignore web event handlers
+      onBlur={onBlur}
+      onFocus={onFocus}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      // onClick={onClick}
     >
       {children}
     </Animated.View>

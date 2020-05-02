@@ -9,6 +9,7 @@ export * from './spacing';
 export * from './row';
 export * from './center';
 export * from './content';
+export * from './text_input';
 export * from './interactive';
 export * from './icon';
 export * from './search_input';

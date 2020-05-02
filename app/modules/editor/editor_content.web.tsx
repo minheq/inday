@@ -12,6 +12,8 @@ import type {
   MessagePayload,
   Line,
   ResizeEvent,
+  HeadingSize,
+  Formats,
 } from './types';
 
 export const EditorContent = React.forwardRef(
@@ -26,6 +28,7 @@ export const EditorContent = React.forwardRef(
       initialContent,
       onTextChange = () => {},
       onSelectionChange = () => {},
+      onResize = () => {},
     } = props;
     const editorRef = React.useRef<HTMLIFrameElement | null>(null);
 
@@ -38,8 +41,26 @@ export const EditorContent = React.forwardRef(
     React.useImperativeHandle(
       ref,
       () => ({
+        focus: () => {
+          sendMessage({ type: 'focus' });
+        },
         bold: () => {
           sendMessage({ type: 'bold' });
+        },
+        italic: () => {
+          sendMessage({ type: 'italic' });
+        },
+        strikethrough: () => {
+          sendMessage({ type: 'strikethrough' });
+        },
+        link: (url: string) => {
+          sendMessage({ type: 'link', url });
+        },
+        heading: (size: HeadingSize) => {
+          sendMessage({ type: 'heading', size });
+        },
+        code: () => {
+          sendMessage({ type: 'inline-code' });
         },
         getBounds: async (range: Range) => {
           return new Promise((resolve) => {
@@ -87,15 +108,35 @@ export const EditorContent = React.forwardRef(
             return;
           });
         },
+        getFormats: async () => {
+          return new Promise((resolve) => {
+            sendMessage({ type: 'get-formats' });
+
+            window.addEventListener('message', handleTemporaryMessage);
+
+            function handleTemporaryMessage(event: MessageEvent) {
+              if (event.data.type === 'get-formats') {
+                resolve(event.data.formats as Formats);
+                window.removeEventListener('message', handleTemporaryMessage);
+              }
+            }
+
+            return;
+          });
+        },
       }),
       [sendMessage],
     );
 
-    const handleResize = React.useCallback((resize: ResizeEvent) => {
-      if (editorRef.current) {
-        editorRef.current.style.height = resize.height + 'px';
-      }
-    }, []);
+    const handleResize = React.useCallback(
+      (event: ResizeEvent) => {
+        if (editorRef.current) {
+          editorRef.current.style.height = event.size.height + 'px';
+          onResize(event);
+        }
+      },
+      [onResize],
+    );
 
     const handleMessage = React.useCallback(
       (event: MessageEvent) => {

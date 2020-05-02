@@ -8,6 +8,7 @@ interface ContainerProps {
   maxWidth?: number | string;
   minWidth?: number | string;
   borderRadius?: number;
+  flex?: number;
   width?: number | string;
   height?: number | string;
   borderWidth?: number;
@@ -37,6 +38,7 @@ export function Container(props: ContainerProps) {
     expanded,
     color = 'default',
     width,
+    flex,
     maxWidth,
     minWidth,
     borderWidth,
@@ -72,6 +74,7 @@ export function Container(props: ContainerProps) {
           borderWidth,
           backgroundColor: theme.container.color[color],
           width: effectiveWidth,
+          flex,
           maxWidth,
           minWidth,
           borderRadius,
