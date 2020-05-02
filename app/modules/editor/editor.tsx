@@ -9,6 +9,7 @@ import {
   Container,
   Row,
   Button,
+  Spacing,
 } from '../../components';
 import { useTheme, tokens, TextSize } from '../../theme';
 import type { TextChangeEvent, SelectionChangeEvent, Range } from './types';
@@ -31,8 +32,14 @@ export function Editor(props: EditorProps) {
   } = props;
   const theme = useTheme();
   const editorContentRef = React.useRef<EditorContentInstance | null>(null);
-  const toolbar = React.useRef(new Animated.ValueXY()).current;
-  const sidebar = React.useRef(new Animated.Value(0)).current;
+  const toolbar = React.useRef({
+    position: new Animated.ValueXY(),
+    opacity: new Animated.Value(0),
+  }).current;
+  const sidebar = React.useRef({
+    position: new Animated.Value(0),
+    opacity: new Animated.Value(0),
+  }).current;
   const [isToolbarVisible, setIsToolbarVisible] = React.useState(false);
   const [isAddBlockVisible, setIsAddBlockVisible] = React.useState(false);
 
@@ -46,37 +53,77 @@ export function Editor(props: EditorProps) {
 
         const value = rangeBounds.top - 12;
 
-        setIsAddBlockVisible(true);
-        sidebar.setValue(value);
+        if (isAddBlockVisible) {
+          Animated.parallel([
+            Animated.spring(sidebar.position, {
+              toValue: value,
+              useNativeDriver: true,
+              bounciness: 0,
+              speed: 300,
+            }),
+            Animated.timing(sidebar.opacity, {
+              toValue: 1,
+              useNativeDriver: true,
+              duration: 100,
+            }),
+          ]).start();
+        } else {
+          setIsAddBlockVisible(true);
+          sidebar.position.setValue(value);
+          Animated.timing(sidebar.opacity, {
+            toValue: 1,
+            useNativeDriver: true,
+            duration: 100,
+          }).start();
+        }
       }
     },
-    [sidebar],
+    [sidebar, isAddBlockVisible],
   );
 
   const handleHideAddBlock = React.useCallback(async () => {
-    setIsAddBlockVisible(false);
-  }, []);
+    Animated.timing(sidebar.opacity, {
+      toValue: 0,
+      useNativeDriver: true,
+      duration: 100,
+    }).start(() => {
+      setIsAddBlockVisible(false);
+    });
+  }, [sidebar]);
 
   const handleShowToolbar = React.useCallback(
     async (range: Range) => {
       if (editorContentRef.current) {
         const rangeBounds = await editorContentRef.current.getBounds(range);
-        toolbar.setValue({
+        toolbar.position.setValue({
           x: Math.max(
             rangeBounds.left + rangeBounds.width / 2 - TOOLBAR_WIDTH / 2,
             0,
           ),
           y: rangeBounds.top - TOOLBAR_HEIGHT - 16,
         });
+
         setIsToolbarVisible(true);
+
+        Animated.timing(toolbar.opacity, {
+          toValue: 1,
+          useNativeDriver: true,
+          duration: 100,
+        }).start();
       }
     },
     [toolbar],
   );
 
   const handleHideToolbar = React.useCallback(async () => {
-    setIsToolbarVisible(false);
-  }, []);
+    Animated.timing(toolbar.opacity, {
+      toValue: 0,
+      useNativeDriver: true,
+      duration: 100,
+    }).start(() => {
+      setIsToolbarVisible(false);
+    });
+  }, [toolbar]);
 
   const handleTextChange = React.useCallback(
     async (_event: TextChangeEvent) => {
@@ -131,7 +178,11 @@ export function Editor(props: EditorProps) {
           {
             borderColor: theme.border.color.default,
             backgroundColor: theme.container.color.content,
-            transform: [{ translateX: toolbar.x }, { translateY: toolbar.y }],
+            transform: [
+              { translateX: toolbar.position.x },
+              { translateY: toolbar.position.y },
+            ],
+            opacity: toolbar.opacity,
           },
         ]}
       >
@@ -142,7 +193,8 @@ export function Editor(props: EditorProps) {
           styles.addBlockWrapper,
           isAddBlockVisible ? styles.visible : styles.invisible,
           {
-            transform: [{ translateY: sidebar }],
+            transform: [{ translateY: sidebar.position }],
+            opacity: sidebar.opacity,
           },
         ]}
       >
@@ -158,15 +210,81 @@ export function Editor(props: EditorProps) {
   );
 }
 
+interface SidebarControl {
+  icon: IconName;
+  onPress: () => void;
+  x: Animated.Value;
+}
+
 function AddBlock() {
   const theme = useTheme();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const controls = React.useRef<SidebarControl[]>([
+    { icon: 'bold' as const, onPress: () => {}, x: new Animated.Value(0) },
+    { icon: 'italic' as const, onPress: () => {}, x: new Animated.Value(0) },
+    { icon: 'code' as const, onPress: () => {}, x: new Animated.Value(0) },
+  ]).current;
+
+  const handleToggleSidebar = React.useCallback(() => {
+    if (isOpen) {
+      Animated.stagger(
+        30,
+        controls.map((c) =>
+          Animated.spring(c.x, {
+            toValue: 0,
+            bounciness: 0,
+            speed: 100,
+            useNativeDriver: true,
+          }),
+        ),
+      ).start(() => {
+        setIsOpen(false);
+      });
+    } else {
+      setIsOpen(true);
+      Animated.stagger(
+        30,
+        controls.map((c, index) =>
+          Animated.spring(c.x, {
+            toValue: (index + 1) * 40,
+            bounciness: 0,
+            speed: 100,
+            useNativeDriver: true,
+          }),
+        ),
+      ).start();
+    }
+  }, [controls, isOpen]);
 
   return (
-    <Button
-      style={[styles.addBlock, { borderColor: theme.border.color.default }]}
-    >
-      <Icon name="plus" color="muted" />
-    </Button>
+    <Row>
+      <Button
+        onPress={handleToggleSidebar}
+        style={[styles.addBlock, { borderColor: theme.border.color.default }]}
+      >
+        <Icon name="plus" color="muted" />
+      </Button>
+      <Spacing width={8} />
+      {isOpen && (
+        <Row>
+          {controls.map((c) => {
+            const { onPress, icon, x } = c;
+
+            return (
+              <Animated.View
+                key={icon}
+                style={[
+                  styles.sidebarControlButton,
+                  { transform: [{ translateX: x }] },
+                ]}
+              >
+                <ToolbarButton icon={icon} onPress={onPress} />
+              </Animated.View>
+            );
+          })}
+        </Row>
+      )}
+    </Row>
   );
 }
 
@@ -217,13 +335,21 @@ const styles = StyleSheet.create({
     width: SIDEBAR_CONTROLS_HEIGHT,
     height: SIDEBAR_CONTROLS_HEIGHT,
     borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     borderRadius: 999,
+    zIndex: 1,
   },
   visible: {
     display: 'flex',
   },
   invisible: {
     display: 'none',
+  },
+  sidebarControlButton: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    left: -48,
   },
   toolbarButton: {
     flex: 1,

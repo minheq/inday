@@ -76,9 +76,14 @@ export interface GetSelectionMessage {
   type: 'get-selection';
 }
 
+export interface FocusMessage {
+  type: 'focus';
+}
+
 /** Messages sent to iframe */
 export type MessagePayload =
   | FormatBoldMessage
   | GetBoundsMessage
   | GetLineMessage
-  | GetSelectionMessage;
+  | GetSelectionMessage
+  | FocusMessage;

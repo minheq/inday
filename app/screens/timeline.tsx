@@ -45,8 +45,9 @@ export function TimelineScreen() {
         animationType="slide"
         isOpen={isEditingCard}
         onRequestClose={handleCloseEditingCard}
+        style={{ width: 800 }}
       >
-        <Container width={800} padding={16} height="100%">
+        <Container padding={16} height="100%" width="100%">
           <Row justifyContent="space-between">
             <CloseButton onPress={handleCloseEditingCard} />
             <Row>

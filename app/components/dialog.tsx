@@ -1,5 +1,12 @@
 import React from 'react';
-import { Animated, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  Animated,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
 import { Modal, ModalProps } from './modal';
 import { usePressability, PressabilityConfig } from './pressability';
 import { useTheme, tokens } from '../theme';
@@ -7,7 +14,7 @@ import { useTheme, tokens } from '../theme';
 const OFFSET_TOP = 64;
 
 interface DialogProps extends ModalProps {
-  size?: 'auto' | 'fill';
+  style?: StyleProp<ViewStyle>;
 }
 
 // TODO: Add 'fade' and 'none' animationType handlers
@@ -16,8 +23,8 @@ export function Dialog(props: DialogProps) {
     isOpen,
     onRequestClose = () => {},
     onShow,
-    size = 'auto',
     animationType = 'none',
+    style,
     children,
   } = props;
   const { height } = useWindowDimensions();
@@ -105,11 +112,7 @@ export function Dialog(props: DialogProps) {
       >
         <View style={[styles.overlay]} {...eventHandlers} />
         <Animated.View
-          style={[
-            styles.dialog,
-            size === 'fill' && styles.fill,
-            { transform: [{ translateY: slide }] },
-          ]}
+          style={[styles.dialog, style, { transform: [{ translateY: slide }] }]}
         >
           {children}
         </Animated.View>
@@ -125,11 +128,9 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
   },
-  fill: {
-    height: '80%',
-  },
   dialog: {
-    maxHeight: '80%',
+    maxHeight: '90%',
+    maxWidth: '90%',
     borderRadius: tokens.radius,
     backgroundColor: 'rgba(255, 255, 255, 1)',
   },

@@ -1,10 +1,16 @@
 import React from 'react';
-import { StyleSheet, Animated, ViewStyle, StyleProp } from 'react-native';
+import {
+  StyleSheet,
+  Animated,
+  ViewStyle,
+  StyleProp,
+  GestureResponderEvent,
+} from 'react-native';
 import { Pressable } from '../components';
 import { tokens, useTheme } from '../theme';
 
 interface ButtonProps {
-  onPress?: () => void;
+  onPress?: (e: GestureResponderEvent) => void;
   children?: React.ReactNode;
   align?: 'left' | 'center' | 'right';
   style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>;
