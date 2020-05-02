@@ -71,17 +71,6 @@ export function Editor(props: EditorProps) {
     setIsSidebarControlsVisible,
   ] = React.useState(false);
   const { scrollViewState, handlers: scrollHandlers } = useScrollViewState();
-  const mount = React.useRef(new Animated.Value(0)).current;
-  const [isMounted, setIsMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsMounted(true);
-    Animated.timing(mount, {
-      toValue: 1,
-      useNativeDriver: true,
-      duration: 600,
-    }).start();
-  }, [mount]);
 
   const handleHideSidebarControls = React.useCallback(() => {
     setIsSidebarControlsVisible(false);
@@ -380,16 +369,12 @@ export function Editor(props: EditorProps) {
             />
           </Animated.View>
         )}
-        <Animated.View style={[{ opacity: mount }]}>
-          {isMounted && (
-            <EditorContent
-              ref={editorContentRef}
-              onTextChange={handleTextChange}
-              onSelectionChange={handleSelectionChange}
-              initialContent={initialContent}
-            />
-          )}
-        </Animated.View>
+        <EditorContent
+          ref={editorContentRef}
+          onTextChange={handleTextChange}
+          onSelectionChange={handleSelectionChange}
+          initialContent={initialContent}
+        />
       </Container>
     </ScrollView>
   );
@@ -508,8 +493,6 @@ function Toolbar(props: ToolbarProps) {
     onHeadingLarge,
     onCode,
   } = props;
-  console.log(activeFormats, 'activeFormats');
-
   const [isAddingLink, setIsAddingLink] = React.useState(false);
   const [link, setLink] = React.useState('');
 
