@@ -74,6 +74,8 @@ export type Bounds = {
   top: number;
   height: number;
   width: number;
+  bottom: number;
+  right: number;
 };
 
 export interface GetBoundsMessage {

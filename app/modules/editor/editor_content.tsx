@@ -56,6 +56,8 @@ export const EditorContent = React.forwardRef(
         left: 0,
         height: 0,
         width: 0,
+        bottom: 0,
+        right: 0,
       }),
       getLine: async () => ({ isEmpty: true, offset: 0 }),
       getSelection: async () => ({ index: 0, length: 0 }),

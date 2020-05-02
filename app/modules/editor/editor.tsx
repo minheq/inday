@@ -16,10 +16,10 @@ import type {
   TextChangeEvent,
   SelectionChangeEvent,
   Range,
-  ResizeEvent,
   Formats,
 } from './types';
 import { between } from '../../utils/numbers';
+import { useScrollViewState } from '../../utils/scrollview';
 
 interface EditorProps {
   initialContent?: Delta;
@@ -32,6 +32,21 @@ const SIDEBAR_CONTROLS_HEIGHT = 40;
 export function Editor(props: EditorProps) {
   const {
     initialContent = new Delta()
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
       .insert(
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
       )
@@ -55,6 +70,18 @@ export function Editor(props: EditorProps) {
     isSidebarControlsVisible,
     setIsSidebarControlsVisible,
   ] = React.useState(false);
+  const { scrollViewState, handlers: scrollHandlers } = useScrollViewState();
+  const mount = React.useRef(new Animated.Value(0)).current;
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+    Animated.timing(mount, {
+      toValue: 1,
+      useNativeDriver: true,
+      duration: 600,
+    }).start();
+  }, [mount]);
 
   const handleHideSidebarControls = React.useCallback(() => {
     setIsSidebarControlsVisible(false);
@@ -206,8 +233,14 @@ export function Editor(props: EditorProps) {
   const handleTextChange = React.useCallback(
     async (_event: TextChangeEvent) => {
       if (editorContentRef.current) {
+        // These take around 3-6ms
         const range = await editorContentRef.current.getSelection();
         const line = await editorContentRef.current.getLine(range.index);
+        const rangeBounds = await editorContentRef.current.getBounds(range);
+
+        if (rangeBounds.bottom > scrollViewState.contentHeight) {
+          scrollViewRef.current?.scrollTo({ y: rangeBounds.bottom });
+        }
 
         if (range.length === 0) {
           handleHideToolbar();
@@ -230,6 +263,7 @@ export function Editor(props: EditorProps) {
       handleHideToolbar,
       handleUpdateToolbarIfNeeded,
       isAddBlockVisible,
+      scrollViewState,
     ],
   );
 
@@ -270,15 +304,6 @@ export function Editor(props: EditorProps) {
     ],
   );
 
-  const handleResize = React.useCallback(
-    (event: ResizeEvent) => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollTo({ y: event.size.height });
-      }
-    },
-    [scrollViewRef],
-  );
-
   const handleBold = React.useCallback(() => {
     editorContentRef.current?.bold();
   }, []);
@@ -308,7 +333,7 @@ export function Editor(props: EditorProps) {
   }, []);
 
   return (
-    <ScrollView ref={scrollViewRef}>
+    <ScrollView ref={scrollViewRef} scrollEventThrottle={0} {...scrollHandlers}>
       <Container expanded paddingHorizontal={48}>
         {isToolbarVisible && (
           <Animated.View
@@ -355,13 +380,16 @@ export function Editor(props: EditorProps) {
             />
           </Animated.View>
         )}
-        <EditorContent
-          ref={editorContentRef}
-          onTextChange={handleTextChange}
-          onSelectionChange={handleSelectionChange}
-          onResize={handleResize}
-          initialContent={initialContent}
-        />
+        <Animated.View style={[{ opacity: mount }]}>
+          {isMounted && (
+            <EditorContent
+              ref={editorContentRef}
+              onTextChange={handleTextChange}
+              onSelectionChange={handleSelectionChange}
+              initialContent={initialContent}
+            />
+          )}
+        </Animated.View>
       </Container>
     </ScrollView>
   );
@@ -583,12 +611,14 @@ const styles = StyleSheet.create({
     width: TOOLBAR_WIDTH,
     position: 'absolute',
     borderRadius: tokens.radius,
+    zIndex: 1,
   },
   addBlockWrapper: {
     width: SIDEBAR_CONTROLS_HEIGHT,
     height: SIDEBAR_CONTROLS_HEIGHT,
     position: 'absolute',
     left: 0,
+    zIndex: 1,
   },
   addBlock: {
     width: SIDEBAR_CONTROLS_HEIGHT,
