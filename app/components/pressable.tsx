@@ -2,7 +2,7 @@ import React from 'react';
 import { Animated, ViewStyle, StyleProp, StyleSheet } from 'react-native';
 import { usePressability, PressabilityConfig } from './pressability';
 
-interface PressableChildrenProps {
+export interface PressableChildrenProps {
   pressed: boolean;
   hovered: boolean;
   focused: boolean;

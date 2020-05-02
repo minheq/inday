@@ -6,14 +6,18 @@ import {
   StyleProp,
   GestureResponderEvent,
 } from 'react-native';
-import { Pressable } from '../components';
+import { Pressable, PressableChildrenProps } from '../components';
 import { tokens, useTheme } from '../theme';
 
 interface ButtonProps {
   onPress?: (e: GestureResponderEvent) => void;
   children?: React.ReactNode;
   align?: 'left' | 'center' | 'right';
-  style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>;
+  style?:
+    | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
+    | ((
+        props: PressableChildrenProps,
+      ) => Animated.WithAnimatedValue<StyleProp<ViewStyle>>);
 }
 
 export function Button(props: ButtonProps) {

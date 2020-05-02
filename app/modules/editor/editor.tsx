@@ -42,6 +42,10 @@ export function Editor(props: EditorProps) {
   }).current;
   const [isToolbarVisible, setIsToolbarVisible] = React.useState(false);
   const [isAddBlockVisible, setIsAddBlockVisible] = React.useState(false);
+  const [
+    isSidebarControlsVisible,
+    setIsSidebarControlsVisible,
+  ] = React.useState(false);
 
   const handleShowAddBlock = React.useCallback(
     async (index: number) => {
@@ -115,6 +119,14 @@ export function Editor(props: EditorProps) {
     [toolbar],
   );
 
+  const handleHideSidebarControls = React.useCallback(() => {
+    setIsSidebarControlsVisible(false);
+  }, [setIsSidebarControlsVisible]);
+
+  const handleShowSidebarControls = React.useCallback(() => {
+    setIsSidebarControlsVisible(true);
+  }, [setIsSidebarControlsVisible]);
+
   const handleHideToolbar = React.useCallback(async () => {
     Animated.timing(toolbar.opacity, {
       toValue: 0,
@@ -147,6 +159,7 @@ export function Editor(props: EditorProps) {
       if (editorContentRef.current) {
         if (range.length === 0) {
           handleHideToolbar();
+          handleHideSidebarControls();
           const line = await editorContentRef.current.getLine(range.index);
 
           if (line?.isEmpty) {
@@ -161,6 +174,7 @@ export function Editor(props: EditorProps) {
     },
     [
       editorContentRef,
+      handleHideSidebarControls,
       handleHideAddBlock,
       handleHideToolbar,
       handleShowToolbar,
@@ -198,7 +212,11 @@ export function Editor(props: EditorProps) {
           },
         ]}
       >
-        <AddBlock />
+        <AddBlock
+          onOpen={handleShowSidebarControls}
+          onClose={handleHideSidebarControls}
+          isSidebarControlsVisible={isSidebarControlsVisible}
+        />
       </Animated.View>
       <EditorContent
         ref={editorContentRef}
@@ -216,32 +234,24 @@ interface SidebarControl {
   x: Animated.Value;
 }
 
-function AddBlock() {
+interface AddBlockProps {
+  isSidebarControlsVisible: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}
+
+function AddBlock(props: AddBlockProps) {
+  const { isSidebarControlsVisible, onOpen, onClose } = props;
   const theme = useTheme();
-  const [isOpen, setIsOpen] = React.useState(false);
+
   const controls = React.useRef<SidebarControl[]>([
     { icon: 'bold' as const, onPress: () => {}, x: new Animated.Value(0) },
     { icon: 'italic' as const, onPress: () => {}, x: new Animated.Value(0) },
     { icon: 'code' as const, onPress: () => {}, x: new Animated.Value(0) },
   ]).current;
 
-  const handleToggleSidebar = React.useCallback(() => {
-    if (isOpen) {
-      Animated.stagger(
-        30,
-        controls.map((c) =>
-          Animated.spring(c.x, {
-            toValue: 0,
-            bounciness: 0,
-            speed: 100,
-            useNativeDriver: true,
-          }),
-        ),
-      ).start(() => {
-        setIsOpen(false);
-      });
-    } else {
-      setIsOpen(true);
+  React.useEffect(() => {
+    if (isSidebarControlsVisible) {
       Animated.stagger(
         30,
         controls.map((c, index) =>
@@ -253,8 +263,28 @@ function AddBlock() {
           }),
         ),
       ).start();
+    } else {
+      Animated.stagger(
+        30,
+        controls.map((c) =>
+          Animated.spring(c.x, {
+            toValue: 0,
+            bounciness: 0,
+            speed: 100,
+            useNativeDriver: true,
+          }),
+        ),
+      ).start();
     }
-  }, [controls, isOpen]);
+  }, [controls, isSidebarControlsVisible]);
+
+  const handleToggleSidebar = React.useCallback(() => {
+    if (isSidebarControlsVisible) {
+      onClose();
+    } else {
+      onOpen();
+    }
+  }, [onClose, onOpen, isSidebarControlsVisible]);
 
   return (
     <Row>
@@ -265,25 +295,23 @@ function AddBlock() {
         <Icon name="plus" color="muted" />
       </Button>
       <Spacing width={8} />
-      {isOpen && (
-        <Row>
-          {controls.map((c) => {
-            const { onPress, icon, x } = c;
+      <Row>
+        {controls.map((c) => {
+          const { onPress, icon, x } = c;
 
-            return (
-              <Animated.View
-                key={icon}
-                style={[
-                  styles.sidebarControlButton,
-                  { transform: [{ translateX: x }] },
-                ]}
-              >
-                <ToolbarButton icon={icon} onPress={onPress} />
-              </Animated.View>
-            );
-          })}
-        </Row>
-      )}
+          return (
+            <Animated.View
+              key={icon}
+              style={[
+                styles.sidebarControlButton,
+                { transform: [{ translateX: x }] },
+              ]}
+            >
+              <ToolbarButton icon={icon} onPress={onPress} />
+            </Animated.View>
+          );
+        })}
+      </Row>
     </Row>
   );
 }

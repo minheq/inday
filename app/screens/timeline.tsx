@@ -65,9 +65,9 @@ export function TimelineScreen() {
               </Button>
             </Row>
           </Row>
-          <Spacing height={24} />
           <View style={{ flex: 1, paddingBottom: 24 }}>
             <ScrollView>
+              <Spacing height={40} />
               <Editor />
             </ScrollView>
           </View>
