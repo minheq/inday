@@ -11,6 +11,7 @@ import type {
   Bounds,
   MessagePayload,
   Line,
+  ResizeEvent,
 } from './types';
 
 export const EditorContent = React.forwardRef(
@@ -31,14 +32,6 @@ export const EditorContent = React.forwardRef(
     const sendMessage = React.useCallback((message: MessagePayload) => {
       if (editorRef.current) {
         editorRef.current?.contentWindow?.postMessage(message, '*');
-      }
-    }, []);
-
-    const handleLoad = React.useCallback(() => {
-      if (editorRef.current && editorRef.current.contentWindow) {
-        editorRef.current.style.height =
-          editorRef.current.contentWindow?.document.documentElement
-            .scrollHeight + 'px';
       }
     }, []);
 
@@ -78,9 +71,31 @@ export const EditorContent = React.forwardRef(
             return;
           });
         },
+        getSelection: async () => {
+          return new Promise((resolve) => {
+            sendMessage({ type: 'get-selection' });
+
+            window.addEventListener('message', handleTemporaryMessage);
+
+            function handleTemporaryMessage(event: MessageEvent) {
+              if (event.data.type === 'get-selection') {
+                resolve(event.data.range as Range);
+                window.removeEventListener('message', handleTemporaryMessage);
+              }
+            }
+
+            return;
+          });
+        },
       }),
       [sendMessage],
     );
+
+    const handleResize = React.useCallback((resize: ResizeEvent) => {
+      if (editorRef.current) {
+        editorRef.current.style.height = resize.height + 'px';
+      }
+    }, []);
 
     const handleMessage = React.useCallback(
       (event: MessageEvent) => {
@@ -88,9 +103,11 @@ export const EditorContent = React.forwardRef(
           onTextChange(event.data as TextChangeEvent);
         } else if (event.data.type === 'selection-change') {
           onSelectionChange(event.data as SelectionChangeEvent);
+        } else if (event.data.type === 'resize') {
+          handleResize(event.data as ResizeEvent);
         }
       },
-      [onTextChange, onSelectionChange],
+      [onTextChange, onSelectionChange, handleResize],
     );
 
     React.useEffect(() => {
@@ -106,9 +123,6 @@ export const EditorContent = React.forwardRef(
         ref={editorRef}
         srcDoc={generateHTML({ initialContent })}
         style={styles.iframe}
-        frameBorder="0"
-        scrolling="no"
-        onLoad={handleLoad}
       />
     );
   },
@@ -117,7 +131,6 @@ export const EditorContent = React.forwardRef(
 const styles = {
   iframe: {
     width: '100%',
-    height: '100%',
     borderWidth: 0,
   },
 };

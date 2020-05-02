@@ -21,6 +21,16 @@ export interface GetBoundsEvent {
   bounds: Bounds;
 }
 
+export interface ResizeEvent {
+  type: 'resize';
+  height: number;
+}
+
+export interface GetSelectionEvent {
+  type: 'get-selection';
+  range: Range;
+}
+
 export interface GetLineEvent {
   type: 'get-line';
   line: Line | null;
@@ -31,7 +41,8 @@ export type EventPayload =
   | TextChangeEvent
   | SelectionChangeEvent
   | GetBoundsEvent
-  | GetLineEvent;
+  | GetLineEvent
+  | ResizeEvent;
 
 export type Range = { index: number; length: number };
 
@@ -61,8 +72,13 @@ export interface GetLineMessage {
   index: number;
 }
 
+export interface GetSelectionMessage {
+  type: 'get-selection';
+}
+
 /** Messages sent to iframe */
 export type MessagePayload =
   | FormatBoldMessage
   | GetBoundsMessage
-  | GetLineMessage;
+  | GetLineMessage
+  | GetSelectionMessage;

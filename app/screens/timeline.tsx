@@ -11,7 +11,7 @@ import {
   Container,
   Button,
 } from '../components';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { AddCard } from '../core/add_card';
 import { Editor } from '../modules/editor';
 
@@ -46,7 +46,7 @@ export function TimelineScreen() {
         isOpen={isEditingCard}
         onRequestClose={handleCloseEditingCard}
       >
-        <Container width={800} padding={16}>
+        <Container width={800} padding={16} height="100%">
           <Row justifyContent="space-between">
             <CloseButton onPress={handleCloseEditingCard} />
             <Row>
@@ -54,21 +54,22 @@ export function TimelineScreen() {
                 <Text>Turn into task</Text>
               </Button>
               <Button>
-                <Text>Add due date</Text>
-              </Button>
-              <Button>
-                <Text>Add properties</Text>
-              </Button>
-              <Button>
                 <Text>Add reminder</Text>
               </Button>
               <Button>
                 <Text>Add label</Text>
               </Button>
+              <Button>
+                <Text>More</Text>
+              </Button>
             </Row>
           </Row>
-          <Spacing height={40} />
-          <Editor />
+          <Spacing height={24} />
+          <View style={{ flex: 1, paddingBottom: 24 }}>
+            <ScrollView>
+              <Editor />
+            </ScrollView>
+          </View>
         </Container>
       </Dialog>
     </Screen>

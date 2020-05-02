@@ -20,6 +20,7 @@ export interface EditorContentInstance {
   bold: () => void;
   getBounds: (range: Range) => Promise<Bounds>;
   getLine: (index: number) => Promise<Line | null>;
+  getSelection: () => Promise<Range>;
 }
 
 function EditorContentBase(
@@ -39,6 +40,7 @@ function EditorContentBase(
       width: 0,
     }),
     getLine: async () => ({ isEmpty: true, offset: 0 }),
+    getSelection: async () => ({ index: 0, length: 0 }),
   }));
 
   return (

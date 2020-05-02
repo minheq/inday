@@ -1,16 +1,17 @@
 import React from 'react';
-import { StyleSheet, Animated, ViewStyle } from 'react-native';
+import { StyleSheet, Animated, ViewStyle, StyleProp } from 'react-native';
 import { Pressable } from '../components';
 import { tokens, useTheme } from '../theme';
 
 interface ButtonProps {
   onPress?: () => void;
   children?: React.ReactNode;
-  style?: ViewStyle;
+  align?: 'left' | 'center' | 'right';
+  style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>;
 }
 
 export function Button(props: ButtonProps) {
-  const { onPress = () => {}, children, style } = props;
+  const { onPress = () => {}, children, style, align = 'center' } = props;
   const background = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
@@ -26,6 +27,7 @@ export function Button(props: ButtonProps) {
 
         return [
           styles.base,
+          styles[align],
           {
             backgroundColor: background.interpolate({
               inputRange: [0, 0.5, 1],
@@ -49,8 +51,18 @@ export function Button(props: ButtonProps) {
 const styles = StyleSheet.create({
   base: {
     height: 40,
+    paddingHorizontal: 8,
     flexDirection: 'row',
-    alignItems: 'center',
     borderRadius: tokens.radius,
+    alignItems: 'center',
+  },
+  center: {
+    justifyContent: 'center',
+  },
+  left: {
+    justifyContent: 'flex-start',
+  },
+  right: {
+    justifyContent: 'flex-end',
   },
 });

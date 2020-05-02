@@ -126,9 +126,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fill: {
-    height: '90%',
+    height: '80%',
   },
   dialog: {
+    maxHeight: '80%',
     borderRadius: tokens.radius,
     backgroundColor: 'rgba(255, 255, 255, 1)',
   },

@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
     // @ts-ignore
     touchAction: 'manipulation',
     cursor: 'pointer',
+    userSelect: 'none',
   },
 });
 

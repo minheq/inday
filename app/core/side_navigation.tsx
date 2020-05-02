@@ -176,7 +176,7 @@ function AddPage(props: AddPageProps) {
   const { onPress } = props;
 
   return (
-    <Button style={styles.add} onPress={onPress}>
+    <Button align="left" style={styles.add} onPress={onPress}>
       <Icon name="plus" size="lg" />
       <Spacing width={8} />
       <Text>Add page</Text>
