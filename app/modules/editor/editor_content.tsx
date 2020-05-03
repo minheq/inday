@@ -11,11 +11,12 @@ import type {
   ResizeEvent,
   HeadingSize,
   Formats,
-  Word,
 } from './types';
 
 export interface EditorContentProps {
   initialContent?: Delta;
+  onBlur?: () => void;
+  onFocus?: () => void;
   onResize?: (event: ResizeEvent) => void;
   onTextChange?: (event: TextChangeEvent) => void;
   onSelectionChange?: (event: SelectionChangeEvent) => void;
@@ -28,6 +29,7 @@ export interface EditorContentInstance {
   formatBold: () => void;
   formatItalic: () => void;
   formatStrike: () => void;
+  removeLink: (index: number) => void;
   formatLink: (range: Range, text: string, url: string) => void;
   formatHeading: (size: HeadingSize) => void;
   formatCode: () => void;
@@ -37,7 +39,8 @@ export interface EditorContentInstance {
   insertImage: (index: number, url: string) => void;
   insertVideo: (index: number, url: string) => void;
   focus: () => void;
-  selectWord: (index?: number) => Promise<Word | null>;
+  setSelection: (range: Range) => Promise<void>;
+  getLinkRange: (index: number) => Promise<Range | null>;
   getBounds: (range: Range) => Promise<Bounds>;
   getText: (range: Range) => Promise<string>;
   getLine: (index: number) => Promise<Line | null>;
@@ -62,8 +65,8 @@ export const EditorContent = React.forwardRef(
       formatBold: () => {},
       formatItalic: () => {},
       formatStrike: () => {},
+      removeLink: () => {},
       formatLink: () => {},
-      selectWord: async () => null,
       formatHeading: () => {},
       formatCode: () => {},
       formatList: () => {},
@@ -72,6 +75,8 @@ export const EditorContent = React.forwardRef(
       insertImage: () => {},
       insertVideo: () => {},
       focus: () => {},
+      getLinkRange: async () => null,
+      setSelection: async () => {},
       getBounds: async () => ({
         top: 0,
         left: 0,

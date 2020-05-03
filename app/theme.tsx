@@ -61,6 +61,7 @@ interface Theme {
     color: {
       transparent: string;
       default: string;
+      dark: string;
       focus: string;
     };
   };
@@ -132,6 +133,7 @@ const lightTheme: Theme = {
     color: {
       transparent: 'rgba(255, 255, 255, 0)',
       default: 'rgba(34, 34, 34, 0.15)',
+      dark: 'rgba(34, 34, 34, 0.4)',
       focus: 'rgba(34, 34, 34, 1)',
     },
   },

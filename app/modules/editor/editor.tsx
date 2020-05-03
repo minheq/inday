@@ -90,35 +90,38 @@ export function Editor(props: EditorProps) {
     },
   });
 
-  const getHoverablePosition = React.useCallback(async (range: Range) => {
-    if (editorContentRef.current) {
-      const rangeBounds = await editorContentRef.current.getBounds(range);
-      console.log(rangeBounds);
+  const getHoverablePosition = React.useCallback(
+    async (range: Range, type: HoverableType) => {
+      if (editorContentRef.current) {
+        const rangeBounds = await editorContentRef.current.getBounds(range);
+        const hoverableHeight = type === 'link' ? LINK_PREVIEW_HEIGHT : 0;
+        const hoverableWidth = type === 'link' ? LINK_PREVIEW_WIDTH : 0;
 
-      let y = 0;
+        let y = 0;
+        if (rangeBounds.top - hoverableHeight - 16 < 16) {
+          y = rangeBounds.top + hoverableHeight - 14;
+        } else {
+          y = rangeBounds.top - hoverableHeight - 8;
+        }
 
-      if (rangeBounds.top - LINK_PREVIEW_HEIGHT - 16 < 16) {
-        y = rangeBounds.top + LINK_PREVIEW_HEIGHT - 14;
-      } else {
-        y = rangeBounds.top - LINK_PREVIEW_HEIGHT - 8;
+        const x = between(
+          rangeBounds.left + rangeBounds.width / 2 - hoverableWidth / 2,
+          -40,
+          440,
+        );
+
+        return { x, y };
       }
 
-      const x = between(
-        rangeBounds.left + rangeBounds.width / 2 - LINK_PREVIEW_WIDTH / 2,
-        -40,
-        440,
-      );
-
-      return { x, y };
-    }
-
-    return null;
-  }, []);
+      return null;
+    },
+    [],
+  );
 
   const handleShowHoverable = React.useCallback(
     async (range: Range, type: HoverableType) => {
       if (editorContentRef.current) {
-        const position = await getHoverablePosition(range);
+        const position = await getHoverablePosition(range, type);
 
         if (!position) {
           return;
@@ -149,7 +152,7 @@ export function Editor(props: EditorProps) {
 
   const handleUpdateHoverablePositionIfNeeded = React.useCallback(
     async (range: Range) => {
-      const position = await getHoverablePosition(range);
+      const position = await getHoverablePosition(range, hoverable.type);
 
       if (!position) {
         return;
@@ -255,29 +258,44 @@ export function Editor(props: EditorProps) {
     editorContentRef.current?.formatStrike();
   }, []);
 
-  const handleRemoveLink = React.useCallback(async () => {
-    editorContentRef.current?.removeLink();
+  const handleRemoveLink = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current?.removeLink(
+        editorContentRef.current.selection.index,
+      );
+    }
   }, []);
 
   const handleFormatLink = React.useCallback(async () => {
     handleHideHoverable();
 
-    if (editorContentRef.current && editorContentRef.current.selection) {
+    if (editorContentRef.current?.selection) {
       const formats = await editorContentRef.current.getFormats();
 
       // If selection is collapsed
       if (editorContentRef.current.selection.length === 0) {
         if (formats.link) {
-          const word = await editorContentRef.current.selectWord(
+          const range = await editorContentRef.current.getLinkRange(
             editorContentRef.current.selection.index,
           );
 
-          if (word) {
+          if (range) {
+            const text = await editorContentRef.current.getText(range);
+            await editorContentRef.current.setSelection(range);
+
             setLinkEdit({
               isOpen: true,
               initialValue: {
-                text: word.text,
+                text,
                 url: formats.link,
+              },
+            });
+          } else {
+            setLinkEdit({
+              isOpen: true,
+              initialValue: {
+                text: '',
+                url: '',
               },
             });
           }
@@ -324,6 +342,8 @@ export function Editor(props: EditorProps) {
         link.url,
       );
     }
+
+    editorContentRef.current?.focus();
   }, []);
 
   const handleCloseLinkEdit = React.useCallback(() => {
@@ -394,6 +414,10 @@ export function Editor(props: EditorProps) {
     editorContentRef.current?.redo();
   }, []);
 
+  const handleBlur = React.useCallback(() => {}, []);
+
+  const handleFocus = React.useCallback(() => {}, []);
+
   return (
     <Container expanded>
       <Container paddingBottom={4}>
@@ -415,7 +439,7 @@ export function Editor(props: EditorProps) {
         />
       </Container>
       <Dialog
-        animationType="slide"
+        animationType="fade"
         isOpen={linkEdit.isOpen}
         onRequestClose={handleCloseLinkEdit}
       >
@@ -459,6 +483,8 @@ export function Editor(props: EditorProps) {
           ref={editorContentRef}
           onTextChange={handleTextChange}
           onSelectionChange={handleSelectionChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           initialContent={initialContent}
         />
       </ScrollView>
@@ -690,6 +716,7 @@ const styles = StyleSheet.create({
   },
   toolbarDivider: {
     height: 24,
+    marginHorizontal: 8,
     width: 1,
     alignSelf: 'center',
   },

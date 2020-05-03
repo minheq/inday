@@ -116,55 +116,147 @@ export function generateHTML(props: GenerateHTMLProps) {
           sendMessage({ type: 'selection-change', range, oldRange, source });
         });
 
+        function handleFormatBold() {
+          const isBold = quill.getFormat().bold;
+          quill.format('bold', !isBold);
+        }
+
+        function handleFormatItalic() {
+          const isItalic = quill.getFormat().italic;
+          quill.format('italic', !isItalic);
+        }
+        
+        function handleFormatStrike() {
+          const isStriked = quill.getFormat().strike;
+          quill.format('strike', !isStriked);
+        }
+        
+        function handleFormatCode() {
+          const isCode = quill.getFormat().code;
+          quill.format('code', !isCode);
+        }
+        
+        function handleRemoveLink(index) {
+          const [link, offset] = quill.getLeaf(index);
+
+          if (link && link.parent.domNode instanceof HTMLAnchorElement) {
+            const linkRange = { index: index - offset, length: link.length() };
+            quill.formatText(linkRange, 'link', false);
+          }
+        }
+        
+        function handleFormatLink(range, text, url) {
+          quill.deleteText(range.index, range.length);
+          quill.insertText(range.index, text, 'link', url);
+        }
+
+        function handleFormatHeading(size) {
+          const header = quill.getFormat().header;
+
+          if (header == size) {
+            quill.format('header', false);
+          } else {
+            quill.format('header', size);
+          }
+        }
+
+        function handleFormatList(index) {
+          const isList = quill.getFormat().list;
+          quill.formatLine(index, 1, 'list', isList ? false : 'bullet');
+        }
+        
+        function handleFormatBlockquote(index) {
+          const isBlockquote = quill.getFormat().blockquote;
+          quill.formatLine(index, 1, 'blockquote', !isBlockquote);
+        }
+        
+        function handleFormatCodeBlock(index) {
+          const isCodeBlock = quill.getFormat()['code-block'];
+          quill.formatLine(index, 1, 'code-block', !isCodeBlock);
+        }
+
+        function getBounds(range) {
+          const bounds = quill.getBounds(range.index, range.length);
+          sendMessage({ type: 'get-bounds', bounds });
+        }
+        
+        function getSelection() {
+          const selection = quill.getSelection();
+          sendMessage({ type: 'get-selection', range: selection });
+        }
+        
+        function getFormats() {
+          const formats = quill.getFormat();
+          sendMessage({ type: 'get-formats', formats });
+        }
+
+        function getText(range) {
+          const text = quill.getText(range.index, range.length);
+          sendMessage({ type: 'get-text', text });
+        }
+
+        function getLinkRange(index) {
+          const [link, offset] = quill.getLeaf(index);
+
+          if (link && link.parent.domNode instanceof HTMLAnchorElement) {
+            const range = { index: index - offset, length: link.length() };
+
+            sendMessage({ type: 'get-link-range', range });
+          } else {
+            sendMessage({ type: 'get-link-range', range: null });
+          }          
+        }
+        
+        function getLine(index) {
+          const [blot, offset] = quill.getLine(index);
+
+          if (!blot) {
+            sendMessage({ type: 'get-line', line: null });
+          } else {
+            const line = {
+              isEmpty: blot.domNode instanceof HTMLParagraphElement && blot.domNode.firstChild instanceof HTMLBRElement,
+              offset,
+            }
+
+            sendMessage({ type: 'get-line', line });
+          }
+        }
+
         function receiveMessage(event) {
           switch(event.data.type) {
             case 'format-bold':
-              const isBold = quill.getFormat().bold;
-              quill.format('bold', !isBold);
+              handleFormatBold();
               break;
             case 'format-italic':
-              const isItalic = quill.getFormat().italic;
-              quill.format('italic', !isItalic);
+              handleFormatItalic();
               break;
             case 'format-strike':
-              const isStriked = quill.getFormat().strike;
-              quill.format('strike', !isStriked);
+              handleFormatStrike();
               break;
             case 'format-code':
-              const isCode = quill.getFormat().code;
-              quill.format('code', !isCode);
+              handleFormatCode();
+              break;
+            case 'remove-link':
+              handleRemoveLink(event.data.index);
               break;
             case 'format-link':
-              quill.deleteText(event.data.range.index, event.data.range.length);
-              quill.insertText(event.data.range.index, event.data.text, 'link', event.data.url);
+              handleFormatLink(event.data.range, event.data.text, event.data.url);
               break;
             case 'format-heading':
-              const header = quill.getFormat().header;
-              const headingSize = event.data.size;
-
-              if (header == headingSize) {
-                quill.format('header', false);
-              } else {
-                quill.format('header', headingSize);
-              }
+              handleFormatHeading(event.data.size);
               break;
             case 'format-list':
-              const isList = quill.getFormat().list;
-              quill.formatLine(event.data.index, 1, 'list', isList ? false : 'bullet');
+              handleFormatList(event.data.index);
               break;
             case 'format-blockquote':
-              const isBlockquote = quill.getFormat().blockquote;
-              quill.formatLine(event.data.index, 1, 'blockquote', !isBlockquote);
+              handleFormatBlockquote(event.data.index);
               break;
             case 'format-code-block':
-              const isCodeBlock = quill.getFormat()['code-block'];
-              quill.formatLine(event.data.index, 1, 'code-block', !isCodeBlock);
+              handleFormatCodeBlock(event.data.index);
               break;
             case 'insert-image':
-
               break;
             case 'insert-video':
-
               break;
             case 'focus':
               quill.focus();
@@ -175,55 +267,26 @@ export function generateHTML(props: GenerateHTMLProps) {
             case 'redo':
               quill.history.redo();
               break;
+            case 'set-selection':
+              quill.setSelection(event.data.range.index, event.data.range.length);
+              break;
             case 'get-bounds':
-              const bounds = quill.getBounds(event.data.range.index, event.data.range.length);
-              sendMessage({ type: 'get-bounds', bounds });
+              getBounds(event.data.range);
               break;
             case 'get-selection':
-              const selection = quill.getSelection();
-              sendMessage({ type: 'get-selection', range: selection });
+              getSelection()
               break;
             case 'get-formats':
-              const formats = quill.getFormat();
-              sendMessage({ type: 'get-formats', formats });
+              getFormats();
               break;
             case 'get-text':
-              const text = quill.getText(event.data.range.index, event.data.range.length);
-              sendMessage({ type: 'get-text', text });
+              getText(event.data.range);
               break;
-            case 'select-word':
-              const [leaf, leafOffset] = quill.getLeaf(event.data.index);
-
-              const firstHalf = leaf.text.substring(0, leafOffset).split(' ');
-              const lastCharactersOfFirstHalf = firstHalf[firstHalf.length - 1];
-              const firstCharacterOffset = leafOffset - lastCharactersOfFirstHalf.length;
-
-              const secondHalf = leaf.text.substring(leafOffset).split(' ');
-              const firstCharactersOfSecondHalf = secondHalf[0];
-              const lastCharacterOffset = leafOffset + firstCharactersOfSecondHalf.length;
-              
-              let word = lastCharactersOfFirstHalf + firstCharactersOfSecondHalf;
-
-              const isEndingWithPunctuation = [',', '.', ';'].includes(word[word.length - 1])
-
-              const index = event.data.index - lastCharactersOfFirstHalf.length;
-              const length = lastCharacterOffset - firstCharacterOffset - (isEndingWithPunctuation ? 1 : 0);
-
-              quill.setSelection({ index, length });
-
-              sendMessage({ type: 'select-word', word: { text: word, range: { index, length } } });
+            case 'get-link-range':
+              getLinkRange(event.data.index);
               break;
             case 'get-line':
-              const [blot, offset] = quill.getLine(event.data.index);
-              if (!blot) {
-                sendMessage({ type: 'get-line', line: null });
-              } else {
-                const line = {
-                  isEmpty: blot.domNode instanceof HTMLParagraphElement && blot.domNode.firstChild instanceof HTMLBRElement,
-                  offset,
-                }
-                sendMessage({ type: 'get-line', line });
-              }
+              getLine(event.data.index);
               break;
             default:
               break;

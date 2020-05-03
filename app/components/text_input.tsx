@@ -64,15 +64,15 @@ export function TextInput(props: TextInputProps) {
       onResponderStart={onPressIn}
       onResponderRelease={onPressOut}
       style={[
-        styles.root,
+        styles.base,
         theme.container.shadow,
         {
-          backgroundColor: theme.container.color.darkTint,
+          backgroundColor: theme.container.color.content,
           borderColor: interaction.interpolate({
             inputRange: [0, 0.5, 1],
             outputRange: [
-              'rgba(0, 0, 0, 0)',
               theme.border.color.default,
+              theme.border.color.dark,
               theme.border.color.focus,
             ],
           }),
@@ -97,6 +97,7 @@ export function TextInput(props: TextInputProps) {
         style={[
           styles.input,
           theme.text.size.md,
+          !!icon && styles.hasIcon,
           // @ts-ignore
           webStyle,
         ]}
@@ -110,7 +111,7 @@ const webStyle = {
 };
 
 const styles = StyleSheet.create({
-  root: {
+  base: {
     flexDirection: 'row',
     borderRadius: tokens.radius,
     alignItems: 'center',
@@ -119,8 +120,12 @@ const styles = StyleSheet.create({
   icon: {
     paddingHorizontal: 8,
   },
+  hasIcon: {
+    paddingLeft: 0,
+  },
   input: {
     height: 38,
+    paddingLeft: 8,
     paddingRight: 8,
     borderRadius: tokens.radius,
     flex: 1,

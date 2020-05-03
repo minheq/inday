@@ -33,7 +33,55 @@ export function Dialog(props: DialogProps) {
   const slide = React.useRef(
     new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
   ).current;
-  const fade = React.useRef(new Animated.Value(isOpen ? 1 : 0)).current;
+  const overlayFade = React.useRef(new Animated.Value(isOpen ? 1 : 0)).current;
+  const fade = React.useRef(
+    new Animated.Value(animationType === 'fade' ? (isOpen ? 1 : 0) : 1),
+  ).current;
+
+  React.useEffect(() => {
+    if (animationType !== 'fade') {
+      return;
+    }
+    if (isOpen) {
+      setInternalIsOpen(isOpen);
+      Animated.parallel([
+        Animated.spring(fade, {
+          toValue: 1,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+        Animated.spring(overlayFade, {
+          toValue: 1,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.spring(overlayFade, {
+          toValue: 0,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+        Animated.spring(fade, {
+          toValue: 0,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setInternalIsOpen(false);
+      });
+    }
+  }, [
+    animationType,
+    overlayFade,
+    fade,
+    isOpen,
+    internalIsOpen,
+    slide,
+    height,
+    onRequestClose,
+  ]);
 
   React.useEffect(() => {
     if (animationType !== 'slide') {
@@ -41,33 +89,37 @@ export function Dialog(props: DialogProps) {
     }
     if (isOpen) {
       setInternalIsOpen(isOpen);
-      Animated.spring(slide, {
-        toValue: OFFSET_TOP,
-        bounciness: 0,
-        useNativeDriver: true,
-      }).start();
-      Animated.spring(fade, {
-        toValue: 1,
-        bounciness: 0,
-        useNativeDriver: true,
-      }).start();
+      Animated.parallel([
+        Animated.spring(slide, {
+          toValue: OFFSET_TOP,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+        Animated.spring(overlayFade, {
+          toValue: 1,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+      ]).start();
     } else {
-      Animated.spring(fade, {
-        toValue: 0,
-        bounciness: 0,
-        useNativeDriver: true,
-      }).start();
-      Animated.spring(slide, {
-        toValue: height,
-        bounciness: 0,
-        useNativeDriver: true,
-      }).start(() => {
+      Animated.parallel([
+        Animated.spring(overlayFade, {
+          toValue: 0,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slide, {
+          toValue: height,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
         setInternalIsOpen(false);
       });
     }
   }, [
     animationType,
-    fade,
+    overlayFade,
     isOpen,
     internalIsOpen,
     slide,
@@ -100,10 +152,10 @@ export function Dialog(props: DialogProps) {
         style={[
           styles.base,
           {
-            backgroundColor: fade.interpolate({
+            backgroundColor: overlayFade.interpolate({
               inputRange: [0, 1],
               outputRange: [
-                theme.button.flat.backgroundDefault,
+                theme.container.color.default,
                 'rgba(0, 0, 0, 0.3)',
               ],
             }),
@@ -112,7 +164,15 @@ export function Dialog(props: DialogProps) {
       >
         <View style={[styles.overlay]} {...eventHandlers} />
         <Animated.View
-          style={[styles.dialog, style, { transform: [{ translateY: slide }] }]}
+          style={[
+            styles.dialog,
+            style,
+            {
+              backgroundColor: theme.container.color.content,
+              opacity: fade,
+              transform: [{ translateY: slide }],
+            },
+          ]}
         >
           {children}
         </Animated.View>
@@ -132,7 +192,6 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
     maxWidth: '90%',
     borderRadius: tokens.radius,
-    backgroundColor: 'rgba(255, 255, 255, 1)',
   },
   overlay: {
     position: 'absolute',

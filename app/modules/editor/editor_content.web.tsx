@@ -8,14 +8,15 @@ import type {
   TextChangeEvent,
   SelectionChangeEvent,
   Range,
-  Bounds,
   MessagePayload,
-  Line,
   ResizeEvent,
   HeadingSize,
-  Formats,
-  Word,
-  SelectWordEvent,
+  GetBoundsEvent,
+  GetLineEvent,
+  GetSelectionEvent,
+  GetTextEvent,
+  GetFormatsEvent,
+  GetLinkRangeEvent,
 } from './types';
 
 export const EditorContent = React.forwardRef(
@@ -28,15 +29,17 @@ export const EditorContent = React.forwardRef(
   ) => {
     const {
       initialContent,
+      onBlur = () => {},
+      onFocus = () => {},
       onTextChange = () => {},
       onSelectionChange = () => {},
       onResize = () => {},
     } = props;
-    const editorRef = React.useRef<HTMLIFrameElement | null>(null);
+    const editorContentRef = React.useRef<HTMLIFrameElement | null>(null);
 
     const sendMessage = React.useCallback((message: MessagePayload) => {
-      if (editorRef.current) {
-        editorRef.current?.contentWindow?.postMessage(message, '*');
+      if (editorContentRef.current) {
+        editorContentRef.current?.contentWindow?.postMessage(message, '*');
       }
     }, []);
 
@@ -77,6 +80,9 @@ export const EditorContent = React.forwardRef(
         formatStrike: () => {
           sendMessage({ type: 'format-strike' });
         },
+        removeLink: (index: number) => {
+          sendMessage({ type: 'remove-link', index });
+        },
         formatLink: (range: Range, text: string, url: string) => {
           sendMessage({ type: 'format-link', range, text, url });
         },
@@ -102,102 +108,66 @@ export const EditorContent = React.forwardRef(
           sendMessage({ type: 'insert-video', index, url });
         },
         focus: () => {
+          editorContentRef.current?.focus();
           sendMessage({ type: 'focus' });
         },
-        selectWord: async (index?: number) => {
-          const data = await sendAsyncMessage<SelectWordEvent>({
-            type: 'select-word',
+        setSelection: async (range: Range) => {
+          sendMessage({ type: 'set-selection', range });
+        },
+        getLinkRange: async (index: number) => {
+          const data = await sendAsyncMessage<GetLinkRangeEvent>({
+            type: 'get-link-range',
             index,
           });
 
-          return data.word;
+          return data.range;
         },
         getBounds: async (range: Range) => {
-          return new Promise((resolve) => {
-            sendMessage({ type: 'get-bounds', range });
-
-            window.addEventListener('message', handleTemporaryMessage);
-
-            function handleTemporaryMessage(event: MessageEvent) {
-              if (event.data.type === 'get-bounds') {
-                resolve(event.data.bounds as Bounds);
-                window.removeEventListener('message', handleTemporaryMessage);
-              }
-            }
+          const data = await sendAsyncMessage<GetBoundsEvent>({
+            type: 'get-bounds',
+            range,
           });
+
+          return data.bounds;
         },
         getLine: async (index: number) => {
-          return new Promise((resolve) => {
-            sendMessage({ type: 'get-line', index });
-
-            window.addEventListener('message', handleTemporaryMessage);
-
-            function handleTemporaryMessage(event: MessageEvent) {
-              if (event.data.type === 'get-line') {
-                resolve(event.data.line as Line | null);
-                window.removeEventListener('message', handleTemporaryMessage);
-              }
-            }
-
-            return;
+          const data = await sendAsyncMessage<GetLineEvent>({
+            type: 'get-line',
+            index,
           });
+
+          return data.line;
         },
         getSelection: async () => {
-          return new Promise((resolve) => {
-            sendMessage({ type: 'get-selection' });
-
-            window.addEventListener('message', handleTemporaryMessage);
-
-            function handleTemporaryMessage(event: MessageEvent) {
-              if (event.data.type === 'get-selection') {
-                resolve(event.data.range as Range);
-                window.removeEventListener('message', handleTemporaryMessage);
-              }
-            }
-
-            return;
+          const data = await sendAsyncMessage<GetSelectionEvent>({
+            type: 'get-selection',
           });
+
+          return data.range;
         },
         getText: async (range: Range) => {
-          return new Promise((resolve) => {
-            sendMessage({ type: 'get-text', range });
-
-            window.addEventListener('message', handleTemporaryMessage);
-
-            function handleTemporaryMessage(event: MessageEvent) {
-              if (event.data.type === 'get-text') {
-                resolve(event.data.text as string);
-                window.removeEventListener('message', handleTemporaryMessage);
-              }
-            }
-
-            return;
+          const data = await sendAsyncMessage<GetTextEvent>({
+            type: 'get-text',
+            range,
           });
+
+          return data.text;
         },
         getFormats: async () => {
-          return new Promise((resolve) => {
-            sendMessage({ type: 'get-formats' });
-
-            window.addEventListener('message', handleTemporaryMessage);
-
-            function handleTemporaryMessage(event: MessageEvent) {
-              if (event.data.type === 'get-formats') {
-                resolve(event.data.formats as Formats);
-                window.removeEventListener('message', handleTemporaryMessage);
-              }
-            }
-
-            return;
+          const data = await sendAsyncMessage<GetFormatsEvent>({
+            type: 'get-formats',
           });
+
+          return data.formats;
         },
       }),
-      [sendMessage],
+      [sendMessage, sendAsyncMessage],
     );
 
     const handleResize = React.useCallback(
       (event: ResizeEvent) => {
-        if (editorRef.current) {
-          editorRef.current.style.height = event.size.height + 'px';
+        if (editorContentRef.current) {
+          editorContentRef.current.style.height = event.size.height + 'px';
           onResize(event);
         }
       },
@@ -227,9 +197,11 @@ export const EditorContent = React.forwardRef(
 
     return (
       <iframe
-        ref={editorRef}
+        ref={editorContentRef}
         srcDoc={generateHTML({ initialContent })}
         style={styles.iframe}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
     );
   },

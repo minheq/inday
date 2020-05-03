@@ -42,7 +42,7 @@ export function TimelineScreen() {
         </Content>
       </ScrollView>
       <Dialog
-        animationType="slide"
+        animationType="fade"
         isOpen={isEditingCard}
         onRequestClose={handleCloseEditingCard}
         style={{ width: 800 }}
