@@ -46,6 +46,14 @@ export function generateHTML(props: GenerateHTMLProps) {
           overflow-y: initial;
         }
 
+        blockquote {
+          padding-left: 1em !important;
+          color: rgba(134, 134, 139, 1);
+          border-left: 2px solid rgba(134, 134, 139, 1) !important;
+          margin-top: 1em !important;
+          margin-bottom: 1em !important;
+        }
+
         a {
           color: rgba(34, 34, 34, 1);
         }
@@ -143,6 +151,21 @@ export function generateHTML(props: GenerateHTMLProps) {
               } else {
                 quill.format('header', headingSize);
               }
+              break;
+            case 'insert-list':
+              quill.formatLine(event.data.index, 1, 'list', 'bullet');
+              break;
+            case 'insert-blockquote':
+              quill.formatLine(event.data.index, 1, 'blockquote', true);
+              break;
+            case 'insert-code-block':
+              quill.formatLine(event.data.index, 1, 'code-block', true);
+              break;
+            case 'insert-image':
+
+              break;
+            case 'insert-video':
+
               break;
             case 'focus':
               quill.focus();

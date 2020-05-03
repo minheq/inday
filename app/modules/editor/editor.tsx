@@ -39,6 +39,14 @@ interface HoverableState {
   opacity: Animated.Value;
 }
 
+interface SidebarState {
+  index: number;
+  isVisible: boolean;
+  isControlsVisible: boolean;
+  position: Animated.Value;
+  opacity: Animated.Value;
+}
+
 export function Editor(props: EditorProps) {
   const {
     initialContent = new Delta()
@@ -65,32 +73,36 @@ export function Editor(props: EditorProps) {
   const theme = useTheme();
   const editorContentRef = React.useRef<EditorContentInstance | null>(null);
   const scrollViewRef = React.useRef<ScrollView | null>(null);
-  const sidebar = React.useRef({
-    position: new Animated.Value(0),
-    opacity: new Animated.Value(0),
-  }).current;
   const [hoverable, setHoverable] = React.useState<HoverableState>({
     isVisible: false,
     type: 'toolbar',
     position: new Animated.ValueXY(),
     opacity: new Animated.Value(0),
   });
-  const [isAddBlockVisible, setIsAddBlockVisible] = React.useState(false);
+  const [sidebar, setSidebar] = React.useState<SidebarState>({
+    index: 0,
+    isVisible: false,
+    isControlsVisible: false,
+    position: new Animated.Value(0),
+    opacity: new Animated.Value(0),
+  });
   const [activeFormats, setActiveFormats] = React.useState<Formats>({});
   const [linkPreviewURL, setLinkPreviewURL] = React.useState('');
-  const [
-    isSidebarControlsVisible,
-    setIsSidebarControlsVisible,
-  ] = React.useState(false);
   const { scrollViewState, handlers: scrollHandlers } = useScrollViewState();
 
   const handleHideSidebarControls = React.useCallback(() => {
-    setIsSidebarControlsVisible(false);
-  }, [setIsSidebarControlsVisible]);
+    setSidebar((prev) => ({
+      ...prev,
+      isControlsVisible: false,
+    }));
+  }, []);
 
   const handleShowSidebarControls = React.useCallback(() => {
-    setIsSidebarControlsVisible(true);
-  }, [setIsSidebarControlsVisible]);
+    setSidebar((prev) => ({
+      ...prev,
+      isControlsVisible: true,
+    }));
+  }, []);
 
   const handleShowAddBlock = React.useCallback(
     async (index: number) => {
@@ -102,7 +114,7 @@ export function Editor(props: EditorProps) {
 
         const value = rangeBounds.top - 12;
 
-        if (isAddBlockVisible) {
+        if (sidebar.isVisible) {
           Animated.parallel([
             Animated.spring(sidebar.position, {
               toValue: value,
@@ -118,7 +130,11 @@ export function Editor(props: EditorProps) {
           ]).start();
         } else {
           sidebar.position.setValue(value);
-          setIsAddBlockVisible(true);
+          setSidebar((prev) => ({
+            ...prev,
+            index,
+            isVisible: true,
+          }));
           Animated.timing(sidebar.opacity, {
             toValue: 1,
             useNativeDriver: true,
@@ -127,7 +143,7 @@ export function Editor(props: EditorProps) {
         }
       }
     },
-    [sidebar, isAddBlockVisible],
+    [sidebar],
   );
 
   const handleHideAddBlock = React.useCallback(() => {
@@ -136,10 +152,14 @@ export function Editor(props: EditorProps) {
       useNativeDriver: true,
       duration: 100,
     }).start(() => {
-      handleHideSidebarControls();
-      setIsAddBlockVisible(false);
+      setSidebar((prev) => ({
+        ...prev,
+        index: 0,
+        isVisible: false,
+        isControlsVisible: false,
+      }));
     });
-  }, [sidebar, handleHideSidebarControls]);
+  }, [sidebar]);
 
   const getHoverablePosition = React.useCallback(async (range: Range) => {
     if (editorContentRef.current) {
@@ -260,7 +280,7 @@ export function Editor(props: EditorProps) {
 
         if (line?.isEmpty) {
           handleShowAddBlock(range.index);
-        } else if (isAddBlockVisible) {
+        } else if (sidebar.isVisible) {
           handleHideAddBlock();
         }
       }
@@ -270,7 +290,7 @@ export function Editor(props: EditorProps) {
       handleHideAddBlock,
       handleHideHoverable,
       handleUpdateHoverablePositionIfNeeded,
-      isAddBlockVisible,
+      sidebar,
       scrollViewState,
     ],
   );
@@ -350,6 +370,32 @@ export function Editor(props: EditorProps) {
     editorContentRef.current?.code();
   }, []);
 
+  const handleInsertList = React.useCallback(() => {
+    editorContentRef.current?.insertList(sidebar.index);
+  }, [sidebar]);
+
+  const handleInsertBlockquote = React.useCallback(() => {
+    editorContentRef.current?.insertBlockquote(sidebar.index);
+  }, [sidebar]);
+
+  const handleInsertCodeBlock = React.useCallback(() => {
+    editorContentRef.current?.insertCodeBlock(sidebar.index);
+  }, [sidebar]);
+
+  const handleInsertImage = React.useCallback(
+    (url: string) => {
+      editorContentRef.current?.insertImage(sidebar.index, url);
+    },
+    [sidebar],
+  );
+
+  const handleInsertVideo = React.useCallback(
+    (url: string) => {
+      editorContentRef.current?.insertVideo(sidebar.index, url);
+    },
+    [sidebar],
+  );
+
   return (
     <ScrollView ref={scrollViewRef} scrollEventThrottle={0} {...scrollHandlers}>
       <Container expanded paddingHorizontal={48}>
@@ -384,7 +430,7 @@ export function Editor(props: EditorProps) {
             {hoverable.type === 'link' && <LinkPreview url={linkPreviewURL} />}
           </Animated.View>
         )}
-        {isAddBlockVisible && (
+        {sidebar.isVisible && (
           <Animated.View
             style={[
               styles.addBlockWrapper,
@@ -395,9 +441,14 @@ export function Editor(props: EditorProps) {
             ]}
           >
             <AddBlock
-              onOpen={handleShowSidebarControls}
-              onClose={handleHideSidebarControls}
-              isSidebarControlsVisible={isSidebarControlsVisible}
+              onSidebarControls={handleShowSidebarControls}
+              onCloseSidebarControls={handleHideSidebarControls}
+              isSidebarControlsVisible={sidebar.isControlsVisible}
+              onInsertList={handleInsertList}
+              onInsertBlockquote={handleInsertBlockquote}
+              onInsertCodeBlock={handleInsertCodeBlock}
+              onInsertImage={handleInsertImage}
+              onInsertVideo={handleInsertVideo}
             />
           </Animated.View>
         )}
@@ -420,20 +471,42 @@ interface SidebarControl {
 
 interface AddBlockProps {
   isSidebarControlsVisible: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+  onSidebarControls: () => void;
+  onCloseSidebarControls: () => void;
+  onInsertList: () => void;
+  onInsertBlockquote: () => void;
+  onInsertCodeBlock: () => void;
+  onInsertImage: (url: string) => void;
+  onInsertVideo: (url: string) => void;
 }
 
 function AddBlock(props: AddBlockProps) {
-  const { isSidebarControlsVisible, onOpen, onClose } = props;
+  const {
+    isSidebarControlsVisible,
+    onSidebarControls,
+    onCloseSidebarControls,
+    onInsertList,
+    onInsertBlockquote,
+    onInsertCodeBlock,
+    onInsertImage,
+    onInsertVideo,
+  } = props;
   const theme = useTheme();
 
   const controls = React.useRef<SidebarControl[]>([
-    { icon: 'list' as const, onPress: () => {}, x: new Animated.Value(0) },
+    { icon: 'list' as const, onPress: onInsertList, x: new Animated.Value(0) },
     { icon: 'image' as const, onPress: () => {}, x: new Animated.Value(0) },
     { icon: 'video' as const, onPress: () => {}, x: new Animated.Value(0) },
-    { icon: 'quote' as const, onPress: () => {}, x: new Animated.Value(0) },
-    { icon: 'code' as const, onPress: () => {}, x: new Animated.Value(0) },
+    {
+      icon: 'quote' as const,
+      onPress: onInsertBlockquote,
+      x: new Animated.Value(0),
+    },
+    {
+      icon: 'code' as const,
+      onPress: onInsertCodeBlock,
+      x: new Animated.Value(0),
+    },
   ]).current;
 
   React.useEffect(() => {
@@ -466,11 +539,11 @@ function AddBlock(props: AddBlockProps) {
 
   const handleToggleSidebar = React.useCallback(() => {
     if (isSidebarControlsVisible) {
-      onClose();
+      onCloseSidebarControls();
     } else {
-      onOpen();
+      onSidebarControls();
     }
-  }, [onClose, onOpen, isSidebarControlsVisible]);
+  }, [onCloseSidebarControls, onSidebarControls, isSidebarControlsVisible]);
 
   return (
     <Row>

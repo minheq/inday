@@ -28,6 +28,11 @@ export interface EditorContentInstance {
   heading: (size: HeadingSize) => void;
   code: () => void;
   focus: () => void;
+  insertList: (index: number) => void;
+  insertBlockquote: (index: number) => void;
+  insertCodeBlock: (index: number) => void;
+  insertImage: (index: number, url: string) => void;
+  insertVideo: (index: number, url: string) => void;
   getBounds: (range: Range) => Promise<Bounds>;
   getLine: (index: number) => Promise<Line | null>;
   getSelection: () => Promise<Range>;
@@ -51,6 +56,11 @@ export const EditorContent = React.forwardRef(
       link: () => {},
       heading: () => {},
       code: () => {},
+      insertList: () => {},
+      insertBlockquote: () => {},
+      insertCodeBlock: () => {},
+      insertImage: () => {},
+      insertVideo: () => {},
       getBounds: async () => ({
         top: 0,
         left: 0,

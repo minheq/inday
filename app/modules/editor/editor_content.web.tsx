@@ -62,6 +62,21 @@ export const EditorContent = React.forwardRef(
         code: () => {
           sendMessage({ type: 'inline-code' });
         },
+        insertList: (index: number) => {
+          sendMessage({ type: 'insert-list', index });
+        },
+        insertBlockquote: (index: number) => {
+          sendMessage({ type: 'insert-blockquote', index });
+        },
+        insertCodeBlock: (index: number) => {
+          sendMessage({ type: 'insert-code-block', index });
+        },
+        insertImage: (index: number, url: string) => {
+          sendMessage({ type: 'insert-image', index, url });
+        },
+        insertVideo: (index: number, url: string) => {
+          sendMessage({ type: 'insert-video', index, url });
+        },
         getBounds: async (range: Range) => {
           return new Promise((resolve) => {
             sendMessage({ type: 'get-bounds', range });

@@ -131,6 +131,33 @@ export interface FormatLinkMessage {
   url: string;
 }
 
+export interface InsertListMessage {
+  type: 'insert-list';
+  index: number;
+}
+
+export interface InsertBlockquoteMessage {
+  type: 'insert-blockquote';
+  index: number;
+}
+
+export interface InsertCodeBlockMessage {
+  type: 'insert-code-block';
+  index: number;
+}
+
+export interface InsertImageMessage {
+  type: 'insert-image';
+  index: number;
+  url: string;
+}
+
+export interface InsertVideoMessage {
+  type: 'insert-video';
+  index: number;
+  url: string;
+}
+
 /** Messages sent to iframe */
 export type MessagePayload =
   | GetFormatsMessage
@@ -143,4 +170,9 @@ export type MessagePayload =
   | GetBoundsMessage
   | GetLineMessage
   | GetSelectionMessage
+  | InsertListMessage
+  | InsertBlockquoteMessage
+  | InsertCodeBlockMessage
+  | InsertImageMessage
+  | InsertVideoMessage
   | FocusMessage;
