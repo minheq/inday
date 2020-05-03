@@ -8,16 +8,16 @@ import {
   Container,
   Row,
   Button,
-  Spacing,
   CloseButton,
   Text,
 } from '../../components';
-import { useTheme, tokens } from '../../theme';
+import { useTheme, tokens, TextSize } from '../../theme';
 import type {
   TextChangeEvent,
   SelectionChangeEvent,
   Range,
   Formats,
+  HeadingSize,
 } from './types';
 import { between } from '../../utils/numbers';
 import { useScrollViewState } from '../../utils/scrollview';
@@ -30,20 +30,12 @@ const TOOLBAR_WIDTH = 280;
 const TOOLBAR_HEIGHT = 40;
 const SIDEBAR_CONTROLS_HEIGHT = 40;
 
-type HoverableType = 'toolbar' | 'link';
+type HoverableType = 'link';
 
 interface HoverableState {
   isVisible: boolean;
   type: HoverableType;
   position: Animated.ValueXY;
-  opacity: Animated.Value;
-}
-
-interface SidebarState {
-  index: number;
-  isVisible: boolean;
-  isControlsVisible: boolean;
-  position: Animated.Value;
   opacity: Animated.Value;
 }
 
@@ -71,95 +63,17 @@ export function Editor(props: EditorProps) {
       .insert('\n'),
   } = props;
   const theme = useTheme();
+  const { scrollViewState, handlers: scrollHandlers } = useScrollViewState();
   const editorContentRef = React.useRef<EditorContentInstance | null>(null);
   const scrollViewRef = React.useRef<ScrollView | null>(null);
   const [hoverable, setHoverable] = React.useState<HoverableState>({
     isVisible: false,
-    type: 'toolbar',
+    type: 'link',
     position: new Animated.ValueXY(),
-    opacity: new Animated.Value(0),
-  });
-  const [sidebar, setSidebar] = React.useState<SidebarState>({
-    index: 0,
-    isVisible: false,
-    isControlsVisible: false,
-    position: new Animated.Value(0),
     opacity: new Animated.Value(0),
   });
   const [activeFormats, setActiveFormats] = React.useState<Formats>({});
   const [linkPreviewURL, setLinkPreviewURL] = React.useState('');
-  const { scrollViewState, handlers: scrollHandlers } = useScrollViewState();
-
-  const handleHideSidebarControls = React.useCallback(() => {
-    setSidebar((prev) => ({
-      ...prev,
-      isControlsVisible: false,
-    }));
-  }, []);
-
-  const handleShowSidebarControls = React.useCallback(() => {
-    setSidebar((prev) => ({
-      ...prev,
-      isControlsVisible: true,
-    }));
-  }, []);
-
-  const handleShowAddBlock = React.useCallback(
-    async (index: number) => {
-      if (editorContentRef.current) {
-        const rangeBounds = await editorContentRef.current.getBounds({
-          index,
-          length: 0,
-        });
-
-        const value = rangeBounds.top - 12;
-
-        if (sidebar.isVisible) {
-          Animated.parallel([
-            Animated.spring(sidebar.position, {
-              toValue: value,
-              useNativeDriver: true,
-              bounciness: 0,
-              speed: 300,
-            }),
-            Animated.timing(sidebar.opacity, {
-              toValue: 1,
-              useNativeDriver: true,
-              duration: 100,
-            }),
-          ]).start();
-        } else {
-          sidebar.position.setValue(value);
-          setSidebar((prev) => ({
-            ...prev,
-            index,
-            isVisible: true,
-          }));
-          Animated.timing(sidebar.opacity, {
-            toValue: 1,
-            useNativeDriver: true,
-            duration: 100,
-          }).start();
-        }
-      }
-    },
-    [sidebar],
-  );
-
-  const handleHideAddBlock = React.useCallback(() => {
-    Animated.timing(sidebar.opacity, {
-      toValue: 0,
-      useNativeDriver: true,
-      duration: 100,
-    }).start(() => {
-      setSidebar((prev) => ({
-        ...prev,
-        index: 0,
-        isVisible: false,
-        isControlsVisible: false,
-      }));
-    });
-  }, [sidebar]);
 
   const getHoverablePosition = React.useCallback(async (range: Range) => {
     if (editorContentRef.current) {
@@ -261,9 +175,7 @@ export function Editor(props: EditorProps) {
   const handleTextChange = React.useCallback(
     async (_event: TextChangeEvent) => {
       if (editorContentRef.current) {
-        // These take around 3-6ms
         const range = await editorContentRef.current.getSelection();
-        const line = await editorContentRef.current.getLine(range.index);
         const rangeBounds = await editorContentRef.current.getBounds(range);
 
         if (rangeBounds.bottom > scrollViewState.contentHeight) {
@@ -277,20 +189,11 @@ export function Editor(props: EditorProps) {
           setActiveFormats(formats);
           handleUpdateHoverablePositionIfNeeded(range);
         }
-
-        if (line?.isEmpty) {
-          handleShowAddBlock(range.index);
-        } else if (sidebar.isVisible) {
-          handleHideAddBlock();
-        }
       }
     },
     [
-      handleShowAddBlock,
-      handleHideAddBlock,
       handleHideHoverable,
       handleUpdateHoverablePositionIfNeeded,
-      sidebar,
       scrollViewState,
     ],
   );
@@ -299,102 +202,98 @@ export function Editor(props: EditorProps) {
     async (event: SelectionChangeEvent) => {
       const { range } = event;
 
-      if (range === null) {
-        handleHideAddBlock();
-        return;
-      }
-
       if (editorContentRef.current) {
+        editorContentRef.current.selection = range;
+
+        if (range === null) {
+          return;
+        }
         if (range.length === 0) {
           handleHideHoverable();
-          handleHideSidebarControls();
-          const line = await editorContentRef.current.getLine(range.index);
           const formats = await editorContentRef.current.getFormats();
 
           if (formats.link) {
             setLinkPreviewURL(formats.link);
             handleShowHoverable(range, 'link');
           }
-
-          if (line?.isEmpty) {
-            handleShowAddBlock(range.index);
-          } else {
-            handleHideAddBlock();
-          }
         } else {
-          handleShowHoverable(range, 'toolbar');
           const formats = await editorContentRef.current.getFormats();
           setActiveFormats(formats);
         }
       }
     },
-    [
-      editorContentRef,
-      handleHideSidebarControls,
-      handleHideAddBlock,
-      handleHideHoverable,
-      handleShowHoverable,
-      handleShowAddBlock,
-    ],
+    [editorContentRef, handleHideHoverable, handleShowHoverable],
   );
 
-  const handleBold = React.useCallback(() => {
-    editorContentRef.current?.bold();
+  const handleFormatBold = React.useCallback(() => {
+    editorContentRef.current?.formatBold();
   }, []);
 
-  const handleItalic = React.useCallback(() => {
-    editorContentRef.current?.italic();
+  const handleFormatItalic = React.useCallback(() => {
+    editorContentRef.current?.formatItalic();
   }, []);
 
-  const handleStrikethrough = React.useCallback(() => {
-    editorContentRef.current?.strikethrough();
+  const handleFormatStrike = React.useCallback(() => {
+    editorContentRef.current?.formatStrike();
   }, []);
 
-  const handleLink = React.useCallback(
+  const handleFormatLink = React.useCallback(
     (url: string) => {
-      editorContentRef.current?.link(url);
+      editorContentRef.current?.formatLink(url);
       handleHideHoverable();
     },
     [handleHideHoverable],
   );
 
-  const handleHeadingMedium = React.useCallback(() => {
-    editorContentRef.current?.heading(2);
+  const handleFormatHeading = React.useCallback((size: HeadingSize) => {
+    editorContentRef.current?.formatHeading(size);
   }, []);
 
-  const handleHeadingLarge = React.useCallback(() => {
-    editorContentRef.current?.heading(1);
+  const handleFormatCode = React.useCallback(() => {
+    editorContentRef.current?.formatCode();
   }, []);
 
-  const handleCode = React.useCallback(() => {
-    editorContentRef.current?.code();
+  const handleFormatList = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.formatList(
+        editorContentRef.current.selection.index,
+      );
+    }
   }, []);
 
-  const handleInsertList = React.useCallback(() => {
-    editorContentRef.current?.insertList(sidebar.index);
-  }, [sidebar]);
+  const handleFormatBlockquote = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.formatBlockquote(
+        editorContentRef.current.selection.index,
+      );
+    }
+  }, []);
 
-  const handleInsertBlockquote = React.useCallback(() => {
-    editorContentRef.current?.insertBlockquote(sidebar.index);
-  }, [sidebar]);
+  const handleFormatCodeBlock = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.formatCodeBlock(
+        editorContentRef.current.selection.index,
+      );
+    }
+  }, []);
 
-  const handleInsertCodeBlock = React.useCallback(() => {
-    editorContentRef.current?.insertCodeBlock(sidebar.index);
-  }, [sidebar]);
+  const handleInsertImage = React.useCallback((url: string) => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.insertImage(
+        editorContentRef.current.selection.index,
+        url,
+      );
+    }
+  }, []);
 
-  const handleInsertImage = React.useCallback(
-    (url: string) => {
-      editorContentRef.current?.insertImage(sidebar.index, url);
-    },
-    [sidebar],
-  );
-
-  const handleInsertVideo = React.useCallback(
-    (url: string) => {
-      editorContentRef.current?.insertVideo(sidebar.index, url);
-    },
-    [sidebar],
-  );
+  const handleInsertVideo = React.useCallback((url: string) => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.insertVideo(
+        editorContentRef.current.selection.index,
+        url,
+      );
+    }
+  }, []);
 
   return (
     <ScrollView ref={scrollViewRef} scrollEventThrottle={0} {...scrollHandlers}>
@@ -415,43 +314,23 @@ export function Editor(props: EditorProps) {
               },
             ]}
           >
-            {hoverable.type === 'toolbar' && (
-              <Toolbar
-                activeFormats={activeFormats}
-                onBold={handleBold}
-                onItalic={handleItalic}
-                onStrikethrough={handleStrikethrough}
-                onLink={handleLink}
-                onHeadingMedium={handleHeadingMedium}
-                onHeadingLarge={handleHeadingLarge}
-                onCode={handleCode}
-              />
-            )}
             {hoverable.type === 'link' && <LinkPreview url={linkPreviewURL} />}
           </Animated.View>
         )}
-        {sidebar.isVisible && (
-          <Animated.View
-            style={[
-              styles.addBlockWrapper,
-              {
-                transform: [{ translateY: sidebar.position }],
-                opacity: sidebar.opacity,
-              },
-            ]}
-          >
-            <AddBlock
-              onSidebarControls={handleShowSidebarControls}
-              onCloseSidebarControls={handleHideSidebarControls}
-              isSidebarControlsVisible={sidebar.isControlsVisible}
-              onInsertList={handleInsertList}
-              onInsertBlockquote={handleInsertBlockquote}
-              onInsertCodeBlock={handleInsertCodeBlock}
-              onInsertImage={handleInsertImage}
-              onInsertVideo={handleInsertVideo}
-            />
-          </Animated.View>
-        )}
+        <Toolbar
+          activeFormats={activeFormats}
+          onFormatBold={handleFormatBold}
+          onFormatItalic={handleFormatItalic}
+          onFormatStrike={handleFormatStrike}
+          onFormatLink={handleFormatLink}
+          onFormatHeading={handleFormatHeading}
+          onFormatCode={handleFormatCode}
+          onFormatList={handleFormatList}
+          onFormatBlockquote={handleFormatBlockquote}
+          onFormatCodeBlock={handleFormatCodeBlock}
+          onInsertImage={handleInsertImage}
+          onInsertVideo={handleInsertVideo}
+        />
         <EditorContent
           ref={editorContentRef}
           onTextChange={handleTextChange}
@@ -463,152 +342,46 @@ export function Editor(props: EditorProps) {
   );
 }
 
-interface SidebarControl {
-  icon: IconName;
-  onPress: () => void;
-  x: Animated.Value;
-}
-
-interface AddBlockProps {
-  isSidebarControlsVisible: boolean;
-  onSidebarControls: () => void;
-  onCloseSidebarControls: () => void;
-  onInsertList: () => void;
-  onInsertBlockquote: () => void;
-  onInsertCodeBlock: () => void;
-  onInsertImage: (url: string) => void;
-  onInsertVideo: (url: string) => void;
-}
-
-function AddBlock(props: AddBlockProps) {
-  const {
-    isSidebarControlsVisible,
-    onSidebarControls,
-    onCloseSidebarControls,
-    onInsertList,
-    onInsertBlockquote,
-    onInsertCodeBlock,
-    onInsertImage,
-    onInsertVideo,
-  } = props;
-  const theme = useTheme();
-
-  const controls = React.useRef<SidebarControl[]>([
-    { icon: 'list' as const, onPress: onInsertList, x: new Animated.Value(0) },
-    { icon: 'image' as const, onPress: () => {}, x: new Animated.Value(0) },
-    { icon: 'video' as const, onPress: () => {}, x: new Animated.Value(0) },
-    {
-      icon: 'quote' as const,
-      onPress: onInsertBlockquote,
-      x: new Animated.Value(0),
-    },
-    {
-      icon: 'code' as const,
-      onPress: onInsertCodeBlock,
-      x: new Animated.Value(0),
-    },
-  ]).current;
-
-  React.useEffect(() => {
-    if (isSidebarControlsVisible) {
-      Animated.stagger(
-        30,
-        controls.map((c, index) =>
-          Animated.spring(c.x, {
-            toValue: (index + 1) * 40,
-            bounciness: 0,
-            speed: 100,
-            useNativeDriver: true,
-          }),
-        ),
-      ).start();
-    } else {
-      Animated.stagger(
-        30,
-        controls.map((c) =>
-          Animated.spring(c.x, {
-            toValue: 0,
-            bounciness: 0,
-            speed: 100,
-            useNativeDriver: true,
-          }),
-        ),
-      ).start();
-    }
-  }, [controls, isSidebarControlsVisible]);
-
-  const handleToggleSidebar = React.useCallback(() => {
-    if (isSidebarControlsVisible) {
-      onCloseSidebarControls();
-    } else {
-      onSidebarControls();
-    }
-  }, [onCloseSidebarControls, onSidebarControls, isSidebarControlsVisible]);
-
-  return (
-    <Row>
-      <Button
-        onPress={handleToggleSidebar}
-        style={[styles.addBlock, { borderColor: theme.border.color.default }]}
-      >
-        <Icon name="plus" color="muted" />
-      </Button>
-      <Spacing width={8} />
-      <Row>
-        {controls.map((c) => {
-          const { onPress, icon, x } = c;
-
-          return (
-            <Animated.View
-              key={icon}
-              style={[
-                styles.sidebarControlButton,
-                { transform: [{ translateX: x }] },
-              ]}
-            >
-              <Button style={styles.toolbarButton} onPress={onPress}>
-                <Icon name={icon} />
-              </Button>
-            </Animated.View>
-          );
-        })}
-      </Row>
-    </Row>
-  );
-}
-
 interface ToolbarProps {
   activeFormats: Formats;
-  onBold: () => void;
-  onItalic: () => void;
-  onStrikethrough: () => void;
-  onLink: (url: string) => void;
-  onHeadingMedium: () => void;
-  onHeadingLarge: () => void;
-  onCode: () => void;
+  onFormatBold: () => void;
+  onFormatItalic: () => void;
+  onFormatStrike: () => void;
+  onFormatLink: (url: string) => void;
+  onFormatHeading: (size: HeadingSize) => void;
+  onFormatCode: () => void;
+  onFormatList: () => void;
+  onFormatBlockquote: () => void;
+  onFormatCodeBlock: () => void;
+  onInsertImage: (url: string) => void;
+  onInsertVideo: (url: string) => void;
 }
 
 function Toolbar(props: ToolbarProps) {
   const {
     activeFormats,
-    onBold,
-    onItalic,
-    onStrikethrough,
-    onLink,
-    onHeadingMedium,
-    onHeadingLarge,
-    onCode,
+    onFormatBold,
+    onFormatItalic,
+    onFormatStrike,
+    onFormatLink,
+    onFormatHeading,
+    onFormatCode,
+    onFormatList,
+    onFormatBlockquote,
+    onFormatCodeBlock,
+    onInsertImage,
+    onInsertVideo,
   } = props;
   const [isAddingLink, setIsAddingLink] = React.useState(false);
   const [link, setLink] = React.useState('');
 
   const handlePressLink = React.useCallback(() => {
     if (activeFormats.link) {
-      onLink('');
+      onFormatLink('');
     } else {
       setIsAddingLink(true);
     }
-  }, [onLink, activeFormats.link]);
+  }, [onFormatLink, activeFormats.link]);
 
   const handleCloseLink = React.useCallback(() => {
     setIsAddingLink(false);
@@ -618,9 +391,17 @@ function Toolbar(props: ToolbarProps) {
     setLink(url);
   }, []);
 
+  const handleFormatHeadingLarge = React.useCallback(() => {
+    onFormatHeading(1);
+  }, [onFormatHeading]);
+
+  const handleFormatHeadingMedium = React.useCallback(() => {
+    onFormatHeading(2);
+  }, [onFormatHeading]);
+
   const handleSubmitLink = React.useCallback(() => {
-    onLink(link);
-  }, [link, onLink]);
+    onFormatLink(link);
+  }, [link, onFormatLink]);
 
   return (
     <Row>
@@ -646,53 +427,79 @@ function Toolbar(props: ToolbarProps) {
         </>
       ) : (
         <>
-          <Button style={styles.toolbarButton} onPress={onBold}>
-            <Icon
-              name="bold"
-              color={activeFormats.bold ? 'primary' : 'default'}
-            />
-          </Button>
-          <Button style={styles.toolbarButton} onPress={onItalic}>
-            <Icon
-              name="italic"
-              color={activeFormats.italic ? 'primary' : 'default'}
-            />
-          </Button>
-          <Button style={styles.toolbarButton} onPress={onStrikethrough}>
-            <Icon
-              name="strikethrough"
-              size="lg"
-              color={activeFormats.strike ? 'primary' : 'default'}
-            />
-          </Button>
-          <Button style={styles.toolbarButton} onPress={handlePressLink}>
-            <Icon
-              name="link"
-              color={activeFormats.link ? 'primary' : 'default'}
-            />
-          </Button>
-          <Button style={styles.toolbarButton} onPress={onHeadingMedium}>
-            <Icon
-              name="font"
-              size="sm"
-              color={activeFormats.header === 2 ? 'primary' : 'default'}
-            />
-          </Button>
-          <Button style={styles.toolbarButton} onPress={onHeadingLarge}>
-            <Icon
-              name="font"
-              color={activeFormats.header === 1 ? 'primary' : 'default'}
-            />
-          </Button>
-          <Button style={styles.toolbarButton} onPress={onCode}>
-            <Icon
-              name="code"
-              color={activeFormats.code ? 'primary' : 'default'}
-            />
-          </Button>
+          <ToolbarButton
+            isActive={activeFormats.bold}
+            icon="bold"
+            onPress={onFormatBold}
+          />
+          <ToolbarButton
+            isActive={activeFormats.italic}
+            icon="italic"
+            onPress={onFormatItalic}
+          />
+          <ToolbarButton
+            isActive={activeFormats.strike}
+            icon="strikethrough"
+            size="lg"
+            onPress={onFormatStrike}
+          />
+          <ToolbarButton
+            isActive={!!activeFormats.link}
+            icon="link"
+            size="lg"
+            onPress={handlePressLink}
+          />
+          <ToolbarButton
+            isActive={activeFormats.header === 2}
+            icon="font"
+            size="sm"
+            onPress={handleFormatHeadingMedium}
+          />
+          <ToolbarButton
+            isActive={activeFormats.header === 1}
+            icon="font"
+            onPress={handleFormatHeadingLarge}
+          />
+          <ToolbarButton
+            isActive={activeFormats.code}
+            icon="code"
+            onPress={onFormatCode}
+          />
+          <ToolbarButton
+            isActive={activeFormats.list}
+            icon="list"
+            onPress={onFormatList}
+          />
+          <ToolbarButton
+            isActive={activeFormats.blockquote}
+            icon="quote"
+            onPress={onFormatBlockquote}
+          />
+          <ToolbarButton
+            isActive={activeFormats['code-block']}
+            icon="codepen"
+            onPress={onFormatCodeBlock}
+          />
         </>
       )}
     </Row>
+  );
+}
+
+interface ToolbarButtonProps {
+  onPress: () => void;
+  icon: IconName;
+  size?: TextSize;
+  isActive?: boolean;
+}
+
+function ToolbarButton(props: ToolbarButtonProps) {
+  const { onPress, icon, size, isActive } = props;
+
+  return (
+    <Button style={styles.toolbarButton} onPress={onPress}>
+      <Icon name={icon} size={size} color={isActive ? 'primary' : 'default'} />
+    </Button>
   );
 }
 

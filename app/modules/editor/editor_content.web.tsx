@@ -41,41 +41,42 @@ export const EditorContent = React.forwardRef(
     React.useImperativeHandle(
       ref,
       () => ({
-        focus: () => {
-          sendMessage({ type: 'focus' });
+        selection: null,
+        formatBold: () => {
+          sendMessage({ type: 'format-bold' });
         },
-        bold: () => {
-          sendMessage({ type: 'bold' });
+        formatItalic: () => {
+          sendMessage({ type: 'format-italic' });
         },
-        italic: () => {
-          sendMessage({ type: 'italic' });
+        formatStrike: () => {
+          sendMessage({ type: 'format-strike' });
         },
-        strikethrough: () => {
-          sendMessage({ type: 'strikethrough' });
+        formatLink: (url: string) => {
+          sendMessage({ type: 'format-link', url });
         },
-        link: (url: string) => {
-          sendMessage({ type: 'link', url });
+        formatHeading: (size: HeadingSize) => {
+          sendMessage({ type: 'format-heading', size });
         },
-        heading: (size: HeadingSize) => {
-          sendMessage({ type: 'heading', size });
+        formatCode: () => {
+          sendMessage({ type: 'format-code' });
         },
-        code: () => {
-          sendMessage({ type: 'inline-code' });
+        formatList: (index: number) => {
+          sendMessage({ type: 'format-list', index });
         },
-        insertList: (index: number) => {
-          sendMessage({ type: 'insert-list', index });
+        formatBlockquote: (index: number) => {
+          sendMessage({ type: 'format-blockquote', index });
         },
-        insertBlockquote: (index: number) => {
-          sendMessage({ type: 'insert-blockquote', index });
-        },
-        insertCodeBlock: (index: number) => {
-          sendMessage({ type: 'insert-code-block', index });
+        formatCodeBlock: (index: number) => {
+          sendMessage({ type: 'format-code-block', index });
         },
         insertImage: (index: number, url: string) => {
           sendMessage({ type: 'insert-image', index, url });
         },
         insertVideo: (index: number, url: string) => {
           sendMessage({ type: 'insert-video', index, url });
+        },
+        focus: () => {
+          sendMessage({ type: 'focus' });
         },
         getBounds: async (range: Range) => {
           return new Promise((resolve) => {

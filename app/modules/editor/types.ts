@@ -41,6 +41,9 @@ export type Formats = {
   bold?: true;
   strike?: true;
   link?: string;
+  list?: true;
+  blockquote?: true;
+  'code-block'?: true;
   header?: HeadingSize;
   code?: true;
 };
@@ -104,45 +107,45 @@ export interface FocusMessage {
 // Formats
 
 export interface FormatBoldMessage {
-  type: 'bold';
+  type: 'format-bold';
 }
 
 export interface FormatItalicMessage {
-  type: 'italic';
+  type: 'format-italic';
 }
 
-export interface FormatStrikethroughMessage {
-  type: 'strikethrough';
+export interface FormatStrikeMessage {
+  type: 'format-strike';
 }
 
 export type HeadingSize = 1 | 2 | 3 | 4 | 5;
 
 export interface FormatHeadingMessage {
-  type: 'heading';
+  type: 'format-heading';
   size: HeadingSize;
 }
 
 export interface FormatCodeMessage {
-  type: 'inline-code';
+  type: 'format-code';
 }
 
 export interface FormatLinkMessage {
-  type: 'link';
+  type: 'format-link';
   url: string;
 }
 
-export interface InsertListMessage {
-  type: 'insert-list';
+export interface FormatListMessage {
+  type: 'format-list';
   index: number;
 }
 
-export interface InsertBlockquoteMessage {
-  type: 'insert-blockquote';
+export interface FormatBlockquoteMessage {
+  type: 'format-blockquote';
   index: number;
 }
 
-export interface InsertCodeBlockMessage {
-  type: 'insert-code-block';
+export interface FormatCodeBlockMessage {
+  type: 'format-code-block';
   index: number;
 }
 
@@ -163,16 +166,16 @@ export type MessagePayload =
   | GetFormatsMessage
   | FormatBoldMessage
   | FormatItalicMessage
-  | FormatStrikethroughMessage
+  | FormatStrikeMessage
   | FormatHeadingMessage
   | FormatLinkMessage
   | FormatCodeMessage
+  | FormatListMessage
+  | FormatBlockquoteMessage
+  | FormatCodeBlockMessage
+  | InsertImageMessage
+  | InsertVideoMessage
   | GetBoundsMessage
   | GetLineMessage
   | GetSelectionMessage
-  | InsertListMessage
-  | InsertBlockquoteMessage
-  | InsertCodeBlockMessage
-  | InsertImageMessage
-  | InsertVideoMessage
   | FocusMessage;

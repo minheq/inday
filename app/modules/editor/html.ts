@@ -118,23 +118,23 @@ export function generateHTML(props: GenerateHTMLProps) {
 
         function receiveMessage(event) {
           switch(event.data.type) {
-            case 'bold':
+            case 'format-bold':
               const isBold = quill.getFormat().bold;
               quill.format('bold', !isBold);
               break;
-            case 'italic':
+            case 'format-italic':
               const isItalic = quill.getFormat().italic;
               quill.format('italic', !isItalic);
               break;
-            case 'strikethrough':
+            case 'format-strike':
               const isStriked = quill.getFormat().strike;
               quill.format('strike', !isStriked);
               break;
-            case 'inline-code':
+            case 'format-code':
               const isCode = quill.getFormat().code;
               quill.format('code', !isCode);
               break;
-            case 'link':
+            case 'format-link':
               const isLink = quill.getFormat().link;
               if (isLink) {
                 quill.format('link', false);
@@ -142,7 +142,7 @@ export function generateHTML(props: GenerateHTMLProps) {
                 quill.format('link', event.data.url);
               }
               break;
-            case 'heading':
+            case 'format-heading':
               const header = quill.getFormat().header;
               const headingSize = event.data.size;
 
@@ -152,13 +152,13 @@ export function generateHTML(props: GenerateHTMLProps) {
                 quill.format('header', headingSize);
               }
               break;
-            case 'insert-list':
+            case 'format-list':
               quill.formatLine(event.data.index, 1, 'list', 'bullet');
               break;
-            case 'insert-blockquote':
+            case 'format-blockquote':
               quill.formatLine(event.data.index, 1, 'blockquote', true);
               break;
-            case 'insert-code-block':
+            case 'format-code-block':
               quill.formatLine(event.data.index, 1, 'code-block', true);
               break;
             case 'insert-image':

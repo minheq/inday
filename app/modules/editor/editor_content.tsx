@@ -21,18 +21,19 @@ export interface EditorContentProps {
 }
 
 export interface EditorContentInstance {
-  bold: () => void;
-  italic: () => void;
-  strikethrough: () => void;
-  link: (url: string) => void;
-  heading: (size: HeadingSize) => void;
-  code: () => void;
-  focus: () => void;
-  insertList: (index: number) => void;
-  insertBlockquote: (index: number) => void;
-  insertCodeBlock: (index: number) => void;
+  selection: Range | null;
+  formatBold: () => void;
+  formatItalic: () => void;
+  formatStrike: () => void;
+  formatLink: (url: string) => void;
+  formatHeading: (size: HeadingSize) => void;
+  formatCode: () => void;
+  formatList: (index: number) => void;
+  formatBlockquote: (index: number) => void;
+  formatCodeBlock: (index: number) => void;
   insertImage: (index: number, url: string) => void;
   insertVideo: (index: number, url: string) => void;
+  focus: () => void;
   getBounds: (range: Range) => Promise<Bounds>;
   getLine: (index: number) => Promise<Line | null>;
   getSelection: () => Promise<Range>;
@@ -49,18 +50,19 @@ export const EditorContent = React.forwardRef(
   ) => {
     const {} = props;
     React.useImperativeHandle(ref, () => ({
-      focus: () => {},
-      bold: () => {},
-      italic: () => {},
-      strikethrough: () => {},
-      link: () => {},
-      heading: () => {},
-      code: () => {},
-      insertList: () => {},
-      insertBlockquote: () => {},
-      insertCodeBlock: () => {},
+      selection: null,
+      formatBold: () => {},
+      formatItalic: () => {},
+      formatStrike: () => {},
+      formatLink: () => {},
+      formatHeading: () => {},
+      formatCode: () => {},
+      formatList: () => {},
+      formatBlockquote: () => {},
+      formatCodeBlock: () => {},
       insertImage: () => {},
       insertVideo: () => {},
+      focus: () => {},
       getBounds: async () => ({
         top: 0,
         left: 0,
