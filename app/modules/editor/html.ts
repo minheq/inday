@@ -135,12 +135,8 @@ export function generateHTML(props: GenerateHTMLProps) {
               quill.format('code', !isCode);
               break;
             case 'format-link':
-              const isLink = quill.getFormat().link;
-              if (isLink) {
-                quill.format('link', false);
-              } else {
-                quill.format('link', event.data.url);
-              }
+              quill.deleteText(event.data.range.index, event.data.range.length);
+              quill.insertText(event.data.range.index, event.data.text, 'link', event.data.url);
               break;
             case 'format-heading':
               const header = quill.getFormat().header;
@@ -153,13 +149,16 @@ export function generateHTML(props: GenerateHTMLProps) {
               }
               break;
             case 'format-list':
-              quill.formatLine(event.data.index, 1, 'list', 'bullet');
+              const isList = quill.getFormat().list;
+              quill.formatLine(event.data.index, 1, 'list', isList ? false : 'bullet');
               break;
             case 'format-blockquote':
-              quill.formatLine(event.data.index, 1, 'blockquote', true);
+              const isBlockquote = quill.getFormat().blockquote;
+              quill.formatLine(event.data.index, 1, 'blockquote', !isBlockquote);
               break;
             case 'format-code-block':
-              quill.formatLine(event.data.index, 1, 'code-block', true);
+              const isCodeBlock = quill.getFormat()['code-block'];
+              quill.formatLine(event.data.index, 1, 'code-block', !isCodeBlock);
               break;
             case 'insert-image':
 
@@ -169,6 +168,12 @@ export function generateHTML(props: GenerateHTMLProps) {
               break;
             case 'focus':
               quill.focus();
+              break;
+            case 'undo':
+              quill.history.undo();
+              break;
+            case 'redo':
+              quill.history.redo();
               break;
             case 'get-bounds':
               const bounds = quill.getBounds(event.data.range.index, event.data.range.length);
@@ -181,6 +186,32 @@ export function generateHTML(props: GenerateHTMLProps) {
             case 'get-formats':
               const formats = quill.getFormat();
               sendMessage({ type: 'get-formats', formats });
+              break;
+            case 'get-text':
+              const text = quill.getText(event.data.range.index, event.data.range.length);
+              sendMessage({ type: 'get-text', text });
+              break;
+            case 'select-word':
+              const [leaf, leafOffset] = quill.getLeaf(event.data.index);
+
+              const firstHalf = leaf.text.substring(0, leafOffset).split(' ');
+              const lastCharactersOfFirstHalf = firstHalf[firstHalf.length - 1];
+              const firstCharacterOffset = leafOffset - lastCharactersOfFirstHalf.length;
+
+              const secondHalf = leaf.text.substring(leafOffset).split(' ');
+              const firstCharactersOfSecondHalf = secondHalf[0];
+              const lastCharacterOffset = leafOffset + firstCharactersOfSecondHalf.length;
+              
+              let word = lastCharactersOfFirstHalf + firstCharactersOfSecondHalf;
+
+              const isEndingWithPunctuation = [',', '.', ';'].includes(word[word.length - 1])
+
+              const index = event.data.index - lastCharactersOfFirstHalf.length;
+              const length = lastCharacterOffset - firstCharacterOffset - (isEndingWithPunctuation ? 1 : 0);
+
+              quill.setSelection({ index, length });
+
+              sendMessage({ type: 'select-word', word: { text: word, range: { index, length } } });
               break;
             case 'get-line':
               const [blot, offset] = quill.getLine(event.data.index);

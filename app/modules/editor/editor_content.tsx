@@ -11,6 +11,7 @@ import type {
   ResizeEvent,
   HeadingSize,
   Formats,
+  Word,
 } from './types';
 
 export interface EditorContentProps {
@@ -22,10 +23,12 @@ export interface EditorContentProps {
 
 export interface EditorContentInstance {
   selection: Range | null;
+  undo: () => void;
+  redo: () => void;
   formatBold: () => void;
   formatItalic: () => void;
   formatStrike: () => void;
-  formatLink: (url: string) => void;
+  formatLink: (range: Range, text: string, url: string) => void;
   formatHeading: (size: HeadingSize) => void;
   formatCode: () => void;
   formatList: (index: number) => void;
@@ -34,7 +37,9 @@ export interface EditorContentInstance {
   insertImage: (index: number, url: string) => void;
   insertVideo: (index: number, url: string) => void;
   focus: () => void;
+  selectWord: (index?: number) => Promise<Word | null>;
   getBounds: (range: Range) => Promise<Bounds>;
+  getText: (range: Range) => Promise<string>;
   getLine: (index: number) => Promise<Line | null>;
   getSelection: () => Promise<Range>;
   getFormats: () => Promise<Formats>;
@@ -51,10 +56,14 @@ export const EditorContent = React.forwardRef(
     const {} = props;
     React.useImperativeHandle(ref, () => ({
       selection: null,
+      undo: () => {},
+      redo: () => {},
+      getText: async () => '',
       formatBold: () => {},
       formatItalic: () => {},
       formatStrike: () => {},
       formatLink: () => {},
+      selectWord: async () => null,
       formatHeading: () => {},
       formatCode: () => {},
       formatList: () => {},

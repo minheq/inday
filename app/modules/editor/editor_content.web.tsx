@@ -14,6 +14,8 @@ import type {
   ResizeEvent,
   HeadingSize,
   Formats,
+  Word,
+  SelectWordEvent,
 } from './types';
 
 export const EditorContent = React.forwardRef(
@@ -38,10 +40,34 @@ export const EditorContent = React.forwardRef(
       }
     }, []);
 
+    const sendAsyncMessage = React.useCallback(
+      <T extends any>(message: MessagePayload): Promise<T> => {
+        return new Promise((resolve) => {
+          sendMessage(message);
+
+          window.addEventListener('message', handleTemporaryMessage);
+
+          function handleTemporaryMessage(event: MessageEvent) {
+            if (event.data.type === message.type) {
+              resolve(event.data);
+              window.removeEventListener('message', handleTemporaryMessage);
+            }
+          }
+        });
+      },
+      [sendMessage],
+    );
+
     React.useImperativeHandle(
       ref,
       () => ({
         selection: null,
+        undo: () => {
+          sendMessage({ type: 'undo' });
+        },
+        redo: () => {
+          sendMessage({ type: 'redo' });
+        },
         formatBold: () => {
           sendMessage({ type: 'format-bold' });
         },
@@ -51,8 +77,8 @@ export const EditorContent = React.forwardRef(
         formatStrike: () => {
           sendMessage({ type: 'format-strike' });
         },
-        formatLink: (url: string) => {
-          sendMessage({ type: 'format-link', url });
+        formatLink: (range: Range, text: string, url: string) => {
+          sendMessage({ type: 'format-link', range, text, url });
         },
         formatHeading: (size: HeadingSize) => {
           sendMessage({ type: 'format-heading', size });
@@ -77,6 +103,14 @@ export const EditorContent = React.forwardRef(
         },
         focus: () => {
           sendMessage({ type: 'focus' });
+        },
+        selectWord: async (index?: number) => {
+          const data = await sendAsyncMessage<SelectWordEvent>({
+            type: 'select-word',
+            index,
+          });
+
+          return data.word;
         },
         getBounds: async (range: Range) => {
           return new Promise((resolve) => {
@@ -117,6 +151,22 @@ export const EditorContent = React.forwardRef(
             function handleTemporaryMessage(event: MessageEvent) {
               if (event.data.type === 'get-selection') {
                 resolve(event.data.range as Range);
+                window.removeEventListener('message', handleTemporaryMessage);
+              }
+            }
+
+            return;
+          });
+        },
+        getText: async (range: Range) => {
+          return new Promise((resolve) => {
+            sendMessage({ type: 'get-text', range });
+
+            window.addEventListener('message', handleTemporaryMessage);
+
+            function handleTemporaryMessage(event: MessageEvent) {
+              if (event.data.type === 'get-text') {
+                resolve(event.data.text as string);
                 window.removeEventListener('message', handleTemporaryMessage);
               }
             }

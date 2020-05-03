@@ -36,6 +36,21 @@ export interface GetSelectionEvent {
   range: Range;
 }
 
+export interface Word {
+  text: string;
+  range: Range;
+}
+
+export interface SelectWordEvent {
+  type: 'select-word';
+  word: Word | null;
+}
+
+export interface GetTextEvent {
+  type: 'get-text';
+  text: string;
+}
+
 export type Formats = {
   italic?: true;
   bold?: true;
@@ -64,6 +79,7 @@ export type EventPayload =
   | SelectionChangeEvent
   | GetBoundsEvent
   | GetLineEvent
+  | GetTextEvent
   | ResizeEvent;
 
 export type Range = { index: number; length: number };
@@ -94,6 +110,16 @@ export interface GetLineMessage {
 
 export interface GetSelectionMessage {
   type: 'get-selection';
+}
+
+export interface GetTextMessage {
+  type: 'get-text';
+  range: Range;
+}
+
+export interface SelectWordMessage {
+  type: 'select-word';
+  index?: number;
 }
 
 export interface GetFormatsMessage {
@@ -132,6 +158,8 @@ export interface FormatCodeMessage {
 export interface FormatLinkMessage {
   type: 'format-link';
   url: string;
+  text: string;
+  range: Range;
 }
 
 export interface FormatListMessage {
@@ -161,6 +189,14 @@ export interface InsertVideoMessage {
   url: string;
 }
 
+export interface UndoMessage {
+  type: 'undo';
+}
+
+export interface RedoMessage {
+  type: 'redo';
+}
+
 /** Messages sent to iframe */
 export type MessagePayload =
   | GetFormatsMessage
@@ -178,4 +214,8 @@ export type MessagePayload =
   | GetBoundsMessage
   | GetLineMessage
   | GetSelectionMessage
+  | UndoMessage
+  | RedoMessage
+  | GetTextMessage
+  | SelectWordMessage
   | FocusMessage;

@@ -3,6 +3,7 @@ import * as Bootstrap from 'react-icons/bs';
 import * as Feather from 'react-icons/fi';
 import * as Octicon from 'react-icons/go';
 import * as FontAwesome from 'react-icons/fa';
+import * as AntDesign from 'react-icons/ai';
 
 import { useTheme } from '../theme';
 
@@ -29,6 +30,10 @@ function CustomIcon(props: IconProps) {
       return <Octicon.GoQuote color={iconColor} size={iconSize} />;
     case 'font':
       return <FontAwesome.FaFont color={iconColor} size={iconSize} />;
+    case 'undo':
+      return <AntDesign.AiOutlineUndo color={iconColor} size={iconSize} />;
+    case 'redo':
+      return <AntDesign.AiOutlineRedo color={iconColor} size={iconSize} />;
     case 'strikethrough':
       return (
         <Bootstrap.BsTypeStrikethrough color={iconColor} size={iconSize} />

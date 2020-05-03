@@ -3,6 +3,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Octicon from 'react-native-vector-icons/Octicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Fontisto from 'react-native-vector-icons/Fontisto';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
 import { TextColor, TextSize, useTheme } from '../theme';
 
@@ -25,7 +26,7 @@ export interface IconProps {
   size?: TextSize;
 }
 
-type CustomIconName = 'quote' | 'font' | 'strikethrough';
+type CustomIconName = 'quote' | 'font' | 'strikethrough' | 'undo' | 'redo';
 
 type FeatherIconName =
   | 'activity'
@@ -310,6 +311,10 @@ function CustomIcon(props: IconProps) {
       return <Octicon name="quote" color={iconColor} size={iconSize} />;
     case 'font':
       return <FontAwesome name="font" color={iconColor} size={iconSize} />;
+    case 'undo':
+      return <EvilIcons name="undo" color={iconColor} size={iconSize} />;
+    case 'redo':
+      return <EvilIcons name="redo" color={iconColor} size={iconSize} />;
     case 'strikethrough':
       return (
         <Fontisto name="strikethrough" color={iconColor} size={iconSize} />

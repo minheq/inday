@@ -2,37 +2,24 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme';
 
-interface DividerProps {
-  children?: React.ReactNode;
-  orientation?: 'vertical' | 'horizontal';
-}
+interface DividerProps {}
 
 /**
  * Visual separator between components.
  */
-export function Divider(props: DividerProps) {
-  const { children, orientation = 'horizontal' } = props;
+export function Divider(_props: DividerProps) {
   const theme = useTheme();
 
   return (
     <View
-      style={[
-        styles[orientation],
-        { backgroundColor: theme.border.color.default },
-      ]}
-    >
-      {children}
-    </View>
+      style={[styles.base, { backgroundColor: theme.border.color.default }]}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  horizontal: {
+  base: {
     width: '100%',
     height: 1,
-  },
-  vertical: {
-    height: '100%',
-    width: 1,
   },
 });
