@@ -47,6 +47,11 @@ interface HoverableState {
 const LINK_PREVIEW_WIDTH = 280;
 const LINK_PREVIEW_HEIGHT = 40;
 
+// TODO:
+// - Markdown auto formatting
+// - Disable pasted formats
+// - Drag and drop files into editor
+
 export function Editor(props: EditorProps) {
   const {
     initialContent = new Delta()
