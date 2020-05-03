@@ -10,6 +10,7 @@ import {
   Button,
   Spacing,
   CloseButton,
+  Text,
 } from '../../components';
 import { useTheme, tokens } from '../../theme';
 import type {
@@ -28,6 +29,15 @@ interface EditorProps {
 const TOOLBAR_WIDTH = 280;
 const TOOLBAR_HEIGHT = 40;
 const SIDEBAR_CONTROLS_HEIGHT = 40;
+
+type HoverableType = 'toolbar' | 'link';
+
+interface HoverableState {
+  isVisible: boolean;
+  type: HoverableType;
+  position: Animated.ValueXY;
+  opacity: Animated.Value;
+}
 
 export function Editor(props: EditorProps) {
   const {
@@ -55,17 +65,19 @@ export function Editor(props: EditorProps) {
   const theme = useTheme();
   const editorContentRef = React.useRef<EditorContentInstance | null>(null);
   const scrollViewRef = React.useRef<ScrollView | null>(null);
-  const toolbar = React.useRef({
-    position: new Animated.ValueXY(),
-    opacity: new Animated.Value(0),
-  }).current;
   const sidebar = React.useRef({
     position: new Animated.Value(0),
     opacity: new Animated.Value(0),
   }).current;
-  const [isToolbarVisible, setIsToolbarVisible] = React.useState(false);
+  const [hoverable, setHoverable] = React.useState<HoverableState>({
+    isVisible: false,
+    type: 'toolbar',
+    position: new Animated.ValueXY(),
+    opacity: new Animated.Value(0),
+  });
   const [isAddBlockVisible, setIsAddBlockVisible] = React.useState(false);
   const [activeFormats, setActiveFormats] = React.useState<Formats>({});
+  const [linkPreviewURL, setLinkPreviewURL] = React.useState('');
   const [
     isSidebarControlsVisible,
     setIsSidebarControlsVisible,
@@ -129,7 +141,7 @@ export function Editor(props: EditorProps) {
     });
   }, [sidebar, handleHideSidebarControls]);
 
-  const getToolbarPosition = React.useCallback(async (range: Range) => {
+  const getHoverablePosition = React.useCallback(async (range: Range) => {
     if (editorContentRef.current) {
       const rangeBounds = await editorContentRef.current.getBounds(range);
       let y = 0;
@@ -152,10 +164,10 @@ export function Editor(props: EditorProps) {
     return null;
   }, []);
 
-  const handleShowToolbar = React.useCallback(
-    async (range: Range) => {
+  const handleShowHoverable = React.useCallback(
+    async (range: Range, type: HoverableType) => {
       if (editorContentRef.current) {
-        const position = await getToolbarPosition(range);
+        const position = await getHoverablePosition(range);
 
         if (!position) {
           return;
@@ -163,37 +175,41 @@ export function Editor(props: EditorProps) {
 
         const { x, y } = position;
 
-        toolbar.position.setValue({
+        hoverable.position.setValue({
           x,
           y,
         });
 
-        setIsToolbarVisible(true);
+        setHoverable((prev) => ({
+          ...prev,
+          type,
+          isVisible: true,
+        }));
 
-        Animated.timing(toolbar.opacity, {
+        Animated.timing(hoverable.opacity, {
           toValue: 1,
           useNativeDriver: true,
           duration: 100,
         }).start();
       }
     },
-    [toolbar, getToolbarPosition],
+    [hoverable, getHoverablePosition],
   );
 
-  const handleUpdateToolbarIfNeeded = React.useCallback(
+  const handleUpdateHoverablePositionIfNeeded = React.useCallback(
     async (range: Range) => {
-      const position = await getToolbarPosition(range);
+      const position = await getHoverablePosition(range);
 
       if (!position) {
         return;
       }
 
       const { x, y } = position;
-      const prevX = (toolbar.position.x as any)._value;
-      const prevY = (toolbar.position.y as any)._value;
+      const prevX = (hoverable.position.x as any)._value;
+      const prevY = (hoverable.position.y as any)._value;
 
       if (x !== prevX || y !== prevY) {
-        Animated.spring(toolbar.position, {
+        Animated.spring(hoverable.position, {
           toValue: {
             x,
             y,
@@ -204,20 +220,23 @@ export function Editor(props: EditorProps) {
         }).start();
       }
     },
-    [toolbar, getToolbarPosition],
+    [hoverable, getHoverablePosition],
   );
 
-  const handleHideToolbar = React.useCallback(async () => {
-    if (isToolbarVisible) {
-      Animated.timing(toolbar.opacity, {
+  const handleHideHoverable = React.useCallback(async () => {
+    if (hoverable.isVisible) {
+      Animated.timing(hoverable.opacity, {
         toValue: 0,
         useNativeDriver: true,
         duration: 100,
       }).start(() => {
-        setIsToolbarVisible(false);
+        setHoverable((prev) => ({
+          ...prev,
+          isVisible: false,
+        }));
       });
     }
-  }, [toolbar, isToolbarVisible]);
+  }, [hoverable]);
 
   const handleTextChange = React.useCallback(
     async (_event: TextChangeEvent) => {
@@ -232,11 +251,11 @@ export function Editor(props: EditorProps) {
         }
 
         if (range.length === 0) {
-          handleHideToolbar();
+          handleHideHoverable();
         } else {
           const formats = await editorContentRef.current.getFormats();
           setActiveFormats(formats);
-          handleUpdateToolbarIfNeeded(range);
+          handleUpdateHoverablePositionIfNeeded(range);
         }
 
         if (line?.isEmpty) {
@@ -249,8 +268,8 @@ export function Editor(props: EditorProps) {
     [
       handleShowAddBlock,
       handleHideAddBlock,
-      handleHideToolbar,
-      handleUpdateToolbarIfNeeded,
+      handleHideHoverable,
+      handleUpdateHoverablePositionIfNeeded,
       isAddBlockVisible,
       scrollViewState,
     ],
@@ -267,9 +286,15 @@ export function Editor(props: EditorProps) {
 
       if (editorContentRef.current) {
         if (range.length === 0) {
-          handleHideToolbar();
+          handleHideHoverable();
           handleHideSidebarControls();
           const line = await editorContentRef.current.getLine(range.index);
+          const formats = await editorContentRef.current.getFormats();
+
+          if (formats.link) {
+            setLinkPreviewURL(formats.link);
+            handleShowHoverable(range, 'link');
+          }
 
           if (line?.isEmpty) {
             handleShowAddBlock(range.index);
@@ -277,7 +302,7 @@ export function Editor(props: EditorProps) {
             handleHideAddBlock();
           }
         } else {
-          handleShowToolbar(range);
+          handleShowHoverable(range, 'toolbar');
           const formats = await editorContentRef.current.getFormats();
           setActiveFormats(formats);
         }
@@ -287,8 +312,8 @@ export function Editor(props: EditorProps) {
       editorContentRef,
       handleHideSidebarControls,
       handleHideAddBlock,
-      handleHideToolbar,
-      handleShowToolbar,
+      handleHideHoverable,
+      handleShowHoverable,
       handleShowAddBlock,
     ],
   );
@@ -305,9 +330,13 @@ export function Editor(props: EditorProps) {
     editorContentRef.current?.strikethrough();
   }, []);
 
-  const handleLink = React.useCallback((url: string) => {
-    editorContentRef.current?.link(url);
-  }, []);
+  const handleLink = React.useCallback(
+    (url: string) => {
+      editorContentRef.current?.link(url);
+      handleHideHoverable();
+    },
+    [handleHideHoverable],
+  );
 
   const handleHeadingMedium = React.useCallback(() => {
     editorContentRef.current?.heading(2);
@@ -324,7 +353,7 @@ export function Editor(props: EditorProps) {
   return (
     <ScrollView ref={scrollViewRef} scrollEventThrottle={0} {...scrollHandlers}>
       <Container expanded paddingHorizontal={48}>
-        {isToolbarVisible && (
+        {hoverable.isVisible && (
           <Animated.View
             style={[
               styles.toolbar,
@@ -333,23 +362,26 @@ export function Editor(props: EditorProps) {
                 borderColor: theme.border.color.default,
                 backgroundColor: theme.container.color.content,
                 transform: [
-                  { translateX: toolbar.position.x },
-                  { translateY: toolbar.position.y },
+                  { translateX: hoverable.position.x },
+                  { translateY: hoverable.position.y },
                 ],
-                opacity: toolbar.opacity,
+                opacity: hoverable.opacity,
               },
             ]}
           >
-            <Toolbar
-              activeFormats={activeFormats}
-              onBold={handleBold}
-              onItalic={handleItalic}
-              onStrikethrough={handleStrikethrough}
-              onLink={handleLink}
-              onHeadingMedium={handleHeadingMedium}
-              onHeadingLarge={handleHeadingLarge}
-              onCode={handleCode}
-            />
+            {hoverable.type === 'toolbar' && (
+              <Toolbar
+                activeFormats={activeFormats}
+                onBold={handleBold}
+                onItalic={handleItalic}
+                onStrikethrough={handleStrikethrough}
+                onLink={handleLink}
+                onHeadingMedium={handleHeadingMedium}
+                onHeadingLarge={handleHeadingLarge}
+                onCode={handleCode}
+              />
+            )}
+            {hoverable.type === 'link' && <LinkPreview url={linkPreviewURL} />}
           </Animated.View>
         )}
         {isAddBlockVisible && (
@@ -397,6 +429,7 @@ function AddBlock(props: AddBlockProps) {
   const theme = useTheme();
 
   const controls = React.useRef<SidebarControl[]>([
+    { icon: 'list' as const, onPress: () => {}, x: new Animated.Value(0) },
     { icon: 'image' as const, onPress: () => {}, x: new Animated.Value(0) },
     { icon: 'video' as const, onPress: () => {}, x: new Animated.Value(0) },
     { icon: 'quote' as const, onPress: () => {}, x: new Animated.Value(0) },
@@ -497,8 +530,12 @@ function Toolbar(props: ToolbarProps) {
   const [link, setLink] = React.useState('');
 
   const handlePressLink = React.useCallback(() => {
-    setIsAddingLink(true);
-  }, []);
+    if (activeFormats.link) {
+      onLink('');
+    } else {
+      setIsAddingLink(true);
+    }
+  }, [onLink, activeFormats.link]);
 
   const handleCloseLink = React.useCallback(() => {
     setIsAddingLink(false);
@@ -556,7 +593,10 @@ function Toolbar(props: ToolbarProps) {
             />
           </Button>
           <Button style={styles.toolbarButton} onPress={handlePressLink}>
-            <Icon name="link" />
+            <Icon
+              name="link"
+              color={activeFormats.link ? 'primary' : 'default'}
+            />
           </Button>
           <Button style={styles.toolbarButton} onPress={onHeadingMedium}>
             <Icon
@@ -580,6 +620,19 @@ function Toolbar(props: ToolbarProps) {
         </>
       )}
     </Row>
+  );
+}
+
+interface LinkPreviewProps {
+  url: string;
+}
+
+function LinkPreview(props: LinkPreviewProps) {
+  const { url } = props;
+  return (
+    <Container padding={8}>
+      <Text decoration="underline">{url}</Text>
+    </Container>
   );
 }
 

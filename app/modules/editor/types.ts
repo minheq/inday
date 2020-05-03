@@ -40,6 +40,7 @@ export type Formats = {
   italic?: true;
   bold?: true;
   strike?: true;
+  link?: string;
   header?: HeadingSize;
   code?: true;
 };

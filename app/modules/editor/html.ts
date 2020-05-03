@@ -46,6 +46,10 @@ export function generateHTML(props: GenerateHTMLProps) {
           overflow-y: initial;
         }
 
+        a {
+          color: rgba(34, 34, 34, 1);
+        }
+
         h1 + p,
         h2 + p {
           margin-top: 0.5em; 
@@ -121,6 +125,14 @@ export function generateHTML(props: GenerateHTMLProps) {
             case 'inline-code':
               const isCode = quill.getFormat().code;
               quill.format('code', !isCode);
+              break;
+            case 'link':
+              const isLink = quill.getFormat().link;
+              if (isLink) {
+                quill.format('link', false);
+              } else {
+                quill.format('link', event.data.url);
+              }
               break;
             case 'heading':
               const header = quill.getFormat().header;

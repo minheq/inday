@@ -2,6 +2,11 @@ import React from 'react';
 import { Text as RNText, StyleSheet } from 'react-native';
 import { useTheme, TextSize, TextColor, tokens } from '../theme';
 
+type TextDecorationLine =
+  | 'none'
+  | 'underline'
+  | 'line-through'
+  | 'underline line-through';
 export interface TextProps {
   children?: React.ReactNode;
   size?: TextSize;
@@ -9,6 +14,7 @@ export interface TextProps {
   align?: 'left' | 'right' | 'center';
   bold?: boolean;
   testID?: string;
+  decoration?: TextDecorationLine;
 }
 
 /**
@@ -22,6 +28,7 @@ export function Text(props: TextProps) {
     size = 'md',
     testID,
     bold,
+    decoration = 'none',
   } = props;
   const theme = useTheme();
 
@@ -32,7 +39,7 @@ export function Text(props: TextProps) {
         styles[align],
         bold && styles.bold,
         theme.text.size[size],
-        { color: theme.text.color[color] },
+        { color: theme.text.color[color], textDecorationLine: decoration },
       ]}
     >
       {children}
