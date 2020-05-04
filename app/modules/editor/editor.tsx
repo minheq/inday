@@ -21,7 +21,7 @@ import {
 import { ThemeContext, tokens, TextSize, useTheme } from '../../theme';
 import { between } from '../../utils/numbers';
 import { EditorContentInstance, EditorContent } from './editor_content';
-import { ChangeSource, Range } from './types';
+import { ChangeSource, Range, HeadingSize, Formats } from './types';
 
 interface EditorProps {
   initialContent?: Delta;
@@ -39,7 +39,15 @@ interface HoverableLinkEdit {
   type: 'link-edit';
 }
 
-type Hoverable = HoverableToolbar | HoverableLinkPreview | HoverableLinkEdit;
+interface HoverableCommands {
+  type: 'commands';
+}
+
+type Hoverable =
+  | HoverableToolbar
+  | HoverableLinkPreview
+  | HoverableLinkEdit
+  | HoverableCommands;
 
 interface HoverableItem {
   isVisible: boolean;
@@ -47,20 +55,6 @@ interface HoverableItem {
   position: Animated.ValueXY;
   opacity: Animated.Value;
 }
-
-type HeadingSize = 1 | 2 | 3 | 4 | 5;
-
-type Formats = {
-  italic?: true;
-  bold?: true;
-  strike?: true;
-  link?: string;
-  list?: true;
-  blockquote?: true;
-  'code-block'?: true;
-  header?: HeadingSize;
-  code?: true;
-};
 
 const LINK_PREVIEW_WIDTH = 280;
 const LINK_PREVIEW_HEIGHT = 40;
@@ -93,7 +87,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   editor: EditorContentInstance | null = null;
   contentHeight: number = 0;
 
-  state = {
+  state: EditorState = {
     hoverableItem: initialHoverableItem,
   };
 
@@ -105,7 +99,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     this.editor = this.editorContentRef.current;
   }
 
-  getHoverablePosition = async () => {
+  getHoverablePosition = async (hoverable: Hoverable) => {
     if (!this.editor) {
       return;
     }
@@ -119,19 +113,31 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       selection.index,
       selection.length,
     );
-    const hoverableHeight = LINK_PREVIEW_HEIGHT;
-    const hoverableWidth = LINK_PREVIEW_WIDTH;
+
+    let hoverableHeight = 0;
+    let hoverableWidth = 0;
+
+    switch (hoverable.type) {
+      case 'commands':
+        hoverableHeight = HOVERABLE_COMMANDS_HEIGHT;
+        hoverableWidth = HOVERABLE_COMMANDS_WIDTH;
+        break;
+      default:
+        return;
+    }
 
     let y = 0;
-    if (rangeBounds.top - hoverableHeight - 16 < 16) {
-      y = rangeBounds.top + hoverableHeight - 14;
+    const LINE_HEIGHT = 16;
+    const LINE_OFFSET = 8;
+    if (rangeBounds.top - hoverableHeight < 4) {
+      y = rangeBounds.top + LINE_HEIGHT + LINE_OFFSET;
     } else {
-      y = rangeBounds.top - hoverableHeight - 8;
+      y = rangeBounds.top - hoverableHeight - LINE_OFFSET;
     }
 
     const x = between(
       rangeBounds.left + rangeBounds.width / 2 - hoverableWidth / 2,
-      -40,
+      8,
       440,
     );
 
@@ -139,27 +145,23 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   };
 
   handleShowHoverable = async (hoverable: Hoverable) => {
-    const { hoverableItem } = this.state;
-    const position = await this.getHoverablePosition();
+    const position = await this.getHoverablePosition(hoverable);
 
     if (!position) {
       return;
     }
 
     const { x, y } = position;
+    const hoverableItem: HoverableItem = {
+      hoverable,
+      isVisible: true,
+      position: new Animated.ValueXY({ x, y }),
+      opacity: new Animated.Value(0),
+    };
 
-    hoverableItem.position.setValue({
-      x,
-      y,
+    this.setState({
+      hoverableItem,
     });
-
-    this.setState((prev) => ({
-      hoverableItem: {
-        ...prev.hoverableItem,
-        hoverable,
-        isVisible: true,
-      },
-    }));
 
     Animated.timing(hoverableItem.opacity, {
       toValue: 1,
@@ -168,9 +170,43 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     }).start();
   };
 
+  handleEditorContentLoad = () => {
+    const {
+      initialContent = new Delta()
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert('\n'),
+    } = this.props;
+
+    if (this.editor) {
+      this.editor.setContents(initialContent, 'api');
+    }
+  };
+
   handleUpdateHoverablePositionIfNeeded = async () => {
     const { hoverableItem } = this.state;
-    const position = await this.getHoverablePosition();
+
+    if (!hoverableItem.hoverable) {
+      return;
+    }
+
+    const position = await this.getHoverablePosition(hoverableItem.hoverable);
 
     if (!position) {
       return;
@@ -233,7 +269,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     if (selection.length === 0) {
-      this.handleHideHoverable();
+      // this.handleHideHoverable();
     } else {
       this.handleUpdateHoverablePositionIfNeeded();
     }
@@ -373,29 +409,15 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     this.editor.redo();
   };
 
+  handlePromptCommands = () => {
+    if (!this.editor) {
+      return;
+    }
+
+    this.handleShowHoverable({ type: 'commands' });
+  };
+
   render() {
-    const {
-      initialContent = new Delta()
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert('\n'),
-    } = this.props;
     const { hoverableItem } = this.state;
 
     return (
@@ -440,12 +462,8 @@ export class Editor extends React.Component<EditorProps, EditorState> {
                     },
                   ]}
                 >
-                  {hoverableItem.hoverable?.type === 'link' && (
-                    <LinkPreview
-                      onFormatLink={handleFormatLink}
-                      onRemoveLink={handleRemoveLink}
-                      url={linkPreviewURL}
-                    />
+                  {hoverableItem.hoverable?.type === 'commands' && (
+                    <HoverableCommands />
                   )}
                 </Animated.View>
               )}
@@ -453,9 +471,10 @@ export class Editor extends React.Component<EditorProps, EditorState> {
           )}
           <EditorContent
             ref={this.editorContentRef}
+            onLoad={this.handleEditorContentLoad}
             onTextChange={this.handleTextChange}
             onSelectionChange={this.handleSelectionChange}
-            initialContent={initialContent}
+            onPromptCommands={this.handlePromptCommands}
           />
         </ScrollView>
       </Container>
@@ -656,6 +675,32 @@ function LinkPreview(props: LinkPreviewProps) {
           <Icon name="x-circle" />
         </Button>
       </Row>
+    </Container>
+  );
+}
+
+interface HoverableCommandsProps {}
+
+const options = ['item-1', 'item-2', 'item-3'];
+
+const HOVERABLE_COMMANDS_WIDTH = 240;
+const HOVERABLE_COMMANDS_HEIGHT = 280;
+
+function HoverableCommands(props: HoverableCommandsProps) {
+  console.log('render');
+
+  return (
+    <Container
+      width={HOVERABLE_COMMANDS_WIDTH}
+      height={HOVERABLE_COMMANDS_HEIGHT}
+    >
+      {options.map((opt) => {
+        return (
+          <Container flex={1} key={opt}>
+            <Text>{opt}</Text>
+          </Container>
+        );
+      })}
     </Container>
   );
 }

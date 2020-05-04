@@ -12,9 +12,10 @@ import type {
 } from './types';
 
 export interface EditorContentProps {
-  initialContent?: Delta;
   onBlur?: () => void;
   onFocus?: () => void;
+  onLoad?: () => void;
+  onPromptCommands?: (index: number) => void;
   onTextChange?: (
     delta: Delta,
     oldContents: Delta,
@@ -59,6 +60,7 @@ export interface EditorContentInstance {
     value: Formats[TFormat],
     source?: ChangeSource,
   ) => void;
+  setContents: (delta: Delta, source?: ChangeSource) => void;
   removeLink: (index: number) => void;
   formatLink: (range: Range, text: string, url: string) => void;
   // Editor
@@ -81,10 +83,10 @@ export const EditorContent = React.forwardRef(
       | ((instance: EditorContentInstance) => void)
       | null,
   ) => {
-    const {} = props;
     React.useImperativeHandle(ref, () => ({
       selection: null,
       undo: () => {},
+      setContents: () => {},
       redo: () => {},
       getText: async () => '',
       format: () => {},

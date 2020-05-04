@@ -1,24 +1,23 @@
 import Delta from 'quill-delta';
 import React from 'react';
-import { generateHTML } from './html';
 import type {
   EditorContentProps,
   EditorContentInstance,
 } from './editor_content';
 import type {
-  TextChangeEvent,
-  SelectionChangeEvent,
   Range,
-  MessagePayload,
-  ResizeEvent,
-  GetBoundsEvent,
-  GetLineEvent,
-  GetSelectionEvent,
-  GetTextEvent,
-  GetFormatsEvent,
-  GetLinkRangeEvent,
+  ToWebViewMessage,
   EditorContentSize,
+  FromWebViewGetLinkRange,
+  FromWebViewGetBounds,
+  FromWebViewMessage,
+  FromWebViewGetLine,
+  FromWebViewGetSelection,
+  FromWebViewGetText,
+  FromWebViewGetFormats,
+  ChangeSource,
 } from './types';
+import html from './webview/index.bundle.html';
 
 export const EditorContent = React.forwardRef(
   (
@@ -29,22 +28,23 @@ export const EditorContent = React.forwardRef(
       | null,
   ) => {
     const {
-      initialContent,
+      onPromptCommands = () => {},
       onBlur = () => {},
+      onLoad = () => {},
       onFocus = () => {},
       onTextChange = () => {},
       onSelectionChange = () => {},
     } = props;
     const editorContentRef = React.useRef<HTMLIFrameElement | null>(null);
 
-    const sendMessage = React.useCallback((message: MessagePayload) => {
+    const sendMessage = React.useCallback((message: ToWebViewMessage) => {
       if (editorContentRef.current) {
         editorContentRef.current?.contentWindow?.postMessage(message, '*');
       }
     }, []);
 
     const sendAsyncMessage = React.useCallback(
-      <T extends any>(message: MessagePayload): Promise<T> => {
+      <T extends FromWebViewMessage>(message: ToWebViewMessage): Promise<T> => {
         return new Promise((resolve) => {
           sendMessage(message);
 
@@ -83,6 +83,9 @@ export const EditorContent = React.forwardRef(
         setSelection: async (range: Range) => {
           sendMessage({ type: 'set-selection', range });
         },
+        setContents: (delta: Delta, source?: ChangeSource) => {
+          sendMessage({ type: 'set-contents', delta, source });
+        },
         insertText: () => {
           return new Delta();
         },
@@ -90,7 +93,7 @@ export const EditorContent = React.forwardRef(
           return new Delta();
         },
         getLinkRange: async (index: number) => {
-          const data = await sendAsyncMessage<GetLinkRangeEvent>({
+          const data = await sendAsyncMessage<FromWebViewGetLinkRange>({
             type: 'get-link-range',
             index,
           });
@@ -98,7 +101,7 @@ export const EditorContent = React.forwardRef(
           return data.range;
         },
         getBounds: async (index: number, length?: number) => {
-          const data = await sendAsyncMessage<GetBoundsEvent>({
+          const data = await sendAsyncMessage<FromWebViewGetBounds>({
             type: 'get-bounds',
             index,
             length,
@@ -107,7 +110,7 @@ export const EditorContent = React.forwardRef(
           return data.bounds;
         },
         getLine: async (index: number) => {
-          const data = await sendAsyncMessage<GetLineEvent>({
+          const data = await sendAsyncMessage<FromWebViewGetLine>({
             type: 'get-line',
             index,
           });
@@ -115,14 +118,14 @@ export const EditorContent = React.forwardRef(
           return data.line;
         },
         getSelection: async () => {
-          const data = await sendAsyncMessage<GetSelectionEvent>({
+          const data = await sendAsyncMessage<FromWebViewGetSelection>({
             type: 'get-selection',
           });
 
           return data.range;
         },
         getText: async (range: Range) => {
-          const data = await sendAsyncMessage<GetTextEvent>({
+          const data = await sendAsyncMessage<FromWebViewGetText>({
             type: 'get-text',
             range,
           });
@@ -130,7 +133,7 @@ export const EditorContent = React.forwardRef(
           return data.text;
         },
         getFormats: async () => {
-          const data = await sendAsyncMessage<GetFormatsEvent>({
+          const data = await sendAsyncMessage<FromWebViewGetFormats>({
             type: 'get-formats',
           });
 
@@ -146,34 +149,37 @@ export const EditorContent = React.forwardRef(
       }
     }, []);
 
-    const handleMessage = React.useCallback(
+    const receiveMessage = React.useCallback(
       (event: MessageEvent) => {
-        if (event.data.type === 'text-change') {
-          const data = event.data as TextChangeEvent;
+        const data = event.data as FromWebViewMessage;
+
+        if (data.type === 'text-change') {
           onTextChange(data.delta, data.oldDelta, data.source);
-        } else if (event.data.type === 'selection-change') {
-          const data = event.data as SelectionChangeEvent;
+        } else if (data.type === 'selection-change') {
           onSelectionChange(data.range, data.oldRange, data.source);
-        } else if (event.data.type === 'resize') {
-          const data = event.data as ResizeEvent;
+        } else if (data.type === 'resize') {
           handleResize(data.size);
+        } else if (data.type === 'prompt-commands') {
+          onPromptCommands(data.index);
+        } else if (data.type === 'dom-content-loaded') {
+          onLoad();
         }
       },
-      [onTextChange, onSelectionChange, handleResize],
+      [onTextChange, onSelectionChange, handleResize, onPromptCommands, onLoad],
     );
 
     React.useEffect(() => {
-      window.addEventListener('message', handleMessage);
+      window.addEventListener('message', receiveMessage);
 
       return () => {
-        window.removeEventListener('message', handleMessage);
+        window.removeEventListener('message', receiveMessage);
       };
-    }, [handleMessage]);
+    }, [receiveMessage]);
 
     return (
       <iframe
         ref={editorContentRef}
-        srcDoc={generateHTML({ initialContent })}
+        srcDoc={html}
         style={styles.iframe}
         onFocus={onFocus}
         onBlur={onBlur}

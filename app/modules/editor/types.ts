@@ -2,49 +2,7 @@ import type Delta from 'quill-delta';
 
 export type ChangeSource = 'user' | 'api' | 'silent';
 
-export interface SelectionChangeEvent {
-  type: 'selection-change';
-  range: Range | null;
-  oldRange: Range | null;
-  source: ChangeSource;
-}
-
-export interface TextChangeEvent {
-  type: 'text-change';
-  delta: Delta;
-  oldDelta: Delta;
-  source: ChangeSource;
-}
-
-export interface GetBoundsEvent {
-  type: 'get-bounds';
-  bounds: Bounds;
-}
-
-export interface EditorContentSize {
-  height: number;
-  width: number;
-}
-
-export interface ResizeEvent {
-  type: 'resize';
-  size: EditorContentSize;
-}
-
-export interface GetSelectionEvent {
-  type: 'get-selection';
-  range: Range;
-}
-
-export interface GetLinkRangeEvent {
-  type: 'get-link-range';
-  range: Range | null;
-}
-
-export interface GetTextEvent {
-  type: 'get-text';
-  text: string;
-}
+export type HeadingSize = 1 | 2 | 3 | 4 | 5;
 
 export interface Formats {
   italic?: boolean;
@@ -60,79 +18,135 @@ export interface Formats {
 
 export type Format = keyof Formats;
 
-export interface GetFormatsEvent {
-  type: 'get-format';
-  formats: Formats;
+export interface Range {
+  index: number;
+  length: number;
 }
 
-export interface GetLineEvent {
-  type: 'get-line';
-  line: Line | null;
-}
-
-/** Events received from iframe */
-export type EventPayload =
-  | TextChangeEvent
-  | SelectionChangeEvent
-  | GetBoundsEvent
-  | GetLineEvent
-  | GetTextEvent
-  | ResizeEvent;
-
-export type Range = { index: number; length: number };
-
-export type Line = {
+export interface Line {
   isEmpty: boolean;
   offset: number;
-};
+}
 
-export type Bounds = {
+export interface Bounds {
   left: number;
   top: number;
   height: number;
   width: number;
   bottom: number;
   right: number;
-};
+}
 
-export interface GetBoundsMessage {
+export interface EditorContentSize {
+  height: number;
+  width: number;
+}
+
+export interface FromWebViewSelectionChange {
+  type: 'selection-change';
+  range: Range | null;
+  oldRange: Range | null;
+  source: ChangeSource;
+}
+
+export interface FromWebViewPromptCommands {
+  type: 'prompt-commands';
+  index: number;
+}
+
+export interface FromWebViewTextChange {
+  type: 'text-change';
+  delta: Delta;
+  oldDelta: Delta;
+  source: ChangeSource;
+}
+
+export interface FromWebViewGetBounds {
+  type: 'get-bounds';
+  bounds: Bounds;
+}
+export interface FromWebViewResize {
+  type: 'resize';
+  size: EditorContentSize;
+}
+
+export interface FromWebViewDOMContentLoaded {
+  type: 'dom-content-loaded';
+}
+
+export interface FromWebViewGetSelection {
+  type: 'get-selection';
+  range: Range | null;
+}
+
+export interface FromWebViewGetLinkRange {
+  type: 'get-link-range';
+  range: Range | null;
+}
+
+export interface FromWebViewGetText {
+  type: 'get-text';
+  text: string;
+}
+
+export interface FromWebViewGetFormats {
+  type: 'get-formats';
+  formats: Formats;
+}
+
+export interface FromWebViewGetLine {
+  type: 'get-line';
+  line: Line | null;
+}
+
+/** Events received from iframe */
+export type FromWebViewMessage =
+  | FromWebViewTextChange
+  | FromWebViewSelectionChange
+  | FromWebViewGetSelection
+  | FromWebViewPromptCommands
+  | FromWebViewGetBounds
+  | FromWebViewGetLine
+  | FromWebViewGetText
+  | FromWebViewGetLinkRange
+  | FromWebViewGetFormats
+  | FromWebViewDOMContentLoaded
+  | FromWebViewResize;
+
+export interface ToWebViewGetBounds {
   type: 'get-bounds';
   index: number;
   length?: number;
 }
 
-export interface GetLineMessage {
+export interface ToWebViewGetLine {
   type: 'get-line';
   index: number;
 }
 
-export interface GetSelectionMessage {
+export interface ToWebViewGetSelection {
   type: 'get-selection';
 }
 
-export interface GetTextMessage {
+export interface ToWebViewGetText {
   type: 'get-text';
   range: Range;
 }
 
-export interface GetLinkRangeMessage {
+export interface ToWebViewGetLinkRange {
   type: 'get-link-range';
   index: number;
 }
 
-export interface GetFormatsMessage {
+export interface ToWebViewGetFormats {
   type: 'get-formats';
 }
 
-export interface FocusMessage {
+export interface ToWebViewFocus {
   type: 'focus';
 }
 
-// Formats
-
-export type HeadingSize = 1 | 2 | 3 | 4 | 5;
-
-export interface FormatMessage<
+export interface ToWebViewFormat<
   T extends Formats = any,
   K extends keyof T = any
 > {
@@ -142,35 +156,42 @@ export interface FormatMessage<
   source?: ChangeSource;
 }
 
-export interface RemoveLinkMessage {
+export interface ToWebViewRemoveLink {
   type: 'remove-link';
   index: number;
 }
 
-export interface UndoMessage {
+export interface ToWebViewUndo {
   type: 'undo';
 }
 
-export interface RedoMessage {
+export interface ToWebViewRedo {
   type: 'redo';
 }
 
-export interface SetSelectionMessage {
+export interface ToWebViewSetSelection {
   type: 'set-selection';
   range: Range;
 }
 
+export interface ToWebViewSetContents {
+  type: 'set-contents';
+  delta: Delta;
+  source?: ChangeSource;
+}
+
 /** Messages sent to iframe */
-export type MessagePayload =
-  | GetFormatsMessage
-  | GetBoundsMessage
-  | FormatMessage
-  | GetLineMessage
-  | GetSelectionMessage
-  | UndoMessage
-  | RedoMessage
-  | GetTextMessage
-  | GetLinkRangeMessage
-  | RemoveLinkMessage
-  | SetSelectionMessage
-  | FocusMessage;
+export type ToWebViewMessage =
+  | ToWebViewGetFormats
+  | ToWebViewGetBounds
+  | ToWebViewFormat
+  | ToWebViewGetLine
+  | ToWebViewGetSelection
+  | ToWebViewUndo
+  | ToWebViewRedo
+  | ToWebViewGetText
+  | ToWebViewGetLinkRange
+  | ToWebViewRemoveLink
+  | ToWebViewSetSelection
+  | ToWebViewSetContents
+  | ToWebViewFocus;
