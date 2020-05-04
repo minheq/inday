@@ -139,7 +139,7 @@ const lightTheme: Theme = {
   },
 };
 
-const ThemeContext = React.createContext<Theme>(lightTheme);
+export const ThemeContext = React.createContext<Theme>(lightTheme);
 
 interface ThemeProviderProps {
   children?: React.ReactNode;

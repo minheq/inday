@@ -1,6 +1,6 @@
 import Delta from 'quill-delta';
-import quillJS from './quill';
-import quillCSS from './quill.css';
+import quillJS from './vendor/quill';
+import quillCSS from './vendor/quill.css';
 
 interface GenerateHTMLProps {
   initialContent?: Delta;
@@ -116,26 +116,6 @@ export function generateHTML(props: GenerateHTMLProps) {
           sendMessage({ type: 'selection-change', range, oldRange, source });
         });
 
-        function handleFormatBold() {
-          const isBold = quill.getFormat().bold;
-          quill.format('bold', !isBold);
-        }
-
-        function handleFormatItalic() {
-          const isItalic = quill.getFormat().italic;
-          quill.format('italic', !isItalic);
-        }
-        
-        function handleFormatStrike() {
-          const isStriked = quill.getFormat().strike;
-          quill.format('strike', !isStriked);
-        }
-        
-        function handleFormatCode() {
-          const isCode = quill.getFormat().code;
-          quill.format('code', !isCode);
-        }
-        
         function handleRemoveLink(index) {
           const [link, offset] = quill.getLeaf(index);
 
@@ -145,38 +125,17 @@ export function generateHTML(props: GenerateHTMLProps) {
           }
         }
         
+        function handleFormat(name, value, source) {
+          quill.format(name, value, source);
+        }
+
         function handleFormatLink(range, text, url) {
           quill.deleteText(range.index, range.length);
           quill.insertText(range.index, text, 'link', url);
         }
 
-        function handleFormatHeading(size) {
-          const header = quill.getFormat().header;
-
-          if (header == size) {
-            quill.format('header', false);
-          } else {
-            quill.format('header', size);
-          }
-        }
-
-        function handleFormatList(index) {
-          const isList = quill.getFormat().list;
-          quill.formatLine(index, 1, 'list', isList ? false : 'bullet');
-        }
-        
-        function handleFormatBlockquote(index) {
-          const isBlockquote = quill.getFormat().blockquote;
-          quill.formatLine(index, 1, 'blockquote', !isBlockquote);
-        }
-        
-        function handleFormatCodeBlock(index) {
-          const isCodeBlock = quill.getFormat()['code-block'];
-          quill.formatLine(index, 1, 'code-block', !isCodeBlock);
-        }
-
-        function getBounds(range) {
-          const bounds = quill.getBounds(range.index, range.length);
+        function getBounds(index, length) {
+          const bounds = quill.getBounds(index, length);
           sendMessage({ type: 'get-bounds', bounds });
         }
         
@@ -224,39 +183,8 @@ export function generateHTML(props: GenerateHTMLProps) {
 
         function receiveMessage(event) {
           switch(event.data.type) {
-            case 'format-bold':
-              handleFormatBold();
-              break;
-            case 'format-italic':
-              handleFormatItalic();
-              break;
-            case 'format-strike':
-              handleFormatStrike();
-              break;
-            case 'format-code':
-              handleFormatCode();
-              break;
-            case 'remove-link':
-              handleRemoveLink(event.data.index);
-              break;
-            case 'format-link':
-              handleFormatLink(event.data.range, event.data.text, event.data.url);
-              break;
-            case 'format-heading':
-              handleFormatHeading(event.data.size);
-              break;
-            case 'format-list':
-              handleFormatList(event.data.index);
-              break;
-            case 'format-blockquote':
-              handleFormatBlockquote(event.data.index);
-              break;
-            case 'format-code-block':
-              handleFormatCodeBlock(event.data.index);
-              break;
-            case 'insert-image':
-              break;
-            case 'insert-video':
+            case 'format':
+              handleFormat(event.data.name, event.data.value);
               break;
             case 'focus':
               quill.focus();
@@ -271,7 +199,7 @@ export function generateHTML(props: GenerateHTMLProps) {
               quill.setSelection(event.data.range.index, event.data.range.length);
               break;
             case 'get-bounds':
-              getBounds(event.data.range);
+              getBounds(event.data.index, event.data.length);
               break;
             case 'get-selection':
               getSelection()

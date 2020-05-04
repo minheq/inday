@@ -1,3 +1,4 @@
+import Delta from 'quill-delta';
 import React from 'react';
 import { generateHTML } from './html';
 import type {
@@ -10,13 +11,13 @@ import type {
   Range,
   MessagePayload,
   ResizeEvent,
-  HeadingSize,
   GetBoundsEvent,
   GetLineEvent,
   GetSelectionEvent,
   GetTextEvent,
   GetFormatsEvent,
   GetLinkRangeEvent,
+  EditorContentSize,
 } from './types';
 
 export const EditorContent = React.forwardRef(
@@ -33,7 +34,6 @@ export const EditorContent = React.forwardRef(
       onFocus = () => {},
       onTextChange = () => {},
       onSelectionChange = () => {},
-      onResize = () => {},
     } = props;
     const editorContentRef = React.useRef<HTMLIFrameElement | null>(null);
 
@@ -71,48 +71,23 @@ export const EditorContent = React.forwardRef(
         redo: () => {
           sendMessage({ type: 'redo' });
         },
-        formatBold: () => {
-          sendMessage({ type: 'format-bold' });
+        format: (name, value, source) => {
+          sendMessage({ type: 'format', name, value, source });
         },
-        formatItalic: () => {
-          sendMessage({ type: 'format-italic' });
-        },
-        formatStrike: () => {
-          sendMessage({ type: 'format-strike' });
-        },
-        removeLink: (index: number) => {
-          sendMessage({ type: 'remove-link', index });
-        },
-        formatLink: (range: Range, text: string, url: string) => {
-          sendMessage({ type: 'format-link', range, text, url });
-        },
-        formatHeading: (size: HeadingSize) => {
-          sendMessage({ type: 'format-heading', size });
-        },
-        formatCode: () => {
-          sendMessage({ type: 'format-code' });
-        },
-        formatList: (index: number) => {
-          sendMessage({ type: 'format-list', index });
-        },
-        formatBlockquote: (index: number) => {
-          sendMessage({ type: 'format-blockquote', index });
-        },
-        formatCodeBlock: (index: number) => {
-          sendMessage({ type: 'format-code-block', index });
-        },
-        insertImage: (index: number, url: string) => {
-          sendMessage({ type: 'insert-image', index, url });
-        },
-        insertVideo: (index: number, url: string) => {
-          sendMessage({ type: 'insert-video', index, url });
-        },
+        formatLink: () => {},
+        removeLink: () => {},
         focus: () => {
           editorContentRef.current?.focus();
           sendMessage({ type: 'focus' });
         },
         setSelection: async (range: Range) => {
           sendMessage({ type: 'set-selection', range });
+        },
+        insertText: () => {
+          return new Delta();
+        },
+        insertEmbed: () => {
+          return new Delta();
         },
         getLinkRange: async (index: number) => {
           const data = await sendAsyncMessage<GetLinkRangeEvent>({
@@ -122,10 +97,11 @@ export const EditorContent = React.forwardRef(
 
           return data.range;
         },
-        getBounds: async (range: Range) => {
+        getBounds: async (index: number, length?: number) => {
           const data = await sendAsyncMessage<GetBoundsEvent>({
             type: 'get-bounds',
-            range,
+            index,
+            length,
           });
 
           return data.bounds;
@@ -164,24 +140,23 @@ export const EditorContent = React.forwardRef(
       [sendMessage, sendAsyncMessage],
     );
 
-    const handleResize = React.useCallback(
-      (event: ResizeEvent) => {
-        if (editorContentRef.current) {
-          editorContentRef.current.style.height = event.size.height + 'px';
-          onResize(event);
-        }
-      },
-      [onResize],
-    );
+    const handleResize = React.useCallback((size: EditorContentSize) => {
+      if (editorContentRef.current) {
+        editorContentRef.current.style.height = size.height + 'px';
+      }
+    }, []);
 
     const handleMessage = React.useCallback(
       (event: MessageEvent) => {
         if (event.data.type === 'text-change') {
-          onTextChange(event.data as TextChangeEvent);
+          const data = event.data as TextChangeEvent;
+          onTextChange(data.delta, data.oldDelta, data.source);
         } else if (event.data.type === 'selection-change') {
-          onSelectionChange(event.data as SelectionChangeEvent);
+          const data = event.data as SelectionChangeEvent;
+          onSelectionChange(data.range, data.oldRange, data.source);
         } else if (event.data.type === 'resize') {
-          handleResize(event.data as ResizeEvent);
+          const data = event.data as ResizeEvent;
+          handleResize(data.size);
         }
       },
       [onTextChange, onSelectionChange, handleResize],

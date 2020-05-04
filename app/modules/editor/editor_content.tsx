@@ -1,51 +1,76 @@
-import type Delta from 'quill-delta';
+import Delta from 'quill-delta';
 import React from 'react';
 import { View } from 'react-native';
 import { Text } from '../../components/text';
 import type {
-  TextChangeEvent,
-  SelectionChangeEvent,
   Bounds,
   Range,
   Line,
-  ResizeEvent,
-  HeadingSize,
+  Format,
   Formats,
+  ChangeSource,
 } from './types';
 
 export interface EditorContentProps {
   initialContent?: Delta;
   onBlur?: () => void;
   onFocus?: () => void;
-  onResize?: (event: ResizeEvent) => void;
-  onTextChange?: (event: TextChangeEvent) => void;
-  onSelectionChange?: (event: SelectionChangeEvent) => void;
+  onTextChange?: (
+    delta: Delta,
+    oldContents: Delta,
+    source: ChangeSource,
+  ) => void;
+  onSelectionChange?: (
+    range: Range | null,
+    oldRange: Range | null,
+    source: ChangeSource,
+  ) => void;
 }
 
 export interface EditorContentInstance {
-  selection: Range | null;
+  // Content
+  insertText(index: number, text: string, source?: ChangeSource): Delta;
+  insertText(
+    index: number,
+    text: string,
+    format: Format,
+    value: any,
+    source?: ChangeSource,
+  ): Delta;
+  insertText(
+    index: number,
+    text: string,
+    formats: Formats,
+    source?: ChangeSource,
+  ): Delta;
+  insertEmbed(
+    index: number,
+    type: string,
+    value: any,
+    source: ChangeSource,
+  ): Delta;
+  // History
   undo: () => void;
   redo: () => void;
-  formatBold: () => void;
-  formatItalic: () => void;
-  formatStrike: () => void;
+  // Formatting
+  getFormats: () => Promise<Formats>;
+  format: <TFormat extends Format>(
+    name: TFormat,
+    value: Formats[TFormat],
+    source?: ChangeSource,
+  ) => void;
   removeLink: (index: number) => void;
   formatLink: (range: Range, text: string, url: string) => void;
-  formatHeading: (size: HeadingSize) => void;
-  formatCode: () => void;
-  formatList: (index: number) => void;
-  formatBlockquote: (index: number) => void;
-  formatCodeBlock: (index: number) => void;
-  insertImage: (index: number, url: string) => void;
-  insertVideo: (index: number, url: string) => void;
+  // Editor
   focus: () => void;
-  setSelection: (range: Range) => Promise<void>;
-  getLinkRange: (index: number) => Promise<Range | null>;
-  getBounds: (range: Range) => Promise<Bounds>;
+  // Model
   getText: (range: Range) => Promise<string>;
+  getLinkRange: (index: number) => Promise<Range | null>;
   getLine: (index: number) => Promise<Line | null>;
-  getSelection: () => Promise<Range>;
-  getFormats: () => Promise<Formats>;
+  // Selection
+  getBounds: (index: number, length?: number) => Promise<Bounds>;
+  getSelection: () => Promise<Range | null>;
+  setSelection: (range: Range) => Promise<void>;
 }
 
 export const EditorContent = React.forwardRef(
@@ -62,21 +87,14 @@ export const EditorContent = React.forwardRef(
       undo: () => {},
       redo: () => {},
       getText: async () => '',
-      formatBold: () => {},
-      formatItalic: () => {},
-      formatStrike: () => {},
-      removeLink: () => {},
+      format: () => {},
       formatLink: () => {},
-      formatHeading: () => {},
-      formatCode: () => {},
-      formatList: () => {},
-      formatBlockquote: () => {},
-      formatCodeBlock: () => {},
-      insertImage: () => {},
-      insertVideo: () => {},
+      removeLink: () => {},
       focus: () => {},
       getLinkRange: async () => null,
       setSelection: async () => {},
+      insertText: () => new Delta(),
+      insertEmbed: () => new Delta(),
       getBounds: async () => ({
         top: 0,
         left: 0,

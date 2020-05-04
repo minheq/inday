@@ -46,17 +46,19 @@ export interface GetTextEvent {
   text: string;
 }
 
-export type Formats = {
-  italic?: true;
-  bold?: true;
-  strike?: true;
+export interface Formats {
+  italic?: boolean;
+  bold?: boolean;
+  strike?: boolean;
   link?: string;
-  list?: true;
-  blockquote?: true;
-  'code-block'?: true;
-  header?: HeadingSize;
-  code?: true;
-};
+  list?: 'bullet' | false;
+  blockquote?: boolean;
+  'code-block'?: boolean;
+  header?: HeadingSize | false;
+  code?: boolean;
+}
+
+export type Format = keyof Formats;
 
 export interface GetFormatsEvent {
   type: 'get-format';
@@ -95,7 +97,8 @@ export type Bounds = {
 
 export interface GetBoundsMessage {
   type: 'get-bounds';
-  range: Range;
+  index: number;
+  length?: number;
 }
 
 export interface GetLineMessage {
@@ -127,61 +130,16 @@ export interface FocusMessage {
 
 // Formats
 
-export interface FormatBoldMessage {
-  type: 'format-bold';
-}
-
-export interface FormatItalicMessage {
-  type: 'format-italic';
-}
-
-export interface FormatStrikeMessage {
-  type: 'format-strike';
-}
-
 export type HeadingSize = 1 | 2 | 3 | 4 | 5;
 
-export interface FormatHeadingMessage {
-  type: 'format-heading';
-  size: HeadingSize;
-}
-
-export interface FormatCodeMessage {
-  type: 'format-code';
-}
-
-export interface FormatLinkMessage {
-  type: 'format-link';
-  url: string;
-  text: string;
-  range: Range;
-}
-
-export interface FormatListMessage {
-  type: 'format-list';
-  index: number;
-}
-
-export interface FormatBlockquoteMessage {
-  type: 'format-blockquote';
-  index: number;
-}
-
-export interface FormatCodeBlockMessage {
-  type: 'format-code-block';
-  index: number;
-}
-
-export interface InsertImageMessage {
-  type: 'insert-image';
-  index: number;
-  url: string;
-}
-
-export interface InsertVideoMessage {
-  type: 'insert-video';
-  index: number;
-  url: string;
+export interface FormatMessage<
+  T extends Formats = any,
+  K extends keyof T = any
+> {
+  type: 'format';
+  name: K;
+  value: T[K];
+  source?: ChangeSource;
 }
 
 export interface RemoveLinkMessage {
@@ -205,18 +163,8 @@ export interface SetSelectionMessage {
 /** Messages sent to iframe */
 export type MessagePayload =
   | GetFormatsMessage
-  | FormatBoldMessage
-  | FormatItalicMessage
-  | FormatStrikeMessage
-  | FormatHeadingMessage
-  | FormatLinkMessage
-  | FormatCodeMessage
-  | FormatListMessage
-  | FormatBlockquoteMessage
-  | FormatCodeBlockMessage
-  | InsertImageMessage
-  | InsertVideoMessage
   | GetBoundsMessage
+  | FormatMessage
   | GetLineMessage
   | GetSelectionMessage
   | UndoMessage
