@@ -45,7 +45,7 @@ export function TimelineScreen() {
         animationType="fade"
         isOpen={isEditingCard}
         onRequestClose={handleCloseEditingCard}
-        style={{ width: 736 }}
+        style={{ width: 800 }}
       >
         <Container padding={16} height="100%" width="100%">
           <Row justifyContent="space-between">

@@ -1,9 +1,13 @@
-import 'quill/dist/quill.core.css';
-import './editor.css';
-import Quill, { Sources, RangeStatic } from 'quill';
 import Delta from 'quill-delta';
 import React from 'react';
-import { Animated, StyleSheet, View, Clipboard } from 'react-native';
+import {
+  Animated,
+  StyleSheet,
+  ScrollView,
+  View,
+  Clipboard,
+} from 'react-native';
+import { EditorContent, EditorContentInstance } from './editor_content';
 import {
   IconName,
   Icon,
@@ -13,58 +17,32 @@ import {
   CloseButton,
   Text,
   TextInput,
+  Dialog,
   Spacing,
 } from '../../components';
 import { useTheme, tokens, TextSize } from '../../theme';
+import type {
+  TextChangeEvent,
+  SelectionChangeEvent,
+  Range,
+  Formats,
+  HeadingSize,
+} from './types';
 import { between } from '../../utils/numbers';
-
-declare module 'quill' {
-  interface Quill {
-    history: {
-      undo: () => void;
-      redo: () => void;
-    };
-  }
-}
+import { useScrollViewState } from '../../utils/scrollview';
 
 interface EditorProps {
   initialContent?: Delta;
 }
 
-interface HoverableToolbar {
-  type: 'toolbar';
-}
+type HoverableType = 'link';
 
-interface HoverableLinkPreview {
-  type: 'link-preview';
-}
-
-interface HoverableLinkEdit {
-  type: 'link-edit';
-}
-
-type Hoverable = HoverableToolbar | HoverableLinkPreview | HoverableLinkEdit;
-
-interface HoverableItem {
+interface HoverableState {
   isVisible: boolean;
-  hoverable: Hoverable | null;
+  type: HoverableType;
   position: Animated.ValueXY;
   opacity: Animated.Value;
 }
-
-type HeadingSize = 1 | 2 | 3 | 4 | 5;
-
-type Formats = {
-  italic?: true;
-  bold?: true;
-  strike?: true;
-  link?: string;
-  list?: true;
-  blockquote?: true;
-  'code-block'?: true;
-  header?: HeadingSize;
-  code?: true;
-};
 
 const LINK_PREVIEW_WIDTH = 280;
 const LINK_PREVIEW_HEIGHT = 40;
@@ -72,324 +50,416 @@ const LINK_PREVIEW_HEIGHT = 40;
 // TODO:
 // - Markdown auto formatting
 // - Disable pasted formats
-// - Code block syntax highlighting
-// - Smooth loading of editor
-// - Drag and drop image/video into editor
-// - Paste image
-// - Embed videos
-// - Embed Tweets
-// - Embed Drawings
+// - Drag and drop files into editor
 
-const EMPTY_FORMATS = {};
-const EMPTY_HOVERABLE_ITEM = {
-  isVisible: false,
-  hoverable: null,
-  position: new Animated.ValueXY(),
-  opacity: new Animated.Value(0),
-};
+export function Editor(props: EditorProps) {
+  const {
+    initialContent = new Delta()
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+      )
+      .insert('\n'),
+  } = props;
+  const theme = useTheme();
+  const { scrollViewState, handlers: scrollHandlers } = useScrollViewState();
+  const editorContentRef = React.useRef<EditorContentInstance | null>(null);
+  const scrollViewRef = React.useRef<ScrollView | null>(null);
+  const [hoverable, setHoverable] = React.useState<HoverableState>({
+    isVisible: false,
+    type: 'link',
+    position: new Animated.ValueXY(),
+    opacity: new Animated.Value(0),
+  });
+  const [activeFormats, setActiveFormats] = React.useState<Formats>({});
+  const [linkPreviewURL, setLinkPreviewURL] = React.useState('');
+  const [linkEdit, setLinkEdit] = React.useState({
+    isOpen: false,
+    initialValue: {
+      text: '',
+      url: '',
+    },
+  });
 
-interface EditorState {
-  hoverableItem: HoverableItem;
-}
+  const getHoverablePosition = React.useCallback(
+    async (range: Range, type: HoverableType) => {
+      if (editorContentRef.current) {
+        const rangeBounds = await editorContentRef.current.getBounds(range);
+        const hoverableHeight = type === 'link' ? LINK_PREVIEW_HEIGHT : 0;
+        const hoverableWidth = type === 'link' ? LINK_PREVIEW_WIDTH : 0;
 
-export class Editor extends React.Component<EditorProps, EditorState> {
-  quill: Quill | null = null;
+        let y = 0;
+        if (rangeBounds.top - hoverableHeight - 16 < 16) {
+          y = rangeBounds.top + hoverableHeight - 14;
+        } else {
+          y = rangeBounds.top - hoverableHeight - 8;
+        }
 
-  state = {
-    hoverableItem: EMPTY_HOVERABLE_ITEM,
-  };
+        const x = between(
+          rangeBounds.left + rangeBounds.width / 2 - hoverableWidth / 2,
+          -40,
+          440,
+        );
 
-  constructor(props: EditorProps) {
-    super(props);
-  }
+        return { x, y };
+      }
 
-  componentDidMount() {
-    const {
-      initialContent = new Delta()
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert('\n'),
-    } = this.props;
-    this.quill = new Quill('#editor-container');
-    this.quill.on('text-change', this.handleTextChange);
-    this.quill.on('selection-change', this.handleSelectionChange);
-    this.quill.setContents(initialContent);
-  }
-
-  getHoverablePosition = () => {
-    if (!this.quill) {
-      return;
-    }
-
-    const selection = this.quill.getSelection();
-    if (!selection) {
       return null;
-    }
+    },
+    [],
+  );
 
-    const rangeBounds = this.quill.getBounds(selection.index);
-    const hoverableHeight = LINK_PREVIEW_HEIGHT;
-    const hoverableWidth = LINK_PREVIEW_WIDTH;
+  const handleShowHoverable = React.useCallback(
+    async (range: Range, type: HoverableType) => {
+      if (editorContentRef.current) {
+        const position = await getHoverablePosition(range, type);
 
-    let y = 0;
-    if (rangeBounds.top - hoverableHeight - 16 < 16) {
-      y = rangeBounds.top + hoverableHeight - 14;
-    } else {
-      y = rangeBounds.top - hoverableHeight - 8;
-    }
+        if (!position) {
+          return;
+        }
 
-    const x = between(
-      rangeBounds.left + rangeBounds.width / 2 - hoverableWidth / 2,
-      -40,
-      440,
-    );
+        const { x, y } = position;
 
-    return { x, y };
-  };
-
-  handleShowHoverable = (hoverable: Hoverable) => {
-    const { hoverableItem } = this.state;
-    const position = this.getHoverablePosition();
-
-    if (!position) {
-      return;
-    }
-
-    const { x, y } = position;
-
-    hoverableItem.position.setValue({
-      x,
-      y,
-    });
-
-    this.setState((prev) => ({
-      hoverableItem: {
-        ...prev.hoverableItem,
-        hoverable,
-        isVisible: true,
-      },
-    }));
-
-    Animated.timing(hoverableItem.opacity, {
-      toValue: 1,
-      useNativeDriver: true,
-      duration: 100,
-    }).start();
-  };
-
-  handleUpdateHoverablePositionIfNeeded = () => {
-    const { hoverableItem } = this.state;
-    const position = this.getHoverablePosition();
-
-    if (!position) {
-      return;
-    }
-
-    const { x, y } = position;
-    const prevX = (hoverableItem.position.x as any)._value;
-    const prevY = (hoverableItem.position.y as any)._value;
-
-    if (x !== prevX || y !== prevY) {
-      Animated.spring(hoverableItem.position, {
-        toValue: {
+        hoverable.position.setValue({
           x,
           y,
-        },
-        useNativeDriver: true,
-        bounciness: 0,
-        speed: 300,
-      }).start();
-    }
-  };
+        });
 
-  handleHideHoverable = () => {
-    const { hoverableItem } = this.state;
+        setHoverable((prev) => ({
+          ...prev,
+          type,
+          isVisible: true,
+        }));
 
-    if (hoverableItem.isVisible) {
-      Animated.timing(hoverableItem.opacity, {
+        Animated.timing(hoverable.opacity, {
+          toValue: 1,
+          useNativeDriver: true,
+          duration: 100,
+        }).start();
+      }
+    },
+    [hoverable, getHoverablePosition],
+  );
+
+  const handleUpdateHoverablePositionIfNeeded = React.useCallback(
+    async (range: Range) => {
+      const position = await getHoverablePosition(range, hoverable.type);
+
+      if (!position) {
+        return;
+      }
+
+      const { x, y } = position;
+      const prevX = (hoverable.position.x as any)._value;
+      const prevY = (hoverable.position.y as any)._value;
+
+      if (x !== prevX || y !== prevY) {
+        Animated.spring(hoverable.position, {
+          toValue: {
+            x,
+            y,
+          },
+          useNativeDriver: true,
+          bounciness: 0,
+          speed: 300,
+        }).start();
+      }
+    },
+    [hoverable, getHoverablePosition],
+  );
+
+  const handleHideHoverable = React.useCallback(async () => {
+    if (hoverable.isVisible) {
+      Animated.timing(hoverable.opacity, {
         toValue: 0,
         useNativeDriver: true,
         duration: 100,
       }).start(() => {
-        this.setState({
-          hoverableItem: EMPTY_HOVERABLE_ITEM,
-        });
+        setHoverable((prev) => ({
+          ...prev,
+          isVisible: false,
+        }));
       });
     }
-  };
+  }, [hoverable]);
 
-  handleTextChange = (_delta: Delta, _oldContents: Delta, _source: Sources) => {
-    if (!this.quill) {
-      return;
-    }
+  const handleTextChange = React.useCallback(
+    async (_event: TextChangeEvent) => {
+      if (editorContentRef.current) {
+        const range = await editorContentRef.current.getSelection();
+        const rangeBounds = await editorContentRef.current.getBounds(range);
 
-    const selection = this.quill.getSelection();
-    if (!selection) {
-      return null;
-    }
+        if (rangeBounds.bottom > scrollViewState.contentHeight) {
+          scrollViewRef.current?.scrollTo({ y: rangeBounds.bottom });
+        }
 
-    if (selection.length === 0) {
-      this.handleHideHoverable();
-    } else {
-      this.handleUpdateHoverablePositionIfNeeded();
-    }
-  };
+        const formats = await editorContentRef.current.getFormats();
+        setActiveFormats(formats);
 
-  handleSelectionChange = (
-    range: RangeStatic,
-    _oldRange: RangeStatic,
-    _source: Sources,
-  ) => {
-    if (!this.quill) {
-      return;
-    }
-
-    if (range === null) {
-      return;
-    }
-
-    const formats = this.quill.getFormat() as Formats;
-
-    if (range.length === 0) {
-      this.handleHideHoverable();
-
-      if (formats.link) {
-        this.handleShowHoverable(range, 'link');
+        if (range.length === 0) {
+          handleHideHoverable();
+        } else {
+          handleUpdateHoverablePositionIfNeeded(range);
+        }
       }
+    },
+    [
+      handleHideHoverable,
+      handleUpdateHoverablePositionIfNeeded,
+      scrollViewState,
+    ],
+  );
+
+  const handleSelectionChange = React.useCallback(
+    async (event: SelectionChangeEvent) => {
+      const { range } = event;
+
+      if (editorContentRef.current) {
+        editorContentRef.current.selection = range;
+
+        const formats = await editorContentRef.current.getFormats();
+        setActiveFormats(formats);
+
+        if (range === null) {
+          return;
+        }
+
+        if (range.length === 0) {
+          handleHideHoverable();
+
+          if (formats.link) {
+            setLinkPreviewURL(formats.link);
+            handleShowHoverable(range, 'link');
+          }
+        }
+      }
+    },
+    [editorContentRef, handleHideHoverable, handleShowHoverable],
+  );
+
+  const handleFormatBold = React.useCallback(() => {
+    editorContentRef.current?.formatBold();
+  }, []);
+
+  const handleFormatItalic = React.useCallback(() => {
+    editorContentRef.current?.formatItalic();
+  }, []);
+
+  const handleFormatStrike = React.useCallback(() => {
+    editorContentRef.current?.formatStrike();
+  }, []);
+
+  const handleRemoveLink = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current?.removeLink(
+        editorContentRef.current.selection.index,
+      );
     }
-  };
+  }, []);
 
-  handleFormatBold = () => {
-    if (!this.quill) {
-      return;
+  const handleFormatLink = React.useCallback(async () => {
+    handleHideHoverable();
+
+    if (editorContentRef.current?.selection) {
+      const formats = await editorContentRef.current.getFormats();
+
+      // If selection is collapsed
+      if (editorContentRef.current.selection.length === 0) {
+        if (formats.link) {
+          const range = await editorContentRef.current.getLinkRange(
+            editorContentRef.current.selection.index,
+          );
+
+          if (range) {
+            const text = await editorContentRef.current.getText(range);
+            await editorContentRef.current.setSelection(range);
+
+            setLinkEdit({
+              isOpen: true,
+              initialValue: {
+                text,
+                url: formats.link,
+              },
+            });
+          } else {
+            setLinkEdit({
+              isOpen: true,
+              initialValue: {
+                text: '',
+                url: '',
+              },
+            });
+          }
+        } else {
+          setLinkEdit({
+            isOpen: true,
+            initialValue: {
+              text: '',
+              url: '',
+            },
+          });
+        }
+
+        return;
+      }
+
+      const initialText = await editorContentRef.current.getText(
+        editorContentRef.current.selection,
+      );
+
+      setLinkEdit({
+        isOpen: true,
+        initialValue: {
+          text: initialText || '',
+          url: formats.link || '',
+        },
+      });
+    }
+  }, [handleHideHoverable]);
+
+  const handleSubmitLinkEdit = React.useCallback((link: LinkValue) => {
+    setLinkEdit({
+      isOpen: false,
+      initialValue: {
+        text: '',
+        url: '',
+      },
+    });
+
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.formatLink(
+        editorContentRef.current.selection,
+        link.text,
+        link.url,
+      );
     }
 
-    const formats = this.quill.getFormat() as Formats;
-    this.quill.format('bold', !formats.bold);
-  };
+    editorContentRef.current?.focus();
+  }, []);
 
-  handleFormatItalic = () => {
-    if (!this.quill) {
-      return;
+  const handleCloseLinkEdit = React.useCallback(() => {
+    setLinkEdit({
+      isOpen: false,
+      initialValue: {
+        text: '',
+        url: '',
+      },
+    });
+  }, []);
+
+  const handleFormatHeading = React.useCallback((size: HeadingSize) => {
+    editorContentRef.current?.formatHeading(size);
+  }, []);
+
+  const handleFormatCode = React.useCallback(() => {
+    editorContentRef.current?.formatCode();
+  }, []);
+
+  const handleFormatList = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.formatList(
+        editorContentRef.current.selection.index,
+      );
     }
+  }, []);
 
-    const formats = this.quill.getFormat() as Formats;
-    this.quill.format('italic', !formats.italic);
-  };
-
-  handleFormatStrike = () => {
-    if (!this.quill) {
-      return;
+  const handleFormatBlockquote = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.formatBlockquote(
+        editorContentRef.current.selection.index,
+      );
     }
+  }, []);
 
-    const formats = this.quill.getFormat() as Formats;
-    this.quill.format('strike', !formats.strike);
-  };
-
-  handleFormatCode = () => {
-    if (!this.quill) {
-      return;
+  const handleFormatCodeBlock = React.useCallback(() => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.formatCodeBlock(
+        editorContentRef.current.selection.index,
+      );
     }
+  }, []);
 
-    const formats = this.quill.getFormat() as Formats;
-    this.quill.format('code', !formats.code);
-  };
-
-  handleFormatHeading = (size: HeadingSize) => {
-    if (!this.quill) {
-      return;
+  const handleInsertImage = React.useCallback((url: string) => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.insertImage(
+        editorContentRef.current.selection.index,
+        url,
+      );
     }
-    const formats = this.quill.getFormat() as Formats;
+  }, []);
 
-    if (formats.header === size) {
-      this.quill.format('header', false);
-    } else {
-      this.quill.format('header', size);
+  const handleInsertVideo = React.useCallback((url: string) => {
+    if (editorContentRef.current?.selection) {
+      editorContentRef.current.insertVideo(
+        editorContentRef.current.selection.index,
+        url,
+      );
     }
-  };
+  }, []);
 
-  handleFormatList = () => {
-    if (!this.quill) {
-      return;
-    }
+  const handleUndo = React.useCallback(() => {
+    editorContentRef.current?.undo();
+  }, []);
 
-    const formats = this.quill.getFormat() as Formats;
-    this.quill.format('list', formats.list ? false : 'bullet');
-  };
+  const handleRedo = React.useCallback(() => {
+    editorContentRef.current?.redo();
+  }, []);
 
-  handleFormatBlockquote = () => {
-    if (!this.quill) {
-      return;
-    }
+  const handleBlur = React.useCallback(() => {}, []);
 
-    const formats = this.quill.getFormat() as Formats;
-    this.quill.format('blockquote', !formats.blockquote);
-  };
+  const handleFocus = React.useCallback(() => {}, []);
 
-  handleFormatCodeBlock = () => {
-    if (!this.quill) {
-      return;
-    }
-
-    const formats = this.quill.getFormat() as Formats;
-    this.quill.format('code-block', !formats['code-block']);
-  };
-
-  handleRemoveLink = () => {};
-
-  handleFormatLink = async () => {
-    this.handleHideHoverable();
-  };
-
-  handleSubmitLinkEdit = () => {};
-
-  handleCloseLinkEdit = () => {};
-
-  handleInsertImage = () => {};
-
-  handleInsertVideo = () => {};
-
-  handleUndo = () => {
-    if (!this.quill) {
-      return;
-    }
-
-    this.quill.history.undo();
-  };
-
-  handleRedo = () => {
-    if (!this.quill) {
-      return;
-    }
-
-    this.quill.history.redo();
-  };
-
-  render() {
-    return (
-      <Container expanded>
-        <Container paddingBottom={4}>
-          <Toolbar
-            formats={this.quill ? this.quill.getFormat() : EMPTY_FORMATS}
-            onUndo={this.handleUndo}
-            onRedo={this.handleRedo}
-            onFormatLink={this.handleFormatLink}
-            onFormatBold={this.handleFormatBold}
-            onFormatItalic={this.handleFormatItalic}
-            onFormatStrike={this.handleFormatStrike}
-            onFormatHeading={this.handleFormatHeading}
-            onFormatCode={this.handleFormatCode}
-            onFormatList={this.handleFormatList}
-            onFormatBlockquote={this.handleFormatBlockquote}
-            onFormatCodeBlock={this.handleFormatCodeBlock}
-            onInsertImage={this.handleInsertImage}
-            onInsertVideo={this.handleInsertVideo}
-          />
-        </Container>
-        {/* {hoverable.isVisible && (
+  return (
+    <Container expanded>
+      <Container paddingBottom={4}>
+        <Toolbar
+          activeFormats={activeFormats}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onFormatLink={handleFormatLink}
+          onFormatBold={handleFormatBold}
+          onFormatItalic={handleFormatItalic}
+          onFormatStrike={handleFormatStrike}
+          onFormatHeading={handleFormatHeading}
+          onFormatCode={handleFormatCode}
+          onFormatList={handleFormatList}
+          onFormatBlockquote={handleFormatBlockquote}
+          onFormatCodeBlock={handleFormatCodeBlock}
+          onInsertImage={handleInsertImage}
+          onInsertVideo={handleInsertVideo}
+        />
+      </Container>
+      <Dialog
+        animationType="fade"
+        isOpen={linkEdit.isOpen}
+        onRequestClose={handleCloseLinkEdit}
+      >
+        <LinkEdit
+          initialValue={linkEdit.initialValue}
+          onRequestClose={handleCloseLinkEdit}
+          onSubmit={handleSubmitLinkEdit}
+        />
+      </Dialog>
+      <ScrollView
+        ref={scrollViewRef}
+        scrollEventThrottle={0}
+        {...scrollHandlers}
+      >
+        {hoverable.isVisible && (
           <Animated.View
             style={[
               styles.hoverable,
@@ -413,15 +483,22 @@ export class Editor extends React.Component<EditorProps, EditorState> {
               />
             )}
           </Animated.View>
-        )} */}
-        <div id="editor-container" />
-      </Container>
-    );
-  }
+        )}
+        <EditorContent
+          ref={editorContentRef}
+          onTextChange={handleTextChange}
+          onSelectionChange={handleSelectionChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          initialContent={initialContent}
+        />
+      </ScrollView>
+    </Container>
+  );
 }
 
 interface ToolbarProps {
-  formats: Formats;
+  activeFormats: Formats;
   onUndo: () => void;
   onRedo: () => void;
   onFormatBold: () => void;
@@ -433,13 +510,13 @@ interface ToolbarProps {
   onFormatList: () => void;
   onFormatBlockquote: () => void;
   onFormatCodeBlock: () => void;
-  onInsertImage: () => void;
-  onInsertVideo: () => void;
+  onInsertImage: (url: string) => void;
+  onInsertVideo: (url: string) => void;
 }
 
 function Toolbar(props: ToolbarProps) {
   const {
-    formats,
+    activeFormats,
     onUndo,
     onRedo,
     onFormatBold,
@@ -469,62 +546,62 @@ function Toolbar(props: ToolbarProps) {
       <ToolbarButton icon="redo" onPress={onRedo} />
       <ToolbarDivider />
       <ToolbarButton
-        isActive={formats.header === 2}
+        isActive={activeFormats.header === 2}
         icon="font"
         size="sm"
         onPress={handleFormatHeadingMedium}
       />
       <ToolbarButton
-        isActive={formats.header === 1}
+        isActive={activeFormats.header === 1}
         icon="font"
         onPress={handleFormatHeadingLarge}
       />
       <ToolbarDivider />
       <ToolbarButton
-        isActive={formats.bold}
+        isActive={activeFormats.bold}
         icon="bold"
         onPress={onFormatBold}
       />
       <ToolbarButton
-        isActive={formats.italic}
+        isActive={activeFormats.italic}
         icon="italic"
         onPress={onFormatItalic}
       />
       <ToolbarButton
-        isActive={formats.strike}
+        isActive={activeFormats.strike}
         icon="strikethrough"
         size="lg"
         onPress={onFormatStrike}
       />
       <ToolbarButton
-        isActive={formats.code}
+        isActive={activeFormats.code}
         icon="code"
         onPress={onFormatCode}
       />
       <ToolbarDivider />
       <ToolbarButton
-        isActive={formats.list}
+        isActive={activeFormats.list}
         icon="list"
         onPress={onFormatList}
       />
       <ToolbarButton
-        isActive={formats.blockquote}
+        isActive={activeFormats.blockquote}
         icon="quote"
         onPress={onFormatBlockquote}
       />
       <ToolbarButton
-        isActive={formats['code-block']}
+        isActive={activeFormats['code-block']}
         icon="codepen"
         onPress={onFormatCodeBlock}
       />
       <ToolbarDivider />
       <ToolbarButton
-        isActive={!!formats.link}
+        isActive={!!activeFormats.link}
         icon="link"
         onPress={onFormatLink}
       />
       <ToolbarButton icon="image" />
-      <ToolbarButton icon="video" onPress={onInsertVideo} />
+      <ToolbarButton icon="video" />
     </Row>
   );
 }
