@@ -2,14 +2,14 @@ import React from 'react';
 import { Clipboard } from 'react-native';
 import { Container, Row, Text, Button, Icon } from '../../components';
 
-interface LinkPreviewProps {
+interface HoverableLinkPreviewProps {
   url: string;
-  onFormatLink: () => void;
+  onOpenLinkEdit: () => void;
   onRemoveLink: () => void;
 }
 
-export function LinkPreview(props: LinkPreviewProps) {
-  const { url, onFormatLink, onRemoveLink } = props;
+export function HoverableLinkPreview(props: HoverableLinkPreviewProps) {
+  const { url, onOpenLinkEdit, onRemoveLink } = props;
 
   const handleCopy = React.useCallback(() => {
     Clipboard.setString(url);
@@ -24,7 +24,7 @@ export function LinkPreview(props: LinkPreviewProps) {
         <Button onPress={handleCopy}>
           <Icon name="copy" />
         </Button>
-        <Button onPress={onFormatLink}>
+        <Button onPress={onOpenLinkEdit}>
           <Icon name="edit" />
         </Button>
         <Button onPress={onRemoveLink}>

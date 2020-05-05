@@ -14,6 +14,7 @@ export interface TextInputProps {
   icon?: IconName;
   testID?: string;
   value?: string;
+  autoFocus?: boolean;
   onValueChange?: (value: string) => void;
   placeholder?: string;
   onFocus?: () => void;
@@ -21,7 +22,14 @@ export interface TextInputProps {
 }
 
 export function TextInput(props: TextInputProps) {
-  const { testID, icon, value, onValueChange = () => {}, placeholder } = props;
+  const {
+    testID,
+    autoFocus,
+    icon,
+    value,
+    onValueChange = () => {},
+    placeholder,
+  } = props;
   const {
     onHoverIn,
     onHoverOut,
@@ -87,6 +95,7 @@ export function TextInput(props: TextInputProps) {
       <RNTextInput
         testID={testID}
         value={value}
+        autoFocus={autoFocus}
         placeholder={placeholder}
         onChangeText={onValueChange}
         onFocus={onFocus}

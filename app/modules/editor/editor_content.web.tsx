@@ -78,7 +78,9 @@ export const EditorContent = React.forwardRef(
         formatLink: (range: Range, link: LinkValue) => {
           sendMessage({ type: 'format-link', range, link });
         },
-        removeLink: () => {},
+        removeLink: (index: number) => {
+          sendMessage({ type: 'remove-link', index });
+        },
         focus: () => {
           editorContentRef.current?.focus();
           sendMessage({ type: 'focus' });

@@ -62,6 +62,8 @@ export type PressabilityConfig = {
 
   /**
    * Duration to wait after press down before calling `onPressIn`.
+   * If the press was initiated by mouse, it will default to 0;
+   * Otherwise, it defaults to 130;
    */
   delayPressIn?: number;
 
@@ -331,6 +333,12 @@ export class Pressability {
       },
 
       onResponderGrant: (event: GestureResponderEvent): void => {
+        // @ts-ignore available on web
+        const eventType = event.nativeEvent.type as
+          | 'mousedown'
+          | 'touchstart'
+          | undefined;
+
         event.persist();
 
         this._cancelPressOutDelayTimeout();
@@ -342,7 +350,7 @@ export class Pressability {
         const delayPressIn = normalizeDelay(
           this._config.delayPressIn,
           0,
-          DEFAULT_PRESS_DELAY_MS,
+          eventType === 'mousedown' ? 0 : DEFAULT_PRESS_DELAY_MS,
         );
 
         if (delayPressIn > 0) {

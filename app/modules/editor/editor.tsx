@@ -23,6 +23,7 @@ import { measure } from '../drag_drop/measurements';
 import { HoverableToolbar } from './hoverable_toolbar';
 import { HoverableCommands } from './hoverable_commands';
 import { HoverableLinkEdit } from './hoverable_link_edit';
+import { HoverableLinkPreview } from './hoverable_link_preview';
 
 interface EditorProps {
   initialContent?: Delta;
@@ -34,6 +35,7 @@ interface HoverableToolbarData {
 
 interface HoverableLinkPreviewData {
   type: 'link-preview';
+  url: string;
 }
 
 interface HoverableLinkEditData {
@@ -320,12 +322,13 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     const formats = await this.editor.getFormats();
+    this.setState({ formats });
 
     if (range.length === 0) {
-      this.handleHideHoverable();
-
       if (formats.link) {
-        this.handleShowHoverable({ type: 'link-preview' });
+        this.handleShowHoverable({ type: 'link-preview', url: formats.link });
+      } else {
+        this.handleHideHoverable();
       }
     } else {
       this.handleShowHoverable({ type: 'toolbar' });
@@ -399,7 +402,19 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     this.handleHideHoverable();
   };
 
-  handleRemoveLink = () => {};
+  handleRemoveLink = async () => {
+    if (!this.editor) {
+      return;
+    }
+
+    const selection = await this.editor.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    this.editor.removeLink(selection.index);
+    this.handleHideHoverable();
+  };
 
   handleSubmitLinkEdit = async (link: LinkValue) => {
     if (!this.editor) {
@@ -425,11 +440,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const linkRange = await this.editor.getLinkRange(selection.index);
+    // + 1 does some adjustments that works well when selecting a word
+    const linkRange = await this.editor.getLinkRange(selection.index + 1);
+
     if (!linkRange) {
+      const text = await this.editor.getText(selection);
       this.handleShowHoverable({
         type: 'link-edit',
-        link: { text: '', url: '' },
+        link: { text, url: '' },
       });
     } else {
       await this.editor.setSelection(linkRange);
@@ -517,6 +535,13 @@ export class Editor extends React.Component<EditorProps, EditorState> {
                       <HoverableLinkEdit
                         initialValue={hoverableItem.hoverable.link}
                         onSubmit={this.handleSubmitLinkEdit}
+                      />
+                    )}
+                    {hoverableItem.hoverable?.type === 'link-preview' && (
+                      <HoverableLinkPreview
+                        url={hoverableItem.hoverable.url}
+                        onOpenLinkEdit={this.handleOpenLinkEdit}
+                        onRemoveLink={this.handleRemoveLink}
                       />
                     )}
                     {hoverableItem.hoverable?.type === 'toolbar' && (

@@ -21,10 +21,18 @@ export function HoverableLinkEdit(props: HoverableLinkEditProps) {
     <Container width={320}>
       <Spacing height={16} />
       <Text>Text</Text>
-      <TextInput value={text} onValueChange={setText} />
+      <TextInput
+        autoFocus={!url && !text}
+        value={text}
+        onValueChange={setText}
+      />
       <Spacing height={16} />
       <Text>URL</Text>
-      <TextInput value={url} onValueChange={setURL} />
+      <TextInput
+        autoFocus={!!url || !!text}
+        value={url}
+        onValueChange={setURL}
+      />
       <Spacing height={24} />
       <Button onPress={handleSubmit}>
         <Text>Submit</Text>
