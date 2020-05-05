@@ -7,7 +7,7 @@ import {
   ScrollView,
   findNodeHandle,
 } from 'react-native';
-import { Container } from '../../components';
+import { Container, Text } from '../../components';
 import { ThemeContext, tokens } from '../../theme';
 import { between } from '../../utils/numbers';
 import { EditorContentInstance, EditorContent } from './editor_content';
@@ -18,6 +18,8 @@ import {
   HeadingSize,
   Formats,
   ListType,
+  HoverableItem,
+  Hoverable,
 } from './types';
 import { measure } from '../drag_drop/measurements';
 import { HoverableToolbar } from './hoverable_toolbar';
@@ -27,37 +29,6 @@ import { HoverableLinkPreview } from './hoverable_link_preview';
 
 interface EditorProps {
   initialContent?: Delta;
-}
-
-interface HoverableToolbarData {
-  type: 'toolbar';
-}
-
-interface HoverableLinkPreviewData {
-  type: 'link-preview';
-  url: string;
-}
-
-interface HoverableLinkEditData {
-  type: 'link-edit';
-  link: LinkValue;
-}
-
-interface HoverableCommandsData {
-  type: 'commands';
-}
-
-type Hoverable =
-  | HoverableToolbarData
-  | HoverableLinkPreviewData
-  | HoverableCommandsData
-  | HoverableLinkEditData;
-
-interface HoverableItem {
-  isVisible: boolean;
-  hoverable: Hoverable | null;
-  position: Animated.ValueXY;
-  opacity: Animated.Value;
 }
 
 // Type of commands
@@ -77,11 +48,11 @@ interface HoverableItem {
 
 // Desktop
 // HoverableToolbar -> Inline format + Block format
-// Commands -> Blocks + Block format
+// Commands -> Block format + Blocks
 
 // Mobile
 // Selection -> Inline Format
-// Collapsed selection -> Blocks + Block format
+// Collapsed selection -> Block format + Blocks
 // Collapsed on link -> Link edit/preview
 
 // TODO:
@@ -102,11 +73,21 @@ const initialHoverableItem = {
   opacity: new Animated.Value(0),
 };
 
+interface Placeholder {
+  position: {
+    top: number;
+    left: number;
+  };
+}
+
 interface EditorState {
+  placeholder: Placeholder | null;
   hoverableItem: HoverableItem;
   /** Formats under current selection */
   formats: Formats;
 }
+
+const LINE_HEIGHT = 16;
 
 export class Editor extends React.Component<EditorProps, EditorState> {
   scrollViewRef = React.createRef<ScrollView>();
@@ -116,6 +97,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   contentHeight: number = 0;
 
   state: EditorState = {
+    placeholder: null,
     hoverableItem: initialHoverableItem,
     formats: {},
   };
@@ -128,6 +110,151 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     this.editor = this.editorContentRef.current;
   }
 
+  handleEditorLoad = () => {
+    const {
+      initialContent = new Delta()
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert(
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
+        )
+        .insert('\n'),
+    } = this.props;
+
+    if (this.editor) {
+      this.editor.setContents(initialContent, 'api');
+    }
+  };
+
+  handleTextChange = async (
+    _delta: Delta,
+    _oldContents: Delta,
+    _source: ChangeSource,
+  ) => {
+    if (!this.editor) {
+      return;
+    }
+
+    const range = await this.editor.getSelection();
+    if (!range) {
+      return null;
+    }
+
+    const formats = await this.editor.getFormats();
+    this.setState({ formats });
+
+    const bounds = await this.editor.getBounds(range.index, range.length);
+
+    if (bounds.bottom > this.contentHeight) {
+      this.scrollViewRef.current?.scrollTo({ y: bounds.bottom });
+    }
+
+    if (range.length === 0) {
+      this.handleShowPlaceholderIfNeeded(range);
+      // this.handleHideHoverable();
+    } else {
+      this.handleUpdateHoverablePositionIfNeeded();
+    }
+  };
+
+  handleSelectionChange = async (
+    range: Range | null,
+    _oldRange: Range | null,
+    _source: ChangeSource,
+  ) => {
+    if (!this.editor) {
+      return;
+    }
+
+    if (range === null) {
+      return;
+    }
+
+    const formats = await this.editor.getFormats();
+    this.setState({ formats });
+
+    if (range.length === 0) {
+      if (formats.link) {
+        this.handleShowHoverable({ type: 'link-preview', url: formats.link });
+        return;
+      }
+
+      this.handleHideHoverable();
+      this.handleShowPlaceholderIfNeeded(range);
+    } else {
+      console.log(range);
+
+      this.handleShowHoverable({ type: 'toolbar' });
+    }
+  };
+
+  handleShowPlaceholderIfNeeded = async (range: Range) => {
+    if (!this.editor) {
+      return;
+    }
+
+    if (range === null) {
+      return;
+    }
+
+    const line = await this.editor.getLine(range.index);
+
+    if (line?.isEmpty) {
+      this.handleShowPlaceholder(range);
+    } else {
+      this.handleHidePlaceholder();
+    }
+  };
+
+  handleShowPlaceholder = async (range: Range) => {
+    const { placeholder } = this.state;
+
+    if (!this.editor) {
+      return;
+    }
+
+    const bounds = await this.editor.getBounds(range.index, range.length);
+
+    // "4" comes from eyeball adjustment to be inline with cursor
+    const top = bounds.top - 4;
+    const prevTop = placeholder?.position.top;
+    const left = 4;
+
+    if (top !== prevTop) {
+      this.setState({
+        placeholder: {
+          position: {
+            top,
+            left,
+          },
+        },
+      });
+    }
+  };
+
+  handleHidePlaceholder = () => {
+    const { placeholder } = this.state;
+
+    if (placeholder) {
+      this.setState({
+        placeholder: null,
+      });
+    }
+  };
+
   getHoverablePosition = async () => {
     if (!this.editor) {
       return;
@@ -138,7 +265,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const rangeBounds = await this.editor.getBounds(
+    const bounds = await this.editor.getBounds(
       selection.index,
       selection.length,
     );
@@ -152,19 +279,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     const { width, height } = await measure(this.hoverableRef);
 
     let y = 0;
-    const LINE_HEIGHT = 16;
     const LINE_OFFSET = 8;
-    if (rangeBounds.top - height < 4) {
-      y = rangeBounds.top + LINE_HEIGHT + LINE_OFFSET;
+    if (bounds.top - height < 4) {
+      y = bounds.top + LINE_HEIGHT + LINE_OFFSET;
     } else {
-      y = rangeBounds.top - height - LINE_OFFSET;
+      y = bounds.top - height - LINE_OFFSET;
     }
 
-    const x = between(
-      rangeBounds.left + rangeBounds.width / 2 - width / 2,
-      8,
-      440,
-    );
+    const x = between(bounds.left + bounds.width / 2 - width / 2, 8, 440);
 
     return { x, y };
   };
@@ -195,35 +317,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       useNativeDriver: true,
       duration: 100,
     }).start();
-  };
-
-  handleEditorLoad = () => {
-    const {
-      initialContent = new Delta()
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert('\n'),
-    } = this.props;
-
-    if (this.editor) {
-      this.editor.setContents(initialContent, 'api');
-    }
   };
 
   handleUpdateHoverablePositionIfNeeded = async () => {
@@ -272,66 +365,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
           hoverableItem: initialHoverableItem,
         });
       });
-    }
-  };
-
-  handleTextChange = async (
-    _delta: Delta,
-    _oldContents: Delta,
-    _source: ChangeSource,
-  ) => {
-    if (!this.editor) {
-      return;
-    }
-
-    const selection = await this.editor.getSelection();
-    if (!selection) {
-      return null;
-    }
-
-    const formats = await this.editor.getFormats();
-    this.setState({ formats });
-
-    const bounds = await this.editor.getBounds(
-      selection.index,
-      selection.length,
-    );
-
-    if (bounds.bottom > this.contentHeight) {
-      this.scrollViewRef.current?.scrollTo({ y: bounds.bottom });
-    }
-
-    if (selection.length === 0) {
-      // this.handleHideHoverable();
-    } else {
-      this.handleUpdateHoverablePositionIfNeeded();
-    }
-  };
-
-  handleSelectionChange = async (
-    range: Range | null,
-    _oldRange: Range | null,
-    _source: ChangeSource,
-  ) => {
-    if (!this.editor) {
-      return;
-    }
-
-    if (range === null) {
-      return;
-    }
-
-    const formats = await this.editor.getFormats();
-    this.setState({ formats });
-
-    if (range.length === 0) {
-      if (formats.link) {
-        this.handleShowHoverable({ type: 'link-preview', url: formats.link });
-      } else {
-        this.handleHideHoverable();
-      }
-    } else {
-      this.handleShowHoverable({ type: 'toolbar' });
     }
   };
 
@@ -501,7 +534,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   };
 
   render() {
-    const { hoverableItem, formats } = this.state;
+    const { hoverableItem, placeholder, formats } = this.state;
 
     return (
       <Container expanded>
@@ -563,6 +596,19 @@ export class Editor extends React.Component<EditorProps, EditorState> {
               )}
             </ThemeContext.Consumer>
           )}
+          {placeholder && (
+            <View
+              style={[
+                styles.placeholder,
+                {
+                  top: placeholder.position.top,
+                  left: placeholder.position.left,
+                },
+              ]}
+            >
+              <Text color="muted">Type "/" for commands</Text>
+            </View>
+          )}
           <EditorContent
             ref={this.editorContentRef}
             onLoad={this.handleEditorLoad}
@@ -581,5 +627,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: tokens.radius,
     zIndex: 1,
+  },
+  placeholder: {
+    position: 'absolute',
+    zIndex: -1,
   },
 });

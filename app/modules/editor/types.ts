@@ -1,4 +1,36 @@
 import type Delta from 'quill-delta';
+import { Animated } from 'react-native';
+
+export interface HoverableToolbarData {
+  type: 'toolbar';
+}
+
+export interface HoverableLinkPreviewData {
+  type: 'link-preview';
+  url: string;
+}
+
+export interface HoverableLinkEditData {
+  type: 'link-edit';
+  link: LinkValue;
+}
+
+export interface HoverableCommandsData {
+  type: 'commands';
+}
+
+export type Hoverable =
+  | HoverableToolbarData
+  | HoverableLinkPreviewData
+  | HoverableCommandsData
+  | HoverableLinkEditData;
+
+export interface HoverableItem {
+  isVisible: boolean;
+  hoverable: Hoverable | null;
+  position: Animated.ValueXY;
+  opacity: Animated.Value;
+}
 
 export type ChangeSource = 'user' | 'api' | 'silent';
 

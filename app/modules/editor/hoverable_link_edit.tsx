@@ -17,19 +17,29 @@ export function HoverableLinkEdit(props: HoverableLinkEditProps) {
     onSubmit({ text: text || url, url });
   }, [text, url, onSubmit]);
 
+  let focus: 'text' | 'url' = 'text';
+
+  if (!url && !text) {
+    focus = 'text';
+  } else if (url && text) {
+    focus = 'text';
+  } else if (text && !url) {
+    focus = 'url';
+  }
+
   return (
     <Container width={320}>
       <Spacing height={16} />
       <Text>Text</Text>
       <TextInput
-        autoFocus={!url && !text}
+        autoFocus={focus === 'text'}
         value={text}
         onValueChange={setText}
       />
       <Spacing height={16} />
       <Text>URL</Text>
       <TextInput
-        autoFocus={!!url || !!text}
+        autoFocus={focus === 'url'}
         value={url}
         onValueChange={setURL}
       />
