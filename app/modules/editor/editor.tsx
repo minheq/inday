@@ -57,12 +57,13 @@ interface EditorProps {
 
 // TODO:
 // - Markdown auto formatting
+// - Code and Code block syntax highlighting
 // - Disable pasted formats
-// - Code block syntax highlighting
+// - Paste image
+
 // - Smooth loading of editor
 // - Drag and drop image/video into editor
-// - Paste image
-// - Embed videos
+// - Embed Videos
 // - Embed Tweets
 // - Embed Drawings
 
@@ -164,7 +165,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
     if (range.length === 0) {
       this.handleShowPlaceholderIfNeeded(range);
-      // this.handleHideHoverable();
     } else {
       this.handleUpdateHoverablePositionIfNeeded();
     }
@@ -195,8 +195,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       this.handleHideHoverable();
       this.handleShowPlaceholderIfNeeded(range);
     } else {
-      console.log(range);
-
       this.handleShowHoverable({ type: 'toolbar' });
     }
   };
@@ -210,9 +208,9 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const line = await this.editor.getLine(range.index);
+    const [line] = await this.editor.getLine(range.index);
 
-    if (line?.isEmpty) {
+    if (line?.tagName === 'P' && line?.firstChild?.tagName === 'BR') {
       this.handleShowPlaceholder(range);
     } else {
       this.handleHidePlaceholder();
@@ -440,12 +438,20 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const selection = await this.editor.getSelection();
-    if (!selection) {
+    const range = await this.editor.getSelection();
+    if (!range) {
       return;
     }
 
-    this.editor.removeLink(selection.index);
+    const { index } = range;
+    const [link, offset] = await this.editor.getLeaf(index);
+
+    if (link && link.parent.tagName === 'A') {
+      const linkRange = { index: index - offset, length: link.length };
+
+      this.editor.formatText(linkRange.index, linkRange.length, 'link', false);
+    }
+
     this.handleHideHoverable();
   };
 
@@ -454,12 +460,13 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const selection = await this.editor.getSelection();
-    if (!selection) {
+    const range = await this.editor.getSelection();
+    if (!range) {
       return;
     }
 
-    this.editor.formatLink(selection, link);
+    this.editor.deleteText(range.index, range.length);
+    this.editor.insertText(range.index, link.text, 'link', link.url);
     this.handleHideHoverable();
   };
 
@@ -474,7 +481,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     // + 1 does some adjustments that works well when selecting a word
-    const linkRange = await this.editor.getLinkRange(selection.index + 1);
+    const index = selection.index + 1;
+    const [link, offset] = await this.editor.getLeaf(index);
+
+    let linkRange = null;
+
+    if (link && link.parent.tagName === 'A') {
+      linkRange = { index: index - offset, length: link.length };
+    }
 
     if (!linkRange) {
       const text = await this.editor.getText(selection);
@@ -483,7 +497,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         link: { text, url: '' },
       });
     } else {
-      await this.editor.setSelection(linkRange);
+      await this.editor.setSelection(linkRange.index, linkRange.length);
       const formats = await this.editor.getFormats();
       const text = await this.editor.getText(linkRange);
 

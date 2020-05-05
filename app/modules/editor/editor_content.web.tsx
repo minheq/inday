@@ -8,7 +8,7 @@ import type {
   Range,
   ToWebViewMessage,
   EditorContentSize,
-  FromWebViewGetLinkRange,
+  FromWebViewGetLeaf,
   FromWebViewGetBounds,
   FromWebViewMessage,
   FromWebViewGetLine,
@@ -16,7 +16,6 @@ import type {
   FromWebViewGetText,
   FromWebViewGetFormats,
   ChangeSource,
-  LinkValue,
 } from './types';
 import html from './webview/index.bundle.html';
 
@@ -75,35 +74,30 @@ export const EditorContent = React.forwardRef(
         format: (name, value, source) => {
           sendMessage({ type: 'format', name, value, source });
         },
-        formatLink: (range: Range, link: LinkValue) => {
-          sendMessage({ type: 'format-link', range, link });
+        formatText: (index, length, format, value) => {
+          sendMessage({ type: 'format-text', index, length, format, value });
         },
-        removeLink: (index: number) => {
-          sendMessage({ type: 'remove-link', index });
+        formatLine: (index, length, name, value) => {
+          sendMessage({ type: 'format-line', index, length, name, value });
+        },
+        deleteText: (index: number, length: number) => {
+          sendMessage({ type: 'delete-text', index, length });
         },
         focus: () => {
           editorContentRef.current?.focus();
           sendMessage({ type: 'focus' });
         },
-        setSelection: async (range: Range) => {
-          sendMessage({ type: 'set-selection', range });
+        setSelection: async (index: number, length: number) => {
+          sendMessage({ type: 'set-selection', index, length });
         },
         setContents: (delta: Delta, source?: ChangeSource) => {
           sendMessage({ type: 'set-contents', delta, source });
         },
-        insertText: () => {
-          return new Delta();
+        insertText: (index, text, format, value) => {
+          sendMessage({ type: 'insert-text', index, text, format, value });
         },
         insertEmbed: () => {
           return new Delta();
-        },
-        getLinkRange: async (index: number) => {
-          const data = await sendAsyncMessage<FromWebViewGetLinkRange>({
-            type: 'get-link-range',
-            index,
-          });
-
-          return data.range;
         },
         getBounds: async (index: number, length?: number) => {
           const data = await sendAsyncMessage<FromWebViewGetBounds>({
@@ -120,7 +114,15 @@ export const EditorContent = React.forwardRef(
             index,
           });
 
-          return data.line;
+          return [data.line, data.offset];
+        },
+        getLeaf: async (index: number) => {
+          const data = await sendAsyncMessage<FromWebViewGetLeaf>({
+            type: 'get-leaf',
+            index,
+          });
+
+          return [data.leaf, data.offset];
         },
         getSelection: async () => {
           const data = await sendAsyncMessage<FromWebViewGetSelection>({

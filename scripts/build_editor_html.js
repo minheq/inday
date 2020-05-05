@@ -49,7 +49,7 @@ const compiler = webpack({
 
 compiler.run(async (err, stats) => {
   if (err) {
-    console.error(err);
+    console.log(err);
     return;
   }
 

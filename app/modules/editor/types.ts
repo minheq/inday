@@ -47,7 +47,7 @@ export interface Formats {
   italic?: boolean;
   bold?: boolean;
   strike?: boolean;
-  link?: string;
+  link?: string | false;
   list?: ListType | false;
   blockquote?: boolean;
   'code-block'?: boolean;
@@ -62,9 +62,16 @@ export interface Range {
   length: number;
 }
 
-export interface Line {
-  isEmpty: boolean;
-  offset: number;
+export interface Blot {
+  textContent: string;
+  tagName: string;
+  length: number;
+  firstChild: {
+    tagName: string;
+  } | null;
+  parent: {
+    tagName: string;
+  };
 }
 
 export interface Bounds {
@@ -118,11 +125,6 @@ export interface FromWebViewGetSelection {
   range: Range | null;
 }
 
-export interface FromWebViewGetLinkRange {
-  type: 'get-link-range';
-  range: Range | null;
-}
-
 export interface FromWebViewGetText {
   type: 'get-text';
   text: string;
@@ -135,7 +137,14 @@ export interface FromWebViewGetFormats {
 
 export interface FromWebViewGetLine {
   type: 'get-line';
-  line: Line | null;
+  line: Blot | null;
+  offset: number;
+}
+
+export interface FromWebViewGetLeaf {
+  type: 'get-leaf';
+  leaf: Blot | null;
+  offset: number;
 }
 
 /** Events received from iframe */
@@ -147,8 +156,8 @@ export type FromWebViewMessage =
   | FromWebViewGetBounds
   | FromWebViewGetLine
   | FromWebViewGetText
-  | FromWebViewGetLinkRange
   | FromWebViewGetFormats
+  | FromWebViewGetLeaf
   | FromWebViewDOMContentLoaded
   | FromWebViewResize;
 
@@ -172,13 +181,13 @@ export interface ToWebViewGetText {
   range: Range;
 }
 
-export interface ToWebViewGetLinkRange {
-  type: 'get-link-range';
-  index: number;
-}
-
 export interface ToWebViewGetFormats {
   type: 'get-formats';
+}
+
+export interface ToWebViewGetLeaf {
+  type: 'get-leaf';
+  index: number;
 }
 
 export interface ToWebViewFocus {
@@ -195,9 +204,16 @@ export interface ToWebViewFormat<
   source?: ChangeSource;
 }
 
-export interface ToWebViewRemoveLink {
-  type: 'remove-link';
+export interface ToWebViewFormatText<
+  T extends Formats = any,
+  K extends keyof T = any
+> {
+  type: 'format-text';
   index: number;
+  length: number;
+  format: K;
+  value: T[K];
+  source?: ChangeSource;
 }
 
 export interface ToWebViewUndo {
@@ -208,15 +224,41 @@ export interface ToWebViewRedo {
   type: 'redo';
 }
 
-export interface ToWebViewSetSelection {
-  type: 'set-selection';
-  range: Range;
+export interface ToWebViewGetLeaf {
+  type: 'get-leaf';
 }
 
-export interface ToWebViewFormatLink {
-  type: 'format-link';
-  range: Range;
-  link: LinkValue;
+export interface ToWebViewFormatLine<
+  T extends Formats = any,
+  K extends keyof T = any
+> {
+  type: 'format-line';
+  index: number;
+  length: number;
+  name: K;
+  value: T[K];
+}
+
+export interface ToWebViewDeleteText {
+  type: 'delete-text';
+  index: number;
+  length: number;
+}
+
+export interface ToWebViewInsertText<
+  T extends Formats = any,
+  K extends keyof T = any
+> {
+  type: 'insert-text';
+  index: number;
+  text: string;
+  format: K;
+  value: T[K];
+}
+export interface ToWebViewSetSelection {
+  type: 'set-selection';
+  index: number;
+  length: number;
 }
 
 export interface ToWebViewSetContents {
@@ -235,9 +277,11 @@ export type ToWebViewMessage =
   | ToWebViewUndo
   | ToWebViewRedo
   | ToWebViewGetText
-  | ToWebViewGetLinkRange
-  | ToWebViewRemoveLink
+  | ToWebViewDeleteText
+  | ToWebViewFormatText
+  | ToWebViewGetLeaf
+  | ToWebViewFormatLine
   | ToWebViewSetSelection
+  | ToWebViewInsertText
   | ToWebViewSetContents
-  | ToWebViewFormatLink
   | ToWebViewFocus;

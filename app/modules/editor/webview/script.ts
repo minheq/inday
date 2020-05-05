@@ -3,7 +3,18 @@ import Delta from 'quill-delta';
 import 'quill/dist/quill.core.css';
 import './editor.css';
 
-import type { ToWebViewMessage, FromWebViewMessage, Range } from '../types';
+import type {
+  ToWebViewMessage,
+  FromWebViewMessage,
+  Range,
+  Blot,
+} from '../types';
+
+let BlockEmbed = Quill.import('blots/block/embed');
+
+class HorizontalRule extends BlockEmbed {}
+HorizontalRule.blotName = 'hr';
+HorizontalRule.tagName = 'hr';
 
 declare class ResizeObserver {
   constructor(callback: ResizeObserverCallback);
@@ -124,12 +135,54 @@ quill.on('selection-change', function (range, oldRange, source) {
   sendMessage({ type: 'selection-change', range, oldRange, source });
 });
 
+function serializeBlot(blot: any): Blot {
+  return {
+    textContent: blot.domNode.textContent,
+    tagName: blot.domNode.tagName,
+    length: blot.length(),
+    firstChild: blot.firstChild
+      ? {
+          tagName: blot.firstChild.domNode.tagName,
+        }
+      : null,
+    parent: {
+      tagName: blot.parent.domNode.tagName,
+    },
+  };
+}
+
 function receiveMessage(event: MessageEvent) {
   const data = event.data as ToWebViewMessage;
+
+  console.log(data, 'EVENT');
 
   if (data.type === 'format') {
     const { name, value, source } = data;
     quill.format(name, value, source);
+    return;
+  }
+
+  if (data.type === 'format-text') {
+    const { format, index, length, value, source } = data;
+    quill.formatText(index, length, format, value, source);
+    return;
+  }
+
+  if (data.type === 'format-line') {
+    const { name, value, index, length } = data;
+    quill.formatLine(index, length, name, value);
+    return;
+  }
+
+  if (data.type === 'delete-text') {
+    const { index, length } = data;
+    quill.deleteText(index, length);
+    return;
+  }
+
+  if (data.type === 'insert-text') {
+    const { index, text, format, value } = data;
+    quill.insertText(index, text, format, value);
     return;
   }
 
@@ -155,8 +208,8 @@ function receiveMessage(event: MessageEvent) {
   }
 
   if (data.type === 'set-selection') {
-    const { range } = data;
-    quill.setSelection(range.index, range.length);
+    const { index, length } = data;
+    quill.setSelection(index, length);
     return;
   }
 
@@ -186,57 +239,33 @@ function receiveMessage(event: MessageEvent) {
     return;
   }
 
-  if (data.type === 'get-link-range') {
-    const { index } = data;
-    const [link, offset] = quill.getLeaf(index);
-
-    if (link && link.parent.domNode instanceof window.HTMLAnchorElement) {
-      const range = { index: index - offset, length: link.length() };
-
-      sendMessage({ type: 'get-link-range', range });
-    } else {
-      sendMessage({ type: 'get-link-range', range: null });
-    }
-    return;
-  }
-
   if (data.type === 'get-line') {
     const { index } = data;
     const [blot, offset] = quill.getLine(index);
 
     if (!blot) {
-      sendMessage({ type: 'get-line', line: null });
+      sendMessage({ type: 'get-line', line: null, offset });
     } else {
-      const line = {
-        isEmpty:
-          blot.domNode instanceof window.HTMLParagraphElement &&
-          blot.domNode.firstChild instanceof window.HTMLBRElement,
-        offset,
-      };
-
-      sendMessage({ type: 'get-line', line });
+      sendMessage({ type: 'get-line', line: serializeBlot(blot), offset });
     }
     return;
   }
 
-  if (data.type === 'remove-link') {
+  if (data.type === 'get-leaf') {
     const { index } = data;
-    const [link, offset] = quill.getLeaf(index);
+    const [blot, offset] = quill.getLeaf(index);
 
-    if (link && link.parent.domNode instanceof window.HTMLAnchorElement) {
-      const linkRange = { index: index - offset, length: link.length() };
-      quill.formatText(linkRange, 'link', false);
+    if (!blot) {
+      sendMessage({ type: 'get-leaf', leaf: null, offset });
+    } else {
+      sendMessage({ type: 'get-leaf', leaf: serializeBlot(blot), offset });
     }
     return;
   }
 
-  if (data.type === 'format-link') {
-    const {
-      range,
-      link: { text, url },
-    } = data;
-    quill.deleteText(range.index, range.length);
-    quill.insertText(range.index, text, 'link', url);
+  // When data infers to `never`, it indicates all the cases have been satisfied
+  if (data) {
+    return;
   }
 }
 

@@ -5,11 +5,10 @@ import { Text } from '../../components/text';
 import type {
   Bounds,
   Range,
-  Line,
+  Blot,
   Format,
   Formats,
   ChangeSource,
-  LinkValue,
 } from './types';
 
 export interface EditorContentProps {
@@ -31,26 +30,27 @@ export interface EditorContentProps {
 
 export interface EditorContentInstance {
   // Content
-  insertText(index: number, text: string, source?: ChangeSource): Delta;
-  insertText(
+  insertText<TFormat extends Format>(
     index: number,
     text: string,
-    format: Format,
-    value: any,
+    format: TFormat,
+    value: Formats[TFormat],
     source?: ChangeSource,
-  ): Delta;
-  insertText(
-    index: number,
-    text: string,
-    formats: Formats,
-    source?: ChangeSource,
-  ): Delta;
+  ): void;
   insertEmbed(
     index: number,
     type: string,
     value: any,
-    source: ChangeSource,
-  ): Delta;
+    source?: ChangeSource,
+  ): void;
+  formatLine<TFormat extends Format>(
+    index: number,
+    length: number,
+    format: TFormat,
+    value: Formats[TFormat],
+    source?: ChangeSource,
+  ): void;
+  deleteText(index: number, length: number, source?: ChangeSource): void;
   // History
   undo: () => void;
   redo: () => void;
@@ -61,19 +61,24 @@ export interface EditorContentInstance {
     value: Formats[TFormat],
     source?: ChangeSource,
   ) => void;
+  formatText: <TFormat extends Format>(
+    index: number,
+    length: number,
+    format: TFormat,
+    value: Formats[TFormat],
+    source?: ChangeSource,
+  ) => void;
   setContents: (delta: Delta, source?: ChangeSource) => void;
-  removeLink: (index: number) => void;
-  formatLink: (range: Range, link: LinkValue) => void;
   // Editor
   focus: () => void;
   // Model
   getText: (range: Range) => Promise<string>;
-  getLinkRange: (index: number) => Promise<Range | null>;
-  getLine: (index: number) => Promise<Line | null>;
+  getLine: (index: number) => Promise<[Blot | null, number]>;
+  getLeaf: (index: number) => Promise<[Blot | null, number]>;
   // Selection
   getBounds: (index: number, length?: number) => Promise<Bounds>;
   getSelection: () => Promise<Range | null>;
-  setSelection: (range: Range) => Promise<void>;
+  setSelection: (index: number, length: number) => Promise<void>;
 }
 
 export const EditorContent = React.forwardRef(
@@ -91,10 +96,10 @@ export const EditorContent = React.forwardRef(
       redo: () => {},
       getText: async () => '',
       format: () => {},
-      formatLink: () => {},
-      removeLink: () => {},
+      formatText: () => {},
+      formatLine: () => new Delta(),
+      deleteText: () => new Delta(),
       focus: () => {},
-      getLinkRange: async () => null,
       setSelection: async () => {},
       insertText: () => new Delta(),
       insertEmbed: () => new Delta(),
@@ -106,7 +111,36 @@ export const EditorContent = React.forwardRef(
         bottom: 0,
         right: 0,
       }),
-      getLine: async () => ({ isEmpty: true, offset: 0 }),
+      getLine: async () => [
+        {
+          isEmpty: true,
+          textContent: '',
+          tagName: '',
+          length: 0,
+          firstChild: {
+            tagName: '',
+          },
+          parent: {
+            tagName: '',
+          },
+        },
+        0,
+      ],
+      getLeaf: async () => [
+        {
+          isEmpty: true,
+          textContent: '',
+          tagName: '',
+          length: 0,
+          firstChild: {
+            tagName: '',
+          },
+          parent: {
+            tagName: '',
+          },
+        },
+        0,
+      ],
       getSelection: async () => ({ index: 0, length: 0 }),
       getFormats: async () => ({}),
     }));
