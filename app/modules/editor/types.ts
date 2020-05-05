@@ -4,12 +4,19 @@ export type ChangeSource = 'user' | 'api' | 'silent';
 
 export type HeadingSize = 1 | 2 | 3 | 4 | 5;
 
+export type ListType = 'bullet' | 'ordered';
+
+export interface LinkValue {
+  text: string;
+  url: string;
+}
+
 export interface Formats {
   italic?: boolean;
   bold?: boolean;
   strike?: boolean;
   link?: string;
-  list?: 'bullet' | false;
+  list?: ListType | false;
   blockquote?: boolean;
   'code-block'?: boolean;
   header?: HeadingSize | false;
@@ -174,6 +181,12 @@ export interface ToWebViewSetSelection {
   range: Range;
 }
 
+export interface ToWebViewFormatLink {
+  type: 'format-link';
+  range: Range;
+  link: LinkValue;
+}
+
 export interface ToWebViewSetContents {
   type: 'set-contents';
   delta: Delta;
@@ -194,4 +207,5 @@ export type ToWebViewMessage =
   | ToWebViewRemoveLink
   | ToWebViewSetSelection
   | ToWebViewSetContents
+  | ToWebViewFormatLink
   | ToWebViewFocus;

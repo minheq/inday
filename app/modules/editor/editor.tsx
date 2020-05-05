@@ -4,50 +4,52 @@ import {
   Animated,
   StyleSheet,
   View,
-  Clipboard,
   ScrollView,
+  findNodeHandle,
 } from 'react-native';
-import {
-  IconName,
-  Icon,
-  Container,
-  Row,
-  Button,
-  CloseButton,
-  Text,
-  TextInput,
-  Spacing,
-} from '../../components';
-import { ThemeContext, tokens, TextSize, useTheme } from '../../theme';
+import { Container } from '../../components';
+import { ThemeContext, tokens } from '../../theme';
 import { between } from '../../utils/numbers';
 import { EditorContentInstance, EditorContent } from './editor_content';
-import { ChangeSource, Range, HeadingSize, Formats } from './types';
+import {
+  LinkValue,
+  ChangeSource,
+  Range,
+  HeadingSize,
+  Formats,
+  ListType,
+} from './types';
+import { measure } from '../drag_drop/measurements';
+import { HoverableToolbar } from './hoverable_toolbar';
+import { HoverableCommands } from './hoverable_commands';
+import { HoverableLinkEdit } from './hoverable_link_edit';
 
 interface EditorProps {
   initialContent?: Delta;
 }
 
-interface HoverableToolbar {
+interface HoverableToolbarData {
   type: 'toolbar';
 }
 
-interface HoverableLinkPreview {
+interface HoverableLinkPreviewData {
   type: 'link-preview';
 }
 
-interface HoverableLinkEdit {
+interface HoverableLinkEditData {
   type: 'link-edit';
+  link: LinkValue;
 }
 
-interface HoverableCommands {
+interface HoverableCommandsData {
   type: 'commands';
 }
 
 type Hoverable =
-  | HoverableToolbar
-  | HoverableLinkPreview
-  | HoverableLinkEdit
-  | HoverableCommands;
+  | HoverableToolbarData
+  | HoverableLinkPreviewData
+  | HoverableCommandsData
+  | HoverableLinkEditData;
 
 interface HoverableItem {
   isVisible: boolean;
@@ -56,8 +58,29 @@ interface HoverableItem {
   opacity: Animated.Value;
 }
 
-const LINK_PREVIEW_WIDTH = 280;
-const LINK_PREVIEW_HEIGHT = 40;
+// Type of commands
+// Inline format
+//  - Emphasis (Bold, Italic, Code, Strike)
+//  - Link
+// Block format
+//  - Headers
+//  - Lists
+//  - Blockquotes
+//  - Code Block
+// Blocks
+//  - Images
+//  - Divider
+//  - Videos
+//  - Tables
+
+// Desktop
+// HoverableToolbar -> Inline format + Block format
+// Commands -> Blocks + Block format
+
+// Mobile
+// Selection -> Inline Format
+// Collapsed selection -> Blocks + Block format
+// Collapsed on link -> Link edit/preview
 
 // TODO:
 // - Markdown auto formatting
@@ -79,16 +102,20 @@ const initialHoverableItem = {
 
 interface EditorState {
   hoverableItem: HoverableItem;
+  /** Formats under current selection */
+  formats: Formats;
 }
 
 export class Editor extends React.Component<EditorProps, EditorState> {
   scrollViewRef = React.createRef<ScrollView>();
+  hoverableRef = React.createRef<View>();
   editorContentRef = React.createRef<EditorContentInstance>();
   editor: EditorContentInstance | null = null;
   contentHeight: number = 0;
 
   state: EditorState = {
     hoverableItem: initialHoverableItem,
+    formats: {},
   };
 
   constructor(props: EditorProps) {
@@ -99,14 +126,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     this.editor = this.editorContentRef.current;
   }
 
-  getHoverablePosition = async (hoverable: Hoverable) => {
+  getHoverablePosition = async () => {
     if (!this.editor) {
       return;
     }
 
     const selection = await this.editor.getSelection();
     if (!selection) {
-      return null;
+      return;
     }
 
     const rangeBounds = await this.editor.getBounds(
@@ -114,29 +141,25 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       selection.length,
     );
 
-    let hoverableHeight = 0;
-    let hoverableWidth = 0;
+    const handle = findNodeHandle(this.hoverableRef.current);
 
-    switch (hoverable.type) {
-      case 'commands':
-        hoverableHeight = HOVERABLE_COMMANDS_HEIGHT;
-        hoverableWidth = HOVERABLE_COMMANDS_WIDTH;
-        break;
-      default:
-        return;
+    if (!handle) {
+      return;
     }
+
+    const { width, height } = await measure(this.hoverableRef);
 
     let y = 0;
     const LINE_HEIGHT = 16;
     const LINE_OFFSET = 8;
-    if (rangeBounds.top - hoverableHeight < 4) {
+    if (rangeBounds.top - height < 4) {
       y = rangeBounds.top + LINE_HEIGHT + LINE_OFFSET;
     } else {
-      y = rangeBounds.top - hoverableHeight - LINE_OFFSET;
+      y = rangeBounds.top - height - LINE_OFFSET;
     }
 
     const x = between(
-      rangeBounds.left + rangeBounds.width / 2 - hoverableWidth / 2,
+      rangeBounds.left + rangeBounds.width / 2 - width / 2,
       8,
       440,
     );
@@ -145,23 +168,25 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   };
 
   handleShowHoverable = async (hoverable: Hoverable) => {
-    const position = await this.getHoverablePosition(hoverable);
+    const hoverableItem: HoverableItem = {
+      hoverable,
+      isVisible: true,
+      position: new Animated.ValueXY(),
+      opacity: new Animated.Value(0),
+    };
+
+    // Set hoverable item first so that we can measure its dimensions
+    this.setState({ hoverableItem });
+
+    const position = await this.getHoverablePosition();
 
     if (!position) {
       return;
     }
 
+    // Update its position
     const { x, y } = position;
-    const hoverableItem: HoverableItem = {
-      hoverable,
-      isVisible: true,
-      position: new Animated.ValueXY({ x, y }),
-      opacity: new Animated.Value(0),
-    };
-
-    this.setState({
-      hoverableItem,
-    });
+    hoverableItem.position.setValue({ x, y });
 
     Animated.timing(hoverableItem.opacity, {
       toValue: 1,
@@ -170,7 +195,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     }).start();
   };
 
-  handleEditorContentLoad = () => {
+  handleEditorLoad = () => {
     const {
       initialContent = new Delta()
         .insert(
@@ -206,7 +231,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const position = await this.getHoverablePosition(hoverableItem.hoverable);
+    const position = await this.getHoverablePosition();
 
     if (!position) {
       return;
@@ -215,8 +240,11 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     const { x, y } = position;
     const prevX = (hoverableItem.position.x as any)._value;
     const prevY = (hoverableItem.position.y as any)._value;
+    const deltaX = prevX - x;
+    const deltaY = prevY - y;
 
-    if (x !== prevX || y !== prevY) {
+    // Update when significant enough
+    if (Math.hypot(deltaX, deltaY) > 10) {
       Animated.spring(hoverableItem.position, {
         toValue: {
           x,
@@ -259,6 +287,9 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return null;
     }
 
+    const formats = await this.editor.getFormats();
+    this.setState({ formats });
+
     const bounds = await this.editor.getBounds(
       selection.index,
       selection.length,
@@ -294,96 +325,130 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       this.handleHideHoverable();
 
       if (formats.link) {
-        this.handleShowHoverable(range, 'link');
+        this.handleShowHoverable({ type: 'link-preview' });
       }
-    }
-  };
-
-  handleFormatBold = async () => {
-    if (!this.editor) {
-      return;
-    }
-
-    const formats = await this.editor.getFormats();
-    this.editor.format('bold', !formats.bold);
-  };
-
-  handleFormatItalic = async () => {
-    if (!this.editor) {
-      return;
-    }
-
-    const formats = await this.editor.getFormats();
-    this.editor.format('italic', !formats.italic);
-  };
-
-  handleFormatStrike = async () => {
-    if (!this.editor) {
-      return;
-    }
-
-    const formats = await this.editor.getFormats();
-    this.editor.format('strike', !formats.strike);
-  };
-
-  handleFormatCode = async () => {
-    if (!this.editor) {
-      return;
-    }
-
-    const formats = await this.editor.getFormats();
-    this.editor.format('code', !formats.code);
-  };
-
-  handleFormatHeading = async (size: HeadingSize) => {
-    if (!this.editor) {
-      return;
-    }
-    const formats = await this.editor.getFormats();
-
-    if (formats.header === size) {
-      this.editor.format('header', false);
     } else {
-      this.editor.format('header', size);
+      this.handleShowHoverable({ type: 'toolbar' });
     }
   };
 
-  handleFormatList = async () => {
+  handleFormatBold = async (value: boolean) => {
     if (!this.editor) {
       return;
     }
 
-    const formats = await this.editor.getFormats();
-    this.editor.format('list', formats.list ? false : 'bullet');
+    this.editor.format('bold', value);
   };
 
-  handleFormatBlockquote = async () => {
+  handleFormatItalic = async (value: boolean) => {
     if (!this.editor) {
       return;
     }
 
-    const formats = await this.editor.getFormats();
-    this.editor.format('blockquote', !formats.blockquote);
+    this.editor.format('italic', value);
   };
 
-  handleFormatCodeBlock = async () => {
+  handleFormatStrike = async (value: boolean) => {
     if (!this.editor) {
       return;
     }
 
-    const formats = await this.editor.getFormats();
-    this.editor.format('code-block', !formats['code-block']);
+    this.editor.format('strike', value);
+  };
+
+  handleFormatCode = async (value: boolean) => {
+    if (!this.editor) {
+      return;
+    }
+
+    this.editor.format('code', value);
+  };
+
+  handleFormatHeading = async (value: HeadingSize | false) => {
+    if (!this.editor) {
+      return;
+    }
+    this.editor.format('header', value);
+    this.handleHideHoverable();
+  };
+
+  handleFormatList = async (value: ListType | false) => {
+    if (!this.editor) {
+      return;
+    }
+
+    this.editor.format('list', value);
+    this.handleHideHoverable();
+  };
+
+  handleFormatBlockquote = async (value: boolean) => {
+    if (!this.editor) {
+      return;
+    }
+
+    this.editor.format('blockquote', value);
+    this.handleHideHoverable();
+  };
+
+  handleFormatCodeBlock = async (value: boolean) => {
+    if (!this.editor) {
+      return;
+    }
+
+    this.editor.format('code-block', value);
+    this.handleHideHoverable();
   };
 
   handleRemoveLink = () => {};
 
-  handleFormatLink = async () => {
+  handleSubmitLinkEdit = async (link: LinkValue) => {
+    if (!this.editor) {
+      return;
+    }
+
+    const selection = await this.editor.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    this.editor.formatLink(selection, link);
     this.handleHideHoverable();
   };
 
-  handleSubmitLinkEdit = () => {};
+  handleOpenLinkEdit = async () => {
+    if (!this.editor) {
+      return;
+    }
 
-  handleCloseLinkEdit = () => {};
+    const selection = await this.editor.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    const linkRange = await this.editor.getLinkRange(selection.index);
+    if (!linkRange) {
+      this.handleShowHoverable({
+        type: 'link-edit',
+        link: { text: '', url: '' },
+      });
+    } else {
+      await this.editor.setSelection(linkRange);
+      const formats = await this.editor.getFormats();
+      const text = await this.editor.getText(linkRange);
+
+      if (!formats.link) {
+        this.handleShowHoverable({
+          type: 'link-edit',
+          link: { text: '', url: '' },
+        });
+      } else {
+        this.handleShowHoverable({
+          type: 'link-edit',
+          link: { text: text, url: formats.link },
+        });
+      }
+    }
+  };
 
   handleInsertImage = () => {};
 
@@ -418,28 +483,10 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   };
 
   render() {
-    const { hoverableItem } = this.state;
+    const { hoverableItem, formats } = this.state;
 
     return (
       <Container expanded>
-        <Container paddingBottom={4}>
-          <Toolbar
-            formats={{}}
-            onUndo={this.handleUndo}
-            onRedo={this.handleRedo}
-            onFormatLink={this.handleFormatLink}
-            onFormatBold={this.handleFormatBold}
-            onFormatItalic={this.handleFormatItalic}
-            onFormatStrike={this.handleFormatStrike}
-            onFormatHeading={this.handleFormatHeading}
-            onFormatCode={this.handleFormatCode}
-            onFormatList={this.handleFormatList}
-            onFormatBlockquote={this.handleFormatBlockquote}
-            onFormatCodeBlock={this.handleFormatCodeBlock}
-            onInsertImage={this.handleInsertImage}
-            onInsertVideo={this.handleInsertVideo}
-          />
-        </Container>
         <ScrollView
           ref={this.scrollViewRef}
           onContentSizeChange={this.handleContentSizeChange}
@@ -462,16 +509,38 @@ export class Editor extends React.Component<EditorProps, EditorState> {
                     },
                   ]}
                 >
-                  {hoverableItem.hoverable?.type === 'commands' && (
-                    <HoverableCommands />
-                  )}
+                  <View ref={this.hoverableRef}>
+                    {hoverableItem.hoverable?.type === 'commands' && (
+                      <HoverableCommands />
+                    )}
+                    {hoverableItem.hoverable?.type === 'link-edit' && (
+                      <HoverableLinkEdit
+                        initialValue={hoverableItem.hoverable.link}
+                        onSubmit={this.handleSubmitLinkEdit}
+                      />
+                    )}
+                    {hoverableItem.hoverable?.type === 'toolbar' && (
+                      <HoverableToolbar
+                        formats={formats}
+                        onOpenLinkEdit={this.handleOpenLinkEdit}
+                        onFormatBold={this.handleFormatBold}
+                        onFormatItalic={this.handleFormatItalic}
+                        onFormatStrike={this.handleFormatStrike}
+                        onFormatHeading={this.handleFormatHeading}
+                        onFormatCode={this.handleFormatCode}
+                        onFormatList={this.handleFormatList}
+                        onFormatBlockquote={this.handleFormatBlockquote}
+                        onFormatCodeBlock={this.handleFormatCodeBlock}
+                      />
+                    )}
+                  </View>
                 </Animated.View>
               )}
             </ThemeContext.Consumer>
           )}
           <EditorContent
             ref={this.editorContentRef}
-            onLoad={this.handleEditorContentLoad}
+            onLoad={this.handleEditorLoad}
             onTextChange={this.handleTextChange}
             onSelectionChange={this.handleSelectionChange}
             onPromptCommands={this.handlePromptCommands}
@@ -482,259 +551,10 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 }
 
-interface ToolbarProps {
-  formats: Formats;
-  onUndo: () => void;
-  onRedo: () => void;
-  onFormatBold: () => void;
-  onFormatItalic: () => void;
-  onFormatStrike: () => void;
-  onFormatLink: () => void;
-  onFormatHeading: (size: HeadingSize) => void;
-  onFormatCode: () => void;
-  onFormatList: () => void;
-  onFormatBlockquote: () => void;
-  onFormatCodeBlock: () => void;
-  onInsertImage: () => void;
-  onInsertVideo: () => void;
-}
-
-function Toolbar(props: ToolbarProps) {
-  const {
-    formats,
-    onUndo,
-    onRedo,
-    onFormatBold,
-    onFormatItalic,
-    onFormatStrike,
-    onFormatLink,
-    onFormatHeading,
-    onFormatCode,
-    onFormatList,
-    onFormatBlockquote,
-    onFormatCodeBlock,
-    onInsertImage,
-    onInsertVideo,
-  } = props;
-
-  const handleFormatHeadingLarge = React.useCallback(() => {
-    onFormatHeading(1);
-  }, [onFormatHeading]);
-
-  const handleFormatHeadingMedium = React.useCallback(() => {
-    onFormatHeading(2);
-  }, [onFormatHeading]);
-
-  return (
-    <Row>
-      <ToolbarButton icon="undo" onPress={onUndo} />
-      <ToolbarButton icon="redo" onPress={onRedo} />
-      <ToolbarDivider />
-      <ToolbarButton
-        isActive={formats.header === 2}
-        icon="font"
-        size="sm"
-        onPress={handleFormatHeadingMedium}
-      />
-      <ToolbarButton
-        isActive={formats.header === 1}
-        icon="font"
-        onPress={handleFormatHeadingLarge}
-      />
-      <ToolbarDivider />
-      <ToolbarButton
-        isActive={formats.bold}
-        icon="bold"
-        onPress={onFormatBold}
-      />
-      <ToolbarButton
-        isActive={formats.italic}
-        icon="italic"
-        onPress={onFormatItalic}
-      />
-      <ToolbarButton
-        isActive={formats.strike}
-        icon="strikethrough"
-        size="lg"
-        onPress={onFormatStrike}
-      />
-      <ToolbarButton
-        isActive={formats.code}
-        icon="code"
-        onPress={onFormatCode}
-      />
-      <ToolbarDivider />
-      <ToolbarButton
-        isActive={formats.list}
-        icon="list"
-        onPress={onFormatList}
-      />
-      <ToolbarButton
-        isActive={formats.blockquote}
-        icon="quote"
-        onPress={onFormatBlockquote}
-      />
-      <ToolbarButton
-        isActive={formats['code-block']}
-        icon="codepen"
-        onPress={onFormatCodeBlock}
-      />
-      <ToolbarDivider />
-      <ToolbarButton
-        isActive={!!formats.link}
-        icon="link"
-        onPress={onFormatLink}
-      />
-      <ToolbarButton icon="image" />
-      <ToolbarButton icon="video" onPress={onInsertVideo} />
-    </Row>
-  );
-}
-
-interface ToolbarButtonProps {
-  onPress?: () => void;
-  icon: IconName;
-  size?: TextSize;
-  isActive?: boolean;
-}
-
-function ToolbarButton(props: ToolbarButtonProps) {
-  const { onPress = () => {}, icon, size, isActive } = props;
-
-  return (
-    <Button style={styles.toolbarButton} onPress={onPress}>
-      <Icon name={icon} size={size} color={isActive ? 'primary' : 'default'} />
-    </Button>
-  );
-}
-
-interface LinkValue {
-  text: string;
-  url: string;
-}
-
-interface LinkEditProps {
-  initialValue: LinkValue;
-  onSubmit: (link: LinkValue) => void;
-  onRequestClose: () => void;
-}
-
-function LinkEdit(props: LinkEditProps) {
-  const { onSubmit, onRequestClose, initialValue } = props;
-
-  const [text, setText] = React.useState(initialValue.text);
-  const [url, setURL] = React.useState(initialValue.url);
-
-  const handleSubmit = React.useCallback(() => {
-    onSubmit({ text: text || url, url });
-  }, [text, url, onSubmit]);
-
-  return (
-    <Container padding={16} minWidth={400}>
-      <CloseButton onPress={onRequestClose} />
-      <Spacing height={16} />
-      <Text>Text</Text>
-      <TextInput value={text} onValueChange={setText} />
-      <Spacing height={16} />
-      <Text>URL</Text>
-      <TextInput value={url} onValueChange={setURL} />
-      <Spacing height={24} />
-      <Button onPress={handleSubmit}>
-        <Text>Submit</Text>
-      </Button>
-    </Container>
-  );
-}
-
-interface LinkPreviewProps {
-  url: string;
-  onFormatLink: () => void;
-  onRemoveLink: () => void;
-}
-
-function LinkPreview(props: LinkPreviewProps) {
-  const { url, onFormatLink, onRemoveLink } = props;
-
-  const handleCopy = React.useCallback(() => {
-    Clipboard.setString(url);
-  }, [url]);
-
-  return (
-    <Container width={LINK_PREVIEW_WIDTH} height={LINK_PREVIEW_HEIGHT}>
-      <Row>
-        <Container flex={1} padding={8}>
-          <Text decoration="underline">{url}</Text>
-        </Container>
-        <Button onPress={handleCopy}>
-          <Icon name="copy" />
-        </Button>
-        <Button onPress={onFormatLink}>
-          <Icon name="edit" />
-        </Button>
-        <Button onPress={onRemoveLink}>
-          <Icon name="x-circle" />
-        </Button>
-      </Row>
-    </Container>
-  );
-}
-
-interface HoverableCommandsProps {}
-
-const options = ['item-1', 'item-2', 'item-3'];
-
-const HOVERABLE_COMMANDS_WIDTH = 240;
-const HOVERABLE_COMMANDS_HEIGHT = 280;
-
-function HoverableCommands(props: HoverableCommandsProps) {
-  console.log('render');
-
-  return (
-    <Container
-      width={HOVERABLE_COMMANDS_WIDTH}
-      height={HOVERABLE_COMMANDS_HEIGHT}
-    >
-      {options.map((opt) => {
-        return (
-          <Container flex={1} key={opt}>
-            <Text>{opt}</Text>
-          </Container>
-        );
-      })}
-    </Container>
-  );
-}
-
-function ToolbarDivider() {
-  const theme = useTheme();
-
-  return (
-    <View
-      style={[
-        styles.toolbarDivider,
-        { backgroundColor: theme.border.color.default },
-      ]}
-    />
-  );
-}
-
 const styles = StyleSheet.create({
   hoverable: {
     position: 'absolute',
     borderRadius: tokens.radius,
     zIndex: 1,
-  },
-  toolbarButton: {
-    height: 40,
-    width: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: tokens.radius,
-  },
-  toolbarDivider: {
-    height: 24,
-    marginHorizontal: 8,
-    width: 1,
-    alignSelf: 'center',
   },
 });

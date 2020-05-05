@@ -9,6 +9,7 @@ import type {
   Format,
   Formats,
   ChangeSource,
+  LinkValue,
 } from './types';
 
 export interface EditorContentProps {
@@ -62,7 +63,7 @@ export interface EditorContentInstance {
   ) => void;
   setContents: (delta: Delta, source?: ChangeSource) => void;
   removeLink: (index: number) => void;
-  formatLink: (range: Range, text: string, url: string) => void;
+  formatLink: (range: Range, link: LinkValue) => void;
   // Editor
   focus: () => void;
   // Model

@@ -219,19 +219,25 @@ function receiveMessage(event: MessageEvent) {
     return;
   }
 
-  // function handleRemoveLink(index: number) {
-  //   const [link, offset] = quill.getLeaf(index);
+  if (data.type === 'remove-link') {
+    const { index } = data;
+    const [link, offset] = quill.getLeaf(index);
 
-  //   if (link && link.parent.domNode instanceof HTMLAnchorElement) {
-  //     const linkRange = { index: index - offset, length: link.length() };
-  //     quill.formatText(linkRange, 'link', false);
-  //   }
-  // }
+    if (link && link.parent.domNode instanceof window.HTMLAnchorElement) {
+      const linkRange = { index: index - offset, length: link.length() };
+      quill.formatText(linkRange, 'link', false);
+    }
+    return;
+  }
 
-  // function handleFormatLink(range: Range, text: string, url: string) {
-  //   quill.deleteText(range.index, range.length);
-  //   quill.insertText(range.index, text, 'link', url);
-  // }
+  if (data.type === 'format-link') {
+    const {
+      range,
+      link: { text, url },
+    } = data;
+    quill.deleteText(range.index, range.length);
+    quill.insertText(range.index, text, 'link', url);
+  }
 }
 
 window.addEventListener('message', receiveMessage);

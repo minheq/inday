@@ -16,6 +16,7 @@ import type {
   FromWebViewGetText,
   FromWebViewGetFormats,
   ChangeSource,
+  LinkValue,
 } from './types';
 import html from './webview/index.bundle.html';
 
@@ -74,7 +75,9 @@ export const EditorContent = React.forwardRef(
         format: (name, value, source) => {
           sendMessage({ type: 'format', name, value, source });
         },
-        formatLink: () => {},
+        formatLink: (range: Range, link: LinkValue) => {
+          sendMessage({ type: 'format-link', range, link });
+        },
         removeLink: () => {},
         focus: () => {
           editorContentRef.current?.focus();

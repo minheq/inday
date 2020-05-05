@@ -7,6 +7,7 @@ export * from './divider';
 export * from './dialog';
 export * from './spacing';
 export * from './row';
+export * from './popover';
 export * from './center';
 export * from './content';
 export * from './text_input';

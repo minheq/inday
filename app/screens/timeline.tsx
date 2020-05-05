@@ -50,24 +50,24 @@ export function TimelineScreen() {
         <Container padding={16} height="100%" width="100%">
           <Row justifyContent="space-between">
             <CloseButton onPress={handleCloseEditingCard} />
-            <Row>
-              <Button>
-                <Text>Turn into task</Text>
-              </Button>
-              <Button>
-                <Text>Add reminder</Text>
-              </Button>
-              <Button>
-                <Text>Add label</Text>
-              </Button>
-              <Button>
-                <Text>More</Text>
-              </Button>
-            </Row>
           </Row>
           <View style={{ flex: 1 }}>
             <Editor />
           </View>
+          <Row>
+            <Button>
+              <Text>Turn into task</Text>
+            </Button>
+            <Button>
+              <Text>Add reminder</Text>
+            </Button>
+            <Button>
+              <Text>Add label</Text>
+            </Button>
+            <Button>
+              <Text>More</Text>
+            </Button>
+          </Row>
         </Container>
       </Dialog>
     </Screen>
