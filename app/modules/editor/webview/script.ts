@@ -10,12 +10,6 @@ import type {
   Blot,
 } from '../types';
 
-let BlockEmbed = Quill.import('blots/block/embed');
-
-class HorizontalRule extends BlockEmbed {}
-HorizontalRule.blotName = 'hr';
-HorizontalRule.tagName = 'hr';
-
 declare class ResizeObserver {
   constructor(callback: ResizeObserverCallback);
   disconnect: () => void;
@@ -48,7 +42,7 @@ declare global {
   interface Window {
     initialContent: Delta;
     ReactNativeWebView: {
-      postMessage: (message: FromWebViewMessage) => void;
+      postMessage: (message: string) => void;
     };
   }
 }
@@ -62,9 +56,17 @@ declare module 'quill' {
   }
 }
 
+let BlockEmbed = Quill.import('blots/block/embed');
+
+class HorizontalRule extends BlockEmbed {}
+HorizontalRule.blotName = 'hr';
+HorizontalRule.tagName = 'hr';
+
 function sendMessage(message: FromWebViewMessage) {
   if (window.ReactNativeWebView) {
-    window.ReactNativeWebView.postMessage(message);
+    console.log(message);
+
+    window.ReactNativeWebView.postMessage(JSON.stringify(message));
   } else {
     window.top.postMessage(message, '*');
   }
@@ -152,7 +154,8 @@ function serializeBlot(blot: any): Blot {
 }
 
 function receiveMessage(event: MessageEvent) {
-  const data = event.data as ToWebViewMessage;
+  console.log(event);
+  const data = JSON.parse(event.data) as ToWebViewMessage;
 
   console.log(data);
 
@@ -292,7 +295,7 @@ function receiveMessage(event: MessageEvent) {
 
   // When data infers to `never`, it indicates all the cases have been satisfied
 
-  console.error('Event not handled', event.data);
+  throw new Error(`Event not handled ${event.data}`);
 }
 
 window.addEventListener('message', receiveMessage);

@@ -205,6 +205,6 @@ const styles = StyleSheet.create({
     padding: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    touchAction: 'manipulation',
+    // touchAction: 'manipulation',
   },
 });

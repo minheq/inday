@@ -1,5 +1,11 @@
 import React from 'react';
-import { Animated, ViewStyle, StyleProp, StyleSheet } from 'react-native';
+import {
+  Animated,
+  ViewStyle,
+  StyleProp,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { usePressability, PressabilityConfig } from './pressability';
 
 export interface PressableChildrenProps {
@@ -130,10 +136,12 @@ export function Pressable(props: PressableProps) {
 
 const styles = StyleSheet.create({
   base: {
-    // @ts-ignore
-    touchAction: 'manipulation',
-    cursor: 'pointer',
-    userSelect: 'none',
+    ...(Platform.OS === 'web' && {
+      // @ts-ignore
+      touchAction: 'manipulation',
+      cursor: 'pointer',
+      userSelect: 'none',
+    }),
   },
 });
 

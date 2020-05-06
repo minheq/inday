@@ -6,7 +6,7 @@ import {
   StyleProp,
   GestureResponderEvent,
 } from 'react-native';
-import { Pressable, PressableChildrenProps } from '../components';
+import { Pressable, PressableChildrenProps } from './pressable';
 import { tokens, useTheme } from '../theme';
 
 interface ButtonProps {

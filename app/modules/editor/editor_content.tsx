@@ -1,7 +1,7 @@
 import Delta from 'quill-delta';
 import React from 'react';
-import { View } from 'react-native';
-import { Text } from '../../components/text';
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
+
 import type {
   Bounds,
   Range,
@@ -9,13 +9,22 @@ import type {
   Format,
   Formats,
   ChangeSource,
+  ToWebViewMessage,
+  FromWebViewMessage,
+  EditorContentSize,
 } from './types';
+import { StyleSheet } from 'react-native';
+import { useWebViewHandler } from './use_webview_handler';
+
+// const html = require('./try.html');
+const html = require('./webview/index.bundle.html');
+// const html = require('./webview/index.html');
+// const { html } = require('./webview/asjs');
 
 export interface EditorContentProps {
   onBlur?: () => void;
   onFocus?: () => void;
   onLoad?: () => void;
-  onPromptCommands?: (index: number) => void;
   onTextChange?: (
     delta: Delta,
     oldContents: Delta,
@@ -106,6 +115,22 @@ export interface EditorContentInstance {
   setSelection(range: Range): Promise<void>;
 }
 
+class MessageHolder {
+  constructor(listener: (message: FromWebViewMessage) => void) {
+    this.listener = listener;
+  }
+
+  listener: (message: FromWebViewMessage) => void;
+
+  on = (message: FromWebViewMessage) => {
+    if (this.listener) {
+      this.listener(message);
+    } else {
+      console.error('No listener');
+    }
+  };
+}
+
 export const EditorContent = React.forwardRef(
   (
     props: EditorContentProps,
@@ -114,66 +139,106 @@ export const EditorContent = React.forwardRef(
       | ((instance: EditorContentInstance) => void)
       | null,
   ) => {
-    React.useImperativeHandle(ref, () => ({
-      selection: null,
-      undo: () => {},
-      setContents: () => {},
-      redo: () => {},
-      getText: async () => '',
-      format: () => {},
-      formatText: () => {},
-      formatLine: () => new Delta(),
-      deleteText: () => new Delta(),
-      focus: () => {},
-      setSelection: async () => {},
-      insertText: () => new Delta(),
-      insertEmbed: () => new Delta(),
-      getBounds: async () => ({
-        top: 0,
-        left: 0,
-        height: 0,
-        width: 0,
-        bottom: 0,
-        right: 0,
-      }),
-      getLine: async () => [
-        {
-          isEmpty: true,
-          textContent: '',
-          tagName: '',
-          length: 0,
-          firstChild: {
-            tagName: '',
-          },
-          parent: {
-            tagName: '',
-          },
-        },
-        0,
-      ],
-      getLeaf: async () => [
-        {
-          isEmpty: true,
-          textContent: '',
-          tagName: '',
-          length: 0,
-          firstChild: {
-            tagName: '',
-          },
-          parent: {
-            tagName: '',
-          },
-        },
-        0,
-      ],
-      getSelection: async () => ({ index: 0, length: 0 }),
-      getFormat: async () => ({}),
-    }));
+    const {
+      onLoad = () => {},
+      onTextChange = () => {},
+      onSelectionChange = () => {},
+    } = props;
+    const webViewRef = React.useRef<WebView>();
+    const messageHolderRef = React.useRef<MessageHolder | null>(null);
+
+    const sendMessage = React.useCallback((message: ToWebViewMessage) => {
+      if (webViewRef.current) {
+        webViewRef.current.injectJavaScript(
+          `(function() {window.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(
+            message,
+          )}}));})()`,
+        );
+      }
+    }, []);
+
+    const sendRequest = React.useCallback(
+      (message: ToWebViewMessage): Promise<FromWebViewMessage> => {
+        return new Promise((resolve) => {
+          sendMessage(message);
+
+          if (messageHolderRef.current) {
+            messageHolderRef.current = new MessageHolder(
+              (data: FromWebViewMessage) => {
+                if (data.type === message.type) {
+                  resolve(data);
+                }
+
+                messageHolderRef.current = null;
+              },
+            );
+          }
+        });
+      },
+      [sendMessage],
+    );
+
+    useWebViewHandler({
+      ref,
+      sendMessage,
+      sendRequest,
+    });
+
+    const handleResize = React.useCallback((_size: EditorContentSize) => {
+      if (webViewRef.current) {
+        // webViewRef.current.style.height = size.height + 'px';
+      }
+    }, []);
+
+    const receiveMessage = React.useCallback(
+      (event: WebViewMessageEvent) => {
+        const data = JSON.parse(event.nativeEvent.data) as FromWebViewMessage;
+
+        console.log(data);
+
+        if (data.type === 'text-change') {
+          onTextChange(data.delta, data.oldDelta, data.source);
+        } else if (data.type === 'selection-change') {
+          onSelectionChange(data.range, data.oldRange, data.source);
+        } else if (data.type === 'resize') {
+          handleResize(data.size);
+        } else if (data.type === 'dom-content-loaded') {
+          onLoad();
+        }
+
+        if (messageHolderRef.current) {
+          messageHolderRef.current.on(data);
+        }
+      },
+      [onTextChange, onSelectionChange, handleResize, onLoad],
+    );
 
     return (
-      <View>
-        <Text>Editor</Text>
-      </View>
+      <WebView
+        // @ts-ignore
+        ref={webViewRef}
+        injectedJavaScript={debugging}
+        source={html}
+        style={styles.base}
+        onMessage={receiveMessage}
+      />
     );
   },
 );
+const debugging = `
+  // Debug
+  console = new Object();
+  console.log = function(log) {
+    window.webViewBridge.send("console", log);
+  };
+  console.debug = console.log;
+  console.info = console.log;
+  console.warn = console.log;
+  console.error = console.log;
+`;
+const styles = StyleSheet.create({
+  base: {
+    height: '100%',
+    width: '100%',
+  },
+});
