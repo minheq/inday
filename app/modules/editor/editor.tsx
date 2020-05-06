@@ -154,7 +154,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return null;
     }
 
-    const formats = await this.editor.getFormats();
+    const formats = await this.editor.getFormat();
     this.setState({ formats });
 
     const bounds = await this.editor.getBounds(range.index, range.length);
@@ -183,7 +183,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const formats = await this.editor.getFormats();
+    const formats = await this.editor.getFormat();
     this.setState({ formats });
 
     if (range.length === 0) {
@@ -498,7 +498,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       });
     } else {
       await this.editor.setSelection(linkRange.index, linkRange.length);
-      const formats = await this.editor.getFormats();
+      const formats = await this.editor.getFormat();
       const text = await this.editor.getText(linkRange);
 
       if (!formats.link) {

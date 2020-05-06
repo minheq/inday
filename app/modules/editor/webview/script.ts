@@ -154,7 +154,7 @@ function serializeBlot(blot: any): Blot {
 function receiveMessage(event: MessageEvent) {
   const data = event.data as ToWebViewMessage;
 
-  console.log(data, 'EVENT');
+  console.log(data);
 
   if (data.type === 'format') {
     const { name, value, source } = data;
@@ -163,14 +163,26 @@ function receiveMessage(event: MessageEvent) {
   }
 
   if (data.type === 'format-text') {
-    const { format, index, length, value, source } = data;
-    quill.formatText(index, length, format, value, source);
+    const { format, index, length, value, source, formats } = data;
+    if (formats) {
+      quill.formatText(index, length, formats, source);
+    } else if (format) {
+      quill.formatText(index, length, format, value, source);
+    } else {
+      quill.formatText(index, length, source);
+    }
     return;
   }
 
   if (data.type === 'format-line') {
-    const { name, value, index, length } = data;
-    quill.formatLine(index, length, name, value);
+    const { formats, format, value, index, length, source } = data;
+    if (formats) {
+      quill.formatLine(index, length, formats, source);
+    } else if (format) {
+      quill.formatLine(index, length, format, value, source);
+    } else {
+      quill.formatLine(index, length, source);
+    }
     return;
   }
 
@@ -181,8 +193,14 @@ function receiveMessage(event: MessageEvent) {
   }
 
   if (data.type === 'insert-text') {
-    const { index, text, format, value } = data;
-    quill.insertText(index, text, format, value);
+    const { formats, format, value, index, text, source } = data;
+    if (formats) {
+      quill.insertText(index, text, formats, source);
+    } else if (format) {
+      quill.insertText(index, text, format, value, source);
+    } else {
+      quill.insertText(index, text, source);
+    }
     return;
   }
 
@@ -208,8 +226,12 @@ function receiveMessage(event: MessageEvent) {
   }
 
   if (data.type === 'set-selection') {
-    const { index, length } = data;
-    quill.setSelection(index, length);
+    const { index, length, range, source } = data;
+    if (range) {
+      quill.setSelection(range, source);
+    } else if (index && length) {
+      quill.setSelection(index, length, source);
+    }
     return;
   }
 
@@ -221,8 +243,13 @@ function receiveMessage(event: MessageEvent) {
   }
 
   if (data.type === 'get-selection') {
-    const selection = quill.getSelection();
-    sendMessage({ type: 'get-selection', range: selection });
+    if (data.focus) {
+      const selection = quill.getSelection(data.focus);
+      sendMessage({ type: 'get-selection', range: selection });
+    } else {
+      const selection = quill.getSelection();
+      sendMessage({ type: 'get-selection', range: selection });
+    }
     return;
   }
 
@@ -264,9 +291,8 @@ function receiveMessage(event: MessageEvent) {
   }
 
   // When data infers to `never`, it indicates all the cases have been satisfied
-  if (data) {
-    return;
-  }
+
+  console.error('Event not handled', event.data);
 }
 
 window.addEventListener('message', receiveMessage);

@@ -74,11 +74,65 @@ export const EditorContent = React.forwardRef(
         format: (name, value, source) => {
           sendMessage({ type: 'format', name, value, source });
         },
-        formatText: (index, length, format, value) => {
-          sendMessage({ type: 'format-text', index, length, format, value });
+        formatText: (...args: any[]) => {
+          const [index, length, arg3, arg4, arg5] = args;
+
+          // Formats
+          if (typeof arg4 === 'object') {
+            sendMessage({
+              type: 'format-text',
+              index,
+              length,
+              formats: arg3,
+              source: arg4,
+            });
+          } else if (arg4 !== undefined || arg4 !== null) {
+            sendMessage({
+              type: 'format-text',
+              index,
+              length,
+              format: arg3,
+              value: arg4,
+              source: arg5,
+            });
+          } else {
+            sendMessage({
+              type: 'format-text',
+              index,
+              length,
+              source: arg3,
+            });
+          }
         },
-        formatLine: (index, length, name, value) => {
-          sendMessage({ type: 'format-line', index, length, name, value });
+        formatLine: (...args: any[]) => {
+          const [index, length, arg3, arg4, arg5] = args;
+
+          // Formats
+          if (typeof arg4 === 'object') {
+            sendMessage({
+              type: 'format-line',
+              index,
+              length,
+              formats: arg3,
+              source: arg4,
+            });
+          } else if (arg4 !== undefined || arg4 !== null) {
+            sendMessage({
+              type: 'format-line',
+              index,
+              length,
+              format: arg3,
+              value: arg4,
+              source: arg5,
+            });
+          } else {
+            sendMessage({
+              type: 'format-line',
+              index,
+              length,
+              source: arg3,
+            });
+          }
         },
         deleteText: (index: number, length: number) => {
           sendMessage({ type: 'delete-text', index, length });
@@ -87,14 +141,51 @@ export const EditorContent = React.forwardRef(
           editorContentRef.current?.focus();
           sendMessage({ type: 'focus' });
         },
-        setSelection: async (index: number, length: number) => {
-          sendMessage({ type: 'set-selection', index, length });
+        setSelection: async (...args: any[]) => {
+          const [arg1, arg2, arg3] = args;
+          if (typeof arg1 === 'object') {
+            sendMessage({ type: 'set-selection', range: arg1, source: arg2 });
+          } else {
+            sendMessage({
+              type: 'set-selection',
+              index: arg1,
+              length: arg2,
+              source: arg3,
+            });
+          }
         },
         setContents: (delta: Delta, source?: ChangeSource) => {
           sendMessage({ type: 'set-contents', delta, source });
         },
-        insertText: (index, text, format, value) => {
-          sendMessage({ type: 'insert-text', index, text, format, value });
+        insertText: (...args: any[]) => {
+          const [index, text, arg3, arg4, arg5] = args;
+
+          // Formats
+          if (typeof arg3 === 'object') {
+            sendMessage({
+              type: 'insert-text',
+              index,
+              text,
+              formats: arg3,
+              source: arg4,
+            });
+          } else if (arg4 !== undefined || arg4 !== null) {
+            sendMessage({
+              type: 'insert-text',
+              index,
+              text,
+              format: arg3,
+              value: arg4,
+              source: arg5,
+            });
+          } else {
+            sendMessage({
+              type: 'insert-text',
+              index,
+              text,
+              source: arg3,
+            });
+          }
         },
         insertEmbed: () => {
           return new Delta();
@@ -124,9 +215,10 @@ export const EditorContent = React.forwardRef(
 
           return [data.leaf, data.offset];
         },
-        getSelection: async () => {
+        getSelection: async (focus?: boolean) => {
           const data = await sendAsyncMessage<FromWebViewGetSelection>({
             type: 'get-selection',
+            focus,
           });
 
           return data.range;
@@ -139,7 +231,7 @@ export const EditorContent = React.forwardRef(
 
           return data.text;
         },
-        getFormats: async () => {
+        getFormat: async () => {
           const data = await sendAsyncMessage<FromWebViewGetFormats>({
             type: 'get-formats',
           });

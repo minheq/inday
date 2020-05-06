@@ -174,6 +174,7 @@ export interface ToWebViewGetLine {
 
 export interface ToWebViewGetSelection {
   type: 'get-selection';
+  focus?: boolean;
 }
 
 export interface ToWebViewGetText {
@@ -211,8 +212,9 @@ export interface ToWebViewFormatText<
   type: 'format-text';
   index: number;
   length: number;
-  format: K;
-  value: T[K];
+  format?: K;
+  formats?: K;
+  value?: T[K];
   source?: ChangeSource;
 }
 
@@ -235,8 +237,10 @@ export interface ToWebViewFormatLine<
   type: 'format-line';
   index: number;
   length: number;
-  name: K;
-  value: T[K];
+  formats?: Format;
+  format?: K;
+  value?: T[K];
+  source?: ChangeSource;
 }
 
 export interface ToWebViewDeleteText {
@@ -252,13 +256,17 @@ export interface ToWebViewInsertText<
   type: 'insert-text';
   index: number;
   text: string;
-  format: K;
-  value: T[K];
+  format?: K;
+  formats?: K;
+  value?: T[K];
+  source?: ChangeSource;
 }
 export interface ToWebViewSetSelection {
   type: 'set-selection';
-  index: number;
-  length: number;
+  range?: Range;
+  index?: number;
+  length?: number;
+  source?: ChangeSource;
 }
 
 export interface ToWebViewSetContents {

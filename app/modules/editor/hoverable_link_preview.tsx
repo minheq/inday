@@ -18,7 +18,7 @@ export function HoverableLinkPreview(props: HoverableLinkPreviewProps) {
   return (
     <Container>
       <Row>
-        <Container flex={1} padding={8}>
+        <Container flex={1} padding={8} maxWidth={144}>
           <Text decoration="underline">{url}</Text>
         </Container>
         <Button onPress={handleCopy}>

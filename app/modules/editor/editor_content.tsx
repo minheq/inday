@@ -30,6 +30,13 @@ export interface EditorContentProps {
 
 export interface EditorContentInstance {
   // Content
+  insertText(index: number, text: string, source?: ChangeSource): void;
+  insertText(
+    index: number,
+    text: string,
+    formats: Formats,
+    source?: ChangeSource,
+  ): void;
   insertText<TFormat extends Format>(
     index: number,
     text: string,
@@ -41,6 +48,13 @@ export interface EditorContentInstance {
     index: number,
     type: string,
     value: any,
+    source?: ChangeSource,
+  ): void;
+  formatLine(index: number, length: number, source?: ChangeSource): void;
+  formatLine(
+    index: number,
+    length: number,
+    formats: Formats,
     source?: ChangeSource,
   ): void;
   formatLine<TFormat extends Format>(
@@ -55,19 +69,28 @@ export interface EditorContentInstance {
   undo: () => void;
   redo: () => void;
   // Formatting
-  getFormats: () => Promise<Formats>;
+  getFormat(): Promise<Formats>;
+  getFormat(range: Range): Promise<Formats>;
+  getFormat(index: number, length: number): Promise<Formats>;
   format: <TFormat extends Format>(
     name: TFormat,
     value: Formats[TFormat],
     source?: ChangeSource,
   ) => void;
-  formatText: <TFormat extends Format>(
+  formatText(index: number, length: number, source?: ChangeSource): void;
+  formatText(
+    index: number,
+    length: number,
+    formats: Formats,
+    source?: ChangeSource,
+  ): void;
+  formatText<TFormat extends Format>(
     index: number,
     length: number,
     format: TFormat,
     value: Formats[TFormat],
     source?: ChangeSource,
-  ) => void;
+  ): void;
   setContents: (delta: Delta, source?: ChangeSource) => void;
   // Editor
   focus: () => void;
@@ -77,8 +100,10 @@ export interface EditorContentInstance {
   getLeaf: (index: number) => Promise<[Blot | null, number]>;
   // Selection
   getBounds: (index: number, length?: number) => Promise<Bounds>;
-  getSelection: () => Promise<Range | null>;
-  setSelection: (index: number, length: number) => Promise<void>;
+  getSelection(): Promise<Range | null>;
+  getSelection(focus: boolean): Promise<Range | null>;
+  setSelection(index: number, length: number): Promise<void>;
+  setSelection(range: Range): Promise<void>;
 }
 
 export const EditorContent = React.forwardRef(
@@ -142,7 +167,7 @@ export const EditorContent = React.forwardRef(
         0,
       ],
       getSelection: async () => ({ index: 0, length: 0 }),
-      getFormats: async () => ({}),
+      getFormat: async () => ({}),
     }));
 
     return (
