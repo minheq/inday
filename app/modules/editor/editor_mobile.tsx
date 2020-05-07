@@ -5,6 +5,7 @@ import { EditorContentInstance, EditorContent } from './editor_content';
 import { ChangeSource, Range, HeadingSize, Formats, ListType } from './types';
 import { EditorProps } from './editor';
 import { KeyboardAvoidingView } from 'react-native';
+import { MobileSelectionToolbar } from './range_toolbar';
 
 interface EditorState {
   /** Formats in current selection */
@@ -140,6 +141,8 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
     this.editor.format('code-block', value);
   };
 
+  handleOpenLinkEdit = () => {};
+
   handleInsertImage = () => {};
 
   handleInsertVideo = () => {};
@@ -165,17 +168,29 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
   };
 
   render() {
+    const { formats } = this.state;
+
     return (
-      <KeyboardAvoidingView style={{ height: '100%', width: '100%' }}>
-        <Container expanded>
-          <EditorContent
-            ref={this.editorContentRef}
-            onLoad={this.handleEditorLoad}
-            onTextChange={this.handleTextChange}
-            onSelectionChange={this.handleSelectionChange}
-          />
-        </Container>
-      </KeyboardAvoidingView>
+      <Container flex={1} padding={16}>
+        <EditorContent
+          ref={this.editorContentRef}
+          onLoad={this.handleEditorLoad}
+          onTextChange={this.handleTextChange}
+          onSelectionChange={this.handleSelectionChange}
+        />
+        <MobileSelectionToolbar
+          formats={formats}
+          onOpenLinkEdit={this.handleOpenLinkEdit}
+          onFormatBold={this.handleFormatBold}
+          onFormatItalic={this.handleFormatItalic}
+          onFormatStrike={this.handleFormatStrike}
+          onFormatHeading={this.handleFormatHeading}
+          onFormatCode={this.handleFormatCode}
+          onFormatList={this.handleFormatList}
+          onFormatBlockquote={this.handleFormatBlockquote}
+          onFormatCodeBlock={this.handleFormatCodeBlock}
+        />
+      </Container>
     );
   }
 }

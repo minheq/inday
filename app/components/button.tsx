@@ -30,7 +30,7 @@ export function Button(props: ButtonProps) {
       style={({ pressed, hovered }) => {
         Animated.spring(background, {
           toValue: pressed ? 1 : hovered ? 0.5 : 0,
-          useNativeDriver: true,
+          useNativeDriver: false,
           bounciness: 0,
           speed: 100,
         }).start();
