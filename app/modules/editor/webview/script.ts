@@ -10,6 +10,8 @@ import type {
   Blot,
 } from '../types';
 
+const ENABLE_DEBUG = false;
+
 declare class ResizeObserver {
   constructor(callback: ResizeObserverCallback);
   disconnect: () => void;
@@ -63,9 +65,11 @@ HorizontalRule.blotName = 'hr';
 HorizontalRule.tagName = 'hr';
 
 function sendMessage(message: FromWebViewMessage) {
-  if (window.ReactNativeWebView) {
-    console.log(message);
+  if (ENABLE_DEBUG) {
+    debug(JSON.stringify(message));
+  }
 
+  if (window.ReactNativeWebView) {
     window.ReactNativeWebView.postMessage(JSON.stringify(message));
   } else {
     window.top.postMessage(message, '*');
@@ -153,11 +157,23 @@ function serializeBlot(blot: any): Blot {
   };
 }
 
-function receiveMessage(event: MessageEvent) {
-  console.log(event);
-  const data = JSON.parse(event.data) as ToWebViewMessage;
+function debug(message: string) {
+  const el = document.querySelector('#debug');
 
-  console.log(data);
+  if (el) {
+    let current = el.textContent;
+    current += message;
+    current += '\n';
+    el.textContent = current;
+  }
+}
+
+function receiveMessage(event: MessageEvent) {
+  const data = event.data as ToWebViewMessage;
+
+  if (ENABLE_DEBUG) {
+    debug(JSON.stringify(event.data));
+  }
 
   if (data.type === 'format') {
     const { name, value, source } = data;

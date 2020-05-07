@@ -53,6 +53,11 @@ compiler.run(async (err, stats) => {
     return;
   }
 
+  if (stats.compilation.errors.length) {
+    console.log(stats.compilation.errors);
+    return;
+  }
+
   const script = fs.readFileSync(bundleFile, {
     encoding: 'utf-8',
   });

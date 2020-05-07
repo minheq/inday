@@ -150,9 +150,9 @@ export const EditorContent = React.forwardRef(
     const sendMessage = React.useCallback((message: ToWebViewMessage) => {
       if (webViewRef.current) {
         webViewRef.current.injectJavaScript(
-          `(function() {window.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(
-            message,
-          )}}));})()`,
+          `window.postMessage(${JSON.stringify(message)}, '*');
+           true;
+          `,
         );
       }
     }, []);
@@ -194,8 +194,6 @@ export const EditorContent = React.forwardRef(
       (event: WebViewMessageEvent) => {
         const data = JSON.parse(event.nativeEvent.data) as FromWebViewMessage;
 
-        console.log(data);
-
         if (data.type === 'text-change') {
           onTextChange(data.delta, data.oldDelta, data.source);
         } else if (data.type === 'selection-change') {
@@ -217,7 +215,6 @@ export const EditorContent = React.forwardRef(
       <WebView
         // @ts-ignore
         ref={webViewRef}
-        injectedJavaScript={debugging}
         source={html}
         style={styles.base}
         onMessage={receiveMessage}
@@ -225,17 +222,6 @@ export const EditorContent = React.forwardRef(
     );
   },
 );
-const debugging = `
-  // Debug
-  console = new Object();
-  console.log = function(log) {
-    window.webViewBridge.send("console", log);
-  };
-  console.debug = console.log;
-  console.info = console.log;
-  console.warn = console.log;
-  console.error = console.log;
-`;
 const styles = StyleSheet.create({
   base: {
     height: '100%',

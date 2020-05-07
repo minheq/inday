@@ -4,6 +4,7 @@ import { Container } from '../../components';
 import { EditorContentInstance, EditorContent } from './editor_content';
 import { ChangeSource, Range, HeadingSize, Formats, ListType } from './types';
 import { EditorProps } from './editor';
+import { KeyboardAvoidingView } from 'react-native';
 
 interface EditorState {
   /** Formats in current selection */
@@ -30,21 +31,6 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
   handleEditorLoad = () => {
     const {
       initialContent = new Delta()
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
         .insert(
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
         )
@@ -180,14 +166,16 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
 
   render() {
     return (
-      <Container expanded>
-        <EditorContent
-          ref={this.editorContentRef}
-          onLoad={this.handleEditorLoad}
-          onTextChange={this.handleTextChange}
-          onSelectionChange={this.handleSelectionChange}
-        />
-      </Container>
+      <KeyboardAvoidingView style={{ height: '100%', width: '100%' }}>
+        <Container expanded>
+          <EditorContent
+            ref={this.editorContentRef}
+            onLoad={this.handleEditorLoad}
+            onTextChange={this.handleTextChange}
+            onSelectionChange={this.handleSelectionChange}
+          />
+        </Container>
+      </KeyboardAvoidingView>
     );
   }
 }
