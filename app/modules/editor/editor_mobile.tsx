@@ -4,7 +4,6 @@ import { Container } from '../../components';
 import { EditorContentInstance, EditorContent } from './editor_content';
 import { ChangeSource, Range, HeadingSize, Formats, ListType } from './types';
 import { EditorProps } from './editor';
-import { KeyboardAvoidingView } from 'react-native';
 import { MobileSelectionToolbar } from './range_toolbar';
 
 interface EditorState {
@@ -76,6 +75,10 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
 
     const formats = await this.editor.getFormat();
     this.setState({ formats });
+
+    if (range.length === 0) {
+    } else {
+    }
   };
 
   handleFormatBold = async (value: boolean) => {
@@ -143,14 +146,6 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
 
   handleOpenLinkEdit = () => {};
 
-  handleInsertImage = () => {};
-
-  handleInsertVideo = () => {};
-
-  handleContentSizeChange = (width: number, height: number) => {
-    this.contentHeight = height;
-  };
-
   handleUndo = () => {
     if (!this.editor) {
       return;
@@ -171,7 +166,7 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
     const { formats } = this.state;
 
     return (
-      <Container flex={1} padding={16}>
+      <Container flex={1}>
         <EditorContent
           ref={this.editorContentRef}
           onLoad={this.handleEditorLoad}

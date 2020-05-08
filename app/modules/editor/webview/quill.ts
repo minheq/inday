@@ -1,7 +1,7 @@
 import Quill from 'quill';
 import Delta from 'quill-delta';
 import 'quill/dist/quill.core.css';
-import './editor.css';
+import './quill.css';
 
 import type {
   ToWebViewMessage,

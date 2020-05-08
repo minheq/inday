@@ -40,6 +40,7 @@ export function MobileSelectionToolbar(props: MobileSelectionToolbarProps) {
     onFormatBlockquote,
     onFormatCodeBlock,
   } = props;
+  const theme = useTheme();
   const [isTextFormatOpen, setIsTextFormatOpen] = React.useState(false);
 
   const handleFormatText = React.useCallback(() => {
@@ -142,7 +143,11 @@ export function MobileSelectionToolbar(props: MobileSelectionToolbarProps) {
   }
 
   return (
-    <Container color="content" borderTopWidth={1}>
+    <Container
+      color="content"
+      borderTopWidth={1}
+      borderColor={theme.border.color.default}
+    >
       <Row>
         <Modal animationType="slide" isOpen={isTextFormatOpen}>
           <Row>
@@ -245,7 +250,7 @@ function ToolbarDivider() {
 const styles = StyleSheet.create({
   toolbarButton: {
     height: 40,
-    flex: 1,
+    width: 40,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: tokens.radius,

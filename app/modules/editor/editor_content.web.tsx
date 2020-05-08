@@ -3,13 +3,10 @@ import type {
   EditorContentProps,
   EditorContentInstance,
 } from './editor_content';
-import type {
-  ToWebViewMessage,
-  EditorContentSize,
-  FromWebViewMessage,
-} from './types';
+import type { ToWebViewMessage, FromWebViewMessage } from './types';
 import html from './webview/index.bundle.html';
 import { useWebViewHandler } from './use_webview_handler';
+import { RequestQueue } from './request_queue';
 
 export const EditorContent = React.forwardRef(
   (
@@ -27,6 +24,7 @@ export const EditorContent = React.forwardRef(
       onSelectionChange = () => {},
     } = props;
     const editorContentRef = React.useRef<HTMLIFrameElement | null>(null);
+    const requestQueue = React.useRef(new RequestQueue()).current;
 
     const sendMessage = React.useCallback((message: ToWebViewMessage) => {
       if (editorContentRef.current) {
@@ -35,34 +33,17 @@ export const EditorContent = React.forwardRef(
     }, []);
 
     const sendRequest = React.useCallback(
-      <T extends FromWebViewMessage>(message: ToWebViewMessage): Promise<T> => {
+      (message: ToWebViewMessage): Promise<FromWebViewMessage> => {
         return new Promise((resolve) => {
+          requestQueue.request(message, (fromWebViewMessage) => {
+            resolve(fromWebViewMessage);
+          });
+
           sendMessage(message);
-
-          window.addEventListener('message', handleTemporaryMessage);
-
-          function handleTemporaryMessage(event: MessageEvent) {
-            if (event.data.type === message.type) {
-              resolve(event.data);
-              window.removeEventListener('message', handleTemporaryMessage);
-            }
-          }
         });
       },
-      [sendMessage],
+      [sendMessage, requestQueue],
     );
-
-    useWebViewHandler({
-      ref,
-      sendMessage,
-      sendRequest,
-    });
-
-    const handleResize = React.useCallback((size: EditorContentSize) => {
-      if (editorContentRef.current) {
-        editorContentRef.current.style.height = size.height + 'px';
-      }
-    }, []);
 
     const receiveMessage = React.useCallback(
       (event: MessageEvent) => {
@@ -72,14 +53,20 @@ export const EditorContent = React.forwardRef(
           onTextChange(data.delta, data.oldDelta, data.source);
         } else if (data.type === 'selection-change') {
           onSelectionChange(data.range, data.oldRange, data.source);
-        } else if (data.type === 'resize') {
-          handleResize(data.size);
         } else if (data.type === 'dom-content-loaded') {
           onLoad();
+        } else {
+          requestQueue.receive(data);
         }
       },
-      [onTextChange, onSelectionChange, handleResize, onLoad],
+      [onTextChange, onSelectionChange, onLoad, requestQueue],
     );
+
+    useWebViewHandler({
+      ref,
+      sendMessage,
+      sendRequest,
+    });
 
     React.useEffect(() => {
       window.addEventListener('message', receiveMessage);
@@ -105,5 +92,6 @@ const styles = {
   iframe: {
     width: '100%',
     borderWidth: 0,
+    flex: 1,
   },
 };

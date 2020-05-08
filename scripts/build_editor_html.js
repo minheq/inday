@@ -4,7 +4,7 @@ const webpack = require('webpack');
 
 const entryPath = path.join(
   __dirname,
-  '../app/modules/editor/webview/script.ts',
+  '../app/modules/editor/webview/quill.ts',
 );
 const outputPath = path.join(__dirname, '../app/modules/editor/webview/temp/');
 const bundleFilename = 'bundle.js';

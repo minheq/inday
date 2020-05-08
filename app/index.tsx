@@ -6,10 +6,7 @@ import { Editor } from './modules/editor';
 export function App() {
   return (
     <AppProvider>
-      <KeyboardAvoidingView
-        behavior="height"
-        style={{ flex: 1, backgroundColor: 'blue' }}
-      >
+      <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
         <Editor />
       </KeyboardAvoidingView>
     </AppProvider>

@@ -16,10 +16,7 @@ import type {
 import { StyleSheet } from 'react-native';
 import { useWebViewHandler } from './use_webview_handler';
 
-// const html = require('./try.html');
 const html = require('./webview/index.bundle.html');
-// const html = require('./webview/index.html');
-// const { html } = require('./webview/asjs');
 
 export interface EditorContentProps {
   onBlur?: () => void;

@@ -6,6 +6,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 #editor-container {
@@ -14,16 +15,17 @@ body {
     sans-serif;
   font-size: 1em;
   color: rgba(34, 34, 34, 1);
-  padding-bottom: 16px;
-}
-
-#editor-container .ql-editor > * {
-  padding-top: 1em;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
 }
 
 .ql-editor {
   outline: none;
   padding: 0;
+  flex: 1;
+  height: 100%;
   overflow-y: initial;
 }
 
