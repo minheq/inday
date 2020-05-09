@@ -11,20 +11,59 @@ import {
   Range,
   FromWebViewMessage,
 } from './types';
-import { EditorContentInstance } from './editor_content';
+import { EditorContentInstance, EditorContentProps } from './editor_content';
 import Delta from 'quill-delta';
+import { RequestQueue } from './request_queue';
 
-interface UseWebViewHandlerProps {
+interface UseEditorContentHandlersProps extends EditorContentProps {
   ref:
     | React.MutableRefObject<EditorContentInstance | null>
     | ((instance: EditorContentInstance) => void)
     | null;
-  sendMessage: (message: ToWebViewMessage) => void;
-  sendRequest: (message: ToWebViewMessage) => Promise<FromWebViewMessage>;
+  send: (message: ToWebViewMessage) => void;
+  // sendRequest: (message: ToWebViewMessage) => Promise<FromWebViewMessage>;
 }
 
-export function useWebViewHandler(props: UseWebViewHandlerProps) {
-  const { sendMessage, sendRequest, ref } = props;
+export function useEditorContentHandlers(props: UseEditorContentHandlersProps) {
+  const requestQueue = React.useRef(new RequestQueue()).current;
+  const {
+    send,
+    ref,
+    onTextChange = () => {},
+    onLoad = () => {},
+    onSelectionChange = () => {},
+  } = props;
+
+  const sendMessage = send;
+
+  const sendRequest = React.useCallback(
+    (message: ToWebViewMessage): Promise<FromWebViewMessage> => {
+      return new Promise((resolve) => {
+        requestQueue.request(message, (fromWebViewMessage) => {
+          resolve(fromWebViewMessage);
+        });
+
+        sendMessage(message);
+      });
+    },
+    [sendMessage, requestQueue],
+  );
+
+  const receiveMessage = React.useCallback(
+    (message: FromWebViewMessage) => {
+      if (message.type === 'text-change') {
+        onTextChange(message.delta, message.oldDelta, message.source);
+      } else if (message.type === 'selection-change') {
+        onSelectionChange(message.range, message.oldRange, message.source);
+      } else if (message.type === 'dom-content-loaded') {
+        onLoad();
+      } else if ((message.type as any) === 'webpackOk') {
+      } else {
+        requestQueue.receive(message);
+      }
+    },
+    [onTextChange, onSelectionChange, onLoad, requestQueue],
+  );
 
   React.useImperativeHandle(
     ref,
@@ -205,4 +244,6 @@ export function useWebViewHandler(props: UseWebViewHandlerProps) {
     }),
     [sendMessage, sendRequest],
   );
+
+  return receiveMessage;
 }

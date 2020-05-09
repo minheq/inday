@@ -5,8 +5,7 @@ import type {
 } from './editor_content';
 import type { ToWebViewMessage, FromWebViewMessage } from './types';
 import html from './webview/index.bundle.html';
-import { useWebViewHandler } from './use_webview_handler';
-import { RequestQueue } from './request_queue';
+import { useEditorContentHandlers } from './use_editor_content_handlers';
 
 export const EditorContent = React.forwardRef(
   (
@@ -16,66 +15,38 @@ export const EditorContent = React.forwardRef(
       | ((instance: EditorContentInstance) => void)
       | null,
   ) => {
-    const {
-      onBlur = () => {},
-      onLoad = () => {},
-      onFocus = () => {},
-      onTextChange = () => {},
-      onSelectionChange = () => {},
-    } = props;
+    const { onBlur, onLoad, onFocus, onTextChange, onSelectionChange } = props;
     const editorContentRef = React.useRef<HTMLIFrameElement | null>(null);
-    const requestQueue = React.useRef(new RequestQueue()).current;
 
-    const sendMessage = React.useCallback((message: ToWebViewMessage) => {
+    const send = React.useCallback((message: ToWebViewMessage) => {
       if (editorContentRef.current) {
         editorContentRef.current?.contentWindow?.postMessage(message, '*');
       }
     }, []);
 
-    const sendRequest = React.useCallback(
-      (message: ToWebViewMessage): Promise<FromWebViewMessage> => {
-        return new Promise((resolve) => {
-          requestQueue.request(message, (fromWebViewMessage) => {
-            resolve(fromWebViewMessage);
-          });
-
-          sendMessage(message);
-        });
-      },
-      [sendMessage, requestQueue],
-    );
-
-    const receiveMessage = React.useCallback(
-      (event: MessageEvent) => {
-        const data = event.data as FromWebViewMessage;
-
-        if (data.type === 'text-change') {
-          onTextChange(data.delta, data.oldDelta, data.source);
-        } else if (data.type === 'selection-change') {
-          onSelectionChange(data.range, data.oldRange, data.source);
-        } else if (data.type === 'dom-content-loaded') {
-          onLoad();
-        } else if ((data.type as any) === 'webpackOk') {
-        } else {
-          requestQueue.receive(data);
-        }
-      },
-      [onTextChange, onSelectionChange, onLoad, requestQueue],
-    );
-
-    useWebViewHandler({
+    const receive = useEditorContentHandlers({
       ref,
-      sendMessage,
-      sendRequest,
+      send,
+      onLoad,
+      onTextChange,
+      onSelectionChange,
     });
 
+    const handleReceive = React.useCallback(
+      (event: MessageEvent) => {
+        const data = event.data as FromWebViewMessage;
+        receive(data);
+      },
+      [receive],
+    );
+
     React.useEffect(() => {
-      window.addEventListener('message', receiveMessage);
+      window.addEventListener('message', handleReceive);
 
       return () => {
-        window.removeEventListener('message', receiveMessage);
+        window.removeEventListener('message', handleReceive);
       };
-    }, [receiveMessage]);
+    }, [handleReceive]);
 
     return (
       <iframe
