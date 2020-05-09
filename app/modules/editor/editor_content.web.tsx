@@ -55,6 +55,7 @@ export const EditorContent = React.forwardRef(
           onSelectionChange(data.range, data.oldRange, data.source);
         } else if (data.type === 'dom-content-loaded') {
           onLoad();
+        } else if ((data.type as any) === 'webpackOk') {
         } else {
           requestQueue.receive(data);
         }

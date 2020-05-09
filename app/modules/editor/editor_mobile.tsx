@@ -2,11 +2,58 @@ import Delta from 'quill-delta';
 import React from 'react';
 import { Container } from '../../components';
 import { EditorContentInstance, EditorContent } from './editor_content';
-import { ChangeSource, Range, HeadingSize, Formats, ListType } from './types';
+import {
+  ChangeSource,
+  Range,
+  HeadingSize,
+  Formats,
+  ListType,
+  LinkValue,
+} from './types';
 import { EditorProps } from './editor';
 import { MobileSelectionToolbar } from './range_toolbar';
+import { Animated } from 'react-native';
+
+export interface BottomBarToolbarData {
+  type: 'toolbar';
+}
+
+export interface BottomBarLinkPreviewData {
+  type: 'link-preview';
+  url: string;
+}
+
+export interface BottomBarLinkEditData {
+  type: 'link-edit';
+  link: LinkValue;
+}
+
+export interface BottomBarCommandsData {
+  type: 'commands';
+}
+
+export type BottomBar =
+  | BottomBarToolbarData
+  | BottomBarLinkPreviewData
+  | BottomBarCommandsData
+  | BottomBarLinkEditData;
+
+export interface BottomBarItem {
+  isVisible: boolean;
+  bottomBar: BottomBar | null;
+  position: Animated.ValueXY;
+  opacity: Animated.Value;
+}
+
+const initialBottomBarItem: BottomBarItem = {
+  isVisible: false,
+  bottomBar: null,
+  position: new Animated.ValueXY(),
+  opacity: new Animated.Value(0),
+};
 
 interface EditorState {
+  bottomBarItem: BottomBarItem;
   /** Formats in current selection */
   formats: Formats;
 }
@@ -17,6 +64,7 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
   contentHeight: number = 0;
 
   state: EditorState = {
+    bottomBarItem: initialBottomBarItem,
     formats: {},
   };
 
@@ -42,6 +90,14 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
     }
   };
 
+  handleUpdateFormats = async () => {
+    if (!this.editor) {
+      return;
+    }
+    const formats = await this.editor.getFormat();
+    this.setState({ formats });
+  };
+
   handleTextChange = async (
     _delta: Delta,
     _oldContents: Delta,
@@ -56,8 +112,7 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
       return null;
     }
 
-    const formats = await this.editor.getFormat();
-    this.setState({ formats });
+    await this.handleUpdateFormats();
   };
 
   handleSelectionChange = async (
@@ -73,12 +128,13 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
       return;
     }
 
-    const formats = await this.editor.getFormat();
-    this.setState({ formats });
+    console.log(range);
 
     if (range.length === 0) {
     } else {
     }
+
+    await this.handleUpdateFormats();
   };
 
   handleFormatBold = async (value: boolean) => {

@@ -27,7 +27,10 @@ import { EditorMobile } from './editor_mobile';
 // Collapsed on link -> Link edit/preview
 
 // TODO:
+// - Write test for request queue
+// - Refactor toolbar to use common handlers
 // - Markdown auto formatting
+// - Proper icons
 // - Code and Code block syntax highlighting
 // - Disable pasted formats
 // - Paste image

@@ -12,34 +12,6 @@ import type {
 
 const ENABLE_DEBUG = false;
 
-declare class ResizeObserver {
-  constructor(callback: ResizeObserverCallback);
-  disconnect: () => void;
-  observe: (target: Element, options?: ResizeObserverObserveOptions) => void;
-  unobserve: (target: Element) => void;
-}
-
-interface ResizeObserverObserveOptions {
-  box?: 'content-box' | 'border-box';
-}
-
-type ResizeObserverCallback = (
-  entries: ResizeObserverEntry[],
-  observer: ResizeObserver,
-) => void;
-
-interface ResizeObserverEntry {
-  readonly borderBoxSize: ResizeObserverEntryBoxSize;
-  readonly contentBoxSize: ResizeObserverEntryBoxSize;
-  readonly contentRect: DOMRectReadOnly;
-  readonly target: Element;
-}
-
-interface ResizeObserverEntryBoxSize {
-  blockSize: number;
-  inlineSize: number;
-}
-
 declare global {
   interface Window {
     initialContent: Delta;
@@ -75,26 +47,6 @@ function sendMessage(message: FromWebViewMessage) {
     window.top.postMessage(message, '*');
   }
 }
-
-const observer = new ResizeObserver((entries) => {
-  const body = entries[0];
-
-  sendMessage({
-    type: 'resize',
-    size: {
-      height: body.contentRect.height,
-      width: body.contentRect.width,
-    },
-  });
-});
-
-const bodyElement = document.querySelector('body');
-
-if (!bodyElement) {
-  throw new Error('Body element not found');
-}
-
-observer.observe(bodyElement);
 
 let quill = new Quill('#editor-container');
 

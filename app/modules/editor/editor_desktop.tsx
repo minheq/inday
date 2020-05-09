@@ -18,8 +18,6 @@ import {
   HeadingSize,
   Formats,
   ListType,
-  HoverableItem,
-  Hoverable,
 } from './types';
 import { measure } from '../drag_drop/measurements';
 import { HoverableToolbar } from './hoverable_toolbar';
@@ -28,7 +26,38 @@ import { HoverableLinkEdit } from './hoverable_link_edit';
 import { HoverableLinkPreview } from './hoverable_link_preview';
 import { EditorProps } from './editor';
 
-const initialHoverableItem = {
+export interface HoverableToolbarData {
+  type: 'toolbar';
+}
+
+export interface HoverableLinkPreviewData {
+  type: 'link-preview';
+  url: string;
+}
+
+export interface HoverableLinkEditData {
+  type: 'link-edit';
+  link: LinkValue;
+}
+
+export interface HoverableCommandsData {
+  type: 'commands';
+}
+
+export type Hoverable =
+  | HoverableToolbarData
+  | HoverableLinkPreviewData
+  | HoverableCommandsData
+  | HoverableLinkEditData;
+
+export interface HoverableItem {
+  isVisible: boolean;
+  hoverable: Hoverable | null;
+  position: Animated.ValueXY;
+  opacity: Animated.Value;
+}
+
+const initialHoverableItem: HoverableItem = {
   isVisible: false,
   hoverable: null,
   position: new Animated.ValueXY(),

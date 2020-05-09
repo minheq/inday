@@ -43,6 +43,8 @@ export class RequestQueue {
   }
 
   flush() {
+    const pairs: [Request, FromWebViewMessage][] = [];
+
     for (let i = 0; i < this.requestQueue.length; i++) {
       const request = this.requestQueue[i];
       let found = false;
@@ -51,9 +53,7 @@ export class RequestQueue {
         const fromWebViewMessage = this.receiveQueue[j];
 
         if (fromWebViewMessage.type === request.message.type) {
-          request.callback(fromWebViewMessage);
-          this.requestQueue.splice(i, 1);
-          this.receiveQueue.splice(i, 1);
+          pairs.push([request, fromWebViewMessage]);
           found = true;
           break;
         }
@@ -66,6 +66,11 @@ export class RequestQueue {
           )}`,
         );
       }
+    }
+
+    for (let i = 0; i < pairs.length; i++) {
+      const [request, message] = pairs[i];
+      request.callback(message);
     }
   }
 }
