@@ -81,7 +81,13 @@ export interface FromWebViewGetBounds {
 }
 export interface FromWebViewResize {
   type: 'resize';
-  size: EditorContentSize;
+  height: number;
+  width: number;
+}
+
+export interface FromWebViewDebug {
+  type: 'debug';
+  message: any;
 }
 
 export interface FromWebViewDOMContentLoaded {
@@ -127,7 +133,8 @@ export type FromWebViewMessage =
   | FromWebViewGetFormats
   | FromWebViewGetLeaf
   | FromWebViewDOMContentLoaded
-  | FromWebViewResize;
+  | FromWebViewResize
+  | FromWebViewDebug;
 
 export interface ToWebViewGetBounds {
   type: 'get-bounds';

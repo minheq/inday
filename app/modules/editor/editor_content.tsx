@@ -21,6 +21,8 @@ export interface EditorContentProps {
   onBlur?: () => void;
   onFocus?: () => void;
   onLoad?: () => void;
+  onDebug?: (message: any) => void;
+  onResize?: (width: number, height: number) => void;
   onTextChange?: (
     delta: Delta,
     oldContents: Delta,
@@ -119,7 +121,13 @@ export const EditorContent = React.forwardRef(
       | ((instance: EditorContentInstance) => void)
       | null,
   ) => {
-    const { onLoad, onTextChange, onSelectionChange } = props;
+    const {
+      onLoad,
+      onTextChange,
+      onDebug,
+      onSelectionChange,
+      onResize,
+    } = props;
     const webViewRef = React.useRef<WebView>();
 
     const send = React.useCallback((message: ToWebViewMessage) => {
@@ -136,6 +144,8 @@ export const EditorContent = React.forwardRef(
       ref,
       send,
       onLoad,
+      onResize,
+      onDebug,
       onTextChange,
       onSelectionChange,
     });

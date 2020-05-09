@@ -29,6 +29,8 @@ export function useEditorContentHandlers(props: UseEditorContentHandlersProps) {
   const {
     send,
     ref,
+    onDebug = () => {},
+    onResize = () => {},
     onTextChange = () => {},
     onLoad = () => {},
     onSelectionChange = () => {},
@@ -57,12 +59,16 @@ export function useEditorContentHandlers(props: UseEditorContentHandlersProps) {
         onSelectionChange(message.range, message.oldRange, message.source);
       } else if (message.type === 'dom-content-loaded') {
         onLoad();
-      } else if ((message.type as any) === 'webpackOk') {
+      } else if (message.type === 'resize') {
+        onResize(message.width, message.height);
+      } else if (message.type === 'debug') {
+        onDebug(message.message);
+      } else if ((message.type as string).includes('webpack')) {
       } else {
         requestQueue.receive(message);
       }
     },
-    [onTextChange, onSelectionChange, onLoad, requestQueue],
+    [onTextChange, onDebug, onSelectionChange, onLoad, onResize, requestQueue],
   );
 
   React.useImperativeHandle(

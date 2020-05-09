@@ -77,15 +77,9 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
   }
 
   handleEditorLoad = () => {
-    const {
-      initialContent = new Delta()
-        .insert(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque laoreet nulla tortor, ut consequat metus imperdiet eu. Aenean viverra non mi convallis auctor. Nullam felis elit, varius ut maximus sed, luctus ac arcu. Sed tincidunt, nibh eget ultrices tincidunt, felis eros commodo felis, vel ornare nibh sapien vel metus. Vivamus eu tristique sapien. Pellentesque imperdiet porttitor velit at pharetra. Morbi sem orci, dictum id sapien vel, ullamcorper semper neque.\n',
-        )
-        .insert('\n'),
-    } = this.props;
+    const { initialContent } = this.props;
 
-    if (this.editor) {
+    if (this.editor && initialContent) {
       this.editor.setContents(initialContent, 'api');
     }
   };
@@ -127,8 +121,6 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
     if (range === null) {
       return;
     }
-
-    console.log(range);
 
     if (range.length === 0) {
     } else {
@@ -223,12 +215,16 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
 
     return (
       <Container flex={1}>
-        <EditorContent
-          ref={this.editorContentRef}
-          onLoad={this.handleEditorLoad}
-          onTextChange={this.handleTextChange}
-          onSelectionChange={this.handleSelectionChange}
-        />
+        <Container flex={1} paddingHorizontal={16} color="tint">
+          <EditorContent
+            ref={this.editorContentRef}
+            onLoad={this.handleEditorLoad}
+            onTextChange={this.handleTextChange}
+            onResize={console.log}
+            onDebug={console.log}
+            onSelectionChange={this.handleSelectionChange}
+          />
+        </Container>
         <MobileSelectionToolbar
           formats={formats}
           onOpenLinkEdit={this.handleOpenLinkEdit}

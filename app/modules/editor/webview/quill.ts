@@ -3,14 +3,7 @@ import Delta from 'quill-delta';
 import 'quill/dist/quill.core.css';
 import './quill.css';
 
-import type {
-  ToWebViewMessage,
-  FromWebViewMessage,
-  Range,
-  Blot,
-} from '../types';
-
-const ENABLE_DEBUG = false;
+import type { ToWebViewMessage, FromWebViewMessage, Blot } from '../types';
 
 declare global {
   interface Window {
@@ -37,10 +30,6 @@ HorizontalRule.blotName = 'hr';
 HorizontalRule.tagName = 'hr';
 
 function sendMessage(message: FromWebViewMessage) {
-  if (ENABLE_DEBUG) {
-    debug(JSON.stringify(message));
-  }
-
   if (window.ReactNativeWebView) {
     window.ReactNativeWebView.postMessage(JSON.stringify(message));
   } else {
@@ -49,41 +38,6 @@ function sendMessage(message: FromWebViewMessage) {
 }
 
 let quill = new Quill('#editor-container');
-
-// Forward slash
-quill.keyboard.addBinding(
-  { key: 191 },
-  {
-    empty: true,
-    collapsed: true,
-  },
-  function (range: Range) {
-    sendMessage({ type: 'prompt-commands', index: range.index });
-    quill.insertText(range.index, '/');
-  },
-);
-
-// Arrow up
-quill.keyboard.addBinding(
-  { key: 38 },
-  {
-    prefix: /^\/$/,
-  },
-  function () {
-    console.log('up');
-  },
-);
-
-// Arrow down
-quill.keyboard.addBinding(
-  { key: 40 },
-  {
-    prefix: /^\/$/,
-  },
-  function () {
-    console.log('down');
-  },
-);
 
 quill.on('text-change', function (delta, oldDelta, source) {
   sendMessage({ type: 'text-change', delta, oldDelta, source });
@@ -109,23 +63,8 @@ function serializeBlot(blot: any): Blot {
   };
 }
 
-function debug(message: string) {
-  const el = document.querySelector('#debug');
-
-  if (el) {
-    let current = el.textContent;
-    current += message;
-    current += '\n';
-    el.textContent = current;
-  }
-}
-
 function receiveMessage(event: MessageEvent) {
   const data = event.data as ToWebViewMessage;
-
-  if (ENABLE_DEBUG) {
-    debug(JSON.stringify(event.data));
-  }
 
   if (data.type === 'format') {
     const { name, value, source } = data;
@@ -266,7 +205,15 @@ function receiveMessage(event: MessageEvent) {
   throw new Error(`Event not handled ${event.data}`);
 }
 
+function handleWindowResize() {
+  const width = document.documentElement.clientWidth;
+  const height = document.documentElement.clientHeight;
+
+  sendMessage({ type: 'resize', width, height });
+}
+
 window.addEventListener('message', receiveMessage);
 window.addEventListener('DOMContentLoaded', () => {
   sendMessage({ type: 'dom-content-loaded' });
 });
+window.addEventListener('resize', handleWindowResize);

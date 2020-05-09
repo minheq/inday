@@ -20,10 +20,10 @@ export class RequestQueue {
   }
 
   receive(fromWebViewMessage: FromWebViewMessage): void {
-    const receiveMatch =
+    const firstMatch =
       this.requestQueue[0].message.type === fromWebViewMessage.type;
 
-    if (receiveMatch) {
+    if (firstMatch) {
       const request = this.requestQueue.shift();
 
       if (!request) {
@@ -60,11 +60,8 @@ export class RequestQueue {
       }
 
       if (!found) {
-        throw new Error(
-          `Expected a matching receive message from request ${JSON.stringify(
-            request.message,
-          )}`,
-        );
+        // No response yet
+        return;
       }
     }
 

@@ -9,55 +9,73 @@ import {
   ToWebViewGetText,
 } from './types';
 
-test('single', () => {
+class MessagesHolder {
+  messages: FromWebViewMessage[] = [];
+
+  add = (message: FromWebViewMessage) => {
+    this.messages.push(message);
+  };
+
+  at = (index: number) => {
+    return this.messages[index];
+  };
+}
+
+const request1: ToWebViewGetFormats = { type: 'get-formats' };
+const request2: ToWebViewGetSelection = { type: 'get-selection' };
+const request3: ToWebViewGetText = {
+  type: 'get-text',
+  range: { index: 0, length: 0 },
+};
+
+const response1: FromWebViewGetFormats = { type: 'get-formats', formats: {} };
+const response2: FromWebViewGetSelection = {
+  type: 'get-selection',
+  range: { index: 0, length: 0 },
+};
+const response3: FromWebViewGetText = { type: 'get-text', text: '' };
+
+test('single happy', () => {
   const q = new RequestQueue();
-  const messages: FromWebViewMessage[] = [];
+  const messages = new MessagesHolder();
+  console.log(messages);
 
-  q.request({ type: 'get-formats' }, (message) => {
-    messages.push(message);
-  });
-
-  const response1: FromWebViewGetFormats = { type: 'get-formats', formats: {} };
+  q.request(request1, messages.add);
   q.receive(response1);
 
-  expect(messages[0]).toMatchObject(response1);
-
-  console.log(messages);
+  expect(messages.at(0)).toMatchObject(response1);
 });
 
-test('reverse order', () => {
+test('multiple in order', () => {
   const q = new RequestQueue();
-  const messages: FromWebViewMessage[] = [];
+  const messages = new MessagesHolder();
 
-  function add(message: FromWebViewMessage) {
-    messages.push(message);
-  }
-
-  const request1: ToWebViewGetFormats = { type: 'get-formats' };
-  q.request(request1, add);
-  const request2: ToWebViewGetSelection = { type: 'get-selection' };
-  q.request(request2, add);
-  const request3: ToWebViewGetText = {
-    type: 'get-text',
-    range: { index: 0, length: 0 },
-  };
-  q.request(request3, add);
-
-  // No matter what the response order is like, it should follow the same sequence of requests
-  const response1: FromWebViewGetText = { type: 'get-text', text: '' };
-  const response2: FromWebViewGetSelection = {
-    type: 'get-selection',
-    range: { index: 0, length: 0 },
-  };
-  const response3: FromWebViewGetFormats = { type: 'get-formats', formats: {} };
+  q.request(request1, messages.add);
+  q.request(request2, messages.add);
+  q.request(request3, messages.add);
 
   q.receive(response1);
-  q.receive(response2);
   q.receive(response3);
+  q.receive(response2);
 
-  console.log(messages);
+  expect(messages.at(0)).toMatchObject(response1);
+  expect(messages.at(1)).toMatchObject(response2);
+  expect(messages.at(2)).toMatchObject(response3);
+});
 
-  expect(messages[0]).toMatchObject(response3);
-  expect(messages[1]).toMatchObject(response2);
-  expect(messages[2]).toMatchObject(response1);
+test('multiple reverse order', () => {
+  const q = new RequestQueue();
+  const messages = new MessagesHolder();
+
+  q.request(request1, messages.add);
+  q.request(request2, messages.add);
+  q.request(request3, messages.add);
+
+  q.receive(response3);
+  q.receive(response2);
+  q.receive(response1);
+
+  expect(messages.at(0)).toMatchObject(response1);
+  expect(messages.at(1)).toMatchObject(response2);
+  expect(messages.at(2)).toMatchObject(response3);
 });
