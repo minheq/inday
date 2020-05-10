@@ -1,6 +1,7 @@
 import Delta from 'quill-delta';
 import React from 'react';
-import { EditorMobile } from './editor_mobile';
+// import { EditorMobile } from './editor_mobile';
+import { EditorDesktop } from './editor_desktop';
 
 // Type of commands
 // Inline format
@@ -63,5 +64,5 @@ export function Editor(props: EditorProps) {
       .insert('\n'),
   } = props;
 
-  return <EditorMobile initialContent={initialContent} />;
+  return <EditorDesktop initialContent={initialContent} />;
 }

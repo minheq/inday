@@ -1,33 +1,9 @@
 import Quill from 'quill';
-import Delta from 'quill-delta';
 import 'quill/dist/quill.core.css';
 import './quill.css';
 
 import type { ToWebViewMessage, FromWebViewMessage, Blot } from '../types';
-
-declare global {
-  interface Window {
-    initialContent: Delta;
-    ReactNativeWebView: {
-      postMessage: (message: string) => void;
-    };
-  }
-}
-
-declare module 'quill' {
-  interface Quill {
-    history: {
-      undo: () => void;
-      redo: () => void;
-    };
-  }
-}
-
-let BlockEmbed = Quill.import('blots/block/embed');
-
-class HorizontalRule extends BlockEmbed {}
-HorizontalRule.blotName = 'hr';
-HorizontalRule.tagName = 'hr';
+import { bindings } from './keyboard';
 
 function sendMessage(message: FromWebViewMessage) {
   if (window.ReactNativeWebView) {
@@ -43,7 +19,13 @@ if (!container) {
   throw new Error('Editor container element not found');
 }
 
-let quill = new Quill(container);
+let quill = new Quill(container, {
+  modules: {
+    keyboard: {
+      bindings,
+    },
+  },
+});
 
 const editor = document.querySelector<HTMLDivElement>('.ql-editor');
 

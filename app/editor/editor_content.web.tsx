@@ -4,7 +4,7 @@ import type {
   EditorContentInstance,
 } from './editor_content';
 import type { ToWebViewMessage, FromWebViewMessage } from './types';
-import html from './webview/index.bundle.html';
+import html from './webview/quill.html';
 import { useEditorContentHandlers } from './use_editor_content_handlers';
 
 export const EditorContent = React.forwardRef(

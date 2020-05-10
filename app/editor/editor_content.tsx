@@ -15,7 +15,7 @@ import type {
 import { useEditorContentHandlers } from './use_editor_content_handlers';
 import { Platform } from 'react-native';
 
-const html = require('./webview/index.bundle.html');
+const html = require('./webview/quill.html');
 
 export interface EditorContentProps {
   onBlur?: () => void;
