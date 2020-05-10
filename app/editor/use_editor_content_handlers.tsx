@@ -29,11 +29,11 @@ export function useEditorContentHandlers(props: UseEditorContentHandlersProps) {
   const {
     send,
     ref,
-    onDebug = () => {},
-    onResize = () => {},
-    onTextChange = () => {},
-    onLoad = () => {},
-    onSelectionChange = () => {},
+    onDebug,
+    onResize,
+    onTextChange,
+    onLoad,
+    onSelectionChange,
   } = props;
 
   const sendMessage = send;
@@ -60,15 +60,15 @@ export function useEditorContentHandlers(props: UseEditorContentHandlersProps) {
         return;
       }
 
-      if (message.type === 'text-change') {
+      if (onTextChange && message.type === 'text-change') {
         onTextChange(message.delta, message.oldDelta, message.source);
-      } else if (message.type === 'selection-change') {
+      } else if (onSelectionChange && message.type === 'selection-change') {
         onSelectionChange(message.range, message.oldRange, message.source);
-      } else if (message.type === 'dom-content-loaded') {
+      } else if (onLoad && message.type === 'editor-content-loaded') {
         onLoad();
-      } else if (message.type === 'resize') {
+      } else if (onResize && message.type === 'resize') {
         onResize(message.width, message.height);
-      } else if (message.type === 'debug') {
+      } else if (onDebug && message.type === 'debug') {
         onDebug(message.message);
       } else {
         requestQueue.receive(message);

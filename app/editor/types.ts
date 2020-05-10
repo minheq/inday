@@ -91,7 +91,7 @@ export interface FromWebViewDebug {
 }
 
 export interface FromWebViewDOMContentLoaded {
-  type: 'dom-content-loaded';
+  type: 'editor-content-loaded';
 }
 
 export interface FromWebViewGetSelection {

@@ -5,7 +5,7 @@ import Quill from 'quill';
 // import Block from './formats/Block';
 // import ImageBlot from './formats/Image';
 // import { identifyLanguage } from './Syntax';
-import { Range, Format, Formats } from '../types';
+import { Range, Format, Formats } from './types';
 
 interface QuillContainer {
   quill: Quill;
@@ -43,8 +43,8 @@ export const bindings = {
   //     }
   //   },
   // },
-  // arrow: makeCompletionHotkey('->', '→'),
-  // mdash: makeCompletionHotkey('--', '—'),
+  arrow: makeCompletionHotkey('->', '→'),
+  mdash: makeCompletionHotkey('--', '—'),
   'title-tab': {
     key: 'Tab',
     handler(this: QuillContainer, range: Range) {

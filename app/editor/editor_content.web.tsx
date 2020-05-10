@@ -3,9 +3,9 @@ import type {
   EditorContentProps,
   EditorContentInstance,
 } from './editor_content';
-import type { ToWebViewMessage, FromWebViewMessage } from './types';
-import html from './webview/quill.html';
 import { useEditorContentHandlers } from './use_editor_content_handlers';
+import { QuillHandlers, createQuill } from './quill';
+import type { ToWebViewMessage } from './types';
 
 export const EditorContent = React.forwardRef(
   (
@@ -15,19 +15,13 @@ export const EditorContent = React.forwardRef(
       | ((instance: EditorContentInstance) => void)
       | null,
   ) => {
-    const {
-      onBlur,
-      onLoad,
-      onFocus,
-      onResize,
-      onTextChange,
-      onSelectionChange,
-    } = props;
-    const editorContentRef = React.useRef<HTMLIFrameElement | null>(null);
+    const { onLoad, onResize, onTextChange, onSelectionChange } = props;
+    const editorContentRef = React.useRef<HTMLDivElement | null>(null);
+    const quillRef = React.useRef<QuillHandlers | null>(null);
 
     const send = React.useCallback((message: ToWebViewMessage) => {
-      if (editorContentRef.current) {
-        editorContentRef.current?.contentWindow?.postMessage(message, '*');
+      if (quillRef.current) {
+        quillRef.current.handleMessage(message);
       }
     }, []);
 
@@ -40,38 +34,15 @@ export const EditorContent = React.forwardRef(
       onSelectionChange,
     });
 
-    const handleReceive = React.useCallback(
-      (event: MessageEvent) => {
-        const data = event.data as FromWebViewMessage;
-        receive(data);
-      },
-      [receive],
-    );
-
     React.useEffect(() => {
-      window.addEventListener('message', handleReceive);
+      if (editorContentRef.current) {
+        quillRef.current = createQuill(editorContentRef.current, receive);
+        if (onLoad) {
+          onLoad();
+        }
+      }
+    }, [editorContentRef, receive, onLoad]);
 
-      return () => {
-        window.removeEventListener('message', handleReceive);
-      };
-    }, [handleReceive]);
-
-    return (
-      <iframe
-        ref={editorContentRef}
-        srcDoc={html}
-        style={styles.iframe}
-        onFocus={onFocus}
-        onBlur={onBlur}
-      />
-    );
+    return <div spellCheck="false" ref={editorContentRef} />;
   },
 );
-
-const styles = {
-  iframe: {
-    width: '100%',
-    borderWidth: 0,
-    flex: 1,
-  },
-};

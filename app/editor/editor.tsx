@@ -19,7 +19,6 @@ import { EditorDesktop } from './editor_desktop';
 //  - Tables
 
 // Desktop
-// Don't use iframe
 // HoverableToolbar -> Inline format + Block format
 // Commands -> Block format + Blocks
 
@@ -29,8 +28,7 @@ import { EditorDesktop } from './editor_desktop';
 // Collapsed on link -> Link edit/preview
 
 // TODO:
-// - Write test for request queue
-// - Refactor toolbar to use common handlers
+// Don't use iframe
 // - Markdown auto formatting
 // - Proper icons
 // - Code and Code block syntax highlighting
