@@ -53,6 +53,13 @@ export function useEditorContentHandlers(props: UseEditorContentHandlersProps) {
 
   const receiveMessage = React.useCallback(
     (message: FromWebViewMessage) => {
+      if (!message.type) {
+        return;
+      }
+      if (message.type.includes('webpack')) {
+        return;
+      }
+
       if (message.type === 'text-change') {
         onTextChange(message.delta, message.oldDelta, message.source);
       } else if (message.type === 'selection-change') {
@@ -63,7 +70,6 @@ export function useEditorContentHandlers(props: UseEditorContentHandlersProps) {
         onResize(message.width, message.height);
       } else if (message.type === 'debug') {
         onDebug(message.message);
-      } else if ((message.type as string).includes('webpack')) {
       } else {
         requestQueue.receive(message);
       }

@@ -15,7 +15,14 @@ export const EditorContent = React.forwardRef(
       | ((instance: EditorContentInstance) => void)
       | null,
   ) => {
-    const { onBlur, onLoad, onFocus, onTextChange, onSelectionChange } = props;
+    const {
+      onBlur,
+      onLoad,
+      onFocus,
+      onResize,
+      onTextChange,
+      onSelectionChange,
+    } = props;
     const editorContentRef = React.useRef<HTMLIFrameElement | null>(null);
 
     const send = React.useCallback((message: ToWebViewMessage) => {
@@ -28,6 +35,7 @@ export const EditorContent = React.forwardRef(
       ref,
       send,
       onLoad,
+      onResize,
       onTextChange,
       onSelectionChange,
     });

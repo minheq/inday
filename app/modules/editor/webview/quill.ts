@@ -37,10 +37,41 @@ function sendMessage(message: FromWebViewMessage) {
   }
 }
 
-let quill = new Quill('#editor-container');
+const container = document.querySelector<HTMLDivElement>('#editor-container');
+
+if (!container) {
+  throw new Error('Editor container element not found');
+}
+
+let quill = new Quill(container);
+
+const editor = document.querySelector<HTMLDivElement>('.ql-editor');
+
+let prevEditorHeight = 0;
+let prevEditorWidth = 0;
+
+function sendResizeMessageIfNeeded() {
+  if (!editor) {
+    return;
+  }
+
+  if (
+    editor.offsetWidth !== prevEditorWidth ||
+    editor.offsetHeight !== prevEditorHeight
+  ) {
+    sendMessage({
+      type: 'resize',
+      width: editor.offsetWidth,
+      height: editor.offsetHeight,
+    });
+    prevEditorWidth = editor.offsetWidth;
+    prevEditorHeight = editor.offsetHeight;
+  }
+}
 
 quill.on('text-change', function (delta, oldDelta, source) {
   sendMessage({ type: 'text-change', delta, oldDelta, source });
+  sendResizeMessageIfNeeded();
 });
 
 quill.on('selection-change', function (range, oldRange, source) {
@@ -205,15 +236,8 @@ function receiveMessage(event: MessageEvent) {
   throw new Error(`Event not handled ${event.data}`);
 }
 
-function handleWindowResize() {
-  const width = document.documentElement.clientWidth;
-  const height = document.documentElement.clientHeight;
-
-  sendMessage({ type: 'resize', width, height });
-}
-
 window.addEventListener('message', receiveMessage);
 window.addEventListener('DOMContentLoaded', () => {
   sendMessage({ type: 'dom-content-loaded' });
+  sendResizeMessageIfNeeded();
 });
-window.addEventListener('resize', handleWindowResize);

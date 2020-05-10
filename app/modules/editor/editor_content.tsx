@@ -12,8 +12,8 @@ import type {
   ToWebViewMessage,
   FromWebViewMessage,
 } from './types';
-import { StyleSheet } from 'react-native';
 import { useEditorContentHandlers } from './use_editor_content_handlers';
+import { Platform } from 'react-native';
 
 const html = require('./webview/index.bundle.html');
 
@@ -130,6 +130,15 @@ export const EditorContent = React.forwardRef(
     } = props;
     const webViewRef = React.useRef<WebView>();
 
+    const handleResize = React.useCallback(
+      (width: number, contentHeight: number) => {
+        if (onResize) {
+          onResize(width, contentHeight);
+        }
+      },
+      [onResize],
+    );
+
     const send = React.useCallback((message: ToWebViewMessage) => {
       if (webViewRef.current) {
         webViewRef.current.injectJavaScript(
@@ -144,7 +153,7 @@ export const EditorContent = React.forwardRef(
       ref,
       send,
       onLoad,
-      onResize,
+      onResize: handleResize,
       onDebug,
       onTextChange,
       onSelectionChange,
@@ -161,17 +170,26 @@ export const EditorContent = React.forwardRef(
 
     return (
       <WebView
+        originWhitelist={['*']}
         // @ts-ignore
         ref={webViewRef}
-        source={html}
-        style={styles.base}
+        source={Platform.select({
+          ios: html,
+          android: { uri: 'file:///android_asset/index.bundle.html' },
+        })}
+        // style={height ? { flex: 0, height } : { flex: 1 }}
+        // style={{ paddingBottom: 80 }}
+        // containerStyle={{ flex: 1 }}
+        // scrollEnabled={false}
+        bounces={false}
+        hideKeyboardAccessoryView
+        // overScrollMode="content"
+        onLayout={(e) => {
+          console.log(e.nativeEvent.layout, 'webview layout');
+          // setLayoutHeight(e.nativeEvent.layout.height);
+        }}
         onMessage={handleReceive}
       />
     );
   },
 );
-const styles = StyleSheet.create({
-  base: {
-    flex: 1,
-  },
-});

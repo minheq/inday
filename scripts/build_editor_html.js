@@ -19,6 +19,11 @@ const destinationFile = path.join(
   '../app/modules/editor/webview/index.bundle.html',
 );
 
+const androidFile = path.join(
+  __dirname,
+  '../android/app/src/main/assets/index.bundle.html',
+);
+
 const compiler = webpack({
   entry: entryPath,
   output: {
@@ -68,4 +73,5 @@ compiler.run(async (err, stats) => {
   let newHTML = html.replace('__REPLACED__BY__SCRIPT__', script);
 
   fs.writeFileSync(destinationFile, newHTML);
+  fs.writeFileSync(androidFile, newHTML);
 });

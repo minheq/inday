@@ -1,6 +1,5 @@
 import Delta from 'quill-delta';
 import React from 'react';
-import { Container } from '../../components';
 import { EditorContentInstance, EditorContent } from './editor_content';
 import {
   ChangeSource,
@@ -11,8 +10,13 @@ import {
   LinkValue,
 } from './types';
 import { EditorProps } from './editor';
-import { MobileSelectionToolbar } from './range_toolbar';
-import { Animated } from 'react-native';
+import {
+  Animated,
+  Keyboard,
+  EmitterSubscription,
+  KeyboardEvent,
+  SafeAreaView,
+} from 'react-native';
 
 export interface BottomBarToolbarData {
   type: 'toolbar';
@@ -61,7 +65,10 @@ interface EditorState {
 export class EditorMobile extends React.Component<EditorProps, EditorState> {
   editorContentRef = React.createRef<EditorContentInstance>();
   editor: EditorContentInstance | null = null;
-  contentHeight: number = 0;
+  scrollViewHeight: Animated.Value = new Animated.Value(0);
+  keyboardWillShowSub: EmitterSubscription | null = null;
+  keyboardWillHideSub: EmitterSubscription | null = null;
+  keyboardHeight: Animated.Value = new Animated.Value(0);
 
   state: EditorState = {
     bottomBarItem: initialBottomBarItem,
@@ -74,7 +81,41 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
 
   componentDidMount() {
     this.editor = this.editorContentRef.current;
+    this.keyboardWillShowSub = Keyboard.addListener(
+      'keyboardWillShow',
+      this.handleKeyboardWillShow,
+    );
+    this.keyboardWillHideSub = Keyboard.addListener(
+      'keyboardWillHide',
+      this.handleKeyboardWillHide,
+    );
   }
+
+  componentWillUnmount() {
+    if (this.keyboardWillShowSub) {
+      this.keyboardWillShowSub.remove();
+    }
+
+    if (this.keyboardWillHideSub) {
+      this.keyboardWillHideSub.remove();
+    }
+  }
+
+  handleKeyboardWillShow = (event: KeyboardEvent) => {
+    Animated.timing(this.keyboardHeight, {
+      duration: event.duration,
+      useNativeDriver: false,
+      toValue: event.endCoordinates.height,
+    }).start();
+  };
+
+  handleKeyboardWillHide = (event: KeyboardEvent) => {
+    Animated.timing(this.keyboardHeight, {
+      duration: event.duration,
+      useNativeDriver: false,
+      toValue: 0,
+    }).start();
+  };
 
   handleEditorLoad = () => {
     const { initialContent } = this.props;
@@ -211,33 +252,39 @@ export class EditorMobile extends React.Component<EditorProps, EditorState> {
   };
 
   render() {
-    const { formats } = this.state;
-
     return (
-      <Container flex={1}>
-        <Container flex={1} paddingHorizontal={16} color="tint">
+      <Animated.View style={[{ flex: 1 }]}>
+        <SafeAreaView style={{ flex: 1 }}>
           <EditorContent
             ref={this.editorContentRef}
             onLoad={this.handleEditorLoad}
             onTextChange={this.handleTextChange}
-            onResize={console.log}
-            onDebug={console.log}
             onSelectionChange={this.handleSelectionChange}
           />
-        </Container>
-        <MobileSelectionToolbar
-          formats={formats}
-          onOpenLinkEdit={this.handleOpenLinkEdit}
-          onFormatBold={this.handleFormatBold}
-          onFormatItalic={this.handleFormatItalic}
-          onFormatStrike={this.handleFormatStrike}
-          onFormatHeading={this.handleFormatHeading}
-          onFormatCode={this.handleFormatCode}
-          onFormatList={this.handleFormatList}
-          onFormatBlockquote={this.handleFormatBlockquote}
-          onFormatCodeBlock={this.handleFormatCodeBlock}
-        />
-      </Container>
+          {/* <Animated.View
+            style={[
+              {
+                position: 'absolute',
+                width: '100%',
+                bottom: this.keyboardHeight,
+              },
+            ]}
+          >
+            <MobileSelectionToolbar
+              formats={formats}
+              onOpenLinkEdit={this.handleOpenLinkEdit}
+              onFormatBold={this.handleFormatBold}
+              onFormatItalic={this.handleFormatItalic}
+              onFormatStrike={this.handleFormatStrike}
+              onFormatHeading={this.handleFormatHeading}
+              onFormatCode={this.handleFormatCode}
+              onFormatList={this.handleFormatList}
+              onFormatBlockquote={this.handleFormatBlockquote}
+              onFormatCodeBlock={this.handleFormatCodeBlock}
+            />
+          </Animated.View> */}
+        </SafeAreaView>
+      </Animated.View>
     );
   }
 }
