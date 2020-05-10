@@ -30,8 +30,10 @@ import { EditorDesktop } from './editor_desktop';
 // TODO:
 // Don't use iframe
 // - Markdown auto formatting
-// - Proper icons
+// - ``` code block
+// - --- horizontal rule
 // - Code and Code block syntax highlighting
+// - Proper icons
 // - Disable pasted formats
 // - Paste image
 

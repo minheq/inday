@@ -5,8 +5,10 @@ import Quill from 'quill';
 // import Block from './formats/Block';
 // import ImageBlot from './formats/Image';
 // import { identifyLanguage } from './Syntax';
+import { identifyLanguage } from './syntax';
 import { Range, Format, Formats } from './types';
 
+identifyLanguage('');
 interface QuillContainer {
   quill: Quill;
 }
@@ -20,29 +22,52 @@ interface Context {
 }
 
 export const bindings = {
-  // autolink: {
-  //   key: [' ', '\n'],
-  //   prefix: /https?:\/\/[^\s]+$/,
-  //   collapsed: true,
-  //   format: { link: false, code: false, 'code-block': false },
-  //   handler(this: QuillContainer, range: Range, context: Context) {
-  //     const matches = context.prefix.match(bindings.autolink.prefix);
+  'autolink-space': {
+    key: ' ',
+    prefix: /https?:\/\/[^\s]+$/,
+    collapsed: true,
+    format: { link: false, code: false, 'code-block': false },
+    handler(this: QuillContainer, range: Range, context: Context) {
+      const matches = context.prefix.match(bindings['autolink-space'].prefix);
 
-  //     if (matches) {
-  //       const [match] = matches;
-  //       const index = range.index + range.length;
-  //       const text = context.eventKey === ' ' ? ' ' : '\n';
-  //       this.quill.insertText(index, text, 'user');
-  //       this.quill.history.cutoff();
-  //       const delta = new Delta()
-  //         .retain(index - match.length)
-  //         .retain(match.length, { link: match });
-  //       this.quill.updateContents(delta, 'user');
-  //       this.quill.setSelection(index + 1, 0, 'silent');
-  //       this.quill.history.cutoff();
-  //     }
-  //   },
-  // },
+      if (matches) {
+        const [match] = matches;
+        const index = range.index + range.length;
+        const text = ' ';
+        this.quill.insertText(index, text, 'user');
+        this.quill.history.cutoff();
+        const delta = new Delta()
+          .retain(index - match.length)
+          .retain(match.length, { link: match });
+        this.quill.updateContents(delta, 'user');
+        this.quill.setSelection(index + 1, 0, 'silent');
+        this.quill.history.cutoff();
+      }
+    },
+  },
+  'autolink-enter': {
+    key: 'Enter',
+    prefix: /https?:\/\/[^\s]+$/,
+    collapsed: true,
+    format: { link: false, code: false, 'code-block': false },
+    handler(this: QuillContainer, range: Range, context: Context) {
+      const matches = context.prefix.match(bindings['autolink-enter'].prefix);
+
+      if (matches) {
+        const [match] = matches;
+        const index = range.index + range.length;
+        const text = '\n';
+        this.quill.insertText(index, text, 'user');
+        this.quill.history.cutoff();
+        const delta = new Delta()
+          .retain(index - match.length)
+          .retain(match.length, { link: match });
+        this.quill.updateContents(delta, 'user');
+        this.quill.setSelection(index + 1, 0, 'silent');
+        this.quill.history.cutoff();
+      }
+    },
+  },
   arrow: makeCompletionHotkey('->', '→'),
   mdash: makeCompletionHotkey('--', '—'),
   'title-tab': {
@@ -154,27 +179,32 @@ export const bindings = {
   //     return true;
   //   },
   // },
-  // 'markdown-code-block': {
-  //   key: 'Enter',
-  //   prefix: /^```([a-z]*)$/,
-  //   collapsed: true,
-  //   handler(this: QuillContainer, range: Range, context: Context, binding: any) {
-  //     let format = null;
-  //     let length = 3;
-  //     if (!context.format['code-block']) {
-  //       [, format] = context.prefix.match(binding.prefix);
-  //       length += format.length;
-  //       format = identifyLanguage(format);
-  //     }
-  //     this.quill.history.cutoff();
-  //     const delta = new Delta()
-  //       .retain(range.index - length)
-  //       .delete(length)
-  //       .retain(1, { 'code-block': format });
-  //     this.quill.updateContents(delta, 'user');
-  //     this.quill.history.cutoff();
-  //   },
-  // },
+  'markdown-code-block': {
+    key: 'Enter',
+    prefix: /^```([a-z]*)$/,
+    collapsed: true,
+    handler(this: QuillContainer, range: Range, context: Context) {
+      let format = null;
+      let length = 3;
+      console.log(context);
+
+      if (!context.format['code-block']) {
+        const matches = context.prefix.match(/^```([a-z]*)$/);
+        if (matches) {
+          [, format] = matches;
+          length += format.length;
+          format = identifyLanguage(format);
+        }
+      }
+      this.quill.history.cutoff();
+      const delta = new Delta()
+        .retain(range.index - length)
+        .delete(length)
+        .retain(1, { 'code-block': format });
+      this.quill.updateContents(delta, 'user');
+      this.quill.history.cutoff();
+    },
+  },
   'markdown-header': {
     key: ' ',
     shiftKey: null,
@@ -399,8 +429,9 @@ function applyInlineMarkdown(
 
 function makeCompletionHotkey(from: string, to: string) {
   const [prev, next] = from.split('');
+
   return {
-    key: next,
+    key: next === '>' ? 190 : 189,
     shiftKey: null,
     prefix: new RegExp(`[^${prev}]+${prev}$`),
     format: { code: false, 'code-block': false },
