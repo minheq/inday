@@ -4,7 +4,7 @@ export type ChangeSource = 'user' | 'api' | 'silent';
 
 export type HeadingSize = 1 | 2 | 3 | 4 | 5;
 
-export type ListType = 'bullet' | 'ordered';
+export type ListType = 'bullet' | 'ordered' | 'checked' | 'unchecked';
 
 export interface LinkValue {
   text: string;

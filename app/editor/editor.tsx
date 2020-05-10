@@ -19,6 +19,7 @@ import { EditorDesktop } from './editor_desktop';
 //  - Tables
 
 // Desktop
+// Don't use iframe
 // HoverableToolbar -> Inline format + Block format
 // Commands -> Block format + Blocks
 
