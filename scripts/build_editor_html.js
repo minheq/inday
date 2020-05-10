@@ -2,21 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 
-const entryPath = path.join(
-  __dirname,
-  '../app/modules/editor/webview/quill.ts',
-);
-const outputPath = path.join(__dirname, '../app/modules/editor/webview/temp/');
+const entryPath = path.join(__dirname, '../app/editor/webview/quill.ts');
+const outputPath = path.join(__dirname, '../app/editor/webview/temp/');
 const bundleFilename = 'bundle.js';
 const bundleFile = outputPath + bundleFilename;
-const htmlFile = path.join(
-  __dirname,
-  '../app/modules/editor/webview/index.html',
-);
+const htmlFile = path.join(__dirname, '../app/editor/webview/index.html');
 
 const destinationFile = path.join(
   __dirname,
-  '../app/modules/editor/webview/index.bundle.html',
+  '../app/editor/webview/index.bundle.html',
 );
 
 const androidFile = path.join(

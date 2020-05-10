@@ -7,6 +7,7 @@ type TextDecorationLine =
   | 'underline'
   | 'line-through'
   | 'underline line-through';
+
 export interface TextProps {
   children?: React.ReactNode;
   size?: TextSize;

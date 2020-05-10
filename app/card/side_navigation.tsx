@@ -125,7 +125,7 @@ function Menu() {
         />
       ))}
       <Spacing height={24} />
-      <AddPage />
+      <AddPage onPress={() => {}} />
     </Column>
   );
 }

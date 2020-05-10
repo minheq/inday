@@ -12,8 +12,8 @@ import {
   Button,
 } from '../components';
 import { ScrollView, View } from 'react-native';
-import { AddCard } from '../core/add_card';
-import { Editor } from '../modules/editor';
+import { AddCard } from '../card/add_card';
+import { Editor } from '../editor';
 
 export function TimelineScreen() {
   const [isEditingCard, setIsEditingCard] = React.useState(true);

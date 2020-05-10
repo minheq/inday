@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clipboard } from 'react-native';
-import { Container, Row, Text, Button, Icon } from '../../components';
+import { Container, Row, Text, Button, Icon } from '../components';
 
 interface HoverableLinkPreviewProps {
   url: string;

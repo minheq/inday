@@ -7,9 +7,9 @@ import {
   ScrollView,
   findNodeHandle,
 } from 'react-native';
-import { Container, Text } from '../../components';
-import { ThemeContext, tokens } from '../../theme';
-import { between } from '../../utils/numbers';
+import { Container, Text } from '../components';
+import { ThemeContext, tokens } from '../theme';
+import { between } from '../utils/numbers';
 import { EditorContentInstance, EditorContent } from './editor_content';
 import {
   LinkValue,

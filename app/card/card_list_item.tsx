@@ -12,10 +12,10 @@ import {
   useGestureDetector,
   GestureDetectorConfig,
 } from '../components/gesture_detector';
-import { useDraggable } from '../modules/drag_drop/use_draggable';
-import { DragState } from '../modules/drag_drop/draggable';
-import { measure } from '../modules/drag_drop/measurements';
-import { Card } from '../domain/card';
+import { useDraggable } from '../drag_drop/use_draggable';
+import { DragState } from '../drag_drop/draggable';
+import { measure } from '../drag_drop/measurements';
+import { Card } from './types';
 
 export interface CardListItem extends Card {
   index: number;

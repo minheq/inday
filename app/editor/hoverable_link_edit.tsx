@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Text, Spacing, TextInput, Button } from '../../components';
+import { Container, Text, Spacing, TextInput, Button } from '../components';
 import { LinkValue } from './types';
 
 interface HoverableLinkEditProps {

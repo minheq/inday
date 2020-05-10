@@ -1,11 +1,11 @@
 import React from 'react';
-import { AppProvider } from './app_provider';
-import { Editor } from './modules/editor';
+import { Editor } from './editor';
+import { ThemeProvider } from './theme';
 
 export function App() {
   return (
-    <AppProvider>
+    <ThemeProvider>
       <Editor />
-    </AppProvider>
+    </ThemeProvider>
   );
 }

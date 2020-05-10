@@ -1,4 +1,4 @@
-import { CardListItem } from '../core/card_list_item';
+import { CardListItem } from './card_list_item';
 
 export function logTable(positionedCards: CardListItem[]) {
   console.table(positionedCards.map(toInteresting));

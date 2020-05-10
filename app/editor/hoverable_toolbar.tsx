@@ -6,15 +6,14 @@ import {
   IconName,
   Container,
   Row,
+  Popover,
   Text,
   Spacing,
   Icon,
-  Modal,
-  CloseButton,
-} from '../../components';
-import { TextSize, tokens, useTheme } from '../../theme';
+} from '../components';
+import { TextSize, tokens, useTheme } from '../theme';
 
-interface MobileSelectionToolbarProps {
+interface HoverableToolbarProps {
   formats: Formats;
   onOpenLinkEdit: () => void;
   onFormatBold: (value: boolean) => void;
@@ -27,7 +26,7 @@ interface MobileSelectionToolbarProps {
   onFormatCodeBlock: (value: boolean) => void;
 }
 
-export function MobileSelectionToolbar(props: MobileSelectionToolbarProps) {
+export function HoverableToolbar(props: HoverableToolbarProps) {
   const {
     formats,
     onOpenLinkEdit,
@@ -40,7 +39,6 @@ export function MobileSelectionToolbar(props: MobileSelectionToolbarProps) {
     onFormatBlockquote,
     onFormatCodeBlock,
   } = props;
-  const theme = useTheme();
   const [isTextFormatOpen, setIsTextFormatOpen] = React.useState(false);
 
   const handleFormatText = React.useCallback(() => {
@@ -143,48 +141,46 @@ export function MobileSelectionToolbar(props: MobileSelectionToolbarProps) {
   }
 
   return (
-    <Container
-      color="content"
-      borderTopWidth={1}
-      borderColor={theme.border.color.default}
-    >
+    <Container>
       <Row>
-        <Modal animationType="slide" isOpen={isTextFormatOpen}>
-          <Row>
-            <CloseButton onPress={handleToggleTextFormatting} />
-          </Row>
-          <Container color="content">
-            <Button align="left" onPress={handleFormatText}>
-              <Text size="sm">{textLabel}</Text>
-            </Button>
-            <Button align="left" onPress={handleFormatHeading1}>
-              <Text size="sm">{titleLabel}</Text>
-            </Button>
-            <Button align="left" onPress={handleFormatHeading2}>
-              <Text size="sm">{headingLabel}</Text>
-            </Button>
-            <Button align="left" onPress={handleFormatHeading3}>
-              <Text size="sm">{subheadingLabel}</Text>
-            </Button>
-            <Button align="left" onPress={handleFormatBulletList}>
-              <Text size="sm">{bulletedListLabel}</Text>
-            </Button>
-            <Button align="left" onPress={handleFormatNumberedList}>
-              <Text size="sm">{numberedListLabel}</Text>
-            </Button>
-            <Button align="left" onPress={handleFormatCodeBlock}>
-              <Text size="sm">{codeLabel}</Text>
-            </Button>
-            <Button align="left" onPress={handleFormatBlockquote}>
-              <Text size="sm">{quoteLabel}</Text>
-            </Button>
-          </Container>
-        </Modal>
-        <Button onPress={handleToggleTextFormatting}>
-          <Text>{activeFormatLabel}</Text>
-          <Spacing width={8} />
-          <Icon name="chevron-down" />
-        </Button>
+        <Popover
+          isOpen={isTextFormatOpen}
+          position="left"
+          content={
+            <Container width={160} shadow color="content">
+              <Button align="left" onPress={handleFormatText}>
+                <Text size="sm">{textLabel}</Text>
+              </Button>
+              <Button align="left" onPress={handleFormatHeading1}>
+                <Text size="sm">{titleLabel}</Text>
+              </Button>
+              <Button align="left" onPress={handleFormatHeading2}>
+                <Text size="sm">{headingLabel}</Text>
+              </Button>
+              <Button align="left" onPress={handleFormatHeading3}>
+                <Text size="sm">{subheadingLabel}</Text>
+              </Button>
+              <Button align="left" onPress={handleFormatBulletList}>
+                <Text size="sm">{bulletedListLabel}</Text>
+              </Button>
+              <Button align="left" onPress={handleFormatNumberedList}>
+                <Text size="sm">{numberedListLabel}</Text>
+              </Button>
+              <Button align="left" onPress={handleFormatCodeBlock}>
+                <Text size="sm">{codeLabel}</Text>
+              </Button>
+              <Button align="left" onPress={handleFormatBlockquote}>
+                <Text size="sm">{quoteLabel}</Text>
+              </Button>
+            </Container>
+          }
+        >
+          <Button onPress={handleToggleTextFormatting}>
+            <Text>{activeFormatLabel}</Text>
+            <Spacing width={8} />
+            <Icon name="chevron-down" />
+          </Button>
+        </Popover>
         <ToolbarDivider />
         <ToolbarButton
           isActive={formats.bold}
@@ -250,7 +246,7 @@ function ToolbarDivider() {
 const styles = StyleSheet.create({
   toolbarButton: {
     height: 40,
-    width: 40,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: tokens.radius,

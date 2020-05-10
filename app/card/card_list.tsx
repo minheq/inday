@@ -6,11 +6,11 @@ import {
   NativeScrollEvent,
   Animated,
 } from 'react-native';
-import { useDropTarget } from '../modules/drag_drop/use_drop_target';
-import { measure } from '../modules/drag_drop/measurements';
+import { useDropTarget } from '../drag_drop/use_drop_target';
+import { measure } from '../drag_drop/measurements';
 import { CardListItem } from './card_list_item';
-import { Draggable } from '../modules/drag_drop/draggable';
-import { Card } from '../domain/card';
+import { Draggable } from '../drag_drop/draggable';
+import { Card } from './types';
 
 interface CardListProps {
   id: string;
