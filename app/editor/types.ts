@@ -1,10 +1,15 @@
 import type Delta from 'quill-delta';
+import type Quill from 'quill';
 
 export type ChangeSource = 'user' | 'api' | 'silent';
 
 export type HeadingSize = 1 | 2 | 3 | 4 | 5;
 
 export type ListType = 'bullet' | 'ordered' | 'checked' | 'unchecked';
+
+export interface ThisQuill {
+  quill: Quill;
+}
 
 export interface LinkValue {
   text: string;

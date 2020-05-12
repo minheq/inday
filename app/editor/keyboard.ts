@@ -1,4 +1,5 @@
 import Delta from 'quill-delta';
+// import QuillKeyboard from 'quill/modules/keyboard';
 // import { BlockEmbed } from 'quill/blots/block';
 import Quill from 'quill';
 // import selectNode from '../utils/editor/selectNode';
@@ -6,12 +7,7 @@ import Quill from 'quill';
 // import ImageBlot from './formats/Image';
 // import { identifyLanguage } from './Syntax';
 import { identifyLanguage } from './syntax';
-import { Range, Format, Formats } from './types';
-
-identifyLanguage('');
-interface QuillContainer {
-  quill: Quill;
-}
+import { Range, Format, Formats, ThisQuill } from './types';
 
 interface Context {
   prefix: string;
@@ -27,7 +23,7 @@ export const bindings = {
     prefix: /https?:\/\/[^\s]+$/,
     collapsed: true,
     format: { link: false, code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       const matches = context.prefix.match(bindings['autolink-space'].prefix);
 
       if (matches) {
@@ -50,7 +46,7 @@ export const bindings = {
     prefix: /https?:\/\/[^\s]+$/,
     collapsed: true,
     format: { link: false, code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       const matches = context.prefix.match(bindings['autolink-enter'].prefix);
 
       if (matches) {
@@ -72,7 +68,7 @@ export const bindings = {
   mdash: makeCompletionHotkey('--', '—'),
   'title-tab': {
     key: 'Tab',
-    handler(this: QuillContainer, range: Range) {
+    handler(this: ThisQuill, range: Range) {
       const [line] = this.quill.getLine(range.index);
       if (line && line.offset(this.quill.scroll) === 0 && line.next) {
         // If we are on the title row, insert a newline or advance to content
@@ -92,7 +88,7 @@ export const bindings = {
     key: 48,
     shortKey: true,
     altKey: true,
-    handler(this: QuillContainer, range: Range) {
+    handler(this: ThisQuill, range: Range) {
       if (range.length === 0) {
         const formats = this.quill.getFormat();
         Object.keys(formats).forEach((name) => {
@@ -107,7 +103,7 @@ export const bindings = {
     key: 55,
     shortKey: true,
     shiftKey: true,
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       const {
         format: { list },
       } = context;
@@ -118,7 +114,7 @@ export const bindings = {
     key: 56,
     shortKey: true,
     shiftKey: true,
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       const {
         format: { list },
       } = context;
@@ -129,7 +125,7 @@ export const bindings = {
   //   key: 57,
   //   shortKey: true,
   //   shiftKey: true,
-  //   handler(this: QuillContainer, range: Range, context: Context) {
+  //   handler(this: ThisQuill, range: Range, context: Context) {
   //     const {
   //       format: { list },
   //     } = context;
@@ -146,7 +142,7 @@ export const bindings = {
     offset: 1,
     prefix: /^ $/,
     format: { list: true },
-    handler(this: QuillContainer, range: Range) {
+    handler(this: ThisQuill, range: Range) {
       this.quill.insertText(range.index, ' ', 'user');
       this.quill.history.cutoff();
       this.quill.deleteText(range.index - 1, 2, 'user');
@@ -158,7 +154,7 @@ export const bindings = {
     key: 88, // cmd + alt + x
     altKey: true,
     shortKey: true,
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       this.quill.format('strike', !context.format.strike, 'user');
     },
   },
@@ -168,7 +164,7 @@ export const bindings = {
   //   format: {
   //     'code-block': true,
   //   },
-  //   handler(this: QuillContainer, range: Range) {
+  //   handler(this: ThisQuill, range: Range) {
   //     const [line] = this.quill.getLine(range.index);
   //     if (line && line.parent) {
   //       const index = line.parent.offset();
@@ -183,7 +179,7 @@ export const bindings = {
     key: 'Enter',
     prefix: /^```([a-z]*)$/,
     collapsed: true,
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       let format = null;
       let length = 3;
       console.log(context);
@@ -196,6 +192,8 @@ export const bindings = {
           format = identifyLanguage(format);
         }
       }
+      console.log(format);
+
       this.quill.history.cutoff();
       const delta = new Delta()
         .retain(range.index - length)
@@ -210,7 +208,7 @@ export const bindings = {
     shiftKey: null,
     prefix: /^#{1,6}$/,
     format: { code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       this.quill.insertText(range.index, ' ', 'user');
       this.quill.history.cutoff();
       const [line, offset] = this.quill.getLine(range.index + 1);
@@ -228,7 +226,7 @@ export const bindings = {
     key: ' ',
     prefix: /^>$/,
     format: { blockquote: false, code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       this.quill.insertText(range.index, ' ', 'user');
       this.quill.history.cutoff();
       const [line, offset] = this.quill.getLine(range.index + 1);
@@ -246,7 +244,7 @@ export const bindings = {
   //   key: 'Enter',
   //   prefix: /^[-*_]{3}$/,
   //   collapsed: true,
-  //   handler(this: QuillContainer, range: Range) {
+  //   handler(this: ThisQuill, range: Range) {
   //     this.quill.insertText(range.index, '\n', 'user');
   //     this.quill.history.cutoff();
   //     const delta = new Delta()
@@ -264,7 +262,7 @@ export const bindings = {
     prefix: /(^|\s)[_*]{2}[^_*]+[_*]$/,
     collapsed: true,
     format: { bold: false, code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       handleInlineMarkdown(this.quill, 'bold', range, context, '*');
     },
   },
@@ -274,7 +272,7 @@ export const bindings = {
     prefix: /(^|\s)[_*]{2}[^_*]+[_*]$/,
     collapsed: true,
     format: { bold: false, code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       handleInlineMarkdown(this.quill, 'bold', range, context, '_');
     },
   },
@@ -284,7 +282,7 @@ export const bindings = {
     prefix: /(^|\s)[_*][^_*]+$/,
     collapsed: true,
     format: { italic: false, code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       handleInlineMarkdown(this.quill, 'italic', range, context, '*');
     },
   },
@@ -294,7 +292,7 @@ export const bindings = {
     prefix: /(^|\s)[_*][^_*]+$/,
     collapsed: true,
     format: { italic: false, code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       handleInlineMarkdown(this.quill, 'italic', range, context, '_');
     },
   },
@@ -303,7 +301,7 @@ export const bindings = {
     prefix: /`[^`]*/,
     collapsed: true,
     format: { 'code-block': false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       if (context.prefix.match(/^`+$/g) && context.format.list == null) {
         return true;
       } else if (context.prefix.endsWith('`')) {
@@ -321,7 +319,7 @@ export const bindings = {
     prefix: /(^|\s)~{2}[^~]+~$/,
     collapsed: true,
     format: { strike: false },
-    handler(this: QuillContainer, range: Range, context: Context) {
+    handler(this: ThisQuill, range: Range, context: Context) {
       handleInlineMarkdown(this.quill, 'strike', range, context, '~');
     },
   },
@@ -329,7 +327,7 @@ export const bindings = {
   //   key: ['Enter'],
   //   collapsed: false,
   //   offset: 0,
-  //   handler(this: QuillContainer, range: Range, { line }) {
+  //   handler(this: ThisQuill, range: Range, { line }) {
   //     if (!(line instanceof BlockEmbed)) {
   //       return true;
   //     }
@@ -351,7 +349,7 @@ export const bindings = {
   //   key: ['Backspace'],
   //   collapsed: true,
   //   offset: 0,
-  //   handler(this: QuillContainer, range: Range, context: Context) {
+  //   handler(this: ThisQuill, range: Range, context: Context) {
   //     const { empty, line } = context;
   //     if (!line.prev || line.prev.statics.blotName !== ImageBlot.blotName) {
   //       return true;
@@ -371,7 +369,7 @@ export const bindings = {
   //   key: 'Enter',
   //   collapsed: true,
   //   format: ['hint'],
-  //   handler(this: QuillContainer, range: Range, context: Context) {
+  //   handler(this: ThisQuill, range: Range, context: Context) {
   //     const { line, offset } = context;
   //     if (offset < line.length() - 1) {
   //       return true;
@@ -435,7 +433,7 @@ function makeCompletionHotkey(from: string, to: string) {
     shiftKey: null,
     prefix: new RegExp(`[^${prev}]+${prev}$`),
     format: { code: false, 'code-block': false },
-    handler(this: QuillContainer, range: Range) {
+    handler(this: ThisQuill, range: Range) {
       this.quill.insertText(range.index, next, 'user');
       this.quill.history.cutoff();
       this.quill.updateContents(
@@ -456,9 +454,21 @@ function makeHeaderHotkey(level: number) {
     key: level + 48, // 49 is 1
     shortKey: true,
     altKey: true,
-    handler(this: QuillContainer) {
+    handler(this: ThisQuill) {
       this.quill.format('header', Math.min(level, 3), 'user');
       this.quill.format('indent', null, 'user');
     },
   };
 }
+
+// export default class Keyboard extends QuillKeyboard {
+//   constructor(quill: Quill, options) {
+//     super(quill, {
+//       ...options,
+//       bindings: {
+//         ...bindings,
+//         ...options.bindings,
+//       },
+//     });
+//   }
+// }

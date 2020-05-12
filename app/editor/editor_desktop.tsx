@@ -185,7 +185,9 @@ export class EditorDesktop extends React.Component<EditorProps, EditorState> {
       this.handleHideHoverable();
       this.handleShowPlaceholderIfNeeded(range);
     } else {
-      this.handleShowHoverable({ type: 'toolbar' });
+      if (!formats['code-block']) {
+        this.handleShowHoverable({ type: 'toolbar' });
+      }
     }
   };
 

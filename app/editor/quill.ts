@@ -1,3 +1,5 @@
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github.css';
 import 'quill/dist/quill.core.css';
 import './quill.css';
 import Quill from 'quill';
@@ -19,6 +21,9 @@ export function createQuill(
 ): QuillHandlers {
   let quill = new Quill(container, {
     modules: {
+      syntax: {
+        highlight: (text: string) => hljs.highlightAuto(text).value,
+      },
       keyboard: {
         bindings,
       },

@@ -1,6 +1,7 @@
 import hljs from 'highlight.js';
 import InlineBlot from 'quill/blots/inline';
 import QuillSyntax, { CodeBlock } from 'quill/modules/syntax';
+import { ThisQuill } from './types';
 
 const languages = [
   {
@@ -176,19 +177,19 @@ const filtered = languages.map(({ key, label, aliases }) => {
 CodeBlock.allowedChildren.push(InlineBlot);
 
 export class Syntax extends QuillSyntax {
-  static DEFAULTS = {
-    hljs,
-    interval: 1000,
-    languages: [{ label: 'Plain', key: 'plain' }].concat(filtered),
-  };
-
-  highlight(...args: any[]) {
+  highlight(this: ThisQuill, ...args: any[]) {
     if (this.quill.selection.mouseDown) {
       return;
     }
     super.highlight(...args);
   }
 }
+
+Syntax.DEFAULTS = {
+  highlight: hljs,
+  interval: 1000,
+  languages: [{ label: 'Plain', key: 'plain' }].concat(filtered),
+};
 
 export function identifyLanguage(key: string) {
   return languageMap[key.toLowerCase()] || true;
