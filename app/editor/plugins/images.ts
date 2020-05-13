@@ -1,8 +1,9 @@
 import { Transforms, Editor } from 'slate';
-import { isUrl } from '../utils/is_url';
-import { imageExtensions } from '../utils/image_extensions';
+import { isUrl } from '../../utils/is_url';
+import { imageExtensions } from '../../utils/image_extensions';
+import { ReactEditor } from 'slate-react';
 
-export function withImages(editor: Editor) {
+export function withImages<T extends ReactEditor>(editor: T): T & Editor {
   const { insertData, isVoid } = editor;
 
   editor.isVoid = (element) => {
@@ -14,14 +15,19 @@ export function withImages(editor: Editor) {
     const { files } = data;
 
     if (files && files.length > 0) {
-      for (const file of files) {
-        const reader = new FileReader();
+      for (const file of Array.from(files)) {
+        const reader = new window.FileReader();
         const [mime] = file.type.split('/');
 
         if (mime === 'image') {
           reader.addEventListener('load', () => {
             const url = reader.result;
-            insertImage(editor, url);
+            if (url) {
+              insertImage(
+                editor,
+                typeof url === 'string' ? url : arrayBufferToString(url),
+              );
+            }
           });
 
           reader.readAsDataURL(file);
@@ -37,7 +43,17 @@ export function withImages(editor: Editor) {
   return editor;
 }
 
-const insertImage = (editor, url) => {
+function arrayBufferToString(buf: ArrayBuffer) {
+  return String.fromCharCode(convertArrayBufferToNumber(buf));
+}
+
+function convertArrayBufferToNumber(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  const dv = new DataView(bytes.buffer);
+  return dv.getUint16(0, true);
+}
+
+const insertImage = (editor: ReactEditor, url: string) => {
   const text = { text: '' };
   const image = { type: 'image', url, children: [text] };
   Transforms.insertNodes(editor, image);

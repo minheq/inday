@@ -3,7 +3,10 @@ import isHotkey from 'is-hotkey';
 import { Editable, withReact, Slate } from 'slate-react';
 import { Editor as SlateEditor, createEditor, Node } from 'slate';
 import { withHistory } from 'slate-history';
-import { Leaf } from './leaf';
+import { Leaf } from './nodes/leaf';
+import { withShortcuts } from './plugins/shortcuts';
+import { withChecklists } from './plugins/checklists';
+import { withLinks } from './plugins/links';
 import { Element } from './element';
 
 const HOTKEYS: { [key: string]: string } = {
@@ -15,13 +18,13 @@ const HOTKEYS: { [key: string]: string } = {
 
 export function Editor() {
   const [value, setValue] = React.useState<Node[]>(initialValue);
-  const renderElement = React.useCallback(
-    (props) => <Element {...props} />,
-    [],
-  );
-  const renderLeaf = React.useCallback((props) => <Leaf {...props} />, []);
+  const renderElement = React.useCallback((p) => <Element {...p} />, []);
+  const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
   const editor = React.useMemo(
-    () => withHistory(withReact(createEditor())),
+    () =>
+      withLinks(
+        withChecklists(withShortcuts(withReact(withHistory(createEditor())))),
+      ),
     [],
   );
 
@@ -63,7 +66,7 @@ const toggleMark = (editor: SlateEditor, format: string) => {
   }
 };
 
-const initialValue = [
+const initialValue: Element[] = [
   {
     type: 'paragraph',
     children: [
@@ -95,7 +98,59 @@ const initialValue = [
     children: [{ text: 'A wise quote.' }],
   },
   {
+    type: 'image',
+    void: true,
+    url: 'https://source.unsplash.com/kFrdX5IeQzI',
+    children: [{ text: '' }],
+  },
+  {
     type: 'paragraph',
     children: [{ text: 'Try it out for yourself!' }],
+  },
+  {
+    type: 'check-list-item',
+    checked: true,
+    children: [{ text: 'Slide to the left.' }],
+  },
+  {
+    type: 'check-list-item',
+    checked: true,
+    children: [{ text: 'Slide to the right.' }],
+  },
+  {
+    type: 'check-list-item',
+    checked: false,
+    children: [{ text: 'Criss-cross.' }],
+  },
+  {
+    type: 'check-list-item',
+    checked: true,
+    children: [{ text: 'Criss-cross!' }],
+  },
+  {
+    type: 'check-list-item',
+    checked: false,
+    children: [{ text: 'Cha cha real smooth…' }],
+  },
+  {
+    type: 'check-list-item',
+    checked: false,
+    children: [{ text: "Let's go to work!" }],
+  },
+  {
+    type: 'paragraph',
+    children: [
+      {
+        text: 'In addition to block nodes, you can create inline nodes, like ',
+      },
+      {
+        type: 'link',
+        url: 'https://en.wikipedia.org/wiki/Hypertext',
+        children: [{ text: 'hyperlinks' }],
+      },
+      {
+        text: '!',
+      },
+    ],
   },
 ];

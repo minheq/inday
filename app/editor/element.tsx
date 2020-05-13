@@ -1,33 +1,62 @@
 import React from 'react';
-import { Element } from './types';
+import { HeadingOne } from './nodes/heading_one';
+import { HeadingTwo } from './nodes/heading_two';
+import { HeadingThree } from './nodes/heading_three';
+import { Paragraph } from './nodes/paragraph';
+import { Image } from './nodes/image';
+import { Link } from './nodes/link';
+import { Blockquote } from './nodes/block_quote';
+import { BulletedList } from './nodes/bulleted_list';
+import { NumberedList } from './nodes/numbered_list';
+import { ListItem } from './nodes/list_item';
+import { CheckListItem } from './nodes/check_list_item';
 
-export interface ElementProps {
-  children: any;
+export type Element =
+  | Paragraph
+  | BulletedList
+  | NumberedList
+  | ListItem
+  | Blockquote
+  | Link
+  | CheckListItem
+  | HeadingOne
+  | HeadingTwo
+  | HeadingThree
+  | Image;
+
+export type ElementType = Element['type'];
+
+interface ElementProps {
+  children: React.ReactNode;
+  attributes: unknown;
   element: Element;
-  attributes: {
-    'data-slate-node': 'element';
-    'data-slate-inline'?: true;
-    'data-slate-void'?: true;
-    dir?: 'rtl';
-    ref: any;
-  };
 }
 
 export function Element(props: ElementProps) {
-  const { attributes, children, element } = props;
-
-  switch (element.type) {
+  switch (props.element.type) {
+    case 'heading-one':
+      return <HeadingOne {...props} element={props.element} />;
+    case 'heading-two':
+      return <HeadingTwo {...props} element={props.element} />;
+    case 'heading-three':
+      return <HeadingThree {...props} element={props.element} />;
+    case 'image':
+      return <Image {...props} element={props.element} />;
+    case 'link':
+      return <Link {...props} element={props.element} />;
     case 'block-quote':
-      return <blockquote {...attributes}>{children}</blockquote>;
+      return <Blockquote {...props} element={props.element} />;
     case 'bulleted-list':
-      return <ul {...attributes}>{children}</ul>;
-    case 'heading':
-      return <h1 {...attributes}>{children}</h1>;
-    case 'list-item':
-      return <li {...attributes}>{children}</li>;
+      return <BulletedList {...props} element={props.element} />;
     case 'numbered-list':
-      return <ol {...attributes}>{children}</ol>;
+      return <NumberedList {...props} element={props.element} />;
+    case 'list-item':
+      return <ListItem {...props} element={props.element} />;
+    case 'check-list-item':
+      return <CheckListItem {...props} element={props.element} />;
+    case 'paragraph':
+      return <Paragraph {...props} element={props.element} />;
     default:
-      return <p {...attributes}>{children}</p>;
+      throw new Error(`Unexpected element ${JSON.stringify(props.element)}`);
   }
 }

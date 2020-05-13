@@ -1,6 +1,9 @@
 import { Editor, Transforms, Range, Point } from 'slate';
+import { ReactEditor } from 'slate-react';
 
-export function withChecklists(editor: Editor) {
+export function withChecklists<T extends ReactEditor>(
+  editor: T,
+): T & ReactEditor {
   const { deleteBackward } = editor;
 
   editor.deleteBackward = (unit) => {

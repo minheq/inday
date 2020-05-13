@@ -1,12 +1,18 @@
 import React from 'react';
-import { Text } from './types';
 
 export interface LeafProps {
   children: any;
-  leaf: Text;
+  leaf: Leaf;
   attributes: {
     'data-slate-leaf': true;
   };
+}
+
+interface Leaf {
+  bold?: boolean;
+  italic?: boolean;
+  code?: boolean;
+  strikethrough?: boolean;
 }
 
 export function Leaf(props: LeafProps) {

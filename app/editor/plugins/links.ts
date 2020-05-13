@@ -1,7 +1,8 @@
 import { Transforms, Editor, Range } from 'slate';
-import { isUrl } from '../utils/is_url';
+import { isUrl } from '../../utils/is_url';
+import { ReactEditor } from 'slate-react';
 
-export function withLinks(editor: Editor) {
+export function withLinks<T extends ReactEditor>(editor: T): T & ReactEditor {
   const { insertData, insertText, isInline } = editor;
 
   editor.isInline = (element) => {
@@ -29,11 +30,11 @@ export function withLinks(editor: Editor) {
   return editor;
 }
 
-const insertLink = (editor: Editor, url: string) => {
-  if (editor.selection) {
-    wrapLink(editor, url);
-  }
-};
+// const insertLink = (editor: Editor, url: string) => {
+//   if (editor.selection) {
+//     wrapLink(editor, url);
+//   }
+// };
 
 const isLinkActive = (editor: Editor) => {
   const [link] = Editor.nodes(editor, { match: (n) => n.type === 'link' });

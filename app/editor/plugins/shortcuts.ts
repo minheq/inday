@@ -1,19 +1,20 @@
 import { Editor, Transforms, Range, Point } from 'slate';
+import { ReactEditor } from 'slate-react';
+import { ElementType } from '../element';
 
-const SHORTCUTS = {
-  '*': 'list-item' as const,
-  '-': 'list-item' as const,
-  '+': 'list-item' as const,
-  '>': 'block-quote' as const,
-  '#': 'heading-one' as const,
-  '##': 'heading-two' as const,
-  '###': 'heading-three' as const,
-  '####': 'heading-four' as const,
-  '#####': 'heading-five' as const,
-  '######': 'heading-six' as const,
+const SHORTCUTS: { [key: string]: ElementType } = {
+  '*': 'list-item',
+  '-': 'list-item',
+  '+': 'list-item',
+  '>': 'block-quote',
+  '#': 'heading-one',
+  '##': 'heading-two',
+  '###': 'heading-three',
 };
 
-export function withShortcuts(editor: Editor) {
+export function withShortcuts<T extends ReactEditor>(
+  editor: T,
+): T & ReactEditor {
   const { deleteBackward, insertText } = editor;
 
   editor.insertText = (text) => {
