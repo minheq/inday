@@ -1,14 +1,10 @@
 import React from 'react';
 import isHotkey from 'is-hotkey';
-import {
-  Editable,
-  withReact,
-  Slate,
-  RenderElementProps,
-  RenderLeafProps,
-} from 'slate-react';
+import { Editable, withReact, Slate } from 'slate-react';
 import { Editor as SlateEditor, createEditor, Node } from 'slate';
 import { withHistory } from 'slate-history';
+import { Leaf } from './leaf';
+import { Element } from './element';
 
 const HOTKEYS: { [key: string]: string } = {
   'mod+b': 'bold',
@@ -66,45 +62,6 @@ const toggleMark = (editor: SlateEditor, format: string) => {
     SlateEditor.addMark(editor, format, true);
   }
 };
-
-const Element = ({ attributes, children, element }: RenderElementProps) => {
-  switch (element.type) {
-    case 'block-quote':
-      return <blockquote {...attributes}>{children}</blockquote>;
-    case 'bulleted-list':
-      return <ul {...attributes}>{children}</ul>;
-    case 'heading-one':
-      return <h1 {...attributes}>{children}</h1>;
-    case 'heading-two':
-      return <h2 {...attributes}>{children}</h2>;
-    case 'list-item':
-      return <li {...attributes}>{children}</li>;
-    case 'numbered-list':
-      return <ol {...attributes}>{children}</ol>;
-    default:
-      return <p {...attributes}>{children}</p>;
-  }
-};
-
-function Leaf({ attributes, children, leaf }: RenderLeafProps) {
-  if (leaf.bold) {
-    children = <strong>{children}</strong>;
-  }
-
-  if (leaf.code) {
-    children = <code>{children}</code>;
-  }
-
-  if (leaf.italic) {
-    children = <em>{children}</em>;
-  }
-
-  if (leaf.underline) {
-    children = <u>{children}</u>;
-  }
-
-  return <span {...attributes}>{children}</span>;
-}
 
 const initialValue = [
   {
