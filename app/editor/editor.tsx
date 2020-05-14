@@ -17,6 +17,7 @@ const HOTKEYS: { [key: string]: string } = {
 };
 
 // TODO:
+// - ~~Divider~~
 // - Code block and syntax highlighting
 // - Markdown shortcuts
 //  - Code
