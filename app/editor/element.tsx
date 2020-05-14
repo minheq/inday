@@ -10,6 +10,7 @@ import { BulletedList } from './nodes/bulleted_list';
 import { NumberedList } from './nodes/numbered_list';
 import { ListItem } from './nodes/list_item';
 import { CheckListItem } from './nodes/check_list_item';
+import { Divider } from './nodes/divider';
 
 export type Element =
   | Paragraph
@@ -17,6 +18,7 @@ export type Element =
   | NumberedList
   | ListItem
   | Blockquote
+  | Divider
   | Link
   | CheckListItem
   | HeadingOne
@@ -28,7 +30,13 @@ export type ElementType = Element['type'];
 
 interface ElementProps {
   children: React.ReactNode;
-  attributes: unknown;
+  attributes: {
+    'data-slate-node': 'element';
+    'data-slate-inline'?: true;
+    'data-slate-void'?: true;
+    dir?: 'rtl';
+    ref: any;
+  };
   element: Element;
 }
 
@@ -42,6 +50,8 @@ export function Element(props: ElementProps) {
       return <HeadingThree {...props} element={props.element} />;
     case 'image':
       return <Image {...props} element={props.element} />;
+    case 'divider':
+      return <Divider {...props} element={props.element} />;
     case 'link':
       return <Link {...props} element={props.element} />;
     case 'block-quote':

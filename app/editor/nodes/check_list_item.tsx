@@ -49,7 +49,7 @@ export function CheckListItem(props: ElementProps<CheckListItem>) {
         style={{
           flex: 1,
           opacity: checked ? 0.666 : 1,
-          textDecoration: checked ? 'none' : 'line-through',
+          textDecoration: !checked ? 'none' : 'line-through',
         }}
       >
         {children}

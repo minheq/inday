@@ -16,6 +16,25 @@ const HOTKEYS: { [key: string]: string } = {
   'mod+`': 'code',
 };
 
+// TODO:
+// - Code block and syntax highlighting
+// - Markdown shortcuts
+//  - Code
+//  - Code block
+//  - Divider
+//  - Strike through
+//  - Bold
+//  - Italic
+//  - Link
+// - Formatting Toolbar
+// - Link Toolbar
+// - Type Commands
+//  - Insert Image
+//  - Insert Video
+//  - Insert Twitter
+// - Hashtags
+// - Mentions
+// - Enforce layout?
 export function Editor() {
   const [value, setValue] = React.useState<Node[]>(initialValue);
   const renderElement = React.useCallback((p) => <Element {...p} />, []);
@@ -106,6 +125,11 @@ const initialValue: Element[] = [
   {
     type: 'paragraph',
     children: [{ text: 'Try it out for yourself!' }],
+  },
+  {
+    type: 'divider',
+    void: true,
+    children: [{ text: '' }],
   },
   {
     type: 'check-list-item',
