@@ -18,14 +18,23 @@ const HOTKEYS: { [key: string]: string } = {
 
 // TODO:
 // - ~~Divider~~
-// - Code block and syntax highlighting
 // - Markdown shortcuts
-//  - Code
-//  - Code block
 //  - Divider
-//  - Strike through
+//  - Code block
+//  - Code
+//  - Strikethrough
 //  - Bold
 //  - Italic
+//  - [] Checklist
+//  - Link?
+// - Keyboard shortcuts
+//  - Bold
+//  - Italic
+//  - Code
+//  - Strikethrough
+//  - Numbered list
+//  - Bulleted list
+//  - Block quote
 //  - Link
 // - Formatting Toolbar
 // - Link Toolbar
@@ -35,7 +44,6 @@ const HOTKEYS: { [key: string]: string } = {
 //  - Insert Twitter
 // - Hashtags
 // - Mentions
-// - Enforce layout?
 export function Editor() {
   const [value, setValue] = React.useState<Node[]>(initialValue);
   const renderElement = React.useCallback((p) => <Element {...p} />, []);

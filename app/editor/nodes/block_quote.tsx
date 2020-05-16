@@ -10,5 +10,9 @@ export interface Blockquote extends Element {
 export function Blockquote(props: ElementProps<Blockquote>) {
   const { attributes, children } = props;
 
-  return <blockquote {...attributes}>{children}</blockquote>;
+  return (
+    <blockquote style={{ color: 'grey' }} {...attributes}>
+      {children}
+    </blockquote>
+  );
 }

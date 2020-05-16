@@ -15,6 +15,8 @@ interface Leaf {
   strikethrough?: boolean;
 }
 
+export type Mark = keyof Leaf;
+
 export function Leaf(props: LeafProps) {
   const { attributes, leaf } = props;
   let { children } = props;
@@ -33,3 +35,40 @@ export function Leaf(props: LeafProps) {
 
   return <span {...attributes}>{children}</span>;
 }
+
+// const DECORATION_SHORTCUTS: {
+//   [key: string]: { prefix: RegExp; decoration: Decoration }[];
+// } = {
+//   '`': [
+//     {
+//       prefix: /`[^`]*/,
+//       decoration: 'code',
+//     },
+//   ],
+//   '*': [
+//     {
+//       prefix: /(^|\s)[*][^*]+$/,
+//       decoration: 'italic',
+//     },
+//     {
+//       prefix: /(^|\s)[*]{2}[^*]+[*]$/,
+//       decoration: 'bold',
+//     },
+//   ],
+//   _: [
+//     {
+//       prefix: /(^|\s)[_][^_]+$/,
+//       decoration: 'italic',
+//     },
+//     {
+//       prefix: /(^|\s)[_]{2}[^_]+[_]$/,
+//       decoration: 'bold',
+//     },
+//   ],
+//   '~': [
+//     {
+//       prefix: /(^|\s)~{2}[^~]+~$/,
+//       decoration: 'strikethrough',
+//     },
+//   ],
+// };
