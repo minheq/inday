@@ -26,7 +26,7 @@ export function Leaf(props: LeafProps) {
   }
 
   if (leaf.code) {
-    children = <code>{children}</code>;
+    children = <code style={{ backgroundColor: 'grey' }}>{children}</code>;
   }
 
   if (leaf.italic) {

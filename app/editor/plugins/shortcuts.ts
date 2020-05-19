@@ -9,7 +9,7 @@ import { Mark } from '../nodes/leaf';
 // strike immediate
 // code immediate
 
-const KEY_SHORTCUTS: {
+const BLOCK_SHORTCUTS: {
   [text: string]: {
     [beforeText: string]: ElementType;
   };
@@ -48,16 +48,16 @@ const MARK_SHORTCUTS: {
       mark: 'code',
     },
   ],
-  // '*': [
-  //   {
-  //     prefix: /(^|\s)[*][^*]+$/,
-  //     mark: 'italic',
-  //   },
-  //   {
-  //     prefix: /(^|\s)[*]{2}[^*]+[*]$/,
-  //     mark: 'bold',
-  //   },
-  // ],
+  '*': [
+    {
+      prefix: /\*[^*]*/,
+      mark: 'italic',
+    },
+    // {
+    //   prefix: /(^|\s)[*]{2}[^*]+[*]$/,
+    //   mark: 'bold',
+    // },
+  ],
   // _: [
   //   {
   //     prefix: /(^|\s)[_][^_]+$/,
@@ -68,17 +68,20 @@ const MARK_SHORTCUTS: {
   //     mark: 'bold',
   //   },
   // ],
-  // '~': [
-  //   {
-  //     prefix: /(^|\s)~{2}[^~]+~$/,
-  //     mark: 'strikethrough',
-  //   },
-  // ],
+  '~': [
+    {
+      prefix: /~{2}[^~]+~/,
+      mark: 'strikethrough',
+    },
+  ],
 };
 
-// Don't format if it is already in that format
-// Don't format if it is `code`
-// Don't format if it is within code block
+//   autolink: {
+//     key: [' ', '\n'],
+//     prefix: /https?:\/\/[^\s]+$/,
+//   },
+//   arrow: makeCompletionHotkey('->', '→'),
+//   mdash: makeCompletionHotkey('--', '—'),
 
 export function withShortcuts<T extends ReactEditor>(
   editor: T,
@@ -87,8 +90,9 @@ export function withShortcuts<T extends ReactEditor>(
 
   editor.insertText = (text) => {
     const { selection } = editor;
+    // console.log(editor.children, 'ed');
 
-    if (KEY_SHORTCUTS[text] && selection && Range.isCollapsed(selection)) {
+    if (BLOCK_SHORTCUTS[text] && selection && Range.isCollapsed(selection)) {
       const { anchor } = selection;
       const block = Editor.above(editor, {
         match: (n) => Editor.isBlock(editor, n),
@@ -98,7 +102,7 @@ export function withShortcuts<T extends ReactEditor>(
       const range = { anchor, focus: start };
       const beforeText = Editor.string(editor, range);
 
-      const type = KEY_SHORTCUTS[text][beforeText];
+      const type = BLOCK_SHORTCUTS[text][beforeText];
 
       if (type) {
         Transforms.select(editor, range);
@@ -121,57 +125,49 @@ export function withShortcuts<T extends ReactEditor>(
     }
 
     if (MARK_SHORTCUTS[text] && selection && Range.isCollapsed(selection)) {
-      const { anchor } = selection;
-      const block = Editor.above(editor, {
-        match: (n) => Editor.isBlock(editor, n),
-      });
-      const path = block ? block[1] : [];
-      const start = Editor.start(editor, path);
-      const range = { anchor, focus: start };
-      const beforeText = Editor.string(editor, range);
+      const { focus } = selection;
+      const leaf = Editor.leaf(editor, selection);
+      const [{ text: leafText }, path] = leaf;
 
       for (let i = 0; i < MARK_SHORTCUTS[text].length; i++) {
         const shortcut = MARK_SHORTCUTS[text][i];
-        const match = beforeText.match(shortcut.prefix);
-        if (match) {
-          if (match.index && editor.selection) {
-            const prevSelection = editor.selection;
-            console.log(beforeText.substring(match.index));
-            const markRange: Range = {
-              anchor: {
-                path: editor.selection.anchor.path,
-                offset: match.index,
-              },
-              focus: editor.selection.focus,
-            };
-            console.log(markRange, 'markRange');
 
-            Transforms.select(editor, markRange);
-            console.log('selected');
+        console.log(leafText, 'match', shortcut.prefix);
 
-            Editor.addMark(editor, shortcut.mark, true);
-            console.log('mark added');
+        const match = leafText.match(shortcut.prefix);
+        console.log(match);
 
-            Transforms.select(editor, prevSelection);
-            console.log('seletion restored');
-          }
+        if (match?.index !== undefined) {
+          console.log(match);
+
+          const offset = match.index;
+
+          const range = {
+            anchor: { path, offset },
+            focus,
+          };
+
+          // Don't format if it is empty
+          // Don't format if it is already in that format
+          // Don't format if it is `code`
+          // Don't format if it is within code block
+          Transforms.select(editor, range);
+
+          const beforeText = Editor.string(editor, range);
+          console.log(beforeText);
+          const insertedText = beforeText.substring(2);
+          console.log(insertedText);
+
+          // Transforms.delete(editor);
+
+          // editor.addMark(shortcut.mark, true);
+          // editor.insertText(insertedText);
+          // editor.removeMark(shortcut.mark);
+
+          return;
         }
       }
     }
-
-    // console.log(beforeText);
-
-    // if (matchedShortcut) {
-    //   Transforms.select(editor, range);
-    //   Transforms.delete(editor);
-    //   Transforms.setNodes(
-    //     editor,
-    //     { type: matchedShortcut.type },
-    //     { match: (n) => Editor.isBlock(editor, n) },
-    //   );
-
-    //   return;
-    // }
 
     insertText(text);
   };
