@@ -33,42 +33,9 @@ export function Leaf(props: LeafProps) {
     children = <em>{children}</em>;
   }
 
+  if (leaf.strikethrough) {
+    children = <del>{children}</del>;
+  }
+
   return <span {...attributes}>{children}</span>;
 }
-
-// const DECORATION_SHORTCUTS: {
-//   [key: string]: { prefix: RegExp; decoration: Decoration }[];
-// } = {
-//   '`': [
-//     {
-//       prefix: /`[^`]*/,
-//       decoration: 'code',
-//     },
-//   ],
-//   '*': [
-//     {
-//       prefix: /(^|\s)[*][^*]+$/,
-//       decoration: 'italic',
-//     },
-//     {
-//       prefix: /(^|\s)[*]{2}[^*]+[*]$/,
-//       decoration: 'bold',
-//     },
-//   ],
-//   _: [
-//     {
-//       prefix: /(^|\s)[_][^_]+$/,
-//       decoration: 'italic',
-//     },
-//     {
-//       prefix: /(^|\s)[_]{2}[^_]+[_]$/,
-//       decoration: 'bold',
-//     },
-//   ],
-//   '~': [
-//     {
-//       prefix: /(^|\s)~{2}[^~]+~$/,
-//       decoration: 'strikethrough',
-//     },
-//   ],
-// };

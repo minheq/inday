@@ -44,33 +44,33 @@ const MARK_SHORTCUTS: {
 } = {
   '`': [
     {
-      prefix: /`[^`]*/,
+      prefix: /`([^`]*)/,
       mark: 'code',
     },
   ],
   '*': [
     {
-      prefix: /\*[^*]*/,
+      prefix: /\*{2}([^*]*)\*/,
+      mark: 'bold',
+    },
+    {
+      prefix: /\*([^*]*)/,
       mark: 'italic',
     },
-    // {
-    //   prefix: /(^|\s)[*]{2}[^*]+[*]$/,
-    //   mark: 'bold',
-    // },
   ],
-  // _: [
-  //   {
-  //     prefix: /(^|\s)[_][^_]+$/,
-  //     mark: 'italic',
-  //   },
-  //   {
-  //     prefix: /(^|\s)[_]{2}[^_]+[_]$/,
-  //     mark: 'bold',
-  //   },
-  // ],
+  _: [
+    {
+      prefix: /_{2}([^_]*)_/,
+      mark: 'bold',
+    },
+    {
+      prefix: /_([^_]*)/,
+      mark: 'italic',
+    },
+  ],
   '~': [
     {
-      prefix: /~{2}[^~]+~/,
+      prefix: /~{2}([^~]*)~/,
       mark: 'strikethrough',
     },
   ],
@@ -128,41 +128,31 @@ export function withShortcuts<T extends ReactEditor>(
       const { focus } = selection;
       const leaf = Editor.leaf(editor, selection);
       const [{ text: leafText }, path] = leaf;
+      const beforeText = leafText.substring(0, selection.focus.offset);
 
       for (let i = 0; i < MARK_SHORTCUTS[text].length; i++) {
         const shortcut = MARK_SHORTCUTS[text][i];
-
-        console.log(leafText, 'match', shortcut.prefix);
-
-        const match = leafText.match(shortcut.prefix);
-        console.log(match);
+        const match = beforeText.match(shortcut.prefix);
 
         if (match?.index !== undefined) {
-          console.log(match);
-
-          const offset = match.index;
-
-          const range = {
-            anchor: { path, offset },
-            focus,
-          };
+          const matchedText = match[1];
 
           // Don't format if it is empty
+          if (!matchedText) {
+            break;
+          }
+
+          const range = { anchor: { path, offset: match.index }, focus };
+
           // Don't format if it is already in that format
           // Don't format if it is `code`
           // Don't format if it is within code block
           Transforms.select(editor, range);
+          Transforms.delete(editor);
 
-          const beforeText = Editor.string(editor, range);
-          console.log(beforeText);
-          const insertedText = beforeText.substring(2);
-          console.log(insertedText);
-
-          // Transforms.delete(editor);
-
-          // editor.addMark(shortcut.mark, true);
-          // editor.insertText(insertedText);
-          // editor.removeMark(shortcut.mark);
+          editor.addMark(shortcut.mark, true);
+          editor.insertText(matchedText);
+          editor.removeMark(shortcut.mark);
 
           return;
         }
