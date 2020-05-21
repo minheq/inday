@@ -3,12 +3,6 @@ import { ReactEditor } from 'slate-react';
 import { ElementType } from '../element';
 import { Mark } from '../nodes/leaf';
 
-// Anywhere
-// bold immediate
-// italic immediate
-// strike immediate
-// code immediate
-
 const BLOCK_SHORTCUTS: {
   [text: string]: {
     [beforeText: string]: ElementType;
@@ -76,13 +70,23 @@ const MARK_SHORTCUTS: {
   ],
 };
 
-//   autolink: {
-//     key: [' ', '\n'],
-//     prefix: /https?:\/\/[^\s]+$/,
-//   },
-//   arrow: makeCompletionHotkey('->', '→'),
-//   mdash: makeCompletionHotkey('--', '—'),
+const SUBSTITUTE_SHORTCUTS: {
+  [text: string]: {
+    [beforeCharacter: string]: string;
+  };
+} = {
+  '>': {
+    '-': '→',
+  },
+  '-': {
+    '-': '—',
+  },
+};
 
+// TODO:
+// Don't format if it is already in that format
+// Don't format if it is `code`
+// > It is already not possible because of how inline nodes work
 export function withShortcuts<T extends ReactEditor>(
   editor: T,
 ): T & ReactEditor {
@@ -142,11 +146,17 @@ export function withShortcuts<T extends ReactEditor>(
             break;
           }
 
+          const node = Editor.above(editor, {
+            match: (n) => Editor.isBlock(editor, n),
+          });
+
+          // Don't format if it is within code block
+          if (node && node[0].type === 'code-block') {
+            break;
+          }
+
           const range = { anchor: { path, offset: match.index }, focus };
 
-          // Don't format if it is already in that format
-          // Don't format if it is `code`
-          // Don't format if it is within code block
           Transforms.select(editor, range);
           Transforms.delete(editor);
 
@@ -156,6 +166,31 @@ export function withShortcuts<T extends ReactEditor>(
 
           return;
         }
+      }
+    }
+
+    if (
+      SUBSTITUTE_SHORTCUTS[text] &&
+      selection &&
+      Range.isCollapsed(selection)
+    ) {
+      const { focus } = selection;
+      const leaf = Editor.leaf(editor, selection);
+      const [{ text: leafText }, path] = leaf;
+      const beforeText = leafText.substring(0, selection.focus.offset);
+      const beforeCharacter = beforeText.charAt(beforeText.length - 1);
+      const substitutedText = SUBSTITUTE_SHORTCUTS[text][beforeCharacter];
+
+      if (substitutedText) {
+        const range = {
+          anchor: { path, offset: beforeText.length - 1 },
+          focus,
+        };
+
+        Transforms.select(editor, range);
+        Transforms.delete(editor);
+        editor.insertText(substitutedText);
+        return;
       }
     }
 
