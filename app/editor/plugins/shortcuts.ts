@@ -34,9 +34,9 @@ const BLOCK_SHORTCUTS: {
   '*': {
     '**': 'divider',
   },
-  // '`': {
-  //   '``': 'code-block',
-  // },
+  '`': {
+    '``': 'code-block',
+  },
 };
 
 const MARK_SHORTCUTS: {

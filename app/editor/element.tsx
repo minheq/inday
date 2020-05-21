@@ -11,6 +11,7 @@ import { NumberedList } from './nodes/numbered_list';
 import { ListItem } from './nodes/list_item';
 import { CheckListItem } from './nodes/check_list_item';
 import { Divider } from './nodes/divider';
+import { CodeBlock } from './nodes/code_block';
 
 export type Element =
   | Paragraph
@@ -18,6 +19,7 @@ export type Element =
   | NumberedList
   | ListItem
   | Blockquote
+  | CodeBlock
   | Divider
   | Link
   | CheckListItem
@@ -50,6 +52,8 @@ export function Element(props: ElementProps) {
       return <HeadingThree {...props} element={props.element} />;
     case 'image':
       return <Image {...props} element={props.element} />;
+    case 'code-block':
+      return <CodeBlock {...props} element={props.element} />;
     case 'divider':
       return <Divider {...props} element={props.element} />;
     case 'link':
