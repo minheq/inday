@@ -8,7 +8,6 @@ export interface Image extends Element {
   type: 'image';
   url: string;
   caption?: string;
-  void: true;
 }
 
 export function Image(props: ElementProps<Image>) {

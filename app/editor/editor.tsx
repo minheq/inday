@@ -1,40 +1,41 @@
 import React from 'react';
 import isHotkey from 'is-hotkey';
 import { Editable, withReact, Slate } from 'slate-react';
-import { Editor as SlateEditor, createEditor, Node } from 'slate';
+import { Editor, createEditor, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { Leaf } from './nodes/leaf';
+import { Leaf, Mark } from './nodes/leaf';
 import { withShortcuts } from './plugins/shortcuts';
 import { withChecklists } from './plugins/checklists';
 import { withLinks } from './plugins/links';
-import { Element } from './element';
+import { Element, BlockType } from './element';
 
-const HOTKEYS: { [key: string]: string } = {
+const HOTKEYS: { [key: string]: Mark } = {
   'mod+b': 'bold',
   'mod+i': 'italic',
-  'mod+u': 'underline',
-  'mod+`': 'code',
+  'mod+shift+c': 'code',
+  'mod+shift+x': 'strikethrough',
 };
 
 // TODO:
 // - ~~Divider~~
-// - Markdown shortcuts
-//  - Divider
-//  - Code block
-//  - Code
-//  - Strikethrough
-//  - Bold
-//  - Italic
-//  - [] Checklist
-//  - Link?
+// - ~~Markdown shortcuts~~
+//  - ~~Divider~~
+//  - ~~Code block~~
+//  - ~~Code~~
+//  - ~~Strikethrough~~
+//  - ~~Bold~~
+//  - ~~Italic~~
+//  - ~~[] Checklist~~
+//  - ~~Link?~~
 // - Keyboard shortcuts
-//  - Bold
-//  - Italic
-//  - Code
-//  - Strikethrough
+//  - ~~Bold~~
+//  - ~~Italic~~
+//  - ~~Code~~
+//  - ~~Strikethrough~~
 //  - Numbered list
 //  - Bulleted list
 //  - Block quote
+//  - Code block
 //  - Link
 // - Formatting Toolbar
 // - Link Toolbar
@@ -44,7 +45,13 @@ const HOTKEYS: { [key: string]: string } = {
 //  - Insert Twitter
 // - Hashtags
 // - Mentions
-export function Editor() {
+
+interface MyEditorProps {
+  initialValue?: Node[];
+}
+
+export function MyEditor(props: MyEditorProps) {
+  const { initialValue = [] } = props;
   const [value, setValue] = React.useState<Node[]>(initialValue);
   const renderElement = React.useCallback((p) => <Element {...p} />, []);
   const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
@@ -56,134 +63,70 @@ export function Editor() {
     [],
   );
 
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      for (const hotkey in HOTKEYS) {
+        if (isHotkey(hotkey, event)) {
+          event.preventDefault();
+          const mark = HOTKEYS[hotkey];
+          toggleMark(editor, mark);
+        }
+      }
+    },
+    [editor],
+  );
+
   return (
     <Slate editor={editor} value={value} onChange={setValue}>
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        placeholder="Enter some rich text…"
-        spellCheck
-        autoFocus
-        onKeyDown={(event) => {
-          for (const hotkey in HOTKEYS) {
-            // @ts-ignore
-            if (isHotkey(hotkey, event)) {
-              event.preventDefault();
-              const mark = HOTKEYS[hotkey];
-              toggleMark(editor, mark);
-            }
-          }
-        }}
+        onKeyDown={handleKeyDown}
       />
     </Slate>
   );
 }
 
-const isMarkActive = (editor: SlateEditor, format: string) => {
-  const marks = SlateEditor.marks(editor);
-  return marks ? marks[format] === true : false;
-};
+function isMarkActive(editor: Editor, mark: Mark) {
+  const marks = Editor.marks(editor);
+  return marks ? marks[mark] === true : false;
+}
 
-const toggleMark = (editor: SlateEditor, format: string) => {
-  const isActive = isMarkActive(editor, format);
+function toggleMark(editor: Editor, mark: Mark) {
+  const isActive = isMarkActive(editor, mark);
 
   if (isActive) {
-    SlateEditor.removeMark(editor, format);
+    Editor.removeMark(editor, mark);
   } else {
-    SlateEditor.addMark(editor, format, true);
+    Editor.addMark(editor, mark, true);
   }
-};
+}
 
-const initialValue: Element[] = [
-  {
-    type: 'paragraph',
-    children: [
-      { text: 'This is editable ' },
-      { text: 'rich', bold: true },
-      { text: ' text, ' },
-      { text: 'much', italic: true },
-      { text: ' better than a ' },
-      { text: '<textarea>', code: true },
-      { text: '!' },
-    ],
-  },
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text:
-          "Since it's rich text, you can do things like turn a selection of text ",
-      },
-      { text: 'bold', bold: true },
-      {
-        text:
-          ', or add a semantically rendered block quote in the middle of the page, like this:',
-      },
-    ],
-  },
-  {
-    type: 'block-quote',
-    children: [{ text: 'A wise quote.' }],
-  },
-  {
-    type: 'image',
-    void: true,
-    url: 'https://source.unsplash.com/kFrdX5IeQzI',
-    children: [{ text: '' }],
-  },
-  {
-    type: 'paragraph',
-    children: [{ text: 'Try it out for yourself!' }],
-  },
-  {
-    type: 'divider',
-    void: true,
-    children: [{ text: '' }],
-  },
-  {
-    type: 'check-list-item',
-    checked: true,
-    children: [{ text: 'Slide to the left.' }],
-  },
-  {
-    type: 'check-list-item',
-    checked: true,
-    children: [{ text: 'Slide to the right.' }],
-  },
-  {
-    type: 'check-list-item',
-    checked: false,
-    children: [{ text: 'Criss-cross.' }],
-  },
-  {
-    type: 'check-list-item',
-    checked: true,
-    children: [{ text: 'Criss-cross!' }],
-  },
-  {
-    type: 'check-list-item',
-    checked: false,
-    children: [{ text: 'Cha cha real smooth…' }],
-  },
-  {
-    type: 'check-list-item',
-    checked: false,
-    children: [{ text: "Let's go to work!" }],
-  },
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text: 'In addition to block nodes, you can create inline nodes, like ',
-      },
-      {
-        type: 'link',
-        url: 'https://en.wikipedia.org/wiki/Hypertext',
-        children: [{ text: 'hyperlinks' }],
-      },
-      {
-        text: '!',
-      },
-    ],
-  },
-];
+function isBlockActive(editor: Editor, block: string) {
+  const [match] = Editor.nodes(editor, {
+    match: (n) => n.type === block,
+  });
+
+  return !!match;
+}
+
+const LIST_TYPES = ['numbered-list', 'bulleted-list'];
+
+function toggleBlock(editor: Editor, blockType: BlockType) {
+  const isActive = isBlockActive(editor, blockType);
+  const isList = LIST_TYPES.includes(blockType);
+
+  Transforms.unwrapNodes(editor, {
+    match: (n) => LIST_TYPES.includes(n.type),
+    split: true,
+  });
+
+  Transforms.setNodes(editor, {
+    type: isActive ? 'paragraph' : isList ? 'list-item' : blockType,
+  });
+
+  if (!isActive && isList) {
+    const block = { type: blockType, children: [] };
+    Transforms.wrapNodes(editor, block);
+  }
+}

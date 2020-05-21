@@ -13,7 +13,7 @@ import { CheckListItem } from './nodes/check_list_item';
 import { Divider } from './nodes/divider';
 import { CodeBlock } from './nodes/code_block';
 
-export type Element =
+export type Block =
   | Paragraph
   | BulletedList
   | NumberedList
@@ -21,13 +21,17 @@ export type Element =
   | Blockquote
   | CodeBlock
   | Divider
-  | Link
   | CheckListItem
   | HeadingOne
   | HeadingTwo
   | HeadingThree
   | Image;
+export type BlockType = Block['type'];
 
+export type Inline = Link;
+export type InlineType = Inline['type'];
+
+export type Element = Block | Inline;
 export type ElementType = Element['type'];
 
 interface ElementProps {

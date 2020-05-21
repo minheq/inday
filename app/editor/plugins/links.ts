@@ -30,11 +30,11 @@ export function withLinks<T extends ReactEditor>(editor: T): T & ReactEditor {
   return editor;
 }
 
-// const insertLink = (editor: Editor, url: string) => {
-//   if (editor.selection) {
-//     wrapLink(editor, url);
-//   }
-// };
+const insertLink = (editor: Editor, url: string) => {
+  if (editor.selection) {
+    wrapLink(editor, url);
+  }
+};
 
 const isLinkActive = (editor: Editor) => {
   const [link] = Editor.nodes(editor, { match: (n) => n.type === 'link' });
