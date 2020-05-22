@@ -29,10 +29,6 @@ build/
 local.properties
 *.iml
 
-# Visual Studio Code
-#
-.vscode/
-
 # node.js
 #
 node_modules/
@@ -64,4 +60,6 @@ buck-out/
 
 # Web
 bundle.js
+*.map
 stats.json
+temp
