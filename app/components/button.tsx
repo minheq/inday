@@ -1,27 +1,15 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Animated,
-  ViewStyle,
-  StyleProp,
-  GestureResponderEvent,
-} from 'react-native';
-import { Pressable, PressableChildrenProps } from './pressable';
+import { StyleSheet, Animated, GestureResponderEvent } from 'react-native';
+import { Pressable } from './pressable';
 import { tokens, useTheme } from '../theme';
 
 interface ButtonProps {
   onPress?: (e: GestureResponderEvent) => void;
   children?: React.ReactNode;
-  align?: 'left' | 'center' | 'right';
-  style?:
-    | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
-    | ((
-        props: PressableChildrenProps,
-      ) => Animated.WithAnimatedValue<StyleProp<ViewStyle>>);
 }
 
 export function Button(props: ButtonProps) {
-  const { onPress = () => {}, children, style, align = 'center' } = props;
+  const { onPress = () => {}, children } = props;
   const background = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
@@ -37,7 +25,6 @@ export function Button(props: ButtonProps) {
 
         return [
           styles.base,
-          styles[align],
           {
             backgroundColor: background.interpolate({
               inputRange: [0, 0.5, 1],
@@ -48,7 +35,6 @@ export function Button(props: ButtonProps) {
               ],
             }),
           },
-          style,
         ];
       }}
       onPress={onPress}
@@ -65,14 +51,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: tokens.radius,
     alignItems: 'center',
-  },
-  center: {
-    justifyContent: 'center',
-  },
-  left: {
-    justifyContent: 'flex-start',
-  },
-  right: {
-    justifyContent: 'flex-end',
   },
 });
