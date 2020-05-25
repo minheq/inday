@@ -6,7 +6,7 @@ interface UseBlockHandlersProps {
   onSetBlock: (value: BlockType) => void;
 }
 
-export function getActiveBlock(editor: Editor) {
+export function getBlockType(editor: Editor): BlockType | null {
   const block = Editor.above(editor, {
     match: (n) => Editor.isBlock(editor, n),
   });
@@ -15,7 +15,7 @@ export function getActiveBlock(editor: Editor) {
     return null;
   }
 
-  return block[0].type as string;
+  return block[0].type as BlockType;
 }
 
 export function isBlockActive(editor: Editor, blockType: BlockType) {

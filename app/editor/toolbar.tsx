@@ -7,44 +7,41 @@ import {
   Popover,
   Pressable,
   Text,
-  Spacing,
   Icon,
   IconName,
+  Spacing,
 } from '../components';
 import { useToggle } from '../hooks/use_toggle';
 import { Mark } from './nodes/leaf';
 import { isMarkActive, toggleMark } from './use_mark_handlers';
-import { toggleBlock, getActiveBlock } from './use_block_handlers';
+import { toggleBlock } from './use_block_handlers';
 import { BlockType } from './element';
+import { StyleSheet } from 'react-native';
 
 export function Toolbar() {
-  const editor = useSlate();
   const [isOpen, { toggle }] = useToggle();
-  const activeBlock = getActiveBlock(editor);
 
   return (
-    <Container>
+    <Container borderBottomWidth={1}>
       <Row>
+        <AddButton onPress={() => {}} />
         <Popover
           isOpen={isOpen}
           position="left"
           content={
             <Container width={160} shadow color="content">
-              <BlockButton format="heading-one" icon="activity" />
-              <BlockButton format="heading-two" icon="activity" />
-              <BlockButton format="heading-three" icon="activity" />
-              <BlockButton format="block-quote" icon="quote" />
-              <BlockButton format="code-block" icon="code" />
-              <BlockButton format="numbered-list" icon="list" />
-              <BlockButton format="bulleted-list" icon="list" />
+              <BlockButton format="paragraph" label="Paragraph" />
+              <BlockButton format="heading-one" label="Heading one" />
+              <BlockButton format="heading-two" label="Heading two" />
+              <BlockButton format="heading-three" label="Heading three" />
+              <BlockButton format="block-quote" label="Quote" />
+              <BlockButton format="code-block" label="Code block" />
+              <BlockButton format="numbered-list" label="Numbered list" />
+              <BlockButton format="bulleted-list" label="Bulleted list" />
             </Container>
           }
         >
-          <Pressable onPress={toggle}>
-            <Text>{activeBlock}</Text>
-            <Spacing width={8} />
-            <Icon name="chevron-down" />
-          </Pressable>
+          <BlockPickerButton onPress={toggle} />
         </Popover>
         <MarkButton format="bold" icon="bold" />
         <MarkButton format="italic" icon="italic" />
@@ -68,6 +65,7 @@ function MarkButton(props: MarkButtonProps) {
 
   return (
     <Pressable
+      style={styles.toolbarButton}
       onPress={() => {
         toggleMark(editor, format);
       }}
@@ -79,20 +77,76 @@ function MarkButton(props: MarkButtonProps) {
 
 interface BlockButtonProps {
   format: BlockType;
-  icon: IconName;
+  label: string;
 }
 
 function BlockButton(props: BlockButtonProps) {
-  const { format, icon } = props;
+  const { format, label } = props;
   const editor = useSlate();
 
   return (
     <Pressable
+      style={styles.blockOption}
       onPress={() => {
         toggleBlock(editor, format);
       }}
     >
-      <Icon name={icon} />
+      <Text size="sm">{label}</Text>
     </Pressable>
   );
 }
+
+interface BlockPickerButtonProps {
+  onPress: () => void;
+}
+
+function BlockPickerButton(props: BlockPickerButtonProps) {
+  const { onPress } = props;
+
+  return (
+    <Pressable style={styles.blockPickerButton} onPress={onPress}>
+      <Text size="sm">Type</Text>
+      <Spacing width={4} />
+      <Icon name="chevron-down" />
+    </Pressable>
+  );
+}
+
+interface AddButtonProps {
+  onPress: () => void;
+}
+
+function AddButton(props: AddButtonProps) {
+  const { onPress } = props;
+
+  return (
+    <Pressable style={styles.addButton} onPress={onPress}>
+      <Icon name="plus" />
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  toolbarButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blockOption: {
+    padding: 8,
+  },
+  addButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blockPickerButton: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    height: 32,
+    paddingHorizontal: 8,
+  },
+});

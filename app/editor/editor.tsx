@@ -26,13 +26,14 @@ const HOTKEYS: { [key: string]: Mark | ElementType } = {
 };
 
 // TODO:
+// - Toolbar
 // - Link
-// - Link Toolbar
-// - Formatting Toolbar
 // - Type Commands
 //  - Insert Image
-//  - Insert Video
-//  - Insert Twitter
+//  - Insert Video Embed
+//  - Insert Twitter Embed
+//  - Insert Audio Recording
+//  - More
 // - Hashtags
 // - Mentions
 
