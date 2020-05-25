@@ -23,6 +23,7 @@ export function Dialog(props: DialogProps) {
     isOpen,
     onRequestClose = () => {},
     onShow,
+    onDismiss,
     animationType = 'none',
     style,
     children,
@@ -140,13 +141,16 @@ export function Dialog(props: DialogProps) {
 
   const eventHandlers = usePressability(config);
 
+  console.log(animationType);
+
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       onShow={onShow}
-      animationType="fade"
+      animationType={animationType === 'none' ? 'none' : 'fade'}
       transparent
+      onDismiss={onDismiss}
     >
       <Animated.View
         style={[

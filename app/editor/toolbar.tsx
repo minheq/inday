@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSlate } from 'slate-react';
+import { useSlate, ReactEditor } from 'slate-react';
 
 import {
   Container,
@@ -14,12 +14,17 @@ import {
 import { useToggle } from '../hooks/use_toggle';
 import { Mark } from './nodes/leaf';
 import { isMarkActive, toggleMark } from './use_mark_handlers';
-import { toggleBlock } from './use_block_handlers';
+import { toggleBlock, getBlockType } from './use_block_handlers';
 import { BlockType } from './element';
 import { StyleSheet } from 'react-native';
+import { useTheme } from '../theme';
+import { useLinkEdit } from './link_edit';
 
-export function Toolbar() {
+interface ToolbarProps {}
+
+export function Toolbar(_props: ToolbarProps) {
   const [isOpen, { toggle }] = useToggle();
+  const { onOpenLinkEdit } = useLinkEdit();
 
   return (
     <Container borderBottomWidth={1}>
@@ -29,16 +34,18 @@ export function Toolbar() {
           isOpen={isOpen}
           position="left"
           content={
-            <Container width={160} shadow color="content">
-              <BlockButton format="paragraph" label="Paragraph" />
-              <BlockButton format="heading-one" label="Heading one" />
-              <BlockButton format="heading-two" label="Heading two" />
-              <BlockButton format="heading-three" label="Heading three" />
-              <BlockButton format="block-quote" label="Quote" />
-              <BlockButton format="code-block" label="Code block" />
-              <BlockButton format="numbered-list" label="Numbered list" />
-              <BlockButton format="bulleted-list" label="Bulleted list" />
-            </Container>
+            isOpen && (
+              <Container width={160} shadow color="content">
+                <BlockOption format="paragraph" label="Paragraph" />
+                <BlockOption format="heading-one" label="Heading one" />
+                <BlockOption format="heading-two" label="Heading two" />
+                <BlockOption format="heading-three" label="Heading three" />
+                <BlockOption format="block-quote" label="Quote" />
+                <BlockOption format="code-block" label="Code block" />
+                <BlockOption format="numbered-list" label="Numbered list" />
+                <BlockOption format="bulleted-list" label="Bulleted list" />
+              </Container>
+            )
           }
         >
           <BlockPickerButton onPress={toggle} />
@@ -47,7 +54,7 @@ export function Toolbar() {
         <MarkButton format="italic" icon="italic" />
         <MarkButton format="strikethrough" icon="strikethrough" />
         <MarkButton format="code" icon="code" />
-        {/* <MarkButton format="link" icon="link" /> */}
+        <LinkButton onPress={onOpenLinkEdit} />
       </Row>
     </Container>
   );
@@ -68,30 +75,36 @@ function MarkButton(props: MarkButtonProps) {
       style={styles.toolbarButton}
       onPress={() => {
         toggleMark(editor, format);
+        ReactEditor.focus(editor);
       }}
     >
-      <Icon color={active ? 'default' : 'muted'} name={icon} />
+      <Icon color={active ? 'primary' : 'default'} name={icon} />
     </Pressable>
   );
 }
 
-interface BlockButtonProps {
+interface BlockOptionProps {
   format: BlockType;
   label: string;
 }
 
-function BlockButton(props: BlockButtonProps) {
+function BlockOption(props: BlockOptionProps) {
   const { format, label } = props;
   const editor = useSlate();
+  const current = getBlockType(editor);
+  const isActive = current === format;
 
   return (
     <Pressable
       style={styles.blockOption}
       onPress={() => {
         toggleBlock(editor, format);
+        ReactEditor.focus(editor);
       }}
     >
-      <Text size="sm">{label}</Text>
+      <Text color={isActive ? 'primary' : 'default'} size="sm">
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -118,15 +131,39 @@ interface AddButtonProps {
 
 function AddButton(props: AddButtonProps) {
   const { onPress } = props;
+  const theme = useTheme();
 
   return (
-    <Pressable style={styles.addButton} onPress={onPress}>
-      <Icon name="plus" />
+    <Pressable
+      style={[styles.addButton, { borderColor: theme.border.color.default }]}
+      onPress={onPress}
+    >
+      <Icon name="plus" size="lg" />
+    </Pressable>
+  );
+}
+
+interface LinkButtonProps {
+  onPress: () => void;
+}
+
+function LinkButton(props: LinkButtonProps) {
+  const { onPress } = props;
+
+  return (
+    <Pressable style={styles.linkButton} onPress={onPress}>
+      <Icon name="link" />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  linkButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   toolbarButton: {
     width: 32,
     height: 32,
@@ -141,6 +178,7 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRightWidth: 1,
   },
   blockPickerButton: {
     alignItems: 'center',

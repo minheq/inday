@@ -8,6 +8,7 @@ export interface ModalProps {
   transparent?: boolean;
   animationType?: 'none' | 'slide' | 'fade';
   onShow?: () => void;
+  onDismiss?: () => void;
 }
 
 export function Modal(props: ModalProps) {
@@ -16,6 +17,7 @@ export function Modal(props: ModalProps) {
     isOpen,
     onRequestClose,
     onShow,
+    onDismiss,
     animationType,
     transparent = false,
   } = props;
@@ -27,6 +29,7 @@ export function Modal(props: ModalProps) {
       transparent={transparent}
       onRequestClose={onRequestClose}
       onShow={onShow}
+      onDismiss={onDismiss}
     >
       {children}
     </RNModal>

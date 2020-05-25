@@ -30,22 +30,22 @@ export function withLinks<T extends ReactEditor>(editor: T): T & ReactEditor {
   return editor;
 }
 
-const insertLink = (editor: Editor, url: string) => {
+export function insertLink(editor: ReactEditor, url: string) {
   if (editor.selection) {
     wrapLink(editor, url);
   }
-};
+}
 
-const isLinkActive = (editor: Editor) => {
+const isLinkActive = (editor: ReactEditor) => {
   const [link] = Editor.nodes(editor, { match: (n) => n.type === 'link' });
   return !!link;
 };
 
-const unwrapLink = (editor: Editor) => {
+const unwrapLink = (editor: ReactEditor) => {
   Transforms.unwrapNodes(editor, { match: (n) => n.type === 'link' });
 };
 
-const wrapLink = (editor: Editor, url: string) => {
+const wrapLink = (editor: ReactEditor, url: string) => {
   if (isLinkActive(editor)) {
     unwrapLink(editor);
   }

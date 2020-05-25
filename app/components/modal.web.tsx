@@ -13,6 +13,7 @@ export function Modal(props: ModalProps) {
     children,
     transparent = false,
     onShow,
+    onDismiss,
   } = props;
   const [internalIsOpen, setInternalIsOpen] = React.useState(isOpen);
   const { height } = useWindowDimensions();
@@ -78,6 +79,7 @@ export function Modal(props: ModalProps) {
   return (
     <RModal
       onAfterOpen={onShow}
+      onAfterClose={onDismiss}
       isOpen={internalIsOpen}
       onRequestClose={onRequestClose}
       style={{
