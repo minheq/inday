@@ -1,19 +1,18 @@
 import React from 'react';
 import isHotkey from 'is-hotkey';
-import { Editable, withReact, Slate, ReactEditor } from 'slate-react';
-import { createEditor, Node, Transforms, Range } from 'slate';
+import { Editable, withReact, Slate } from 'slate-react';
+import { createEditor, Node } from 'slate';
 import { withHistory } from 'slate-history';
 import { Leaf, Mark } from './nodes/leaf';
 import { withShortcuts } from './plugins/shortcuts';
 import { withChecklists } from './plugins/checklists';
-import { withLinks, insertLink } from './plugins/links';
+import { withLinks } from './plugins/links';
 import { Element, ElementType } from './element';
 import { isMark, toggleMark } from './use_mark_handlers';
 import { isBlock, toggleBlock } from './use_block_handlers';
 import { isInline } from './use_inline_handlers';
 import { Toolbar } from './toolbar';
-import { Dialog } from '../components';
-import { LinkEdit, LinkValue, LinkEditProvider } from './link_edit';
+import { LinkEditProvider } from './link_edit';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',

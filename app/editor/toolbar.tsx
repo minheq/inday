@@ -26,6 +26,10 @@ export function Toolbar(_props: ToolbarProps) {
   const [isOpen, { toggle }] = useToggle();
   const { onOpenLinkEdit } = useLinkEdit();
 
+  const handleOpenLinkEdit = React.useCallback(() => {
+    onOpenLinkEdit();
+  }, [onOpenLinkEdit]);
+
   return (
     <Container borderBottomWidth={1}>
       <Row>
@@ -54,7 +58,7 @@ export function Toolbar(_props: ToolbarProps) {
         <MarkButton format="italic" icon="italic" />
         <MarkButton format="strikethrough" icon="strikethrough" />
         <MarkButton format="code" icon="code" />
-        <LinkButton onPress={onOpenLinkEdit} />
+        <LinkButton onPress={handleOpenLinkEdit} />
       </Row>
     </Container>
   );

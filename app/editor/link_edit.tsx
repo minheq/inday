@@ -12,12 +12,12 @@ import { ReactEditor, useSlate } from 'slate-react';
 import { insertLink } from './plugins/links';
 
 export interface LinkValue {
-  text: string;
+  display: string;
   url: string;
 }
 
 interface LinkEditContext {
-  onOpenLinkEdit: () => void;
+  onOpenLinkEdit: (value?: LinkValue) => void;
   onCloseLinkEdit: () => void;
   onSubmitLinkEdit: (value: LinkValue) => void;
 }
@@ -53,17 +53,18 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
   const [state, setState] = React.useState<State>(initialState);
   const { isOpen, selection, link } = state;
 
-  const handleOpenLinkEdit = React.useCallback(() => {
-    console.log(editor.selection);
-
-    if (editor.selection) {
-      setState({
-        selection: editor.selection,
-        isOpen: true,
-        link: { text: '', url: '' },
-      });
-    }
-  }, [editor]);
+  const handleOpenLinkEdit = React.useCallback(
+    (value?: LinkValue) => {
+      if (editor.selection) {
+        setState({
+          selection: editor.selection,
+          isOpen: true,
+          link: value ?? { display: '', url: '' },
+        });
+      }
+    },
+    [editor],
+  );
 
   const handleCloseLinkEdit = React.useCallback(() => {
     setState(initialState);
@@ -74,7 +75,7 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
       if (selection) {
         ReactEditor.focus(editor);
         Transforms.select(editor, selection);
-        insertLink(editor, value.url);
+        insertLink(editor, value);
       }
 
       setState(initialState);
@@ -98,7 +99,7 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
     >
       {children}
       <Dialog
-        // animationType="slide"
+        animationType="slide"
         isOpen={isOpen}
         onRequestClose={handleCloseLinkEdit}
         onDismiss={handleDismiss}
@@ -119,30 +120,30 @@ interface LinkEditProps {
 export function LinkEdit(props: LinkEditProps) {
   const { onSubmit, initialValue } = props;
 
-  const [text, setText] = React.useState(initialValue.text);
+  const [display, setDisplay] = React.useState(initialValue.display);
   const [url, setURL] = React.useState(initialValue.url);
 
   const handleSubmit = React.useCallback(() => {
-    onSubmit({ text: text || url, url });
-  }, [text, url, onSubmit]);
+    onSubmit({ display: display || url, url });
+  }, [display, url, onSubmit]);
 
-  let focus: 'text' | 'url' = 'text';
+  let focus: 'display' | 'url' = 'display';
 
-  if (!url && !text) {
-    focus = 'text';
-  } else if (url && text) {
-    focus = 'text';
-  } else if (text && !url) {
+  if (!url && !display) {
+    focus = 'display';
+  } else if (url && display) {
+    focus = 'display';
+  } else if (display && !url) {
     focus = 'url';
   }
 
   return (
     <Container>
-      <Text>Text</Text>
+      <Text>Display</Text>
       <TextInput
-        autoFocus={focus === 'text'}
-        value={text}
-        onValueChange={setText}
+        autoFocus={focus === 'display'}
+        value={display}
+        onValueChange={setDisplay}
       />
       <Spacing height={16} />
       <Text>URL</Text>

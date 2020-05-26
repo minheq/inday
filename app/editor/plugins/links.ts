@@ -1,12 +1,18 @@
-import { Transforms, Editor, Range } from 'slate';
+import { Transforms, Editor, Range, Node } from 'slate';
 import { isUrl } from '../../utils/is_url';
 import { ReactEditor } from 'slate-react';
+import { Link } from '../nodes/link';
+import { LinkValue } from '../link_edit';
 
 export function withLinks<T extends ReactEditor>(editor: T): T & ReactEditor {
-  const { insertData, insertText, isInline } = editor;
+  const { insertData, insertText, isInline, isVoid } = editor;
 
   editor.isInline = (element) => {
     return element.type === 'link' ? true : isInline(element);
+  };
+
+  editor.isVoid = (element) => {
+    return element.type === 'link' ? true : isVoid(element);
   };
 
   editor.insertText = (text) => {
@@ -30,9 +36,9 @@ export function withLinks<T extends ReactEditor>(editor: T): T & ReactEditor {
   return editor;
 }
 
-export function insertLink(editor: ReactEditor, url: string) {
+export function insertLink(editor: ReactEditor, value: LinkValue) {
   if (editor.selection) {
-    wrapLink(editor, url);
+    wrapLink(editor, value);
   }
 }
 
@@ -45,23 +51,36 @@ const unwrapLink = (editor: ReactEditor) => {
   Transforms.unwrapNodes(editor, { match: (n) => n.type === 'link' });
 };
 
-const wrapLink = (editor: ReactEditor, url: string) => {
+const wrapLink = (editor: ReactEditor, value: LinkValue | string) => {
+  const { selection } = editor;
+
+  if (!selection) {
+    return;
+  }
   if (isLinkActive(editor)) {
     unwrapLink(editor);
   }
 
-  const { selection } = editor;
-  const isCollapsed = selection && Range.isCollapsed(selection);
-  const link = {
+  const isCollapsed = Range.isCollapsed(selection);
+
+  const link: Link = {
     type: 'link',
-    url,
-    children: isCollapsed ? [{ text: url }] : [],
+    url: typeof value === 'string' ? value : value.url,
+    display: typeof value === 'string' ? value : value.display,
+    children: [{ text: '' }],
   };
 
   if (isCollapsed) {
     Transforms.insertNodes(editor, link);
   } else {
     Transforms.wrapNodes(editor, link, { split: true });
-    Transforms.collapse(editor, { edge: 'end' });
+  }
+
+  if (editor.selection) {
+    const after = Editor.after(editor, editor.selection);
+
+    if (after) {
+      Transforms.select(editor, after);
+    }
   }
 };

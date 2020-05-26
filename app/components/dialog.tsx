@@ -141,8 +141,6 @@ export function Dialog(props: DialogProps) {
 
   const eventHandlers = usePressability(config);
 
-  console.log(animationType);
-
   return (
     <Modal
       isOpen={isOpen}
