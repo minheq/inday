@@ -53,6 +53,13 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
   const [state, setState] = React.useState<State>(initialState);
   const { isOpen, selection, link } = state;
 
+  const handleReturnFocus = React.useCallback(() => {
+    if (selection) {
+      ReactEditor.focus(editor);
+      Transforms.select(editor, selection);
+    }
+  }, [editor, selection]);
+
   const handleOpenLinkEdit = React.useCallback(
     (value?: LinkValue) => {
       if (editor.selection) {
@@ -68,19 +75,16 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
 
   const handleCloseLinkEdit = React.useCallback(() => {
     setState(initialState);
-  }, []);
+    handleReturnFocus();
+  }, [handleReturnFocus]);
 
   const handleSubmitLinkEdit = React.useCallback(
     (value: LinkValue) => {
-      if (selection) {
-        ReactEditor.focus(editor);
-        Transforms.select(editor, selection);
-        insertLink(editor, value);
-      }
-
+      handleReturnFocus();
+      insertLink(editor, value);
       setState(initialState);
     },
-    [editor, selection],
+    [editor, handleReturnFocus],
   );
 
   // We need to focus after everything finished re-rendering

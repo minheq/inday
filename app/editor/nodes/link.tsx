@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Element, Transforms, Node, Editor } from 'slate';
+import { Element, Transforms, Range, Path } from 'slate';
 import { ElementProps } from './types';
 import { useSelected, useFocused, useSlate, ReactEditor } from 'slate-react';
 import { useToggle } from '../../hooks/use_toggle';
@@ -25,12 +25,28 @@ export function Link(props: RenderLinkProps) {
   const { onOpenLinkEdit } = useLinkEdit();
   const [isOpen, { toggle, setFalse }] = useToggle();
 
-  const handleClick = React.useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const handleMouseDown = React.useCallback(
+    (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
       event.preventDefault();
       toggle();
+      ReactEditor.focus(editor);
     },
-    [toggle],
+    [toggle, editor],
+  );
+
+  // Prevents closing the popover
+  const handleMouseDownPopover = React.useCallback(
+    (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
+      event.preventDefault();
+    },
+    [],
+  );
+
+  const handleMouseUp = React.useCallback(
+    (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
+      event.preventDefault();
+    },
+    [],
   );
 
   const handleOpenLinkEdit = React.useCallback(() => {
@@ -46,18 +62,27 @@ export function Link(props: RenderLinkProps) {
     [editor, setFalse],
   );
 
+  React.useEffect(() => {
+    if (!selected) {
+      setFalse();
+    }
+  }, [selected, setFalse]);
+
   return (
     <span {...attributes} contentEditable={false} style={styles('root')}>
-      <a
+      <span
         style={styles('anchor', selected && focused && 'selected')}
-        href={url}
-        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       >
         {display}
-      </a>
+      </span>
       {isOpen && (
-        <span style={styles('popover')}>
+        <span onMouseDown={handleMouseDownPopover} style={styles('popover')}>
           <span>{url}</span>
+          <a href={url} target="_blank">
+            Open link
+          </a>
           <span onMouseDown={handleOpenLinkEdit}>
             <span>Edit</span>
           </span>
@@ -77,6 +102,8 @@ const styles = css.create({
   },
   anchor: {
     textDecoration: 'none',
+    color: 'blue',
+    cursor: 'pointer',
   },
   selected: {
     backgroundColor: 'grey',

@@ -60,12 +60,6 @@ export function removeLink(editor: ReactEditor) {
 
   Transforms.delete(editor);
   Transforms.insertText(editor, link.display);
-
-  // const selection = editor.selection;
-  setTimeout(() => {
-    // ReactEditor.focus(editor);
-    console.log(editor);
-  }, 10);
 }
 
 const wrapLink = (editor: ReactEditor, value: LinkValue | string) => {
