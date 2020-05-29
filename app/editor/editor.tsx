@@ -1,94 +1,65 @@
 import React from 'react';
-import isHotkey from 'is-hotkey';
-import { Editable, withReact, Slate } from 'slate-react';
-import { createEditor, Node } from 'slate';
-import { withHistory } from 'slate-history';
-import { Leaf, Mark } from './nodes/leaf';
-import { withShortcuts } from './plugins/shortcuts';
-import { withChecklists } from './plugins/checklists';
-import { withLinks } from './plugins/links';
-import { Element, ElementType } from './element';
-import { isMark, toggleMark } from './use_mark_handlers';
-import { isBlock, toggleBlock } from './use_block_handlers';
-import { isInline } from './use_inline_handlers';
+import { Node } from 'slate';
+import { Editable, EditableState, EditableInstance } from './editable/editable';
 import { Toolbar } from './toolbar';
-import { LinkEditProvider } from './link_edit';
+import { BlockType } from './editable/nodes/element';
+import { Mark } from './editable/nodes/leaf';
 
-const HOTKEYS: { [key: string]: Mark | ElementType } = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+shift+c': 'code',
-  'mod+shift+x': 'strikethrough',
-  'mod+shift+7': 'numbered-list',
-  'mod+shift+8': 'bulleted-list',
-  'mod+shift+9': 'block-quote',
-  'mod+shift+alt+c': 'code-block',
-  'mod+k': 'link',
-};
-
-// TODO:
-// - Toolbar
-// - Link
-// - Type Commands
-//  - Insert Image
-//  - Insert Video Embed
-//  - Insert Twitter Embed
-//  - Insert Audio Recording
-//  - More
-// - Hashtags
-// - Mentions
-
-interface MyEditorProps {
+interface EditorProps {
   initialValue?: Node[];
 }
 
-export function MyEditor(props: MyEditorProps) {
+const initialState: EditableState = {
+  selection: null,
+  type: 'paragraph',
+  marks: {},
+};
+
+const initialInstance: EditableInstance = {
+  toggleBlock: () => {},
+  toggleMark: () => {},
+  focus: () => {},
+};
+
+export function Editor(props: EditorProps) {
   const { initialValue = [] } = props;
-  const [value, setValue] = React.useState<Node[]>(initialValue);
-  const renderElement = React.useCallback((p) => <Element {...p} />, []);
-  const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
-
-  const editor = React.useMemo(
-    () =>
-      withLinks(
-        withChecklists(withShortcuts(withReact(withHistory(createEditor())))),
-      ),
-    [],
-  );
-
-  const handleKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      for (const hotkey in HOTKEYS) {
-        // @ts-ignore
-        if (isHotkey(hotkey, event)) {
-          event.preventDefault();
-          const format = HOTKEYS[hotkey];
-
-          if (isMark(format)) {
-            toggleMark(editor, format);
-          } else if (isBlock(format)) {
-            toggleBlock(editor, format);
-          } else if (isInline(format)) {
-            if (format === 'link') {
-              // TODO
-            }
-          }
-        }
-      }
-    },
-    [editor],
-  );
+  const editable = React.useRef<EditableInstance>(initialInstance);
+  const [state, setState] = React.useState<EditableState>(initialState);
+  console.log(state);
 
   return (
-    <Slate editor={editor} value={value} onChange={setValue}>
-      <LinkEditProvider>
-        <Toolbar />
-        <Editable
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          onKeyDown={handleKeyDown}
-        />
-      </LinkEditProvider>
-    </Slate>
+    <EditorContext.Provider
+      value={{
+        state,
+        toggleBlock: editable.current.toggleBlock,
+        toggleMark: editable.current.toggleMark,
+        focus: editable.current.focus,
+      }}
+    >
+      <Toolbar />
+      <Editable
+        ref={editable}
+        initialValue={initialValue}
+        onChange={setState}
+      />
+    </EditorContext.Provider>
   );
+}
+
+interface EditorContext {
+  state: EditableState;
+  toggleBlock: (format: BlockType) => void;
+  toggleMark: (format: Mark) => void;
+  focus: () => void;
+}
+
+const EditorContext = React.createContext<EditorContext>({
+  state: initialState,
+  toggleBlock: () => {},
+  toggleMark: () => {},
+  focus: () => {},
+});
+
+export function useEditor() {
+  return React.useContext(EditorContext);
 }

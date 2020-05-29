@@ -1,6 +1,6 @@
 import { Editor, Transforms, Range, Point } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { ElementType } from '../element';
+import { ElementType } from '../nodes/element';
 import { Mark } from '../nodes/leaf';
 
 const BLOCK_SHORTCUTS: {

@@ -1,17 +1,17 @@
 import React from 'react';
-import { HeadingOne } from './nodes/heading_one';
-import { HeadingTwo } from './nodes/heading_two';
-import { HeadingThree } from './nodes/heading_three';
-import { Paragraph } from './nodes/paragraph';
-import { Image } from './nodes/image';
-import { Link } from './nodes/link';
-import { Blockquote } from './nodes/block_quote';
-import { BulletedList } from './nodes/bulleted_list';
-import { NumberedList } from './nodes/numbered_list';
-import { ListItem } from './nodes/list_item';
-import { CheckListItem } from './nodes/check_list_item';
-import { Divider } from './nodes/divider';
-import { CodeBlock } from './nodes/code_block';
+import { HeadingOne } from './heading_one';
+import { HeadingTwo } from './heading_two';
+import { HeadingThree } from './heading_three';
+import { Paragraph } from './paragraph';
+import { Image } from './image';
+import { Link } from './link';
+import { Blockquote } from './block_quote';
+import { BulletedList } from './bulleted_list';
+import { NumberedList } from './numbered_list';
+import { ListItem } from './list_item';
+import { CheckListItem } from './check_list_item';
+import { Divider } from './divider';
+import { CodeBlock } from './code_block';
 
 export type Block =
   | Paragraph
@@ -26,6 +26,7 @@ export type Block =
   | HeadingTwo
   | HeadingThree
   | Image;
+
 export type BlockType = Block['type'];
 
 export type Inline = Link;

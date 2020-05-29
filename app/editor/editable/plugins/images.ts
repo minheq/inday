@@ -1,6 +1,6 @@
 import { Transforms, Editor } from 'slate';
-import { isUrl } from '../../utils/is_url';
-import { imageExtensions } from '../../utils/image_extensions';
+import { isUrl } from '../../../utils/is_url';
+import { imageExtensions } from '../../../utils/image_extensions';
 import { ReactEditor } from 'slate-react';
 
 export function withImages<T extends ReactEditor>(editor: T): T & Editor {

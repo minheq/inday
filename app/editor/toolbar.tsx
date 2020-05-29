@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSlate, ReactEditor } from 'slate-react';
 
 import {
   Container,
@@ -12,23 +11,14 @@ import {
   Spacing,
 } from '../components';
 import { useToggle } from '../hooks/use_toggle';
-import { Mark } from './nodes/leaf';
-import { isMarkActive, toggleMark } from './use_mark_handlers';
-import { toggleBlock, getBlockType } from './use_block_handlers';
-import { BlockType } from './element';
+import { Mark } from './editable/nodes/leaf';
+import { BlockType } from './editable/nodes/element';
 import { StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
-import { useLinkEdit } from './link_edit';
+import { useEditor } from './editor';
 
-interface ToolbarProps {}
-
-export function Toolbar(_props: ToolbarProps) {
+export function Toolbar() {
   const [isOpen, { toggle }] = useToggle();
-  const { onOpenLinkEdit } = useLinkEdit();
-
-  const handleOpenLinkEdit = React.useCallback(() => {
-    onOpenLinkEdit();
-  }, [onOpenLinkEdit]);
 
   return (
     <Container borderBottomWidth={1}>
@@ -58,7 +48,6 @@ export function Toolbar(_props: ToolbarProps) {
         <MarkButton format="italic" icon="italic" />
         <MarkButton format="strikethrough" icon="strikethrough" />
         <MarkButton format="code" icon="code" />
-        <LinkButton onPress={handleOpenLinkEdit} />
       </Row>
     </Container>
   );
@@ -71,15 +60,14 @@ interface MarkButtonProps {
 
 function MarkButton(props: MarkButtonProps) {
   const { format, icon } = props;
-  const editor = useSlate();
-  const active = isMarkActive(editor, format);
+  const { state, toggleMark } = useEditor();
+  const active = state.marks && !!state.marks[format];
 
   return (
     <Pressable
       style={styles.toolbarButton}
       onPress={() => {
-        toggleMark(editor, format);
-        ReactEditor.focus(editor);
+        toggleMark(format);
       }}
     >
       <Icon color={active ? 'primary' : 'default'} name={icon} />
@@ -94,19 +82,17 @@ interface BlockOptionProps {
 
 function BlockOption(props: BlockOptionProps) {
   const { format, label } = props;
-  const editor = useSlate();
-  const current = getBlockType(editor);
-  const isActive = current === format;
+  const { state, toggleBlock } = useEditor();
+  const active = state.type === format;
 
   return (
     <Pressable
       style={styles.blockOption}
       onPress={() => {
-        toggleBlock(editor, format);
-        ReactEditor.focus(editor);
+        toggleBlock(format);
       }}
     >
-      <Text color={isActive ? 'primary' : 'default'} size="sm">
+      <Text color={active ? 'primary' : 'default'} size="sm">
         {label}
       </Text>
     </Pressable>
@@ -147,19 +133,67 @@ function AddButton(props: AddButtonProps) {
   );
 }
 
-interface LinkButtonProps {
-  onPress: () => void;
-}
+// interface LinkButtonProps {
+//   onPress: () => void;
+// }
 
-function LinkButton(props: LinkButtonProps) {
-  const { onPress } = props;
+// function LinkButton(props: LinkButtonProps) {
+//   const { onPress } = props;
 
-  return (
-    <Pressable style={styles.linkButton} onPress={onPress}>
-      <Icon name="link" />
-    </Pressable>
-  );
-}
+//   return (
+//     <Pressable style={styles.linkButton} onPress={onPress}>
+//       <Icon name="link" />
+//     </Pressable>
+//   );
+// }
+
+// interface LinkEditProps {
+//   initialValue: LinkValue;
+//   onSubmit: (link: LinkValue) => void;
+// }
+
+// function LinkEdit(props: LinkEditProps) {
+//   const { onSubmit, initialValue } = props;
+
+//   const [display, setDisplay] = React.useState(initialValue.display);
+//   const [url, setURL] = React.useState(initialValue.url);
+
+//   const handleSubmit = React.useCallback(() => {
+//     onSubmit({ display: display || url, url });
+//   }, [display, url, onSubmit]);
+
+//   let focus: 'display' | 'url' = 'display';
+
+//   if (!url && !display) {
+//     focus = 'display';
+//   } else if (url && display) {
+//     focus = 'display';
+//   } else if (display && !url) {
+//     focus = 'url';
+//   }
+
+//   return (
+//     <Container>
+//       <Text>Display</Text>
+//       <TextInput
+//         autoFocus={focus === 'display'}
+//         value={display}
+//         onValueChange={setDisplay}
+//       />
+//       <Spacing height={16} />
+//       <Text>URL</Text>
+//       <TextInput
+//         autoFocus={focus === 'url'}
+//         value={url}
+//         onValueChange={setURL}
+//       />
+//       <Spacing height={24} />
+//       <Button onPress={handleSubmit}>
+//         <Text>Submit</Text>
+//       </Button>
+//     </Container>
+//   );
+// }
 
 const styles = StyleSheet.create({
   linkButton: {

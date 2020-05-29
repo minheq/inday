@@ -1,12 +1,12 @@
 import React from 'react';
-import { MyEditor } from './editor';
+import { Editor } from './editor';
 import { ThemeProvider } from './theme';
-import { Element } from './editor/element';
+import { Element } from './editor/editable/nodes/element';
 
 export function App() {
   return (
     <ThemeProvider>
-      <MyEditor initialValue={initialValue} />
+      <Editor initialValue={initialValue} />
     </ThemeProvider>
   );
 }
