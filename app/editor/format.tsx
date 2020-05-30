@@ -41,9 +41,8 @@ export function Toolbar() {
               </Container>
             )
           }
-        >
-          <BlockPickerButton onPress={toggle} />
-        </Popover>
+        />
+        <BlockPickerButton onPress={toggle} />
         <MarkButton format="bold" icon="bold" />
         <MarkButton format="italic" icon="italic" />
         <MarkButton format="strikethrough" icon="strikethrough" />
@@ -60,8 +59,8 @@ interface MarkButtonProps {
 
 function MarkButton(props: MarkButtonProps) {
   const { format, icon } = props;
-  const { state, toggleMark } = useEditor();
-  const active = state.marks && !!state.marks[format];
+  const { marks, toggleMark } = useEditor();
+  const active = marks && !!marks[format];
 
   return (
     <Pressable
@@ -82,8 +81,8 @@ interface BlockOptionProps {
 
 function BlockOption(props: BlockOptionProps) {
   const { format, label } = props;
-  const { state, toggleBlock } = useEditor();
-  const active = state.type === format;
+  const { type, toggleBlock } = useEditor();
+  const active = type === format;
 
   return (
     <Pressable
@@ -132,68 +131,6 @@ function AddButton(props: AddButtonProps) {
     </Pressable>
   );
 }
-
-// interface LinkButtonProps {
-//   onPress: () => void;
-// }
-
-// function LinkButton(props: LinkButtonProps) {
-//   const { onPress } = props;
-
-//   return (
-//     <Pressable style={styles.linkButton} onPress={onPress}>
-//       <Icon name="link" />
-//     </Pressable>
-//   );
-// }
-
-// interface LinkEditProps {
-//   initialValue: LinkValue;
-//   onSubmit: (link: LinkValue) => void;
-// }
-
-// function LinkEdit(props: LinkEditProps) {
-//   const { onSubmit, initialValue } = props;
-
-//   const [display, setDisplay] = React.useState(initialValue.display);
-//   const [url, setURL] = React.useState(initialValue.url);
-
-//   const handleSubmit = React.useCallback(() => {
-//     onSubmit({ display: display || url, url });
-//   }, [display, url, onSubmit]);
-
-//   let focus: 'display' | 'url' = 'display';
-
-//   if (!url && !display) {
-//     focus = 'display';
-//   } else if (url && display) {
-//     focus = 'display';
-//   } else if (display && !url) {
-//     focus = 'url';
-//   }
-
-//   return (
-//     <Container>
-//       <Text>Display</Text>
-//       <TextInput
-//         autoFocus={focus === 'display'}
-//         value={display}
-//         onValueChange={setDisplay}
-//       />
-//       <Spacing height={16} />
-//       <Text>URL</Text>
-//       <TextInput
-//         autoFocus={focus === 'url'}
-//         value={url}
-//         onValueChange={setURL}
-//       />
-//       <Spacing height={24} />
-//       <Button onPress={handleSubmit}>
-//         <Text>Submit</Text>
-//       </Button>
-//     </Container>
-//   );
-// }
 
 const styles = StyleSheet.create({
   linkButton: {

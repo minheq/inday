@@ -22,8 +22,7 @@ import {
   toggleMark,
   getBlockType,
 } from './plugins/handlers';
-import { EditableProvider } from './provider';
-import { LinkValue } from './nodes/link';
+import { LinkValue, Link } from './nodes/link';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',
@@ -37,10 +36,21 @@ const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+k': 'link',
 };
 
+interface Rect {
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+}
+
+interface Selection extends Range, Rect {
+  link: LinkValue | null;
+}
+
 export interface EditableState {
   marks: { [key in Mark]?: true } | null;
   type: BlockType | null;
-  selection: Range | null;
+  selection: Selection | null;
 }
 
 export interface EditableInstance {
@@ -51,16 +61,11 @@ export interface EditableInstance {
 interface EditableProps {
   initialValue?: Node[];
   onChange?: (state: EditableState) => void;
-  onSelectLink?: (value: LinkValue) => void;
 }
 
 export const Editable = React.forwardRef<EditableInstance, EditableProps>(
   (props, ref) => {
-    const {
-      initialValue = [],
-      onChange = () => {},
-      onSelectLink = () => {},
-    } = props;
+    const { initialValue = [], onChange = () => {} } = props;
     const [value, setValue] = React.useState<Node[]>(initialValue);
     const renderElement = React.useCallback((p) => <Element {...p} />, []);
     const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
@@ -114,25 +119,82 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
     const handleChange = React.useCallback(
       (newValue: Node[]) => {
         setValue(newValue);
+        const marks = Editor.marks(editor);
+        const type = getBlockType(editor);
+        let selection: Selection | null = null;
 
-        onChange({
-          marks: Editor.marks(editor),
-          selection: editor.selection,
-          type: getBlockType(editor),
-        });
+        if (editor.selection) {
+          let rect = {
+            width: 0,
+            left: 0,
+            top: 0,
+            height: 0,
+          };
+          let link: LinkValue | null = null;
+
+          if (
+            !Range.isCollapsed(editor.selection) &&
+            Editor.string(editor, editor.selection) !== ''
+          ) {
+            const domSelection = window.getSelection();
+            const domRange = domSelection!.getRangeAt(0);
+            const domRect = domRange.getBoundingClientRect();
+
+            rect = {
+              width: domRect.width,
+              left: domRect.left,
+              top: domRect.top,
+              height: domRect.height,
+            };
+          }
+
+          if (Range.isCollapsed(editor.selection)) {
+            const [linkEntry] = Editor.nodes(editor, {
+              match: (n) => n.type === 'link',
+            });
+
+            if (linkEntry) {
+              const linkNode = linkEntry[0] as Link;
+              const domNode = ReactEditor.toDOMNode(editor, linkNode);
+              const domRect = domNode.getBoundingClientRect();
+
+              link = {
+                url: linkNode.url,
+                display: linkNode.display,
+              };
+
+              rect = {
+                width: domRect.width,
+                left: domRect.left,
+                top: domRect.top,
+                height: domRect.height,
+              };
+            }
+          }
+
+          selection = {
+            anchor: editor.selection.anchor,
+            focus: editor.selection.focus,
+            width: rect.width,
+            left: rect.left,
+            top: rect.top,
+            height: rect.height,
+            link,
+          };
+        }
+
+        onChange({ marks, selection, type });
       },
       [editor, onChange],
     );
 
     return (
       <Slate editor={editor} value={value} onChange={handleChange}>
-        <EditableProvider onSelectLink={onSelectLink}>
-          <SlateEditable
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            onKeyDown={handleKeyDown}
-          />
-        </EditableProvider>
+        <SlateEditable
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          onKeyDown={handleKeyDown}
+        />
       </Slate>
     );
   },

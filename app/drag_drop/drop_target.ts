@@ -1,4 +1,4 @@
-import { Measurements } from './measurements';
+import { Measurements } from '../utils/measurements';
 import { Draggable, DragState } from './draggable';
 
 export interface DropTargetProps {

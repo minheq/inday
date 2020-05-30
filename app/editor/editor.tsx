@@ -1,7 +1,7 @@
 import React from 'react';
 import { Node } from 'slate';
 import { Editable, EditableState, EditableInstance } from './editable/editable';
-import { Toolbar } from './toolbar';
+import { MainToolbar } from './main_toolbar';
 import { BlockType } from './editable/nodes/element';
 import { Mark } from './editable/nodes/leaf';
 
@@ -25,33 +25,54 @@ export function Editor(props: EditorProps) {
   const editableRef = React.useRef<EditableInstance>(initialInstance);
   const [state, setState] = React.useState<EditableState>(initialState);
 
+  const handleToggleBlock = React.useCallback(
+    (format: BlockType) => {
+      editableRef.current.toggleBlock(format);
+    },
+    [editableRef],
+  );
+
+  const handleToggleMark = React.useCallback(
+    (format: Mark) => {
+      editableRef.current.toggleMark(format);
+    },
+    [editableRef],
+  );
+
+  const handleChange = React.useCallback((value: EditableState) => {
+    console.log(value);
+
+    setState(value);
+  }, []);
+
+  console.log(state);
+
   return (
     <EditorContext.Provider
       value={{
-        state,
-        toggleBlock: editableRef.current.toggleBlock,
-        toggleMark: editableRef.current.toggleMark,
+        selection: state.selection,
+        marks: state.marks,
+        type: state.type,
+        toggleBlock: handleToggleBlock,
+        toggleMark: handleToggleMark,
       }}
     >
-      <Toolbar />
+      <MainToolbar />
       <Editable
         ref={editableRef}
         initialValue={initialValue}
-        onChange={setState}
-        onSelectLink={console.log}
+        onChange={handleChange}
       />
     </EditorContext.Provider>
   );
 }
 
-interface EditorContext {
-  state: EditableState;
-  toggleBlock: (format: BlockType) => void;
-  toggleMark: (format: Mark) => void;
-}
+interface EditorContext extends EditableState, EditableInstance {}
 
 const EditorContext = React.createContext<EditorContext>({
-  state: initialState,
+  selection: null,
+  type: 'paragraph',
+  marks: {},
   toggleBlock: () => {},
   toggleMark: () => {},
 });

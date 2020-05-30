@@ -14,7 +14,7 @@ import {
 } from '../components/gesture_detector';
 import { useDraggable } from '../drag_drop/use_draggable';
 import { DragState } from '../drag_drop/draggable';
-import { measure } from '../drag_drop/measurements';
+import { measure } from '../utils/measurements';
 import { Card } from './types';
 
 export interface CardListItem extends Card {
