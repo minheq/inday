@@ -4,6 +4,7 @@ import { useSelected, useFocused, useSlate, ReactEditor } from 'slate-react';
 
 import { ElementProps } from './types';
 import { css } from '../../../utils/css';
+import { useEditable } from '../provider';
 
 export interface LinkValue {
   display: string;
@@ -19,24 +20,13 @@ export interface RenderLinkProps extends ElementProps<Link> {}
 export function Link(props: RenderLinkProps) {
   const { attributes, children, element } = props;
   const { display } = element;
-  const editor = useSlate();
+  const { onSelectLink } = useEditable();
   const selected = useSelected();
   const focused = useFocused();
 
-  const handleMouseDown = React.useCallback(
-    (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
-      event.preventDefault();
-      ReactEditor.focus(editor);
-    },
-    [editor],
-  );
-
-  const handleMouseUp = React.useCallback(
-    (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
-      event.preventDefault();
-    },
-    [],
-  );
+  const handleMouseDown = React.useCallback(() => {
+    onSelectLink({ url: element.url, display: element.display });
+  }, [onSelectLink, element]);
 
   return (
     <span
@@ -44,7 +34,6 @@ export function Link(props: RenderLinkProps) {
       contentEditable={false}
       style={styles('anchor', selected && focused && 'selected')}
       onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
     >
       {display}
       {children}
@@ -53,11 +42,7 @@ export function Link(props: RenderLinkProps) {
 }
 
 const styles = css.create({
-  root: {
-    position: 'relative',
-  },
   anchor: {
-    textDecoration: 'none',
     color: 'blue',
     cursor: 'pointer',
   },

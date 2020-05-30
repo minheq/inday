@@ -18,29 +18,27 @@ const initialState: EditableState = {
 const initialInstance: EditableInstance = {
   toggleBlock: () => {},
   toggleMark: () => {},
-  focus: () => {},
 };
 
 export function Editor(props: EditorProps) {
   const { initialValue = [] } = props;
-  const editable = React.useRef<EditableInstance>(initialInstance);
+  const editableRef = React.useRef<EditableInstance>(initialInstance);
   const [state, setState] = React.useState<EditableState>(initialState);
-  console.log(state);
 
   return (
     <EditorContext.Provider
       value={{
         state,
-        toggleBlock: editable.current.toggleBlock,
-        toggleMark: editable.current.toggleMark,
-        focus: editable.current.focus,
+        toggleBlock: editableRef.current.toggleBlock,
+        toggleMark: editableRef.current.toggleMark,
       }}
     >
       <Toolbar />
       <Editable
-        ref={editable}
+        ref={editableRef}
         initialValue={initialValue}
         onChange={setState}
+        onSelectLink={console.log}
       />
     </EditorContext.Provider>
   );
@@ -50,14 +48,12 @@ interface EditorContext {
   state: EditableState;
   toggleBlock: (format: BlockType) => void;
   toggleMark: (format: Mark) => void;
-  focus: () => void;
 }
 
 const EditorContext = React.createContext<EditorContext>({
   state: initialState,
   toggleBlock: () => {},
   toggleMark: () => {},
-  focus: () => {},
 });
 
 export function useEditor() {

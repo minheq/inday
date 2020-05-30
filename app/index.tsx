@@ -94,7 +94,8 @@ const initialValue: Element[] = [
       {
         type: 'link',
         url: 'https://en.wikipedia.org/wiki/Hypertext',
-        children: [{ text: 'hyperlinks' }],
+        display: 'hyperlinks',
+        children: [{ text: '' }],
       },
       {
         text: '!',

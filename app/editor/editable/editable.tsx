@@ -22,6 +22,8 @@ import {
   toggleMark,
   getBlockType,
 } from './plugins/handlers';
+import { EditableProvider } from './provider';
+import { LinkValue } from './nodes/link';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',
@@ -44,17 +46,21 @@ export interface EditableState {
 export interface EditableInstance {
   toggleBlock: (format: BlockType) => void;
   toggleMark: (format: Mark) => void;
-  focus: () => void;
 }
 
 interface EditableProps {
   initialValue?: Node[];
   onChange?: (state: EditableState) => void;
+  onSelectLink?: (value: LinkValue) => void;
 }
 
 export const Editable = React.forwardRef<EditableInstance, EditableProps>(
   (props, ref) => {
-    const { initialValue = [], onChange = () => {} } = props;
+    const {
+      initialValue = [],
+      onChange = () => {},
+      onSelectLink = () => {},
+    } = props;
     const [value, setValue] = React.useState<Node[]>(initialValue);
     const renderElement = React.useCallback((p) => <Element {...p} />, []);
     const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
@@ -77,9 +83,6 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
         toggleMark: (format) => {
           ReactEditor.focus(editor);
           toggleMark(editor, format);
-        },
-        focus: () => {
-          ReactEditor.focus(editor);
         },
       }),
       [editor],
@@ -123,11 +126,13 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
 
     return (
       <Slate editor={editor} value={value} onChange={handleChange}>
-        <SlateEditable
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          onKeyDown={handleKeyDown}
-        />
+        <EditableProvider onSelectLink={onSelectLink}>
+          <SlateEditable
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            onKeyDown={handleKeyDown}
+          />
+        </EditableProvider>
       </Slate>
     );
   },
