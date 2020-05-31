@@ -46,16 +46,16 @@ export function Editor(props: EditorProps) {
   }, []);
 
   return (
-    <EditorContext.Provider
-      value={{
-        selection: state.selection,
-        marks: state.marks,
-        type: state.type,
-        toggleBlock: handleToggleBlock,
-        toggleMark: handleToggleMark,
-      }}
-    >
-      <View>
+    <View>
+      <EditorContext.Provider
+        value={{
+          selection: state.selection,
+          marks: state.marks,
+          type: state.type,
+          toggleBlock: handleToggleBlock,
+          toggleMark: handleToggleMark,
+        }}
+      >
         <MainToolbar />
         <Editable
           ref={editableRef}
@@ -63,8 +63,8 @@ export function Editor(props: EditorProps) {
           onChange={handleChange}
         />
         <Hoverable />
-      </View>
-    </EditorContext.Provider>
+      </EditorContext.Provider>
+    </View>
   );
 }
 

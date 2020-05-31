@@ -8,7 +8,6 @@ import { LinkValue } from './editable/nodes/link';
 import { LinkEdit } from './link_edit';
 import { SelectionToolbar } from './selection_toolbar';
 import { usePrevious } from '../hooks/use_previous';
-import { Range } from 'slate';
 
 export interface HoverableToolbarData {
   type: 'toolbar';
@@ -72,11 +71,7 @@ export function Hoverable() {
   const show = React.useCallback(
     async (hoverable: Hoverable) => {
       // If there was no change in selection, early return
-      if (
-        selection &&
-        prevSelection &&
-        Range.equals(selection, prevSelection)
-      ) {
+      if (state.isVisible) {
         return;
       }
 
@@ -99,7 +94,7 @@ export function Hoverable() {
         duration: 100,
       }).start();
     },
-    [getPosition, selection, prevSelection],
+    [getPosition, state.isVisible],
   );
 
   const hide = React.useCallback(() => {
@@ -120,7 +115,6 @@ export function Hoverable() {
     if (!ref.current || !selection) {
       return;
     }
-    // console.log(selection);
 
     if (
       selection.height === 0 ||
@@ -130,6 +124,16 @@ export function Hoverable() {
     ) {
       hide();
       return;
+    }
+
+    // If the selection has changed, hide previous hoverable first
+    if (
+      prevSelection &&
+      selection &&
+      prevSelection.link === null &&
+      selection.link
+    ) {
+      hide();
     }
 
     if (selection.link) {
@@ -142,7 +146,7 @@ export function Hoverable() {
         type: 'toolbar',
       });
     }
-  }, [selection, show, hide]);
+  }, [selection, prevSelection, show, hide, state]);
 
   return (
     <Animated.View
