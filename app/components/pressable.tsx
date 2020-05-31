@@ -16,6 +16,7 @@ export interface PressableChildrenProps {
 
 interface PressableProps extends PressabilityConfig {
   children?: React.ReactNode;
+  disabled?: boolean;
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
     | ((
@@ -28,6 +29,7 @@ export function Pressable(props: PressableProps) {
     children,
     onPress = () => {},
     style,
+    disabled,
     delayHoverIn,
     delayHoverOut,
     delayLongPress,
@@ -107,6 +109,7 @@ export function Pressable(props: PressableProps) {
       style={[
         styles.base,
         webStyle.outline,
+        disabled && styles.disabled,
         typeof style === 'function'
           ? style({
               pressed: isPressed,
@@ -121,7 +124,7 @@ export function Pressable(props: PressableProps) {
       onResponderTerminate={onResponderTerminate}
       onResponderTerminationRequest={onResponderTerminationRequest}
       onStartShouldSetResponder={onStartShouldSetResponder}
-      accessible
+      accessible={!disabled}
       // @ts-ignore web event handlers
       onBlur={onBlur}
       onFocus={onFocus}
@@ -135,12 +138,18 @@ export function Pressable(props: PressableProps) {
 }
 
 const styles = StyleSheet.create({
+  // @ts-ignore
   base: {
     ...(Platform.OS === 'web' && {
-      // @ts-ignore
       touchAction: 'manipulation',
       cursor: 'pointer',
       userSelect: 'none',
+    }),
+  },
+  // @ts-ignore
+  disabled: {
+    ...(Platform.OS === 'web' && {
+      cursor: 'not-allowed',
     }),
   },
 });

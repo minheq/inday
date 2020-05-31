@@ -20,13 +20,12 @@ export function Link(props: RenderLinkProps) {
   const { attributes, children, element } = props;
   const { display } = element;
   const selected = useSelected();
-  const focused = useFocused();
 
   return (
     <span
       {...attributes}
       contentEditable={false}
-      style={styles('anchor', selected && focused && 'selected')}
+      style={styles('anchor', selected && 'selected')}
     >
       {display}
       {children}

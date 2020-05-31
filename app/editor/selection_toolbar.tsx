@@ -1,19 +1,18 @@
 import React from 'react';
 
-import { Pressable, Icon, IconName } from '../components';
-import { StyleSheet, View } from 'react-native';
-import { useTheme } from '../theme';
+import { Icon, IconName, Row } from '../components';
 import { Mark } from './editable/nodes/leaf';
 import { useEditor } from './editor';
+import { ToolbarButton } from './toolbar';
 
 export function SelectionToolbar() {
   return (
-    <View style={styles.root}>
+    <Row>
       <MarkButton icon="bold" format="bold" />
       <MarkButton icon="italic" format="italic" />
       <MarkButton icon="strikethrough" format="strikethrough" />
       <MarkButton icon="code" format="code" />
-    </View>
+    </Row>
   );
 }
 
@@ -24,7 +23,6 @@ interface MarkButtonProps {
 
 function MarkButton(props: MarkButtonProps) {
   const { icon, format } = props;
-  const theme = useTheme();
   const { toggleMark, marks } = useEditor();
   const active = marks && !!marks[format];
 
@@ -33,24 +31,8 @@ function MarkButton(props: MarkButtonProps) {
   }, [toggleMark, format]);
 
   return (
-    <Pressable
-      style={[styles.button, { borderColor: theme.border.color.default }]}
-      onPress={handlePress}
-    >
+    <ToolbarButton onPress={handlePress}>
       <Icon color={active ? 'primary' : 'default'} name={icon} />
-    </Pressable>
+    </ToolbarButton>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flexDirection: 'row',
-    height: 24,
-  },
-  button: {
-    height: '100%',
-    paddingHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -15,6 +15,7 @@ export interface TextProps {
   align?: 'left' | 'right' | 'center';
   bold?: boolean;
   testID?: string;
+  numberOfLines?: number;
   decoration?: TextDecorationLine;
 }
 
@@ -29,6 +30,7 @@ export function Text(props: TextProps) {
     size = 'md',
     testID,
     bold,
+    numberOfLines,
     decoration = 'none',
   } = props;
   const theme = useTheme();
@@ -42,6 +44,7 @@ export function Text(props: TextProps) {
         theme.text.size[size],
         { color: theme.text.color[color], textDecorationLine: decoration },
       ]}
+      numberOfLines={numberOfLines}
     >
       {children}
     </RNText>

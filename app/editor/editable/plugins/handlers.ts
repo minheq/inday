@@ -140,14 +140,11 @@ export function removeLink(editor: ReactEditor) {
 export const wrapLink = (editor: ReactEditor, value: LinkValue | string) => {
   const { selection } = editor;
 
-  if (!selection) {
-    return;
-  }
   if (isLinkActive(editor)) {
     unwrapLink(editor);
   }
 
-  const isCollapsed = Range.isCollapsed(selection);
+  const isCollapsed = selection && Range.isCollapsed(selection);
 
   const link: Link = {
     type: 'link',
@@ -165,15 +162,20 @@ export const wrapLink = (editor: ReactEditor, value: LinkValue | string) => {
     }
 
     Transforms.insertNodes(editor, link);
+
+    // We get the call ReactEditor.toDOMNode at every change
+    // However, when we insert new nodes and want to select it
+    // the DOMNode is not ready. Thus we defer selection so that the DOMNode
+    // gets registered in time
+    if (editor.selection) {
+      const prevSelection = editor.selection;
+      Transforms.deselect(editor);
+
+      setTimeout(() => {
+        Transforms.select(editor, prevSelection);
+      }, 0);
+    }
   } else {
     Transforms.wrapNodes(editor, link, { split: true });
-  }
-
-  if (editor.selection) {
-    const after = Editor.after(editor, editor.selection);
-
-    if (after) {
-      Transforms.select(editor, after);
-    }
   }
 };

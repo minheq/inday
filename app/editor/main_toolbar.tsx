@@ -3,6 +3,7 @@ import React from 'react';
 import { Container, Row, Pressable, IconName, Icon } from '../components';
 import { StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
+import { useEditor } from './editor';
 
 export function MainToolbar() {
   return (
@@ -26,12 +27,15 @@ interface ButtonProps {
 function Button(props: ButtonProps) {
   const { icon } = props;
   const theme = useTheme();
+  const { selection } = useEditor();
+  const disabled = selection === null;
 
   return (
     <Pressable
+      disabled={disabled}
       style={[styles.button, { borderColor: theme.border.color.default }]}
     >
-      <Icon name={icon} />
+      <Icon color={disabled ? 'muted' : 'default'} name={icon} />
     </Pressable>
   );
 }

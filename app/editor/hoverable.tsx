@@ -8,6 +8,7 @@ import { LinkValue } from './editable/nodes/link';
 import { LinkEdit } from './link_edit';
 import { SelectionToolbar } from './selection_toolbar';
 import { usePrevious } from '../hooks/use_previous';
+import { LinkToolbar } from './link_toolbar';
 
 export interface HoverableToolbarData {
   type: 'toolbar';
@@ -166,7 +167,7 @@ export function Hoverable() {
     >
       <View testID="hello" ref={ref}>
         {state.hoverable?.type === 'link' && (
-          <LinkEdit initialValue={state.hoverable.data} onSubmit={hide} />
+          <LinkToolbar value={state.hoverable.data} />
         )}
         {state.hoverable?.type === 'toolbar' && <SelectionToolbar />}
       </View>

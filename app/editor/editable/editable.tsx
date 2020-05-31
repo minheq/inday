@@ -6,7 +6,7 @@ import {
   Slate,
   ReactEditor,
 } from 'slate-react';
-import { createEditor, Node, Range, Editor } from 'slate';
+import { createEditor, Node, Range, Editor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 
 import { Leaf, Mark } from './nodes/leaf';
@@ -21,9 +21,12 @@ import {
   isMark,
   toggleMark,
   getBlockType,
+  removeLink,
+  insertLink,
 } from './plugins/handlers';
 import { LinkValue, Link } from './nodes/link';
 import { css } from '../../utils/css';
+import { usePrevious } from '../../hooks/use_previous';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',
@@ -57,6 +60,8 @@ export interface EditableState {
 export interface EditableInstance {
   toggleBlock: (format: BlockType) => void;
   toggleMark: (format: Mark) => void;
+  removeLink: () => void;
+  insertLink: (value: LinkValue) => void;
 }
 
 interface EditableProps {
@@ -68,9 +73,6 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
   (props, ref) => {
     const { initialValue = [], onChange = () => {} } = props;
     const [value, setValue] = React.useState<Node[]>(initialValue);
-    const renderElement = React.useCallback((p) => <Element {...p} />, []);
-    const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
-
     const editor = React.useMemo(
       () =>
         withLinks(
@@ -78,6 +80,10 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
         ),
       [],
     );
+    const prevSelection = usePrevious(editor.selection);
+
+    const renderElement = React.useCallback((p) => <Element {...p} />, []);
+    const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
 
     React.useImperativeHandle(
       ref,
@@ -90,8 +96,25 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           ReactEditor.focus(editor);
           toggleMark(editor, format);
         },
+        removeLink: () => {
+          ReactEditor.focus(editor);
+          removeLink(editor);
+        },
+        insertLink: (val: LinkValue) => {
+          // When "edit" is pressed, we lose focus and selection.
+          // We keep track of previous selection so that we can reuse it
+          // here and select
+          if (!prevSelection) {
+            return;
+          }
+
+          ReactEditor.focus(editor);
+          Transforms.select(editor, prevSelection);
+
+          insertLink(editor, val);
+        },
       }),
-      [editor],
+      [editor, prevSelection],
     );
 
     const handleKeyDown = React.useCallback(

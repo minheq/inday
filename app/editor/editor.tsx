@@ -6,6 +6,7 @@ import { BlockType } from './editable/nodes/element';
 import { Mark } from './editable/nodes/leaf';
 import { Hoverable } from './hoverable';
 import { View } from 'react-native';
+import { LinkValue } from './editable/nodes/link';
 
 interface EditorProps {
   initialValue?: Node[];
@@ -20,6 +21,8 @@ const initialState: EditableState = {
 const initialInstance: EditableInstance = {
   toggleBlock: () => {},
   toggleMark: () => {},
+  removeLink: () => {},
+  insertLink: () => {},
 };
 
 export function Editor(props: EditorProps) {
@@ -41,6 +44,17 @@ export function Editor(props: EditorProps) {
     [editableRef],
   );
 
+  const handleRemoveLink = React.useCallback(() => {
+    editableRef.current.removeLink();
+  }, [editableRef]);
+
+  const handleInsertLink = React.useCallback(
+    (value: LinkValue) => {
+      editableRef.current.insertLink(value);
+    },
+    [editableRef],
+  );
+
   const handleChange = React.useCallback((value: EditableState) => {
     setState(value);
   }, []);
@@ -54,6 +68,8 @@ export function Editor(props: EditorProps) {
           type: state.type,
           toggleBlock: handleToggleBlock,
           toggleMark: handleToggleMark,
+          removeLink: handleRemoveLink,
+          insertLink: handleInsertLink,
         }}
       >
         <MainToolbar />
@@ -76,6 +92,8 @@ const EditorContext = React.createContext<EditorContext>({
   marks: {},
   toggleBlock: () => {},
   toggleMark: () => {},
+  removeLink: () => {},
+  insertLink: () => {},
 });
 
 export function useEditor() {
