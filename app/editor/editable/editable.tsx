@@ -23,6 +23,7 @@ import {
   getBlockType,
 } from './plugins/handlers';
 import { LinkValue, Link } from './nodes/link';
+import { css } from '../../utils/css';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',
@@ -194,8 +195,17 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onKeyDown={handleKeyDown}
+          style={styles('editable')}
         />
       </Slate>
     );
   },
 );
+
+const styles = css.create({
+  editable: {
+    fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI",
+  "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+  "Helvetica Neue", sans-serif`,
+  },
+});

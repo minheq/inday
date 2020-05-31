@@ -4,6 +4,8 @@ import { Editable, EditableState, EditableInstance } from './editable/editable';
 import { MainToolbar } from './main_toolbar';
 import { BlockType } from './editable/nodes/element';
 import { Mark } from './editable/nodes/leaf';
+import { Hoverable } from './hoverable';
+import { View } from 'react-native';
 
 interface EditorProps {
   initialValue?: Node[];
@@ -40,12 +42,8 @@ export function Editor(props: EditorProps) {
   );
 
   const handleChange = React.useCallback((value: EditableState) => {
-    console.log(value);
-
     setState(value);
   }, []);
-
-  console.log(state);
 
   return (
     <EditorContext.Provider
@@ -57,12 +55,15 @@ export function Editor(props: EditorProps) {
         toggleMark: handleToggleMark,
       }}
     >
-      <MainToolbar />
-      <Editable
-        ref={editableRef}
-        initialValue={initialValue}
-        onChange={handleChange}
-      />
+      <View>
+        <MainToolbar />
+        <Editable
+          ref={editableRef}
+          initialValue={initialValue}
+          onChange={handleChange}
+        />
+        <Hoverable />
+      </View>
     </EditorContext.Provider>
   );
 }

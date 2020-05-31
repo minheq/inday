@@ -1,10 +1,14 @@
 import React from 'react';
 import { Animated, StyleSheet, View, findNodeHandle } from 'react-native';
-import { Container } from '../components';
 import { tokens, useTheme } from '../theme';
 import { between } from '../utils/numbers';
 import { measure } from '../utils/measurements';
 import { useEditor } from './editor';
+import { LinkValue } from './editable/nodes/link';
+import { LinkEdit } from './link_edit';
+import { SelectionToolbar } from './selection_toolbar';
+import { usePrevious } from '../hooks/use_previous';
+import { Range } from 'slate';
 
 export interface HoverableToolbarData {
   type: 'toolbar';
@@ -12,18 +16,19 @@ export interface HoverableToolbarData {
 
 export interface HoverableLinkData {
   type: 'link';
+  data: LinkValue;
 }
 
 export type Hoverable = HoverableToolbarData | HoverableLinkData;
 
-export interface HoverableItem {
+export interface State {
   isVisible: boolean;
   hoverable: Hoverable | null;
   position: Animated.ValueXY;
   opacity: Animated.Value;
 }
 
-const initialHoverableItem: HoverableItem = {
+const initialState: State = {
   isVisible: false,
   hoverable: null,
   position: new Animated.ValueXY(),
@@ -33,35 +38,25 @@ const initialHoverableItem: HoverableItem = {
 export function Hoverable() {
   const theme = useTheme();
   const editor = useEditor();
+  const ref = React.useRef<View | null>(null);
+  const [state, setState] = React.useState<State>(initialState);
   const { selection } = editor;
-  const hoverableRef = React.useRef<View>();
-  const [hoverableItem, setHoverableItem] = React.useState<HoverableItem>(
-    initialHoverableItem,
-  );
+  const prevSelection = usePrevious(selection);
 
-  React.useEffect(() => {
-    if (!hoverableRef.current || !selection) {
-      return;
+  const getPosition = React.useCallback(async () => {
+    if (!selection || !ref.current) {
+      throw new Error('Selection and node expected');
     }
 
-    if (
-      selection.height === 0 ||
-      selection.left === 0 ||
-      selection.top === 0 ||
-      selection.width === 0
-    ) {
-      return;
-    }
-
-    const handle = findNodeHandle(hoverableRef.current);
+    const handle = findNodeHandle(ref.current);
 
     if (!handle) {
-      return;
+      throw new Error('Node handle not found');
     }
 
-    const { width, height } = await measure(hoverableRef);
-
+    const { width, height } = await measure(ref);
     let y = 0;
+    const LINE_HEIGHT = 16;
     const LINE_OFFSET = 8;
     if (selection.top - height < 4) {
       y = selection.top + LINE_HEIGHT + LINE_OFFSET;
@@ -72,75 +67,106 @@ export function Hoverable() {
     const x = between(selection.left + selection.width / 2 - width / 2, 8, 440);
 
     return { x, y };
-  });
+  }, [selection]);
 
-  const handleShowHoverable = async (hoverable: Hoverable) => {
-    const item: HoverableItem = {
-      hoverable,
-      isVisible: true,
-      position: new Animated.ValueXY(),
-      opacity: new Animated.Value(0),
-    };
+  const show = React.useCallback(
+    async (hoverable: Hoverable) => {
+      // If there was no change in selection, early return
+      if (
+        selection &&
+        prevSelection &&
+        Range.equals(selection, prevSelection)
+      ) {
+        return;
+      }
 
-    // Set hoverable item first so that we can measure its dimensions
-    setHoverableItem(item);
+      // Set hoverable state first so that we can measure its dimensions
+      const newState: State = {
+        hoverable,
+        isVisible: true,
+        position: new Animated.ValueXY(),
+        opacity: new Animated.Value(0),
+      };
+      setState(newState);
 
-    const position = await getHoverablePosition();
+      // Update its position
+      const position = await getPosition();
+      newState.position.setValue(position);
 
-    if (!position) {
+      Animated.timing(newState.opacity, {
+        toValue: 1,
+        useNativeDriver: true,
+        duration: 100,
+      }).start();
+    },
+    [getPosition, selection, prevSelection],
+  );
+
+  const hide = React.useCallback(() => {
+    if (!state.isVisible) {
       return;
     }
 
-    // Update its position
-    const { x, y } = position;
-    item.position.setValue({ x, y });
-
-    Animated.timing(item.opacity, {
-      toValue: 1,
+    Animated.timing(state.opacity, {
+      toValue: 0,
       useNativeDriver: true,
       duration: 100,
-    }).start();
-  };
+    }).start(() => {
+      setState(initialState);
+    });
+  }, [state.isVisible, state.opacity]);
 
-  const handleHideHoverable = () => {
-    if (hoverableItem.isVisible) {
-      Animated.timing(hoverableItem.opacity, {
-        toValue: 0,
-        useNativeDriver: true,
-        duration: 100,
-      }).start(() => {
-        setHoverableItem(initialHoverableItem);
+  React.useEffect(() => {
+    if (!ref.current || !selection) {
+      return;
+    }
+    // console.log(selection);
+
+    if (
+      selection.height === 0 ||
+      selection.left === 0 ||
+      selection.top === 0 ||
+      selection.width === 0
+    ) {
+      hide();
+      return;
+    }
+
+    if (selection.link) {
+      show({
+        type: 'link',
+        data: selection.link,
+      });
+    } else {
+      show({
+        type: 'toolbar',
       });
     }
-  };
+  }, [selection, show, hide]);
 
   return (
-    <Container expanded>
-      <Animated.View
-        style={[
-          styles.hoverable,
-          theme.container.shadow,
-          {
-            borderColor: theme.border.color.default,
-            backgroundColor: theme.container.color.content,
-            transform: [
-              { translateX: hoverableItem.position.x },
-              { translateY: hoverableItem.position.y },
-            ],
-            opacity: hoverableItem.opacity,
-          },
-        ]}
-      >
-        <View ref={hoverableRef}>
-          {hoverableItem.hoverable?.type === 'toolbar' && (
-            <HoverableToolbar
-              formats={formats}
-              onOpenLinkEdit={this.handleOpenLinkEdit}
-            />
-          )}
-        </View>
-      </Animated.View>
-    </Container>
+    <Animated.View
+      style={[
+        styles.hoverable,
+        theme.container.shadow,
+        {
+          borderColor: theme.border.color.default,
+          backgroundColor: theme.container.color.content,
+          transform: [
+            { translateX: state.position.x },
+            { translateY: state.position.y },
+          ],
+          opacity: state.opacity,
+        },
+      ]}
+    >
+      <View testID="hello" ref={ref}>
+        {state.hoverable?.type === 'link' && (
+          <LinkEdit initialValue={state.hoverable.data} onSubmit={hide} />
+        )}
+        {state.hoverable?.type === 'toolbar' && <SelectionToolbar />}
+      </View>
+    </Animated.View>
   );
 }
 
@@ -155,34 +181,3 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
 });
-
-// const handleUpdateHoverablePositionIfNeeded = async () => {
-//   if (!hoverableItem.hoverable) {
-//     return;
-//   }
-
-//   const position = await this.getHoverablePosition();
-
-//   if (!position) {
-//     return;
-//   }
-
-//   const { x, y } = position;
-//   const prevX = (hoverableItem.position.x as any)._value;
-//   const prevY = (hoverableItem.position.y as any)._value;
-//   const deltaX = prevX - x;
-//   const deltaY = prevY - y;
-
-//   // Update when significant enough
-//   if (Math.hypot(deltaX, deltaY) > 10) {
-//     Animated.spring(hoverableItem.position, {
-//       toValue: {
-//         x,
-//         y,
-//       },
-//       useNativeDriver: true,
-//       bounciness: 0,
-//       speed: 300,
-//     }).start();
-//   }
-// };
