@@ -1,21 +1,19 @@
 import React from 'react';
 
-import { Container, Row, Pressable, IconName, Icon } from '../components';
-import { StyleSheet } from 'react-native';
-import { useTheme } from '../theme';
+import { Row, IconName, Icon } from '../components';
 import { useEditor } from './editor';
+import { useLinkEdit } from './link_edit';
+import { ToolbarButton } from './toolbar';
 
 export function MainToolbar() {
   return (
-    <Container borderBottomWidth={1}>
-      <Row>
-        <Button icon="plus" label="Insert" />
-        <Button icon="layers" label="Format" />
-        <Button icon="link" label="Link" />
-        <Button icon="flag" label="Tag" />
-        <Button icon="user" label="Mention" />
-      </Row>
-    </Container>
+    <Row>
+      <Button icon="plus" label="Insert" />
+      <Button icon="layers" label="Format" />
+      <LinkButton />
+      <Button icon="flag" label="Tag" />
+      <Button icon="user" label="Mention" />
+    </Row>
   );
 }
 
@@ -26,26 +24,30 @@ interface ButtonProps {
 
 function Button(props: ButtonProps) {
   const { icon } = props;
-  const theme = useTheme();
   const { selection } = useEditor();
   const disabled = selection === null;
 
   return (
-    <Pressable
-      disabled={disabled}
-      style={[styles.button, { borderColor: theme.border.color.default }]}
-    >
+    <ToolbarButton disabled={disabled}>
       <Icon color={disabled ? 'muted' : 'default'} name={icon} />
-    </Pressable>
+    </ToolbarButton>
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRightWidth: 1,
-  },
-});
+function LinkButton() {
+  const { selection } = useEditor();
+  const { onEdit } = useLinkEdit();
+  const disabled = selection === null;
+
+  const handlePress = React.useCallback(() => {
+    if (selection) {
+      onEdit({ url: '', display: selection.text ?? '' });
+    }
+  }, [onEdit, selection]);
+
+  return (
+    <ToolbarButton onPress={handlePress}>
+      <Icon color={disabled ? 'muted' : 'default'} name="link" />
+    </ToolbarButton>
+  );
+}

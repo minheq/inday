@@ -50,6 +50,7 @@ interface Rect {
 interface Selection extends Range, Rect {
   link: LinkValue | null;
   text: string | null;
+  dragging: boolean;
 }
 
 export interface EditableState {
@@ -82,6 +83,12 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
       [],
     );
     const prevSelection = usePrevious(editor.selection);
+    const draggingRef = React.useRef(false);
+    const previousStateRef = React.useRef<EditableState>({
+      selection: null,
+      type: 'paragraph',
+      marks: {},
+    });
 
     const renderElement = React.useCallback((p) => <Element {...p} />, []);
     const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
@@ -141,6 +148,26 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
       [editor],
     );
 
+    const handleMouseDown = React.useCallback(() => {
+      draggingRef.current = true;
+    }, [draggingRef]);
+
+    const handleMouseUp = React.useCallback(() => {
+      draggingRef.current = false;
+      const prevState = previousStateRef.current;
+
+      if (prevState.selection?.dragging) {
+        onChange({
+          marks: prevState.marks,
+          selection: {
+            ...prevState.selection,
+            dragging: false,
+          },
+          type: prevState.type,
+        });
+      }
+    }, [draggingRef, previousStateRef, onChange]);
+
     const handleChange = React.useCallback(
       (newValue: Node[]) => {
         setValue(newValue);
@@ -148,6 +175,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
         const type = getBlockType(editor);
         let selection: Selection | null = null;
         let text: string | null = null;
+        const dragging = draggingRef.current;
 
         if (editor.selection) {
           let rect = {
@@ -213,12 +241,17 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
             height: rect.height,
             link,
             text,
+            dragging,
           };
         }
 
-        onChange({ marks, selection, type });
+        const state: EditableState = { marks, selection, type };
+
+        previousStateRef.current = state;
+
+        onChange(state);
       },
-      [editor, onChange],
+      [editor, onChange, draggingRef, previousStateRef],
     );
 
     return (
@@ -228,6 +261,8 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           renderLeaf={renderLeaf}
           onKeyDown={handleKeyDown}
           style={styles('editable')}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
         />
       </Slate>
     );

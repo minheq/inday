@@ -72,6 +72,8 @@ export function Hoverable() {
     async (hoverable: Hoverable) => {
       // If there was no change in selection, early return
       if (state.isVisible) {
+        const position = await getPosition();
+        state.position.setValue(position);
         return;
       }
 
@@ -94,7 +96,7 @@ export function Hoverable() {
         duration: 100,
       }).start();
     },
-    [getPosition, state.isVisible],
+    [getPosition, state],
   );
 
   const hide = React.useCallback(() => {
@@ -122,6 +124,11 @@ export function Hoverable() {
       selection.top === 0 ||
       selection.width === 0
     ) {
+      hide();
+      return;
+    }
+
+    if (selection.dragging) {
       hide();
       return;
     }

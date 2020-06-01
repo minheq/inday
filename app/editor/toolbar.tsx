@@ -7,14 +7,16 @@ import { useTheme } from '../theme';
 interface ToolbarButtonProps {
   onPress?: () => void;
   children?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export function ToolbarButton(props: ToolbarButtonProps) {
-  const { onPress, children } = props;
+  const { onPress, disabled, children } = props;
   const theme = useTheme();
 
   return (
     <Pressable
+      disabled={disabled}
       style={[styles.root, { borderColor: theme.border.color.default }]}
       onPress={onPress}
     >
