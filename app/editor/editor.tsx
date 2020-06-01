@@ -8,6 +8,13 @@ import { Hoverable } from './hoverable';
 import { View } from 'react-native';
 import { LinkValue } from './editable/nodes/link';
 import { LinkEditProvider } from './link_edit';
+import { FormatProvider } from './format';
+
+// TODO
+// - Insert
+// - Hotkeys
+// - Tooltips
+// - Type commands
 
 interface EditorProps {
   initialValue?: Node[];
@@ -24,6 +31,7 @@ const initialInstance: EditableInstance = {
   toggleMark: () => {},
   removeLink: () => {},
   insertLink: () => {},
+  focus: () => {},
 };
 
 export function Editor(props: EditorProps) {
@@ -60,6 +68,10 @@ export function Editor(props: EditorProps) {
     setState(value);
   }, []);
 
+  const handleFocus = React.useCallback(() => {
+    editableRef.current.focus();
+  }, []);
+
   return (
     <View>
       <EditorContext.Provider
@@ -71,17 +83,20 @@ export function Editor(props: EditorProps) {
           toggleMark: handleToggleMark,
           removeLink: handleRemoveLink,
           insertLink: handleInsertLink,
+          focus: handleFocus,
         }}
       >
-        <LinkEditProvider>
-          <MainToolbar />
-          <Editable
-            ref={editableRef}
-            initialValue={initialValue}
-            onChange={handleChange}
-          />
-          <Hoverable />
-        </LinkEditProvider>
+        <FormatProvider>
+          <LinkEditProvider>
+            <MainToolbar />
+            <Editable
+              ref={editableRef}
+              initialValue={initialValue}
+              onChange={handleChange}
+            />
+            <Hoverable />
+          </LinkEditProvider>
+        </FormatProvider>
       </EditorContext.Provider>
     </View>
   );
@@ -97,6 +112,7 @@ const EditorContext = React.createContext<EditorContext>({
   toggleMark: () => {},
   removeLink: () => {},
   insertLink: () => {},
+  focus: () => {},
 });
 
 export function useEditor() {

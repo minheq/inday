@@ -40,7 +40,7 @@ const initialState: State = {
 export function LinkEditProvider(props: LinkEditProviderProps) {
   const { children } = props;
   const [state, setState] = React.useState<State>(initialState);
-  const { insertLink } = useEditor();
+  const { insertLink, focus } = useEditor();
 
   const handleEdit = React.useCallback((value: LinkValue) => {
     setState({ open: true, value });
@@ -61,7 +61,12 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
   return (
     <LinkEditContext.Provider value={{ onEdit: handleEdit }}>
       {children}
-      <Dialog isOpen={state.open} onRequestClose={handleClose}>
+      <Dialog
+        animationType="slide"
+        isOpen={state.open}
+        onRequestClose={handleClose}
+        onDismiss={focus}
+      >
         {state.value && (
           <LinkEdit initialValue={state.value} onSubmit={handleInsert} />
         )}

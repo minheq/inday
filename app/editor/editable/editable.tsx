@@ -63,6 +63,7 @@ export interface EditableInstance {
   toggleBlock: (format: BlockType) => void;
   toggleMark: (format: Mark) => void;
   removeLink: () => void;
+  focus: () => void;
   insertLink: (value: LinkValue) => void;
 }
 
@@ -120,6 +121,9 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           Transforms.select(editor, prevSelection);
 
           insertLink(editor, val);
+        },
+        focus: () => {
+          ReactEditor.focus(editor);
         },
       }),
       [editor, prevSelection],
@@ -203,10 +207,9 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
             };
 
             text = Editor.string(editor, editor.selection);
-          }
 
-          // Link is selected
-          if (Range.isCollapsed(editor.selection)) {
+            // Link is selected
+          } else if (Range.isCollapsed(editor.selection)) {
             const [linkEntry] = Editor.nodes(editor, {
               match: (n) => n.type === 'link',
             });

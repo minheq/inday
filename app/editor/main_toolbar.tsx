@@ -1,35 +1,28 @@
 import React from 'react';
 
-import { Row, IconName, Icon } from '../components';
+import { Row, Icon } from '../components';
 import { useEditor } from './editor';
 import { useLinkEdit } from './link_edit';
 import { ToolbarButton } from './toolbar';
+import { useFormat } from './format';
 
 export function MainToolbar() {
   return (
     <Row>
-      <Button icon="plus" label="Insert" />
-      <Button icon="layers" label="Format" />
+      <FormatButton />
       <LinkButton />
-      <Button icon="flag" label="Tag" />
-      <Button icon="user" label="Mention" />
     </Row>
   );
 }
 
-interface ButtonProps {
-  icon: IconName;
-  label: string;
-}
-
-function Button(props: ButtonProps) {
-  const { icon } = props;
+function FormatButton() {
+  const { onOpen } = useFormat();
   const { selection } = useEditor();
   const disabled = selection === null;
 
   return (
-    <ToolbarButton disabled={disabled}>
-      <Icon color={disabled ? 'muted' : 'default'} name={icon} />
+    <ToolbarButton disabled={disabled} onPress={onOpen}>
+      <Icon color={disabled ? 'muted' : 'default'} name="layers" />
     </ToolbarButton>
   );
 }

@@ -111,19 +111,14 @@ export function Hoverable() {
     }).start(() => {
       setState(initialState);
     });
-  }, [state.isVisible, state.opacity]);
+  }, [state]);
 
   React.useEffect(() => {
     if (!ref.current || !selection) {
       return;
     }
 
-    if (
-      selection.height === 0 ||
-      selection.left === 0 ||
-      selection.top === 0 ||
-      selection.width === 0
-    ) {
+    if (selection.height === 0 || selection.width === 0) {
       hide();
       return;
     }
