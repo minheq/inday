@@ -1,7 +1,74 @@
 import React from 'react';
 
-import { Container, Text, Spacing, TextInput, Button } from '../components';
+import {
+  Container,
+  Text,
+  Spacing,
+  TextInput,
+  Button,
+  Dialog,
+} from '../components';
 import { LinkValue } from './editable/nodes/link';
+import { useEditor } from './editor';
+
+interface LinkEditContext {
+  onEdit: (value: LinkValue) => void;
+}
+
+const LinkEditContext = React.createContext<LinkEditContext>({
+  onEdit: () => {},
+});
+
+export function useLinkEdit() {
+  return React.useContext(LinkEditContext);
+}
+
+interface LinkEditProviderProps {
+  children?: React.ReactNode;
+}
+
+interface State {
+  open: boolean;
+  value: LinkValue | null;
+}
+
+const initialState: State = {
+  open: false,
+  value: null,
+};
+
+export function LinkEditProvider(props: LinkEditProviderProps) {
+  const { children } = props;
+  const [state, setState] = React.useState<State>(initialState);
+  const { insertLink } = useEditor();
+
+  const handleEdit = React.useCallback((value: LinkValue) => {
+    setState({ open: true, value });
+  }, []);
+
+  const handleInsert = React.useCallback(
+    (newValue: LinkValue) => {
+      setState(initialState);
+      insertLink(newValue);
+    },
+    [insertLink],
+  );
+
+  const handleClose = React.useCallback(() => {
+    setState(initialState);
+  }, []);
+
+  return (
+    <LinkEditContext.Provider value={{ onEdit: handleEdit }}>
+      {children}
+      <Dialog isOpen={state.open} onRequestClose={handleClose}>
+        {state.value && (
+          <LinkEdit initialValue={state.value} onSubmit={handleInsert} />
+        )}
+      </Dialog>
+    </LinkEditContext.Provider>
+  );
+}
 
 interface LinkEditProps {
   initialValue: LinkValue;

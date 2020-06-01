@@ -4,6 +4,7 @@ import { Icon, IconName, Row } from '../components';
 import { Mark } from './editable/nodes/leaf';
 import { useEditor } from './editor';
 import { ToolbarButton } from './toolbar';
+import { useLinkEdit } from './link_edit';
 
 export function SelectionToolbar() {
   return (
@@ -12,6 +13,7 @@ export function SelectionToolbar() {
       <MarkButton icon="italic" format="italic" />
       <MarkButton icon="strikethrough" format="strikethrough" />
       <MarkButton icon="code" format="code" />
+      <LinkButton />
     </Row>
   );
 }
@@ -33,6 +35,23 @@ function MarkButton(props: MarkButtonProps) {
   return (
     <ToolbarButton onPress={handlePress}>
       <Icon color={active ? 'primary' : 'default'} name={icon} />
+    </ToolbarButton>
+  );
+}
+
+function LinkButton() {
+  const { selection } = useEditor();
+  const { onEdit } = useLinkEdit();
+
+  const handlePress = React.useCallback(() => {
+    if (selection) {
+      onEdit({ url: '', display: selection.text ?? '' });
+    }
+  }, [onEdit, selection]);
+
+  return (
+    <ToolbarButton onPress={handlePress}>
+      <Icon name="link" />
     </ToolbarButton>
   );
 }

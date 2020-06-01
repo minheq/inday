@@ -1,12 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, Linking, Clipboard } from 'react-native';
 
-import { Text, Dialog } from '../components';
+import { Text } from '../components';
 import { LinkValue } from './editable/nodes/link';
 import { ToolbarButton } from './toolbar';
 import { useEditor } from './editor';
-import { useToggle } from '../hooks/use_toggle';
-import { LinkEdit } from './link_edit';
+import { useLinkEdit } from './link_edit';
 
 interface LinkToolbarProps {
   value: LinkValue;
@@ -15,8 +14,8 @@ interface LinkToolbarProps {
 export function LinkToolbar(props: LinkToolbarProps) {
   const { value } = props;
   const { url } = value;
-  const { removeLink, insertLink } = useEditor();
-  const [edit, { setFalse, setTrue }] = useToggle();
+  const { removeLink } = useEditor();
+  const { onEdit } = useLinkEdit();
 
   const handleOpen = React.useCallback(() => {
     Linking.canOpenURL(url).then(() => {
@@ -32,13 +31,9 @@ export function LinkToolbar(props: LinkToolbarProps) {
     removeLink();
   }, [removeLink]);
 
-  const handleInsert = React.useCallback(
-    (newValue: LinkValue) => {
-      setFalse();
-      insertLink(newValue);
-    },
-    [insertLink, setFalse],
-  );
+  const handleEdit = React.useCallback(() => {
+    onEdit(value);
+  }, [onEdit, value]);
 
   return (
     <View style={styles.root}>
@@ -51,15 +46,12 @@ export function LinkToolbar(props: LinkToolbarProps) {
       <ToolbarButton onPress={handleCopy}>
         <Text>Copy</Text>
       </ToolbarButton>
-      <ToolbarButton onPress={setTrue}>
+      <ToolbarButton onPress={handleEdit}>
         <Text>Edit</Text>
       </ToolbarButton>
       <ToolbarButton onPress={handleRemove}>
         <Text>Remove</Text>
       </ToolbarButton>
-      <Dialog isOpen={edit} onRequestClose={setFalse}>
-        <LinkEdit initialValue={value} onSubmit={handleInsert} />
-      </Dialog>
     </View>
   );
 }

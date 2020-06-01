@@ -5,7 +5,6 @@ import { between } from '../utils/numbers';
 import { measure } from '../utils/measurements';
 import { useEditor } from './editor';
 import { LinkValue } from './editable/nodes/link';
-import { LinkEdit } from './link_edit';
 import { SelectionToolbar } from './selection_toolbar';
 import { usePrevious } from '../hooks/use_previous';
 import { LinkToolbar } from './link_toolbar';

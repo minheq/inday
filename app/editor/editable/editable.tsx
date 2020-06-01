@@ -49,6 +49,7 @@ interface Rect {
 
 interface Selection extends Range, Rect {
   link: LinkValue | null;
+  text: string | null;
 }
 
 export interface EditableState {
@@ -146,6 +147,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
         const marks = Editor.marks(editor);
         const type = getBlockType(editor);
         let selection: Selection | null = null;
+        let text: string | null = null;
 
         if (editor.selection) {
           let rect = {
@@ -156,6 +158,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           };
           let link: LinkValue | null = null;
 
+          // Non-collapsed range is selected
           if (
             !Range.isCollapsed(editor.selection) &&
             Editor.string(editor, editor.selection) !== ''
@@ -170,8 +173,11 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
               top: domRect.top,
               height: domRect.height,
             };
+
+            text = Editor.string(editor, editor.selection);
           }
 
+          // Link is selected
           if (Range.isCollapsed(editor.selection)) {
             const [linkEntry] = Editor.nodes(editor, {
               match: (n) => n.type === 'link',
@@ -193,6 +199,8 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
                 top: domRect.top,
                 height: domRect.height,
               };
+
+              text = linkNode.display;
             }
           }
 
@@ -204,6 +212,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
             top: rect.top,
             height: rect.height,
             link,
+            text,
           };
         }
 
