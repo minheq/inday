@@ -5,13 +5,27 @@ import { useEditor } from './editor';
 import { useLinkEdit } from './link_edit';
 import { ToolbarButton } from './toolbar';
 import { useFormat } from './format';
+import { useInsert } from './insert';
 
 export function MainToolbar() {
   return (
     <Row>
+      <InsertButton />
       <FormatButton />
       <LinkButton />
     </Row>
+  );
+}
+
+function InsertButton() {
+  const { onOpen } = useInsert();
+  const { selection } = useEditor();
+  const disabled = selection === null;
+
+  return (
+    <ToolbarButton disabled={disabled} onPress={onOpen}>
+      <Icon color={disabled ? 'muted' : 'default'} name="plus" />
+    </ToolbarButton>
   );
 }
 

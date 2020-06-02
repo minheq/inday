@@ -9,12 +9,16 @@ import { View } from 'react-native';
 import { LinkValue } from './editable/nodes/link';
 import { LinkEditProvider } from './link_edit';
 import { FormatProvider } from './format';
+import { InsertProvider } from './insert';
 
 // TODO
 // - Insert
+//  - Image
+//  - YouTube
+//  - Twitter
 // - Hotkeys
-// - Tooltips
 // - Type commands
+// - Beautify
 
 interface EditorProps {
   initialValue?: Node[];
@@ -88,13 +92,15 @@ export function Editor(props: EditorProps) {
       >
         <FormatProvider>
           <LinkEditProvider>
-            <MainToolbar />
-            <Editable
-              ref={editableRef}
-              initialValue={initialValue}
-              onChange={handleChange}
-            />
-            <Hoverable />
+            <InsertProvider>
+              <MainToolbar />
+              <Editable
+                ref={editableRef}
+                initialValue={initialValue}
+                onChange={handleChange}
+              />
+              <Hoverable />
+            </InsertProvider>
           </LinkEditProvider>
         </FormatProvider>
       </EditorContext.Provider>
