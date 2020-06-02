@@ -1,6 +1,14 @@
 import React from 'react';
 
-import { Text, Dialog, Container, Pressable } from '../components';
+import {
+  Text,
+  Dialog,
+  Container,
+  ListItem,
+  CloseButton,
+  Column,
+  Row,
+} from '../components';
 import { useToggle } from '../hooks/use_toggle';
 import { useEditor } from './editor';
 import { ImagePicker } from '../modules/image_picker';
@@ -37,18 +45,20 @@ export function InsertProvider(props: InsertProviderProps) {
         onRequestClose={setFalse}
         onDismiss={focus}
       >
-        <Container padding={16}>
-          <Pressable
+        <Container minWidth={320}>
+          <Row>
+            <CloseButton onPress={setFalse} />
+          </Row>
+          <ListItem
             onPress={async () => {
               const image = await ImagePicker.openPicker({});
 
               console.log(image);
             }}
-          >
-            <Text>Image</Text>
-          </Pressable>
-          <Text>YouTube</Text>
-          <Text>Twitter</Text>
+            title="Image"
+          />
+          <ListItem title="YouTube" />
+          <ListItem title="Twitter" />
         </Container>
       </Dialog>
     </InsertContext.Provider>

@@ -12,6 +12,7 @@ export * from './text_input';
 export * from './icon';
 export * from './search_input';
 export * from './modal';
+export * from './list_item';
 export * from './close_button';
 export * from './pressable';
 export * from './button';
