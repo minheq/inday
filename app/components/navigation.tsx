@@ -30,6 +30,8 @@ interface State {
   width: number;
 }
 
+const OFFSET_WIDTH = 80;
+
 export function NavigationProvider(props: NavigationProviderProps) {
   const { children } = props;
   const [state, setState] = React.useState<State>({
@@ -50,7 +52,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
 
       Animated.parallel([
         Animated.spring(prevScreen.visibility, {
-          toValue: -width,
+          toValue: -OFFSET_WIDTH,
           bounciness: 0,
           useNativeDriver: true,
         }),
@@ -116,7 +118,10 @@ export function NavigationProvider(props: NavigationProviderProps) {
               key={index}
               style={[
                 styles.screen,
-                { transform: [{ translateX: screen.visibility }] },
+                {
+                  transform: [{ translateX: screen.visibility }],
+                  zIndex: index,
+                },
               ]}
             >
               {screen.node}
@@ -131,5 +136,6 @@ export function NavigationProvider(props: NavigationProviderProps) {
 const styles = StyleSheet.create({
   screen: {
     position: 'absolute',
+    backgroundColor: 'white',
   },
 });
