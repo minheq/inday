@@ -11,7 +11,9 @@
     "build:editor": "node ./scripts/build_editor_html.js",
     "test": "jest",
     "analyze": "webpack --profile --json > stats.json",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "@babel/core": "^7.9.0",
@@ -21,6 +23,10 @@
     "@babel/preset-typescript": "^7.9.0",
     "@babel/runtime": "^7.6.2",
     "@react-native-community/eslint-config": "^1.0.0",
+    "@storybook/addon-actions": "^5.3.19",
+    "@storybook/addon-links": "^5.3.19",
+    "@storybook/addons": "^5.3.19",
+    "@storybook/react": "^5.3.19",
     "@types/highlight.js": "^9.12.3",
     "@types/jest": "^24.0.24",
     "@types/node": "^13.11.1",
