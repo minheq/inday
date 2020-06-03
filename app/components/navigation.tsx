@@ -1,0 +1,135 @@
+import React from 'react';
+import { Animated, StyleSheet, View, LayoutChangeEvent } from 'react-native';
+import { last, secondLast } from '../utils/arrays';
+
+interface NavigationContext {
+  navigate: (screen: React.ReactNode) => void;
+  back: () => void;
+}
+
+const NavigationContext = React.createContext<NavigationContext>({
+  navigate: () => {},
+  back: () => {},
+});
+
+interface NavigationProviderProps {
+  children?: React.ReactNode;
+}
+
+export function useNavigation() {
+  return React.useContext(NavigationContext);
+}
+
+interface Screen {
+  visibility: Animated.Value;
+  node: React.ReactNode;
+}
+
+interface State {
+  screens: Screen[];
+  width: number;
+}
+
+export function NavigationProvider(props: NavigationProviderProps) {
+  const { children } = props;
+  const [state, setState] = React.useState<State>({
+    screens: [{ node: children, visibility: new Animated.Value(1) }],
+    width: 0,
+  });
+
+  const handleNavigate = React.useCallback(
+    (node: React.ReactNode) => {
+      const { screens, width } = state;
+      const prevScreen = last(screens);
+      const nextScreen = { node, visibility: new Animated.Value(width) };
+
+      setState({
+        screens: screens.concat(nextScreen),
+        width,
+      });
+
+      Animated.parallel([
+        Animated.spring(prevScreen.visibility, {
+          toValue: -width,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+        Animated.spring(nextScreen.visibility, {
+          toValue: 0,
+          bounciness: 0,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    },
+    [state],
+  );
+
+  const handleBack = React.useCallback(() => {
+    const { screens, width } = state;
+    const prevScreen = secondLast(screens);
+    const nextScreen = last(screens);
+
+    Animated.parallel([
+      Animated.spring(nextScreen.visibility, {
+        toValue: width,
+        bounciness: 0,
+        useNativeDriver: true,
+      }),
+      Animated.spring(prevScreen.visibility, {
+        toValue: 0,
+        bounciness: 0,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setState({
+        screens: screens.slice(0, screens.length - 1),
+        width,
+      });
+    });
+  }, [state]);
+
+  const handleLayout = React.useCallback(
+    (event: LayoutChangeEvent) => {
+      const { screens } = state;
+
+      setState({
+        screens,
+        width: event.nativeEvent.layout.width,
+      });
+    },
+    [state],
+  );
+
+  const { screens } = state;
+
+  return (
+    <NavigationContext.Provider
+      value={{
+        navigate: handleNavigate,
+        back: handleBack,
+      }}
+    >
+      <View onLayout={handleLayout}>
+        {screens.map((screen, index) => {
+          return (
+            <Animated.View
+              key={index}
+              style={[
+                styles.screen,
+                { transform: [{ translateX: screen.visibility }] },
+              ]}
+            >
+              {screen.node}
+            </Animated.View>
+          );
+        })}
+      </View>
+    </NavigationContext.Provider>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    position: 'absolute',
+  },
+});

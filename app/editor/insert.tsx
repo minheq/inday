@@ -1,14 +1,6 @@
 import React from 'react';
 
-import {
-  Text,
-  Dialog,
-  Container,
-  ListItem,
-  CloseButton,
-  Column,
-  Row,
-} from '../components';
+import { Dialog, Container, ListItem, CloseButton, Row } from '../components';
 import { useToggle } from '../hooks/use_toggle';
 import { useEditor } from './editor';
 import { ImagePicker } from '../modules/image_picker';
