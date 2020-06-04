@@ -27,6 +27,8 @@ import {
 import { LinkValue, Link } from './nodes/link';
 import { css } from '../../utils/css';
 import { usePrevious } from '../../hooks/use_previous';
+import { withImages, insertImage } from './plugins/images';
+import { withVideos, insertVideo } from './plugins/videos';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',
@@ -60,6 +62,8 @@ export interface EditableState {
 }
 
 export interface EditableInstance {
+  insertImage: (url: string) => void;
+  insertVideo: (url: string) => void;
   toggleBlock: (format: BlockType) => void;
   toggleMark: (format: Mark) => void;
   removeLink: () => void;
@@ -78,8 +82,14 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
     const [value, setValue] = React.useState<Node[]>(initialValue);
     const editor = React.useMemo(
       () =>
-        withLinks(
-          withChecklists(withShortcuts(withReact(withHistory(createEditor())))),
+        withVideos(
+          withImages(
+            withLinks(
+              withChecklists(
+                withShortcuts(withReact(withHistory(createEditor()))),
+              ),
+            ),
+          ),
         ),
       [],
     );
@@ -100,6 +110,14 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
         toggleBlock: (format) => {
           ReactEditor.focus(editor);
           toggleBlock(editor, format);
+        },
+        insertImage: (url) => {
+          ReactEditor.focus(editor);
+          insertImage(editor, url);
+        },
+        insertVideo: (url) => {
+          ReactEditor.focus(editor);
+          insertVideo(editor, url);
         },
         toggleMark: (format) => {
           ReactEditor.focus(editor);

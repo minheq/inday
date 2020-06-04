@@ -12,6 +12,7 @@ import { ListItem } from './list_item';
 import { CheckListItem } from './check_list_item';
 import { Divider } from './divider';
 import { CodeBlock } from './code_block';
+import { Video } from './video';
 
 export type Block =
   | Paragraph
@@ -20,6 +21,7 @@ export type Block =
   | ListItem
   | Blockquote
   | CodeBlock
+  | Video
   | Divider
   | CheckListItem
   | HeadingOne
@@ -65,6 +67,8 @@ export function Element(props: ElementProps) {
       return <Link {...props} element={props.element} />;
     case 'block-quote':
       return <Blockquote {...props} element={props.element} />;
+    case 'video':
+      return <Video {...props} element={props.element} />;
     case 'bulleted-list':
       return <BulletedList {...props} element={props.element} />;
     case 'numbered-list':

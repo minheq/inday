@@ -31,6 +31,8 @@ const initialState: EditableState = {
 };
 
 const initialInstance: EditableInstance = {
+  insertImage: () => {},
+  insertVideo: () => {},
   toggleBlock: () => {},
   toggleMark: () => {},
   removeLink: () => {},
@@ -76,6 +78,14 @@ export function Editor(props: EditorProps) {
     editableRef.current.focus();
   }, []);
 
+  const handleInsertImage = React.useCallback((url: string) => {
+    editableRef.current.insertImage(url);
+  }, []);
+
+  const handleInsertVideo = React.useCallback((url: string) => {
+    editableRef.current.insertVideo(url);
+  }, []);
+
   return (
     <View>
       <EditorContext.Provider
@@ -87,6 +97,8 @@ export function Editor(props: EditorProps) {
           toggleMark: handleToggleMark,
           removeLink: handleRemoveLink,
           insertLink: handleInsertLink,
+          insertImage: handleInsertImage,
+          insertVideo: handleInsertVideo,
           focus: handleFocus,
         }}
       >
@@ -116,7 +128,9 @@ const EditorContext = React.createContext<EditorContext>({
   marks: {},
   toggleBlock: () => {},
   toggleMark: () => {},
+  insertVideo: () => {},
   removeLink: () => {},
+  insertImage: () => {},
   insertLink: () => {},
   focus: () => {},
 });

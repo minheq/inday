@@ -2,14 +2,15 @@ import React from 'react';
 import { StyleSheet, Animated, GestureResponderEvent } from 'react-native';
 import { Pressable } from './pressable';
 import { tokens, useTheme } from '../theme';
+import { Text } from './text';
 
 interface ButtonProps {
   onPress?: (e: GestureResponderEvent) => void;
-  children?: React.ReactNode;
+  title?: string;
 }
 
 export function Button(props: ButtonProps) {
-  const { onPress = () => {}, children } = props;
+  const { onPress = () => {}, title } = props;
   const background = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
@@ -39,7 +40,7 @@ export function Button(props: ButtonProps) {
       }}
       onPress={onPress}
     >
-      {children}
+      <Text>{title}</Text>
     </Pressable>
   );
 }

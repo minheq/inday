@@ -30,12 +30,12 @@ interface State {
   width: number;
 }
 
-const OFFSET_WIDTH = 80;
+const OFFSET_WIDTH = 160;
 
 export function NavigationProvider(props: NavigationProviderProps) {
   const { children } = props;
   const [state, setState] = React.useState<State>({
-    screens: [{ node: children, visibility: new Animated.Value(1) }],
+    screens: [{ node: children, visibility: new Animated.Value(0) }],
     width: 0,
   });
 
@@ -111,7 +111,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
         back: handleBack,
       }}
     >
-      <View onLayout={handleLayout}>
+      <View style={styles.container} onLayout={handleLayout}>
         {screens.map((screen, index) => {
           return (
             <Animated.View
@@ -134,8 +134,15 @@ export function NavigationProvider(props: NavigationProviderProps) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+  },
   screen: {
     position: 'absolute',
     backgroundColor: 'white',
+    width: '100%',
+    height: '100%',
   },
 });

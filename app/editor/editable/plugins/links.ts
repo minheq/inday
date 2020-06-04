@@ -1,4 +1,4 @@
-import { isUrl } from '../../../utils/is_url';
+import { isURL } from '../../../utils/is_url';
 import { ReactEditor } from 'slate-react';
 import { wrapLink } from './handlers';
 
@@ -14,7 +14,7 @@ export function withLinks<T extends ReactEditor>(editor: T): T & ReactEditor {
   };
 
   editor.insertText = (text) => {
-    if (text && isUrl(text)) {
+    if (text && isURL(text)) {
       wrapLink(editor, text);
     } else {
       insertText(text);
@@ -24,7 +24,7 @@ export function withLinks<T extends ReactEditor>(editor: T): T & ReactEditor {
   editor.insertData = (data) => {
     const text = data.getData('text/plain');
 
-    if (text && isUrl(text)) {
+    if (text && isURL(text)) {
       wrapLink(editor, text);
     } else {
       insertData(data);

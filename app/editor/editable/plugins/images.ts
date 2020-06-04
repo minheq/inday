@@ -1,5 +1,5 @@
 import { Transforms, Editor } from 'slate';
-import { isUrl } from '../../../utils/is_url';
+import { isURL } from '../../../utils/is_url';
 import { imageExtensions } from '../../../utils/image_extensions';
 import { ReactEditor } from 'slate-react';
 
@@ -33,7 +33,7 @@ export function withImages<T extends ReactEditor>(editor: T): T & Editor {
           reader.readAsDataURL(file);
         }
       }
-    } else if (isImageUrl(text)) {
+    } else if (isImageURL(text)) {
       insertImage(editor, text);
     } else {
       insertData(data);
@@ -53,17 +53,17 @@ function convertArrayBufferToNumber(buffer: ArrayBuffer) {
   return dv.getUint16(0, true);
 }
 
-const insertImage = (editor: ReactEditor, url: string) => {
+export function insertImage(editor: ReactEditor, url: string) {
   const text = { text: '' };
   const image = { type: 'image', url, children: [text] };
   Transforms.insertNodes(editor, image);
-};
+}
 
-const isImageUrl = (url: string) => {
+const isImageURL = (url: string) => {
   if (!url) {
     return false;
   }
-  if (!isUrl(url)) {
+  if (!isURL(url)) {
     return false;
   }
   const ext = new URL(url).pathname.split('.').pop();

@@ -11,7 +11,7 @@ var nonLocalhostDomainRE = /^[^\s\.]+\.\S{2,}$/;
 /**
  * Loosely validate a URL `string`.
  */
-export function isUrl(string: string): boolean {
+export function isURL(string: string): boolean {
   if (typeof string !== 'string') {
     return false;
   }

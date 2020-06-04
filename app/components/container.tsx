@@ -25,6 +25,7 @@ interface ContainerProps {
   paddingHorizontal?: number;
   padding?: number;
   shadow?: boolean;
+  overflow?: 'visible' | 'hidden' | 'scroll';
   expanded?: boolean;
   testID?: string;
 }
@@ -55,6 +56,7 @@ export function Container(props: ContainerProps) {
     paddingVertical,
     paddingHorizontal,
     padding,
+    overflow,
     height,
     testID,
     shadow,
@@ -91,6 +93,7 @@ export function Container(props: ContainerProps) {
           borderLeftWidth,
           borderBottomWidth,
           borderColor,
+          overflow,
         },
       ]}
     >

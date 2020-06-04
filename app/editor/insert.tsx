@@ -1,6 +1,17 @@
 import React from 'react';
 
-import { Dialog, Container, ListItem, CloseButton, Row } from '../components';
+import {
+  Dialog,
+  Container,
+  ListItem,
+  Row,
+  useNavigation,
+  TextInput,
+  NavigationProvider,
+  Text,
+  BackButton,
+  Button,
+} from '../components';
 import { useToggle } from '../hooks/use_toggle';
 import { useEditor } from './editor';
 import { ImagePicker } from '../modules/image_picker';
@@ -37,22 +48,59 @@ export function InsertProvider(props: InsertProviderProps) {
         onRequestClose={setFalse}
         onDismiss={focus}
       >
-        <Container minWidth={320}>
-          <Row>
-            <CloseButton onPress={setFalse} />
-          </Row>
-          <ListItem
-            onPress={async () => {
-              const image = await ImagePicker.openPicker({});
-
-              console.log(image);
-            }}
-            title="Image"
-          />
-          <ListItem title="YouTube" />
-          <ListItem title="Twitter" />
-        </Container>
+        {open && (
+          <Container width={320} height={400}>
+            <NavigationProvider>
+              <InsertContent />
+            </NavigationProvider>
+          </Container>
+        )}
       </Dialog>
     </InsertContext.Provider>
+  );
+}
+
+function InsertContent() {
+  const { navigate } = useNavigation();
+  const { insertImage } = useEditor();
+
+  return (
+    <Container>
+      <ListItem
+        onPress={async () => {
+          insertImage('https://picsum.photos/200/300');
+          // const image = await ImagePicker.openPicker({});
+        }}
+        title="Image"
+      />
+      <ListItem
+        title="YouTube"
+        onPress={() => navigate(<InsertYouTubeInput />)}
+      />
+      <ListItem title="Twitter" />
+    </Container>
+  );
+}
+
+function InsertYouTubeInput() {
+  const { back } = useNavigation();
+  const { insertVideo } = useEditor();
+  const { onClose } = useInsert();
+  const [value, setValue] = React.useState('');
+
+  const handleInsert = React.useCallback(() => {
+    insertVideo(value);
+    onClose();
+  }, [insertVideo, onClose, value]);
+
+  return (
+    <Container>
+      <Row>
+        <BackButton onPress={back} />
+      </Row>
+      <Text>Enter YouTube video URL</Text>
+      <TextInput value={value} onValueChange={setValue} />
+      <Button title="Insert" onPress={handleInsert} />
+    </Container>
   );
 }

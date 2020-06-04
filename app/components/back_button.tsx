@@ -2,16 +2,16 @@ import React from 'react';
 import { Icon } from './icon';
 import { Pressable } from './pressable';
 
-interface CloseButtonProps {
+interface BackButtonProps {
   onPress?: () => void;
 }
 
-export function CloseButton(props: CloseButtonProps) {
+export function BackButton(props: BackButtonProps) {
   const { onPress } = props;
 
   return (
     <Pressable onPress={onPress}>
-      <Icon name="x" size="xl" />
+      <Icon name="arrow-left" size="xl" />
     </Pressable>
   );
 }

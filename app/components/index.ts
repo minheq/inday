@@ -15,5 +15,6 @@ export * from './modal';
 export * from './navigation';
 export * from './list_item';
 export * from './close_button';
+export * from './back_button';
 export * from './pressable';
 export * from './button';
