@@ -2,7 +2,7 @@ import React from 'react';
 import { Node } from 'slate';
 import { Editable, EditableState, EditableInstance } from './editable/editable';
 import { MainToolbar } from './main_toolbar';
-import { BlockType } from './editable/nodes/element';
+import { BlockType, Block } from './editable/nodes/element';
 import { Mark } from './editable/nodes/leaf';
 import { Hoverable } from './hoverable';
 import { View } from 'react-native';
@@ -31,8 +31,7 @@ const initialState: EditableState = {
 };
 
 const initialInstance: EditableInstance = {
-  insertImage: () => {},
-  insertVideo: () => {},
+  insertBlock: () => {},
   toggleBlock: () => {},
   toggleMark: () => {},
   removeLink: () => {},
@@ -78,12 +77,8 @@ export function Editor(props: EditorProps) {
     editableRef.current.focus();
   }, []);
 
-  const handleInsertImage = React.useCallback((url: string) => {
-    editableRef.current.insertImage(url);
-  }, []);
-
-  const handleInsertVideo = React.useCallback((url: string) => {
-    editableRef.current.insertVideo(url);
+  const handleInsertBlock = React.useCallback((block: Block) => {
+    editableRef.current.insertBlock(block);
   }, []);
 
   return (
@@ -97,8 +92,7 @@ export function Editor(props: EditorProps) {
           toggleMark: handleToggleMark,
           removeLink: handleRemoveLink,
           insertLink: handleInsertLink,
-          insertImage: handleInsertImage,
-          insertVideo: handleInsertVideo,
+          insertBlock: handleInsertBlock,
           focus: handleFocus,
         }}
       >
@@ -128,9 +122,8 @@ const EditorContext = React.createContext<EditorContext>({
   marks: {},
   toggleBlock: () => {},
   toggleMark: () => {},
-  insertVideo: () => {},
   removeLink: () => {},
-  insertImage: () => {},
+  insertBlock: () => {},
   insertLink: () => {},
   focus: () => {},
 });

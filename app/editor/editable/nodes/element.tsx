@@ -13,6 +13,7 @@ import { CheckListItem } from './check_list_item';
 import { Divider } from './divider';
 import { CodeBlock } from './code_block';
 import { Video } from './video';
+import { WebBookmark } from './web_bookmark';
 
 export type Block =
   | Paragraph
@@ -21,6 +22,7 @@ export type Block =
   | ListItem
   | Blockquote
   | CodeBlock
+  | WebBookmark
   | Video
   | Divider
   | CheckListItem
@@ -69,6 +71,8 @@ export function Element(props: ElementProps) {
       return <Blockquote {...props} element={props.element} />;
     case 'video':
       return <Video {...props} element={props.element} />;
+    case 'web-bookmark':
+      return <WebBookmark {...props} element={props.element} />;
     case 'bulleted-list':
       return <BulletedList {...props} element={props.element} />;
     case 'numbered-list':

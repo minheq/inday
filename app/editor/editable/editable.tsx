@@ -13,7 +13,7 @@ import { Leaf, Mark } from './nodes/leaf';
 import { withShortcuts } from './plugins/shortcuts';
 import { withChecklists } from './plugins/checklists';
 import { withLinks } from './plugins/links';
-import { Element, ElementType, BlockType } from './nodes/element';
+import { Element, ElementType, BlockType, Block } from './nodes/element';
 import {
   isInline,
   isBlock,
@@ -27,8 +27,8 @@ import {
 import { LinkValue, Link } from './nodes/link';
 import { css } from '../../utils/css';
 import { usePrevious } from '../../hooks/use_previous';
-import { withImages, insertImage } from './plugins/images';
-import { withVideos, insertVideo } from './plugins/videos';
+import { withImages } from './plugins/images';
+import { withVideos } from './plugins/videos';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',
@@ -62,13 +62,12 @@ export interface EditableState {
 }
 
 export interface EditableInstance {
-  insertImage: (url: string) => void;
-  insertVideo: (url: string) => void;
+  insertBlock: (block: Block) => void;
   toggleBlock: (format: BlockType) => void;
   toggleMark: (format: Mark) => void;
   removeLink: () => void;
-  focus: () => void;
   insertLink: (value: LinkValue) => void;
+  focus: () => void;
 }
 
 interface EditableProps {
@@ -122,13 +121,9 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           ReactEditor.focus(editor);
           toggleBlock(editor, format);
         },
-        insertImage: (url) => {
-          ReactEditor.focus(editor);
-          insertImage(editor, url);
-        },
-        insertVideo: (url) => {
+        insertBlock: (block) => {
           restoreSelection();
-          insertVideo(editor, url);
+          Transforms.insertNodes(editor, block);
         },
         toggleMark: (format) => {
           ReactEditor.focus(editor);
@@ -276,8 +271,6 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
       },
       [editor, onChange, draggingRef, previousStateRef],
     );
-
-    console.log(editor.children);
 
     return (
       <Slate editor={editor} value={value} onChange={handleChange}>

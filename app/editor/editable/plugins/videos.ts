@@ -1,6 +1,7 @@
 import { Transforms, Editor } from 'slate';
 import { isURL } from '../../../utils/is_url';
 import { ReactEditor } from 'slate-react';
+import { Video } from '../nodes/video';
 
 export function withVideos<T extends ReactEditor>(editor: T): T & Editor {
   const { insertData, isVoid } = editor;
@@ -22,14 +23,22 @@ export function withVideos<T extends ReactEditor>(editor: T): T & Editor {
   return editor;
 }
 
-export function insertVideo(editor: ReactEditor, url: string) {
-  let finalURL = url;
+export function toVideo(url: string): Video {
+  const text = { text: '' };
+
+  let embedURL = url;
+
   if (isYouTubeURL(url)) {
-    finalURL = transformYouTubeURL(url);
+    embedURL = transformYouTubeURL(url);
   }
 
-  const text = { text: '' };
-  const video = { type: 'video', url: finalURL, children: [text] };
+  const video = { type: 'video' as const, url: embedURL, children: [text] };
+
+  return video;
+}
+
+function insertVideo(editor: ReactEditor, url: string) {
+  const video = toVideo(url);
 
   Transforms.insertNodes(editor, video);
 }

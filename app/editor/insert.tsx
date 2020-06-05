@@ -15,6 +15,8 @@ import {
 import { useToggle } from '../hooks/use_toggle';
 import { useEditor } from './editor';
 import { ImagePicker } from '../modules/image_picker';
+import { toImage } from './editable/plugins/images';
+import { toVideo } from './editable/plugins/videos';
 
 interface InsertContext {
   onOpen: () => void;
@@ -63,15 +65,17 @@ export function InsertProvider(props: InsertProviderProps) {
 function InsertContent() {
   const { onClose } = useInsert();
   const { navigate } = useNavigation();
-  const { insertImage } = useEditor();
+  const { insertBlock } = useEditor();
 
   return (
     <Container>
       <ListItem
         onPress={async () => {
           onClose();
-          insertImage('https://picsum.photos/200/300');
-          // const image = await ImagePicker.openPicker({});
+          await ImagePicker.openPicker({});
+          // upload image and get URL
+          const image = toImage('https://picsum.photos/200/300');
+          insertBlock(image);
         }}
         title="Image"
       />
@@ -79,21 +83,48 @@ function InsertContent() {
         title="YouTube"
         onPress={() => navigate(<InsertYouTubeInput />)}
       />
-      <ListItem title="Twitter" />
+      <ListItem
+        title="Web Bookmark"
+        onPress={() => navigate(<WebBookmarkInput />)}
+      />
+    </Container>
+  );
+}
+
+function WebBookmarkInput() {
+  const { back } = useNavigation();
+  const { insertBlock } = useEditor();
+  const { onClose } = useInsert();
+  const [value, setValue] = React.useState('');
+
+  const handleInsert = React.useCallback(() => {
+    onClose();
+    insertBlock({ type: 'web-bookmark', url: value, children: [{ text: '' }] });
+  }, [insertBlock, onClose, value]);
+
+  return (
+    <Container>
+      <Row>
+        <BackButton onPress={back} />
+      </Row>
+      <Text>Enter URL</Text>
+      <TextInput value={value} onValueChange={setValue} />
+      <Button title="Insert" onPress={handleInsert} />
     </Container>
   );
 }
 
 function InsertYouTubeInput() {
   const { back } = useNavigation();
-  const { insertVideo } = useEditor();
+  const { insertBlock } = useEditor();
   const { onClose } = useInsert();
   const [value, setValue] = React.useState('');
 
   const handleInsert = React.useCallback(() => {
     onClose();
-    insertVideo(value);
-  }, [insertVideo, onClose, value]);
+    const video = toVideo(value);
+    insertBlock(video);
+  }, [insertBlock, onClose, value]);
 
   return (
     <Container>

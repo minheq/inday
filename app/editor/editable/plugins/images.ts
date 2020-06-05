@@ -2,6 +2,7 @@ import { Transforms, Editor } from 'slate';
 import { isURL } from '../../../utils/is_url';
 import { imageExtensions } from '../../../utils/image_extensions';
 import { ReactEditor } from 'slate-react';
+import { Image } from '../nodes/image';
 
 export function withImages<T extends ReactEditor>(editor: T): T & Editor {
   const { insertData, isVoid } = editor;
@@ -53,9 +54,15 @@ function convertArrayBufferToNumber(buffer: ArrayBuffer) {
   return dv.getUint16(0, true);
 }
 
-export function insertImage(editor: ReactEditor, url: string) {
+export function toImage(url: string): Image {
   const text = { text: '' };
-  const image = { type: 'image', url, children: [text] };
+  const image = { type: 'image' as const, url, children: [text] };
+
+  return image;
+}
+
+function insertImage(editor: ReactEditor, url: string) {
+  const image = toImage(url);
   Transforms.insertNodes(editor, image);
 }
 
