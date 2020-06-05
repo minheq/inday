@@ -15,7 +15,12 @@ import {
 import { useDraggable } from '../drag_drop/use_draggable';
 import { DragState } from '../drag_drop/draggable';
 import { measure } from '../utils/measurements';
-import { Card } from './types';
+
+export interface Card {
+  id: string;
+  contentHeight: number;
+  title: string;
+}
 
 export interface CardListItem extends Card {
   index: number;

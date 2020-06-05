@@ -8,9 +8,8 @@ import {
 } from 'react-native';
 import { useDropTarget } from '../drag_drop/use_drop_target';
 import { measure } from '../utils/measurements';
-import { CardListItem } from './card_list_item';
+import { CardListItem, Card } from './card_list_item';
 import { Draggable } from '../drag_drop/draggable';
-import { Card } from './types';
 
 interface CardListProps {
   id: string;

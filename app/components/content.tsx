@@ -11,14 +11,21 @@ interface ContentProps {
 export function Content(props: ContentProps) {
   const { children } = props;
 
-  return <View style={styles.root}>{children}</View>;
+  return (
+    <View style={styles.root}>
+      <View style={styles.inner}>{children}</View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   root: {
     width: '100%',
-    maxWidth: 1440,
-    paddingTop: 16,
-    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  inner: {
+    width: '100%',
+    maxWidth: 768,
+    padding: 16,
   },
 });
