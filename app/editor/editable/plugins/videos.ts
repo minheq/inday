@@ -28,7 +28,9 @@ export function insertVideo(editor: ReactEditor, url: string) {
     finalURL = transformYouTubeURL(url);
   }
 
-  const video = { type: 'video', url: finalURL, children: [{ text: '' }] };
+  const text = { text: '' };
+  const video = { type: 'video', url: finalURL, children: [text] };
+
   Transforms.insertNodes(editor, video);
 }
 

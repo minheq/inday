@@ -61,6 +61,7 @@ export function InsertProvider(props: InsertProviderProps) {
 }
 
 function InsertContent() {
+  const { onClose } = useInsert();
   const { navigate } = useNavigation();
   const { insertImage } = useEditor();
 
@@ -68,6 +69,7 @@ function InsertContent() {
     <Container>
       <ListItem
         onPress={async () => {
+          onClose();
           insertImage('https://picsum.photos/200/300');
           // const image = await ImagePicker.openPicker({});
         }}
@@ -89,8 +91,8 @@ function InsertYouTubeInput() {
   const [value, setValue] = React.useState('');
 
   const handleInsert = React.useCallback(() => {
-    insertVideo(value);
     onClose();
+    insertVideo(value);
   }, [insertVideo, onClose, value]);
 
   return (

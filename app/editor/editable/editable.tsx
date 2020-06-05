@@ -82,8 +82,8 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
     const [value, setValue] = React.useState<Node[]>(initialValue);
     const editor = React.useMemo(
       () =>
-        withVideos(
-          withImages(
+        withImages(
+          withVideos(
             withLinks(
               withChecklists(
                 withShortcuts(withReact(withHistory(createEditor()))),
@@ -104,6 +104,17 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
     const renderElement = React.useCallback((p) => <Element {...p} />, []);
     const renderLeaf = React.useCallback((p) => <Leaf {...p} />, []);
 
+    const restoreSelection = React.useCallback(() => {
+      // When other items are pressed, we lose focus and selection.
+      // We keep track of previous selection so that we can reuse it here and select
+      if (!prevSelection) {
+        return;
+      }
+
+      ReactEditor.focus(editor);
+      Transforms.select(editor, prevSelection);
+    }, [editor, prevSelection]);
+
     React.useImperativeHandle(
       ref,
       () => ({
@@ -116,7 +127,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           insertImage(editor, url);
         },
         insertVideo: (url) => {
-          ReactEditor.focus(editor);
+          restoreSelection();
           insertVideo(editor, url);
         },
         toggleMark: (format) => {
@@ -128,23 +139,14 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           removeLink(editor);
         },
         insertLink: (val: LinkValue) => {
-          // When "edit" is pressed, we lose focus and selection.
-          // We keep track of previous selection so that we can reuse it
-          // here and select
-          if (!prevSelection) {
-            return;
-          }
-
-          ReactEditor.focus(editor);
-          Transforms.select(editor, prevSelection);
-
+          restoreSelection();
           insertLink(editor, val);
         },
         focus: () => {
           ReactEditor.focus(editor);
         },
       }),
-      [editor, prevSelection],
+      [editor, restoreSelection],
     );
 
     const handleKeyDown = React.useCallback(
@@ -274,6 +276,8 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
       },
       [editor, onChange, draggingRef, previousStateRef],
     );
+
+    console.log(editor.children);
 
     return (
       <Slate editor={editor} value={value} onChange={handleChange}>
