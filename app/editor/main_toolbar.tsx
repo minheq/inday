@@ -48,7 +48,11 @@ function LinkButton() {
 
   const handlePress = React.useCallback(() => {
     if (selection) {
-      onEdit({ url: '', display: selection.text ?? '' });
+      if (selection.link) {
+        onEdit(selection.link);
+      } else {
+        onEdit({ url: '', display: selection.text ?? '' });
+      }
     }
   }, [onEdit, selection]);
 

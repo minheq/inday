@@ -75,6 +75,8 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
   );
 }
 
+export const LinkEditConsumer = LinkEditContext.Consumer;
+
 interface LinkEditProps {
   initialValue: LinkValue;
   onSubmit: (link: LinkValue) => void;

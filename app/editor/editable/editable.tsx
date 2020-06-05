@@ -38,6 +38,7 @@ const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+shift+7': 'numbered-list',
   'mod+shift+8': 'bulleted-list',
   'mod+shift+9': 'block-quote',
+  'mod+shift+0': 'paragraph',
   'mod+shift+alt+c': 'code-block',
   'mod+k': 'link',
 };
@@ -73,11 +74,16 @@ export interface EditableInstance {
 interface EditableProps {
   initialValue?: Node[];
   onChange?: (state: EditableState) => void;
+  onEditLink: (value: LinkValue) => void;
 }
 
 export const Editable = React.forwardRef<EditableInstance, EditableProps>(
   (props, ref) => {
-    const { initialValue = [], onChange = () => {} } = props;
+    const {
+      initialValue = [],
+      onChange = () => {},
+      onEditLink = () => {},
+    } = props;
     const [value, setValue] = React.useState<Node[]>(initialValue);
     const editor = React.useMemo(
       () =>
@@ -157,14 +163,28 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
             } else if (isBlock(format)) {
               toggleBlock(editor, format);
             } else if (isInline(format)) {
+              console.log(format);
+
               if (format === 'link') {
-                // TODO
+                const [linkEntry] = Editor.nodes(editor, {
+                  match: (n) => n.type === 'link',
+                });
+
+                if (linkEntry) {
+                  const linkNode = linkEntry[0] as Link;
+                  onEditLink(linkNode);
+                } else {
+                  if (editor.selection) {
+                    const text = Editor.string(editor, editor.selection);
+                    onEditLink({ display: text, url: '' });
+                  }
+                }
               }
             }
           }
         }
       },
-      [editor],
+      [editor, onEditLink],
     );
 
     const handleMouseDown = React.useCallback(() => {

@@ -7,7 +7,7 @@ import { Mark } from './editable/nodes/leaf';
 import { Hoverable } from './hoverable';
 import { View } from 'react-native';
 import { LinkValue } from './editable/nodes/link';
-import { LinkEditProvider } from './link_edit';
+import { LinkEditProvider, LinkEditConsumer } from './link_edit';
 import { FormatProvider } from './format';
 import { InsertProvider } from './insert';
 
@@ -100,11 +100,16 @@ export function Editor(props: EditorProps) {
           <LinkEditProvider>
             <InsertProvider>
               <MainToolbar />
-              <Editable
-                ref={editableRef}
-                initialValue={initialValue}
-                onChange={handleChange}
-              />
+              <LinkEditConsumer>
+                {({ onEdit }) => (
+                  <Editable
+                    ref={editableRef}
+                    initialValue={initialValue}
+                    onChange={handleChange}
+                    onEditLink={onEdit}
+                  />
+                )}
+              </LinkEditConsumer>
               <Hoverable />
             </InsertProvider>
           </LinkEditProvider>
