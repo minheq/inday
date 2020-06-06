@@ -54,7 +54,7 @@ export function Switch(props: SwitchProps) {
               {
                 translateX: checked.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [3, 24],
+                  outputRange: [2, 26],
                 }),
               },
             ],
@@ -74,9 +74,9 @@ const styles = StyleSheet.create({
   },
   slider: {
     borderRadius: 999,
-    top: 1,
-    width: 28,
-    height: 28,
+    top: 2,
+    width: 26,
+    height: 26,
     backgroundColor: 'white',
     position: 'absolute',
     justifyContent: 'center',

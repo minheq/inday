@@ -39,7 +39,7 @@ export function Checkbox(props: CheckboxProps) {
           backgroundColor: checked.interpolate({
             inputRange: [0, 1],
             outputRange: [
-              theme.container.color.default,
+              theme.container.color.tint,
               theme.container.color.primary,
             ],
           }),
