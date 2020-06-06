@@ -16,9 +16,9 @@ import { CardScreen } from './card';
 
 export function HomeScreen() {
   const { navigate } = useNavigation();
-  const { getCardsByDate } = useCardStore();
+  const { getManyByDate } = useCardStore();
 
-  const cards = getCardsByDate('2020-06-06');
+  const cards = getManyByDate('2020-06-06');
 
   return (
     <Screen>

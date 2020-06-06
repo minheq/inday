@@ -63,7 +63,7 @@ function ToolbarButton(props: ToolbarButtonProps) {
   return (
     <Button onPress={onPress}>
       <Container width={40} height={40} center>
-        <Icon color={disabled ? 'muted' : 'default'} name={icon} />
+        <Icon size="lg" color={disabled ? 'muted' : 'default'} name={icon} />
       </Container>
     </Button>
   );

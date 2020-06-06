@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: tokens.radius,
     zIndex: 1,
+    borderWidth: 1,
   },
   placeholder: {
     position: 'absolute',
