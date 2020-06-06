@@ -15,7 +15,6 @@ import { Card, useCardStore } from '../data/card';
 import { Editor } from '../editor';
 import { AppBar } from '../core/app_bar';
 import { useToggle } from '../hooks/use_toggle';
-import { tokens } from '../theme';
 
 interface CardScreenProps {
   card: Card;
@@ -62,15 +61,9 @@ function TaskButton(props: TaskButtonProps) {
   const [open, popover] = useToggle();
   const active = card.task !== null;
 
-  const handleAddTask = React.useCallback(() => {
-    if (!card.task) {
-      updateTask(card.id, { completed: false });
-    }
-    popover.toggle();
-  }, [updateTask, card, popover]);
-
   const handleToggleTask = React.useCallback(() => {
     if (!card.task) {
+      updateTask(card.id, { completed: false });
       return;
     }
 
@@ -93,18 +86,22 @@ function TaskButton(props: TaskButtonProps) {
         open={open}
         content={
           <PopoverContainer>
-            {card.task && (
-              <Row>
+            <Row>
+              {card.task ? (
                 <Button onPress={handleToggleTask}>
                   <Text>
                     {card.task.completed ? 'Completed' : 'Mark as completed'}
                   </Text>
                 </Button>
-                <Button onPress={handleRemoveTask}>
-                  <Text>Remove</Text>
+              ) : (
+                <Button onPress={handleToggleTask}>
+                  <Text>Turn card into task</Text>
                 </Button>
-              </Row>
-            )}
+              )}
+              <Button onPress={handleRemoveTask}>
+                <Text>Remove</Text>
+              </Button>
+            </Row>
           </PopoverContainer>
         }
       >
@@ -113,17 +110,11 @@ function TaskButton(props: TaskButtonProps) {
             <EditButton
               active={active}
               icon="check-circle"
-              onPress={handleAddTask}
+              onPress={popover.toggle}
             />
           </View>
         )}
       </Popover>
-      {/* <Dialog
-        animationType="slide"
-        isOpen={open}
-        onRequestClose={popover.setFalse}
-      >
-      </Dialog> */}
     </>
   );
 }

@@ -6,6 +6,8 @@ export * from './divider';
 export * from './dialog';
 export * from './spacing';
 export * from './row';
+export * from './checkbox';
+export * from './switch';
 export * from './popover';
 export * from './content';
 export * from './text_input';

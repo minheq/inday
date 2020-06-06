@@ -15,6 +15,7 @@ interface TextColors {
   default: string;
   primary: string;
   muted: string;
+  white: string;
   success: string;
   error: string;
 }
@@ -72,7 +73,7 @@ const lightTheme: Theme = {
     color: {
       default: 'rgba(255, 255, 255, 0)',
       content: 'rgba(255, 255, 255, 1)',
-      primary: 'rgba(34, 34, 34, 1)',
+      primary: 'rgba(0, 102, 204, 1)',
       tint: 'rgba(246, 246, 246, 1)',
       darkTint: 'rgba(230, 230, 230, 1)',
     },
@@ -93,6 +94,7 @@ const lightTheme: Theme = {
       muted: 'rgba(134, 134, 139, 1)',
       success: 'string',
       error: 'string',
+      white: 'white',
     },
     size: {
       xl: {
