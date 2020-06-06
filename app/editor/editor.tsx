@@ -10,6 +10,11 @@ import { LinkValue } from './editable/nodes/link';
 import { LinkEditProvider, LinkEditConsumer } from './link_edit';
 import { FormatProvider } from './format';
 import { InsertProvider } from './insert';
+import {
+  measure,
+  Measurements,
+  initialMeasurements,
+} from '../utils/measurements';
 
 // TODO
 // - Insert
@@ -41,8 +46,12 @@ const initialInstance: EditableInstance = {
 
 export function Editor(props: EditorProps) {
   const { initialValue = [] } = props;
+  const editorRef = React.useRef<View>(null);
   const editableRef = React.useRef<EditableInstance>(initialInstance);
   const [state, setState] = React.useState<EditableState>(initialState);
+  const [measurements, setMeasurements] = React.useState<Measurements>(
+    initialMeasurements,
+  );
 
   const handleToggleBlock = React.useCallback(
     (format: BlockType) => {
@@ -81,13 +90,19 @@ export function Editor(props: EditorProps) {
     editableRef.current.insertBlock(block);
   }, []);
 
+  const handleLayout = React.useCallback(async () => {
+    const m = await measure(editorRef);
+    setMeasurements(m);
+  }, []);
+
   return (
-    <View>
+    <View ref={editorRef} onLayout={handleLayout}>
       <EditorContext.Provider
         value={{
           selection: state.selection,
           marks: state.marks,
           type: state.type,
+          measurements,
           toggleBlock: handleToggleBlock,
           toggleMark: handleToggleMark,
           removeLink: handleRemoveLink,
@@ -119,12 +134,15 @@ export function Editor(props: EditorProps) {
   );
 }
 
-interface EditorContext extends EditableState, EditableInstance {}
+interface EditorContext extends EditableState, EditableInstance {
+  measurements: Measurements;
+}
 
 const EditorContext = React.createContext<EditorContext>({
   selection: null,
   type: 'paragraph',
   marks: {},
+  measurements: initialMeasurements,
   toggleBlock: () => {},
   toggleMark: () => {},
   removeLink: () => {},

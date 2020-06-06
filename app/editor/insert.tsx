@@ -109,7 +109,9 @@ function WebBookmarkInput() {
       </Row>
       <Text>Enter URL</Text>
       <TextInput value={value} onValueChange={setValue} />
-      <Button title="Insert" onPress={handleInsert} />
+      <Button onPress={handleInsert}>
+        <Text>Insert</Text>
+      </Button>
     </Container>
   );
 }
@@ -133,7 +135,9 @@ function InsertYouTubeInput() {
       </Row>
       <Text>Enter YouTube video URL</Text>
       <TextInput value={value} onValueChange={setValue} />
-      <Button title="Insert" onPress={handleInsert} />
+      <Button onPress={handleInsert}>
+        <Text>Insert</Text>
+      </Button>
     </Container>
   );
 }

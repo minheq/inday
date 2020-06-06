@@ -1,21 +1,23 @@
 import React from 'react';
-import { StyleSheet, Animated, GestureResponderEvent } from 'react-native';
+import { StyleSheet, Animated, ViewStyle, StyleProp } from 'react-native';
 import { Pressable } from './pressable';
 import { tokens, useTheme } from '../theme';
-import { Text } from './text';
 
 interface ButtonProps {
-  onPress?: (e: GestureResponderEvent) => void;
-  title?: string;
+  onPress?: () => void;
+  children?: React.ReactNode;
+  disabled?: boolean;
+  style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>;
 }
 
 export function Button(props: ButtonProps) {
-  const { onPress = () => {}, title } = props;
+  const { onPress = () => {}, disabled, style, children } = props;
   const background = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
   return (
     <Pressable
+      disabled={disabled}
       style={({ pressed, hovered }) => {
         Animated.spring(background, {
           toValue: pressed ? 1 : hovered ? 0.5 : 0,
@@ -36,21 +38,22 @@ export function Button(props: ButtonProps) {
               ],
             }),
           },
+          style,
         ];
       }}
       onPress={onPress}
     >
-      <Text>{title}</Text>
+      {children}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
-    height: 40,
-    paddingHorizontal: 8,
-    flexDirection: 'row',
+    // height: 40,
+    // paddingHorizontal: 8,
+    // flexDirection: 'row',
     borderRadius: tokens.radius,
-    alignItems: 'center',
+    // alignItems: 'center',
   },
 });

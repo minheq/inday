@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { ContainerColor, useTheme } from '../theme';
 
 interface ContainerProps {
@@ -25,6 +25,7 @@ interface ContainerProps {
   paddingHorizontal?: number;
   padding?: number;
   shadow?: boolean;
+  center?: boolean;
   overflow?: 'visible' | 'hidden' | 'scroll';
   expanded?: boolean;
   testID?: string;
@@ -60,6 +61,7 @@ export function Container(props: ContainerProps) {
     height,
     testID,
     shadow,
+    center,
   } = props;
 
   const theme = useTheme();
@@ -72,6 +74,7 @@ export function Container(props: ContainerProps) {
       testID={testID}
       style={[
         shadow && theme.container.shadow,
+        center && styles.center,
         {
           borderWidth,
           backgroundColor: theme.container.color[color],
@@ -101,3 +104,11 @@ export function Container(props: ContainerProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

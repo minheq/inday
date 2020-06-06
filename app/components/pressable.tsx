@@ -15,7 +15,9 @@ export interface PressableChildrenProps {
 }
 
 interface PressableProps extends PressabilityConfig {
-  children?: React.ReactNode;
+  children?:
+    | React.ReactNode
+    | ((props: PressableChildrenProps) => React.ReactNode);
   disabled?: boolean;
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
@@ -52,6 +54,7 @@ export function Pressable(props: PressableProps) {
       delayLongPress,
       delayPressIn,
       delayPressOut,
+      disabled,
       onPress,
       onHoverIn: (e) => {
         setIsHovered(true);
@@ -82,6 +85,7 @@ export function Pressable(props: PressableProps) {
       delayLongPress,
       delayPressIn,
       delayPressOut,
+      disabled,
       onPress,
       onHoverIn,
       onHoverOut,
@@ -104,19 +108,19 @@ export function Pressable(props: PressableProps) {
     onStartShouldSetResponder,
   } = usePressability(config);
 
+  const childrenProps: PressableChildrenProps = {
+    pressed: isPressed,
+    focused: isFocused,
+    hovered: !isPressed && isHovered,
+  };
+
   return (
     <Animated.View
       style={[
         styles.base,
         webStyle.outline,
         disabled && styles.disabled,
-        typeof style === 'function'
-          ? style({
-              pressed: isPressed,
-              focused: isFocused,
-              hovered: !isPressed && isHovered,
-            })
-          : style,
+        typeof style === 'function' ? style(childrenProps) : style,
       ]}
       onResponderGrant={onResponderGrant}
       onResponderMove={onResponderMove}
@@ -132,7 +136,7 @@ export function Pressable(props: PressableProps) {
       onMouseLeave={onMouseLeave}
       // onClick={onClick}
     >
-      {children}
+      {typeof children === 'function' ? children(childrenProps) : children}
     </Animated.View>
   );
 }

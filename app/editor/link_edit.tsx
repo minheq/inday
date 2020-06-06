@@ -118,7 +118,9 @@ export function LinkEdit(props: LinkEditProps) {
         onValueChange={setURL}
       />
       <Spacing height={24} />
-      <Button title="Submit" onPress={handleSubmit} />
+      <Button onPress={handleSubmit}>
+        <Text>Submit</Text>
+      </Button>
     </Container>
   );
 }

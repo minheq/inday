@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from './icon';
-import { Pressable } from './pressable';
+import { Button } from './button';
+import { Container } from './container';
 
 interface CloseButtonProps {
   onPress?: () => void;
@@ -10,8 +11,10 @@ export function CloseButton(props: CloseButtonProps) {
   const { onPress } = props;
 
   return (
-    <Pressable onPress={onPress}>
-      <Icon name="x" size="xl" />
-    </Pressable>
+    <Button onPress={onPress}>
+      <Container center width={40} height={40}>
+        <Icon name="x" size="xl" />
+      </Container>
+    </Button>
   );
 }

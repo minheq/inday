@@ -5,11 +5,13 @@ import { last, secondLast } from '../utils/arrays';
 interface NavigationContext {
   navigate: (screen: React.ReactNode) => void;
   back: () => void;
+  canGoBack: boolean;
 }
 
 const NavigationContext = React.createContext<NavigationContext>({
   navigate: () => {},
   back: () => {},
+  canGoBack: false,
 });
 
 interface NavigationProviderProps {
@@ -104,11 +106,14 @@ export function NavigationProvider(props: NavigationProviderProps) {
 
   const { screens } = state;
 
+  const canGoBack = screens.length > 1;
+
   return (
     <NavigationContext.Provider
       value={{
         navigate: handleNavigate,
         back: handleBack,
+        canGoBack,
       }}
     >
       <View style={styles.container} onLayout={handleLayout}>

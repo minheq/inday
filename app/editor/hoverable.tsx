@@ -1,7 +1,6 @@
 import React from 'react';
 import { Animated, StyleSheet, View, findNodeHandle } from 'react-native';
 import { tokens, useTheme } from '../theme';
-import { between } from '../utils/numbers';
 import { measure } from '../utils/measurements';
 import { useEditor } from './editor';
 import { LinkValue } from './editable/nodes/link';
@@ -39,7 +38,7 @@ export function Hoverable() {
   const editor = useEditor();
   const ref = React.useRef<View | null>(null);
   const [state, setState] = React.useState<State>(initialState);
-  const { selection } = editor;
+  const { selection, measurements } = editor;
   const prevSelection = usePrevious(selection);
 
   const getPosition = React.useCallback(async () => {
@@ -54,19 +53,12 @@ export function Hoverable() {
     }
 
     const { width, height } = await measure(ref);
-    let y = 0;
-    const LINE_HEIGHT = 16;
-    const LINE_OFFSET = 8;
-    if (selection.top - height < 4) {
-      y = selection.top + LINE_HEIGHT + LINE_OFFSET;
-    } else {
-      y = selection.top - height - LINE_OFFSET;
-    }
-
-    const x = between(selection.left + selection.width / 2 - width / 2, 8, 440);
+    const y = selection.top - measurements.pageY - height - 4;
+    const x =
+      selection.left - measurements.pageX + selection.width / 2 - width / 2;
 
     return { x, y };
-  }, [selection]);
+  }, [selection, measurements]);
 
   const show = React.useCallback(
     async (hoverable: Hoverable) => {

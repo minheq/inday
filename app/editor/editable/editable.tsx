@@ -163,8 +163,6 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
             } else if (isBlock(format)) {
               toggleBlock(editor, format);
             } else if (isInline(format)) {
-              console.log(format);
-
               if (format === 'link') {
                 const [linkEntry] = Editor.nodes(editor, {
                   match: (n) => n.type === 'link',

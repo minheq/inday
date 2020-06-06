@@ -9,6 +9,15 @@ export interface Measurements {
   pageY: number;
 }
 
+export const initialMeasurements: Measurements = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+  pageX: 0,
+  pageY: 0,
+};
+
 export async function measure(
   ref: React.MutableRefObject<any>,
 ): Promise<Measurements> {

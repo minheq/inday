@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { Row, Icon } from '../components';
+import { Row, Icon, Button, Container, IconName } from '../components';
 import { useEditor } from './editor';
 import { useLinkEdit } from './link_edit';
-import { ToolbarButton } from './toolbar';
 import { useFormat } from './format';
 import { useInsert } from './insert';
 
@@ -22,11 +21,7 @@ function InsertButton() {
   const { selection } = useEditor();
   const disabled = selection === null;
 
-  return (
-    <ToolbarButton disabled={disabled} onPress={onOpen}>
-      <Icon color={disabled ? 'muted' : 'default'} name="plus" />
-    </ToolbarButton>
-  );
+  return <ToolbarButton onPress={onOpen} disabled={disabled} icon="plus" />;
 }
 
 function FormatButton() {
@@ -34,11 +29,7 @@ function FormatButton() {
   const { selection } = useEditor();
   const disabled = selection === null;
 
-  return (
-    <ToolbarButton disabled={disabled} onPress={onOpen}>
-      <Icon color={disabled ? 'muted' : 'default'} name="layers" />
-    </ToolbarButton>
-  );
+  return <ToolbarButton onPress={onOpen} disabled={disabled} icon="layers" />;
 }
 
 function LinkButton() {
@@ -57,8 +48,23 @@ function LinkButton() {
   }, [onEdit, selection]);
 
   return (
-    <ToolbarButton onPress={handlePress}>
-      <Icon color={disabled ? 'muted' : 'default'} name="link" />
-    </ToolbarButton>
+    <ToolbarButton onPress={handlePress} disabled={disabled} icon="link" />
+  );
+}
+
+interface ToolbarButtonProps {
+  onPress: () => void;
+  disabled: boolean;
+  icon: IconName;
+}
+
+function ToolbarButton(props: ToolbarButtonProps) {
+  const { onPress, icon, disabled } = props;
+  return (
+    <Button onPress={onPress}>
+      <Container width={40} height={40} center>
+        <Icon color={disabled ? 'muted' : 'default'} name={icon} />
+      </Container>
+    </Button>
   );
 }

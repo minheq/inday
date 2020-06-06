@@ -1,9 +1,8 @@
 import React from 'react';
 import { StyleSheet, View, Linking, Clipboard } from 'react-native';
 
-import { Text } from '../components';
+import { Text, Button } from '../components';
 import { LinkValue } from './editable/nodes/link';
-import { ToolbarButton } from './toolbar';
 import { useEditor } from './editor';
 import { useLinkEdit } from './link_edit';
 
@@ -40,18 +39,18 @@ export function LinkToolbar(props: LinkToolbarProps) {
       <View style={styles.urlWrapper}>
         <Text numberOfLines={1}>{value.url}</Text>
       </View>
-      <ToolbarButton onPress={handleOpen}>
+      <Button onPress={handleOpen}>
         <Text>Open</Text>
-      </ToolbarButton>
-      <ToolbarButton onPress={handleCopy}>
+      </Button>
+      <Button onPress={handleCopy}>
         <Text>Copy</Text>
-      </ToolbarButton>
-      <ToolbarButton onPress={handleEdit}>
+      </Button>
+      <Button onPress={handleEdit}>
         <Text>Edit</Text>
-      </ToolbarButton>
-      <ToolbarButton onPress={handleRemove}>
+      </Button>
+      <Button onPress={handleRemove}>
         <Text>Remove</Text>
-      </ToolbarButton>
+      </Button>
     </View>
   );
 }

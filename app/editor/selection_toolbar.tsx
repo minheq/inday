@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { Icon, IconName, Row } from '../components';
+import { Icon, IconName, Row, Button, Container } from '../components';
 import { Mark } from './editable/nodes/leaf';
 import { useEditor } from './editor';
-import { ToolbarButton } from './toolbar';
 import { useLinkEdit } from './link_edit';
 
 export function SelectionToolbar() {
@@ -26,17 +25,13 @@ interface MarkButtonProps {
 function MarkButton(props: MarkButtonProps) {
   const { icon, format } = props;
   const { toggleMark, marks } = useEditor();
-  const active = marks && !!marks[format];
+  const active = !!(marks && !!marks[format]);
 
   const handlePress = React.useCallback(() => {
     toggleMark(format);
   }, [toggleMark, format]);
 
-  return (
-    <ToolbarButton onPress={handlePress}>
-      <Icon color={active ? 'primary' : 'default'} name={icon} />
-    </ToolbarButton>
-  );
+  return <ToolbarButton active={active} onPress={handlePress} icon={icon} />;
 }
 
 function LinkButton() {
@@ -49,9 +44,22 @@ function LinkButton() {
     }
   }, [onEdit, selection]);
 
+  return <ToolbarButton active={false} onPress={handlePress} icon="link" />;
+}
+
+interface ToolbarButtonProps {
+  onPress: () => void;
+  active: boolean;
+  icon: IconName;
+}
+
+function ToolbarButton(props: ToolbarButtonProps) {
+  const { onPress, icon, active } = props;
   return (
-    <ToolbarButton onPress={handlePress}>
-      <Icon name="link" />
-    </ToolbarButton>
+    <Button onPress={onPress}>
+      <Container width={32} height={32} center>
+        <Icon color={active ? 'primary' : 'default'} name={icon} />
+      </Container>
+    </Button>
   );
 }
