@@ -15,7 +15,7 @@ export interface TextInputProps {
   testID?: string;
   value?: string;
   autoFocus?: boolean;
-  onValueChange?: (value: string) => void;
+  onChange?: (value: string) => void;
   placeholder?: string;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -27,7 +27,7 @@ export function TextInput(props: TextInputProps) {
     autoFocus,
     icon,
     value,
-    onValueChange = () => {},
+    onChange = () => {},
     placeholder,
   } = props;
   const {
@@ -97,7 +97,7 @@ export function TextInput(props: TextInputProps) {
         value={value}
         autoFocus={autoFocus}
         placeholder={placeholder}
-        onChangeText={onValueChange}
+        onChangeText={onChange}
         onFocus={onFocus}
         onBlur={onBlur}
         onResponderStart={onPressIn}

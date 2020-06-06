@@ -108,15 +108,11 @@ export function LinkEdit(props: LinkEditProps) {
       <TextInput
         autoFocus={focus === 'display'}
         value={display}
-        onValueChange={setDisplay}
+        onChange={setDisplay}
       />
       <Spacing height={16} />
       <Text>URL</Text>
-      <TextInput
-        autoFocus={focus === 'url'}
-        value={url}
-        onValueChange={setURL}
-      />
+      <TextInput autoFocus={focus === 'url'} value={url} onChange={setURL} />
       <Spacing height={24} />
       <Button onPress={handleSubmit}>
         <Text>Submit</Text>

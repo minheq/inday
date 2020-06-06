@@ -8,13 +8,14 @@ import {
   Container,
   Icon,
   Text,
-  Dialog,
+  Popover,
 } from '../components';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Card, useCardStore } from '../data/card';
 import { Editor } from '../editor';
 import { AppBar } from '../core/app_bar';
 import { useToggle } from '../hooks/use_toggle';
+import { tokens } from '../theme';
 
 interface CardScreenProps {
   card: Card;
@@ -58,13 +59,15 @@ interface TaskButtonProps {
 function TaskButton(props: TaskButtonProps) {
   const { card } = props;
   const { updateTask } = useCardStore();
-  const [open, toggle] = useToggle();
+  const [open, popover] = useToggle();
   const active = card.task !== null;
 
   const handleAddTask = React.useCallback(() => {
-    updateTask(card.id, { completed: false });
-    toggle.setTrue();
-  }, [updateTask, card, toggle]);
+    if (!card.task) {
+      updateTask(card.id, { completed: false });
+    }
+    popover.toggle();
+  }, [updateTask, card, popover]);
 
   const handleToggleTask = React.useCallback(() => {
     if (!card.task) {
@@ -80,29 +83,47 @@ function TaskButton(props: TaskButtonProps) {
     }
 
     updateTask(card.id, null);
-  }, [updateTask, card]);
+    popover.setFalse();
+  }, [updateTask, card, popover]);
 
   return (
     <>
-      <EditButton active={active} icon="check-circle" onPress={handleAddTask} />
-      <Dialog
+      <Popover
+        position="bottom-right"
+        open={open}
+        content={
+          <PopoverContainer>
+            {card.task && (
+              <Row>
+                <Button onPress={handleToggleTask}>
+                  <Text>
+                    {card.task.completed ? 'Completed' : 'Mark as completed'}
+                  </Text>
+                </Button>
+                <Button onPress={handleRemoveTask}>
+                  <Text>Remove</Text>
+                </Button>
+              </Row>
+            )}
+          </PopoverContainer>
+        }
+      >
+        {({ ref }) => (
+          <View ref={ref}>
+            <EditButton
+              active={active}
+              icon="check-circle"
+              onPress={handleAddTask}
+            />
+          </View>
+        )}
+      </Popover>
+      {/* <Dialog
         animationType="slide"
         isOpen={open}
-        onRequestClose={toggle.setFalse}
+        onRequestClose={popover.setFalse}
       >
-        {card.task && (
-          <Row>
-            <Button onPress={handleToggleTask}>
-              <Text>
-                {card.task.completed ? 'Completed' : 'Mark as completed'}
-              </Text>
-            </Button>
-            <Button onPress={handleRemoveTask}>
-              <Text>Remove</Text>
-            </Button>
-          </Row>
-        )}
-      </Dialog>
+      </Dialog> */}
     </>
   );
 }
@@ -121,5 +142,19 @@ function EditButton(props: EditButtonProps) {
         <Icon size="lg" color={active ? 'primary' : 'default'} name={icon} />
       </Container>
     </Button>
+  );
+}
+
+interface PopoverContainerProps {
+  children?: React.ReactNode;
+}
+
+function PopoverContainer(props: PopoverContainerProps) {
+  const { children } = props;
+
+  return (
+    <Container shape="rounded" borderWidth={1} shadow padding={16}>
+      {children}
+    </Container>
   );
 }

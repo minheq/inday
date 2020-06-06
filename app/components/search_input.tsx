@@ -3,17 +3,17 @@ import { TextInput } from './text_input';
 
 export interface SearchInputProps {
   value?: string;
-  onValueChange?: (value: string) => void;
+  onChange?: (value: string) => void;
 }
 
 export function SearchInput(props: SearchInputProps) {
-  const { value, onValueChange = () => {} } = props;
+  const { value, onChange = () => {} } = props;
 
   return (
     <TextInput
       icon="search"
       value={value}
-      onValueChange={onValueChange}
+      onChange={onChange}
       placeholder="Search"
     />
   );

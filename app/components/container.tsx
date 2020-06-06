@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { ContainerColor, useTheme } from '../theme';
+import { ContainerColor, useTheme, tokens } from '../theme';
+
+type Shape = 'rounded' | 'square';
 
 interface ContainerProps {
   children?: React.ReactNode;
@@ -29,6 +31,8 @@ interface ContainerProps {
   overflow?: 'visible' | 'hidden' | 'scroll';
   expanded?: boolean;
   testID?: string;
+  shape?: Shape;
+  zIndex?: number;
 }
 
 /**
@@ -59,9 +63,11 @@ export function Container(props: ContainerProps) {
     padding,
     overflow,
     height,
+    shape,
     testID,
     shadow,
     center,
+    zIndex,
   } = props;
 
   const theme = useTheme();
@@ -75,6 +81,7 @@ export function Container(props: ContainerProps) {
       style={[
         shadow && theme.container.shadow,
         center && styles.center,
+        shape && styles[shape],
         {
           borderWidth,
           backgroundColor: theme.container.color[color],
@@ -95,8 +102,9 @@ export function Container(props: ContainerProps) {
           borderRightWidth,
           borderLeftWidth,
           borderBottomWidth,
-          borderColor,
+          borderColor: borderColor ?? theme.border.color.default,
           overflow,
+          zIndex,
         },
       ]}
     >
@@ -110,5 +118,9 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  square: {},
+  rounded: {
+    borderRadius: tokens.radius,
   },
 });

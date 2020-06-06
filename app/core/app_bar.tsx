@@ -17,7 +17,7 @@ export function AppBar(props: AppBarProps) {
   }, [back, onBack]);
 
   return (
-    <Container height={40}>
+    <Container height={40} zIndex={2}>
       <Row expanded alignItems="center" justifyContent="space-between">
         <Container>
           {canGoBack && <BackButton onPress={handlePressBack} />}

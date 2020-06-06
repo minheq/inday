@@ -108,7 +108,7 @@ function WebBookmarkInput() {
         <BackButton onPress={back} />
       </Row>
       <Text>Enter URL</Text>
-      <TextInput value={value} onValueChange={setValue} />
+      <TextInput value={value} onChange={setValue} />
       <Button onPress={handleInsert}>
         <Text>Insert</Text>
       </Button>
@@ -134,7 +134,7 @@ function InsertYouTubeInput() {
         <BackButton onPress={back} />
       </Row>
       <Text>Enter YouTube video URL</Text>
-      <TextInput value={value} onValueChange={setValue} />
+      <TextInput value={value} onChange={setValue} />
       <Button onPress={handleInsert}>
         <Text>Insert</Text>
       </Button>
