@@ -7,14 +7,14 @@ import {
   Button,
   Container,
   Icon,
+  Pressable,
   Text,
-  Popover,
+  Spacing,
 } from '../components';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { Card, useCardStore } from '../data/card';
 import { Editor } from '../editor';
 import { AppBar } from '../core/app_bar';
-import { useToggle } from '../hooks/use_toggle';
 
 interface CardScreenProps {
   card: Card;
@@ -28,10 +28,80 @@ export function CardScreen(props: CardScreenProps) {
       <AppBar actions={<EditActions card={card} />} />
       <ScrollView>
         <Content>
+          <AddOn card={card} />
+          <Spacing height={16} />
           <Editor initialValue={card.content} />
         </Content>
       </ScrollView>
     </Screen>
+  );
+}
+
+interface AddOnProps {
+  card: Card;
+}
+
+function AddOn(props: AddOnProps) {
+  const { card } = props;
+
+  return (
+    <Row>
+      <TaskCheckbox card={card} />
+    </Row>
+  );
+}
+
+interface TaskCheckboxProps {
+  card: Card;
+}
+
+function TaskCheckbox(props: TaskCheckboxProps) {
+  const { card } = props;
+  const { updateTask } = useCardStore();
+  const { task } = card;
+
+  const handleToggle = React.useCallback(() => {
+    if (!task) {
+      return;
+    }
+
+    updateTask(card.id, { completed: !task.completed });
+  }, [updateTask, card, task]);
+
+  if (task === null) {
+    return null;
+  }
+
+  const { completed } = task;
+
+  return (
+    <Pressable onPress={handleToggle}>
+      {completed ? (
+        <Container
+          padding={4}
+          paddingRight={8}
+          borderWidth={1}
+          shape="pill"
+          color="primary"
+        >
+          <Row alignItems="center">
+            <Icon name="check" color="white" />
+            <Spacing width={4} />
+            <Text color="white" size="xs">
+              Completed
+            </Text>
+          </Row>
+        </Container>
+      ) : (
+        <Container padding={4} paddingRight={8} borderWidth={1} shape="pill">
+          <Row alignItems="center">
+            <Icon name="check" color="primary" />
+            <Spacing width={4} />
+            <Text size="xs">Mark as Completed</Text>
+          </Row>
+        </Container>
+      )}
+    </Pressable>
   );
 }
 
@@ -58,7 +128,6 @@ interface TaskButtonProps {
 function TaskButton(props: TaskButtonProps) {
   const { card } = props;
   const { updateTask } = useCardStore();
-  const [open, popover] = useToggle();
   const active = card.task !== null;
 
   const handleToggleTask = React.useCallback(() => {
@@ -67,55 +136,15 @@ function TaskButton(props: TaskButtonProps) {
       return;
     }
 
-    updateTask(card.id, { completed: !card.task.completed });
+    updateTask(card.id, null);
   }, [updateTask, card]);
 
-  const handleRemoveTask = React.useCallback(() => {
-    if (!card.task) {
-      return;
-    }
-
-    updateTask(card.id, null);
-    popover.setFalse();
-  }, [updateTask, card, popover]);
-
   return (
-    <>
-      <Popover
-        position="bottom-right"
-        open={open}
-        content={
-          <PopoverContainer>
-            <Row>
-              {card.task ? (
-                <Button onPress={handleToggleTask}>
-                  <Text>
-                    {card.task.completed ? 'Completed' : 'Mark as completed'}
-                  </Text>
-                </Button>
-              ) : (
-                <Button onPress={handleToggleTask}>
-                  <Text>Turn card into task</Text>
-                </Button>
-              )}
-              <Button onPress={handleRemoveTask}>
-                <Text>Remove</Text>
-              </Button>
-            </Row>
-          </PopoverContainer>
-        }
-      >
-        {({ ref }) => (
-          <View ref={ref}>
-            <EditButton
-              active={active}
-              icon="check-circle"
-              onPress={popover.toggle}
-            />
-          </View>
-        )}
-      </Popover>
-    </>
+    <EditButton
+      active={active}
+      icon="check-circle"
+      onPress={handleToggleTask}
+    />
   );
 }
 
@@ -133,19 +162,5 @@ function EditButton(props: EditButtonProps) {
         <Icon size="lg" color={active ? 'primary' : 'default'} name={icon} />
       </Container>
     </Button>
-  );
-}
-
-interface PopoverContainerProps {
-  children?: React.ReactNode;
-}
-
-function PopoverContainer(props: PopoverContainerProps) {
-  const { children } = props;
-
-  return (
-    <Container shape="rounded" borderWidth={1} shadow padding={16}>
-      {children}
-    </Container>
   );
 }

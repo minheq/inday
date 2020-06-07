@@ -1,5 +1,11 @@
 import React from 'react';
-import { Row, useNavigation, Container, BackButton } from '../components';
+import {
+  Row,
+  useNavigation,
+  Container,
+  BackButton,
+  Divider,
+} from '../components';
 
 interface AppBarProps {
   leading?: React.ReactNode;
@@ -17,13 +23,16 @@ export function AppBar(props: AppBarProps) {
   }, [back, onBack]);
 
   return (
-    <Container height={40} zIndex={2}>
-      <Row expanded alignItems="center" justifyContent="space-between">
-        <Container>
-          {canGoBack && <BackButton onPress={handlePressBack} />}
-        </Container>
-        <Container>{actions}</Container>
-      </Row>
-    </Container>
+    <>
+      <Container height={40} zIndex={2}>
+        <Row expanded alignItems="center" justifyContent="space-between">
+          <Container>
+            {canGoBack && <BackButton onPress={handlePressBack} />}
+          </Container>
+          <Container>{actions}</Container>
+        </Row>
+      </Container>
+      <Divider />
+    </>
   );
 }

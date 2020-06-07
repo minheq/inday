@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ContainerColor, useTheme, tokens } from '../theme';
 
-type Shape = 'rounded' | 'square';
+type Shape = 'rounded' | 'square' | 'pill';
 
 interface ContainerProps {
   children?: React.ReactNode;
@@ -79,9 +79,6 @@ export function Container(props: ContainerProps) {
     <View
       testID={testID}
       style={[
-        shadow && theme.container.shadow,
-        center && styles.center,
-        shape && styles[shape],
         {
           borderWidth,
           backgroundColor: theme.container.color[color],
@@ -106,6 +103,9 @@ export function Container(props: ContainerProps) {
           overflow,
           zIndex,
         },
+        shadow && theme.container.shadow,
+        center && styles.center,
+        shape && styles[shape],
       ]}
     >
       {children}
@@ -122,5 +122,8 @@ const styles = StyleSheet.create({
   square: {},
   rounded: {
     borderRadius: tokens.radius,
+  },
+  pill: {
+    borderRadius: 999,
   },
 });

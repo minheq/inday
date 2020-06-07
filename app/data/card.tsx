@@ -2,15 +2,15 @@ import React from 'react';
 import { Element } from '../editor/editable/nodes/element';
 import { data } from './fake';
 
-type Content = Element[];
-type Task = {
+export type Content = Element[];
+export interface Task {
   completed: boolean;
-};
+}
 
-type Reminder = {
+export interface Reminder {
   date: Date;
   recurrence: Recurrence | null;
-};
+}
 
 export interface Card {
   id: string;
