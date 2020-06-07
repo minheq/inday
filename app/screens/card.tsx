@@ -10,11 +10,14 @@ import {
   Pressable,
   Text,
   Spacing,
+  Dialog,
+  NavigationProvider,
 } from '../components';
 import { ScrollView } from 'react-native';
 import { Card, useCardStore } from '../data/card';
 import { Editor } from '../editor';
 import { AppBar } from '../core/app_bar';
+import { useToggle } from '../hooks/use_toggle';
 
 interface CardScreenProps {
   card: Card;
@@ -114,9 +117,9 @@ function EditActions(props: EditActionsProps) {
   return (
     <Row expanded>
       <TaskButton card={card} />
-      <EditButton icon="clock" onPress={() => {}} />
-      <EditButton icon="tag" onPress={() => {}} />
-      <EditButton icon="more-horizontal" onPress={() => {}} />
+      <ReminderButton card={card} />
+      {/* <EditButton icon="tag" onPress={() => {}} />
+      <EditButton icon="more-horizontal" onPress={() => {}} /> */}
     </Row>
   );
 }
@@ -145,6 +148,33 @@ function TaskButton(props: TaskButtonProps) {
       icon="check-circle"
       onPress={handleToggleTask}
     />
+  );
+}
+
+interface ReminderButtonProps {
+  card: Card;
+}
+
+function ReminderButton(props: ReminderButtonProps) {
+  const { card } = props;
+  const [open, dialog] = useToggle();
+  const active = card.reminderDate !== null || card.reminderPlace !== null;
+
+  return (
+    <>
+      <EditButton active={active} icon="clock" onPress={dialog.setTrue} />
+      <Dialog
+        animationType="slide"
+        isOpen={open}
+        onRequestClose={dialog.setFalse}
+      >
+        <Container width={320} height={480}>
+          <NavigationProvider>
+            {/* <Reminder card={card} /> */}
+          </NavigationProvider>
+        </Container>
+      </Dialog>
+    </>
   );
 }
 

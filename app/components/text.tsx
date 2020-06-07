@@ -17,6 +17,7 @@ export interface TextProps {
   testID?: string;
   numberOfLines?: number;
   decoration?: TextDecorationLine;
+  transform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
 }
 
 /**
@@ -32,6 +33,7 @@ export function Text(props: TextProps) {
     bold,
     numberOfLines,
     decoration = 'none',
+    transform = 'none',
   } = props;
   const theme = useTheme();
 
@@ -42,7 +44,11 @@ export function Text(props: TextProps) {
         styles[align],
         bold && styles.bold,
         theme.text.size[size],
-        { color: theme.text.color[color], textDecorationLine: decoration },
+        {
+          color: theme.text.color[color],
+          textDecorationLine: decoration,
+          textTransform: transform,
+        },
       ]}
       numberOfLines={numberOfLines}
     >

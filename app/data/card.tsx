@@ -1,15 +1,11 @@
 import React from 'react';
 import { Element } from '../editor/editable/nodes/element';
 import { data } from './fake';
+import { ReminderDate, ReminderPlace } from '../components';
 
 export type Content = Element[];
 export interface Task {
   completed: boolean;
-}
-
-export interface Reminder {
-  date: Date;
-  recurrence: Recurrence | null;
 }
 
 export interface Card {
@@ -21,58 +17,27 @@ export interface Card {
     imageURL: string | null;
   };
   labelIDs: string[];
-  reminder: Reminder | null;
+  reminderDate: ReminderDate | null;
+  reminderPlace: ReminderPlace | null;
   task: Task | null;
   createdAt: Date;
   updatedAt: Date;
-}
-
-enum WeekDay {
-  MONDAY = 1,
-  TUESDAY = 2,
-  WEDNESDAY = 3,
-  THURSDAY = 4,
-  FRIDAY = 5,
-  SATURDAY = 6,
-  SUNDAY = 0,
-}
-
-enum Frequency {
-  YEARLY = 'YEARLY',
-  MONTHLY = 'MONTHLY',
-  WEEKLY = 'WEEKLY',
-  DAILY = 'DAILY',
-}
-
-interface Recurrence {
-  startDate: Date;
-  frequency: Frequency;
-  interval?: number | null;
-  count?: number | null;
-  weekStart?: WeekDay | null;
-  until?: Date | null;
-  timezoneID?: string | null;
-  bySetPosition?: number[] | null;
-  byMonth?: number[] | null;
-  byMonthDay?: number[] | null;
-  byYearDay?: number[] | null;
-  byWeekNumber?: number[] | null;
-  byWeekDay?: WeekDay[] | null;
-  byHour?: number[] | null;
-  byMinute?: number[] | null;
-  bySecond?: number[] | null;
 }
 
 interface CardStoreContext {
   getByID: (id: string) => Card | null;
   getManyByDate: (date: string) => Card[];
   updateTask: (id: string, task: Task | null) => void;
+  updateReminderDate: (id: string, reminder: ReminderDate | null) => void;
+  updateReminderPlace: (id: string, reminder: ReminderPlace | null) => void;
 }
 
 const CardStoreContext = React.createContext<CardStoreContext>({
   getByID: () => null,
   getManyByDate: () => [],
   updateTask: () => {},
+  updateReminderDate: () => {},
+  updateReminderPlace: () => {},
 });
 
 export function useCardStore() {
@@ -139,12 +104,38 @@ export function CardStoreProvider(props: CardStoreProviderProps) {
     [cardsByID, cardsByDate],
   );
 
+  const handleUpdateReminderDate = React.useCallback(
+    (id: string, reminder: ReminderDate | null) => {
+      cardsByID[id].reminderDate = reminder;
+
+      setValue({
+        cardsByID,
+        cardsByDate,
+      });
+    },
+    [cardsByID, cardsByDate],
+  );
+
+  const handleUpdateReminderPlace = React.useCallback(
+    (id: string, reminder: ReminderPlace | null) => {
+      cardsByID[id].reminderPlace = reminder;
+
+      setValue({
+        cardsByID,
+        cardsByDate,
+      });
+    },
+    [cardsByID, cardsByDate],
+  );
+
   return (
     <CardStoreContext.Provider
       value={{
         getByID: handleGetByID,
         getManyByDate: handleGetManyByDate,
         updateTask: handleUpdateTask,
+        updateReminderDate: handleUpdateReminderDate,
+        updateReminderPlace: handleUpdateReminderPlace,
       }}
     >
       {children}

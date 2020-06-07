@@ -1,8 +1,7 @@
 import React from 'react';
 import { isHoverEnabled } from '../utils/execution_environment';
 
-interface UseHoverableProps {
-  children?: React.ReactNode | ((isHovered: boolean) => React.ReactNode);
+export interface UseHoverableProps {
   onHoverIn?: () => void;
   onHoverOut?: () => void;
 }

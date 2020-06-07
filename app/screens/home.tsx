@@ -8,6 +8,7 @@ import {
   Button,
   Row,
   useNavigation,
+  Container,
 } from '../components';
 import { ScrollView } from 'react-native';
 import { useCardStore } from '../data/card';
@@ -29,13 +30,13 @@ export function HomeScreen() {
           </Text>
           <Spacing height={16} />
           {cards.map((c) => (
-            <React.Fragment key={c.id}>
+            <Container key={c.id}>
               <CardListItem
                 onPress={() => navigate(<CardScreen card={c} />)}
                 card={c}
               />
               <Divider />
-            </React.Fragment>
+            </Container>
           ))}
           <Spacing height={16} />
           <Row>
