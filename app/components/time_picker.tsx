@@ -6,7 +6,8 @@ import { useToggle } from '../hooks/use_toggle';
 import { WheelPicker } from './wheel_picker';
 import { Row } from './row';
 import { range } from '../utils/arrays';
-import { format, roundToNearestMinutes } from 'date-fns';
+import { format, roundToNearestMinutes, setHours, setMinutes } from 'date-fns';
+import { Expand } from './expand';
 
 interface TimePickerProps {
   /** Sets year, month and day of this date on the operated values */
@@ -36,14 +37,9 @@ export function TimePicker(props: TimePickerProps) {
   const handleHourChange = React.useCallback(
     (hour: number) => {
       if (value) {
-        value.setHours(hour);
-        onChange(value);
-        console.log(value);
+        onChange(setHours(value, hour));
       } else {
-        const newVal = new Date();
-        newVal.setHours(hour);
-        newVal.setMinutes(0);
-        onChange(newVal);
+        onChange(setMinutes(setHours(new Date(), hour), 0));
       }
     },
     [onChange, value],
@@ -52,12 +48,9 @@ export function TimePicker(props: TimePickerProps) {
   const handleMinutesChange = React.useCallback(
     (minute: number) => {
       if (value) {
-        value.setMinutes(minute);
-        onChange(value);
+        onChange(setMinutes(value, minute));
       } else {
-        const newVal = new Date();
-        newVal.setMinutes(minute);
-        onChange(newVal);
+        onChange(setMinutes(new Date(), minute));
       }
     },
     [onChange, value],
@@ -95,7 +88,7 @@ export function TimePicker(props: TimePickerProps) {
         disabled={disabled}
         onClear={handleClear}
       />
-      {open && (
+      <Expand expanded={open}>
         <Row>
           <WheelPicker
             options={hours}
@@ -108,13 +101,13 @@ export function TimePicker(props: TimePickerProps) {
             value={valueMinutes}
           />
         </Row>
-      )}
+      </Expand>
     </Container>
   );
 }
 
 const hours: Option[] = range(24).map((i) => ({ label: `${i}`, value: i }));
-const minutes: Option[] = range(0, 55, 5).map((i) => ({
+const minutes: Option[] = range(0, 60, 5).map((i) => ({
   label: `${i}`,
   value: i,
 }));

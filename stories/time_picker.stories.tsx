@@ -9,7 +9,6 @@ export default {
 
 function StatefulCheckbox() {
   const [value, setValue] = React.useState<Date>();
-  console.log(value);
 
   return (
     <TimePicker

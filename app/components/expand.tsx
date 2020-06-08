@@ -1,0 +1,53 @@
+import React from 'react';
+import { Animated, StyleSheet, LayoutChangeEvent, View } from 'react-native';
+
+interface ExpandProps {
+  expanded?: boolean;
+  children?: React.ReactNode;
+}
+
+export function Expand(props: ExpandProps) {
+  const { expanded, children } = props;
+  const height = React.useRef(new Animated.Value(0)).current;
+  const translateY = React.useRef(new Animated.Value(0)).current;
+  const [intrinsicHeight, setIntrinsicHeight] = React.useState(0);
+
+  const handleLayout = React.useCallback((event: LayoutChangeEvent) => {
+    setIntrinsicHeight(event.nativeEvent.layout.height);
+  }, []);
+
+  React.useEffect(() => {
+    Animated.parallel([
+      Animated.spring(height, {
+        toValue: expanded ? intrinsicHeight : 0,
+        bounciness: 0,
+        useNativeDriver: false,
+      }),
+      Animated.spring(translateY, {
+        toValue: expanded ? 0 : -intrinsicHeight,
+        bounciness: 0,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  }, [height, translateY, expanded, intrinsicHeight]);
+
+  return (
+    <Animated.View style={[styles.base, { height }]}>
+      <Animated.View style={[{ transform: [{ translateY }] }]}>
+        <View onLayout={handleLayout}>{children}</View>
+      </Animated.View>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  base: {
+    overflow: 'hidden',
+  },
+  visible: {
+    display: 'flex',
+  },
+  invisible: {
+    display: 'none',
+  },
+});
