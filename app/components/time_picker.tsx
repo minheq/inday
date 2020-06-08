@@ -1,20 +1,18 @@
 import React from 'react';
-import { Picker } from './picker';
-import { addMinutes, startOfDay, endOfDay, isBefore, format } from 'date-fns';
-import { toTime, parseTime, isSameTime, setSameTime } from '../utils/time';
-import { setSameDay } from '../utils/day';
+import { Option } from './picker';
+import { Container } from './container';
+import { PickerButton } from './picker_button';
+import { useToggle } from '../hooks/use_toggle';
+import { WheelPicker } from './wheel_picker';
+import { Row } from './row';
+import { range } from '../utils/arrays';
+import { format, roundToNearestMinutes } from 'date-fns';
 
 interface TimePickerProps {
   /** Sets year, month and day of this date on the operated values */
   date?: Date;
   value?: Date;
-  onChange?: (value: Date) => void;
-  /** Minimum difference in minutes between time options. */
-  step?: number;
-  startTime?: Date;
-  display?: (value: Date) => string;
-  isBlocked?: (value: Date) => boolean;
-  endTime?: Date;
+  onChange?: (value?: Date) => void;
   placeholder?: string;
   disabled?: boolean;
 }
@@ -25,83 +23,98 @@ interface TimePickerProps {
 export function TimePicker(props: TimePickerProps) {
   const {
     value,
-    date,
-    step = 60,
+    date = new Date(),
     onChange = () => {},
-    startTime,
-    endTime,
-    display = (val: Date) => format(val, 'HH:mm'),
-    isBlocked,
     placeholder,
     disabled = false,
   } = props;
+  const [open, popover] = useToggle();
 
-  const effectiveDate = date ?? new Date();
+  const valueHours = value?.getHours();
+  const valueMinutes = value?.getMinutes();
 
-  const hours = disabled
-    ? []
-    : getHours({
-        date: effectiveDate,
-        display,
-        step,
-        startTime,
-        endTime,
-        isBlocked,
-      });
+  const handleHourChange = React.useCallback(
+    (hour: number) => {
+      if (value) {
+        value.setHours(hour);
+        onChange(value);
+        console.log(value);
+      } else {
+        const newVal = new Date();
+        newVal.setHours(hour);
+        newVal.setMinutes(0);
+        onChange(newVal);
+      }
+    },
+    [onChange, value],
+  );
+
+  const handleMinutesChange = React.useCallback(
+    (minute: number) => {
+      if (value) {
+        value.setMinutes(minute);
+        onChange(value);
+      } else {
+        const newVal = new Date();
+        newVal.setMinutes(minute);
+        onChange(newVal);
+      }
+    },
+    [onChange, value],
+  );
+
+  const handleClear = React.useCallback(() => {
+    onChange();
+    popover.setFalse();
+  }, [onChange, popover]);
+
+  const handleToggle = React.useCallback(() => {
+    if (open) {
+      popover.setFalse();
+    } else {
+      if (!value) {
+        if (date) {
+          onChange(roundToNearestMinutes(date, { nearestTo: 5 }));
+        } else {
+          onChange(roundToNearestMinutes(new Date(), { nearestTo: 5 }));
+        }
+      }
+
+      popover.setTrue();
+    }
+  }, [open, date, value, onChange, popover]);
 
   return (
-    <Picker
-      label="Time"
-      options={hours}
-      placeholder={placeholder}
-      disabled={disabled}
-      display={(val) => display(setSameTime(effectiveDate, parseTime(val)))}
-      value={value ? toTime(value) : undefined}
-      onChange={(time) => onChange(setSameTime(effectiveDate, parseTime(time)))}
-    />
+    <Container>
+      <PickerButton
+        label="Time"
+        description={value ? format(value, 'HH:mm') : undefined}
+        placeholder={placeholder}
+        clearable={!!value}
+        onPress={handleToggle}
+        disabled={disabled}
+        onClear={handleClear}
+      />
+      {open && (
+        <Row>
+          <WheelPicker
+            options={hours}
+            onChange={handleHourChange}
+            value={valueHours}
+          />
+          <WheelPicker
+            options={minutes}
+            onChange={handleMinutesChange}
+            value={valueMinutes}
+          />
+        </Row>
+      )}
+    </Container>
   );
 }
-interface HourOption {
-  value: string;
-  label: string;
-  disabled: boolean;
-}
 
-function getHours(params: {
-  date: Date;
-  step?: number;
-  startTime?: Date;
-  endTime?: Date;
-  display?: (value: Date) => string;
-  isBlocked?: (time: Date) => boolean;
-}): HourOption[] {
-  const {
-    date,
-    step = 30,
-    isBlocked = () => false,
-    startTime,
-    endTime,
-    display,
-  } = params;
-
-  const hours: HourOption[] = [];
-  const start = startTime ? setSameDay(startTime, date) : startOfDay(date);
-
-  const end = endTime ? setSameDay(endTime, date) : endOfDay(date);
-
-  let current = start;
-
-  while (isBefore(current, end) || isSameTime(current, end)) {
-    hours.push({
-      value: toTime(current),
-      label: display ? display(current) : toTime(current),
-      disabled: isBlocked(current),
-    });
-
-    const next = addMinutes(current, step);
-
-    current = next;
-  }
-
-  return hours;
-}
+const hours: Option[] = range(24).map((i) => ({ label: `${i}`, value: i }));
+const minutes: Option[] = range(0, 55, 5).map((i) => ({
+  label: `${i}`,
+  value: i,
+}));

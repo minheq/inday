@@ -3,11 +3,14 @@ import { Frequency, Recurrence } from '../modules/recurrence';
 import { ListItem } from './list_item';
 import { Container } from './container';
 import { Spacing } from './spacing';
-import { InputItem } from './input_item';
 import { BackButton } from './back_button';
 import { Row } from './row';
 import { useNavigation } from './navigation';
 import { Icon } from './icon';
+import { View, StyleSheet } from 'react-native';
+import { Button } from './button';
+import { Column } from './column';
+import { Text } from './text';
 
 interface RecurrencePickerProps {
   startDate: Date;
@@ -21,8 +24,7 @@ export function RecurrencePicker(props: RecurrencePickerProps) {
 
   return (
     <Container>
-      <InputItem
-        icon="chevron-right"
+      <RecurrencePickerButton
         label="Repeat"
         description="Does not repeat"
         onPress={() =>
@@ -109,3 +111,51 @@ interface Option {
   value: Recurrence;
   selected?: boolean;
 }
+
+interface RecurrencePickerButtonProps {
+  onPress?: () => void;
+  label?: string;
+  description?: string;
+  placeholder?: string;
+}
+
+export function RecurrencePickerButton(props: RecurrencePickerButtonProps) {
+  const { description, placeholder, label, onPress } = props;
+
+  return (
+    <Button onPress={onPress} style={styles.button}>
+      <Container
+        paddingVertical={8}
+        paddingLeft={16}
+        paddingRight={40}
+        shape="rounded"
+        height={56}
+      >
+        <Column expanded justifyContent="center">
+          <Text bold size="xs">
+            {label}
+          </Text>
+          <Text color={description ? 'default' : 'muted'}>
+            {description || placeholder}
+          </Text>
+        </Column>
+      </Container>
+      <View style={styles.arrowRight}>
+        <Icon name="chevron-right" size="lg" />
+      </View>
+    </Button>
+  );
+}
+
+const styles = StyleSheet.create({
+  button: {
+    width: '100%',
+  },
+  arrowRight: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

@@ -56,12 +56,14 @@ export function ReminderDate(props: ReminderDateProps) {
     <Container>
       <Text>Pick date</Text>
       <DayPicker value={value?.date} onChange={handleDateChange} />
-      <TimePicker
-        placeholder="Set time"
-        date={value?.date}
-        value={value?.time ?? undefined}
-      />
-      {(value?.date || value?.time) && (
+      {value?.date && (
+        <TimePicker
+          placeholder="Set time"
+          date={value.date}
+          value={value.time ?? undefined}
+        />
+      )}
+      {value?.date && (
         <RecurrencePicker
           startDate={value.time || value.date}
           value={value.recurrence}

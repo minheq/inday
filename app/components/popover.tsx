@@ -12,7 +12,107 @@ export type PopoverPosition =
   | 'bottom-left'
   | 'bottom-right';
 
+interface PopoverChildrenProps {
+  ref: React.MutableRefObject<View | null>;
+}
+
+interface PopoverProps {
+  autoFocus?: boolean;
+  open?: boolean;
+  onRequestClose?: () => void;
+  content?: React.ReactNode;
+  position?: PopoverPosition;
+  children: (props: PopoverChildrenProps) => React.ReactNode;
+}
+
+export function Popover(props: PopoverProps) {
+  const {
+    autoFocus,
+    open,
+    content,
+    children,
+    position = 'bottom-left',
+  } = props;
+  const fade = React.useRef(new Animated.Value(open ? 1 : 0)).current;
+  const popoverRef = React.useRef<View | null>(null);
+  const openerRef = React.useRef<View | null>(null);
+
+  // const handleKeyDown = React.useCallback(
+  //   (event) => {
+  //     const ESC_KEY = 27;
+  //     if (event.keyCode === ESC_KEY) {
+  //       event.stopPropagation();
+  //       onRequestClose();
+  //     }
+  //   },
+  //   [onRequestClose],
+  // );
+
+  // const handleBlur = React.useCallback(
+  //   (event: React.FocusEvent) => {
+  //     if (
+  //       // @ts-ignore: if an element was pressed within the popover
+  //       !event.currentTarget?.contains(event.relatedTarget) &&
+  //       // @ts-ignore: if the press was on element within the opener
+  //       !openerRef.current?.contains(event.relatedTarget) &&
+  //       // if the press was on the opener
+  //       event.relatedTarget !== openerRef.current
+  //     ) {
+  //       onRequestClose();
+  //     }
+  //   },
+  //   [onRequestClose],
+  // );
+
+  const popover = usePopover({
+    autoFocus,
+    open,
+    openerRef,
+    popoverRef,
+    position,
+  });
+
+  React.useEffect(() => {
+    Animated.spring(fade, {
+      toValue: popover.visible ? 1 : 0,
+      bounciness: 0,
+      useNativeDriver: true,
+    }).start();
+  }, [popover.visible, fade]);
+
+  return (
+    <>
+      {children({ ref: openerRef })}
+      <Animated.View
+        // @ts-ignore
+        ref={popoverRef}
+        accessible
+        style={[
+          styles.content,
+          popover.layout,
+          popover.visible && styles.visible,
+          { opacity: fade },
+        ]}
+      >
+        {content}
+      </Animated.View>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  content: {
+    position: 'absolute',
+    zIndex: 1,
+    display: 'none',
+  },
+  visible: {
+    display: 'flex',
+  },
+});
+
 interface UsePopoverProps {
+  autoFocus?: boolean;
   open?: boolean;
   padding?: number;
   position?: PopoverPosition;
@@ -56,6 +156,7 @@ const initialLayout = {
 
 export function usePopover(props: UsePopoverProps): PopoverData {
   const {
+    autoFocus = false,
     open = false,
     openerRef,
     popoverRef,
@@ -88,12 +189,14 @@ export function usePopover(props: UsePopoverProps): PopoverData {
 
         setState({ visible: true, opacity: 1, layout });
 
-        popoverRef.current?.focus();
+        if (autoFocus) {
+          popoverRef.current?.focus();
+        }
       });
     } else {
       setState({ visible: false, opacity: 0, layout: initialLayout });
     }
-  }, [open, position, openerRef, popoverRef, padding]);
+  }, [open, position, openerRef, popoverRef, padding, autoFocus]);
 
   return {
     visible: state.visible,
@@ -142,6 +245,15 @@ function calculatePopoverLayout(
         paddingBottom: 0,
         paddingTop: padding,
       };
+    case 'bottom-center':
+      return {
+        top: openerDimensions.height,
+        left: openerDimensions.width / 2 - popoverDimensions.width / 2,
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingBottom: 0,
+        paddingTop: padding,
+      };
     default:
       return {
         top: -popoverDimensions.height,
@@ -153,94 +265,3 @@ function calculatePopoverLayout(
       };
   }
 }
-interface PopoverChildrenProps {
-  ref: React.MutableRefObject<View | null>;
-}
-
-interface PopoverProps {
-  autoFocus?: boolean;
-  open?: boolean;
-  onRequestClose?: () => void;
-  content?: React.ReactNode;
-  position?: PopoverPosition;
-  children: (props: PopoverChildrenProps) => React.ReactNode;
-}
-
-export function Popover(props: PopoverProps) {
-  const { open, content, children, position = 'bottom-left' } = props;
-  const fade = React.useRef(new Animated.Value(open ? 1 : 0)).current;
-  const popoverRef = React.useRef<View | null>(null);
-  const openerRef = React.useRef<View | null>(null);
-
-  // const handleKeyDown = React.useCallback(
-  //   (event) => {
-  //     const ESC_KEY = 27;
-  //     if (event.keyCode === ESC_KEY) {
-  //       event.stopPropagation();
-  //       onRequestClose();
-  //     }
-  //   },
-  //   [onRequestClose],
-  // );
-
-  // const handleBlur = React.useCallback(
-  //   (event: React.FocusEvent) => {
-  //     if (
-  //       // @ts-ignore: if an element was pressed within the popover
-  //       !event.currentTarget?.contains(event.relatedTarget) &&
-  //       // @ts-ignore: if the press was on element within the opener
-  //       !openerRef.current?.contains(event.relatedTarget) &&
-  //       // if the press was on the opener
-  //       event.relatedTarget !== openerRef.current
-  //     ) {
-  //       onRequestClose();
-  //     }
-  //   },
-  //   [onRequestClose],
-  // );
-
-  const popover = usePopover({
-    open,
-    openerRef,
-    popoverRef,
-    position,
-  });
-
-  React.useEffect(() => {
-    Animated.spring(fade, {
-      toValue: popover.visible ? 1 : 0,
-      bounciness: 0,
-      useNativeDriver: true,
-    }).start();
-  }, [popover.visible, fade]);
-
-  return (
-    <>
-      {children({ ref: openerRef })}
-      <Animated.View
-        // @ts-ignore
-        ref={popoverRef}
-        accessible
-        style={[
-          styles.content,
-          popover.layout,
-          popover.visible && styles.visible,
-          { opacity: fade },
-        ]}
-      >
-        {content}
-      </Animated.View>
-    </>
-  );
-}
-
-const styles = StyleSheet.create({
-  content: {
-    position: 'absolute',
-    zIndex: 1,
-    display: 'none',
-  },
-  visible: {
-    display: 'flex',
-  },
-});

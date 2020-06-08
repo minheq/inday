@@ -21,5 +21,7 @@ export * from './reminder_date';
 export * from './reminder_place';
 export * from './back_button';
 export * from './picker';
+export * from './wheel_picker';
+export * from './time_picker';
 export * from './pressable';
 export * from './button';

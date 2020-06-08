@@ -1,25 +1,33 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Text } from './text';
-import { Button } from './button';
 import { Container } from './container';
-import { Row } from './row';
-import { Icon, IconName } from './icon';
+import { Button } from './button';
 import { Column } from './column';
+import { Text } from './text';
+import { StyleSheet } from 'react-native';
+import { Icon } from './icon';
 
-interface InputItemProps {
+interface PickerButtonProps {
   onPress?: () => void;
+  onClear?: () => void;
   label?: string;
   description?: string;
   placeholder?: string;
-  icon: IconName;
+  clearable?: boolean;
+  disabled?: boolean;
 }
 
-export function InputItem(props: InputItemProps) {
-  const { description, placeholder, label, icon, onPress } = props;
+export function PickerButton(props: PickerButtonProps) {
+  const {
+    clearable,
+    onClear,
+    description,
+    placeholder,
+    label,
+    onPress,
+  } = props;
 
   return (
-    <Row>
+    <Container>
       <Button onPress={onPress} style={styles.button}>
         <Container
           paddingVertical={8}
@@ -37,11 +45,13 @@ export function InputItem(props: InputItemProps) {
             </Text>
           </Column>
         </Container>
-        <View style={styles.arrowRight}>
-          <Icon name={icon} size="lg" />
-        </View>
       </Button>
-    </Row>
+      {clearable && (
+        <Button onPress={onClear} style={styles.clearButton}>
+          <Icon name="x" size="lg" />
+        </Button>
+      )}
+    </Container>
   );
 }
 
@@ -49,10 +59,11 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
   },
-  arrowRight: {
+  clearButton: {
     position: 'absolute',
     right: 16,
     top: 16,
+    zIndex: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -34,9 +34,9 @@ function newTime(hours: number, minutes: number): Date {
   return date;
 }
 
-export function setSameTime(date: Date, toTime: Date) {
-  date = setHours(date, toTime.getHours());
-  date = setMinutes(date, toTime.getMinutes());
+export function setSameTime(date: Date, time: Date) {
+  date = setHours(date, time.getHours());
+  date = setMinutes(date, time.getMinutes());
   date = setSeconds(date, 0);
   date = setMilliseconds(date, 0);
 
