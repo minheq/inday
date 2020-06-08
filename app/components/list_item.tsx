@@ -2,9 +2,9 @@ import React from 'react';
 import { Container } from './container';
 import { Row } from './row';
 import { Spacing } from './spacing';
-import { Pressable } from './pressable';
 import { Column } from './column';
 import { Text } from './text';
+import { Button } from './button';
 
 interface ListItemProps {
   onPress?: () => void;
@@ -18,7 +18,7 @@ export function ListItem(props: ListItemProps) {
   const { onPress, title, description, leading, actions } = props;
 
   return (
-    <Pressable onPress={onPress}>
+    <Button onPress={onPress}>
       <Container height={40} paddingHorizontal={16}>
         <Row expanded justifyContent="space-between">
           <Container flex={1}>
@@ -43,6 +43,6 @@ export function ListItem(props: ListItemProps) {
           )}
         </Row>
       </Container>
-    </Pressable>
+    </Button>
   );
 }

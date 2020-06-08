@@ -2,7 +2,6 @@ import React from 'react';
 import { Container } from './container';
 import { Text } from './text';
 import { DayPicker } from './day_picker';
-import { isBefore } from 'date-fns';
 import { TimePicker } from './time_picker';
 import { Recurrence } from '../modules/recurrence';
 import { RecurrencePicker } from './recurrence_picker';
@@ -16,10 +15,6 @@ export interface ReminderDate {
 interface ReminderDateProps {
   value?: ReminderDate;
   onChange?: (value: ReminderDate) => void;
-}
-
-function isOutsideRange(date: Date) {
-  return isBefore(date, new Date());
 }
 
 export function ReminderDate(props: ReminderDateProps) {
@@ -44,14 +39,23 @@ export function ReminderDate(props: ReminderDateProps) {
     [value, onChange],
   );
 
+  const handleRecurrenceChange = React.useCallback(
+    (newRecurrence: Recurrence | null) => {
+      if (value) {
+        onChange({
+          date: value.date,
+          time: value.time,
+          recurrence: newRecurrence,
+        });
+      }
+    },
+    [value, onChange],
+  );
+
   return (
     <Container>
       <Text>Pick date</Text>
-      <DayPicker
-        value={value?.date}
-        onChange={handleDateChange}
-        isOutsideRange={isOutsideRange}
-      />
+      <DayPicker value={value?.date} onChange={handleDateChange} />
       <TimePicker
         placeholder="Set time"
         date={value?.date}
@@ -59,9 +63,9 @@ export function ReminderDate(props: ReminderDateProps) {
       />
       {(value?.date || value?.time) && (
         <RecurrencePicker
-          placeholder="Repeat"
           startDate={value.time || value.date}
-          value={value.recurrence ?? undefined}
+          value={value.recurrence}
+          onChange={handleRecurrenceChange}
         />
       )}
     </Container>

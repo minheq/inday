@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { CardReminder } from '../app/core/card_reminder';
-import { ReminderDate, Container } from '../app/components';
+import { ReminderDate, Container, NavigationProvider } from '../app/components';
 import { ReminderPlace } from '../app/components/reminder_place';
 
 export default {
@@ -28,17 +28,25 @@ function StatefulReminderPlace() {
 }
 
 export const Default = () => (
-  <Container width={400}>
-    <StatefulCardReminder />
+  <Container height="100%" width={400}>
+    <NavigationProvider>
+      <StatefulCardReminder />
+    </NavigationProvider>
   </Container>
 );
+
 export const Date = () => (
-  <Container width={400}>
-    <StatefulReminderDate />
+  <Container height={800} width={400}>
+    <NavigationProvider>
+      <StatefulReminderDate />
+    </NavigationProvider>
   </Container>
 );
+
 export const Place = () => (
-  <Container width={400}>
-    <StatefulReminderPlace />
+  <Container height={800} width={400}>
+    <NavigationProvider>
+      <StatefulReminderPlace />
+    </NavigationProvider>
   </Container>
 );
