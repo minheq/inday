@@ -1,160 +1,27 @@
 import React from 'react';
 import { useTheme } from '../theme';
-import { View, StyleSheet } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  Animated,
+} from 'react-native';
 import { Text } from './text';
 import { Button } from './button';
 import { Icon } from './icon';
-
-interface WheelPickerProps<TValue extends any> {
-  /**
-   * List of options to show.
-   */
-  options?: Array<WheelPickerOption<TValue>>;
-
-  /**
-   * Initial value of the picker.
-   *
-   * *This is not a controlled component*; you don't need to update the
-   * value during dragging.
-   */
-  value?: TValue;
-
-  /**
-   * Callback continuously called while the user is dragging the slider.
-   */
-  onChange?: (value: TValue) => void;
-}
-
-export const WheelPicker = React.forwardRef(
-  <TValue extends any>(
-    props: WheelPickerProps<TValue>,
-    ref: React.Ref<WheelPickerRef<TValue>>,
-  ) => {
-    const {
-      value,
-      options = [],
-      onChange = () => {
-        return;
-      },
-    } = props;
-    const theme = useTheme();
-
-    const listRef = React.useRef<HTMLDivElement>(null);
-
-    const {
-      optionsWithClones,
-      handlePressDown,
-      handlePressUp,
-      handleScroll,
-      scrollToValue,
-    } = useWheelPicker({
-      onChange,
-      options,
-      ref,
-      scrollContainer: {
-        scrollTo: ({ animated, offset }) =>
-          listRef.current &&
-          listRef.current.scrollTo({
-            behavior: animated ? 'smooth' : 'auto',
-            top: offset,
-          }),
-      },
-      value,
-    });
-
-    React.useLayoutEffect(() => {
-      setTimeout(() => {
-        if (listRef.current && value) {
-          scrollToValue(value, false);
-        }
-      }, 50);
-    }, [scrollToValue, value]);
-
-    return (
-      <View style={styles.root}>
-        <Button style={styles.arrow} onPress={handlePressUp}>
-          <Icon size="lg" name="chevron-up" />
-        </Button>
-        <View style={styles.listWrapper}>
-          <div
-            ref={listRef}
-            onScroll={(event) => handleScroll(event.currentTarget.scrollTop)}
-            style={styles.list}
-          >
-            {optionsWithClones.map((o) => (
-              <View key={o.value} style={styles.item}>
-                <Text align="center">{o.label}</Text>
-              </View>
-            ))}
-          </div>
-          <View
-            style={[
-              styles.upperOverlay,
-              { borderColor: theme.border.color.default },
-            ]}
-          />
-          <View
-            style={[
-              styles.bottomOverlay,
-              { borderColor: theme.border.color.default },
-            ]}
-          />
-        </View>
-
-        <Button style={styles.arrow} onPress={handlePressDown}>
-          <Icon size="lg" name="chevron-down" />
-        </Button>
-      </View>
-    );
-  },
-);
-
-interface WheelPickerRef<TValue extends any> {
-  selectValue: (value: TValue) => void;
-}
+import { Option } from './picker';
 
 const ITEM_HEIGHT = 40;
 const ITEM_COUNT = 3;
 const SCROLL_PICKER_HEIGHT = ITEM_HEIGHT * ITEM_COUNT;
 
-interface WheelPickerOption<TValue extends any> {
-  label: string;
-  value: TValue;
-}
-
-const DEBOUNCE_TIME = 300;
-
-const makePaddedOptions = <TValue extends any>(
-  options: WheelPickerOption<TValue>[],
-) => {
-  return [
-    { value: 'emptyStart', label: '' },
-    ...options,
-    { value: 'emptyEnd', label: '' },
-  ] as WheelPickerOption<TValue>[];
-};
-
-const getOptionFromOptions = <TValue extends any>(
-  options: WheelPickerOption<TValue>[],
-) => (scrollPosition: number) => {
-  const index = Math.round(scrollPosition / ITEM_HEIGHT);
-
-  const finalIndex = Math.abs(
-    index >= options.length ? options.length - index : index,
-  );
-
-  return options[finalIndex];
-};
-
-interface ScrollContainer {
-  scrollTo: (params: { animated?: boolean; offset: number }) => void;
-}
-
-interface UseWheelPickerProps<TValue extends any> {
+interface WheelPickerProps<TValue extends any> {
   /**
    * List of options to show.
    */
-  options: WheelPickerOption<TValue>[];
+  options?: Array<Option<TValue>>;
 
   /**
    * Initial value of the picker.
@@ -168,66 +35,67 @@ interface UseWheelPickerProps<TValue extends any> {
    * Callback continuously called while the user is dragging the slider.
    */
   onChange?: (value: TValue) => void;
-
-  /**
-   * Scroll container
-   */
-  scrollContainer: ScrollContainer | null;
-
-  /**
-   * Methods of the WheelPicker
-   */
-  ref: React.Ref<WheelPickerRef<TValue>>;
 }
 
-const useWheelPicker = <TValue extends any>(
-  props: UseWheelPickerProps<TValue>,
-) => {
+export function WheelPicker<TValue extends any>(
+  props: WheelPickerProps<TValue>,
+) {
   const {
-    options,
+    value,
+    options = [],
     onChange = () => {
       return;
     },
-    value: initialValue = options[0].value,
-    scrollContainer,
-    ref,
   } = props;
-  const optionsWithClones = makePaddedOptions(options);
-  const [value, setValue] = React.useState<TValue>(initialValue);
-  const getOption = React.useMemo(() => getOptionFromOptions(options), [
-    options,
-  ]);
+  const theme = useTheme();
+  const listRef = React.useRef<FlatList>(null);
   const timeout = React.useRef<number | null>(null);
+  const animatedOptions = React.useRef(
+    options.map((o) => ({
+      value: o.value,
+      label: o.value,
+      opacity: new Animated.Value(0.33),
+    })),
+  ).current;
 
   const scrollToValue = React.useCallback(
-    (toValue: TValue, animated = true) => {
-      if (!scrollContainer) {
+    (val: TValue) => {
+      if (!listRef.current) {
         return;
       }
 
-      const index = optionsWithClones.findIndex((o) => o.value === toValue);
+      const index = options.findIndex((o) => o.value === val);
 
-      scrollContainer.scrollTo({
-        animated,
-        offset: index * ITEM_HEIGHT - ITEM_HEIGHT,
+      listRef.current.scrollToOffset({
+        animated: true,
+        offset: index * ITEM_HEIGHT,
       });
     },
-    [scrollContainer, optionsWithClones],
+    [listRef, options],
   );
 
-  const handleChange = React.useCallback(
-    (newValue: TValue) => {
-      if (newValue !== value) {
-        onChange(newValue);
-        setValue(newValue);
-      }
-    },
-    [onChange, value],
-  );
+  const handlePressUp = React.useCallback(() => {
+    const index = options.findIndex((o) => o.value === value);
+
+    if (index <= 0) {
+      return;
+    }
+    scrollToValue(options[index - 1].value);
+  }, [options, scrollToValue, value]);
+
+  const handlePressDown = React.useCallback(() => {
+    const index = options.findIndex((o) => o.value === value);
+
+    if (index >= options.length - 1) {
+      return;
+    }
+
+    scrollToValue(options[index + 1].value);
+  }, [options, scrollToValue, value]);
 
   const handleScroll = React.useCallback(
-    (offset: number) => {
-      if (!scrollContainer) {
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!listRef) {
         return;
       }
 
@@ -235,76 +103,68 @@ const useWheelPicker = <TValue extends any>(
         clearTimeout(timeout.current);
       }
 
-      // @ts-ignore
+      const offset = event.nativeEvent.contentOffset.y;
+      const index = Math.round(offset / ITEM_HEIGHT);
+      const selected = options[index].value;
+
       timeout.current = setTimeout(() => {
-        const selectedOption = getOption(offset);
-        handleChange(selectedOption.value);
-      }, DEBOUNCE_TIME);
-    },
-    [scrollContainer, getOption, handleChange],
-  );
+        if (value !== selected) {
+          scrollToValue(selected);
+          onChange(selected);
+        }
+      }, 100);
 
-  const handleEndDrag = React.useCallback(
-    (offset: number) => {
-      if (!scrollContainer) {
-        return;
-      }
-
-      const scrollPosition = Math.round(offset / ITEM_HEIGHT) * ITEM_HEIGHT;
-
-      scrollContainer.scrollTo({
-        offset: scrollPosition,
+      animatedOptions.forEach((o) => {
+        if (o.value === selected) {
+          o.opacity.setValue(1);
+        } else {
+          o.opacity.setValue(0.33);
+        }
       });
-
-      const selectedOption = getOption(scrollPosition);
-
-      handleChange(selectedOption.value);
     },
-    [scrollContainer, getOption, handleChange],
+    [listRef, options, animatedOptions, scrollToValue, onChange, value],
   );
 
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      selectValue: (newValue: TValue) => scrollToValue(newValue),
-    }),
-    [scrollToValue],
+  const initialScrollIndex = options.findIndex((o) => o.value === value);
+
+  return (
+    <View style={styles.root}>
+      <Button style={styles.arrow} onPress={handlePressUp}>
+        <Icon size="lg" name="chevron-up" />
+      </Button>
+      <View style={styles.listWrapper}>
+        <View
+          style={[styles.selected, { borderColor: theme.border.color.default }]}
+        />
+        <FlatList
+          ref={listRef}
+          data={animatedOptions}
+          getItemLayout={(item, index) => ({
+            index,
+            length: ITEM_HEIGHT,
+            offset: ITEM_HEIGHT * index,
+          })}
+          style={styles.list}
+          initialScrollIndex={initialScrollIndex < 0 ? 0 : initialScrollIndex}
+          keyExtractor={(item) => `${item.value}`}
+          renderItem={({ item }) => (
+            <Animated.View
+              key={item.value}
+              style={[styles.item, { opacity: item.opacity }]}
+            >
+              <Text align="center">{item.label}</Text>
+            </Animated.View>
+          )}
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+        />
+      </View>
+      <Button style={styles.arrow} onPress={handlePressDown}>
+        <Icon size="lg" name="chevron-down" />
+      </Button>
+    </View>
   );
-
-  const handlePressUp = React.useCallback(() => {
-    if (!scrollContainer) {
-      return;
-    }
-    const currentIndex = options.findIndex((o) => o.value === value);
-
-    if (currentIndex <= 0) {
-      return;
-    }
-    scrollToValue(options[currentIndex - 1].value);
-  }, [options, scrollContainer, scrollToValue, value]);
-
-  const handlePressDown = React.useCallback(() => {
-    if (!scrollContainer) {
-      return;
-    }
-
-    const currentIndex = options.findIndex((o) => o.value === value);
-
-    if (currentIndex >= options.length - 1) {
-      return;
-    }
-    scrollToValue(options[currentIndex + 1].value);
-  }, [options, scrollContainer, scrollToValue, value]);
-
-  return {
-    handleEndDrag,
-    handlePressDown,
-    handlePressUp,
-    handleScroll,
-    optionsWithClones,
-    scrollToValue,
-  };
-};
+}
 
 const styles = StyleSheet.create({
   root: {
@@ -312,22 +172,14 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
-  upperOverlay: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  selected: {
     borderBottomWidth: 1,
-    borderStyle: 'solid',
-    height: ITEM_HEIGHT,
-    position: 'absolute',
-    top: 0,
-    width: '100%',
-  },
-  bottomOverlay: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderStyle: 'solid',
     borderTopWidth: 1,
+    borderStyle: 'solid',
     height: ITEM_HEIGHT,
     position: 'absolute',
-    top: ITEM_HEIGHT * 2,
+    top: ITEM_HEIGHT,
+    zIndex: -1,
     width: '100%',
   },
   item: {
@@ -335,17 +187,14 @@ const styles = StyleSheet.create({
     height: ITEM_HEIGHT,
     justifyContent: 'center',
     paddingHorizontal: 4,
-    scrollSnapAlign: 'start',
+  },
+  list: {
+    paddingBottom: ITEM_HEIGHT,
+    paddingTop: ITEM_HEIGHT,
   },
   listWrapper: {
     flex: 1,
     height: SCROLL_PICKER_HEIGHT,
-    width: '100%',
-  },
-  list: {
-    height: SCROLL_PICKER_HEIGHT,
-    overflowY: 'scroll' as const,
-    scrollSnapType: 'y mandatory',
     width: '100%',
   },
   arrow: {
