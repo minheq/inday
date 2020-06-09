@@ -1,7 +1,7 @@
 import React from 'react';
 import { Element } from '../editor/editable/nodes/element';
 import { data } from './fake';
-import { ReminderDate, ReminderPlace } from '../components';
+import { Reminder } from '../core/reminder';
 
 export type Content = Element[];
 export interface Task {
@@ -17,8 +17,7 @@ export interface Card {
     imageURL: string | null;
   };
   labelIDs: string[];
-  reminderDate: ReminderDate | null;
-  reminderPlace: ReminderPlace | null;
+  reminder: Reminder | null;
   task: Task | null;
   createdAt: Date;
   updatedAt: Date;
@@ -28,16 +27,14 @@ interface CardStoreContext {
   getByID: (id: string) => Card | null;
   getManyByDate: (date: string) => Card[];
   updateTask: (id: string, task: Task | null) => void;
-  updateReminderDate: (id: string, reminder: ReminderDate | null) => void;
-  updateReminderPlace: (id: string, reminder: ReminderPlace | null) => void;
+  updateReminder: (id: string, reminder: Reminder | null) => void;
 }
 
 const CardStoreContext = React.createContext<CardStoreContext>({
   getByID: () => null,
   getManyByDate: () => [],
   updateTask: () => {},
-  updateReminderDate: () => {},
-  updateReminderPlace: () => {},
+  updateReminder: () => {},
 });
 
 export function useCardStore() {
@@ -104,21 +101,9 @@ export function CardStoreProvider(props: CardStoreProviderProps) {
     [cardsByID, cardsByDate],
   );
 
-  const handleUpdateReminderDate = React.useCallback(
-    (id: string, reminder: ReminderDate | null) => {
-      cardsByID[id].reminderDate = reminder;
-
-      setValue({
-        cardsByID,
-        cardsByDate,
-      });
-    },
-    [cardsByID, cardsByDate],
-  );
-
-  const handleUpdateReminderPlace = React.useCallback(
-    (id: string, reminder: ReminderPlace | null) => {
-      cardsByID[id].reminderPlace = reminder;
+  const handleUpdateReminder = React.useCallback(
+    (id: string, reminder: Reminder | null) => {
+      cardsByID[id].reminder = reminder;
 
       setValue({
         cardsByID,
@@ -134,8 +119,7 @@ export function CardStoreProvider(props: CardStoreProviderProps) {
         getByID: handleGetByID,
         getManyByDate: handleGetManyByDate,
         updateTask: handleUpdateTask,
-        updateReminderDate: handleUpdateReminderDate,
-        updateReminderPlace: handleUpdateReminderPlace,
+        updateReminder: handleUpdateReminder,
       }}
     >
       {children}

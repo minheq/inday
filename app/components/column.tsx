@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { ContainerProvider } from './container';
 
 interface ColumnProps {
   children?: React.ReactNode;
@@ -15,18 +16,20 @@ export function Column(props: ColumnProps) {
   const { children, justifyContent, alignItems, expanded } = props;
 
   return (
-    <View
-      style={[
-        styles.root,
-        expanded && styles.expanded,
-        {
-          justifyContent,
-          alignItems,
-        },
-      ]}
-    >
-      {children}
-    </View>
+    <ContainerProvider direction="column">
+      <View
+        style={[
+          styles.root,
+          expanded && styles.expanded,
+          {
+            justifyContent,
+            alignItems,
+          },
+        ]}
+      >
+        {children}
+      </View>
+    </ContainerProvider>
   );
 }
 

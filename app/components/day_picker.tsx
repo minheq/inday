@@ -33,8 +33,6 @@ import { useTheme } from '../theme';
 const DEFAULT_MONTH_DAY_SIZE = 40;
 
 interface DayPickerProps<TIsRange extends boolean = false> {
-  /** Initial date used for navigation */
-  startMonth?: Date;
   /** Selected value */
   value?: TIsRange extends true ? Interval : Date;
   onChange?: (value: TIsRange extends true ? Interval : Date) => void;
@@ -53,7 +51,9 @@ function hasBlockedDate(
   interval: Interval,
   isBlocked?: (date: Date) => boolean,
 ) {
-  if (!isBlocked) return false;
+  if (!isBlocked) {
+    return false;
+  }
 
   const dates = datesInInterval(interval, addDays);
 
@@ -65,7 +65,6 @@ export function DayPicker<TIsRange extends boolean = false>(
 ) {
   const {
     range = false,
-    startMonth = new Date(),
     value,
     onChange = () => {},
     isOutsideRange,
@@ -76,7 +75,14 @@ export function DayPicker<TIsRange extends boolean = false>(
   const [interval, setInterval] = React.useState<Interval | null>(
     range ? (value as Interval) : null,
   );
-  const [navigationDate, setNavigationDate] = React.useState(startMonth);
+  const initialNavigationDate = (value
+    ? range
+      ? (value as Interval).start
+      : value
+    : new Date()) as Date;
+  const [navigationDate, setNavigationDate] = React.useState(
+    initialNavigationDate,
+  );
   const [noOfMonths, setNoOfMonths] = React.useState(numberOfMonths);
 
   React.useEffect(() => {
@@ -262,7 +268,9 @@ export const Month = (props: MonthProps) => {
     onHoverOut = () => {},
   } = props;
 
-  if (selected) validateInterval(selected);
+  if (selected) {
+    validateInterval(selected);
+  }
 
   const som = startOfMonth(date);
   const eom = endOfMonth(date);

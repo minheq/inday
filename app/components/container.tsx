@@ -4,6 +4,34 @@ import { ContainerColor, useTheme, tokens } from '../theme';
 
 type Shape = 'rounded' | 'square' | 'pill';
 
+type Direction = 'column' | 'row';
+interface ContainerContext {
+  direction: Direction;
+}
+
+const ContainerContext = React.createContext<ContainerContext>({
+  direction: 'column',
+});
+
+interface ContainerProviderProps {
+  children?: React.ReactNode;
+  direction: Direction;
+}
+
+export function ContainerProvider(props: ContainerProviderProps) {
+  const { children, direction } = props;
+
+  return (
+    <ContainerContext.Provider value={{ direction }}>
+      {children}
+    </ContainerContext.Provider>
+  );
+}
+
+export function useParentContainer() {
+  return React.useContext(ContainerContext);
+}
+
 interface ContainerProps {
   children?: React.ReactNode;
   color?: ContainerColor;
@@ -76,40 +104,42 @@ export function Container(props: ContainerProps) {
   const effectiveHeight = height ?? (expanded ? '100%' : undefined);
 
   return (
-    <View
-      testID={testID}
-      style={[
-        {
-          borderWidth,
-          backgroundColor: theme.container.color[color],
-          width: effectiveWidth,
-          flex,
-          maxWidth,
-          minWidth,
-          borderRadius,
-          height: effectiveHeight,
-          paddingRight,
-          paddingLeft,
-          paddingTop,
-          paddingBottom,
-          paddingVertical,
-          paddingHorizontal,
-          padding,
-          borderTopWidth,
-          borderRightWidth,
-          borderLeftWidth,
-          borderBottomWidth,
-          borderColor: borderColor ?? theme.border.color.default,
-          overflow,
-          zIndex,
-        },
-        shadow && theme.container.shadow,
-        center && styles.center,
-        shape && styles[shape],
-      ]}
-    >
-      {children}
-    </View>
+    <ContainerProvider direction="column">
+      <View
+        testID={testID}
+        style={[
+          {
+            borderWidth,
+            backgroundColor: theme.container.color[color],
+            width: effectiveWidth,
+            flex,
+            maxWidth,
+            minWidth,
+            borderRadius,
+            height: effectiveHeight,
+            paddingRight,
+            paddingLeft,
+            paddingTop,
+            paddingBottom,
+            paddingVertical,
+            paddingHorizontal,
+            padding,
+            borderTopWidth,
+            borderRightWidth,
+            borderLeftWidth,
+            borderBottomWidth,
+            borderColor: borderColor ?? theme.border.color.default,
+            overflow,
+            zIndex,
+          },
+          shadow && theme.container.shadow,
+          center && styles.center,
+          shape && styles[shape],
+        ]}
+      >
+        {children}
+      </View>
+    </ContainerProvider>
   );
 }
 
