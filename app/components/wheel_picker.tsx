@@ -12,6 +12,7 @@ import { Text } from './text';
 import { Button } from './button';
 import { Icon } from './icon';
 import { Option } from './picker';
+import { usePrevious } from '../hooks/use_previous';
 
 const ITEM_HEIGHT = 40;
 const ITEM_COUNT = 3;
@@ -50,6 +51,7 @@ export function WheelPicker<TValue extends any>(
   const theme = useTheme();
   const listRef = React.useRef<FlatList>(null);
   const timeout = React.useRef<number | null>(null);
+  const prevValue = usePrevious(value);
   const animatedOptions = React.useRef(
     options.map((o) => ({
       value: o.value,
@@ -124,6 +126,12 @@ export function WheelPicker<TValue extends any>(
     },
     [listRef, options, animatedOptions, scrollToValue, onChange, value],
   );
+
+  React.useEffect(() => {
+    if (!prevValue && value) {
+      scrollToValue(value);
+    }
+  }, [value, prevValue, scrollToValue]);
 
   const initialScrollIndex = options.findIndex((o) => o.value === value);
 

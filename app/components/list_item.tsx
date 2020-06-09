@@ -36,10 +36,10 @@ export function ListItem(props: ListItemProps) {
             </Row>
           </Container>
           {actions && (
-            <>
+            <Row alignItems="center">
               <Spacing width={8} />
               {actions}
-            </>
+            </Row>
           )}
         </Row>
       </Container>

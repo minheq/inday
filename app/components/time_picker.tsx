@@ -11,7 +11,6 @@ import { Expand } from './expand';
 
 interface TimePickerProps {
   /** Sets year, month and day of this date on the operated values */
-  date?: Date;
   value?: Date;
   onChange?: (value?: Date) => void;
   placeholder?: string;
@@ -22,13 +21,7 @@ interface TimePickerProps {
  * Control for selecting a time.
  */
 export function TimePicker(props: TimePickerProps) {
-  const {
-    value,
-    date = new Date(),
-    onChange = () => {},
-    placeholder,
-    disabled = false,
-  } = props;
+  const { value, onChange = () => {}, placeholder, disabled = false } = props;
   const [open, popover] = useToggle();
 
   const valueHours = value?.getHours();
@@ -66,16 +59,12 @@ export function TimePicker(props: TimePickerProps) {
       popover.setFalse();
     } else {
       if (!value) {
-        if (date) {
-          onChange(roundToNearestMinutes(date, { nearestTo: 5 }));
-        } else {
-          onChange(roundToNearestMinutes(new Date(), { nearestTo: 5 }));
-        }
+        onChange(roundToNearestMinutes(new Date(), { nearestTo: 5 }));
       }
 
       popover.setTrue();
     }
-  }, [open, date, value, onChange, popover]);
+  }, [open, value, onChange, popover]);
 
   return (
     <Container>
@@ -84,6 +73,7 @@ export function TimePicker(props: TimePickerProps) {
         description={value ? format(value, 'HH:mm') : undefined}
         placeholder={placeholder}
         clearable={!!value}
+        open={open}
         onPress={handleToggle}
         disabled={disabled}
         onClear={handleClear}

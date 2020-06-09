@@ -39,6 +39,19 @@ export function ReminderDate(props: ReminderDateProps) {
     [value, onChange],
   );
 
+  const handleTimeChange = React.useCallback(
+    (time?: Date) => {
+      if (value) {
+        onChange({
+          date: value.date,
+          time: time ?? null,
+          recurrence: value.recurrence,
+        });
+      }
+    },
+    [value, onChange],
+  );
+
   const handleRecurrenceChange = React.useCallback(
     (newRecurrence: Recurrence | null) => {
       if (value) {
@@ -59,8 +72,8 @@ export function ReminderDate(props: ReminderDateProps) {
       {value?.date && (
         <TimePicker
           placeholder="Set time"
-          date={value.date}
           value={value.time ?? undefined}
+          onChange={handleTimeChange}
         />
       )}
       {value?.date && (

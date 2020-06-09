@@ -11,6 +11,36 @@ import { View, StyleSheet } from 'react-native';
 import { Button } from './button';
 import { Column } from './column';
 import { Text } from './text';
+import { format, setDay } from 'date-fns';
+
+const formatRecurrence = (recurrence: Recurrence) => {
+  const { interval, count, frequency, byWeekDay, until } = recurrence;
+
+  const frequencyText = {
+    [Frequency.Yearly]: 'Year',
+    [Frequency.Monthly]: 'Month',
+    [Frequency.Weekly]: 'Week',
+    [Frequency.Daily]: 'Day',
+  };
+
+  let text = `Every ${interval} ${frequencyText[frequency]}`;
+
+  if (frequency === Frequency.Weekly && byWeekDay) {
+    text += `on ${byWeekDay
+      .map((weekDay) => format(setDay(new Date(), weekDay), 'EEE'))
+      .join(', ')}`;
+  }
+
+  if (until) {
+    text += `until ${format(until, 'do MMMM yyyy')}`;
+  }
+
+  if (count) {
+    text += ` after ${count} times`;
+  }
+
+  return text;
+};
 
 interface RecurrencePickerProps {
   startDate: Date;
@@ -22,37 +52,23 @@ export function RecurrencePicker(props: RecurrencePickerProps) {
   const { onChange, value, startDate } = props;
   const { navigate } = useNavigation();
 
-  return (
-    <Container>
-      <RecurrencePickerButton
-        label="Repeat"
-        description="Does not repeat"
-        onPress={() =>
-          navigate(
-            <RecurrenceOptions
-              onChange={onChange}
-              value={value}
-              startDate={startDate}
-            />,
-          )
-        }
-      />
-    </Container>
-  );
-}
-
-function RecurrenceOptions(props: RecurrencePickerProps) {
-  const { onChange = () => {}, value, startDate } = props;
-  const { back } = useNavigation();
-
   const options: Option[] = [
-    { label: 'Daily', value: { startDate, frequency: Frequency.Daily } },
-    { label: 'Weekly', value: { startDate, frequency: Frequency.Weekly } },
+    {
+      label: 'Daily',
+      value: { startDate, frequency: Frequency.Daily, interval: 1 },
+    },
+    {
+      label: 'Weekly',
+      value: { startDate, frequency: Frequency.Weekly, interval: 1 },
+    },
     {
       label: 'Biweekly',
       value: { startDate, frequency: Frequency.Weekly, interval: 2 },
     },
-    { label: 'Monthly', value: { startDate, frequency: Frequency.Monthly } },
+    {
+      label: 'Monthly',
+      value: { startDate, frequency: Frequency.Monthly, interval: 1 },
+    },
     {
       label: 'Every 3 months',
       value: { startDate, frequency: Frequency.Monthly, interval: 3 },
@@ -61,7 +77,10 @@ function RecurrenceOptions(props: RecurrencePickerProps) {
       label: 'Every 6 months',
       value: { startDate, frequency: Frequency.Monthly, interval: 6 },
     },
-    { label: 'Yearly', value: { startDate, frequency: Frequency.Yearly } },
+    {
+      label: 'Yearly',
+      value: { startDate, frequency: Frequency.Yearly, interval: 1 },
+    },
   ].map((o) => {
     return {
       label: o.label,
@@ -71,6 +90,46 @@ function RecurrenceOptions(props: RecurrencePickerProps) {
         o.value.interval === value?.interval,
     };
   });
+
+  const selected = options.find((o) => o.selected);
+
+  return (
+    <Container>
+      <RecurrencePickerButton
+        label="Repeat"
+        description={
+          selected
+            ? selected.label
+            : value
+            ? formatRecurrence(value)
+            : 'Does not repeat'
+        }
+        onPress={() =>
+          navigate(
+            <RecurrenceOptions
+              onChange={onChange}
+              value={value}
+              options={options}
+            />,
+          )
+        }
+      />
+    </Container>
+  );
+}
+
+interface RecurrenceOptionsProps {
+  options: Option[];
+  value?: Recurrence | null;
+  onChange?: (value: Recurrence | null) => void;
+}
+
+function RecurrenceOptions(props: RecurrenceOptionsProps) {
+  const { onChange = () => {}, value, options } = props;
+  const { back } = useNavigation();
+
+  const selected = options.find((o) => o.selected);
+  const custom = !selected && !!value;
 
   return (
     <Container>
@@ -101,7 +160,16 @@ function RecurrenceOptions(props: RecurrencePickerProps) {
         />
       ))}
       <Spacing height={16} />
-      <ListItem description="Custom" />
+      <ListItem
+        description="Custom"
+        actions={
+          custom ? (
+            <Icon name="check" color="primary" size="lg" />
+          ) : (
+            <Icon name="chevron-right" size="lg" />
+          )
+        }
+      />
     </Container>
   );
 }

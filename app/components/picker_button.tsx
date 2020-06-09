@@ -12,12 +12,14 @@ interface PickerButtonProps {
   label?: string;
   description?: string;
   placeholder?: string;
+  open?: boolean;
   clearable?: boolean;
   disabled?: boolean;
 }
 
 export function PickerButton(props: PickerButtonProps) {
   const {
+    open,
     clearable,
     onClear,
     description,
@@ -40,7 +42,9 @@ export function PickerButton(props: PickerButtonProps) {
             <Text bold size="xs">
               {label}
             </Text>
-            <Text color={description ? 'default' : 'muted'}>
+            <Text
+              color={description ? (open ? 'primary' : 'default') : 'muted'}
+            >
               {description || placeholder}
             </Text>
           </Column>
