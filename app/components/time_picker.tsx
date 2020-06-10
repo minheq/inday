@@ -15,13 +15,20 @@ interface TimePickerProps {
   onChange?: (value?: Date) => void;
   placeholder?: string;
   disabled?: boolean;
+  clearable?: boolean;
 }
 
 /**
  * Control for selecting a time.
  */
 export function TimePicker(props: TimePickerProps) {
-  const { value, onChange = () => {}, placeholder, disabled = false } = props;
+  const {
+    value,
+    onChange = () => {},
+    placeholder,
+    clearable,
+    disabled = false,
+  } = props;
   const [open, popover] = useToggle();
 
   const valueHours = value?.getHours();
@@ -72,13 +79,13 @@ export function TimePicker(props: TimePickerProps) {
         label="Time"
         description={value ? format(value, 'HH:mm') : undefined}
         placeholder={placeholder}
-        clearable={!!value}
+        clearable={clearable && !!value}
         open={open}
         onPress={handleToggle}
         disabled={disabled}
         onClear={handleClear}
       />
-      <Expand expanded={open}>
+      <Expand open={open}>
         <Row>
           <WheelPicker
             options={hours}

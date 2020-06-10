@@ -11,7 +11,7 @@ export function range(arg0: any, arg1?: any, arg2?: any): number[] {
     return arr;
   }
 
-  for (let i = arg0; i < arg1; i = i + (arg2 || 1)) {
+  for (let i = arg0; i <= arg1; i = i + (arg2 || 1)) {
     arr.push(i);
   }
 

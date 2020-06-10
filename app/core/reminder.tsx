@@ -7,7 +7,7 @@ import { BackButton } from '../components/back_button';
 import { Row } from '../components/row';
 import { useNavigation, NavigationProvider } from '../components/navigation';
 import { Icon } from '../components/icon';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Button } from '../components/button';
 import { Column } from '../components/column';
 import { Text } from '../components/text';
@@ -24,17 +24,22 @@ import {
 import { SegmentedControl } from '../components/segmented_control';
 import { Content } from '../components/content';
 import { DayPicker } from '../components/day_picker';
-import { TextInput } from '../components/text_input';
 import { TimePicker } from '../components/time_picker';
+import { Picker, ListPicker, Fade } from '../components';
+import { range } from '../utils/arrays';
+import { WeekDay } from '../utils/week';
+import { useToggle } from '../hooks/use_toggle';
 
 interface ReminderContext {
   value?: Reminder | null;
   onChange: (value: Reminder) => void;
+  onRecurrenceChange: (recurrence: Recurrence | null) => void;
 }
 
 const ReminderContext = React.createContext<ReminderContext>({
   value: null,
   onChange: () => {},
+  onRecurrenceChange: () => {},
 });
 
 function useReminder() {
@@ -65,8 +70,32 @@ interface ReminderProps {
 }
 
 export function Reminder(props: ReminderProps) {
+  const { value, onChange } = props;
+
+  const handleRecurrenceChange = React.useCallback(
+    (recurrence: Recurrence | null) => {
+      if (value && value.time) {
+        onChange({
+          place: value.place,
+          time: {
+            date: value.time.date,
+            time: value.time.time,
+            recurrence,
+          },
+        });
+      }
+    },
+    [value, onChange],
+  );
+
   return (
-    <ReminderContext.Provider value={props}>
+    <ReminderContext.Provider
+      value={{
+        value,
+        onChange,
+        onRecurrenceChange: handleRecurrenceChange,
+      }}
+    >
       <NavigationProvider>
         <ReminderMenu />
       </NavigationProvider>
@@ -159,6 +188,7 @@ function ReminderTime() {
           placeholder="Set time"
           value={value.time.time ?? undefined}
           onChange={handleTimeChange}
+          clearable
         />
       )}
       {value?.time?.date && <RecurrencePicker />}
@@ -266,7 +296,7 @@ export function RecurrencePicker() {
   const exist = custom || !!selected;
 
   return (
-    <Container>
+    <Container flex={1}>
       <RecurrencePickerButton
         label="Repeat"
         description={
@@ -290,27 +320,11 @@ export function RecurrencePicker() {
 }
 
 function RecurrenceOptions() {
-  const { value, onChange } = useReminder();
-  const { back } = useNavigation();
+  const { value, onRecurrenceChange } = useReminder();
+  const { navigate, back } = useNavigation();
   const options = useOptions();
   const selected = options.find((o) => o.selected);
   const custom = !selected && !!value?.time?.recurrence;
-
-  const handleRecurrenceChange = React.useCallback(
-    (recurrence: Recurrence | null) => {
-      if (value && value.time) {
-        onChange({
-          place: value.place,
-          time: {
-            date: value.time.date,
-            time: value.time.time,
-            recurrence,
-          },
-        });
-      }
-    },
-    [value, onChange],
-  );
 
   return (
     <Container>
@@ -320,7 +334,7 @@ function RecurrenceOptions() {
       <ListItem
         description="Does not repeat"
         onPress={() => {
-          handleRecurrenceChange(null);
+          onRecurrenceChange(null);
           back();
         }}
         actions={
@@ -333,7 +347,7 @@ function RecurrenceOptions() {
         <ListItem
           key={o.label}
           onPress={() => {
-            handleRecurrenceChange(o.value);
+            onRecurrenceChange(o.value);
             back();
           }}
           description={o.label}
@@ -345,6 +359,16 @@ function RecurrenceOptions() {
       <Spacing height={16} />
       <ListItem
         description="Custom"
+        onPress={() => {
+          if (value?.time?.date) {
+            onRecurrenceChange({
+              startDate: value?.time?.date,
+              frequency: Frequency.Daily,
+              interval: 1,
+            });
+            navigate(<RecurrenceCustomOptions />);
+          }
+        }}
         actions={
           custom ? (
             <Icon name="check" color="primary" size="lg" />
@@ -353,6 +377,260 @@ function RecurrenceOptions() {
           )
         }
       />
+    </Container>
+  );
+}
+
+function RecurrenceCustomOptions() {
+  const { value, onRecurrenceChange } = useReminder();
+  const { back } = useNavigation();
+  const recurrence = value?.time?.recurrence;
+  const [monthOption, setMonthOption] = React.useState(1);
+
+  if (!recurrence) {
+    throw new Error('Expected recurrence');
+  }
+
+  const handleChangeOption = React.useCallback(
+    (opt: number) => {
+      if (!value?.time?.date) {
+        return;
+      }
+
+      switch (opt) {
+        case 1:
+          onRecurrenceChange({
+            startDate: value.time.date,
+            frequency: Frequency.Daily,
+            interval: recurrence.interval,
+          });
+          break;
+        case 2:
+          onRecurrenceChange({
+            startDate: value.time.date,
+            frequency: Frequency.Weekly,
+            interval: recurrence.interval,
+          });
+          break;
+        case 3:
+          onRecurrenceChange({
+            startDate: value.time.date,
+            frequency: Frequency.Monthly,
+            interval: recurrence.interval,
+          });
+          break;
+        case 4:
+          onRecurrenceChange({
+            startDate: value.time.date,
+            frequency: Frequency.Yearly,
+            interval: recurrence.interval,
+          });
+          break;
+        default:
+          break;
+      }
+    },
+    [value, recurrence, onRecurrenceChange],
+  );
+
+  const handleChangeInterval = React.useCallback(
+    (interval?: number) => {
+      if (interval) {
+        onRecurrenceChange({
+          ...recurrence,
+          interval,
+        });
+      }
+    },
+    [recurrence, onRecurrenceChange],
+  );
+
+  const handleChangeSetPosition = React.useCallback(
+    (bySetPosition?: number) => {
+      if (bySetPosition) {
+        onRecurrenceChange({
+          ...recurrence,
+          bySetPosition: bySetPosition ? [bySetPosition] : undefined,
+        });
+      }
+    },
+    [recurrence, onRecurrenceChange],
+  );
+
+  const handleChangeWeekDay = React.useCallback(
+    (byWeekDay: WeekDay[]) => {
+      onRecurrenceChange({
+        ...recurrence,
+        byWeekDay,
+      });
+    },
+    [recurrence, onRecurrenceChange],
+  );
+
+  const handleChangeMonthDay = React.useCallback(
+    (byMonthDay: number[]) => {
+      onRecurrenceChange({
+        ...recurrence,
+        byMonthDay,
+      });
+    },
+    [recurrence, onRecurrenceChange],
+  );
+
+  const handleChangeMonthOption = React.useCallback(
+    (opt: number) => {
+      if (opt === 1) {
+        onRecurrenceChange({
+          ...recurrence,
+          byMonthDay: [1],
+        });
+      } else {
+        onRecurrenceChange({
+          ...recurrence,
+          byWeekDay: [WeekDay.Monday],
+          bySetPosition: [1],
+        });
+      }
+      setMonthOption(opt);
+    },
+    [recurrence, onRecurrenceChange],
+  );
+
+  let selected = 1;
+  let label = 'days';
+
+  if (recurrence.frequency === Frequency.Weekly) {
+    selected = 2;
+    label = 'weeks';
+  } else if (recurrence.frequency === Frequency.Monthly) {
+    selected = 3;
+    label = 'months';
+  } else if (recurrence.frequency === Frequency.Yearly) {
+    selected = 4;
+    label = 'years';
+  }
+
+  let content: React.ReactNode;
+
+  switch (selected) {
+    case 2:
+      content = (
+        <ListPicker
+          label="On"
+          multi
+          value={recurrence.byWeekDay}
+          options={[
+            { value: WeekDay.Monday, label: 'Monday' },
+            { value: WeekDay.Tuesday, label: 'Tuesday' },
+            { value: WeekDay.Wednesday, label: 'Wednesday' },
+            { value: WeekDay.Thursday, label: 'Thursday' },
+            { value: WeekDay.Friday, label: 'Friday' },
+            { value: WeekDay.Saturday, label: 'Saturday' },
+            { value: WeekDay.Sunday, label: 'Sunday' },
+          ]}
+          onChange={handleChangeWeekDay}
+        />
+      );
+      break;
+    case 3:
+      content = (
+        <>
+          <SegmentedControl
+            value={monthOption}
+            onChange={handleChangeMonthOption}
+            options={[
+              { value: 1, label: 'Each' },
+              { value: 2, label: 'On the...' },
+            ]}
+          />
+          <Spacing height={16} />
+          {monthOption === 1 && (
+            <Container flex={1}>
+              <ScrollView>
+                <ListPicker
+                  multi
+                  label="Each day"
+                  options={range(1, 31).map((i) => ({
+                    value: i,
+                    label: `Day ${i}`,
+                  }))}
+                  value={value?.time?.recurrence?.byMonthDay ?? [1]}
+                  onChange={handleChangeMonthDay}
+                />
+              </ScrollView>
+            </Container>
+          )}
+          {monthOption === 2 && (
+            <>
+              <Picker
+                label="On"
+                options={[
+                  { value: 1, label: 'First' },
+                  { value: 2, label: 'Second' },
+                  { value: 3, label: 'Third' },
+                  { value: 4, label: 'Fourth' },
+                  { value: 5, label: 'Last' },
+                ]}
+                value={value?.time?.recurrence?.bySetPosition?.[0] ?? 1}
+                onChange={handleChangeSetPosition}
+              />
+              <Picker
+                label="Weekday"
+                value={recurrence.byWeekDay?.[0]}
+                options={[
+                  { value: WeekDay.Monday, label: 'Monday' },
+                  { value: WeekDay.Tuesday, label: 'Tuesday' },
+                  { value: WeekDay.Wednesday, label: 'Wednesday' },
+                  { value: WeekDay.Thursday, label: 'Thursday' },
+                  { value: WeekDay.Friday, label: 'Friday' },
+                  { value: WeekDay.Saturday, label: 'Saturday' },
+                  { value: WeekDay.Sunday, label: 'Sunday' },
+                ]}
+                onChange={(weekday) =>
+                  handleChangeWeekDay(weekday ? [weekday] : [])
+                }
+              />
+            </>
+          )}
+        </>
+      );
+      break;
+    default:
+      content = null;
+      break;
+  }
+
+  return (
+    <Container flex={1}>
+      <Row>
+        <BackButton onPress={back} />
+      </Row>
+      <Text size="lg" bold>
+        Custom repeat by
+      </Text>
+      <Spacing height={8} />
+      <SegmentedControl
+        value={selected}
+        onChange={handleChangeOption}
+        options={[
+          { value: 1, label: 'Day' },
+          { value: 2, label: 'Week' },
+          { value: 3, label: 'Month' },
+          { value: 4, label: 'Year' },
+        ]}
+      />
+      <Spacing height={16} />
+      <Picker
+        label="Every"
+        options={range(1, 999).map((i) => ({
+          value: i,
+          label: `${i} ${label}`,
+        }))}
+        value={value?.time?.recurrence?.interval ?? 1}
+        onChange={handleChangeInterval}
+      />
+      <Spacing height={8} />
+      {content}
     </Container>
   );
 }
@@ -456,11 +734,11 @@ function RecurrenceEndRepeatOptions() {
   );
 
   const handleChangeCount = React.useCallback(
-    (text: string) => {
+    (count?: number) => {
       handleRecurrenceChange({
         ...recurrence,
         until: null,
-        count: Number(text),
+        count,
       });
     },
     [recurrence, handleRecurrenceChange],
@@ -502,7 +780,15 @@ function RecurrenceEndRepeatOptions() {
       break;
     case 3:
       content = (
-        <TextInput value={`${recurrence.count}`} onChange={handleChangeCount} />
+        <Picker
+          label="After"
+          options={range(1, 999).map((i) => ({
+            value: i,
+            label: `${i} occurrences`,
+          }))}
+          value={recurrence.count ?? undefined}
+          onChange={handleChangeCount}
+        />
       );
       break;
     default:

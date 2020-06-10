@@ -2,12 +2,12 @@ import React from 'react';
 import { Animated, StyleSheet, LayoutChangeEvent, View } from 'react-native';
 
 interface ExpandProps {
-  expanded?: boolean;
+  open?: boolean;
   children?: React.ReactNode;
 }
 
 export function Expand(props: ExpandProps) {
-  const { expanded, children } = props;
+  const { open, children } = props;
   const height = React.useRef(new Animated.Value(0)).current;
   const translateY = React.useRef(new Animated.Value(0)).current;
   const [intrinsicHeight, setIntrinsicHeight] = React.useState(0);
@@ -19,17 +19,17 @@ export function Expand(props: ExpandProps) {
   React.useEffect(() => {
     Animated.parallel([
       Animated.spring(height, {
-        toValue: expanded ? intrinsicHeight : 0,
+        toValue: open ? intrinsicHeight : 0,
         bounciness: 0,
         useNativeDriver: false,
       }),
       Animated.spring(translateY, {
-        toValue: expanded ? 0 : -intrinsicHeight,
+        toValue: open ? 0 : -intrinsicHeight,
         bounciness: 0,
         useNativeDriver: false,
       }),
     ]).start();
-  }, [height, translateY, expanded, intrinsicHeight]);
+  }, [height, translateY, open, intrinsicHeight]);
 
   return (
     <Animated.View style={[styles.base, { height }]}>

@@ -15,7 +15,9 @@ interface SegmentedControlProps<TValue = any> {
   options?: Option<TValue>[];
 }
 
-export function SegmentedControl(props: SegmentedControlProps) {
+export function SegmentedControl<TValue = any>(
+  props: SegmentedControlProps<TValue>,
+) {
   const { value, onChange = () => {}, options = [] } = props;
   const theme = useTheme();
 
@@ -26,7 +28,7 @@ export function SegmentedControl(props: SegmentedControlProps) {
 
         return (
           <Button
-            key={option.value}
+            key={option.label}
             style={[
               styles.control,
               selected && {
@@ -51,7 +53,6 @@ const styles = StyleSheet.create({
   control: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
     flex: 1,
     height: 40,
   },

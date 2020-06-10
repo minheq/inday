@@ -3,6 +3,7 @@ import { Container } from './container';
 import { useToggle } from '../hooks/use_toggle';
 import { WheelPicker } from './wheel_picker';
 import { PickerButton } from './picker_button';
+import { Expand } from './expand';
 
 export interface Option<TValue = any> {
   value: TValue;
@@ -17,10 +18,18 @@ interface PickerProps<TValue = any> {
   disabled?: boolean;
   label?: string;
   placeholder?: string;
+  clearable?: boolean;
 }
 
 export function Picker<TValue = any>(props: PickerProps<TValue>) {
-  const { value, options, onChange = () => {}, label, placeholder } = props;
+  const {
+    value,
+    options,
+    clearable,
+    onChange = () => {},
+    label,
+    placeholder,
+  } = props;
   const [open, popover] = useToggle();
 
   const selected = value && options.find((o) => o.value === value);
@@ -31,13 +40,13 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
         label={label}
         description={selected?.label}
         placeholder={placeholder}
-        clearable={!!value}
+        clearable={clearable && !!value}
         onPress={popover.toggle}
         onClear={onChange}
       />
-      {open && (
+      <Expand open={open}>
         <WheelPicker options={options} onChange={onChange} value={value} />
-      )}
+      </Expand>
     </Container>
   );
 }

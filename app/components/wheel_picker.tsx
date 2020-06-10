@@ -55,7 +55,7 @@ export function WheelPicker<TValue extends any>(
   const animatedOptions = React.useRef(
     options.map((o) => ({
       value: o.value,
-      label: o.value,
+      label: o.label,
       opacity: new Animated.Value(0.33),
     })),
   ).current;

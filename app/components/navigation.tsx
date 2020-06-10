@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   screen: {
+    flex: 1,
     position: 'absolute',
     backgroundColor: 'white',
     width: '100%',
