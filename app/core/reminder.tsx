@@ -25,10 +25,9 @@ import { SegmentedControl } from '../components/segmented_control';
 import { Content } from '../components/content';
 import { DayPicker } from '../components/day_picker';
 import { TimePicker } from '../components/time_picker';
-import { Picker, ListPicker, Fade } from '../components';
+import { Picker, ListPicker } from '../components';
 import { range } from '../utils/arrays';
-import { WeekDay } from '../utils/week';
-import { useToggle } from '../hooks/use_toggle';
+import { WeekDay, getWeekDaysOptions } from '../utils/week';
 
 interface ReminderContext {
   value?: Reminder | null;
@@ -197,7 +196,13 @@ function ReminderTime() {
 }
 
 function formatRepeat(recurrence: Recurrence) {
-  const { interval, frequency, byWeekDay } = recurrence;
+  const {
+    interval,
+    frequency,
+    byWeekDay,
+    byMonthDay,
+    bySetPosition,
+  } = recurrence;
 
   const frequencyText = {
     [Frequency.Yearly]: 'Year',
@@ -209,9 +214,41 @@ function formatRepeat(recurrence: Recurrence) {
   let text = `Every ${interval} ${frequencyText[frequency]}`;
 
   if (frequency === Frequency.Weekly && byWeekDay) {
-    text += `on ${byWeekDay
+    text += ` on ${byWeekDay
       .map((weekDay) => format(setDay(new Date(), weekDay), 'EEE'))
       .join(', ')}`;
+  }
+
+  if (frequency === Frequency.Monthly && byMonthDay) {
+    text += ` on ${byMonthDay
+      .map((monthDay) => format(setDay(new Date(), monthDay), 'do'))
+      .join(', ')}`;
+  }
+
+  if (frequency === Frequency.Monthly && bySetPosition && byWeekDay) {
+    switch (bySetPosition[0]) {
+      case 1:
+        text += ' on first';
+        break;
+      case 2:
+        text += ' on second';
+        break;
+      case 3:
+        text += ' on third';
+        break;
+      case 4:
+        text += ' on fourth';
+        break;
+      case -1:
+        text += ' on last';
+        break;
+      default:
+        break;
+    }
+
+    const options = getWeekDaysOptions();
+
+    text += ` ${options.find((o) => o.value === byWeekDay[0])?.label}`;
   }
 
   return text;
@@ -221,7 +258,7 @@ function formatEndRepeat(recurrence: Recurrence) {
   const { count, until } = recurrence;
 
   if (count) {
-    return `After ${count} times`;
+    return `After ${count} occurrences`;
   }
 
   if (until) {
@@ -274,6 +311,9 @@ function useOptions() {
     label: o.label,
     value: o.value,
     selected:
+      !recurrence?.byMonthDay &&
+      !recurrence?.byWeekDay &&
+      !recurrence?.bySetPosition &&
       o.value.frequency === recurrence?.frequency &&
       o.value.interval === recurrence?.interval,
   }));
@@ -360,14 +400,15 @@ function RecurrenceOptions() {
       <ListItem
         description="Custom"
         onPress={() => {
-          if (value?.time?.date) {
+          if (!value?.time?.recurrence && value?.time?.date) {
             onRecurrenceChange({
               startDate: value?.time?.date,
               frequency: Frequency.Daily,
               interval: 1,
             });
-            navigate(<RecurrenceCustomOptions />);
           }
+
+          navigate(<RecurrenceCustomOptions />);
         }}
         actions={
           custom ? (
@@ -499,6 +540,8 @@ function RecurrenceCustomOptions() {
   let selected = 1;
   let label = 'days';
 
+  console.log(recurrence.frequency);
+
   if (recurrence.frequency === Frequency.Weekly) {
     selected = 2;
     label = 'weeks';
@@ -519,15 +562,7 @@ function RecurrenceCustomOptions() {
           label="On"
           multi
           value={recurrence.byWeekDay}
-          options={[
-            { value: WeekDay.Monday, label: 'Monday' },
-            { value: WeekDay.Tuesday, label: 'Tuesday' },
-            { value: WeekDay.Wednesday, label: 'Wednesday' },
-            { value: WeekDay.Thursday, label: 'Thursday' },
-            { value: WeekDay.Friday, label: 'Friday' },
-            { value: WeekDay.Saturday, label: 'Saturday' },
-            { value: WeekDay.Sunday, label: 'Sunday' },
-          ]}
+          options={getWeekDaysOptions()}
           onChange={handleChangeWeekDay}
         />
       );
@@ -569,7 +604,7 @@ function RecurrenceCustomOptions() {
                   { value: 2, label: 'Second' },
                   { value: 3, label: 'Third' },
                   { value: 4, label: 'Fourth' },
-                  { value: 5, label: 'Last' },
+                  { value: -1, label: 'Last' },
                 ]}
                 value={value?.time?.recurrence?.bySetPosition?.[0] ?? 1}
                 onChange={handleChangeSetPosition}

@@ -20,6 +20,18 @@ export enum WeekDay {
   Sunday = 0,
 }
 
+export function getWeekDaysOptions() {
+  return [
+    { value: WeekDay.Monday, label: 'Monday' },
+    { value: WeekDay.Tuesday, label: 'Tuesday' },
+    { value: WeekDay.Wednesday, label: 'Wednesday' },
+    { value: WeekDay.Thursday, label: 'Thursday' },
+    { value: WeekDay.Friday, label: 'Friday' },
+    { value: WeekDay.Saturday, label: 'Saturday' },
+    { value: WeekDay.Sunday, label: 'Sunday' },
+  ];
+}
+
 export type FirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export const getFirstDateOfWeek = (
