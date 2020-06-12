@@ -65,11 +65,11 @@ interface ReminderPlace {
 
 interface ReminderProps {
   value?: Reminder | null;
-  onChange: (value: Reminder) => void;
+  onChange?: (value: Reminder) => void;
 }
 
 export function Reminder(props: ReminderProps) {
-  const { value, onChange } = props;
+  const { value, onChange = () => {} } = props;
 
   const handleRecurrenceChange = React.useCallback(
     (recurrence: Recurrence | null) => {
@@ -539,8 +539,6 @@ function RecurrenceCustomOptions() {
 
   let selected = 1;
   let label = 'days';
-
-  console.log(recurrence.frequency);
 
   if (recurrence.frequency === Frequency.Weekly) {
     selected = 2;

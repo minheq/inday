@@ -11,13 +11,13 @@ import {
   Text,
   Spacing,
   Dialog,
-  NavigationProvider,
 } from '../components';
 import { ScrollView } from 'react-native';
 import { Card, useCardStore } from '../data/card';
 import { Editor } from '../editor';
 import { AppBar } from '../core/app_bar';
 import { useToggle } from '../hooks/use_toggle';
+import { Reminder } from '../core/reminder';
 
 interface CardScreenProps {
   card: Card;
@@ -158,7 +158,7 @@ interface ReminderButtonProps {
 function ReminderButton(props: ReminderButtonProps) {
   const { card } = props;
   const [open, dialog] = useToggle();
-  const active = card.reminderDate !== null || card.reminderPlace !== null;
+  const active = card.reminder !== null;
 
   return (
     <>
@@ -169,9 +169,7 @@ function ReminderButton(props: ReminderButtonProps) {
         onRequestClose={dialog.setFalse}
       >
         <Container width={320} height={480}>
-          <NavigationProvider>
-            {/* <Reminder card={card} /> */}
-          </NavigationProvider>
+          <Reminder />
         </Container>
       </Dialog>
     </>

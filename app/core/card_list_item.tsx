@@ -16,9 +16,11 @@ export function CardListItem(props: CardListItemProps) {
       <Container height={64} padding={16}>
         <Row expanded>
           <Column justifyContent="center" expanded>
-            {preview.title && <Text bold>{preview.title}</Text>}
+            {preview.title && <Text>{preview.title}</Text>}
             {preview.description && (
-              <Text color="muted">{preview.description}</Text>
+              <Text size="sm" color="muted">
+                {preview.description}
+              </Text>
             )}
           </Column>
         </Row>

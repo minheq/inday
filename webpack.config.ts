@@ -1,6 +1,9 @@
 import path from 'path';
 
+const development = process.env.NODE_ENV !== 'production';
+
 module.exports = {
+  mode: development ? 'development' : 'production',
   entry: './index.web.ts',
   output: {
     path: path.join(__dirname),
@@ -10,6 +13,7 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts|tsx)$/,
+        exclude: /node_modules/,
         loader: 'babel-loader',
         options: {
           presets: [
@@ -32,7 +36,6 @@ module.exports = {
     },
     extensions: ['.web.tsx', '.web.ts', '.tsx', '.ts', '.jsx', '.js', '.json'],
   },
-  devtool: 'source-map',
   devServer: {
     contentBase: path.join(__dirname),
   },
