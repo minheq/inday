@@ -22,7 +22,7 @@ export function NavigationMenu() {
   return (
     <ScrollView>
       <Container padding={16}>
-        <HomeMenuItem />
+        <InboxMenuItem />
       </Container>
     </ScrollView>
   );
@@ -30,14 +30,14 @@ export function NavigationMenu() {
 
 interface MenuItemProps {}
 
-function HomeMenuItem() {
+function InboxMenuItem() {
   return (
     <Button>
       <Container height={40} paddingHorizontal={8}>
         <Row alignItems="center" expanded>
-          <Icon name="home" size="lg" />
+          <Icon name="inbox" size="lg" />
           <Spacing width={16} />
-          <Text bold>Home</Text>
+          <Text bold>Inbox</Text>
         </Row>
       </Container>
     </Button>

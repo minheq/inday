@@ -36,13 +36,13 @@ function MarkButton(props: MarkButtonProps) {
 
 function LinkButton() {
   const { selection } = useEditor();
-  const { onEdit } = useLinkEdit();
+  const { onEditLink } = useLinkEdit();
 
   const handlePress = React.useCallback(() => {
     if (selection) {
-      onEdit({ url: '', display: selection.text ?? '' });
+      onEditLink({ url: '', display: selection.text ?? '' });
     }
-  }, [onEdit, selection]);
+  }, [onEditLink, selection]);
 
   return <ToolbarButton active={false} onPress={handlePress} icon="link" />;
 }

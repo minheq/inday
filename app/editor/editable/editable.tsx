@@ -29,6 +29,7 @@ import { css } from '../../utils/css';
 import { usePrevious } from '../../hooks/use_previous';
 import { withImages } from './plugins/images';
 import { withVideos } from './plugins/videos';
+import { useLinkEdit } from '../link_edit';
 
 const HOTKEYS: { [key: string]: Mark | ElementType } = {
   'mod+b': 'bold',
@@ -74,16 +75,12 @@ export interface EditableInstance {
 interface EditableProps {
   initialValue?: Node[];
   onChange?: (state: EditableState) => void;
-  onEditLink: (value: LinkValue) => void;
 }
 
 export const Editable = React.forwardRef<EditableInstance, EditableProps>(
   (props, ref) => {
-    const {
-      initialValue = [],
-      onChange = () => {},
-      onEditLink = () => {},
-    } = props;
+    const { initialValue = [], onChange = () => {} } = props;
+    const { onEditLink } = useLinkEdit();
     const [value, setValue] = React.useState<Node[]>(initialValue);
     const editor = React.useMemo(
       () =>

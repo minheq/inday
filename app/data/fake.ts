@@ -3,6 +3,14 @@ import { Card } from './card';
 
 const content: Element[] = [
   {
+    type: 'heading-one',
+    children: [{ text: 'Minh birthday' }],
+  },
+  {
+    type: 'paragraph',
+    children: [{ text: 'This is a second hello' }],
+  },
+  {
     type: 'paragraph',
     children: [
       { text: 'This is editable ' },

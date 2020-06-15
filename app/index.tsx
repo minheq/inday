@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider } from './theme';
 import { Row, NavigationProvider, Screen } from './components';
 import { SideNavigation } from './core/side_navigation';
-import { HomeScreen } from './screens/home';
+import { InboxScreen } from './screens/inbox';
 import { CardStoreProvider } from './data/card';
 
 export function App() {
@@ -22,7 +22,7 @@ function HomeContainer() {
   return (
     <Screen>
       <NavigationProvider>
-        <HomeScreen />
+        <InboxScreen />
       </NavigationProvider>
     </Screen>
   );

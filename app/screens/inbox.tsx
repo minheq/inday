@@ -14,8 +14,9 @@ import { ScrollView } from 'react-native';
 import { useCardStore } from '../data/card';
 import { CardListItem } from '../core/card_list_item';
 import { CardScreen } from './card';
+import { CardList } from '../core/card_list';
 
-export function HomeScreen() {
+export function InboxScreen() {
   const { navigate } = useNavigation();
   const { getManyByDate } = useCardStore();
 
@@ -26,18 +27,10 @@ export function HomeScreen() {
       <ScrollView>
         <Content>
           <Text bold size="lg">
-            Today
+            Inbox
           </Text>
           <Spacing height={16} />
-          {cards.map((c) => (
-            <Container key={c.id}>
-              <CardListItem
-                onPress={() => navigate(<CardScreen card={c} />)}
-                card={c}
-              />
-              <Divider />
-            </Container>
-          ))}
+          <CardList cards={cards} />
           <Spacing height={16} />
           <Row>
             <AddCard />

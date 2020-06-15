@@ -4,11 +4,9 @@ import { Editable, EditableState, EditableInstance } from './editable/editable';
 import { MainToolbar } from './main_toolbar';
 import { BlockType, Block } from './editable/nodes/element';
 import { Mark } from './editable/nodes/leaf';
-import { Hoverable } from './hoverable';
 import { View } from 'react-native';
 import { LinkValue } from './editable/nodes/link';
-import { LinkEditProvider, LinkEditConsumer } from './link_edit';
-import { FormatProvider } from './format';
+import { LinkEditProvider } from './link_edit';
 import { InsertProvider } from './insert';
 import {
   measure,
@@ -111,24 +109,16 @@ export function Editor(props: EditorProps) {
           focus: handleFocus,
         }}
       >
-        <FormatProvider>
-          <LinkEditProvider>
-            <InsertProvider>
-              <MainToolbar />
-              <LinkEditConsumer>
-                {({ onEdit }) => (
-                  <Editable
-                    ref={editableRef}
-                    initialValue={initialValue}
-                    onChange={handleChange}
-                    onEditLink={onEdit}
-                  />
-                )}
-              </LinkEditConsumer>
-              <Hoverable />
-            </InsertProvider>
-          </LinkEditProvider>
-        </FormatProvider>
+        <LinkEditProvider>
+          <InsertProvider>
+            <MainToolbar />
+            <Editable
+              ref={editableRef}
+              initialValue={initialValue}
+              onChange={handleChange}
+            />
+          </InsertProvider>
+        </LinkEditProvider>
       </EditorContext.Provider>
     </View>
   );

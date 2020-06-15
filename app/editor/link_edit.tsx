@@ -12,11 +12,11 @@ import { LinkValue } from './editable/nodes/link';
 import { useEditor } from './editor';
 
 interface LinkEditContext {
-  onEdit: (value: LinkValue) => void;
+  onEditLink: (value: LinkValue) => void;
 }
 
 const LinkEditContext = React.createContext<LinkEditContext>({
-  onEdit: () => {},
+  onEditLink: () => {},
 });
 
 export function useLinkEdit() {
@@ -42,11 +42,11 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
   const [state, setState] = React.useState<State>(initialState);
   const { insertLink, focus } = useEditor();
 
-  const handleEdit = React.useCallback((value: LinkValue) => {
+  const handleEditLink = React.useCallback((value: LinkValue) => {
     setState({ open: true, value });
   }, []);
 
-  const handleInsert = React.useCallback(
+  const handleInsertLink = React.useCallback(
     (newValue: LinkValue) => {
       setState(initialState);
       insertLink(newValue);
@@ -59,7 +59,7 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
   }, []);
 
   return (
-    <LinkEditContext.Provider value={{ onEdit: handleEdit }}>
+    <LinkEditContext.Provider value={{ onEditLink: handleEditLink }}>
       {children}
       <Dialog
         animationType="slide"
@@ -68,14 +68,12 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
         onDismiss={focus}
       >
         {state.value && (
-          <LinkEdit initialValue={state.value} onSubmit={handleInsert} />
+          <LinkEdit initialValue={state.value} onSubmit={handleInsertLink} />
         )}
       </Dialog>
     </LinkEditContext.Provider>
   );
 }
-
-export const LinkEditConsumer = LinkEditContext.Consumer;
 
 interface LinkEditProps {
   initialValue: LinkValue;
