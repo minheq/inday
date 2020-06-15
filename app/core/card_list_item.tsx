@@ -5,11 +5,10 @@ import { Editor } from '../editor';
 
 interface CardListItemProps {
   card: Card;
-  onPress: () => void;
 }
 
 export function CardListItem(props: CardListItemProps) {
-  const { card, onPress } = props;
+  const { card } = props;
   const [state, setState] = React.useState({
     open: false,
   });

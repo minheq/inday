@@ -1,14 +1,12 @@
 import React from 'react';
 import { Row, Container, Pressable, Text, Column } from '../components';
-import { Card, useCardStore } from '../data/card';
+import { Card } from '../data/card';
 
 interface CardReminderProps {
   card: Card;
 }
 
-export function CardReminder(props: CardReminderProps) {
-  const { updateReminderDate, updateReminderPlace } = useCardStore();
-
+export function CardReminder(_props: CardReminderProps) {
   return (
     <Container>
       <Row>

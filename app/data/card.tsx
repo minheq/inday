@@ -1,4 +1,6 @@
 import React from 'react';
+import { v4 } from 'uuid';
+
 import { Element } from '../editor/editable/nodes/element';
 import { data } from './fake';
 import { Reminder } from '../core/reminder';
@@ -8,14 +10,16 @@ export interface Task {
   completed: boolean;
 }
 
+export interface Preview {
+  title: string | null;
+  description: string | null;
+  imageURL: string | null;
+}
+
 export interface Card {
   id: string;
   content: Content;
-  preview: {
-    title: string | null;
-    description: string | null;
-    imageURL: string | null;
-  };
+  preview: Preview;
   labelIDs: string[];
   reminder: Reminder | null;
   task: Task | null;
@@ -26,15 +30,36 @@ export interface Card {
 interface CardStoreContext {
   getByID: (id: string) => Card | null;
   getManyByDate: (date: string) => Card[];
-  updateTask: (id: string, task: Task | null) => void;
-  updateReminder: (id: string, reminder: Reminder | null) => void;
+  createNewCard: () => Card;
+  updateCardTask: (id: string, task: Task | null) => void;
+  updateCardReminder: (id: string, reminder: Reminder | null) => void;
+  updateCardContent: (id: string, content: Content) => void;
+  updateCardPreview: (id: string, preview: Preview) => void;
 }
 
 const CardStoreContext = React.createContext<CardStoreContext>({
   getByID: () => null,
   getManyByDate: () => [],
-  updateTask: () => {},
-  updateReminder: () => {},
+  createNewCard: () => {
+    return {
+      content: [],
+      preview: {
+        title: null,
+        description: null,
+        imageURL: null,
+      },
+      id: '',
+      labelIDs: [],
+      reminder: null,
+      task: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  },
+  updateCardTask: () => {},
+  updateCardReminder: () => {},
+  updateCardContent: () => {},
+  updateCardPreview: () => {},
 });
 
 export function useCardStore() {
@@ -89,7 +114,28 @@ export function CardStoreProvider(props: CardStoreProviderProps) {
     [cardsByDate, cardsByID],
   );
 
-  const handleUpdateTask = React.useCallback(
+  const handleCreateNewCard = React.useCallback(() => {
+    const card = {
+      content: [],
+      preview: {
+        title: 'New card',
+        description: 'No additional text',
+        imageURL: null,
+      },
+      id: v4(),
+      labelIDs: [],
+      reminder: null,
+      task: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    cardsByID[card.id] = card;
+
+    return card;
+  }, [cardsByID]);
+
+  const handleUpdateCardTask = React.useCallback(
     (id: string, task: Task | null) => {
       cardsByID[id].task = task;
 
@@ -101,9 +147,33 @@ export function CardStoreProvider(props: CardStoreProviderProps) {
     [cardsByID, cardsByDate],
   );
 
-  const handleUpdateReminder = React.useCallback(
+  const handleUpdateCardReminder = React.useCallback(
     (id: string, reminder: Reminder | null) => {
       cardsByID[id].reminder = reminder;
+
+      setValue({
+        cardsByID,
+        cardsByDate,
+      });
+    },
+    [cardsByID, cardsByDate],
+  );
+
+  const handleUpdateCardContent = React.useCallback(
+    (id: string, content: Content) => {
+      cardsByID[id].content = content;
+
+      setValue({
+        cardsByID,
+        cardsByDate,
+      });
+    },
+    [cardsByID, cardsByDate],
+  );
+
+  const handleUpdateCardPreview = React.useCallback(
+    (id: string, preview: Preview) => {
+      cardsByID[id].preview = preview;
 
       setValue({
         cardsByID,
@@ -118,8 +188,11 @@ export function CardStoreProvider(props: CardStoreProviderProps) {
       value={{
         getByID: handleGetByID,
         getManyByDate: handleGetManyByDate,
-        updateTask: handleUpdateTask,
-        updateReminder: handleUpdateReminder,
+        createNewCard: handleCreateNewCard,
+        updateCardTask: handleUpdateCardTask,
+        updateCardReminder: handleUpdateCardReminder,
+        updateCardContent: handleUpdateCardContent,
+        updateCardPreview: handleUpdateCardPreview,
       }}
     >
       {children}

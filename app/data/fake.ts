@@ -40,11 +40,11 @@ const content: Element[] = [
     type: 'block-quote',
     children: [{ text: 'A wise quote.' }],
   },
-  {
-    type: 'image',
-    url: 'https://source.unsplash.com/kFrdX5IeQzI',
-    children: [{ text: '' }],
-  },
+  // {
+  //   type: 'image',
+  //   url: 'https://source.unsplash.com/kFrdX5IeQzI',
+  //   children: [{ text: '' }],
+  // },
   {
     type: 'paragraph',
     children: [{ text: 'Try it out for yourself!' }],

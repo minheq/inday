@@ -14,7 +14,7 @@ export function CardList(props: CardListProps) {
     <Container>
       {cards.map((c) => (
         <Container key={c.id}>
-          <CardListItem onPress={() => {}} card={c} />
+          <CardListItem card={c} />
           <Divider />
         </Container>
       ))}

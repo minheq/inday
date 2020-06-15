@@ -60,7 +60,7 @@ interface TaskCheckboxProps {
 
 function TaskCheckbox(props: TaskCheckboxProps) {
   const { card } = props;
-  const { updateTask } = useCardStore();
+  const { updateCardTask } = useCardStore();
   const { task } = card;
 
   const handleToggle = React.useCallback(() => {
@@ -68,8 +68,8 @@ function TaskCheckbox(props: TaskCheckboxProps) {
       return;
     }
 
-    updateTask(card.id, { completed: !task.completed });
-  }, [updateTask, card, task]);
+    updateCardTask(card.id, { completed: !task.completed });
+  }, [updateCardTask, card, task]);
 
   if (task === null) {
     return null;
@@ -130,17 +130,17 @@ interface TaskButtonProps {
 
 function TaskButton(props: TaskButtonProps) {
   const { card } = props;
-  const { updateTask } = useCardStore();
+  const { updateCardTask } = useCardStore();
   const active = card.task !== null;
 
   const handleToggleTask = React.useCallback(() => {
     if (!card.task) {
-      updateTask(card.id, { completed: false });
+      updateCardTask(card.id, { completed: false });
       return;
     }
 
-    updateTask(card.id, null);
-  }, [updateTask, card]);
+    updateCardTask(card.id, null);
+  }, [updateCardTask, card]);
 
   return (
     <EditButton
