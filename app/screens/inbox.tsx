@@ -1,13 +1,11 @@
 import React from 'react';
 import { Screen, Text, Content, Spacing, Button, Row } from '../components';
 import { ScrollView } from 'react-native';
-import { useCardStore } from '../data/card';
 import { CardList } from '../core/card_list';
+import { useGetAllCards, useCreateCard } from '../data/api';
 
 export function InboxScreen() {
-  const { getManyByDate } = useCardStore();
-
-  const cards = getManyByDate('2020-06-06');
+  const cards = useGetAllCards();
 
   return (
     <Screen>
@@ -29,8 +27,14 @@ export function InboxScreen() {
 }
 
 function AddCard() {
+  const createCard = useCreateCard();
+
+  const handleCreateCard = React.useCallback(() => {
+    createCard();
+  }, [createCard]);
+
   return (
-    <Button>
+    <Button onPress={handleCreateCard}>
       <Text color="primary">+ Add new card</Text>
     </Button>
   );

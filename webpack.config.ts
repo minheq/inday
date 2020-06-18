@@ -36,6 +36,7 @@ module.exports = {
     },
     extensions: ['.web.tsx', '.web.ts', '.tsx', '.ts', '.jsx', '.js', '.json'],
   },
+  devtool: 'source-map',
   devServer: {
     contentBase: path.join(__dirname),
   },

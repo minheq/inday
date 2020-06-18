@@ -63,3 +63,6 @@ bundle.js
 *.map
 stats.json
 temp
+
+# Logs
+*.log

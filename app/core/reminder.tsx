@@ -28,6 +28,7 @@ import { TimePicker } from '../components/time_picker';
 import { Picker, ListPicker } from '../components';
 import { range } from '../utils/arrays';
 import { WeekDay, getWeekDaysOptions } from '../utils/week';
+import { Reminder } from '../data/card';
 
 interface ReminderContext {
   value?: Reminder | null;
@@ -43,24 +44,6 @@ const ReminderContext = React.createContext<ReminderContext>({
 
 function useReminder() {
   return React.useContext(ReminderContext);
-}
-
-export interface Reminder {
-  time: ReminderTime | null;
-  place: ReminderPlace | null;
-}
-
-interface ReminderTime {
-  date: Date;
-  time: Date | null;
-  recurrence: Recurrence | null;
-}
-
-interface ReminderPlace {
-  lat: number;
-  lng: number;
-  radius: number;
-  when: 'leaving' | 'arriving';
 }
 
 interface ReminderProps {
