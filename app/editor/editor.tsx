@@ -111,12 +111,12 @@ export function Editor(props: EditorProps) {
       >
         <LinkEditProvider>
           <InsertProvider>
-            <MainToolbar />
             <Editable
               ref={editableRef}
               initialValue={initialValue}
               onChange={handleChange}
             />
+            <MainToolbar />
           </InsertProvider>
         </LinkEditProvider>
       </EditorContext.Provider>

@@ -1,41 +1,22 @@
 import React from 'react';
-import { Screen, Text, Content, Spacing, Button, Row } from '../components';
-import { ScrollView } from 'react-native';
+import { Screen, Text, Content, Spacer } from '../components';
 import { CardList } from '../core/card_list';
-import { useGetAllCards, useCreateCard } from '../data/api';
+import { useGetAllCards } from '../data/api';
 
 export function InboxScreen() {
   const cards = useGetAllCards();
 
+  return <CardList cards={cards} />;
+
   return (
     <Screen>
-      <ScrollView>
-        <Content>
-          <Text bold size="lg">
-            Inbox
-          </Text>
-          <Spacing height={16} />
-          <CardList cards={cards} />
-          <Spacing height={16} />
-          <Row>
-            <AddCard />
-          </Row>
-        </Content>
-      </ScrollView>
+      <Content>
+        <Text bold size="lg">
+          Inbox
+        </Text>
+        <Spacer size={16} />
+        <CardList cards={cards} />
+      </Content>
     </Screen>
-  );
-}
-
-function AddCard() {
-  const createCard = useCreateCard();
-
-  const handleCreateCard = React.useCallback(() => {
-    createCard();
-  }, [createCard]);
-
-  return (
-    <Button onPress={handleCreateCard}>
-      <Text color="primary">+ Add new card</Text>
-    </Button>
   );
 }

@@ -1,13 +1,14 @@
 import React from 'react';
-import { useQuery, useMutation } from 'react-query';
+import { v4 } from 'uuid';
+import { useQuery, useMutation, queryCache } from 'react-query';
 
 import { Card, Reminder, Content, Preview } from './card';
 import { useWorkspaceCardsCollection } from './workspace';
 
 function toCard(
-  document: firebase.firestore.QueryDocumentSnapshot<
-    firebase.firestore.DocumentData
-  >,
+  document:
+    | firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>
+    | firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>,
 ): Card {
   const data = document.data();
 
@@ -25,17 +26,62 @@ export function useGetAllCards(): Card[] {
     return result.docs.map(toCard) as Card[];
   }, [cards]);
 
-  const result = useQuery(['cards'], fetchAllCards, { suspense: true });
+  const result = useQuery('cards', fetchAllCards, { suspense: true });
 
   return result.data!;
 }
 
-export function useCreateCard(): () => Promise<Card> {
+export function useCreateCard(): () => Card {
   const cards = useWorkspaceCardsCollection();
 
-  const createCard = React.useCallback(async () => {
-    const cardRef = await cards.add({
-      content: [],
+  const createCard = React.useCallback(
+    async (card: Card) => {
+      await cards.doc(card.id).set(card);
+
+      return card;
+    },
+    [cards],
+  );
+
+  const [mutate] = useMutation(createCard, {
+    // When mutate is called:
+    onMutate: (newCard) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      queryCache.cancelQueries('cards');
+
+      // Snapshot the previous value
+      const previousCards = queryCache.getQueryData('cards');
+
+      // Optimistically update to the new value
+      queryCache.setQueryData<Card[]>('cards', (old) => {
+        if (old) {
+          return [...old, newCard];
+        }
+
+        return [];
+      });
+
+      // Return the snapshotted value
+      return previousCards;
+    },
+    // If the mutation fails, use the value returned from onMutate to roll back
+    onError: (err, newCard, previousCards) => {
+      if (err) {
+        console.error(err);
+      } else {
+        queryCache.setQueryData('cards', previousCards);
+      }
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      queryCache.refetchQueries('cards');
+    },
+  });
+
+  return React.useCallback(() => {
+    const card: Card = {
+      id: v4(),
+      content: [{ type: 'paragraph', children: [{ text: '' }] }],
       preview: {
         title: 'New card',
         description: 'No additional text',
@@ -46,21 +92,11 @@ export function useCreateCard(): () => Promise<Card> {
       task: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    };
 
-    return (await cardRef.get()).data();
-  }, [cards]);
+    mutate(card);
 
-  const [mutate] = useMutation(createCard);
-
-  return React.useCallback(async () => {
-    const result = await mutate();
-
-    if (!result) {
-      throw new Error('Failed to create');
-    }
-
-    return result as Card;
+    return card;
   }, [mutate]);
 }
 

@@ -33,8 +33,11 @@ export function Expand(props: ExpandProps) {
 
   return (
     <Animated.View style={[styles.base, { height }]}>
-      <Animated.View style={[{ transform: [{ translateY }] }]}>
-        <View onLayout={handleLayout}>{children}</View>
+      <Animated.View
+        onLayout={handleLayout}
+        style={[{ transform: [{ translateY }] }]}
+      >
+        {children}
       </Animated.View>
     </Animated.View>
   );
@@ -43,11 +46,5 @@ export function Expand(props: ExpandProps) {
 const styles = StyleSheet.create({
   base: {
     overflow: 'hidden',
-  },
-  visible: {
-    display: 'flex',
-  },
-  invisible: {
-    display: 'none',
   },
 });

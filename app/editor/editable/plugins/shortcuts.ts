@@ -12,9 +12,9 @@ const BLOCK_SHORTCUTS: {
     '*': 'list-item',
     '-': 'list-item',
     '+': 'list-item',
-    '#': 'heading-one',
-    '##': 'heading-two',
-    '###': 'heading-three',
+    // '#': 'heading-one',
+    // '##': 'heading-two',
+    // '###': 'heading-three',
   },
   ']': {
     '[': 'check-list-item',

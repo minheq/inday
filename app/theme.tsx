@@ -78,7 +78,7 @@ const lightTheme: Theme = {
       darkTint: 'rgba(230, 230, 230, 1)',
     },
     shadow: {
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 1)',
       shadowOffset: {
         width: 4,
         height: 4,

@@ -2,12 +2,13 @@ import './firebase';
 import React, { Suspense } from 'react';
 
 import { ThemeProvider } from './theme';
-import { Row, NavigationProvider, Screen, Text } from './components';
+import { Row, Text } from './components';
 import { SideNavigation } from './core/side_navigation';
 import { InboxScreen } from './screens/inbox';
 import { WorkspaceProvider } from './data/workspace';
 import { FirebaseProvider } from './firebase';
 import { AppLoader } from './app_loader';
+import { DragDropProvider } from './drag_drop/drag_drop_provider';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC-MhB1W4eBYObS9YUS-rFDtnzJgsFJn08',
@@ -26,10 +27,12 @@ export function App() {
       <FirebaseProvider config={firebaseConfig}>
         <WorkspaceProvider>
           <AppLoader>
-            <Row expanded>
-              <SideNavigation />
-              <HomeContainer />
-            </Row>
+            <DragDropProvider>
+              <Row expanded>
+                <SideNavigation />
+                <HomeContainer />
+              </Row>
+            </DragDropProvider>
           </AppLoader>
         </WorkspaceProvider>
       </FirebaseProvider>
@@ -39,12 +42,8 @@ export function App() {
 
 function HomeContainer() {
   return (
-    <Screen>
-      <NavigationProvider>
-        <Suspense fallback={<Text>Loading..</Text>}>
-          <InboxScreen />
-        </Suspense>
-      </NavigationProvider>
-    </Screen>
+    <Suspense fallback={<Text>Loading..</Text>}>
+      <InboxScreen />
+    </Suspense>
   );
 }

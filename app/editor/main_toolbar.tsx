@@ -17,9 +17,6 @@ export function MainToolbar() {
       <MarkButton icon="strikethrough" format="strikethrough" />
       <MarkButton icon="code" format="code" />
       <LinkButton />
-      <BlockButton format="heading-one" icon="font" />
-      <BlockButton format="heading-two" icon="font" />
-      <BlockButton format="heading-three" icon="font" />
       <BlockButton format="block-quote" icon="quote" />
       <BlockButton format="code-block" icon="code" />
       <BlockButton format="numbered-list" icon="list" />
