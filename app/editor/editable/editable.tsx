@@ -6,7 +6,7 @@ import {
   Slate,
   ReactEditor,
 } from 'slate-react';
-import { createEditor, Node, Range, Editor, Transforms } from 'slate';
+import { createEditor, Range, Editor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 
 import { Leaf, Mark } from './nodes/leaf';
@@ -58,6 +58,7 @@ interface Selection extends Range, Rect {
 }
 
 export interface EditableState {
+  value: Element[];
   marks: { [key in Mark]?: true } | null;
   type: BlockType | null;
   selection: Selection | null;
@@ -73,15 +74,15 @@ export interface EditableInstance {
 }
 
 interface EditableProps {
-  initialValue?: Node[];
-  onChange?: (state: EditableState) => void;
+  value?: Element[];
+  onChange?: (newState: EditableState) => void;
 }
 
 export const Editable = React.forwardRef<EditableInstance, EditableProps>(
   (props, ref) => {
-    const { initialValue = [], onChange = () => {} } = props;
+    const { value = [], onChange = () => {} } = props;
     const { onEditLink } = useLinkEdit();
-    const [value, setValue] = React.useState<Node[]>(initialValue);
+
     const editor = React.useMemo(
       () =>
         withImages(
@@ -98,6 +99,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
     const prevSelection = usePrevious(editor.selection);
     const draggingRef = React.useRef(false);
     const previousStateRef = React.useRef<EditableState>({
+      value: [],
       selection: null,
       type: 'paragraph',
       marks: {},
@@ -192,6 +194,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
 
       if (prevState.selection?.dragging) {
         onChange({
+          value,
           marks: prevState.marks,
           selection: {
             ...prevState.selection,
@@ -200,11 +203,10 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           type: prevState.type,
         });
       }
-    }, [draggingRef, previousStateRef, onChange]);
+    }, [value, draggingRef, previousStateRef, onChange]);
 
     const handleChange = React.useCallback(
-      (newValue: Node[]) => {
-        setValue(newValue);
+      (newValue: Element[]) => {
         const marks = Editor.marks(editor);
         const type = getBlockType(editor);
         let selection: Selection | null = null;
@@ -278,11 +280,16 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           };
         }
 
-        const state: EditableState = { marks, selection, type };
+        const newState: EditableState = {
+          value: newValue,
+          marks,
+          selection,
+          type,
+        };
 
-        previousStateRef.current = state;
+        previousStateRef.current = newState;
 
-        onChange(state);
+        onChange(newState);
       },
       [editor, onChange, draggingRef, previousStateRef],
     );

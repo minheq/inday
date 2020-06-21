@@ -15,11 +15,13 @@ import {
 import { useDraggable } from '../drag_drop/use_draggable';
 import { DragState } from '../drag_drop/draggable';
 import { measure } from '../utils/measurements';
-import { Card } from '../data/card';
+import { Card, Content } from '../data/card';
 import { useCardList } from './card_list';
 import { Text } from '../components';
-import { Editor } from '../editor';
+import { Editor, EditorInstance } from '../editor';
 import { useTheme, tokens } from '../theme';
+import { useDebouncedCallback } from '../hooks/use_debounced_callback';
+import { useUpdateCardContent } from '../data/api';
 
 export interface CardListItem extends Card {
   index: number;
@@ -54,12 +56,24 @@ export function CardListItem(props: CardListItemProps) {
   const { onOpen, cardID } = useCardList();
   const open = cardID === card.id;
   const theme = useTheme();
+  const updateCardContent = useUpdateCardContent();
+  const editorRef = React.useRef<EditorInstance>(null);
   const height = React.useRef(new Animated.Value(CARD_HEIGHT)).current;
   const shadow = React.useRef(new Animated.Value(0)).current;
   const [dragging, setDragging] = React.useState(false);
   const [draggable, ref] = useDraggable<CardListItem, View>({
     item: card,
   });
+
+  const handleChangeContent = useDebouncedCallback(
+    (content: Content) => {
+      updateCardContent({
+        id: card.id,
+        content,
+      });
+    },
+    [card],
+  );
 
   const config: GestureDetectorConfig = React.useMemo(() => {
     let isLongPress = false;
@@ -134,6 +148,10 @@ export function CardListItem(props: CardListItemProps) {
       bounciness: 0,
       useNativeDriver: true,
     });
+
+    if (open) {
+      editorRef.current?.focus();
+    }
   }, [shadow, open]);
 
   return (
@@ -157,9 +175,13 @@ export function CardListItem(props: CardListItemProps) {
     >
       <View onLayout={handleContentLayout} style={[styles.card]}>
         {open ? (
-          <Editor initialValue={card.content} />
+          <Editor
+            ref={editorRef}
+            initialValue={card.content}
+            onChange={handleChangeContent}
+          />
         ) : (
-          <Text>{preview.title}</Text>
+          <Text>{preview.title || 'New card'}</Text>
         )}
       </View>
     </Animated.View>

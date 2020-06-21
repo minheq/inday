@@ -5,7 +5,7 @@ import { ThemeProvider } from './theme';
 import { Row, Text } from './components';
 import { SideNavigation } from './core/side_navigation';
 import { InboxScreen } from './screens/inbox';
-import { WorkspaceProvider } from './data/workspace';
+import { WorkspaceIDProvider } from './data/workspace';
 import { FirebaseProvider } from './firebase';
 import { AppLoader } from './app_loader';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
@@ -25,7 +25,7 @@ export function App() {
   return (
     <ThemeProvider>
       <FirebaseProvider config={firebaseConfig}>
-        <WorkspaceProvider>
+        <WorkspaceIDProvider>
           <AppLoader>
             <DragDropProvider>
               <Row expanded>
@@ -34,7 +34,7 @@ export function App() {
               </Row>
             </DragDropProvider>
           </AppLoader>
-        </WorkspaceProvider>
+        </WorkspaceIDProvider>
       </FirebaseProvider>
     </ThemeProvider>
   );

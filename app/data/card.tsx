@@ -1,5 +1,5 @@
-import { Element } from '../editor/editable/nodes/element';
 import { Recurrence } from '../modules/recurrence';
+import { Element } from '../editor/editable/nodes/element';
 
 export interface Reminder {
   time: ReminderTime | null;
@@ -26,16 +26,15 @@ export interface Task {
 }
 
 export interface Preview {
-  title: string | null;
-  description: string | null;
-  imageURL: string | null;
+  title: string;
+  description: string;
+  imageURL: string;
 }
 
 export interface Card {
   id: string;
   content: Content;
   preview: Preview;
-  labelIDs: string[];
   reminder: Reminder | null;
   task: Task | null;
   createdAt: Date;

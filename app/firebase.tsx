@@ -54,6 +54,10 @@ export function FirebaseProvider(props: FirebaseProviderProps) {
     setValue({ db, loading: false });
   }, [config]);
 
+  if (value.loading) {
+    return null;
+  }
+
   return (
     <FirebaseContext.Provider value={value}>
       {children}

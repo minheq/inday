@@ -2,45 +2,130 @@ import React from 'react';
 import { v4 } from 'uuid';
 import { useQuery, useMutation, queryCache } from 'react-query';
 
-import { Card, Reminder, Content, Preview } from './card';
-import { useWorkspaceCardsCollection } from './workspace';
+import { Card, Content, Preview } from './card';
+import { useFirebase } from '../firebase';
+import { useWorkspaceID, Workspace } from './workspace';
+import { BlockType } from '../editor/editable/nodes/element';
 
-function toCard(
-  document:
-    | firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>
-    | firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>,
-): Card {
-  const data = document.data();
-
-  return {
-    id: document.id,
-    ...data,
-  } as Card;
+export enum Collection {
+  Workspaces = 'workspaces',
+  Cards = 'cards',
 }
 
-export function useGetAllCards(): Card[] {
-  const cards = useWorkspaceCardsCollection();
+export type DB = firebase.firestore.Firestore;
 
-  const fetchAllCards = React.useCallback(async () => {
-    const result = await cards.get();
-    return result.docs.map(toCard) as Card[];
-  }, [cards]);
+export function useDB() {
+  const { db } = useFirebase();
 
-  const result = useQuery('cards', fetchAllCards, { suspense: true });
+  if (!db) {
+    throw new Error('DB not ready.');
+  }
+
+  return db;
+}
+
+export function useGetWorkspace() {
+  const workspaceID = useWorkspaceID();
+  const db = useDB();
+
+  const getWorkspace = React.useCallback(async () => {
+    const doc = await db
+      .collection(Collection.Workspaces)
+      .doc(workspaceID)
+      .get();
+
+    return doc.data() as Workspace;
+  }, [db, workspaceID]);
+
+  const result = useQuery('workspace', getWorkspace, { suspense: true });
 
   return result.data!;
 }
 
+export function useFindOrCreateWorkspace() {
+  const db = useDB();
+
+  const findOrCreateWorkspace = React.useCallback(
+    async (workspaceID: string) => {
+      const workspace = await db
+        .collection(Collection.Workspaces)
+        .doc(workspaceID)
+        .get()
+        .then((doc) => {
+          if (!doc.exists) {
+            const newWorkspace: Workspace = {
+              name: 'New workspace',
+              id: workspaceID,
+            };
+
+            db.collection(Collection.Workspaces)
+              .doc(newWorkspace.id)
+              .set(newWorkspace);
+
+            return newWorkspace;
+          } else {
+            return doc.data() as Workspace;
+          }
+        });
+
+      return workspace;
+    },
+    [db],
+  );
+
+  return findOrCreateWorkspace;
+}
+
+export function useGetAllCards(): Card[] {
+  const cards = useGetCards();
+
+  return cards;
+}
+
+export function useGetCards(): Card[] {
+  const workspaceID = useWorkspaceID();
+  const db = useDB();
+
+  const getWorkspaceCards = React.useCallback(async () => {
+    const collection = await db
+      .collection(Collection.Workspaces)
+      .doc(workspaceID)
+      .collection(Collection.Cards)
+      .orderBy('createdAt', 'asc')
+      .get();
+
+    return collection.docs.map((c) => c.data()) as Card[];
+  }, [workspaceID, db]);
+
+  const result = useQuery('cards', getWorkspaceCards, { suspense: true });
+
+  return result.data!;
+}
+
+function isRollback(value: unknown): value is () => void {
+  if (typeof value === 'function') {
+    return true;
+  }
+
+  return false;
+}
+
 export function useCreateCard(): () => Card {
-  const cards = useWorkspaceCardsCollection();
+  const workspaceID = useWorkspaceID();
+  const db = useDB();
 
   const createCard = React.useCallback(
     async (card: Card) => {
-      await cards.doc(card.id).set(card);
+      await db
+        .collection(Collection.Workspaces)
+        .doc(workspaceID)
+        .collection(Collection.Cards)
+        .doc(card.id)
+        .set(card);
 
       return card;
     },
-    [cards],
+    [db, workspaceID],
   );
 
   const [mutate] = useMutation(createCard, {
@@ -62,14 +147,18 @@ export function useCreateCard(): () => Card {
       });
 
       // Return the snapshotted value
-      return previousCards;
+      return () => {
+        queryCache.setQueryData('cards', previousCards);
+      };
     },
     // If the mutation fails, use the value returned from onMutate to roll back
-    onError: (err, newCard, previousCards) => {
+    onError: (err, newCard, rollback) => {
       if (err) {
         console.error(err);
       } else {
-        queryCache.setQueryData('cards', previousCards);
+        if (isRollback(rollback)) {
+          rollback();
+        }
       }
     },
     // Always refetch after error or success:
@@ -83,11 +172,10 @@ export function useCreateCard(): () => Card {
       id: v4(),
       content: [{ type: 'paragraph', children: [{ text: '' }] }],
       preview: {
-        title: 'New card',
-        description: 'No additional text',
-        imageURL: null,
+        title: '',
+        description: '',
+        imageURL: '',
       },
-      labelIDs: [],
       reminder: null,
       task: null,
       createdAt: new Date(),
@@ -100,13 +188,61 @@ export function useCreateCard(): () => Card {
   }, [mutate]);
 }
 
-export function useUpdateCardTask(id: string, task: Task | null): void {}
+export function useUpdateCardContent() {
+  const workspaceID = useWorkspaceID();
+  const db = useDB();
 
-export function useUpdateCardReminder(
-  id: string,
-  reminder: Reminder | null,
-): void {}
+  const updateCardContent = React.useCallback(
+    async (variables: { id: string; content: Content; preview: Preview }) => {
+      const { id, content, preview } = variables;
 
-export function useUpdateCardContent(id: string, content: Content): void {}
+      await db
+        .collection(Collection.Workspaces)
+        .doc(workspaceID)
+        .collection(Collection.Cards)
+        .doc(id)
+        .update({
+          content,
+          preview,
+        });
+    },
+    [db, workspaceID],
+  );
 
-export function useUpdateCardPreview(id: string, preview: Preview): void {}
+  const [mutate] = useMutation(updateCardContent);
+
+  return React.useCallback(
+    (variables: { id: string; content: Content }) => {
+      const { id, content } = variables;
+
+      mutate({
+        id,
+        content,
+        preview: toPreview(content),
+      });
+    },
+    [mutate],
+  );
+}
+
+function toPreview(content: Content): Preview {
+  let title = '';
+  const firstNode = content[0];
+  const type = firstNode.type as BlockType;
+
+  switch (type) {
+    case 'paragraph':
+      title = firstNode.children[0].text as string;
+      break;
+
+    default:
+      title = firstNode.children[0].text as string;
+      break;
+  }
+
+  return {
+    title,
+    description: '',
+    imageURL: '',
+  };
+}

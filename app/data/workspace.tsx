@@ -1,113 +1,46 @@
 import React from 'react';
-import { Collection, useDB } from './db';
-import { useFirebase } from '../firebase';
+import { queryCache } from 'react-query';
+import { v4 } from 'uuid';
+import { useFindOrCreateWorkspace } from './api';
 
 export interface Workspace {
   id: string;
   name: string;
 }
 
-interface WorkspaceContext {
-  workspace: Workspace;
-  loading: boolean;
+interface WorkspaceIDContext {
+  workspaceID: string;
 }
 
-export const WorkspaceContext = React.createContext<WorkspaceContext>({
-  workspace: {
-    id: '',
-    name: '',
-  },
-  loading: true,
+export const WorkspaceContext = React.createContext<WorkspaceIDContext>({
+  workspaceID: '',
 });
 
-interface WorkspaceProviderProps {
+interface WorkspaceIDProviderProps {
   children?: React.ReactNode;
 }
 
-export function useWorkspace() {
-  const { workspace } = React.useContext(WorkspaceContext);
+export function useWorkspaceID() {
+  const { workspaceID } = React.useContext(WorkspaceContext);
 
-  return workspace;
+  return workspaceID;
 }
 
-export function useWorkspaceCardsCollection() {
-  const workspace = useWorkspace();
-  const db = useDB();
-
-  return db
-    .collection(Collection.Workspaces)
-    .doc(workspace.id)
-    .collection(Collection.Cards);
-}
-
-export function WorkspaceProvider(props: WorkspaceProviderProps) {
+export function WorkspaceIDProvider(props: WorkspaceIDProviderProps) {
   const { children } = props;
-  const { db } = useFirebase();
-  const [value, setValue] = React.useState<WorkspaceContext>({
-    loading: true,
-    workspace: {
-      id: '',
-      name: '',
-    },
+  const findOrCreateWorkspace = useFindOrCreateWorkspace();
+  const [value] = React.useState<WorkspaceIDContext>({
+    workspaceID: window.localStorage.getItem('workspaceID') || v4(),
   });
 
-  const createNewWorkspace = React.useCallback(async () => {
-    if (!db) {
-      return;
-    }
-    const docRef = await db.collection(Collection.Workspaces).add({
-      name: 'New workspace',
-    });
-
-    return docRef.get();
-  }, [db]);
+  const { workspaceID } = value;
 
   React.useEffect(() => {
-    if (!db) {
-      return;
-    }
-
-    const workspaceID = window.localStorage.getItem('workspaceID');
-
-    if (!workspaceID) {
-      createNewWorkspace()
-        .then((workspace) => {
-          if (workspace) {
-            window.localStorage.setItem('workspaceID', workspace.id);
-          }
-        })
-        .catch((error) => {
-          console.log('Error creating document:', error);
-        });
-    } else {
-      db.collection(Collection.Workspaces)
-        .doc(workspaceID)
-        .get()
-        .then((doc) => {
-          const workspace = doc.data();
-
-          if (workspace) {
-            setValue({
-              loading: false,
-              workspace: {
-                id: doc.id,
-                name: workspace.name,
-              },
-            });
-          } else {
-            // doc.data() will be undefined in this case
-            console.log('No such document!');
-          }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
-    }
-  }, [db, createNewWorkspace]);
-
-  if (value.loading) {
-    return null;
-  }
+    findOrCreateWorkspace(workspaceID).then((workspace) => {
+      queryCache.setQueryData('workspace', workspace);
+      window.localStorage.setItem('workspaceID', workspaceID);
+    });
+  }, [workspaceID, findOrCreateWorkspace]);
 
   return (
     <WorkspaceContext.Provider value={value}>
