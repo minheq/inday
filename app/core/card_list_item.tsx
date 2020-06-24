@@ -180,8 +180,10 @@ export function CardListItem(props: CardListItemProps) {
             initialValue={card.content}
             onChange={handleChangeContent}
           />
+        ) : preview.title ? (
+          <Text>{preview.title}</Text>
         ) : (
-          <Text>{preview.title || 'New card'}</Text>
+          <Text color="muted">New card</Text>
         )}
       </View>
     </Animated.View>

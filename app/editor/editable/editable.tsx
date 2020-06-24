@@ -1,12 +1,12 @@
 import React from 'react';
 import isHotkey from 'is-hotkey';
+import { createEditor, Range, Editor, Transforms, Node } from 'slate';
 import {
   Editable as SlateEditable,
   withReact,
   Slate,
   ReactEditor,
 } from 'slate-react';
-import { createEditor, Range, Editor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 
 import { Leaf, Mark } from './nodes/leaf';
@@ -206,7 +206,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
     }, [value, draggingRef, previousStateRef, onChange]);
 
     const handleChange = React.useCallback(
-      (newValue: Element[]) => {
+      (newValue: Node[]) => {
         const marks = Editor.marks(editor);
         const type = getBlockType(editor);
         let selection: Selection | null = null;
@@ -281,7 +281,7 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
         }
 
         const newState: EditableState = {
-          value: newValue,
+          value: newValue as Element[],
           marks,
           selection,
           type,

@@ -1,10 +1,11 @@
 import React from 'react';
 import { v4 } from 'uuid';
-import { useQuery, useMutation, queryCache } from 'react-query';
+import { useAsync } from 'react-async';
 
 import { Card, Content, Preview } from './card';
 import { useFirebase } from '../firebase';
-import { useWorkspaceID, Workspace } from './workspace';
+import { useCache } from './cache';
+import { Workspace } from './workspace';
 import { BlockType } from '../editor/editable/nodes/element';
 
 export enum Collection {
@@ -24,150 +25,151 @@ export function useDB() {
   return db;
 }
 
-export function useGetWorkspace() {
-  const workspaceID = useWorkspaceID();
+export function useGetWorkspace(): Workspace {
   const db = useDB();
+  const cache = useCache();
 
-  const getWorkspace = React.useCallback(async () => {
-    const doc = await db
-      .collection(Collection.Workspaces)
-      .doc(workspaceID)
-      .get();
+  const createWorkspace = React.useCallback(async () => {
+    const workspace: Workspace = {
+      name: 'New workspace',
+      id: v4(),
+      __typename: 'Workspace',
+    };
 
-    return doc.data() as Workspace;
-  }, [db, workspaceID]);
+    db.collection(Collection.Workspaces).doc(workspace.id).set(workspace);
 
-  const result = useQuery('workspace', getWorkspace, { suspense: true });
+    return workspace;
+  }, [db]);
 
-  return result.data!;
-}
+  const promiseFn = React.useCallback(async () => {
+    const cached = await cache.readWorkspace();
 
-export function useFindOrCreateWorkspace() {
-  const db = useDB();
+    if (cached) {
+      return cached;
+    }
 
-  const findOrCreateWorkspace = React.useCallback(
-    async (workspaceID: string) => {
-      const workspace = await db
-        .collection(Collection.Workspaces)
-        .doc(workspaceID)
-        .get()
-        .then((doc) => {
-          if (!doc.exists) {
-            const newWorkspace: Workspace = {
-              name: 'New workspace',
-              id: workspaceID,
-            };
+    const workspace = await createWorkspace();
 
-            db.collection(Collection.Workspaces)
-              .doc(newWorkspace.id)
-              .set(newWorkspace);
+    await cache.writeWorkspace(workspace);
 
-            return newWorkspace;
-          } else {
-            return doc.data() as Workspace;
-          }
-        });
+    return workspace;
+  }, [createWorkspace, cache]);
 
-      return workspace;
-    },
-    [db],
-  );
+  const { data } = useAsync({ promiseFn, suspense: true });
 
-  return findOrCreateWorkspace;
+  return data!;
 }
 
 export function useGetAllCards(): Card[] {
-  const cards = useGetCards();
-
-  return cards;
-}
-
-export function useGetCards(): Card[] {
-  const workspaceID = useWorkspaceID();
+  const workspace = useGetWorkspace();
   const db = useDB();
+  const cache = useCache();
 
-  const getWorkspaceCards = React.useCallback(async () => {
+  const getAllCards = React.useCallback(async () => {
     const collection = await db
       .collection(Collection.Workspaces)
-      .doc(workspaceID)
+      .doc(workspace.id)
       .collection(Collection.Cards)
       .orderBy('createdAt', 'asc')
       .get();
 
-    return collection.docs.map((c) => c.data()) as Card[];
-  }, [workspaceID, db]);
+    const cards = collection.docs.map((c) => c.data()) as Card[];
 
-  const result = useQuery('cards', getWorkspaceCards, { suspense: true });
+    return cards;
+  }, [workspace, db]);
 
-  return result.data!;
+  const promiseFn = React.useCallback(async () => {
+    const cached = await cache.readAllCards();
+
+    if (cached) {
+      return cached;
+    }
+
+    const cards = await getAllCards();
+
+    await cache.writeCards(cards);
+
+    return cards;
+  }, [getAllCards, cache]);
+
+  const { data } = useAsync({ promiseFn, suspense: true });
+
+  return data!;
 }
 
-function isRollback(value: unknown): value is () => void {
-  if (typeof value === 'function') {
-    return true;
-  }
-
-  return false;
-}
-
-export function useCreateCard(): () => Card {
-  const workspaceID = useWorkspaceID();
+export function useGetCardCallback() {
+  const workspace = useGetWorkspace();
   const db = useDB();
+  const cache = useCache();
+
+  const getCard = React.useCallback(
+    async (id: string) => {
+      const cardRef = await db
+        .collection(Collection.Workspaces)
+        .doc(workspace.id)
+        .collection(Collection.Cards)
+        .doc(id)
+        .get();
+
+      return cardRef.data() as Card | null;
+    },
+    [db, workspace],
+  );
+
+  return React.useCallback(
+    async (id: string) => {
+      const cached = await cache.readCard(id);
+
+      if (cached) {
+        return cached;
+      }
+
+      const card = await getCard(id);
+
+      if (card === null) {
+        return null;
+      }
+
+      await cache.writeCard(card);
+
+      return card;
+    },
+    [cache, getCard],
+  );
+}
+
+export function useGetCard(id: string): Card | null {
+  const getCard = useGetCardCallback();
+
+  const promiseFn = React.useCallback(async () => {
+    return getCard(id);
+  }, [getCard, id]);
+
+  const { data } = useAsync({ promiseFn, suspense: true });
+
+  return data!;
+}
+
+export function useCreateCard(): () => Promise<Card> {
+  const workspace = useGetWorkspace();
+  const db = useDB();
+  const cache = useCache();
 
   const createCard = React.useCallback(
     async (card: Card) => {
       await db
         .collection(Collection.Workspaces)
-        .doc(workspaceID)
+        .doc(workspace.id)
         .collection(Collection.Cards)
         .doc(card.id)
         .set(card);
 
       return card;
     },
-    [db, workspaceID],
+    [db, workspace],
   );
 
-  const [mutate] = useMutation(createCard, {
-    // When mutate is called:
-    onMutate: (newCard) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      queryCache.cancelQueries('cards');
-
-      // Snapshot the previous value
-      const previousCards = queryCache.getQueryData('cards');
-
-      // Optimistically update to the new value
-      queryCache.setQueryData<Card[]>('cards', (old) => {
-        if (old) {
-          return [...old, newCard];
-        }
-
-        return [];
-      });
-
-      // Return the snapshotted value
-      return () => {
-        queryCache.setQueryData('cards', previousCards);
-      };
-    },
-    // If the mutation fails, use the value returned from onMutate to roll back
-    onError: (err, newCard, rollback) => {
-      if (err) {
-        console.error(err);
-      } else {
-        if (isRollback(rollback)) {
-          rollback();
-        }
-      }
-    },
-    // Always refetch after error or success:
-    onSettled: () => {
-      queryCache.refetchQueries('cards');
-    },
-  });
-
-  return React.useCallback(() => {
+  return React.useCallback(async () => {
     const card: Card = {
       id: v4(),
       content: [{ type: 'paragraph', children: [{ text: '' }] }],
@@ -178,50 +180,71 @@ export function useCreateCard(): () => Card {
       },
       reminder: null,
       task: null,
+      inbox: false,
+      scheduledAt: null,
+      listID: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      __typename: 'Card',
     };
 
-    mutate(card);
+    await createCard(card);
+
+    await cache.writeCard(card);
 
     return card;
-  }, [mutate]);
+  }, [createCard, cache]);
+}
+
+interface UpdateCardContentInputBase {
+  id: string;
+  content: Content;
+}
+
+interface UpdateCardContentInput extends UpdateCardContentInputBase {
+  preview: Preview;
 }
 
 export function useUpdateCardContent() {
-  const workspaceID = useWorkspaceID();
+  const getCard = useGetCardCallback();
+  const workspace = useGetWorkspace();
   const db = useDB();
+  const cache = useCache();
 
   const updateCardContent = React.useCallback(
-    async (variables: { id: string; content: Content; preview: Preview }) => {
-      const { id, content, preview } = variables;
+    async (input: UpdateCardContentInput) => {
+      const { id, content, preview } = input;
 
       await db
         .collection(Collection.Workspaces)
-        .doc(workspaceID)
+        .doc(workspace.id)
         .collection(Collection.Cards)
         .doc(id)
-        .update({
-          content,
-          preview,
-        });
+        .update({ content, preview });
     },
-    [db, workspaceID],
+    [db, workspace],
   );
 
-  const [mutate] = useMutation(updateCardContent);
-
   return React.useCallback(
-    (variables: { id: string; content: Content }) => {
-      const { id, content } = variables;
+    async (input: UpdateCardContentInputBase) => {
+      const { id, content } = input;
+      const card = await getCard(id);
 
-      mutate({
+      if (!card) {
+        throw new Error('Card not found');
+      }
+
+      const updatedInput: UpdateCardContentInput = {
         id,
         content,
         preview: toPreview(content),
-      });
+      };
+
+      await updateCardContent(updatedInput);
+
+      await cache.writeCard(card);
     },
-    [mutate],
+    [cache, getCard, updateCardContent],
   );
 }
 

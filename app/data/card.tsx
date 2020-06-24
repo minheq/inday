@@ -39,4 +39,8 @@ export interface Card {
   task: Task | null;
   createdAt: Date;
   updatedAt: Date;
+  inbox: boolean;
+  listID: string | null;
+  scheduledAt: Date | null;
+  __typename: 'Card';
 }

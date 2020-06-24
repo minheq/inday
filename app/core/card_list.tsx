@@ -18,11 +18,13 @@ import { Button, Text } from '../components';
 interface CardListContext {
   cardID: string | null;
   onOpen: (cardID: string) => void;
+  onClear: () => void;
 }
 
 const CardListContext = React.createContext<CardListContext>({
   cardID: null,
   onOpen: () => {},
+  onClear: () => {},
 });
 
 export function useCardList() {
@@ -66,6 +68,10 @@ export function CardList(props: CardListProps) {
 
   const handleOpen = React.useCallback((id: string) => {
     setCardID(id);
+  }, []);
+
+  const handleClear = React.useCallback(() => {
+    setCardID(null);
   }, []);
 
   const [dropTarget, ref] = useDropTarget<ScrollView>({
@@ -240,6 +246,7 @@ export function CardList(props: CardListProps) {
       value={{
         cardID,
         onOpen: handleOpen,
+        onClear: handleClear,
       }}
     >
       <Animated.ScrollView
@@ -272,7 +279,7 @@ function AddCard() {
   const { onOpen } = useCardList();
 
   const handleCreateCard = React.useCallback(async () => {
-    const card = createCard();
+    const card = await createCard();
 
     onOpen(card.id);
   }, [createCard, onOpen]);

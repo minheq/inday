@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, StyleSheet, LayoutChangeEvent, View } from 'react-native';
+import { Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
 
 interface ExpandProps {
   open?: boolean;
