@@ -8,6 +8,8 @@ import { InboxScreen } from './screens/inbox';
 import { FirebaseProvider } from './firebase';
 import { AppLoader } from './app_loader';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
+import { CacheProvider } from './data/cache';
+import { ErrorBoundary } from './core/error_boundary';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC-MhB1W4eBYObS9YUS-rFDtnzJgsFJn08',
@@ -22,25 +24,31 @@ const firebaseConfig = {
 
 export function App() {
   return (
-    <ThemeProvider>
-      <FirebaseProvider config={firebaseConfig}>
-        <AppLoader>
-          <DragDropProvider>
-            <Row expanded>
-              <SideNavigation />
-              <HomeContainer />
-            </Row>
-          </DragDropProvider>
-        </AppLoader>
-      </FirebaseProvider>
-    </ThemeProvider>
+    <Suspense fallback={<Text>Loading...</Text>}>
+      <ThemeProvider>
+        <CacheProvider>
+          <FirebaseProvider config={firebaseConfig}>
+            <AppLoader>
+              <DragDropProvider>
+                <Row expanded>
+                  <SideNavigation />
+                  <HomeContainer />
+                </Row>
+              </DragDropProvider>
+            </AppLoader>
+          </FirebaseProvider>
+        </CacheProvider>
+      </ThemeProvider>
+    </Suspense>
   );
 }
 
 function HomeContainer() {
   return (
-    <Suspense fallback={<Text>Loading..</Text>}>
-      <InboxScreen />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<Text>Loading...</Text>}>
+        <InboxScreen />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

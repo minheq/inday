@@ -2,6 +2,7 @@ import React from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card } from './card';
 import { Workspace } from './workspace';
+import { useAsync } from '../hooks/use_async';
 
 interface CacheContext {
   readCard: (id: string) => Promise<Card | null>;
@@ -13,10 +14,6 @@ interface CacheContext {
   writeCard: (card: Card) => Promise<void>;
   deleteCard: (cards: Card) => Promise<void>;
   writeWorkspace: (workspace: Workspace) => Promise<void>;
-}
-
-interface Query {
-  queryKey: string;
 }
 
 const CacheContext = React.createContext<CacheContext>({
@@ -39,11 +36,6 @@ interface CacheProviderProps {
   children?: React.ReactNode;
 }
 
-interface List {
-  id: string;
-  children: string[];
-}
-
 interface Cache {
   cardsByID: {
     [id: string]: Card | undefined;
@@ -56,19 +48,48 @@ interface Cache {
   };
 }
 
-function getKey(card: Card) {
-  return `${card.__typename}:${card.id}`;
+function getKey(obj: Card | Workspace) {
+  return `${obj.__typename}:${obj.id}`;
 }
 
 export function CacheProvider(props: CacheProviderProps) {
   const { children } = props;
-  const [cache, setCache] = React.useState<Cache>({
-    cardsByID: {},
-    workspace: null,
-    all: null,
-    inbox: null,
-    listsByID: {},
-  });
+  const onMount = React.useCallback(async () => {
+    const keys = await AsyncStorage.getAllKeys();
+
+    const workspaceKey = keys.filter((k) => k.split(':')[0] === 'Workspace')[0];
+    let workspace: Workspace | null = null;
+    if (workspaceKey) {
+      const workspaceJSON = await AsyncStorage.getItem(workspaceKey);
+      if (workspaceJSON) {
+        workspace = JSON.parse(workspaceJSON) as Workspace;
+      }
+    }
+
+    const cardKeys = keys.filter((k) => k.split(':')[0] === 'Card');
+    const cardJSONs = await AsyncStorage.multiGet(cardKeys);
+    const cardsByID: { [id: string]: Card } = {};
+    cardJSONs.forEach(([, value]) => {
+      if (!value) {
+        return null;
+      }
+      const card = JSON.parse(value) as Card;
+
+      cardsByID[card.id] = card;
+    });
+
+    return {
+      cardsByID,
+      workspace,
+      all: null,
+      inbox: null,
+      listsByID: {},
+    };
+  }, []);
+
+  const initialCache = useAsync('cache', onMount);
+  console.log(initialCache);
+  const [cache, setCache] = React.useState<Cache>(initialCache);
 
   const writeCards = React.useCallback(async (cards: Card[]) => {
     const batch = cards.map((c) => {
@@ -106,12 +127,14 @@ export function CacheProvider(props: CacheProviderProps) {
 
     setCache((prevCache) => {
       delete prevCache.cardsByID[card.id];
-
       return prevCache;
     });
   }, []);
 
   const writeWorkspace = React.useCallback(async (workspace: Workspace) => {
+    const key = getKey(workspace);
+    await AsyncStorage.setItem(key, JSON.stringify(workspace));
+
     setCache((prevCache) => {
       prevCache.workspace = workspace;
       return prevCache;

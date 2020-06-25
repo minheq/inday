@@ -1,12 +1,12 @@
 import React from 'react';
 import { v4 } from 'uuid';
-import { useAsync } from 'react-async';
 
 import { Card, Content, Preview } from './card';
 import { useFirebase } from '../firebase';
 import { useCache } from './cache';
 import { Workspace } from './workspace';
 import { BlockType } from '../editor/editable/nodes/element';
+import { useAsync } from '../hooks/use_async';
 
 export enum Collection {
   Workspaces = 'workspaces',
@@ -36,15 +36,15 @@ export function useGetWorkspace(): Workspace {
       __typename: 'Workspace',
     };
 
-    db.collection(Collection.Workspaces).doc(workspace.id).set(workspace);
+    await db.collection(Collection.Workspaces).doc(workspace.id).set(workspace);
 
     return workspace;
   }, [db]);
 
-  const promiseFn = React.useCallback(async () => {
+  const getWorkspace = React.useCallback(async () => {
     const cached = await cache.readWorkspace();
 
-    if (cached) {
+    if (cached !== null) {
       return cached;
     }
 
@@ -55,9 +55,9 @@ export function useGetWorkspace(): Workspace {
     return workspace;
   }, [createWorkspace, cache]);
 
-  const { data } = useAsync({ promiseFn, suspense: true });
+  const workspace = useAsync('workspace', getWorkspace);
 
-  return data!;
+  return workspace;
 }
 
 export function useGetAllCards(): Card[] {
@@ -65,7 +65,7 @@ export function useGetAllCards(): Card[] {
   const db = useDB();
   const cache = useCache();
 
-  const getAllCards = React.useCallback(async () => {
+  const getAllCardsFromDB = React.useCallback(async () => {
     const collection = await db
       .collection(Collection.Workspaces)
       .doc(workspace.id)
@@ -78,23 +78,25 @@ export function useGetAllCards(): Card[] {
     return cards;
   }, [workspace, db]);
 
-  const promiseFn = React.useCallback(async () => {
+  const getAllCards = React.useCallback(async () => {
     const cached = await cache.readAllCards();
 
-    if (cached) {
+    console.log(cached);
+
+    if (cached !== null) {
       return cached;
     }
 
-    const cards = await getAllCards();
+    const cards = await getAllCardsFromDB();
 
     await cache.writeCards(cards);
 
     return cards;
-  }, [getAllCards, cache]);
+  }, [getAllCardsFromDB, cache]);
 
-  const { data } = useAsync({ promiseFn, suspense: true });
+  const cards = useAsync('allCards', getAllCards);
 
-  return data!;
+  return cards;
 }
 
 export function useGetCardCallback() {
@@ -120,7 +122,7 @@ export function useGetCardCallback() {
     async (id: string) => {
       const cached = await cache.readCard(id);
 
-      if (cached) {
+      if (cached !== null) {
         return cached;
       }
 
@@ -139,13 +141,13 @@ export function useGetCardCallback() {
 }
 
 export function useGetCard(id: string): Card | null {
-  const getCard = useGetCardCallback();
+  const getCardCallback = useGetCardCallback();
 
-  const promiseFn = React.useCallback(async () => {
-    return getCard(id);
-  }, [getCard, id]);
+  const getCard = React.useCallback(async () => {
+    return getCardCallback(id);
+  }, [getCardCallback, id]);
 
-  const { data } = useAsync({ promiseFn, suspense: true });
+  const { data } = useAsync(`Card:${id}`, getCard);
 
   return data!;
 }
