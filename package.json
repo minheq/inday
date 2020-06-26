@@ -62,6 +62,7 @@
     "react-native-web": "^0.12.2",
     "react-native-webview": "^9.4.0",
     "react-test-renderer": "16.11.0",
+    "recoil": "0.0.10",
     "slate": "^0.58.1",
     "slate-history": "^0.58.1",
     "slate-react": "^0.58.1",

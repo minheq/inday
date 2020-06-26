@@ -1,5 +1,6 @@
 import React from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
+
 import { Card } from './card';
 import { Workspace } from './workspace';
 import { useAsync } from '../hooks/use_async';
@@ -9,10 +10,11 @@ interface CacheContext {
   readAllCards: () => Promise<Card[] | null>;
   readInboxCards: () => Promise<Card[] | null>;
   readListCards: (listID: string) => Promise<Card[] | null>;
-  readWorkspace: () => Promise<Workspace | null>;
   writeCards: (cards: Card[]) => Promise<void>;
   writeCard: (card: Card) => Promise<void>;
+  updateCard: (card: Card) => Promise<void>;
   deleteCard: (cards: Card) => Promise<void>;
+  readWorkspace: () => Promise<Workspace | null>;
   writeWorkspace: (workspace: Workspace) => Promise<void>;
 }
 
@@ -21,6 +23,7 @@ const CacheContext = React.createContext<CacheContext>({
   readCard: async () => null,
   writeCard: async () => {},
   deleteCard: async () => {},
+  updateCard: async () => {},
   writeWorkspace: async () => {},
   readAllCards: async () => [],
   readInboxCards: async () => [],
@@ -88,58 +91,76 @@ export function CacheProvider(props: CacheProviderProps) {
   }, []);
 
   const initialCache = useAsync('cache', onMount);
-  console.log(initialCache);
   const [cache, setCache] = React.useState<Cache>(initialCache);
 
-  const writeCards = React.useCallback(async (cards: Card[]) => {
-    const batch = cards.map((c) => {
-      const key = getKey(c);
-      const value = JSON.stringify(c);
+  const updateCard = React.useCallback(
+    async (card: Card) => {
+      const key = getKey(card);
+      await AsyncStorage.setItem(key, JSON.stringify(card));
 
-      return [key, value];
-    });
+      const nextCache: Cache = { ...cache };
+      nextCache.cardsByID[card.id] = card;
+      setCache(nextCache);
+    },
+    [cache],
+  );
 
-    await AsyncStorage.multiSet(batch);
+  const writeCard = React.useCallback(
+    async (card: Card) => {
+      const key = getKey(card);
+      await AsyncStorage.setItem(key, JSON.stringify(card));
 
-    setCache((prevCache) => {
-      cards.map((c) => {
-        prevCache.cardsByID[c.id] = c;
+      const nextCache: Cache = { ...cache };
+      nextCache.cardsByID[card.id] = card;
+
+      setCache(nextCache);
+    },
+    [cache],
+  );
+
+  const writeCards = React.useCallback(
+    async (cards: Card[]) => {
+      const batch = cards.map((c) => {
+        const key = getKey(c);
+        const value = JSON.stringify(c);
+
+        return [key, value];
       });
 
-      return prevCache;
-    });
-  }, []);
+      await AsyncStorage.multiSet(batch);
 
-  const writeCard = React.useCallback(async (card: Card) => {
-    const key = getKey(card);
-    await AsyncStorage.setItem(key, JSON.stringify(card));
+      const nextCache: Cache = { ...cache };
+      cards.forEach((c) => {
+        nextCache.cardsByID[c.id] = c;
+      });
+      setCache(nextCache);
+    },
+    [cache],
+  );
 
-    setCache((prevCache) => {
-      prevCache.cardsByID[card.id] = card;
+  const deleteCard = React.useCallback(
+    async (card: Card) => {
+      const key = getKey(card);
+      await AsyncStorage.removeItem(key);
 
-      return prevCache;
-    });
-  }, []);
+      const nextCache: Cache = { ...cache };
+      delete nextCache.cardsByID[card.id];
+      setCache(nextCache);
+    },
+    [cache],
+  );
 
-  const deleteCard = React.useCallback(async (card: Card) => {
-    const key = getKey(card);
-    await AsyncStorage.removeItem(key);
+  const writeWorkspace = React.useCallback(
+    async (workspace: Workspace) => {
+      const key = getKey(workspace);
+      await AsyncStorage.setItem(key, JSON.stringify(workspace));
 
-    setCache((prevCache) => {
-      delete prevCache.cardsByID[card.id];
-      return prevCache;
-    });
-  }, []);
-
-  const writeWorkspace = React.useCallback(async (workspace: Workspace) => {
-    const key = getKey(workspace);
-    await AsyncStorage.setItem(key, JSON.stringify(workspace));
-
-    setCache((prevCache) => {
-      prevCache.workspace = workspace;
-      return prevCache;
-    });
-  }, []);
+      const nextCache: Cache = { ...cache };
+      nextCache.workspace = workspace;
+      setCache(nextCache);
+    },
+    [cache],
+  );
 
   const getCardsFromCardIDs = React.useCallback(
     (cardIDs: string[] | null) => {
@@ -207,6 +228,7 @@ export function CacheProvider(props: CacheProviderProps) {
     <CacheContext.Provider
       value={{
         readCard,
+        updateCard,
         writeCard,
         writeCards,
         writeWorkspace,

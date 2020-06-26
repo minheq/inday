@@ -46,6 +46,11 @@ function createUseAsync() {
         })
         .catch((error) => {
           cache.error = error;
+        })
+        .then(() => {
+          setTimeout(() => {
+            delete caches[id];
+          }, 0);
         }),
     };
 
