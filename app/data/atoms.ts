@@ -1,11 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import { atom, selector, useRecoilValue } from 'recoil';
-import { v4 } from 'uuid';
 
-import { Workspace } from './workspace';
-import { Card } from './card';
-import { db } from './db';
-import { Collection } from './api';
+import { Card, Workspace } from './types';
 
 export enum AtomKey {
   Cards = 'Cards',
@@ -13,7 +9,8 @@ export enum AtomKey {
 }
 
 export enum SelectorKey {
-  WorkSpace = 'WorkSpace',
+  // eslint-disable-next-line no-shadow
+  Workspace = 'Workspace',
   AllCards = 'AllCards',
 }
 
@@ -52,50 +49,23 @@ export const allCardsQuery = selector({
 });
 
 export const workspaceQuery = selector({
-  key: SelectorKey.WorkSpace,
+  key: SelectorKey.Workspace,
   get: async ({ get }) => {
     const workspaceID = get(workspaceIDState);
 
     if (workspaceID === '') {
-      const workspace: Workspace = {
-        name: 'New workspace',
-        id: v4(),
-        __typename: 'Workspace',
-      };
-
-      await db
-        .collection(Collection.Workspaces)
-        .doc(workspace.id)
-        .set(workspace);
-
-      await AsyncStorage.setItem('workspaceID', workspace.id);
-      await AsyncStorage.setItem(
-        `Workspace:${workspace.id}`,
-        JSON.stringify(workspace),
-      );
-      return workspace;
+      throw new Error('WorkspaceID not ready');
     }
 
     const workspaceJSON = await AsyncStorage.getItem(
       `Workspace:${workspaceID}`,
     );
 
-    if (workspaceJSON) {
-      return JSON.parse(workspaceJSON) as Workspace;
+    if (workspaceJSON === null) {
+      throw new Error('Workspace not found in storage');
     }
 
-    const workspaceRef = await db
-      .collection(Collection.Workspaces)
-      .doc(workspaceID)
-      .get();
-
-    const workspace = workspaceRef.data() as Workspace;
-    await AsyncStorage.setItem(
-      `Workspace:${workspace.id}`,
-      JSON.stringify(workspace),
-    );
-
-    return workspace;
+    return JSON.parse(workspaceJSON) as Workspace;
   },
 });
 

@@ -44,3 +44,9 @@ export interface Card {
   scheduledAt: Date | null;
   __typename: 'Card';
 }
+
+export interface Workspace {
+  id: string;
+  name: string;
+  __typename: 'Workspace';
+}

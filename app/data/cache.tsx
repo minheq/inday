@@ -1,8 +1,7 @@
 import React from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 
-import { Card } from './card';
-import { Workspace } from './workspace';
+import { Card, Workspace } from './types';
 import { useAsync } from '../hooks/use_async';
 
 interface CacheContext {

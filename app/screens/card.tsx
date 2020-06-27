@@ -13,7 +13,7 @@ import {
   Dialog,
 } from '../components';
 import { ScrollView } from 'react-native';
-import { Card } from '../data/card';
+import { Card } from '../data/types';
 import { Editor } from '../editor';
 import { AppBar } from '../core/app_bar';
 import { useToggle } from '../hooks/use_toggle';

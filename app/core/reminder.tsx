@@ -28,7 +28,7 @@ import { TimePicker } from '../components/time_picker';
 import { Picker, ListPicker } from '../components';
 import { range } from '../utils/arrays';
 import { WeekDay, getWeekDaysOptions } from '../utils/week';
-import { Reminder } from '../data/card';
+import { Reminder } from '../data/types';
 
 interface ReminderContext {
   value?: Reminder | null;

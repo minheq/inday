@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Container, Pressable, Text, Column } from '../components';
-import { Card } from '../data/card';
+import { Card } from '../data/types';
 
 interface CardReminderProps {
   card: Card;

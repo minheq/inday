@@ -1,20 +1,16 @@
 import React from 'react';
-import { FirebaseContext } from './firebase';
-import { Text } from './components';
+import { useInitFromDB } from './data/init_from_db';
+import { useInitWorkspace } from './data/init_workspace';
 
-interface AppLoaderProps {
+interface AppInitProps {
   children?: React.ReactNode;
 }
 
-export function AppLoader(props: AppLoaderProps) {
+export function AppInit(props: AppInitProps) {
   const { children } = props;
-  const { loading: firebaseLoading } = React.useContext(FirebaseContext);
 
-  const loading = firebaseLoading;
-
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
+  useInitFromDB();
+  useInitWorkspace();
 
   return <>{children}</>;
 }

@@ -20,6 +20,7 @@ interface Cache<TResult = any> {
   fn: Promise<void>;
   result?: TResult;
   error?: Error;
+  done: boolean;
 }
 
 function createUseAsync() {
@@ -29,7 +30,7 @@ function createUseAsync() {
     const existingCache = caches[id];
 
     if (existingCache) {
-      if (existingCache.result) {
+      if (existingCache.done) {
         return existingCache.result;
       } else if (existingCache.error) {
         throw existingCache.error;
@@ -40,17 +41,15 @@ function createUseAsync() {
 
     const cache: Cache<TResult> = {
       id,
+      done: false,
       fn: fn()
         .then((result) => {
           cache.result = result;
+          cache.done = true;
         })
         .catch((error) => {
+          console.error('error');
           cache.error = error;
-        })
-        .then(() => {
-          setTimeout(() => {
-            delete caches[id];
-          }, 0);
         }),
     };
 

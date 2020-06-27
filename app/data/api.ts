@@ -1,7 +1,7 @@
 import React from 'react';
 import { v4 } from 'uuid';
 
-import { Card, Content, Preview } from './card';
+import { Card, Content, Preview } from './types';
 import { useFirebase } from '../firebase';
 import { useCache } from './cache';
 import { Workspace } from './workspace';

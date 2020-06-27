@@ -11,7 +11,7 @@ import { useDropTarget } from '../drag_drop/use_drop_target';
 import { measure } from '../utils/measurements';
 import { CardListItem, CARD_HEIGHT } from './card_list_item';
 import { Draggable } from '../drag_drop/draggable';
-import { Card } from '../data/card';
+import { Card } from '../data/types';
 import { useCreateCard } from '../data/api';
 import { Button, Text } from '../components';
 
