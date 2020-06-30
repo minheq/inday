@@ -1,18 +1,72 @@
 import './firebase';
 import React, { Suspense } from 'react';
-import { RecoilRoot } from 'recoil';
+import { RecoilRoot, MutableSnapshot } from 'recoil';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import { ThemeProvider } from './theme';
 import { Row, Text } from './components';
 import { SideNavigation } from './core/side_navigation';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
 import { ErrorBoundary } from './core/error_boundary';
-import { InitWorkspace } from './data/init_workspace';
+import { InitWorkspace } from './data/workspace';
+import { AtomKey, getAtomWithKey } from './data/atoms';
 import { InboxScreen } from './screens/inbox';
 
+type Atoms = [AtomKey, any][];
+
+async function init() {
+  const atoms: Atoms = [];
+  const workspaceID = await AsyncStorage.getItem('workspaceID');
+  if (workspaceID) {
+    atoms.push([AtomKey.WorkspaceID, workspaceID]);
+  }
+
+  return atoms;
+}
+
+function useInit() {
+  const [state, setState] = React.useState<{
+    loading: boolean;
+    atoms: Atoms;
+  }>({
+    loading: true,
+    atoms: [],
+  });
+
+  const { loading, atoms } = state;
+
+  React.useEffect(() => {
+    init().then((initAtoms) => {
+      setState({
+        atoms: initAtoms,
+        loading: false,
+      });
+    });
+  }, []);
+
+  const initializeState = React.useCallback(
+    ({ set }: MutableSnapshot) => {
+      if (!loading) {
+        for (const [key, value] of atoms) {
+          set(getAtomWithKey(key), value);
+        }
+      }
+    },
+    [loading, atoms],
+  );
+
+  return { loading, initializeState };
+}
+
 export function App() {
+  const { loading, initializeState } = useInit();
+
+  if (loading) {
+    return null;
+  }
+
   return (
-    <RecoilRoot>
+    <RecoilRoot initializeState={initializeState}>
       <ErrorBoundary>
         <Suspense fallback={<Text>Initializing workspace...</Text>}>
           <InitWorkspace />
@@ -21,7 +75,7 @@ export function App() {
               <DragDropProvider>
                 <Row expanded>
                   <SideNavigation />
-                  <HomeContainer />
+                  <InboxScreen />
                 </Row>
               </DragDropProvider>
             </ThemeProvider>
@@ -30,8 +84,4 @@ export function App() {
       </ErrorBoundary>
     </RecoilRoot>
   );
-}
-
-function HomeContainer() {
-  return <InboxScreen />;
 }

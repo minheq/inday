@@ -48,5 +48,7 @@ export interface Card {
 export interface Workspace {
   id: string;
   name: string;
+  all: string[];
+  inbox: string[];
   __typename: 'Workspace';
 }

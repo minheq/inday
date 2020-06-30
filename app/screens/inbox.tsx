@@ -1,6 +1,6 @@
 import React from 'react';
 import { CardList } from '../core/card_list';
-import { useGetAllCards } from '../data/atoms';
+import { useGetAllCards } from '../data/api';
 
 export function InboxScreen() {
   const cards = useGetAllCards();

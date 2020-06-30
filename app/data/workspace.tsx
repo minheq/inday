@@ -12,6 +12,8 @@ async function initWorkspace() {
   const workspace: Workspace = {
     name: 'New workspace',
     id: v4(),
+    all: [],
+    inbox: [],
     __typename: 'Workspace',
   };
 
@@ -28,10 +30,6 @@ function useInitWorkspace() {
       const workspace = await initWorkspace();
 
       await AsyncStorage.setItem(StorageKey.WorkspaceID, workspace.id);
-      await AsyncStorage.setItem(
-        `Workspace:${workspace.id}`,
-        JSON.stringify(workspace),
-      );
 
       setWorkspaceID(workspace.id);
     }
