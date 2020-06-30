@@ -1,53 +1,22 @@
 import React from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
-import { AtomKey, CardsState, getAtomWithKey } from './atoms';
-import { Card } from './types';
+import { AtomKey, getAtomWithKey } from './atoms';
 import { MutableSnapshot } from 'recoil';
+import { getCardsStateFromStorage, StorageKey } from './storage';
 
 export type AtomsState = [AtomKey, any][];
 
 async function initFromStorage(): Promise<AtomsState> {
   console.time('initFromStorage');
-  const keys = await AsyncStorage.getAllKeys();
 
   // Workspace state
   const state: AtomsState = [];
-  const workspaceID = await AsyncStorage.getItem('workspaceID');
+  const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
   if (workspaceID) {
     state.push([AtomKey.WorkspaceID, workspaceID]);
   }
 
-  // Cards state
-  const cardKeys = keys.filter((k) => k.split(':')[0] === 'Card');
-  const cardJSONs = await AsyncStorage.multiGet(cardKeys);
-  const cardsByID: { [id: string]: Card } = {};
-  cardJSONs.forEach(([, value]) => {
-    if (!value) {
-      return null;
-    }
-    const card = JSON.parse(value) as Card;
-
-    cardsByID[card.id] = card;
-  });
-
-  const allCardIDs = await AsyncStorage.getItem('allCardIDs');
-  let all: string[] = [];
-  if (allCardIDs) {
-    all = JSON.parse(allCardIDs) as string[];
-  }
-
-  const inboxCardIDs = await AsyncStorage.getItem('inboxCardIDs');
-  let inbox: string[] = [];
-  if (inboxCardIDs) {
-    inbox = JSON.parse(inboxCardIDs) as string[];
-  }
-
-  const cardsState: CardsState = {
-    cardsByID,
-    all,
-    inbox,
-    listsByID: {},
-  };
+  const cardsState = await getCardsStateFromStorage();
 
   state.push([AtomKey.Cards, cardsState]);
 

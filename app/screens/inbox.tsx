@@ -1,7 +1,6 @@
 import React from 'react';
-import { Screen, Text, Content, Spacer } from '../components';
 import { CardList } from '../core/card_list';
-import { useGetAllCards, useGetWorkspace } from '../data/api';
+import { useGetAllCards } from '../data/atoms';
 
 export function InboxScreen() {
   const cards = useGetAllCards();
@@ -20,3 +19,20 @@ export function InboxScreen() {
   //   </Screen>
   // );
 }
+
+// function AddCard() {
+//   const createCard = useCreateCard();
+//   const { onOpen } = useCardList();
+
+//   const handleCreateCard = React.useCallback(async () => {
+//     const card = await createCard();
+
+//     onOpen(card.id);
+//   }, [createCard, onOpen]);
+
+//   return (
+//     <Button onPress={handleCreateCard}>
+//       <Text color="primary">+ Add new card</Text>
+//     </Button>
+//   );
+// }

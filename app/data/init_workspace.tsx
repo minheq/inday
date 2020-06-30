@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { useRecoilState } from 'recoil';
 import { workspaceIDState } from './atoms';
 import { useAsync } from '../hooks/use_async';
+import { StorageKey } from './storage';
 
 async function initWorkspace() {
   const workspace: Workspace = {
@@ -26,7 +27,7 @@ function useInitWorkspace() {
     if (workspaceID === '') {
       const workspace = await initWorkspace();
 
-      await AsyncStorage.setItem('workspaceID', workspace.id);
+      await AsyncStorage.setItem(StorageKey.WorkspaceID, workspace.id);
       await AsyncStorage.setItem(
         `Workspace:${workspace.id}`,
         JSON.stringify(workspace),

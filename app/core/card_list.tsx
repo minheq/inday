@@ -12,7 +12,6 @@ import { measure } from '../utils/measurements';
 import { CardListItem, CARD_HEIGHT } from './card_list_item';
 import { Draggable } from '../drag_drop/draggable';
 import { Card } from '../data/types';
-import { useCreateCard } from '../data/api';
 import { Button, Text } from '../components';
 
 interface CardListContext {
@@ -268,26 +267,8 @@ export function CardList(props: CardListProps) {
             card={card}
           />
         ))}
-        <AddCard />
       </Animated.ScrollView>
     </CardListContext.Provider>
-  );
-}
-
-function AddCard() {
-  const createCard = useCreateCard();
-  const { onOpen } = useCardList();
-
-  const handleCreateCard = React.useCallback(async () => {
-    const card = await createCard();
-
-    onOpen(card.id);
-  }, [createCard, onOpen]);
-
-  return (
-    <Button onPress={handleCreateCard}>
-      <Text color="primary">+ Add new card</Text>
-    </Button>
   );
 }
 
