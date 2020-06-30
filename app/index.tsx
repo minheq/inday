@@ -11,12 +11,14 @@ import { ErrorBoundary } from './core/error_boundary';
 import { InitWorkspace } from './data/workspace';
 import { AtomKey, getAtomWithKey } from './data/atoms';
 import { InboxScreen } from './screens/inbox';
+import { StorageKey } from './data/storage';
 
 type Atoms = [AtomKey, any][];
 
 async function init() {
   const atoms: Atoms = [];
-  const workspaceID = await AsyncStorage.getItem('workspaceID');
+  const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
+
   if (workspaceID) {
     atoms.push([AtomKey.WorkspaceID, workspaceID]);
   }
@@ -46,13 +48,11 @@ function useInit() {
 
   const initializeState = React.useCallback(
     ({ set }: MutableSnapshot) => {
-      if (!loading) {
-        for (const [key, value] of atoms) {
-          set(getAtomWithKey(key), value);
-        }
+      for (const [key, value] of atoms) {
+        set(getAtomWithKey(key), value);
       }
     },
-    [loading, atoms],
+    [atoms],
   );
 
   return { loading, initializeState };

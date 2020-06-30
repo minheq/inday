@@ -31,5 +31,3 @@ db.enablePersistence().catch(function (err) {
     // ...
   }
 });
-
-db.disableNetwork();

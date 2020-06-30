@@ -29,9 +29,9 @@ function useInitWorkspace() {
     if (workspaceID === '') {
       const workspace = await initWorkspace();
 
-      await AsyncStorage.setItem(StorageKey.WorkspaceID, workspace.id);
-
       setWorkspaceID(workspace.id);
+
+      await AsyncStorage.setItem(StorageKey.WorkspaceID, workspace.id);
     }
   }, [workspaceID, setWorkspaceID]);
 

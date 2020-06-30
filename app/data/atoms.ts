@@ -4,15 +4,15 @@ import { Card, Workspace } from './types';
 import { db, Collection } from './db';
 
 export enum AtomKey {
-  CardsByID = 'CardsByID',
-  CardIDListAll = 'CardIDListAll',
-  WorkspaceID = 'WorkspaceID',
+  CardsByID = 'CardsByIDAtom',
+  CardIDListAll = 'CardIDListAllAtom',
+  WorkspaceID = 'WorkspaceIDAtom',
 }
 
 export enum SelectorKey {
   // eslint-disable-next-line no-shadow
-  Workspace = 'Workspace',
-  AllCards = 'AllCards',
+  Workspace = 'WorkspaceSelector',
+  AllCards = 'AllCardsSelector',
   CardsByID = 'CardsByIDSelector',
   CardIDListAll = 'CardIDListAllSelector',
 }
