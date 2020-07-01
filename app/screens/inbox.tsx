@@ -1,9 +1,12 @@
 import React from 'react';
 import { CardList } from '../core/card_list';
-import { useGetAllCards } from '../data/api';
+import { useGetAllCards, useGetWorkspace } from '../data/api';
 
 export function InboxScreen() {
+  const workspace = useGetWorkspace();
   const cards = useGetAllCards();
+  console.log(workspace);
+  console.log(cards);
 
   return <CardList cards={cards} />;
 

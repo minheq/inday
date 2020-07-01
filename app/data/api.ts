@@ -1,5 +1,5 @@
 import { useRecoilValue } from 'recoil';
-import { workspaceQuery, allCardsQuery } from './atoms';
+import { allCardsQuery, workspaceQuery } from './atoms';
 
 export function useGetAllCards() {
   return useRecoilValue(allCardsQuery);

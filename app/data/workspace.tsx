@@ -1,39 +1,37 @@
 import React from 'react';
 import { Workspace } from './types';
 import { v4 } from 'uuid';
-import { db, Collection } from './db';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useRecoilState } from 'recoil';
-import { workspaceIDState } from './atoms';
+import { workspaceIDState, workspaceListState } from './atoms';
 import { useAsync } from '../hooks/use_async';
 import { StorageKey } from './storage';
-
-async function initWorkspace() {
-  const workspace: Workspace = {
-    name: 'New workspace',
-    id: v4(),
-    all: [],
-    inbox: [],
-    __typename: 'Workspace',
-  };
-
-  await db.collection(Collection.Workspaces).doc(workspace.id).set(workspace);
-
-  return workspace;
-}
+import { useGetWorkspace } from './api';
 
 function useInitWorkspace() {
-  const [workspaceID, setWorkspaceID] = useRecoilState(workspaceIDState);
+  const workspace = useGetWorkspace();
+  const [, setWorkspaceID] = useRecoilState(workspaceIDState);
+  const [, setWorkspaceList] = useRecoilState(workspaceListState);
 
   const init = React.useCallback(async () => {
-    if (workspaceID === '') {
-      const workspace = await initWorkspace();
+    if (workspace === null) {
+      const newWorkspace: Workspace = {
+        name: 'New workspace',
+        id: v4(),
+        all: [],
+        inbox: [],
+        __typename: 'Workspace',
+      };
 
-      setWorkspaceID(workspace.id);
-
-      await AsyncStorage.setItem(StorageKey.WorkspaceID, workspace.id);
+      setWorkspaceID(newWorkspace.id);
+      setWorkspaceList([newWorkspace]);
+      await AsyncStorage.setItem(StorageKey.WorkspaceID, newWorkspace.id);
+      await AsyncStorage.setItem(
+        `Workspace:${newWorkspace.id}`,
+        JSON.stringify(newWorkspace),
+      );
     }
-  }, [workspaceID, setWorkspaceID]);
+  }, [workspace, setWorkspaceList, setWorkspaceID]);
 
   useAsync('initWorkspace', init);
 }

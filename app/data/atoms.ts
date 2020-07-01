@@ -1,104 +1,79 @@
-import { atom, selector } from 'recoil';
+import { atom, selector, RecoilState } from 'recoil';
 
 import { Card, Workspace } from './types';
-import { db, Collection } from './db';
 
 export enum AtomKey {
-  CardsByID = 'CardsByIDAtom',
-  CardIDListAll = 'CardIDListAllAtom',
-  WorkspaceID = 'WorkspaceIDAtom',
+  CardsByID = 'CardsByID',
+  AllCardIDList = 'AllCardIDList',
+  WorkspaceID = 'WorkspaceID',
+  WorkspaceList = 'WorkspaceList',
 }
 
 export enum SelectorKey {
-  // eslint-disable-next-line no-shadow
-  Workspace = 'WorkspaceSelector',
-  AllCards = 'AllCardsSelector',
-  CardsByID = 'CardsByIDSelector',
-  CardIDListAll = 'CardIDListAllSelector',
+  Workspace = 'Workspace',
+  AllCards = 'AllCards',
 }
 
-export const cardsByIDState = atom<{ [id: string]: Card }>({
+export type CardsByIDState = { [id: string]: Card };
+export const cardsByIDState = atom<CardsByIDState>({
   key: AtomKey.CardsByID,
   default: {},
 });
 
-export const cardIDListAllState = atom<string[]>({
-  key: AtomKey.CardIDListAll,
+export type AllCardIDListState = string[];
+export const allCardIDListState = atom<AllCardIDListState>({
+  key: AtomKey.AllCardIDList,
   default: [],
 });
 
-export const workspaceIDState = atom<string>({
+export type WorkspaceIDState = string;
+export const workspaceIDState = atom<WorkspaceIDState>({
   key: AtomKey.WorkspaceID,
   default: '',
 });
 
-export const workspaceQuery = selector({
-  key: SelectorKey.Workspace,
-  get: async ({ get }) => {
-    const workspaceID = get(workspaceIDState);
-
-    const workspaceRef = await db
-      .collection(Collection.Workspaces)
-      .doc(workspaceID)
-      .get();
-
-    return workspaceRef.data() as Workspace;
-  },
-});
-
-const cardsByIDQuery = selector({
-  key: SelectorKey.CardsByID,
-  get: async ({ get }) => {
-    const workspaceID = get(workspaceIDState);
-
-    const cardsCollectionRef = await db
-      .collection(Collection.Workspaces)
-      .doc(workspaceID)
-      .collection(Collection.Cards)
-      .orderBy('createdAt', 'asc')
-      .get();
-
-    const cardsByID: { [id: string]: Card } = {};
-
-    cardsCollectionRef.docs.forEach((c) => {
-      const card = c.data() as Card;
-      cardsByID[card.id] = card;
-    });
-
-    return cardsByID;
-  },
-});
-
-const cardIDListAllQuery = selector({
-  key: SelectorKey.CardIDListAll,
-  get: async ({ get }) => {
-    const workspaceID = get(workspaceIDState);
-
-    const workspaceRef = await db
-      .collection(Collection.Workspaces)
-      .doc(workspaceID)
-      .get();
-
-    const workspace = workspaceRef.data() as any;
-
-    return workspace.all as string[];
-  },
+export type WorkspaceListState = Workspace[];
+export const workspaceListState = atom<WorkspaceListState>({
+  key: AtomKey.WorkspaceList,
+  default: [],
 });
 
 export const allCardsQuery = selector({
   key: SelectorKey.AllCards,
-  get: async ({ get }) => {
-    const cardsByID = get(cardsByIDQuery);
-    const cardIDListAll = get(cardIDListAllQuery);
+  get: ({ get }) => {
+    const cardsByID = get(cardsByIDState);
+    const allCardIDList = get(allCardIDListState);
 
-    return cardIDListAll.map((id) => cardsByID[id]);
+    return allCardIDList.map((id) => cardsByID[id]);
   },
 });
 
-export function getAtomWithKey(key: AtomKey) {
+export const workspaceQuery = selector({
+  key: SelectorKey.Workspace,
+  get: ({ get }) => {
+    const workspaceID = get(workspaceIDState);
+    const workspaceList = get(workspaceListState);
+
+    const workspace = workspaceList.find((w) => w.id === workspaceID);
+
+    if (workspace === undefined) {
+      return null;
+    }
+
+    return workspace;
+  },
+});
+
+export function getAtomWithKey(key: AtomKey): RecoilState<any> {
   switch (key) {
     case AtomKey.WorkspaceID:
       return workspaceIDState;
+    case AtomKey.WorkspaceList:
+      return workspaceListState;
+    case AtomKey.CardsByID:
+      return cardsByIDState;
+    case AtomKey.AllCardIDList:
+      return allCardIDListState;
     default:
       throw new Error('Invalid atom key');
   }

@@ -9,19 +9,65 @@ import { SideNavigation } from './core/side_navigation';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
 import { ErrorBoundary } from './core/error_boundary';
 import { InitWorkspace } from './data/workspace';
-import { AtomKey, getAtomWithKey } from './data/atoms';
+import {
+  AtomKey,
+  getAtomWithKey,
+  WorkspaceIDState,
+  AllCardIDListState,
+  CardsByIDState,
+  WorkspaceListState,
+} from './data/atoms';
 import { InboxScreen } from './screens/inbox';
 import { StorageKey } from './data/storage';
+import { Card, Workspace } from './data/types';
 
-type Atoms = [AtomKey, any][];
+type Atoms = (
+  | [AtomKey.WorkspaceID, WorkspaceIDState]
+  | [AtomKey.AllCardIDList, AllCardIDListState]
+  | [AtomKey.CardsByID, CardsByIDState]
+  | [AtomKey.WorkspaceList, WorkspaceListState]
+)[];
 
 async function init() {
   const atoms: Atoms = [];
-  const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
 
+  const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
   if (workspaceID) {
     atoms.push([AtomKey.WorkspaceID, workspaceID]);
   }
+
+  const allCardIDList = await AsyncStorage.getItem(StorageKey.AllCardIDList);
+  if (allCardIDList) {
+    atoms.push([AtomKey.AllCardIDList, JSON.parse(allCardIDList)]);
+  }
+
+  const keys = await AsyncStorage.getAllKeys();
+
+  const cardKeys = keys.filter((k) => k.includes('Card:'));
+  const cardEntries = await AsyncStorage.multiGet(cardKeys);
+  const cardsByID: CardsByIDState = {};
+  cardEntries.forEach(([, value]) => {
+    if (value) {
+      const card = JSON.parse(value) as Card;
+      cardsByID[card.id] = card;
+    }
+  });
+  atoms.push([AtomKey.CardsByID, cardsByID]);
+
+  const workspaceKeys = keys.filter((k) => k.includes('Workspace:'));
+  const workspaceEntries = await AsyncStorage.multiGet(workspaceKeys);
+  const workspaceList = workspaceEntries
+    .map(([, value]) => value)
+    .filter(Boolean)
+    .map((value) => {
+      if (value === null) {
+        throw new Error('Expected value');
+      }
+
+      return JSON.parse(value) as Workspace;
+    });
+
+  atoms.push([AtomKey.WorkspaceList, workspaceList]);
 
   return atoms;
 }
