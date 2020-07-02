@@ -20,6 +20,7 @@ import {
 import { InboxScreen } from './screens/inbox';
 import { StorageKey } from './data/storage';
 import { Card, Workspace } from './data/types';
+import { SyncStorage } from './data/sync_storage';
 
 type Atoms = (
   | [AtomKey.WorkspaceID, WorkspaceIDState]
@@ -116,6 +117,7 @@ export function App() {
       <ErrorBoundary>
         <Suspense fallback={<Text>Initializing workspace...</Text>}>
           <InitWorkspace />
+          <SyncStorage />
           <Suspense fallback={<Text>Loading...</Text>}>
             <ThemeProvider>
               <DragDropProvider>

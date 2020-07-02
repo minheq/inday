@@ -20,7 +20,7 @@ function useInitWorkspace() {
         id: v4(),
         all: [],
         inbox: [],
-        __typename: 'Workspace',
+        typename: 'Workspace',
       };
 
       setWorkspaceID(newWorkspace.id);

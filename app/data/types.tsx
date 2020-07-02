@@ -42,7 +42,7 @@ export interface Card {
   inbox: boolean;
   listID: string | null;
   scheduledAt: Date | null;
-  __typename: 'Card';
+  typename: 'Card';
 }
 
 export interface Workspace {
@@ -50,5 +50,5 @@ export interface Workspace {
   name: string;
   all: string[];
   inbox: string[];
-  __typename: 'Workspace';
+  typename: 'Workspace';
 }

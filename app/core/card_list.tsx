@@ -12,7 +12,6 @@ import { measure } from '../utils/measurements';
 import { CardListItem, CARD_HEIGHT } from './card_list_item';
 import { Draggable } from '../drag_drop/draggable';
 import { Card } from '../data/types';
-import { Button, Text } from '../components';
 
 interface CardListContext {
   cardID: string | null;
