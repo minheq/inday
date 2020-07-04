@@ -76,11 +76,13 @@ export interface EditableInstance {
 interface EditableProps {
   value?: Element[];
   onChange?: (newState: EditableState) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 export const Editable = React.forwardRef<EditableInstance, EditableProps>(
   (props, ref) => {
-    const { value = [], onChange = () => {} } = props;
+    const { value = [], onChange = () => {}, onBlur, onFocus } = props;
     const { onEditLink } = useLinkEdit();
 
     const editor = React.useMemo(
@@ -303,6 +305,8 @@ export const Editable = React.forwardRef<EditableInstance, EditableProps>(
           style={styles('editable')}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
+          onBlur={onBlur}
+          onFocus={onFocus}
         />
       </Slate>
     );

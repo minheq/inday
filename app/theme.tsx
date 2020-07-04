@@ -80,11 +80,11 @@ const lightTheme: Theme = {
     shadow: {
       shadowColor: 'rgba(0, 0, 0, 1)',
       shadowOffset: {
-        width: 4,
-        height: 4,
+        width: 6,
+        height: 6,
       },
-      shadowOpacity: 0.07,
-      shadowRadius: 16,
+      shadowOpacity: 0.1,
+      shadowRadius: 24,
     },
   },
   text: {

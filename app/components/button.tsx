@@ -50,10 +50,6 @@ export function Button(props: ButtonProps) {
 
 const styles = StyleSheet.create({
   base: {
-    // height: 40,
-    // paddingHorizontal: 8,
-    // flexDirection: 'row',
     borderRadius: tokens.radius,
-    // alignItems: 'center',
   },
 });

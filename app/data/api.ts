@@ -56,6 +56,30 @@ export function useCreateCard() {
   return createCard;
 }
 
+export function useDeleteCard() {
+  const setCardsByID = useSetRecoilState(cardsByIDState);
+  const setAllCardIDList = useSetRecoilState(allCardIDListState);
+
+  const deleteCard = React.useCallback(
+    (card: Card) => {
+      setCardsByID((previousCardsByID) => {
+        const nextCardsByID = { ...previousCardsByID };
+
+        delete nextCardsByID[card.id];
+
+        return nextCardsByID;
+      });
+
+      setAllCardIDList((previousAllCardIDList) =>
+        previousAllCardIDList.filter((cardID) => cardID !== card.id),
+      );
+    },
+    [setCardsByID, setAllCardIDList],
+  );
+
+  return deleteCard;
+}
+
 export interface UpdateCardContentInput {
   id: string;
   content: Content;

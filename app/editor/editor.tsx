@@ -25,6 +25,8 @@ import {
 interface EditorProps {
   initialValue?: Element[];
   onChange?: (value: Element[]) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 const initialState: EditableState = {
@@ -49,7 +51,7 @@ export interface EditorInstance {
 
 export const Editor = React.forwardRef<EditorInstance, EditorProps>(
   (props, ref) => {
-    const { initialValue = [], onChange = () => {} } = props;
+    const { initialValue = [], onChange = () => {}, onBlur, onFocus } = props;
     const editorRef = React.useRef<View>(null);
     const editableRef = React.useRef<EditableInstance>(initialInstance);
     const [state, setState] = React.useState<EditableState>({
@@ -135,6 +137,8 @@ export const Editor = React.forwardRef<EditorInstance, EditorProps>(
                 ref={editableRef}
                 value={state.value}
                 onChange={handleChange}
+                onBlur={onBlur}
+                onFocus={onFocus}
               />
               <MainToolbar />
             </InsertProvider>
