@@ -33,10 +33,10 @@ export function CardEditor(props: CardEditorProps) {
     [card],
   );
 
-  const handleDelete = useDebouncedCallback(() => {
+  const handleDelete = React.useCallback(() => {
     onDone();
     deleteCard(card);
-  }, [deleteCard, card]);
+  }, [deleteCard, card, onDone]);
 
   return (
     <Container shape="rounded" padding={16} shadow>

@@ -1,11 +1,6 @@
 import React from 'react';
 import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
-import {
-  allCardsQuery,
-  workspaceQuery,
-  cardsByIDState,
-  allCardIDListState,
-} from './atoms';
+import { allCardsQuery, cardsByIDState, workspaceState } from './atoms';
 import { Card, Content, Preview } from './types';
 import { v4 } from 'uuid';
 import { BlockType } from '../editor/editable/nodes/element';
@@ -15,12 +10,12 @@ export function useGetAllCards() {
 }
 
 export function useGetWorkspace() {
-  return useRecoilValue(workspaceQuery);
+  return useRecoilValue(workspaceState);
 }
 
 export function useCreateCard() {
   const setCardsByID = useSetRecoilState(cardsByIDState);
-  const setAllCardIDList = useSetRecoilState(allCardIDListState);
+  const setWorkspace = useSetRecoilState(workspaceState);
 
   const createCard = React.useCallback(() => {
     const card: Card = {
@@ -45,23 +40,28 @@ export function useCreateCard() {
       ...previousCardsByID,
       [card.id]: card,
     }));
-    setAllCardIDList((previousAllCardIDList) => [
-      card.id,
-      ...previousAllCardIDList,
-    ]);
+    setWorkspace((previousWorkspace) => ({
+      ...previousWorkspace,
+      all: [...previousWorkspace.all, card.id],
+    }));
 
     return card;
-  }, [setCardsByID, setAllCardIDList]);
+  }, [setCardsByID, setWorkspace]);
 
   return createCard;
 }
 
 export function useDeleteCard() {
   const setCardsByID = useSetRecoilState(cardsByIDState);
-  const setAllCardIDList = useSetRecoilState(allCardIDListState);
+  const setWorkspace = useSetRecoilState(workspaceState);
 
   const deleteCard = React.useCallback(
     (card: Card) => {
+      setWorkspace((previousWorkspace) => ({
+        ...previousWorkspace,
+        all: previousWorkspace.all.filter((cardID) => cardID !== card.id),
+      }));
+
       setCardsByID((previousCardsByID) => {
         const nextCardsByID = { ...previousCardsByID };
 
@@ -70,11 +70,9 @@ export function useDeleteCard() {
         return nextCardsByID;
       });
 
-      setAllCardIDList((previousAllCardIDList) =>
-        previousAllCardIDList.filter((cardID) => cardID !== card.id),
-      );
+      console.timeEnd('hmm');
     },
-    [setCardsByID, setAllCardIDList],
+    [setCardsByID, setWorkspace],
   );
 
   return deleteCard;

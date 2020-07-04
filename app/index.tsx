@@ -12,39 +12,25 @@ import { InitWorkspace } from './data/workspace';
 import {
   AtomKey,
   getAtomWithKey,
-  WorkspaceIDState,
-  AllCardIDListState,
   CardsByIDState,
-  WorkspaceListState,
+  WorkspaceState,
 } from './data/atoms';
 import { InboxScreen } from './screens/inbox';
-import { StorageKey } from './data/storage';
+import { StorageKey, StorageKeyPrefix } from './data/storage';
 import { Card, Workspace } from './data/types';
 import { SyncStorage } from './data/sync_storage';
 
 type Atoms = (
-  | [AtomKey.WorkspaceID, WorkspaceIDState]
-  | [AtomKey.AllCardIDList, AllCardIDListState]
   | [AtomKey.CardsByID, CardsByIDState]
-  | [AtomKey.WorkspaceList, WorkspaceListState]
+  | [AtomKey.Workspace, WorkspaceState]
 )[];
 
 async function init() {
   const atoms: Atoms = [];
 
-  const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
-  if (workspaceID) {
-    atoms.push([AtomKey.WorkspaceID, workspaceID]);
-  }
-
-  const allCardIDList = await AsyncStorage.getItem(StorageKey.AllCardIDList);
-  if (allCardIDList) {
-    atoms.push([AtomKey.AllCardIDList, JSON.parse(allCardIDList)]);
-  }
-
   const keys = await AsyncStorage.getAllKeys();
 
-  const cardKeys = keys.filter((k) => k.includes('Card:'));
+  const cardKeys = keys.filter((k) => k.includes(`${StorageKeyPrefix.Card}:`));
   const cardEntries = await AsyncStorage.multiGet(cardKeys);
   const cardsByID: CardsByIDState = {};
   cardEntries.forEach(([, value]) => {
@@ -55,7 +41,9 @@ async function init() {
   });
   atoms.push([AtomKey.CardsByID, cardsByID]);
 
-  const workspaceKeys = keys.filter((k) => k.includes('Workspace:'));
+  const workspaceKeys = keys.filter((k) =>
+    k.includes(`${StorageKeyPrefix.Workspace}:`),
+  );
   const workspaceEntries = await AsyncStorage.multiGet(workspaceKeys);
   const workspaceList = workspaceEntries
     .map(([, value]) => value)
@@ -68,7 +56,12 @@ async function init() {
       return JSON.parse(value) as Workspace;
     });
 
-  atoms.push([AtomKey.WorkspaceList, workspaceList]);
+  const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
+  const workspace = workspaceList.find((w) => w.id === workspaceID) || null;
+
+  if (workspace) {
+    atoms.push([AtomKey.Workspace, workspace]);
+  }
 
   return atoms;
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { cardsByIDState, allCardIDListState } from './atoms';
+import { cardsByIDState, workspaceState } from './atoms';
 import { usePrevious } from '../hooks/use_previous';
 import { useLogger } from '../modules/logger';
 
@@ -11,9 +11,9 @@ export function useSaveUpdatedCardToStorage() {}
 export function SyncStorage() {
   const logger = useLogger();
   const cardsByID = useRecoilValue(cardsByIDState);
-  const allCardIDList = useRecoilValue(allCardIDListState);
+  const workspace = useRecoilValue(workspaceState);
   const previousCardsByID = usePrevious(cardsByID);
-  const previousAllCardIDList = usePrevious(allCardIDList);
+  const previousWorkspace = usePrevious(workspace);
 
   React.useEffect(() => {
     const previousCardIDs = Object.keys(previousCardsByID);
@@ -35,15 +35,11 @@ export function SyncStorage() {
   React.useEffect(() => {
     logger.debug('Updating all card id list in storage');
 
-    if (previousAllCardIDList.length === allCardIDList.length) {
-      return;
-    }
-
     // AsyncStorage.setItem(
     //   StorageKey.AllCardIDList,
     //   JSON.stringify(allCardIDList),
     // );
-  }, [logger, previousAllCardIDList, allCardIDList]);
+  }, [logger, workspace, previousWorkspace]);
 
   return null;
 }

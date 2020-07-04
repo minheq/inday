@@ -1,4 +1,8 @@
 export enum StorageKey {
   WorkspaceID = 'WorkspaceID',
-  AllCardIDList = 'AllCardIDList',
+}
+
+export enum StorageKeyPrefix {
+  Card = 'Card',
+  Workspace = 'Workspace',
 }
