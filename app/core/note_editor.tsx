@@ -8,11 +8,10 @@ import { Content, Note } from '../data/types';
 
 interface NoteEditorProps {
   note: Note;
-  onDone?: () => void;
 }
 
 export function NoteEditor(props: NoteEditorProps) {
-  const { note, onDone = () => {} } = props;
+  const { note } = props;
   const editorRef = React.useRef<EditorInstance>(null);
   const updateNoteContent = useUpdateNoteContent();
   const deleteNote = useDeleteNote();
@@ -34,19 +33,13 @@ export function NoteEditor(props: NoteEditorProps) {
   );
 
   const handleDelete = React.useCallback(() => {
-    onDone();
     deleteNote(note);
-  }, [deleteNote, note, onDone]);
+  }, [deleteNote, note]);
 
   return (
-    <Container shape="rounded" padding={16} shadow>
-      <Row justifyContent="space-between">
-        <Button onPress={onDone}>
-          <MenuButton icon="x" onPress={onDone} />
-        </Button>
-        <Row>
-          <MenuButton icon="trash" onPress={handleDelete} />
-        </Row>
+    <Container shape="rounded" padding={16}>
+      <Row>
+        <MenuButton icon="trash" onPress={handleDelete} />
       </Row>
       <Spacer size={8} />
       <Editor

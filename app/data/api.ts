@@ -1,18 +1,54 @@
 import React from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
-  allNotesQuery,
+  notesQuery,
   notesByIDState,
   workspaceState,
   eventsState,
+  noteQuery,
+  NotesQueryParam,
 } from './atoms';
-import { Note, Content, Preview, Event, Workspace } from './types';
+import {
+  Note,
+  Content,
+  Preview,
+  Event,
+  Workspace,
+  ListID,
+  List,
+} from './types';
 import { v4 } from 'uuid';
 import { BlockType } from '../editor/editable/nodes/element';
 import { useEventEmitter } from './events';
 
-export function useGetAllNotes() {
-  return useRecoilValue(allNotesQuery);
+export function useGetNotes(param: NotesQueryParam) {
+  // @ts-ignore
+  return useRecoilValue(notesQuery(param));
+}
+
+export function useGetNote(noteID: string) {
+  return useRecoilValue(noteQuery(noteID));
+}
+
+export function useGetList(listID: ListID): List {
+  let name = '';
+  switch (listID) {
+    case 'all':
+      name = 'All';
+      break;
+    case 'inbox':
+      name = 'Inbox';
+      break;
+
+    default:
+      name = listID;
+      break;
+  }
+
+  return {
+    id: listID,
+    name,
+  };
 }
 
 export function useGetWorkspace() {

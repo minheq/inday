@@ -133,6 +133,7 @@ export const Editor = React.forwardRef<EditorInstance, EditorProps>(
         >
           <LinkEditProvider>
             <InsertProvider>
+              <MainToolbar />
               <Editable
                 ref={editableRef}
                 value={state.value}
@@ -140,7 +141,6 @@ export const Editor = React.forwardRef<EditorInstance, EditorProps>(
                 onBlur={onBlur}
                 onFocus={onFocus}
               />
-              <MainToolbar />
             </InsertProvider>
           </LinkEditProvider>
         </EditorContext.Provider>

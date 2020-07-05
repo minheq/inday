@@ -2,21 +2,6 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 
 import { Text, Container, Spacing, Icon, Row, Button } from '../components';
-import { useTheme } from '../theme';
-
-export function SideNavigation() {
-  const theme = useTheme();
-  return (
-    <Container
-      expanded
-      width={320}
-      borderRightWidth={1}
-      borderColor={theme.border.color.default}
-    >
-      <NavigationMenu />
-    </Container>
-  );
-}
 
 export function NavigationMenu() {
   return (
@@ -27,8 +12,6 @@ export function NavigationMenu() {
     </ScrollView>
   );
 }
-
-interface MenuItemProps {}
 
 function InboxMenuItem() {
   return (

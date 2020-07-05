@@ -1,96 +1,95 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
-import { NoteListItem } from './note_list_item';
+import { StyleSheet, ScrollView } from 'react-native';
 import { Note } from '../data/types';
-import { Content, Text, Spacer } from '../components';
-import { CreateNote } from './note_create';
+import { Text, Button, Spacer, Row, Container } from '../components';
+import { useCreateNote, useGetNotes, useGetList } from '../data/api';
+import { useViewNoteID, useNavigation } from '../data/ui';
+import { useTheme } from '../theme';
 
-interface NoteListState {
-  noteID: string | null;
-  newNote: Note | null;
-}
-
-interface NoteListContext extends NoteListState {
-  onOpen: (noteID: string) => void;
-  onClear: () => void;
-  onNewNote: (note: Note) => void;
-}
-
-const NoteListContext = React.createContext<NoteListContext>({
-  noteID: null,
-  newNote: null,
-  onNewNote: () => {},
-  onOpen: () => {},
-  onClear: () => {},
-});
-
-export function useNoteList() {
-  return React.useContext(NoteListContext);
-}
-
-interface NoteListProps {
-  notes: Note[];
-}
-
-export interface ScrollViewState {
-  contentHeight: number;
-  height: number;
-  offsetY: number;
-}
-
-export function NoteList(props: NoteListProps) {
-  const { notes } = props;
-  const [state, setState] = React.useState<NoteListState>({
-    noteID: null,
-    newNote: null,
-  });
-
-  const handleNewNote = React.useCallback((newNote: Note) => {
-    setState({
-      noteID: null,
-      newNote,
-    });
-  }, []);
-
-  const handleOpen = React.useCallback((noteID: string) => {
-    setState({
-      noteID,
-      newNote: null,
-    });
-  }, []);
-
-  const handleClear = React.useCallback(() => {
-    setState({
-      noteID: null,
-      newNote: null,
-    });
-  }, []);
+export function NoteList() {
+  const { listID } = useNavigation();
+  const list = useGetList(listID);
+  const notes = useGetNotes({ id: listID });
 
   return (
-    <NoteListContext.Provider
-      value={{
-        noteID: state.noteID,
-        newNote: state.newNote,
-        onNewNote: handleNewNote,
-        onOpen: handleOpen,
-        onClear: handleClear,
-      }}
-    >
-      <ScrollView>
-        <Content>
+    <ScrollView>
+      <Container paddingVertical={8} paddingHorizontal={16}>
+        <Row justifyContent="space-between" alignItems="center">
           <Text bold size="lg">
-            Inbox
+            {list.name}
           </Text>
-          <Spacer size={16} />
-          <CreateNote />
-          <Spacer size={24} />
-          {notes
-            .filter((note) => note.id !== state.newNote?.id)
-            .map((note) => (
-              <NoteListItem key={note.id} note={note} />
-            ))}
-        </Content>
-      </ScrollView>
-    </NoteListContext.Provider>
+          <Spacer size={8} />
+          <CreateNoteButton />
+        </Row>
+      </Container>
+      {notes.map((note) => (
+        <NoteListItem key={note.id} note={note} />
+      ))}
+    </ScrollView>
   );
 }
+
+function CreateNoteButton() {
+  const createNote = useCreateNote();
+  const viewNoteID = useViewNoteID();
+
+  const handleCreateNote = React.useCallback(async () => {
+    const note = createNote();
+    viewNoteID(note.id);
+  }, [createNote, viewNoteID]);
+
+  return (
+    <Button style={styles.noteCreateButton} onPress={handleCreateNote}>
+      <Text color="primary">New note</Text>
+    </Button>
+  );
+}
+
+interface NoteListItemProps {
+  note: Note;
+}
+
+function NoteListItem(props: NoteListItemProps) {
+  const { note } = props;
+  const { preview } = note;
+  const { noteID } = useNavigation();
+  const viewNoteID = useViewNoteID();
+  const theme = useTheme();
+  const selected = noteID === note.id;
+
+  const handlePress = React.useCallback(() => {
+    viewNoteID(note.id);
+  }, [viewNoteID, note]);
+
+  return (
+    <Button
+      style={[
+        styles.previewContainer,
+        {
+          backgroundColor: selected
+            ? theme.container.color.primary
+            : theme.container.color.content,
+        },
+      ]}
+      onPress={handlePress}
+    >
+      <Container paddingHorizontal={16}>
+        {preview.title ? (
+          <Text color={selected ? 'white' : 'default'}>{preview.title}</Text>
+        ) : (
+          <Text color="muted">New note</Text>
+        )}
+      </Container>
+    </Button>
+  );
+}
+
+const styles = StyleSheet.create({
+  previewContainer: {
+    height: 56,
+    justifyContent: 'center',
+  },
+  noteCreateButton: {
+    padding: 8,
+  },
+});

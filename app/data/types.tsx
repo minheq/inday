@@ -76,3 +76,9 @@ export interface NoteUpdatedEvent extends EventBase {
 }
 
 export type Event = NoteCreatedEvent | NoteDeletedEvent | NoteUpdatedEvent;
+
+export type ListID = 'all' | 'inbox' | string;
+export interface List {
+  id: ListID;
+  name: string;
+}

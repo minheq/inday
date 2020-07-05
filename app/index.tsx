@@ -3,9 +3,9 @@ import React, { Suspense } from 'react';
 import { RecoilRoot, MutableSnapshot } from 'recoil';
 import AsyncStorage from '@react-native-community/async-storage';
 
-import { ThemeProvider } from './theme';
-import { Row, Text } from './components';
-import { SideNavigation } from './core/side_navigation';
+import { ThemeProvider, useTheme } from './theme';
+import { Row, Text, Container } from './components';
+import { NavigationMenu } from './core/side_navigation';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
 import { ErrorBoundary } from './core/error_boundary';
 import { InitWorkspace } from './data/workspace';
@@ -14,16 +14,22 @@ import {
   getAtomWithKey,
   NotesByIDState,
   WorkspaceState,
+  NavigationState,
 } from './data/atoms';
-import { InboxScreen } from './screens/inbox';
 import { StorageKey, StorageKeyPrefix } from './data/storage';
 import { Note, Workspace } from './data/types';
+import { useNavigation } from './data/ui';
 import { SyncStorage } from './data/sync_storage';
 import { SyncAtoms } from './data/sync_atoms';
+import { NoteList } from './core/note_list';
+import { useGetNote } from './data/api';
+import { NoteEditor } from './core/note_editor';
+import { InitNavigation } from './data/navigation';
 
 type Atoms = (
   | [AtomKey.NotesByID, NotesByIDState]
   | [AtomKey.Workspace, WorkspaceState]
+  | [AtomKey.Navigation, NavigationState]
 )[];
 
 async function init() {
@@ -62,6 +68,17 @@ async function init() {
 
   if (workspace) {
     atoms.push([AtomKey.Workspace, workspace]);
+  }
+
+  const listID = await AsyncStorage.getItem(StorageKey.LastListID);
+  const noteID = await AsyncStorage.getItem(StorageKey.LastNoteID);
+
+  if (listID) {
+    const navigation: NavigationState = {
+      listID,
+      noteID: noteID ?? '',
+    };
+    atoms.push([AtomKey.Navigation, navigation]);
   }
 
   return atoms;
@@ -111,14 +128,16 @@ export function App() {
       <ErrorBoundary>
         <Suspense fallback={<Text>Initializing workspace...</Text>}>
           <InitWorkspace />
+          <InitNavigation />
           <SyncAtoms />
           <SyncStorage />
           <Suspense fallback={<Text>Loading...</Text>}>
             <ThemeProvider>
               <DragDropProvider>
                 <Row expanded>
-                  <SideNavigation />
-                  <InboxScreen />
+                  <MenuSection />
+                  <NoteListSection />
+                  <NoteViewSection />
                 </Row>
               </DragDropProvider>
             </ThemeProvider>
@@ -126,5 +145,50 @@ export function App() {
         </Suspense>
       </ErrorBoundary>
     </RecoilRoot>
+  );
+}
+
+function MenuSection() {
+  const theme = useTheme();
+
+  return (
+    <Container
+      expanded
+      width={320}
+      borderRightWidth={1}
+      borderColor={theme.border.color.default}
+    >
+      <NavigationMenu />
+    </Container>
+  );
+}
+
+function NoteListSection() {
+  const theme = useTheme();
+
+  return (
+    <Container
+      expanded
+      width={320}
+      borderRightWidth={1}
+      borderColor={theme.border.color.default}
+    >
+      <NoteList />
+    </Container>
+  );
+}
+
+function NoteViewSection() {
+  const { noteID } = useNavigation();
+  const note = useGetNote(noteID);
+
+  if (note === null) {
+    return null;
+  }
+
+  return (
+    <Container flex={1}>
+      <NoteEditor key={note.id} note={note} />
+    </Container>
   );
 }

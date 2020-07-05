@@ -1,10 +1,11 @@
-import { atom, selector, RecoilState } from 'recoil';
+import { atom, RecoilState, selectorFamily } from 'recoil';
 
-import { Note, Workspace, Event } from './types';
+import { Note, Workspace, Event, ListID } from './types';
 
 export enum AtomKey {
   NotesByID = 'NotesByID',
   Workspace = 'Workspace',
+  Navigation = 'Navigation',
   Events = 'Events',
 }
 
@@ -22,15 +23,29 @@ export const workspaceState = atom<WorkspaceState>({
   key: AtomKey.Workspace,
   default: null,
 });
+export type NavigationState = {
+  listID: string;
+  noteID: string;
+};
+export const navigationState = atom<NavigationState>({
+  key: AtomKey.Navigation,
+  default: { listID: '', noteID: '' },
+});
 export type EventsState = Event[];
 export const eventsState = atom<EventsState>({
   key: AtomKey.Events,
   default: [],
 });
 
-export const allNotesQuery = selector({
+export interface ListQuery {
+  id: ListID;
+}
+export type NotesQueryParam = ListQuery;
+// @ts-ignore
+export const notesQuery = selectorFamily<Note[], NotesQueryParam>({
   key: SelectorKey.AllNotes,
-  get: ({ get }) => {
+  get: (param: NotesQueryParam) => ({ get }) => {
+    const listID = param;
     const notesByID = get(notesByIDState);
     const workspace = get(workspaceState);
 
@@ -50,10 +65,26 @@ export const allNotesQuery = selector({
   },
 });
 
+export const noteQuery = selectorFamily<Note | null, string>({
+  key: SelectorKey.AllNotes,
+  get: (noteID: string) => ({ get }) => {
+    const notesByID = get(notesByIDState);
+    const note = notesByID[noteID];
+
+    if (note === undefined) {
+      return null;
+    }
+
+    return note;
+  },
+});
+
 export function getAtomWithKey(key: AtomKey): RecoilState<any> {
   switch (key) {
     case AtomKey.Workspace:
       return workspaceState;
+    case AtomKey.Navigation:
+      return navigationState;
     case AtomKey.NotesByID:
       return notesByIDState;
     default:

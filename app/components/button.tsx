@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, Animated, ViewStyle, StyleProp } from 'react-native';
+import { Animated, ViewStyle, StyleProp } from 'react-native';
 import { Pressable } from './pressable';
-import { tokens, useTheme } from '../theme';
+import { useTheme } from '../theme';
 
 interface ButtonProps {
   onPress?: () => void;
@@ -27,7 +27,6 @@ export function Button(props: ButtonProps) {
         }).start();
 
         return [
-          styles.base,
           {
             backgroundColor: background.interpolate({
               inputRange: [0, 0.5, 1],
@@ -47,9 +46,3 @@ export function Button(props: ButtonProps) {
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: tokens.radius,
-  },
-});
