@@ -18,8 +18,8 @@ import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
 import { useDraggable } from '../drag_drop/use_draggable';
 import { Text } from './text';
 
-interface CardListProps<T = any> {
-  cards: T[];
+interface ReorderableListProps<T = any> {
+  items: T[];
 }
 
 enum DragDirection {
@@ -36,15 +36,15 @@ export interface ScrollViewState {
 
 const CARD_HEIGHT = 56;
 
-export function CardList(props: CardListProps) {
-  const { cards } = props;
+export function ReorderableList(props: ReorderableListProps) {
+  const { items } = props;
   const [scrollEnabled, setScrollEnabled] = React.useState(true);
   const scrollViewState = React.useRef<ScrollViewState>({
     contentHeight: 0,
     height: 0,
     offsetY: 0,
   }).current;
-  const cardListItems: CardListItem[] = cards.map((c, index) => {
+  const listItems: ReorderableListItem[] = items.map((c, index) => {
     return {
       ...c,
       index,
@@ -61,7 +61,7 @@ export function CardList(props: CardListProps) {
     onEnter: () => {
       setScrollEnabled(false);
     },
-    onHover: (draggable: Draggable<CardListItem>, dragState) => {
+    onHover: (draggable: Draggable<ReorderableListItem>, dragState) => {
       if (!draggable.measurements || !dropTarget.measurements) {
         return;
       }
@@ -76,8 +76,8 @@ export function CardList(props: CardListProps) {
 
       // Find the card that this drag is hovering over
       let hoverIndex = 0;
-      for (let i = 0; i < cardListItems.length; i++) {
-        const card = cardListItems[i];
+      for (let i = 0; i < listItems.length; i++) {
+        const card = listItems[i];
 
         hoverIndex = i;
 
@@ -92,7 +92,7 @@ export function CardList(props: CardListProps) {
       }
 
       // During fast movements, hoverIndex may "jump" over next card, to 2nd next card.
-      // To keep sequential movement of the cards we limit each swap to 2 consecutive cards
+      // To keep sequential movement of the items we limit each swap to 2 consecutive items
       if (Math.abs(draggingCard.index - hoverIndex) > 1) {
         return;
       }
@@ -104,36 +104,36 @@ export function CardList(props: CardListProps) {
 
       // Determine whether to perform a swap or not
       // And if there is a swap, amend their post-swap Y-coordinates
-      const hoveredCard = cardListItems[hoverIndex];
+      const hoveredCard = listItems[hoverIndex];
       if (
         dragDirection === DragDirection.Downwards &&
         y > draggingCard.y + hoveredCard.height
       ) {
-        // Perform change in the y of the cards
-        cardListItems[hoverIndex].y = draggingCard.y;
+        // Perform change in the y of the items
+        listItems[hoverIndex].y = draggingCard.y;
         draggingCard.y = draggingCard.y + hoveredCard.height;
       } else if (
         dragDirection === DragDirection.Upwards &&
         y < hoveredCard.y + draggingCard.height
       ) {
-        // Perform change in the y of the cards
+        // Perform change in the y of the items
         draggingCard.y = hoveredCard.y;
         hoveredCard.y = draggingCard.y + draggingCard.height;
       } else {
         return;
       }
 
-      // Perform change in the indexes of the cards
-      const tempIndex = cardListItems[hoverIndex].index;
-      cardListItems[hoverIndex].index = draggable.item.index;
+      // Perform change in the indexes of the items
+      const tempIndex = listItems[hoverIndex].index;
+      listItems[hoverIndex].index = draggable.item.index;
       draggable.item.index = tempIndex;
 
-      // Sort cards according to their latest indexes
-      cardListItems.sort((a, b) => a.index - b.index);
+      // Sort items according to their latest indexes
+      listItems.sort((a, b) => a.index - b.index);
 
       // Shift items according to their indexes
-      for (let i = 0; i < cardListItems.length; i++) {
-        const card = cardListItems[i];
+      for (let i = 0; i < listItems.length; i++) {
+        const card = listItems[i];
 
         if (card.index > hoverIndex) {
           Animated.spring(card.position, {
@@ -202,9 +202,9 @@ export function CardList(props: CardListProps) {
   );
 
   const handleDragStart = React.useCallback(
-    (dragCard: CardListItem) => {
-      for (let i = 0; i < cardListItems.length; i++) {
-        const card = cardListItems[i];
+    (dragCard: ReorderableListItem) => {
+      for (let i = 0; i < listItems.length; i++) {
+        const card = listItems[i];
 
         if (i <= dragCard.index) {
           continue;
@@ -216,7 +216,7 @@ export function CardList(props: CardListProps) {
         });
       }
     },
-    [cardListItems],
+    [listItems],
   );
 
   const handleDragEnd = React.useCallback(() => {}, []);
@@ -232,8 +232,8 @@ export function CardList(props: CardListProps) {
       onLayout={handleLayout}
       onContentSizeChange={handleContentSizeChange}
     >
-      {cardListItems.map((c) => (
-        <CardListItem
+      {listItems.map((c) => (
+        <ReorderableListItem
           card={c}
           onDragEnd={handleDragEnd}
           onDragStart={handleDragStart}
@@ -243,7 +243,7 @@ export function CardList(props: CardListProps) {
   );
 }
 
-export interface CardListItem<T = any> {
+export interface ReorderableListItem<T = any> {
   index: number;
   position: Animated.ValueXY;
   y: number;
@@ -251,11 +251,11 @@ export interface CardListItem<T = any> {
   data: T;
 }
 
-interface CardListItemProps {
-  card: CardListItem;
-  onDragStart: (card: CardListItem) => void;
-  onDragEnd: (card: CardListItem) => void;
-  onPress?: (card: CardListItem) => void;
+interface ReorderableListItemProps {
+  card: ReorderableListItem;
+  onDragStart: (card: ReorderableListItem) => void;
+  onDragEnd: (card: ReorderableListItem) => void;
+  onPress?: (card: ReorderableListItem) => void;
 }
 
 function toDragState(
@@ -270,11 +270,11 @@ function toDragState(
   };
 }
 
-function CardListItem(props: CardListItemProps) {
+function ReorderableListItem(props: ReorderableListItemProps) {
   const { card, onDragStart, onDragEnd, onPress = () => {} } = props;
   const { position } = card;
   const [dragging, setDragging] = React.useState(false);
-  const [draggable, ref] = useDraggable<CardListItem, View>({
+  const [draggable, ref] = useDraggable<ReorderableListItem, View>({
     item: card,
   });
 
