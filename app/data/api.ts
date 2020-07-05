@@ -1,21 +1,48 @@
 import React from 'react';
-import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
-import { allCardsQuery, cardsByIDState, workspaceState } from './atoms';
-import { Card, Content, Preview } from './types';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import {
+  allCardsQuery,
+  cardsByIDState,
+  workspaceState,
+  eventsState,
+} from './atoms';
+import { Card, Content, Preview, Event, Workspace } from './types';
 import { v4 } from 'uuid';
 import { BlockType } from '../editor/editable/nodes/element';
+import { useEventEmitter } from './events';
 
 export function useGetAllCards() {
   return useRecoilValue(allCardsQuery);
 }
 
 export function useGetWorkspace() {
-  return useRecoilValue(workspaceState);
+  const workspace = useRecoilValue(workspaceState);
+
+  if (workspace === null) {
+    throw new Error('Workspace not found');
+  }
+
+  return workspace;
+}
+
+function useEmitEvent() {
+  const eventEmitter = useEventEmitter();
+  const setEvents = useSetRecoilState(eventsState);
+
+  const emitEvent = React.useCallback(
+    (event: Event) => {
+      setEvents((prevEvents) => [...prevEvents, event]);
+      eventEmitter.emit(event);
+    },
+    [setEvents, eventEmitter],
+  );
+
+  return emitEvent;
 }
 
 export function useCreateCard() {
-  const setCardsByID = useSetRecoilState(cardsByIDState);
-  const setWorkspace = useSetRecoilState(workspaceState);
+  const emitEvent = useEmitEvent();
+  const workspace = useGetWorkspace();
 
   const createCard = React.useCallback(() => {
     const card: Card = {
@@ -36,43 +63,43 @@ export function useCreateCard() {
       typename: 'Card',
     };
 
-    setCardsByID((previousCardsByID) => ({
-      ...previousCardsByID,
-      [card.id]: card,
-    }));
-    setWorkspace((previousWorkspace) => ({
-      ...previousWorkspace,
-      all: [...previousWorkspace.all, card.id],
-    }));
+    const nextWorkspace: Workspace = {
+      ...workspace,
+      all: [...workspace.all, card.id],
+    };
+
+    emitEvent({
+      name: 'CardCreated',
+      card,
+      workspace: nextWorkspace,
+      createdAt: new Date(),
+    });
 
     return card;
-  }, [setCardsByID, setWorkspace]);
+  }, [emitEvent, workspace]);
 
   return createCard;
 }
 
 export function useDeleteCard() {
-  const setCardsByID = useSetRecoilState(cardsByIDState);
-  const setWorkspace = useSetRecoilState(workspaceState);
+  const emitEvent = useEmitEvent();
+  const workspace = useGetWorkspace();
 
   const deleteCard = React.useCallback(
     (card: Card) => {
-      setWorkspace((previousWorkspace) => ({
-        ...previousWorkspace,
-        all: previousWorkspace.all.filter((cardID) => cardID !== card.id),
-      }));
+      const nextWorkspace: Workspace = {
+        ...workspace,
+        all: [...workspace.all, card.id],
+      };
 
-      setCardsByID((previousCardsByID) => {
-        const nextCardsByID = { ...previousCardsByID };
-
-        delete nextCardsByID[card.id];
-
-        return nextCardsByID;
+      emitEvent({
+        name: 'CardDeleted',
+        card,
+        workspace: nextWorkspace,
+        createdAt: new Date(),
       });
-
-      console.timeEnd('hmm');
     },
-    [setCardsByID, setWorkspace],
+    [workspace, emitEvent],
   );
 
   return deleteCard;
@@ -84,7 +111,8 @@ export interface UpdateCardContentInput {
 }
 
 export function useUpdateCardContent() {
-  const [cardsByID, setCardsByID] = useRecoilState(cardsByIDState);
+  const cardsByID = useRecoilValue(cardsByIDState);
+  const emitEvent = useEmitEvent();
 
   const updateCardContent = React.useCallback(
     (input: UpdateCardContentInput) => {
@@ -97,12 +125,14 @@ export function useUpdateCardContent() {
         preview,
       };
 
-      setCardsByID((previousCardsByID) => ({
-        ...previousCardsByID,
-        [nextCard.id]: nextCard,
-      }));
+      emitEvent({
+        name: 'CardUpdated',
+        prevCard,
+        nextCard,
+        createdAt: new Date(),
+      });
     },
-    [cardsByID, setCardsByID],
+    [cardsByID, emitEvent],
   );
 
   return updateCardContent;

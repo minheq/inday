@@ -6,53 +6,55 @@ import {
   CardDeletedEvent,
   CardUpdatedEvent,
 } from './types';
-import AsyncStorage from '@react-native-community/async-storage';
-import { StorageKeyPrefix } from './storage';
+import { useSetRecoilState } from 'recoil';
+import { cardsByIDState, workspaceState } from './atoms';
 
-export function SyncStorage() {
+export function SyncAtoms() {
   const eventEmitter = useEventEmitter();
+  const setCardsByID = useSetRecoilState(cardsByIDState);
+  const setWorkspace = useSetRecoilState(workspaceState);
 
   const handleCardCreated = React.useCallback(
-    async (event: CardCreatedEvent) => {
+    (event: CardCreatedEvent) => {
       const { card, workspace } = event;
 
-      await AsyncStorage.setItem(
-        `${StorageKeyPrefix.Card}:${card.id}`,
-        JSON.stringify(card),
-      );
+      setCardsByID((previousCardsByID) => ({
+        ...previousCardsByID,
+        [card.id]: card,
+      }));
 
-      await AsyncStorage.setItem(
-        `${StorageKeyPrefix.Workspace}:${workspace.id}`,
-        JSON.stringify(workspace),
-      );
+      setWorkspace(workspace);
     },
-    [],
+    [setCardsByID, setWorkspace],
   );
 
   const handleCardDeleted = React.useCallback(
-    async (event: CardDeletedEvent) => {
+    (event: CardDeletedEvent) => {
       const { card, workspace } = event;
 
-      await AsyncStorage.removeItem(`${StorageKeyPrefix.Card}:${card.id}`);
+      setWorkspace(workspace);
 
-      await AsyncStorage.setItem(
-        `${StorageKeyPrefix.Workspace}:${workspace.id}`,
-        JSON.stringify(workspace),
-      );
+      setCardsByID((previousCardsByID) => {
+        const nextCardsByID = { ...previousCardsByID };
+
+        delete nextCardsByID[card.id];
+
+        return nextCardsByID;
+      });
     },
-    [],
+    [setCardsByID, setWorkspace],
   );
 
   const handleCardUpdated = React.useCallback(
-    async (event: CardUpdatedEvent) => {
+    (event: CardUpdatedEvent) => {
       const { nextCard } = event;
 
-      await AsyncStorage.setItem(
-        `${StorageKeyPrefix.Card}:${nextCard.id}`,
-        JSON.stringify(nextCard),
-      );
+      setCardsByID((previousCardsByID) => ({
+        ...previousCardsByID,
+        [nextCard.id]: nextCard,
+      }));
     },
-    [],
+    [setCardsByID],
   );
 
   const handleEvent = React.useCallback(

@@ -52,3 +52,27 @@ export interface Workspace {
   inbox: string[];
   typename: 'Workspace';
 }
+
+interface EventBase {
+  createdAt: Date;
+}
+
+export interface CardCreatedEvent extends EventBase {
+  name: 'CardCreated';
+  card: Card;
+  workspace: Workspace;
+}
+
+export interface CardDeletedEvent extends EventBase {
+  name: 'CardDeleted';
+  card: Card;
+  workspace: Workspace;
+}
+
+export interface CardUpdatedEvent extends EventBase {
+  name: 'CardUpdated';
+  prevCard: Card;
+  nextCard: Card;
+}
+
+export type Event = CardCreatedEvent | CardDeletedEvent | CardUpdatedEvent;

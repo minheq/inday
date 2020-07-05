@@ -19,6 +19,7 @@ import { InboxScreen } from './screens/inbox';
 import { StorageKey, StorageKeyPrefix } from './data/storage';
 import { Card, Workspace } from './data/types';
 import { SyncStorage } from './data/sync_storage';
+import { SyncAtoms } from './data/sync_atoms';
 
 type Atoms = (
   | [AtomKey.CardsByID, CardsByIDState]
@@ -110,6 +111,7 @@ export function App() {
       <ErrorBoundary>
         <Suspense fallback={<Text>Initializing workspace...</Text>}>
           <InitWorkspace />
+          <SyncAtoms />
           <SyncStorage />
           <Suspense fallback={<Text>Loading...</Text>}>
             <ThemeProvider>

@@ -5,12 +5,10 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { useRecoilState } from 'recoil';
 import { useAsync } from '../hooks/use_async';
 import { StorageKey, StorageKeyPrefix } from './storage';
-import { useGetWorkspace } from './api';
 import { workspaceState } from './atoms';
 
 function useInitWorkspace() {
-  const workspace = useGetWorkspace();
-  const [, setWorkspace] = useRecoilState(workspaceState);
+  const [workspace, setWorkspace] = useRecoilState(workspaceState);
 
   const init = React.useCallback(async () => {
     if (workspace === null) {
@@ -23,6 +21,7 @@ function useInitWorkspace() {
       };
 
       setWorkspace(newWorkspace);
+
       await AsyncStorage.setItem(StorageKey.WorkspaceID, newWorkspace.id);
       await AsyncStorage.setItem(
         `${StorageKeyPrefix.Workspace}:${newWorkspace.id}`,
