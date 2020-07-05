@@ -14,15 +14,12 @@ import {
 import { useDropTarget } from '../drag_drop/use_drop_target';
 import { measure } from '../utils/measurements';
 import { Draggable, DragState } from '../drag_drop/draggable';
-import { Card } from '../data/types';
 import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
 import { useDraggable } from '../drag_drop/use_draggable';
-import { useTheme, tokens } from '../theme';
-import { useCardList } from '../core/card_list';
 import { Text } from './text';
 
-interface CardListProps {
-  cards: Card[];
+interface CardListProps<T = any> {
+  cards: T[];
 }
 
 enum DragDirection {
@@ -246,17 +243,19 @@ export function CardList(props: CardListProps) {
   );
 }
 
-export interface CardListItem extends Card {
+export interface CardListItem<T = any> {
   index: number;
   position: Animated.ValueXY;
   y: number;
   height: number;
+  data: T;
 }
 
 interface CardListItemProps {
   card: CardListItem;
   onDragStart: (card: CardListItem) => void;
   onDragEnd: (card: CardListItem) => void;
+  onPress?: (card: CardListItem) => void;
 }
 
 function toDragState(
@@ -272,13 +271,8 @@ function toDragState(
 }
 
 function CardListItem(props: CardListItemProps) {
-  const { card, onDragStart, onDragEnd } = props;
-  const { preview, position } = card;
-  const { onOpen, cardID } = useCardList();
-  const open = cardID === card.id;
-  const theme = useTheme();
-  const height = React.useRef(new Animated.Value(CARD_HEIGHT)).current;
-  const shadow = React.useRef(new Animated.Value(0)).current;
+  const { card, onDragStart, onDragEnd, onPress = () => {} } = props;
+  const { position } = card;
   const [dragging, setDragging] = React.useState(false);
   const [draggable, ref] = useDraggable<CardListItem, View>({
     item: card,
@@ -289,7 +283,7 @@ function CardListItem(props: CardListItemProps) {
 
     return {
       onPress: () => {
-        onOpen(card.id);
+        onPress(card);
       },
       onLongPress: () => {
         isLongPress = true;
@@ -330,7 +324,7 @@ function CardListItem(props: CardListItemProps) {
         isLongPress = false;
       },
     };
-  }, [card, draggable, position, setDragging, onDragStart, onDragEnd, onOpen]);
+  }, [card, draggable, position, setDragging, onDragStart, onDragEnd, onPress]);
 
   const eventHandlers = useGestureDetector(config);
 
@@ -339,25 +333,6 @@ function CardListItem(props: CardListItemProps) {
       draggable.measurements = measurements;
     });
   }, [draggable, ref]);
-
-  const handleContentLayout = React.useCallback(
-    (event: LayoutChangeEvent) => {
-      Animated.spring(height, {
-        toValue: event.nativeEvent.layout.height,
-        bounciness: 0,
-        useNativeDriver: false,
-      }).start();
-    },
-    [height],
-  );
-
-  React.useEffect(() => {
-    Animated.spring(shadow, {
-      toValue: open ? 1 : 0,
-      bounciness: 0,
-      useNativeDriver: true,
-    });
-  }, [shadow, open]);
 
   return (
     <Animated.View
@@ -370,21 +345,12 @@ function CardListItem(props: CardListItemProps) {
         {
           transform: [{ translateX: position.x }, { translateY: position.y }],
           top: dragging ? card.y : undefined,
-          height,
         },
-        open && theme.container.shadow,
-        open && styles.open,
         dragging && styles.dragging,
       ]}
       {...eventHandlers}
     >
-      <View onLayout={handleContentLayout} style={[styles.card]}>
-        {preview.title ? (
-          <Text>{preview.title}</Text>
-        ) : (
-          <Text color="muted">New card</Text>
-        )}
-      </View>
+      <Text color="muted">New card</Text>
     </Animated.View>
   );
 }
@@ -400,23 +366,9 @@ const styles = StyleSheet.create({
     width: '100%',
     zIndex: 0,
     overflow: 'hidden',
-    borderRadius: tokens.radius,
-  },
-  open: {
-    marginVertical: 24,
   },
   dragging: {
     zIndex: 1,
     position: 'absolute',
   },
-  card: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    backgroundColor: '#fff',
-    padding: 16,
-  },
-  active: {
-    backgroundColor: 'green',
-  },
-  cardNote: {},
 });

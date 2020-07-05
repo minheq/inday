@@ -38,5 +38,5 @@ Create
 
 delete
 
-- see where the card exists from the Card
+- see where the card exists from the Note
 - go to those lists and remove itself from there

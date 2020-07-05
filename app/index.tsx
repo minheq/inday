@@ -12,17 +12,17 @@ import { InitWorkspace } from './data/workspace';
 import {
   AtomKey,
   getAtomWithKey,
-  CardsByIDState,
+  NotesByIDState,
   WorkspaceState,
 } from './data/atoms';
 import { InboxScreen } from './screens/inbox';
 import { StorageKey, StorageKeyPrefix } from './data/storage';
-import { Card, Workspace } from './data/types';
+import { Note, Workspace } from './data/types';
 import { SyncStorage } from './data/sync_storage';
 import { SyncAtoms } from './data/sync_atoms';
 
 type Atoms = (
-  | [AtomKey.CardsByID, CardsByIDState]
+  | [AtomKey.NotesByID, NotesByIDState]
   | [AtomKey.Workspace, WorkspaceState]
 )[];
 
@@ -31,16 +31,16 @@ async function init() {
 
   const keys = await AsyncStorage.getAllKeys();
 
-  const cardKeys = keys.filter((k) => k.includes(`${StorageKeyPrefix.Card}:`));
-  const cardEntries = await AsyncStorage.multiGet(cardKeys);
-  const cardsByID: CardsByIDState = {};
-  cardEntries.forEach(([, value]) => {
+  const noteKeys = keys.filter((k) => k.includes(`${StorageKeyPrefix.Note}:`));
+  const noteEntries = await AsyncStorage.multiGet(noteKeys);
+  const notesByID: NotesByIDState = {};
+  noteEntries.forEach(([, value]) => {
     if (value) {
-      const card = JSON.parse(value) as Card;
-      cardsByID[card.id] = card;
+      const note = JSON.parse(value) as Note;
+      notesByID[note.id] = note;
     }
   });
-  atoms.push([AtomKey.CardsByID, cardsByID]);
+  atoms.push([AtomKey.NotesByID, notesByID]);
 
   const workspaceKeys = keys.filter((k) =>
     k.includes(`${StorageKeyPrefix.Workspace}:`),

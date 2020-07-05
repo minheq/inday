@@ -1,14 +1,14 @@
 import React from 'react';
-import { CardList } from '../core/card_list';
-import { useGetAllCards } from '../data/api';
+import { NoteList } from '../core/note_list';
+import { useGetAllNotes } from '../data/api';
 import { Screen } from '../components';
 
 export function InboxScreen() {
-  const cards = useGetAllCards();
+  const notes = useGetAllNotes();
 
   return (
     <Screen>
-      <CardList cards={cards} />
+      <NoteList notes={notes} />
     </Screen>
   );
 }

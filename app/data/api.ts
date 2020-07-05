@@ -1,18 +1,18 @@
 import React from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
-  allCardsQuery,
-  cardsByIDState,
+  allNotesQuery,
+  notesByIDState,
   workspaceState,
   eventsState,
 } from './atoms';
-import { Card, Content, Preview, Event, Workspace } from './types';
+import { Note, Content, Preview, Event, Workspace } from './types';
 import { v4 } from 'uuid';
 import { BlockType } from '../editor/editable/nodes/element';
 import { useEventEmitter } from './events';
 
-export function useGetAllCards() {
-  return useRecoilValue(allCardsQuery);
+export function useGetAllNotes() {
+  return useRecoilValue(allNotesQuery);
 }
 
 export function useGetWorkspace() {
@@ -40,12 +40,12 @@ function useEmitEvent() {
   return emitEvent;
 }
 
-export function useCreateCard() {
+export function useCreateNote() {
   const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
 
-  const createCard = React.useCallback(() => {
-    const card: Card = {
+  const createNote = React.useCallback(() => {
+    const note: Note = {
       id: v4(),
       content: [{ type: 'paragraph', children: [{ text: '' }] }],
       preview: {
@@ -60,41 +60,41 @@ export function useCreateCard() {
       inbox: false,
       listID: null,
       scheduledAt: null,
-      typename: 'Card',
+      typename: 'Note',
     };
 
     const nextWorkspace: Workspace = {
       ...workspace,
-      all: [...workspace.all, card.id],
+      all: [...workspace.all, note.id],
     };
 
     emitEvent({
-      name: 'CardCreated',
-      card,
+      name: 'NoteCreated',
+      note,
       workspace: nextWorkspace,
       createdAt: new Date(),
     });
 
-    return card;
+    return note;
   }, [emitEvent, workspace]);
 
-  return createCard;
+  return createNote;
 }
 
-export function useDeleteCard() {
+export function useDeleteNote() {
   const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
 
-  const deleteCard = React.useCallback(
-    (card: Card) => {
+  const deleteNote = React.useCallback(
+    (note: Note) => {
       const nextWorkspace: Workspace = {
         ...workspace,
-        all: [...workspace.all, card.id],
+        all: [...workspace.all, note.id],
       };
 
       emitEvent({
-        name: 'CardDeleted',
-        card,
+        name: 'NoteDeleted',
+        note,
         workspace: nextWorkspace,
         createdAt: new Date(),
       });
@@ -102,40 +102,40 @@ export function useDeleteCard() {
     [workspace, emitEvent],
   );
 
-  return deleteCard;
+  return deleteNote;
 }
 
-export interface UpdateCardContentInput {
+export interface UpdateNoteContentInput {
   id: string;
   content: Content;
 }
 
-export function useUpdateCardContent() {
-  const cardsByID = useRecoilValue(cardsByIDState);
+export function useUpdateNoteContent() {
+  const notesByID = useRecoilValue(notesByIDState);
   const emitEvent = useEmitEvent();
 
-  const updateCardContent = React.useCallback(
-    (input: UpdateCardContentInput) => {
+  const updateNoteContent = React.useCallback(
+    (input: UpdateNoteContentInput) => {
       const { id, content } = input;
-      const prevCard = cardsByID[id];
+      const prevNote = notesByID[id];
       const preview = toPreview(content);
-      const nextCard: Card = {
-        ...prevCard,
+      const nextNote: Note = {
+        ...prevNote,
         content,
         preview,
       };
 
       emitEvent({
-        name: 'CardUpdated',
-        prevCard,
-        nextCard,
+        name: 'NoteUpdated',
+        prevNote,
+        nextNote,
         createdAt: new Date(),
       });
     },
-    [cardsByID, emitEvent],
+    [notesByID, emitEvent],
   );
 
-  return updateCardContent;
+  return updateNoteContent;
 }
 
 function toPreview(content: Content): Preview {

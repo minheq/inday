@@ -3,6 +3,6 @@ export enum StorageKey {
 }
 
 export enum StorageKeyPrefix {
-  Card = 'Card',
+  Note = 'Note',
   Workspace = 'Workspace',
 }

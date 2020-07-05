@@ -11,7 +11,7 @@ export default {
 // Main view
 // Fix Input
 // Custom Repeat
-function StatefulCardReminder() {
+function StatefulNoteReminder() {
   const [value, setValue] = React.useState<Reminder>();
 
   return <Reminder value={value} onChange={setValue} />;
@@ -19,6 +19,6 @@ function StatefulCardReminder() {
 
 export const Default = () => (
   <Container height={800} width={400}>
-    <StatefulCardReminder />
+    <StatefulNoteReminder />
   </Container>
 );

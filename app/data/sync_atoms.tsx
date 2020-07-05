@@ -2,75 +2,75 @@ import React from 'react';
 import { useEventEmitter } from './events';
 import {
   Event,
-  CardCreatedEvent,
-  CardDeletedEvent,
-  CardUpdatedEvent,
+  NoteCreatedEvent,
+  NoteDeletedEvent,
+  NoteUpdatedEvent,
 } from './types';
 import { useSetRecoilState } from 'recoil';
-import { cardsByIDState, workspaceState } from './atoms';
+import { notesByIDState, workspaceState } from './atoms';
 
 export function SyncAtoms() {
   const eventEmitter = useEventEmitter();
-  const setCardsByID = useSetRecoilState(cardsByIDState);
+  const setNotesByID = useSetRecoilState(notesByIDState);
   const setWorkspace = useSetRecoilState(workspaceState);
 
-  const handleCardCreated = React.useCallback(
-    (event: CardCreatedEvent) => {
-      const { card, workspace } = event;
+  const handleNoteCreated = React.useCallback(
+    (event: NoteCreatedEvent) => {
+      const { note, workspace } = event;
 
-      setCardsByID((previousCardsByID) => ({
-        ...previousCardsByID,
-        [card.id]: card,
+      setNotesByID((previousNotesByID) => ({
+        ...previousNotesByID,
+        [note.id]: note,
       }));
 
       setWorkspace(workspace);
     },
-    [setCardsByID, setWorkspace],
+    [setNotesByID, setWorkspace],
   );
 
-  const handleCardDeleted = React.useCallback(
-    (event: CardDeletedEvent) => {
-      const { card, workspace } = event;
+  const handleNoteDeleted = React.useCallback(
+    (event: NoteDeletedEvent) => {
+      const { note, workspace } = event;
 
       setWorkspace(workspace);
 
-      setCardsByID((previousCardsByID) => {
-        const nextCardsByID = { ...previousCardsByID };
+      setNotesByID((previousNotesByID) => {
+        const nextNotesByID = { ...previousNotesByID };
 
-        delete nextCardsByID[card.id];
+        delete nextNotesByID[note.id];
 
-        return nextCardsByID;
+        return nextNotesByID;
       });
     },
-    [setCardsByID, setWorkspace],
+    [setNotesByID, setWorkspace],
   );
 
-  const handleCardUpdated = React.useCallback(
-    (event: CardUpdatedEvent) => {
-      const { nextCard } = event;
+  const handleNoteUpdated = React.useCallback(
+    (event: NoteUpdatedEvent) => {
+      const { nextNote } = event;
 
-      setCardsByID((previousCardsByID) => ({
-        ...previousCardsByID,
-        [nextCard.id]: nextCard,
+      setNotesByID((previousNotesByID) => ({
+        ...previousNotesByID,
+        [nextNote.id]: nextNote,
       }));
     },
-    [setCardsByID],
+    [setNotesByID],
   );
 
   const handleEvent = React.useCallback(
     (event: Event) => {
       switch (event.name) {
-        case 'CardCreated':
-          return handleCardCreated(event);
-        case 'CardDeleted':
-          return handleCardDeleted(event);
-        case 'CardUpdated':
-          return handleCardUpdated(event);
+        case 'NoteCreated':
+          return handleNoteCreated(event);
+        case 'NoteDeleted':
+          return handleNoteDeleted(event);
+        case 'NoteUpdated':
+          return handleNoteUpdated(event);
         default:
           break;
       }
     },
-    [handleCardCreated, handleCardDeleted, handleCardUpdated],
+    [handleNoteCreated, handleNoteDeleted, handleNoteUpdated],
   );
 
   React.useEffect(() => {

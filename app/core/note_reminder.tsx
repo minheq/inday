@@ -1,12 +1,12 @@
 import React from 'react';
 import { Row, Container, Pressable, Text, Column } from '../components';
-import { Card } from '../data/types';
+import { Note } from '../data/types';
 
-interface CardReminderProps {
-  card: Card;
+interface NoteReminderProps {
+  note: Note;
 }
 
-export function CardReminder(_props: CardReminderProps) {
+export function NoteReminder(_props: NoteReminderProps) {
   return (
     <Container>
       <Row>

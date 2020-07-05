@@ -2,9 +2,9 @@ import React from 'react';
 import { useEventEmitter } from './events';
 import {
   Event,
-  CardCreatedEvent,
-  CardDeletedEvent,
-  CardUpdatedEvent,
+  NoteCreatedEvent,
+  NoteDeletedEvent,
+  NoteUpdatedEvent,
 } from './types';
 import AsyncStorage from '@react-native-community/async-storage';
 import { StorageKeyPrefix } from './storage';
@@ -12,13 +12,13 @@ import { StorageKeyPrefix } from './storage';
 export function SyncStorage() {
   const eventEmitter = useEventEmitter();
 
-  const handleCardCreated = React.useCallback(
-    async (event: CardCreatedEvent) => {
-      const { card, workspace } = event;
+  const handleNoteCreated = React.useCallback(
+    async (event: NoteCreatedEvent) => {
+      const { note, workspace } = event;
 
       await AsyncStorage.setItem(
-        `${StorageKeyPrefix.Card}:${card.id}`,
-        JSON.stringify(card),
+        `${StorageKeyPrefix.Note}:${note.id}`,
+        JSON.stringify(note),
       );
 
       await AsyncStorage.setItem(
@@ -29,11 +29,11 @@ export function SyncStorage() {
     [],
   );
 
-  const handleCardDeleted = React.useCallback(
-    async (event: CardDeletedEvent) => {
-      const { card, workspace } = event;
+  const handleNoteDeleted = React.useCallback(
+    async (event: NoteDeletedEvent) => {
+      const { note, workspace } = event;
 
-      await AsyncStorage.removeItem(`${StorageKeyPrefix.Card}:${card.id}`);
+      await AsyncStorage.removeItem(`${StorageKeyPrefix.Note}:${note.id}`);
 
       await AsyncStorage.setItem(
         `${StorageKeyPrefix.Workspace}:${workspace.id}`,
@@ -43,13 +43,13 @@ export function SyncStorage() {
     [],
   );
 
-  const handleCardUpdated = React.useCallback(
-    async (event: CardUpdatedEvent) => {
-      const { nextCard } = event;
+  const handleNoteUpdated = React.useCallback(
+    async (event: NoteUpdatedEvent) => {
+      const { nextNote } = event;
 
       await AsyncStorage.setItem(
-        `${StorageKeyPrefix.Card}:${nextCard.id}`,
-        JSON.stringify(nextCard),
+        `${StorageKeyPrefix.Note}:${nextNote.id}`,
+        JSON.stringify(nextNote),
       );
     },
     [],
@@ -58,17 +58,17 @@ export function SyncStorage() {
   const handleEvent = React.useCallback(
     (event: Event) => {
       switch (event.name) {
-        case 'CardCreated':
-          return handleCardCreated(event);
-        case 'CardDeleted':
-          return handleCardDeleted(event);
-        case 'CardUpdated':
-          return handleCardUpdated(event);
+        case 'NoteCreated':
+          return handleNoteCreated(event);
+        case 'NoteDeleted':
+          return handleNoteDeleted(event);
+        case 'NoteUpdated':
+          return handleNoteUpdated(event);
         default:
           break;
       }
     },
-    [handleCardCreated, handleCardDeleted, handleCardUpdated],
+    [handleNoteCreated, handleNoteDeleted, handleNoteUpdated],
   );
 
   React.useEffect(() => {

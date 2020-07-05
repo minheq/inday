@@ -31,7 +31,7 @@ export interface Preview {
   imageURL: string;
 }
 
-export interface Card {
+export interface Note {
   id: string;
   content: Content;
   preview: Preview;
@@ -42,7 +42,7 @@ export interface Card {
   inbox: boolean;
   listID: string | null;
   scheduledAt: Date | null;
-  typename: 'Card';
+  typename: 'Note';
 }
 
 export interface Workspace {
@@ -57,22 +57,22 @@ interface EventBase {
   createdAt: Date;
 }
 
-export interface CardCreatedEvent extends EventBase {
-  name: 'CardCreated';
-  card: Card;
+export interface NoteCreatedEvent extends EventBase {
+  name: 'NoteCreated';
+  note: Note;
   workspace: Workspace;
 }
 
-export interface CardDeletedEvent extends EventBase {
-  name: 'CardDeleted';
-  card: Card;
+export interface NoteDeletedEvent extends EventBase {
+  name: 'NoteDeleted';
+  note: Note;
   workspace: Workspace;
 }
 
-export interface CardUpdatedEvent extends EventBase {
-  name: 'CardUpdated';
-  prevCard: Card;
-  nextCard: Card;
+export interface NoteUpdatedEvent extends EventBase {
+  name: 'NoteUpdated';
+  prevNote: Note;
+  nextNote: Note;
 }
 
-export type Event = CardCreatedEvent | CardDeletedEvent | CardUpdatedEvent;
+export type Event = NoteCreatedEvent | NoteDeletedEvent | NoteUpdatedEvent;

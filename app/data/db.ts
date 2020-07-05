@@ -2,7 +2,7 @@ import firebase from 'firebase';
 
 export enum Collection {
   Workspaces = 'workspaces',
-  Cards = 'cards',
+  Notes = 'notes',
 }
 
 export type DB = firebase.firestore.Firestore;

@@ -1,21 +1,21 @@
 import React from 'react';
 
 import { Button, Container, Icon, Row, Spacer, IconName } from '../components';
-import { useUpdateCardContent, useDeleteCard } from '../data/api';
+import { useUpdateNoteContent, useDeleteNote } from '../data/api';
 import { EditorInstance, Editor } from '../editor';
 import { useDebouncedCallback } from '../hooks/use_debounced_callback';
-import { Content, Card } from '../data/types';
+import { Content, Note } from '../data/types';
 
-interface CardEditorProps {
-  card: Card;
+interface NoteEditorProps {
+  note: Note;
   onDone?: () => void;
 }
 
-export function CardEditor(props: CardEditorProps) {
-  const { card, onDone = () => {} } = props;
+export function NoteEditor(props: NoteEditorProps) {
+  const { note, onDone = () => {} } = props;
   const editorRef = React.useRef<EditorInstance>(null);
-  const updateCardContent = useUpdateCardContent();
-  const deleteCard = useDeleteCard();
+  const updateNoteContent = useUpdateNoteContent();
+  const deleteNote = useDeleteNote();
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -25,18 +25,18 @@ export function CardEditor(props: CardEditorProps) {
 
   const handleUpdateContent = useDebouncedCallback(
     (content: Content) => {
-      updateCardContent({
-        id: card.id,
+      updateNoteContent({
+        id: note.id,
         content,
       });
     },
-    [card],
+    [note],
   );
 
   const handleDelete = React.useCallback(() => {
     onDone();
-    deleteCard(card);
-  }, [deleteCard, card, onDone]);
+    deleteNote(note);
+  }, [deleteNote, note, onDone]);
 
   return (
     <Container shape="rounded" padding={16} shadow>
@@ -51,7 +51,7 @@ export function CardEditor(props: CardEditorProps) {
       <Spacer size={8} />
       <Editor
         ref={editorRef}
-        initialValue={card.content}
+        initialValue={note.content}
         onChange={handleUpdateContent}
       />
     </Container>

@@ -1,20 +1,20 @@
 import { atom, selector, RecoilState } from 'recoil';
 
-import { Card, Workspace, Event } from './types';
+import { Note, Workspace, Event } from './types';
 
 export enum AtomKey {
-  CardsByID = 'CardsByID',
+  NotesByID = 'NotesByID',
   Workspace = 'Workspace',
   Events = 'Events',
 }
 
 export enum SelectorKey {
-  AllCards = 'AllCards',
+  AllNotes = 'AllNotes',
 }
 
-export type CardsByIDState = { [id: string]: Card };
-export const cardsByIDState = atom<CardsByIDState>({
-  key: AtomKey.CardsByID,
+export type NotesByIDState = { [id: string]: Note };
+export const notesByIDState = atom<NotesByIDState>({
+  key: AtomKey.NotesByID,
   default: {},
 });
 export type WorkspaceState = Workspace | null;
@@ -28,10 +28,10 @@ export const eventsState = atom<EventsState>({
   default: [],
 });
 
-export const allCardsQuery = selector({
-  key: SelectorKey.AllCards,
+export const allNotesQuery = selector({
+  key: SelectorKey.AllNotes,
   get: ({ get }) => {
-    const cardsByID = get(cardsByIDState);
+    const notesByID = get(notesByIDState);
     const workspace = get(workspaceState);
 
     if (workspace === null) {
@@ -39,13 +39,13 @@ export const allCardsQuery = selector({
     }
 
     return workspace.all.map((id) => {
-      const card = cardsByID[id];
+      const note = notesByID[id];
 
-      if (card === undefined) {
-        throw new Error(`Card out of sync for id=${id}`);
+      if (note === undefined) {
+        throw new Error(`Note out of sync for id=${id}`);
       }
 
-      return card;
+      return note;
     });
   },
 });
@@ -54,8 +54,8 @@ export function getAtomWithKey(key: AtomKey): RecoilState<any> {
   switch (key) {
     case AtomKey.Workspace:
       return workspaceState;
-    case AtomKey.CardsByID:
-      return cardsByIDState;
+    case AtomKey.NotesByID:
+      return notesByIDState;
     default:
       throw new Error('Invalid atom key');
   }

@@ -1,35 +1,35 @@
 import React from 'react';
 
-import { Card } from '../data/types';
-import { useCardList } from './card_list';
+import { Note } from '../data/types';
+import { useNoteList } from './note_list';
 import { Text, Container, Button } from '../components';
-import { CardEditor } from './card_editor';
+import { NoteEditor } from './note_editor';
 import { StyleSheet } from 'react-native';
 
-interface CardListItemProps {
-  card: Card;
+interface NoteListItemProps {
+  note: Note;
 }
 
-export function CardListItem(props: CardListItemProps) {
-  const { card } = props;
-  const { preview } = card;
-  const { onOpen, onClear, cardID } = useCardList();
-  const open = cardID === card.id;
+export function NoteListItem(props: NoteListItemProps) {
+  const { note } = props;
+  const { preview } = note;
+  const { onOpen, onClear, noteID } = useNoteList();
+  const open = noteID === note.id;
 
   const handleOpen = React.useCallback(() => {
-    onOpen(card.id);
-  }, [card, onOpen]);
+    onOpen(note.id);
+  }, [note, onOpen]);
 
   return (
     <Container>
       {open ? (
-        <CardEditor onDone={onClear} card={card} />
+        <NoteEditor onDone={onClear} note={note} />
       ) : (
         <Button style={styles.previewContainer} onPress={handleOpen}>
           {preview.title ? (
             <Text>{preview.title}</Text>
           ) : (
-            <Text color="muted">New card</Text>
+            <Text color="muted">New note</Text>
           )}
         </Button>
       )}
