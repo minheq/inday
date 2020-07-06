@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal as RNModal } from 'react-native';
 
 export interface ModalProps {
-  isOpen: boolean;
+  visible: boolean;
   onRequestClose?: () => void;
   children?: React.ReactNode;
   transparent?: boolean;
@@ -14,7 +14,7 @@ export interface ModalProps {
 export function Modal(props: ModalProps) {
   const {
     children,
-    isOpen,
+    visible,
     onRequestClose,
     onShow,
     onDismiss,
@@ -25,7 +25,7 @@ export function Modal(props: ModalProps) {
   return (
     <RNModal
       animationType={animationType}
-      visible={isOpen}
+      visible={visible}
       transparent={transparent}
       onRequestClose={onRequestClose}
       onShow={onShow}

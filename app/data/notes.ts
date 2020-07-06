@@ -5,6 +5,21 @@ import { RecoilKey } from './constants';
 import { Recurrence } from '../modules/recurrence';
 import { Element } from '../editor/editable/nodes/element';
 
+export interface Note {
+  id: string;
+  content: Content;
+  preview: Preview;
+  reminder: Reminder | null;
+  task: Task | null;
+  createdAt: Date;
+  updatedAt: Date;
+  inbox: boolean;
+  listID: string | null;
+  scheduledAt: Date | null;
+  workspaceID: string;
+  typename: 'Note';
+}
+
 export interface Reminder {
   time: ReminderTime | null;
   place: ReminderPlace | null;
@@ -33,20 +48,6 @@ export interface Preview {
   title: string;
   description: string;
   imageURL: string;
-}
-
-export interface Note {
-  id: string;
-  content: Content;
-  preview: Preview;
-  reminder: Reminder | null;
-  task: Task | null;
-  createdAt: Date;
-  updatedAt: Date;
-  inbox: boolean;
-  listID: string | null;
-  scheduledAt: Date | null;
-  typename: 'Note';
 }
 
 export type NotesByIDState = { [id: string]: Note };

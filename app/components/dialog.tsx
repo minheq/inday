@@ -20,7 +20,7 @@ interface DialogProps extends ModalProps {
 // TODO: Add 'fade' and 'none' animationType handlers
 export function Dialog(props: DialogProps) {
   const {
-    isOpen,
+    visible,
     onRequestClose = () => {},
     onShow,
     onDismiss,
@@ -30,21 +30,21 @@ export function Dialog(props: DialogProps) {
   } = props;
   const { height } = useWindowDimensions();
   const theme = useTheme();
-  const [internalIsOpen, setInternalIsOpen] = React.useState(isOpen);
+  const [internalIsOpen, setInternalIsOpen] = React.useState(visible);
   const slide = React.useRef(
     new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
   ).current;
-  const overlayFade = React.useRef(new Animated.Value(isOpen ? 1 : 0)).current;
+  const overlayFade = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
   const fade = React.useRef(
-    new Animated.Value(animationType === 'fade' ? (isOpen ? 1 : 0) : 1),
+    new Animated.Value(animationType === 'fade' ? (visible ? 1 : 0) : 1),
   ).current;
 
   React.useEffect(() => {
     if (animationType !== 'fade') {
       return;
     }
-    if (isOpen) {
-      setInternalIsOpen(isOpen);
+    if (visible) {
+      setInternalIsOpen(visible);
       Animated.parallel([
         Animated.spring(fade, {
           toValue: 1,
@@ -77,7 +77,7 @@ export function Dialog(props: DialogProps) {
     animationType,
     overlayFade,
     fade,
-    isOpen,
+    visible,
     internalIsOpen,
     slide,
     height,
@@ -88,8 +88,8 @@ export function Dialog(props: DialogProps) {
     if (animationType !== 'slide') {
       return;
     }
-    if (isOpen) {
-      setInternalIsOpen(isOpen);
+    if (visible) {
+      setInternalIsOpen(visible);
       Animated.parallel([
         Animated.spring(slide, {
           toValue: OFFSET_TOP,
@@ -121,7 +121,7 @@ export function Dialog(props: DialogProps) {
   }, [
     animationType,
     overlayFade,
-    isOpen,
+    visible,
     internalIsOpen,
     slide,
     height,
@@ -143,7 +143,7 @@ export function Dialog(props: DialogProps) {
 
   return (
     <Modal
-      isOpen={isOpen}
+      visible={visible}
       onRequestClose={onRequestClose}
       onShow={onShow}
       animationType={animationType === 'none' ? 'none' : 'fade'}

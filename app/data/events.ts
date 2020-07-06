@@ -6,6 +6,7 @@ import { Workspace } from './workspace';
 
 interface EventBase {
   createdAt: Date;
+  workspaceID: string;
   typename: 'Event';
 }
 

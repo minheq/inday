@@ -5,6 +5,7 @@ export interface ListGroup {
   id: string;
   name: string;
   listIDs: string[];
+  workspaceID: string;
   typename: 'ListGroup';
 }
 

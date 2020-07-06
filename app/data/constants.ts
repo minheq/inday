@@ -9,6 +9,7 @@ export enum RecoilKey {
 
   // Selectors
   AllNotes = 'AllNotes',
+  AllLists = 'AllLists',
 }
 
 export enum StorageKey {

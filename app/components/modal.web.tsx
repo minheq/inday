@@ -8,35 +8,35 @@ RModal.setAppElement('#root');
 export function Modal(props: ModalProps) {
   const {
     animationType = 'none',
-    isOpen,
+    visible,
     onRequestClose = () => {},
     children,
     transparent = false,
     onShow,
     onDismiss,
   } = props;
-  const [internalIsOpen, setInternalIsOpen] = React.useState(isOpen);
+  const [internalVisible, setInternalIsOpen] = React.useState(visible);
   const { height } = useWindowDimensions();
   const slide = React.useRef(
     new Animated.Value(animationType === 'slide' ? height : 0),
   ).current;
-  const fade = React.useRef(new Animated.Value(isOpen ? 1 : 0)).current;
+  const fade = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
 
   React.useEffect(() => {
     if (animationType !== 'none') {
       return;
     }
 
-    setInternalIsOpen(isOpen);
-  }, [isOpen, internalIsOpen, fade, height, animationType, onRequestClose]);
+    setInternalIsOpen(visible);
+  }, [visible, internalVisible, fade, height, animationType, onRequestClose]);
 
   React.useEffect(() => {
     if (animationType !== 'fade') {
       return;
     }
 
-    if (isOpen) {
-      setInternalIsOpen(isOpen);
+    if (visible) {
+      setInternalIsOpen(visible);
       Animated.spring(fade, {
         toValue: 0,
         bounciness: 0,
@@ -51,15 +51,15 @@ export function Modal(props: ModalProps) {
         setInternalIsOpen(false);
       });
     }
-  }, [isOpen, internalIsOpen, fade, height, animationType, onRequestClose]);
+  }, [visible, internalVisible, fade, height, animationType, onRequestClose]);
 
   React.useEffect(() => {
     if (animationType !== 'slide') {
       return;
     }
 
-    if (isOpen) {
-      setInternalIsOpen(isOpen);
+    if (visible) {
+      setInternalIsOpen(visible);
       Animated.spring(slide, {
         toValue: 0,
         bounciness: 0,
@@ -74,13 +74,13 @@ export function Modal(props: ModalProps) {
         setInternalIsOpen(false);
       });
     }
-  }, [isOpen, internalIsOpen, slide, height, animationType, onRequestClose]);
+  }, [visible, internalVisible, slide, height, animationType, onRequestClose]);
 
   return (
     <RModal
       onAfterOpen={onShow}
       onAfterClose={onDismiss}
-      isOpen={internalIsOpen}
+      isOpen={internalVisible}
       onRequestClose={onRequestClose}
       style={{
         content: webStyles.content,

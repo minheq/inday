@@ -9,12 +9,14 @@ import {
   Row,
   Button,
   IconName,
+  Dialog,
 } from '../components';
 import { Location, useNavigation } from '../data/navigation';
+import { useToggle } from '../hooks/use_toggle';
 
 export function Menu() {
   return (
-    <ScrollView>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flex: 1 }}>
       <Container flex={1} padding={16}>
         <FixedMenuItem icon="inbox" title="Inbox" location={Location.Inbox} />
         <FixedMenuItem
@@ -24,7 +26,30 @@ export function Menu() {
         />
         <FixedMenuItem icon="navigation" title="All" location={Location.All} />
       </Container>
+      <NewListButton />
     </ScrollView>
+  );
+}
+
+function NewListButton() {
+  const [visible, { toggle, setFalse }] = useToggle();
+
+  return (
+    <>
+      <Dialog animationType="slide" visible={visible} onRequestClose={setFalse}>
+        <Container>
+          <Button>
+            <Text>New list</Text>
+          </Button>
+          <Button>
+            <Text>New list group</Text>
+          </Button>
+        </Container>
+      </Dialog>
+      <Button onPress={toggle} style={{ padding: 16 }}>
+        <Text>New list</Text>
+      </Button>
+    </>
   );
 }
 

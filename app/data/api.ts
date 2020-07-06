@@ -12,7 +12,7 @@ import {
   Content,
   Preview,
 } from './notes';
-import { workspaceState, Workspace } from './workspace';
+import { workspaceState, Workspace, allListsQuery } from './workspace';
 
 export function useGetAllNotes() {
   return useRecoilValue(allNotesQuery);
@@ -20,6 +20,10 @@ export function useGetAllNotes() {
 
 export function useGetNote(noteID: string) {
   return useRecoilValue(noteQuery(noteID));
+}
+
+export function useGetLists() {
+  return useRecoilValue(allListsQuery);
 }
 
 export function useGetWorkspace() {
@@ -67,6 +71,7 @@ export function useCreateNote() {
       inbox: false,
       listID: null,
       scheduledAt: null,
+      workspaceID: workspace.id,
       typename: 'Note',
     };
 
@@ -80,6 +85,7 @@ export function useCreateNote() {
       note,
       workspace: nextWorkspace,
       createdAt: new Date(),
+      workspaceID: workspace.id,
       typename: 'Event',
     });
 
@@ -105,6 +111,7 @@ export function useDeleteNote() {
         note,
         workspace: nextWorkspace,
         createdAt: new Date(),
+        workspaceID: workspace.id,
         typename: 'Event',
       });
     },
@@ -121,6 +128,7 @@ export interface UpdateNoteContentInput {
 
 export function useUpdateNoteContent() {
   const notesByID = useRecoilValue(notesByIDState);
+  const workspace = useGetWorkspace();
   const emitEvent = useEmitEvent();
 
   const updateNoteContent = React.useCallback(
@@ -139,6 +147,7 @@ export function useUpdateNoteContent() {
         prevNote,
         nextNote,
         createdAt: new Date(),
+        workspaceID: workspace.id,
         typename: 'Event',
       });
     },

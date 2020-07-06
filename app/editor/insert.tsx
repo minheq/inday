@@ -39,18 +39,18 @@ interface InsertProviderProps {
 export function InsertProvider(props: InsertProviderProps) {
   const { children } = props;
   const { focus } = useEditor();
-  const [open, { setTrue, setFalse }] = useToggle();
+  const [visible, { setTrue, setFalse }] = useToggle();
 
   return (
     <InsertContext.Provider value={{ onOpen: setTrue, onClose: setFalse }}>
       {children}
       <Dialog
         animationType="slide"
-        isOpen={open}
+        visible={visible}
         onRequestClose={setFalse}
         onDismiss={focus}
       >
-        {open && (
+        {visible && (
           <Container width={320} height={400}>
             <NavigationProvider>
               <InsertContent />

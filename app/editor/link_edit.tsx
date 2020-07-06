@@ -63,7 +63,7 @@ export function LinkEditProvider(props: LinkEditProviderProps) {
       {children}
       <Dialog
         animationType="slide"
-        isOpen={state.open}
+        visible={state.open}
         onRequestClose={handleClose}
         onDismiss={focus}
       >

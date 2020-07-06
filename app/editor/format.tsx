@@ -27,14 +27,14 @@ interface FormatProviderProps {
 export function FormatProvider(props: FormatProviderProps) {
   const { children } = props;
   const { focus } = useEditor();
-  const [open, { setTrue, setFalse }] = useToggle();
+  const [visible, { setTrue, setFalse }] = useToggle();
 
   return (
     <FormatContext.Provider value={{ onOpen: setTrue, onClose: setFalse }}>
       {children}
       <Dialog
         animationType="slide"
-        isOpen={open}
+        visible={visible}
         onRequestClose={setFalse}
         onDismiss={focus}
       >
