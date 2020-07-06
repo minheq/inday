@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import React from 'react';
-import { atom, useRecoilValue, useRecoilState } from 'recoil';
+import { atom, useRecoilState } from 'recoil';
 import { StorageKey } from './constants';
 
 export const NavigationAtomKey = 'Navigation';
@@ -28,64 +28,18 @@ export type NavigationState =
     };
 
 export function useNavigation() {
-  return useRecoilValue(navigationState);
-}
-
-export function useViewListID() {
   const [navigation, setNavigation] = useRecoilState(navigationState);
 
-  const viewListID = React.useCallback(
-    (location: Location) => {
-      let newNavigation: NavigationState = { ...navigation };
-
-      switch (location) {
-        case Location.All:
-          newNavigation = { location, noteID: '' };
-          break;
-        case Location.Inbox:
-          newNavigation = { location, noteID: '' };
-          break;
-        case Location.Daily:
-          newNavigation = { location, noteID: '' };
-          break;
-        case Location.List:
-          newNavigation = { location, listID: '', noteID: '' };
-          break;
-
-        default:
-          throw new Error('Invalid location');
-      }
-
-      setNavigation(newNavigation);
-
-      AsyncStorage.setItem(
-        StorageKey.Navigation,
-        JSON.stringify(newNavigation),
-      );
+  const handleNavigate = React.useCallback(
+    (newState: NavigationState) => {
+      setNavigation(newState);
+      AsyncStorage.setItem(StorageKey.Navigation, JSON.stringify(newState));
     },
-    [navigation, setNavigation],
+    [setNavigation],
   );
 
-  return viewListID;
-}
-
-export function useViewNoteID() {
-  const [navigation, setNavigation] = useRecoilState(navigationState);
-
-  const viewNoteID = React.useCallback(
-    (noteID: string) => {
-      const newNavigation: NavigationState = {
-        ...navigation,
-        noteID,
-      };
-      setNavigation(newNavigation);
-      AsyncStorage.setItem(
-        StorageKey.Navigation,
-        JSON.stringify(newNavigation),
-      );
-    },
-    [navigation, setNavigation],
-  );
-
-  return viewNoteID;
+  return {
+    state: navigation,
+    navigate: handleNavigate,
+  };
 }

@@ -5,7 +5,7 @@ import {
   NoteCreatedEvent,
   NoteDeletedEvent,
   NoteUpdatedEvent,
-} from '../data/types';
+} from '../data/events';
 import AsyncStorage from '@react-native-community/async-storage';
 import { StorageKeyPrefix } from '../data/constants';
 

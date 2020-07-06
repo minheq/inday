@@ -1,20 +1,18 @@
 import React from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
+import { v4 } from 'uuid';
+import { BlockType } from '../editor/editable/nodes/element';
+import { useEventEmitter, eventsState, Event } from './events';
 import {
+  allNotesQuery,
+  noteQuery,
+  notesByIDState,
   Note,
   Content,
   Preview,
-  Event,
-  Workspace,
-  ListID,
-  List,
-} from './types';
-import { v4 } from 'uuid';
-import { BlockType } from '../editor/editable/nodes/element';
-import { useEventEmitter, eventsState } from './events';
-import { allNotesQuery, noteQuery, notesByIDState } from './notes';
-import { workspaceState } from './workspace';
+} from './notes';
+import { workspaceState, Workspace } from './workspace';
 
 export function useGetAllNotes() {
   return useRecoilValue(allNotesQuery);
@@ -22,27 +20,6 @@ export function useGetAllNotes() {
 
 export function useGetNote(noteID: string) {
   return useRecoilValue(noteQuery(noteID));
-}
-
-export function useGetList(listID: ListID): List {
-  let name = '';
-  switch (listID) {
-    case 'all':
-      name = 'All';
-      break;
-    case 'inbox':
-      name = 'Inbox';
-      break;
-
-    default:
-      name = listID;
-      break;
-  }
-
-  return {
-    id: listID,
-    name,
-  };
 }
 
 export function useGetWorkspace() {
@@ -103,6 +80,7 @@ export function useCreateNote() {
       note,
       workspace: nextWorkspace,
       createdAt: new Date(),
+      typename: 'Event',
     });
 
     return note;
@@ -127,6 +105,7 @@ export function useDeleteNote() {
         note,
         workspace: nextWorkspace,
         createdAt: new Date(),
+        typename: 'Event',
       });
     },
     [workspace, emitEvent],
@@ -160,6 +139,7 @@ export function useUpdateNoteContent() {
         prevNote,
         nextNote,
         createdAt: new Date(),
+        typename: 'Event',
       });
     },
     [notesByID, emitEvent],

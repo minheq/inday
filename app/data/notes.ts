@@ -1,8 +1,53 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
-import { Note } from './types';
 import { workspaceState } from './workspace';
 import { RecoilKey } from './constants';
+import { Recurrence } from '../modules/recurrence';
+import { Element } from '../editor/editable/nodes/element';
+
+export interface Reminder {
+  time: ReminderTime | null;
+  place: ReminderPlace | null;
+}
+
+interface ReminderTime {
+  date: Date;
+  time: Date | null;
+  recurrence: Recurrence | null;
+}
+
+interface ReminderPlace {
+  lat: number;
+  lng: number;
+  radius: number;
+  when: 'leaving' | 'arriving';
+}
+
+export type Content = Element[];
+
+export interface Task {
+  completed: boolean;
+}
+
+export interface Preview {
+  title: string;
+  description: string;
+  imageURL: string;
+}
+
+export interface Note {
+  id: string;
+  content: Content;
+  preview: Preview;
+  reminder: Reminder | null;
+  task: Task | null;
+  createdAt: Date;
+  updatedAt: Date;
+  inbox: boolean;
+  listID: string | null;
+  scheduledAt: Date | null;
+  typename: 'Note';
+}
 
 export type NotesByIDState = { [id: string]: Note };
 export const notesByIDState = atom<NotesByIDState>({

@@ -4,6 +4,8 @@ export enum RecoilKey {
   Workspace = 'Workspace',
   Navigation = 'Navigation',
   Events = 'Events',
+  Lists = 'Lists',
+  ListGroups = 'ListGroups',
 
   // Selectors
   AllNotes = 'AllNotes',

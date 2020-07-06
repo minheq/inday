@@ -1,6 +1,33 @@
-import { Event } from './types';
 import { atom } from 'recoil';
+
 import { RecoilKey } from './constants';
+import { Note } from './notes';
+import { Workspace } from './workspace';
+
+interface EventBase {
+  createdAt: Date;
+  typename: 'Event';
+}
+
+export interface NoteCreatedEvent extends EventBase {
+  name: 'NoteCreated';
+  note: Note;
+  workspace: Workspace;
+}
+
+export interface NoteDeletedEvent extends EventBase {
+  name: 'NoteDeleted';
+  note: Note;
+  workspace: Workspace;
+}
+
+export interface NoteUpdatedEvent extends EventBase {
+  name: 'NoteUpdated';
+  prevNote: Note;
+  nextNote: Note;
+}
+
+export type Event = NoteCreatedEvent | NoteDeletedEvent | NoteUpdatedEvent;
 
 type SubscriptionCallback = (event: Event) => void;
 

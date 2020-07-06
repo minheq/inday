@@ -1,25 +1,25 @@
-import './firebase';
 import React, { Suspense } from 'react';
 import { RecoilRoot, MutableSnapshot } from 'recoil';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import { ThemeProvider, useTheme } from './theme';
 import { Row, Text, Container } from './components';
-import { NavigationMenu } from './core/side_navigation';
+import { Menu } from './core/menu';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
 import { ErrorBoundary } from './core/error_boundary';
 import { getAtomWithKey } from './data/atoms';
 import { RecoilKey, StorageKey, StorageKeyPrefix } from './data/constants';
-import { Note, Workspace } from './data/types';
+import { Workspace } from './data/workspace';
 import { SyncStorage } from './core/sync_storage';
 import { SyncAtoms } from './core/sync_atoms';
 import { NoteList } from './core/note_list';
 import { useGetNote, useGetAllNotes } from './data/api';
 import { NoteEditor } from './core/note_editor';
-import { NotesByIDState } from './data/notes';
+import { Note, NotesByIDState } from './data/notes';
 import { WorkspaceState } from './data/workspace';
 import { InitWorkspace } from './core/init_workspace';
 import { useNavigation, Location, NavigationState } from './data/navigation';
+import { NoteListHeader } from './core/note_list_header';
 
 type Atoms = (
   | [RecoilKey.NotesByID, NotesByIDState]
@@ -146,7 +146,7 @@ function MenuSection() {
       borderRightWidth={1}
       borderColor={theme.border.color.default}
     >
-      <NavigationMenu />
+      <Menu />
     </Container>
   );
 }
@@ -169,7 +169,7 @@ function NoteListSection() {
 function NoteListSwitch() {
   const navigation = useNavigation();
 
-  switch (navigation.location) {
+  switch (navigation.state.location) {
     case Location.All:
       return <AllNoteList />;
     case Location.Inbox:
@@ -186,13 +186,33 @@ function NoteListSwitch() {
 
 function AllNoteList() {
   const notes = useGetAllNotes();
+  const navigation = useNavigation();
 
-  return <NoteList notes={notes} list={{ id: 'All', name: 'All' }} />;
+  const handleViewNote = React.useCallback(
+    (note: Note) => {
+      navigation.navigate({
+        location: Location.All,
+        noteID: note.id,
+      });
+    },
+    [navigation],
+  );
+
+  return (
+    <Container>
+      <NoteListHeader name="All" onViewNote={handleViewNote} />
+      <NoteList
+        selectedNoteID={navigation.state.noteID}
+        notes={notes}
+        onViewNote={handleViewNote}
+      />
+    </Container>
+  );
 }
 
 function NoteViewSection() {
-  const { noteID } = useNavigation();
-  const note = useGetNote(noteID);
+  const navigation = useNavigation();
+  const note = useGetNote(navigation.state.noteID);
 
   if (note === null) {
     return null;

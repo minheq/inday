@@ -5,7 +5,7 @@ import {
   NoteCreatedEvent,
   NoteDeletedEvent,
   NoteUpdatedEvent,
-} from '../data/types';
+} from '../data/events';
 import { useSetRecoilState } from 'recoil';
 import { notesByIDState } from '../data/notes';
 import { workspaceState } from '../data/workspace';
