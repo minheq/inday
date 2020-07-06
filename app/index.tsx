@@ -8,28 +8,23 @@ import { Row, Text, Container } from './components';
 import { NavigationMenu } from './core/side_navigation';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
 import { ErrorBoundary } from './core/error_boundary';
-import { InitWorkspace } from './data/workspace';
-import {
-  AtomKey,
-  getAtomWithKey,
-  NotesByIDState,
-  WorkspaceState,
-  NavigationState,
-} from './data/atoms';
-import { StorageKey, StorageKeyPrefix } from './data/storage';
+import { getAtomWithKey } from './data/atoms';
+import { RecoilKey, StorageKey, StorageKeyPrefix } from './data/constants';
 import { Note, Workspace } from './data/types';
-import { useNavigation } from './data/ui';
-import { SyncStorage } from './data/sync_storage';
-import { SyncAtoms } from './data/sync_atoms';
+import { SyncStorage } from './core/sync_storage';
+import { SyncAtoms } from './core/sync_atoms';
 import { NoteList } from './core/note_list';
-import { useGetNote } from './data/api';
+import { useGetNote, useGetAllNotes } from './data/api';
 import { NoteEditor } from './core/note_editor';
-import { InitNavigation } from './data/navigation';
+import { NotesByIDState } from './data/notes';
+import { WorkspaceState } from './data/workspace';
+import { InitWorkspace } from './core/init_workspace';
+import { useNavigation, Location, NavigationState } from './data/navigation';
 
 type Atoms = (
-  | [AtomKey.NotesByID, NotesByIDState]
-  | [AtomKey.Workspace, WorkspaceState]
-  | [AtomKey.Navigation, NavigationState]
+  | [RecoilKey.NotesByID, NotesByIDState]
+  | [RecoilKey.Workspace, WorkspaceState]
+  | [RecoilKey.Navigation, NavigationState]
 )[];
 
 async function init() {
@@ -46,7 +41,7 @@ async function init() {
       notesByID[note.id] = note;
     }
   });
-  atoms.push([AtomKey.NotesByID, notesByID]);
+  atoms.push([RecoilKey.NotesByID, notesByID]);
 
   const workspaceKeys = keys.filter((k) =>
     k.includes(`${StorageKeyPrefix.Workspace}:`),
@@ -67,18 +62,12 @@ async function init() {
   const workspace = workspaceList.find((w) => w.id === workspaceID) || null;
 
   if (workspace) {
-    atoms.push([AtomKey.Workspace, workspace]);
+    atoms.push([RecoilKey.Workspace, workspace]);
   }
 
-  const listID = await AsyncStorage.getItem(StorageKey.LastListID);
-  const noteID = await AsyncStorage.getItem(StorageKey.LastNoteID);
-
-  if (listID) {
-    const navigation: NavigationState = {
-      listID,
-      noteID: noteID ?? '',
-    };
-    atoms.push([AtomKey.Navigation, navigation]);
+  const navigation = await AsyncStorage.getItem(StorageKey.Navigation);
+  if (navigation) {
+    atoms.push([RecoilKey.Navigation, JSON.parse(navigation)]);
   }
 
   return atoms;
@@ -128,7 +117,6 @@ export function App() {
       <ErrorBoundary>
         <Suspense fallback={<Text>Initializing workspace...</Text>}>
           <InitWorkspace />
-          <InitNavigation />
           <SyncAtoms />
           <SyncStorage />
           <Suspense fallback={<Text>Loading...</Text>}>
@@ -173,9 +161,33 @@ function NoteListSection() {
       borderRightWidth={1}
       borderColor={theme.border.color.default}
     >
-      <NoteList />
+      <NoteListSwitch />
     </Container>
   );
+}
+
+function NoteListSwitch() {
+  const navigation = useNavigation();
+
+  switch (navigation.location) {
+    case Location.All:
+      return <AllNoteList />;
+    case Location.Inbox:
+      return <AllNoteList />;
+    case Location.Daily:
+      return <AllNoteList />;
+    case Location.List:
+      return <AllNoteList />;
+
+    default:
+      return null;
+  }
+}
+
+function AllNoteList() {
+  const notes = useGetAllNotes();
+
+  return <NoteList notes={notes} list={{ id: 'All', name: 'All' }} />;
 }
 
 function NoteViewSection() {

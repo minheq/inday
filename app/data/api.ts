@@ -1,13 +1,6 @@
 import React from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import {
-  notesQuery,
-  notesByIDState,
-  workspaceState,
-  eventsState,
-  noteQuery,
-  NotesQueryParam,
-} from './atoms';
+
 import {
   Note,
   Content,
@@ -19,11 +12,12 @@ import {
 } from './types';
 import { v4 } from 'uuid';
 import { BlockType } from '../editor/editable/nodes/element';
-import { useEventEmitter } from './events';
+import { useEventEmitter, eventsState } from './events';
+import { allNotesQuery, noteQuery, notesByIDState } from './notes';
+import { workspaceState } from './workspace';
 
-export function useGetNotes(param: NotesQueryParam) {
-  // @ts-ignore
-  return useRecoilValue(notesQuery(param));
+export function useGetAllNotes() {
+  return useRecoilValue(allNotesQuery);
 }
 
 export function useGetNote(noteID: string) {

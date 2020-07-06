@@ -1,60 +1,58 @@
 import React from 'react';
-import { useEventEmitter } from './events';
+import { useEventEmitter } from '../data/events';
 import {
   Event,
   NoteCreatedEvent,
   NoteDeletedEvent,
   NoteUpdatedEvent,
-} from './types';
-import { useSetRecoilState } from 'recoil';
-import { notesByIDState, workspaceState } from './atoms';
+} from '../data/types';
+import AsyncStorage from '@react-native-community/async-storage';
+import { StorageKeyPrefix } from '../data/constants';
 
-export function SyncAtoms() {
+export function SyncStorage() {
   const eventEmitter = useEventEmitter();
-  const setNotesByID = useSetRecoilState(notesByIDState);
-  const setWorkspace = useSetRecoilState(workspaceState);
 
   const handleNoteCreated = React.useCallback(
-    (event: NoteCreatedEvent) => {
+    async (event: NoteCreatedEvent) => {
       const { note, workspace } = event;
 
-      setNotesByID((previousNotesByID) => ({
-        ...previousNotesByID,
-        [note.id]: note,
-      }));
+      await AsyncStorage.setItem(
+        `${StorageKeyPrefix.Note}:${note.id}`,
+        JSON.stringify(note),
+      );
 
-      setWorkspace(workspace);
+      await AsyncStorage.setItem(
+        `${StorageKeyPrefix.Workspace}:${workspace.id}`,
+        JSON.stringify(workspace),
+      );
     },
-    [setNotesByID, setWorkspace],
+    [],
   );
 
   const handleNoteDeleted = React.useCallback(
-    (event: NoteDeletedEvent) => {
+    async (event: NoteDeletedEvent) => {
       const { note, workspace } = event;
 
-      setWorkspace(workspace);
+      await AsyncStorage.removeItem(`${StorageKeyPrefix.Note}:${note.id}`);
 
-      setNotesByID((previousNotesByID) => {
-        const nextNotesByID = { ...previousNotesByID };
-
-        delete nextNotesByID[note.id];
-
-        return nextNotesByID;
-      });
+      await AsyncStorage.setItem(
+        `${StorageKeyPrefix.Workspace}:${workspace.id}`,
+        JSON.stringify(workspace),
+      );
     },
-    [setNotesByID, setWorkspace],
+    [],
   );
 
   const handleNoteUpdated = React.useCallback(
-    (event: NoteUpdatedEvent) => {
+    async (event: NoteUpdatedEvent) => {
       const { nextNote } = event;
 
-      setNotesByID((previousNotesByID) => ({
-        ...previousNotesByID,
-        [nextNote.id]: nextNote,
-      }));
+      await AsyncStorage.setItem(
+        `${StorageKeyPrefix.Note}:${nextNote.id}`,
+        JSON.stringify(nextNote),
+      );
     },
-    [setNotesByID],
+    [],
   );
 
   const handleEvent = React.useCallback(

@@ -1,15 +1,18 @@
 import React from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
-import { Note } from '../data/types';
+import { Note, List } from '../data/types';
 import { Text, Button, Spacer, Row, Container } from '../components';
-import { useCreateNote, useGetNotes, useGetList } from '../data/api';
-import { useViewNoteID, useNavigation } from '../data/ui';
+import { useCreateNote } from '../data/api';
 import { useTheme } from '../theme';
+import { useNavigation, useViewNoteID } from '../data/navigation';
 
-export function NoteList() {
-  const { listID } = useNavigation();
-  const list = useGetList(listID);
-  const notes = useGetNotes({ id: listID });
+interface NoteListProps {
+  notes: Note[];
+  list: List;
+}
+
+export function NoteList(props: NoteListProps) {
+  const { notes, list } = props;
 
   return (
     <ScrollView>

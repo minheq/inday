@@ -1,4 +1,6 @@
 import { Event } from './types';
+import { atom } from 'recoil';
+import { RecoilKey } from './constants';
 
 type SubscriptionCallback = (event: Event) => void;
 
@@ -25,3 +27,9 @@ export const eventEmitter = new EventEmitter();
 export function useEventEmitter() {
   return eventEmitter;
 }
+
+export type EventsState = Event[];
+export const eventsState = atom<EventsState>({
+  key: RecoilKey.Events,
+  default: [],
+});

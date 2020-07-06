@@ -1,11 +1,12 @@
-import React from 'react';
-import { Workspace } from './types';
-import { v4 } from 'uuid';
 import AsyncStorage from '@react-native-community/async-storage';
+import React from 'react';
+import { v4 } from 'uuid';
 import { useRecoilState } from 'recoil';
+
+import { workspaceState } from '../data/workspace';
+import { Workspace } from '../data/types';
+import { StorageKey, StorageKeyPrefix } from '../data/constants';
 import { useAsync } from '../hooks/use_async';
-import { StorageKey, StorageKeyPrefix } from './storage';
-import { workspaceState } from './atoms';
 
 function useInitWorkspace() {
   const [workspace, setWorkspace] = useRecoilState(workspaceState);
