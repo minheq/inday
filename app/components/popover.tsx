@@ -15,14 +15,14 @@ export type PopoverPosition =
   | 'bottom-left'
   | 'bottom-right';
 
-type Anchor = { top: number; left: number };
+export type PopoverAnchor = { top: number; left: number };
 
 interface PopoverProps {
   visible?: boolean;
   onRequestClose?: () => void;
   children: React.ReactNode;
   position?: PopoverPosition;
-  anchor: Anchor;
+  anchor: PopoverAnchor;
 }
 
 interface PopoverLayout {
@@ -131,7 +131,7 @@ export function Popover(props: PopoverProps) {
 }
 
 function calculatePopoverLayout(
-  anchor: Anchor,
+  anchor: PopoverAnchor,
   dimensions: Dimensions,
   position: PopoverPosition,
 ): PopoverLayout {

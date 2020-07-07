@@ -8,65 +8,80 @@ import { ListGroup } from './list_group';
 
 interface EventBase {
   createdAt: Date;
-  workspaceID: string;
   typename: 'Event';
+}
+
+export interface WorkspaceCreatedEvent extends EventBase {
+  name: 'WorkspaceCreated';
+  workspace: Workspace;
+}
+
+export interface WorkspaceUpdatedEvent extends EventBase {
+  name: 'WorkspaceUpdated';
+  prevWorkspace: Workspace;
+  nextWorkspace: Workspace;
 }
 
 export interface NoteCreatedEvent extends EventBase {
   name: 'NoteCreated';
   note: Note;
-  workspace: Workspace;
+  workspaceID: string;
 }
 
 export interface NoteDeletedEvent extends EventBase {
   name: 'NoteDeleted';
   note: Note;
-  workspace: Workspace;
+  workspaceID: string;
 }
 
 export interface NoteUpdatedEvent extends EventBase {
   name: 'NoteUpdated';
   prevNote: Note;
+  workspaceID: string;
   nextNote: Note;
 }
 
 export interface ListCreatedEvent extends EventBase {
   name: 'ListCreated';
   list: List;
-  workspace: Workspace;
+  workspaceID: string;
 }
 
 export interface ListDeletedEvent extends EventBase {
   name: 'ListDeleted';
   list: List;
-  workspace: Workspace;
+  workspaceID: string;
 }
 
 export interface ListNameUpdatedEvent extends EventBase {
   name: 'ListNameUpdated';
   prevList: List;
+  workspaceID: string;
   nextList: List;
 }
 
 export interface ListGroupCreatedEvent extends EventBase {
   name: 'ListGroupCreated';
   listGroup: ListGroup;
-  workspace: Workspace;
+  workspaceID: string;
 }
 
 export interface ListGroupDeletedEvent extends EventBase {
   name: 'ListGroupDeleted';
   listGroup: ListGroup;
-  workspace: Workspace;
+  workspaceID: string;
 }
 
 export interface ListGroupNameUpdatedEvent extends EventBase {
   name: 'ListGroupNameUpdated';
   prevListGroup: ListGroup;
+  workspaceID: string;
   nextListGroup: ListGroup;
 }
 
 export type Event =
+  | WorkspaceCreatedEvent
+  | WorkspaceUpdatedEvent
   | NoteCreatedEvent
   | NoteDeletedEvent
   | NoteUpdatedEvent

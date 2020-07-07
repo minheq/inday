@@ -85,9 +85,16 @@ export function useCreateNote() {
     emitEvent({
       name: 'NoteCreated',
       note,
-      workspace: nextWorkspace,
       createdAt: new Date(),
       workspaceID: workspace.id,
+      typename: 'Event',
+    });
+
+    emitEvent({
+      name: 'WorkspaceUpdated',
+      nextWorkspace: nextWorkspace,
+      prevWorkspace: workspace,
+      createdAt: new Date(),
       typename: 'Event',
     });
 
@@ -111,9 +118,16 @@ export function useDeleteNote() {
       emitEvent({
         name: 'NoteDeleted',
         note,
-        workspace: nextWorkspace,
         createdAt: new Date(),
         workspaceID: workspace.id,
+        typename: 'Event',
+      });
+
+      emitEvent({
+        name: 'WorkspaceUpdated',
+        nextWorkspace: nextWorkspace,
+        prevWorkspace: workspace,
+        createdAt: new Date(),
         typename: 'Event',
       });
     },
@@ -201,9 +215,16 @@ export function useCreateList() {
     emitEvent({
       name: 'ListCreated',
       list,
-      workspace: nextWorkspace,
       createdAt: new Date(),
       workspaceID: workspace.id,
+      typename: 'Event',
+    });
+
+    emitEvent({
+      name: 'WorkspaceUpdated',
+      nextWorkspace: nextWorkspace,
+      prevWorkspace: workspace,
+      createdAt: new Date(),
       typename: 'Event',
     });
 
@@ -227,9 +248,16 @@ export function useDeleteList() {
       emitEvent({
         name: 'ListDeleted',
         list,
-        workspace: nextWorkspace,
         createdAt: new Date(),
         workspaceID: workspace.id,
+        typename: 'Event',
+      });
+
+      emitEvent({
+        name: 'WorkspaceUpdated',
+        nextWorkspace: nextWorkspace,
+        prevWorkspace: workspace,
+        createdAt: new Date(),
         typename: 'Event',
       });
     },
@@ -295,9 +323,16 @@ export function useCreateListGroup() {
     emitEvent({
       name: 'ListGroupCreated',
       listGroup,
-      workspace: nextWorkspace,
       createdAt: new Date(),
       workspaceID: workspace.id,
+      typename: 'Event',
+    });
+
+    emitEvent({
+      name: 'WorkspaceUpdated',
+      nextWorkspace: nextWorkspace,
+      prevWorkspace: workspace,
+      createdAt: new Date(),
       typename: 'Event',
     });
 
@@ -321,9 +356,16 @@ export function useDeleteListGroup() {
       emitEvent({
         name: 'ListGroupDeleted',
         listGroup,
-        workspace: nextWorkspace,
         createdAt: new Date(),
         workspaceID: workspace.id,
+        typename: 'Event',
+      });
+
+      emitEvent({
+        name: 'WorkspaceUpdated',
+        nextWorkspace: nextWorkspace,
+        prevWorkspace: workspace,
+        createdAt: new Date(),
         typename: 'Event',
       });
     },

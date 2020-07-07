@@ -1,6 +1,6 @@
 export enum RecoilKey {
   // Atoms
-  NotesByID = 'NotesByID',
+  Notes = 'Notes',
   Workspace = 'Workspace',
   Navigation = 'Navigation',
   Events = 'Events',
@@ -20,4 +20,6 @@ export enum StorageKey {
 export enum StorageKeyPrefix {
   Note = 'Note',
   Workspace = 'Workspace',
+  List = 'List',
+  ListGroup = 'ListGroup',
 }

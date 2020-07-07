@@ -50,9 +50,9 @@ export interface Preview {
   imageURL: string;
 }
 
-export type NotesByIDState = { [id: string]: Note };
-export const notesState = atom<NotesByIDState>({
-  key: RecoilKey.NotesByID,
+export type NotesState = { [id: string]: Note };
+export const notesState = atom<NotesState>({
+  key: RecoilKey.Notes,
   default: {},
 });
 

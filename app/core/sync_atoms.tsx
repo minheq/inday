@@ -7,6 +7,7 @@ import {
   ListGroupNameUpdatedEvent,
   ListGroupDeletedEvent,
   ListGroupCreatedEvent,
+  WorkspaceUpdatedEvent,
 } from '../data/events';
 import {
   Event,
@@ -27,25 +28,30 @@ export function SyncAtoms() {
   const setListGroups = useSetRecoilState(listGroupsState);
   const setWorkspace = useSetRecoilState(workspaceState);
 
+  const handleWorkspaceUpdated = React.useCallback(
+    (event: WorkspaceUpdatedEvent) => {
+      const { nextWorkspace } = event;
+
+      setWorkspace(nextWorkspace);
+    },
+    [setWorkspace],
+  );
+
   const handleNoteCreated = React.useCallback(
     (event: NoteCreatedEvent) => {
-      const { note, workspace } = event;
+      const { note } = event;
 
       setNotes((previousNotes) => ({
         ...previousNotes,
         [note.id]: note,
       }));
-
-      setWorkspace(workspace);
     },
-    [setNotes, setWorkspace],
+    [setNotes],
   );
 
   const handleNoteDeleted = React.useCallback(
     (event: NoteDeletedEvent) => {
-      const { note, workspace } = event;
-
-      setWorkspace(workspace);
+      const { note } = event;
 
       setNotes((previousNotes) => {
         const nextNotes = { ...previousNotes };
@@ -55,7 +61,7 @@ export function SyncAtoms() {
         return nextNotes;
       });
     },
-    [setNotes, setWorkspace],
+    [setNotes],
   );
 
   const handleNoteUpdated = React.useCallback(
@@ -72,23 +78,19 @@ export function SyncAtoms() {
 
   const handleListCreated = React.useCallback(
     (event: ListCreatedEvent) => {
-      const { list, workspace } = event;
+      const { list } = event;
 
       setLists((previousLists) => ({
         ...previousLists,
         [list.id]: list,
       }));
-
-      setWorkspace(workspace);
     },
-    [setLists, setWorkspace],
+    [setLists],
   );
 
   const handleListDeleted = React.useCallback(
     (event: ListDeletedEvent) => {
-      const { list, workspace } = event;
-
-      setWorkspace(workspace);
+      const { list } = event;
 
       setLists((previousLists) => {
         const nextLists = { ...previousLists };
@@ -98,7 +100,7 @@ export function SyncAtoms() {
         return nextLists;
       });
     },
-    [setLists, setWorkspace],
+    [setLists],
   );
 
   const handleListNameUpdated = React.useCallback(
@@ -115,23 +117,19 @@ export function SyncAtoms() {
 
   const handleListGroupCreated = React.useCallback(
     (event: ListGroupCreatedEvent) => {
-      const { listGroup, workspace } = event;
+      const { listGroup } = event;
 
       setListGroups((previousListGroups) => ({
         ...previousListGroups,
         [listGroup.id]: listGroup,
       }));
-
-      setWorkspace(workspace);
     },
-    [setListGroups, setWorkspace],
+    [setListGroups],
   );
 
   const handleListGroupDeleted = React.useCallback(
     (event: ListGroupDeletedEvent) => {
-      const { listGroup, workspace } = event;
-
-      setWorkspace(workspace);
+      const { listGroup } = event;
 
       setListGroups((previousListGroupsByID) => {
         const nextListGroups = { ...previousListGroupsByID };
@@ -141,7 +139,7 @@ export function SyncAtoms() {
         return nextListGroups;
       });
     },
-    [setListGroups, setWorkspace],
+    [setListGroups],
   );
 
   const handleListGroupNameUpdated = React.useCallback(
@@ -159,6 +157,8 @@ export function SyncAtoms() {
   const handleEvent = React.useCallback(
     (event: Event) => {
       switch (event.name) {
+        case 'WorkspaceUpdated':
+          return handleWorkspaceUpdated(event);
         case 'NoteCreated':
           return handleNoteCreated(event);
         case 'NoteDeleted':
@@ -182,6 +182,7 @@ export function SyncAtoms() {
       }
     },
     [
+      handleWorkspaceUpdated,
       handleNoteCreated,
       handleNoteDeleted,
       handleNoteUpdated,

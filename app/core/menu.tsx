@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  ScrollView,
-  TextInput,
-  StyleSheet,
-  View,
-  LayoutChangeEvent,
-  LayoutRectangle,
-} from 'react-native';
+import { ScrollView, TextInput, StyleSheet, View } from 'react-native';
 
 import {
   Text,
@@ -18,6 +11,7 @@ import {
   IconName,
   Dialog,
   Popover,
+  PopoverAnchor,
 } from '../components';
 import { Location, useNavigation } from '../data/navigation';
 import { useToggle } from '../hooks/use_toggle';
@@ -239,6 +233,10 @@ function ListMenuItem(props: ListMenuItemProps) {
   const updateListName = useUpdateListName();
   const [measurements, setMeasurements] = React.useState(initialMeasurements);
   const [visible, setVisible] = React.useState(false);
+  const [anchor, setAnchor] = React.useState<PopoverAnchor>({
+    top: 0,
+    left: 0,
+  });
   const menuContext = React.useContext(MenuContext);
   const ref = React.useRef<View>(null);
 
@@ -267,11 +265,20 @@ function ListMenuItem(props: ListMenuItemProps) {
 
   const handlePressMore = React.useCallback(async () => {
     setVisible(true);
-  }, []);
+    setAnchor({
+      top: measurements.y + 28,
+      left: measurements.x + measurements.width - 32,
+    });
+  }, [measurements]);
 
   const handleCloseMore = React.useCallback(async () => {
     setVisible(false);
   }, []);
+
+  const handlePressRename = React.useCallback(() => {
+    setVisible(false);
+    menuContext.onSetRenameListOrListGroupID(list.id);
+  }, [menuContext, list]);
 
   if (menuContext.renameListOrListGroupID === list.id) {
     return (
@@ -282,11 +289,6 @@ function ListMenuItem(props: ListMenuItemProps) {
       />
     );
   }
-
-  const anchor = {
-    top: measurements.y + 28,
-    left: measurements.x + measurements.width - 32,
-  };
 
   return (
     <View ref={ref} onLayout={handleLayout}>
@@ -316,16 +318,22 @@ function ListMenuItem(props: ListMenuItemProps) {
         visible={visible}
         position="bottom-left"
       >
-        <ListMenuItemContextMenu />
+        <ListMenuItemContextMenu onPressRename={handlePressRename} />
       </Popover>
     </View>
   );
 }
 
-function ListMenuItemContextMenu() {
+interface ListMenuItemContextMenuProps {
+  onPressRename: () => void;
+}
+
+function ListMenuItemContextMenu(props: ListMenuItemContextMenuProps) {
+  const { onPressRename } = props;
+
   return (
     <Container width={200} color="content" shape="rounded">
-      <Button>
+      <Button onPress={onPressRename}>
         <Container padding={16}>
           <Text>Rename</Text>
         </Container>

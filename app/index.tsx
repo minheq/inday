@@ -15,54 +15,66 @@ import { SyncAtoms } from './core/sync_atoms';
 import { NoteList } from './core/note_list';
 import { useGetNote, useGetAllNotes } from './data/api';
 import { NoteEditor } from './core/note_editor';
-import { Note, NotesByIDState } from './data/notes';
+import { Note, NotesState } from './data/notes';
 import { WorkspaceState } from './data/workspace';
 import { InitWorkspace } from './core/init_workspace';
 import { useNavigation, Location, NavigationState } from './data/navigation';
 import { NoteListHeader } from './core/note_list_header';
+import { ListsState } from './data/list';
+import { ListGroupsState } from './data/list_group';
 
 type Atoms = (
-  | [RecoilKey.NotesByID, NotesByIDState]
+  | [RecoilKey.Notes, NotesState]
+  | [RecoilKey.Lists, ListsState]
+  | [RecoilKey.ListGroups, ListGroupsState]
   | [RecoilKey.Workspace, WorkspaceState]
   | [RecoilKey.Navigation, NavigationState]
 )[];
+
+function preLoad(keys: string[]) {
+  return async function load<T extends { id: string }>(
+    storageKeyPrefix: string,
+  ): Promise<{ [id: string]: T }> {
+    const objKeys = keys.filter((k) => k.includes(`${storageKeyPrefix}:`));
+    const objEntries = await AsyncStorage.multiGet(objKeys);
+    const obj: { [id: string]: T } = {};
+
+    objEntries.forEach(([, value]) => {
+      if (value) {
+        const val = JSON.parse(value) as T;
+        obj[val.id] = val;
+      }
+    });
+
+    return obj;
+  };
+}
 
 async function init() {
   const atoms: Atoms = [];
 
   const keys = await AsyncStorage.getAllKeys();
+  const load = preLoad(keys);
 
-  const noteKeys = keys.filter((k) => k.includes(`${StorageKeyPrefix.Note}:`));
-  const noteEntries = await AsyncStorage.multiGet(noteKeys);
-  const notes: NotesByIDState = {};
-  noteEntries.forEach(([, value]) => {
-    if (value) {
-      const note = JSON.parse(value) as Note;
-      notes[note.id] = note;
-    }
-  });
-  atoms.push([RecoilKey.NotesByID, notes]);
+  const notes: NotesState = await load(StorageKeyPrefix.Note);
+  atoms.push([RecoilKey.Notes, notes]);
 
-  const workspaceKeys = keys.filter((k) =>
-    k.includes(`${StorageKeyPrefix.Workspace}:`),
-  );
-  const workspaceEntries = await AsyncStorage.multiGet(workspaceKeys);
-  const workspaceList = workspaceEntries
-    .map(([, value]) => value)
-    .filter(Boolean)
-    .map((value) => {
-      if (value === null) {
-        throw new Error('Expected value');
-      }
+  const lists: ListsState = await load(StorageKeyPrefix.List);
+  atoms.push([RecoilKey.Lists, lists]);
 
-      return JSON.parse(value) as Workspace;
-    });
+  const listGroups: ListGroupsState = await load(StorageKeyPrefix.ListGroup);
+  atoms.push([RecoilKey.ListGroups, listGroups]);
 
   const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
-  const workspace = workspaceList.find((w) => w.id === workspaceID) || null;
+  const workspaces: { [id: string]: Workspace } = await load(
+    StorageKeyPrefix.Workspace,
+  );
 
-  if (workspace) {
-    atoms.push([RecoilKey.Workspace, workspace]);
+  if (workspaceID) {
+    const workspace = workspaces[workspaceID];
+    if (workspace) {
+      atoms.push([RecoilKey.Workspace, workspace]);
+    }
   }
 
   const navigation = await AsyncStorage.getItem(StorageKey.Navigation);
