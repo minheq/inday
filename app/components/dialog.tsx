@@ -128,15 +128,15 @@ export function Dialog(props: DialogProps) {
     onRequestClose,
   ]);
 
-  const handlePressOverlay = React.useCallback(() => {
+  const handlePressBackground = React.useCallback(() => {
     onRequestClose();
   }, [onRequestClose]);
 
   const config: PressabilityConfig = React.useMemo(
     () => ({
-      onPress: handlePressOverlay,
+      onPress: handlePressBackground,
     }),
-    [handlePressOverlay],
+    [handlePressBackground],
   );
 
   const eventHandlers = usePressability(config);
@@ -164,7 +164,7 @@ export function Dialog(props: DialogProps) {
           },
         ]}
       >
-        <View style={[styles.overlay]} {...eventHandlers} />
+        <View style={styles.background} {...eventHandlers} />
         <Animated.View
           style={[
             styles.dialog,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
     borderRadius: tokens.radius,
   },
-  overlay: {
+  background: {
     position: 'absolute',
     top: 0,
     left: 0,

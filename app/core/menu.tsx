@@ -1,5 +1,12 @@
 import React from 'react';
-import { ScrollView, TextInput, StyleSheet, View } from 'react-native';
+import {
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  View,
+  LayoutChangeEvent,
+  LayoutRectangle,
+} from 'react-native';
 
 import {
   Text,
@@ -23,6 +30,7 @@ import {
 } from '../data/api';
 import { ListGroup } from '../data/list_group';
 import { tokens } from '../theme';
+import { initialMeasurements, measure } from '../utils/measurements';
 
 interface MenuContext {
   renameListOrListGroupID: string | null;
@@ -106,7 +114,7 @@ function NewListButton() {
     <>
       <Dialog animationType="slide" visible={visible} onRequestClose={setFalse}>
         <Container maxWidth={400}>
-          <Button onPress={handleCreateList}>
+          <Button onPress={handleCreateList} style={styles.newList}>
             <Container padding={16}>
               <Row alignItems="center" expanded>
                 <Icon name="list" size="lg" />
@@ -120,7 +128,7 @@ function NewListButton() {
               </Row>
             </Container>
           </Button>
-          <Button onPress={handleCreateListGroup}>
+          <Button onPress={handleCreateListGroup} style={styles.newListGroup}>
             <Container padding={16}>
               <Row alignItems="center" expanded>
                 <Icon name="layers" size="lg" />
@@ -229,8 +237,10 @@ function ListMenuItem(props: ListMenuItemProps) {
   const { list } = props;
   const navigation = useNavigation();
   const updateListName = useUpdateListName();
-  const [visible, { setTrue, setFalse }] = useToggle();
+  const [measurements, setMeasurements] = React.useState(initialMeasurements);
+  const [visible, setVisible] = React.useState(false);
   const menuContext = React.useContext(MenuContext);
+  const ref = React.useRef<View>(null);
 
   const handlePress = React.useCallback(() => {
     navigation.navigate({
@@ -251,6 +261,18 @@ function ListMenuItem(props: ListMenuItemProps) {
     menuContext.onClear();
   }, [menuContext]);
 
+  const handleLayout = React.useCallback(() => {
+    measure(ref).then((m) => setMeasurements(m));
+  }, []);
+
+  const handlePressMore = React.useCallback(async () => {
+    setVisible(true);
+  }, []);
+
+  const handleCloseMore = React.useCallback(async () => {
+    setVisible(false);
+  }, []);
+
   if (menuContext.renameListOrListGroupID === list.id) {
     return (
       <ListNameEditTextInput
@@ -261,47 +283,50 @@ function ListMenuItem(props: ListMenuItemProps) {
     );
   }
 
+  const anchor = {
+    top: measurements.y + 28,
+    left: measurements.x + measurements.width - 32,
+  };
+
   return (
-    <Container>
-      <Popover
-        visible={visible}
-        onRequestClose={setFalse}
-        content={<ListMenuItemContextMenu />}
-      >
-        {({ ref }) => (
-          <Button onPress={handlePress}>
-            {({ hovered }) => (
-              <Container height={56} padding={16}>
-                <Row alignItems="center" expanded>
-                  <Icon name="list" size="lg" />
-                  <Spacing width={16} />
-                  <Container flex={1}>
-                    <Text>{list.name}</Text>
-                  </Container>
-                  {(hovered || visible) && (
-                    <View ref={ref}>
-                      <Button onPress={setTrue} style={styles.menuItemMore}>
-                        <Container center width={32} height={32}>
-                          <Icon name="more-horizontal" size="lg" />
-                        </Container>
-                      </Button>
-                    </View>
-                  )}
-                </Row>
+    <View ref={ref} onLayout={handleLayout}>
+      <Button onPress={handlePress}>
+        {({ hovered }) => (
+          <Container height={56} padding={16}>
+            <Row alignItems="center" expanded>
+              <Icon name="list" size="lg" />
+              <Spacing width={16} />
+              <Container flex={1}>
+                <Text>{list.name}</Text>
               </Container>
-            )}
-          </Button>
+              {hovered && (
+                <Button onPress={handlePressMore} style={styles.menuItemMore}>
+                  <Container center width={32} height={32}>
+                    <Icon name="more-horizontal" size="lg" />
+                  </Container>
+                </Button>
+              )}
+            </Row>
+          </Container>
         )}
+      </Button>
+      <Popover
+        onRequestClose={handleCloseMore}
+        anchor={anchor}
+        visible={visible}
+        position="bottom-left"
+      >
+        <ListMenuItemContextMenu />
       </Popover>
-    </Container>
+    </View>
   );
 }
 
 function ListMenuItemContextMenu() {
   return (
-    <Container>
+    <Container width={200} color="content" shape="rounded">
       <Button>
-        <Container>
+        <Container padding={16}>
           <Text>Rename</Text>
         </Container>
       </Button>
@@ -328,6 +353,7 @@ function ListNameEditTextInput(props: ListNameEditTextInputProps) {
           value={value}
           onBlur={onBlur}
           onChangeText={onChange}
+          // @ts-ignore
           style={[styles.listNameEditTextInput, { outline: 'none' }]}
         />
       </Row>
@@ -338,13 +364,23 @@ function ListNameEditTextInput(props: ListNameEditTextInputProps) {
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
+    overflow: 'visible',
   },
   scrollViewContainer: {
     flex: 1,
+    overflow: 'visible',
   },
   listNameEditTextInput: {
     flex: 1,
     ...tokens.text.size.md,
+  },
+  newList: {
+    borderTopLeftRadius: tokens.radius,
+    borderTopRightRadius: tokens.radius,
+  },
+  newListGroup: {
+    borderBottomLeftRadius: tokens.radius,
+    borderBottomRightRadius: tokens.radius,
   },
   menuItemMore: {
     borderRadius: 999,
