@@ -43,7 +43,7 @@ export function Text(props: TextProps) {
       style={[
         styles[align],
         bold && styles.bold,
-        theme.text.size[size],
+        tokens.text.size[size],
         {
           color: theme.text.color[color],
           textDecorationLine: decoration,

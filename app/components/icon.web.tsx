@@ -5,7 +5,7 @@ import * as Octicon from 'react-icons/go';
 import * as FontAwesome from 'react-icons/fa';
 import * as AntDesign from 'react-icons/ai';
 
-import { useTheme } from '../theme';
+import { useTheme, tokens } from '../theme';
 
 import { IconProps } from './icon';
 
@@ -23,7 +23,7 @@ function CustomIcon(props: IconProps) {
   const theme = useTheme();
 
   const iconColor = theme.text.color[color];
-  const iconSize = theme.text.size[size].fontSize;
+  const iconSize = tokens.text.size[size].fontSize;
 
   switch (name) {
     case 'quote':
@@ -59,7 +59,7 @@ export const Icon = (props: IconProps) => {
   return (
     <IconTag
       color={theme.text.color[color]}
-      size={theme.text.size[size].fontSize}
+      size={tokens.text.size[size].fontSize}
     />
   );
 };

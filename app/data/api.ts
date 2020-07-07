@@ -7,12 +7,14 @@ import { useEventEmitter, eventsState, Event } from './events';
 import {
   allNotesQuery,
   noteQuery,
-  notesByIDState,
+  notesState,
   Note,
   Content,
   Preview,
 } from './notes';
 import { workspaceState, Workspace, allListsQuery } from './workspace';
+import { List, listsState } from './list';
+import { ListGroup, listGroupsState } from './list_group';
 
 export function useGetAllNotes() {
   return useRecoilValue(allNotesQuery);
@@ -103,7 +105,7 @@ export function useDeleteNote() {
     (note: Note) => {
       const nextWorkspace: Workspace = {
         ...workspace,
-        all: [...workspace.all, note.id],
+        all: workspace.all.filter((id) => id !== note.id),
       };
 
       emitEvent({
@@ -127,14 +129,14 @@ export interface UpdateNoteContentInput {
 }
 
 export function useUpdateNoteContent() {
-  const notesByID = useRecoilValue(notesByIDState);
+  const notes = useRecoilValue(notesState);
   const workspace = useGetWorkspace();
   const emitEvent = useEmitEvent();
 
   const updateNoteContent = React.useCallback(
     (input: UpdateNoteContentInput) => {
       const { id, content } = input;
-      const prevNote = notesByID[id];
+      const prevNote = notes[id];
       const preview = toPreview(content);
       const nextNote: Note = {
         ...prevNote,
@@ -151,7 +153,7 @@ export function useUpdateNoteContent() {
         typename: 'Event',
       });
     },
-    [notesByID, emitEvent],
+    [notes, emitEvent, workspace],
   );
 
   return updateNoteContent;
@@ -177,4 +179,191 @@ function toPreview(content: Content): Preview {
     description: '',
     imageURL: '',
   };
+}
+
+export function useCreateList() {
+  const emitEvent = useEmitEvent();
+  const workspace = useGetWorkspace();
+
+  const createList = React.useCallback(() => {
+    const list: List = {
+      id: v4(),
+      name: '',
+      workspaceID: workspace.id,
+      typename: 'List',
+    };
+
+    const nextWorkspace: Workspace = {
+      ...workspace,
+      lists: [...workspace.lists, { type: 'List', id: list.id }],
+    };
+
+    emitEvent({
+      name: 'ListCreated',
+      list,
+      workspace: nextWorkspace,
+      createdAt: new Date(),
+      workspaceID: workspace.id,
+      typename: 'Event',
+    });
+
+    return list;
+  }, [emitEvent, workspace]);
+
+  return createList;
+}
+
+export function useDeleteList() {
+  const emitEvent = useEmitEvent();
+  const workspace = useGetWorkspace();
+
+  const deleteList = React.useCallback(
+    (list: List) => {
+      const nextWorkspace: Workspace = {
+        ...workspace,
+        lists: workspace.lists.filter((l) => l.id !== list.id),
+      };
+
+      emitEvent({
+        name: 'ListDeleted',
+        list,
+        workspace: nextWorkspace,
+        createdAt: new Date(),
+        workspaceID: workspace.id,
+        typename: 'Event',
+      });
+    },
+    [workspace, emitEvent],
+  );
+
+  return deleteList;
+}
+
+export interface UpdateListNameInput {
+  id: string;
+  name: string;
+}
+
+export function useUpdateListName() {
+  const lists = useRecoilValue(listsState);
+  const workspace = useGetWorkspace();
+  const emitEvent = useEmitEvent();
+
+  const updateList = React.useCallback(
+    (input: UpdateListNameInput) => {
+      const { id, name } = input;
+      const prevList = lists[id];
+
+      const nextList: List = {
+        ...prevList,
+        name,
+      };
+
+      emitEvent({
+        name: 'ListNameUpdated',
+        prevList,
+        nextList,
+        createdAt: new Date(),
+        workspaceID: workspace.id,
+        typename: 'Event',
+      });
+    },
+    [lists, emitEvent, workspace],
+  );
+
+  return updateList;
+}
+
+export function useCreateListGroup() {
+  const emitEvent = useEmitEvent();
+  const workspace = useGetWorkspace();
+
+  const createListGroup = React.useCallback(() => {
+    const listGroup: ListGroup = {
+      id: v4(),
+      name: '',
+      listIDs: [],
+      workspaceID: workspace.id,
+      typename: 'ListGroup',
+    };
+
+    const nextWorkspace: Workspace = {
+      ...workspace,
+      lists: [...workspace.lists, { type: 'ListGroup', id: listGroup.id }],
+    };
+
+    emitEvent({
+      name: 'ListGroupCreated',
+      listGroup,
+      workspace: nextWorkspace,
+      createdAt: new Date(),
+      workspaceID: workspace.id,
+      typename: 'Event',
+    });
+
+    return listGroup;
+  }, [emitEvent, workspace]);
+
+  return createListGroup;
+}
+
+export function useDeleteListGroup() {
+  const emitEvent = useEmitEvent();
+  const workspace = useGetWorkspace();
+
+  const deleteListGroup = React.useCallback(
+    (listGroup: ListGroup) => {
+      const nextWorkspace: Workspace = {
+        ...workspace,
+        lists: workspace.lists.filter((l) => l.id !== listGroup.id),
+      };
+
+      emitEvent({
+        name: 'ListGroupDeleted',
+        listGroup,
+        workspace: nextWorkspace,
+        createdAt: new Date(),
+        workspaceID: workspace.id,
+        typename: 'Event',
+      });
+    },
+    [workspace, emitEvent],
+  );
+
+  return deleteListGroup;
+}
+
+export interface UpdateListGroupNameInput {
+  id: string;
+  name: string;
+}
+
+export function useUpdateListGroupName() {
+  const listGroups = useRecoilValue(listGroupsState);
+  const workspace = useGetWorkspace();
+  const emitEvent = useEmitEvent();
+
+  const updateListGroup = React.useCallback(
+    (input: UpdateListGroupNameInput) => {
+      const { id, name } = input;
+      const prevListGroup = listGroups[id];
+
+      const nextListGroup: ListGroup = {
+        ...prevListGroup,
+        name,
+      };
+
+      emitEvent({
+        name: 'ListGroupNameUpdated',
+        prevListGroup,
+        nextListGroup,
+        createdAt: new Date(),
+        workspaceID: workspace.id,
+        typename: 'Event',
+      });
+    },
+    [listGroups, emitEvent, workspace],
+  );
+
+  return updateListGroup;
 }

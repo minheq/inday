@@ -1,7 +1,7 @@
 import { RecoilState } from 'recoil';
 import { workspaceState } from './workspace';
 import { navigationState } from './navigation';
-import { notesByIDState } from './notes';
+import { notesState } from './notes';
 import { RecoilKey } from './constants';
 
 export function getAtomWithKey(key: RecoilKey): RecoilState<any> {
@@ -11,7 +11,7 @@ export function getAtomWithKey(key: RecoilKey): RecoilState<any> {
     case RecoilKey.Navigation:
       return navigationState;
     case RecoilKey.NotesByID:
-      return notesByIDState;
+      return notesState;
     default:
       throw new Error('Invalid atom key');
   }

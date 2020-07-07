@@ -8,7 +8,7 @@ export const NavigationAtomKey = 'Navigation';
 export enum Location {
   All = 'All',
   Inbox = 'Inbox',
-  Daily = 'Daily',
+  Today = 'Today',
   List = 'List',
 }
 
@@ -20,7 +20,7 @@ export const navigationState = atom<NavigationState>({
 export type NavigationState =
   | { location: Location.All; noteID: string }
   | { location: Location.Inbox; noteID: string }
-  | { location: Location.Daily; noteID: string }
+  | { location: Location.Today; noteID: string }
   | {
       location: Location.List;
       listID: string;

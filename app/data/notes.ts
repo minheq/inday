@@ -51,7 +51,7 @@ export interface Preview {
 }
 
 export type NotesByIDState = { [id: string]: Note };
-export const notesByIDState = atom<NotesByIDState>({
+export const notesState = atom<NotesByIDState>({
   key: RecoilKey.NotesByID,
   default: {},
 });
@@ -59,7 +59,7 @@ export const notesByIDState = atom<NotesByIDState>({
 export const allNotesQuery = selector({
   key: RecoilKey.AllNotes,
   get: ({ get }) => {
-    const notesByID = get(notesByIDState);
+    const notes = get(notesState);
     const workspace = get(workspaceState);
 
     if (workspace === null) {
@@ -67,7 +67,7 @@ export const allNotesQuery = selector({
     }
 
     return workspace.all.map((id) => {
-      const note = notesByID[id];
+      const note = notes[id];
 
       if (note === undefined) {
         throw new Error(`Note out of sync for id=${id}`);
@@ -81,8 +81,8 @@ export const allNotesQuery = selector({
 export const noteQuery = selectorFamily<Note | null, string>({
   key: RecoilKey.AllNotes,
   get: (noteID: string) => ({ get }) => {
-    const notesByID = get(notesByIDState);
-    const note = notesByID[noteID];
+    const notes = get(notesState);
+    const note = notes[noteID];
 
     if (note === undefined) {
       return null;

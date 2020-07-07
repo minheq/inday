@@ -18,7 +18,7 @@ interface PopoverChildrenProps {
 
 interface PopoverProps {
   autoFocus?: boolean;
-  open?: boolean;
+  visible?: boolean;
   onRequestClose?: () => void;
   content?: React.ReactNode;
   position?: PopoverPosition;
@@ -28,12 +28,13 @@ interface PopoverProps {
 export function Popover(props: PopoverProps) {
   const {
     autoFocus,
-    open,
+    visible,
     content,
     children,
     position = 'bottom-left',
+    onRequestClose = () => {},
   } = props;
-  const fade = React.useRef(new Animated.Value(open ? 1 : 0)).current;
+  const fade = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
   const popoverRef = React.useRef<View | null>(null);
   const openerRef = React.useRef<View | null>(null);
 
@@ -48,25 +49,13 @@ export function Popover(props: PopoverProps) {
   //   [onRequestClose],
   // );
 
-  // const handleBlur = React.useCallback(
-  //   (event: React.FocusEvent) => {
-  //     if (
-  //       // @ts-ignore: if an element was pressed within the popover
-  //       !event.currentTarget?.contains(event.relatedTarget) &&
-  //       // @ts-ignore: if the press was on element within the opener
-  //       !openerRef.current?.contains(event.relatedTarget) &&
-  //       // if the press was on the opener
-  //       event.relatedTarget !== openerRef.current
-  //     ) {
-  //       onRequestClose();
-  //     }
-  //   },
-  //   [onRequestClose],
-  // );
+  const handleBlur = React.useCallback(() => {
+    onRequestClose();
+  }, [onRequestClose]);
 
   const popover = usePopover({
     autoFocus,
-    open,
+    visible,
     openerRef,
     popoverRef,
     position,
@@ -87,6 +76,7 @@ export function Popover(props: PopoverProps) {
         // @ts-ignore
         ref={popoverRef}
         accessible
+        onBlur={handleBlur}
         style={[
           styles.content,
           popover.layout,
@@ -113,7 +103,7 @@ const styles = StyleSheet.create({
 
 interface UsePopoverProps {
   autoFocus?: boolean;
-  open?: boolean;
+  visible?: boolean;
   padding?: number;
   position?: PopoverPosition;
   popoverRef: React.MutableRefObject<View | null>;
@@ -156,21 +146,21 @@ const initialLayout = {
 
 export function usePopover(props: UsePopoverProps): PopoverData {
   const {
-    autoFocus = false,
-    open = false,
+    autoFocus = true,
+    visible = false,
     openerRef,
     popoverRef,
     position = 'top-center',
     padding = 4,
   } = props;
   const [state, setState] = React.useState<PopoverState>({
-    visible: open,
-    opacity: open ? 1 : 0,
+    visible: visible,
+    opacity: visible ? 1 : 0,
     layout: initialLayout,
   });
 
   React.useEffect(() => {
-    if (open) {
+    if (visible) {
       setState({ visible: true, opacity: 0, layout: initialLayout });
 
       Promise.all([measure(openerRef), measure(popoverRef)]).then((result) => {
@@ -196,7 +186,7 @@ export function usePopover(props: UsePopoverProps): PopoverData {
     } else {
       setState({ visible: false, opacity: 0, layout: initialLayout });
     }
-  }, [open, position, openerRef, popoverRef, padding, autoFocus]);
+  }, [visible, position, openerRef, popoverRef, padding, autoFocus]);
 
   return {
     visible: state.visible,

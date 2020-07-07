@@ -1,17 +1,35 @@
 import React from 'react';
 import { Animated, ViewStyle, StyleProp } from 'react-native';
-import { Pressable } from './pressable';
+import { Pressable, PressableChildrenProps } from './pressable';
 import { useTheme } from '../theme';
+
+type ButtonVariant = 'filled' | 'flat';
+type ButtonColor = 'default' | 'primary';
 
 interface ButtonProps {
   onPress?: () => void;
-  children?: React.ReactNode;
   disabled?: boolean;
-  style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>;
+  variant?: ButtonVariant;
+  color?: ButtonColor;
+  children?:
+    | React.ReactNode
+    | ((props: PressableChildrenProps) => React.ReactNode);
+  style?:
+    | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
+    | ((
+        props: PressableChildrenProps,
+      ) => Animated.WithAnimatedValue<StyleProp<ViewStyle>>);
 }
 
 export function Button(props: ButtonProps) {
-  const { onPress = () => {}, disabled, style, children } = props;
+  const {
+    onPress = () => {},
+    disabled,
+    style,
+    variant = 'flat',
+    color = 'default',
+    children,
+  } = props;
   const background = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
@@ -41,8 +59,7 @@ export function Button(props: ButtonProps) {
         ];
       }}
       onPress={onPress}
-    >
-      {children}
-    </Pressable>
+      children={children}
+    />
   );
 }

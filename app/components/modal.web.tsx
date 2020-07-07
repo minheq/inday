@@ -82,6 +82,7 @@ export function Modal(props: ModalProps) {
       onAfterClose={onDismiss}
       isOpen={internalVisible}
       onRequestClose={onRequestClose}
+      shouldReturnFocusAfterClose={false}
       style={{
         content: webStyles.content,
         overlay: webStyles.overlay,

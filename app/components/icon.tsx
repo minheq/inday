@@ -5,7 +5,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-import { TextColor, TextSize, useTheme } from '../theme';
+import { TextColor, TextSize, useTheme, tokens } from '../theme';
 
 export interface IconProps {
   /**
@@ -304,7 +304,7 @@ function CustomIcon(props: IconProps) {
   const theme = useTheme();
 
   const iconColor = theme.text.color[color];
-  const iconSize = theme.text.size[size].fontSize;
+  const iconSize = tokens.text.size[size].fontSize;
 
   switch (name) {
     case 'quote':
@@ -338,7 +338,7 @@ export function Icon(props: IconProps) {
     <Feather
       name={name}
       color={theme.text.color[color]}
-      size={theme.text.size[size].fontSize}
+      size={tokens.text.size[size].fontSize}
     />
   );
 }

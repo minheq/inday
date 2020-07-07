@@ -18,7 +18,6 @@ interface PressableProps extends PressabilityConfig {
   children?:
     | React.ReactNode
     | ((props: PressableChildrenProps) => React.ReactNode);
-  disabled?: boolean;
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
     | ((

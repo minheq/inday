@@ -34,14 +34,14 @@ async function init() {
 
   const noteKeys = keys.filter((k) => k.includes(`${StorageKeyPrefix.Note}:`));
   const noteEntries = await AsyncStorage.multiGet(noteKeys);
-  const notesByID: NotesByIDState = {};
+  const notes: NotesByIDState = {};
   noteEntries.forEach(([, value]) => {
     if (value) {
       const note = JSON.parse(value) as Note;
-      notesByID[note.id] = note;
+      notes[note.id] = note;
     }
   });
-  atoms.push([RecoilKey.NotesByID, notesByID]);
+  atoms.push([RecoilKey.NotesByID, notes]);
 
   const workspaceKeys = keys.filter((k) =>
     k.includes(`${StorageKeyPrefix.Workspace}:`),
@@ -174,7 +174,7 @@ function NoteListSwitch() {
       return <AllNoteList />;
     case Location.Inbox:
       return <AllNoteList />;
-    case Location.Daily:
+    case Location.Today:
       return <AllNoteList />;
     case Location.List:
       return <AllNoteList />;

@@ -32,11 +32,42 @@ interface ContainerColors {
 
 export type ContainerColor = keyof ContainerColors;
 
-export const tokens = {
+export interface Tokens {
+  radius: number;
+  fontFamily: string;
+  text: {
+    size: TextSizes;
+  };
+}
+export const tokens: Tokens = {
   radius: 8,
   fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI",
   "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
   "Helvetica Neue", sans-serif`,
+  text: {
+    size: {
+      xl: {
+        fontSize: 31.25,
+        lineHeight: 41,
+      },
+      lg: {
+        fontSize: 24,
+        lineHeight: 32,
+      },
+      md: {
+        fontSize: 16,
+        lineHeight: 24,
+      },
+      sm: {
+        fontSize: 14,
+        lineHeight: 18,
+      },
+      xs: {
+        fontSize: 12,
+        lineHeight: 16,
+      },
+    },
+  },
 };
 
 interface ButtonAppearance {
@@ -52,7 +83,6 @@ interface Theme {
   };
   text: {
     color: TextColors;
-    size: TextSizes;
   };
   button: {
     primary: ButtonAppearance;
@@ -95,28 +125,6 @@ const lightTheme: Theme = {
       success: 'string',
       error: 'string',
       white: 'white',
-    },
-    size: {
-      xl: {
-        fontSize: 31.25,
-        lineHeight: 41,
-      },
-      lg: {
-        fontSize: 24,
-        lineHeight: 32,
-      },
-      md: {
-        fontSize: 16,
-        lineHeight: 24,
-      },
-      sm: {
-        fontSize: 14,
-        lineHeight: 18,
-      },
-      xs: {
-        fontSize: 12,
-        lineHeight: 16,
-      },
     },
   },
   button: {
