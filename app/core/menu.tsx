@@ -297,38 +297,36 @@ function ListMenuItem(props: ListMenuItemProps) {
     menuContext.onSetRenameListOrListGroupID(list.id);
   }, [menuContext, list]);
 
-  if (menuContext.renameListOrListGroupID === list.id) {
-    return (
-      <ListNameEditTextInput
-        value={list.name}
-        onChange={handleChange}
-        onBlur={handleBlur}
-      />
-    );
-  }
-
   return (
     <View ref={ref} onLayout={handleLayout}>
-      <Button onPress={handlePress}>
-        {({ hovered }) => (
-          <Container height={56} padding={16}>
-            <Row alignItems="center" expanded>
-              <Icon name="list" size="lg" />
-              <Spacing width={16} />
-              <Container flex={1}>
-                <Text>{list.name}</Text>
-              </Container>
-              {hovered && (
-                <Button onPress={handlePressMore} style={styles.menuItemMore}>
-                  <Container center width={32} height={32}>
-                    <Icon name="more-horizontal" size="lg" />
-                  </Container>
-                </Button>
-              )}
-            </Row>
-          </Container>
-        )}
-      </Button>
+      {menuContext.renameListOrListGroupID === list.id ? (
+        <ListNameEditTextInput
+          value={list.name}
+          onChange={handleChange}
+          onBlur={handleBlur}
+        />
+      ) : (
+        <Button onPress={handlePress}>
+          {({ hovered }) => (
+            <Container height={56} padding={16}>
+              <Row alignItems="center" expanded>
+                <Icon name="list" size="lg" />
+                <Spacing width={16} />
+                <Container flex={1}>
+                  <Text>{list.name}</Text>
+                </Container>
+                {hovered && (
+                  <Button onPress={handlePressMore} style={styles.menuItemMore}>
+                    <Container center width={32} height={32}>
+                      <Icon name="more-horizontal" size="lg" />
+                    </Container>
+                  </Button>
+                )}
+              </Row>
+            </Container>
+          )}
+        </Button>
+      )}
       <Popover
         onRequestClose={handleCloseMore}
         anchor={anchor}
