@@ -34,7 +34,7 @@ type Atoms = (
 function preLoad(keys: string[]) {
   return async function load<T extends { id: string }>(
     storageKeyPrefix: string,
-  ): Promise<{ [id: string]: T }> {
+  ): Promise<{ [id: string]: T | undefined }> {
     const objKeys = keys.filter((k) => k.includes(`${storageKeyPrefix}:`));
     const objEntries = await AsyncStorage.multiGet(objKeys);
     const obj: { [id: string]: T } = {};
@@ -66,7 +66,7 @@ async function init() {
   atoms.push([RecoilKey.ListGroups, listGroups]);
 
   const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
-  const workspaces: { [id: string]: Workspace } = await load(
+  const workspaces: { [id: string]: Workspace | undefined } = await load(
     StorageKeyPrefix.Workspace,
   );
 

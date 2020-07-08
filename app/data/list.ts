@@ -8,7 +8,7 @@ export interface List {
   typename: 'List';
 }
 
-export type ListsState = { [id: string]: List };
+export type ListsState = { [id: string]: List | undefined };
 export const listsState = atom<ListsState>({
   key: RecoilKey.Lists,
   default: {},

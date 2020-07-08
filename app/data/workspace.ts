@@ -27,20 +27,29 @@ export const workspaceState = atom<WorkspaceState>({
 export const allListsQuery = selector({
   key: RecoilKey.AllLists,
   get: ({ get }) => {
-    const listsByID = get(listsState);
-    const listGroupsByID = get(listGroupsState);
+    const lists = get(listsState);
+    const listGroups = get(listGroupsState);
     const workspace = get(workspaceState);
 
     if (workspace === null) {
       throw new Error('Workspace not found');
     }
 
-    return workspace.lists.map((list) => {
-      if (list.type === 'List') {
-        return listsByID[list.id];
+    return workspace.lists.map((listSource) => {
+      if (listSource.type === 'List') {
+        const list = lists[listSource.id];
+        if (list === undefined) {
+          throw new Error('List not found');
+        }
+
+        return list;
       }
 
-      return listGroupsByID[list.id];
+      const listGroup = listGroups[listSource.id];
+      if (listGroup === undefined) {
+        throw new Error('ListGroup not found');
+      }
+      return listGroup;
     });
   },
 });

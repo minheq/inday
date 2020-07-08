@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   // @ts-ignore
   disabled: {
     ...(Platform.OS === 'web' && {
-      cursor: 'not-allowed',
+      cursor: 'auto',
     }),
   },
 });

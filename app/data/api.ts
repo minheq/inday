@@ -14,7 +14,7 @@ import {
 } from './notes';
 import { workspaceState, Workspace, allListsQuery } from './workspace';
 import { List, listsState } from './list';
-import { ListGroup, listGroupsState } from './list_group';
+import { ListGroup, listGroupsState, listGroupQuery } from './list_group';
 
 export function useGetAllNotes() {
   return useRecoilValue(allNotesQuery);
@@ -26,6 +26,10 @@ export function useGetNote(noteID: string) {
 
 export function useGetLists() {
   return useRecoilValue(allListsQuery);
+}
+
+export function useGetListGroupLists(listGroupID: string) {
+  return useRecoilValue(listGroupQuery(listGroupID));
 }
 
 export function useGetWorkspace() {
@@ -151,6 +155,9 @@ export function useUpdateNoteContent() {
     (input: UpdateNoteContentInput) => {
       const { id, content } = input;
       const prevNote = notes[id];
+      if (prevNote === undefined) {
+        throw new Error('Note not found');
+      }
       const preview = toPreview(content);
       const nextNote: Note = {
         ...prevNote,
@@ -282,6 +289,10 @@ export function useUpdateListName() {
       const { id, name } = input;
       const prevList = lists[id];
 
+      if (prevList === undefined) {
+        throw new Error('List not found');
+      }
+
       const nextList: List = {
         ...prevList,
         name,
@@ -389,7 +400,9 @@ export function useUpdateListGroupName() {
     (input: UpdateListGroupNameInput) => {
       const { id, name } = input;
       const prevListGroup = listGroups[id];
-
+      if (prevListGroup === undefined) {
+        throw new Error('ListGroup not found');
+      }
       const nextListGroup: ListGroup = {
         ...prevListGroup,
         name,

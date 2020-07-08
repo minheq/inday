@@ -131,8 +131,8 @@ export function SyncAtoms() {
     (event: ListGroupDeletedEvent) => {
       const { listGroup } = event;
 
-      setListGroups((previousListGroupsByID) => {
-        const nextListGroups = { ...previousListGroupsByID };
+      setListGroups((previousListGroups) => {
+        const nextListGroups = { ...previousListGroups };
 
         delete nextListGroups[listGroup.id];
 
@@ -146,8 +146,8 @@ export function SyncAtoms() {
     (event: ListGroupNameUpdatedEvent) => {
       const { nextListGroup } = event;
 
-      setListGroups((previousListGroupsByID) => ({
-        ...previousListGroupsByID,
+      setListGroups((previousListGroups) => ({
+        ...previousListGroups,
         [nextListGroup.id]: nextListGroup,
       }));
     },
