@@ -10,7 +10,6 @@ export * from './checkbox';
 export * from './switch';
 export * from './popover';
 export * from './content';
-export * from './overlay';
 export * from './text_input';
 export * from './icon';
 export * from './segmented_control';

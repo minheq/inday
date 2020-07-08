@@ -25,6 +25,10 @@ import {
 import { ListGroup } from '../data/list_group';
 import { tokens } from '../theme';
 import { initialMeasurements, measure } from '../utils/measurements';
+import {
+  useContextMenu,
+  ContextMenuCoordinate,
+} from '../hooks/use_context_menu';
 
 interface MenuContext {
   renameListOrListGroupID: string | null;
@@ -234,8 +238,8 @@ function ListMenuItem(props: ListMenuItemProps) {
   const [measurements, setMeasurements] = React.useState(initialMeasurements);
   const [visible, setVisible] = React.useState(false);
   const [anchor, setAnchor] = React.useState<PopoverAnchor>({
-    top: 0,
-    left: 0,
+    y: 0,
+    x: 0,
   });
   const menuContext = React.useContext(MenuContext);
   const ref = React.useRef<View>(null);
@@ -266,10 +270,23 @@ function ListMenuItem(props: ListMenuItemProps) {
   const handlePressMore = React.useCallback(async () => {
     setVisible(true);
     setAnchor({
-      top: measurements.y + 28,
-      left: measurements.x + measurements.width - 32,
+      y: measurements.y + 28,
+      x: measurements.x + measurements.width - 32,
     });
   }, [measurements]);
+
+  const handleOpenContextMenu = React.useCallback(
+    (coordinate: ContextMenuCoordinate) => {
+      setVisible(true);
+      setAnchor({
+        y: coordinate.y,
+        x: coordinate.x,
+      });
+    },
+    [],
+  );
+
+  useContextMenu({ ref, onOpen: handleOpenContextMenu });
 
   const handleCloseMore = React.useCallback(async () => {
     setVisible(false);
@@ -316,7 +333,7 @@ function ListMenuItem(props: ListMenuItemProps) {
         onRequestClose={handleCloseMore}
         anchor={anchor}
         visible={visible}
-        position="bottom-left"
+        placement="bottom-right"
       >
         <ListMenuItemContextMenu onPressRename={handlePressRename} />
       </Popover>
@@ -332,10 +349,10 @@ function ListMenuItemContextMenu(props: ListMenuItemContextMenuProps) {
   const { onPressRename } = props;
 
   return (
-    <Container width={200} color="content" shape="rounded">
+    <Container width={160} color="content" shape="rounded">
       <Button onPress={onPressRename}>
-        <Container padding={16}>
-          <Text>Rename</Text>
+        <Container padding={8}>
+          <Text size="sm">Rename</Text>
         </Container>
       </Button>
     </Container>

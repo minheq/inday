@@ -3,7 +3,7 @@ import { RecoilRoot, MutableSnapshot } from 'recoil';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import { ThemeProvider, useTheme } from './theme';
-import { Row, Text, Container, OverlayProvider } from './components';
+import { Row, Text, Container } from './components';
 import { Menu } from './core/menu';
 import { DragDropProvider } from './drag_drop/drag_drop_provider';
 import { ErrorBoundary } from './core/error_boundary';

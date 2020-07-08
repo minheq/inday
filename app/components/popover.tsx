@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { measure, initialMeasurements } from '../utils/measurements';
+import { measure } from '../utils/measurements';
 import { useTheme, tokens } from '../theme';
 import { Modal } from './modal';
 import { PressabilityConfig, usePressability } from './pressability';
 
-export type PopoverPosition =
+export type PopoverPlacement =
   | 'top-center'
   | 'top-left'
   | 'top-right'
@@ -15,28 +15,21 @@ export type PopoverPosition =
   | 'bottom-left'
   | 'bottom-right';
 
-export type PopoverAnchor = { top: number; left: number };
+export type PopoverAnchor = { y: number; x: number };
 
 interface PopoverProps {
   visible?: boolean;
   onRequestClose?: () => void;
   children: React.ReactNode;
-  position?: PopoverPosition;
+  placement?: PopoverPlacement;
   anchor: PopoverAnchor;
 }
 
 interface PopoverLayout {
-  left: number;
   top: number;
-  paddingLeft: number;
-  paddingRight: number;
-  paddingBottom: number;
-  paddingTop: number;
-}
-
-interface PopoverState {
-  visible: boolean;
-  layout: PopoverLayout;
+  left: number;
+  fromX: number;
+  fromY: number;
 }
 
 interface Dimensions {
@@ -44,55 +37,87 @@ interface Dimensions {
   width: number;
 }
 
-const initialLayout = {
-  left: 0,
+const initialLayout: PopoverLayout = {
   top: 0,
-  paddingLeft: 0,
-  paddingRight: 0,
-  paddingBottom: 0,
-  paddingTop: 0,
+  left: 0,
+  fromX: 0,
+  fromY: 0,
 };
 
 export function Popover(props: PopoverProps) {
   const {
     visible = false,
-    position = 'top-center',
+    placement = 'top-center',
     onRequestClose = () => {},
     anchor,
     children,
   } = props;
   const show = React.useRef(new Animated.Value(0)).current;
+  const position = React.useRef(new Animated.ValueXY()).current;
   const ref = React.useRef<View | null>(null);
-  const [measurements, setMeasurements] = React.useState(initialMeasurements);
   const [layout, setLayout] = React.useState(initialLayout);
   const [ready, setReady] = React.useState(false);
+  const [internalVisible, setInternalVisible] = React.useState(false);
   const theme = useTheme();
 
   React.useEffect(() => {
-    if (measurements.height !== 0) {
-      const l = calculatePopoverLayout(anchor, measurements, position);
-      setLayout(l);
-      setReady(true);
-    }
-  }, [measurements, visible, anchor, position]);
+    if (visible === true) {
+      if (internalVisible === false) {
+        setInternalVisible(true);
+      }
 
-  React.useEffect(() => {
-    if (ready) {
-      Animated.spring(show, {
-        toValue: visible ? 1 : 0,
-        bounciness: 0,
-        useNativeDriver: true,
-      }).start();
+      if (ready) {
+        position.setValue({
+          x: layout.fromX,
+          y: layout.fromY,
+        });
+
+        Animated.parallel([
+          Animated.spring(show, {
+            toValue: 1,
+            bounciness: tokens.animation.spring.bounciness,
+            speed: 48,
+            useNativeDriver: true,
+          }),
+          Animated.spring(position, {
+            toValue: { x: 0, y: 0 },
+            bounciness: tokens.animation.spring.bounciness,
+            speed: 48,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
+    } else {
+      Animated.parallel([
+        Animated.spring(show, {
+          toValue: 0,
+          bounciness: tokens.animation.spring.bounciness,
+          speed: 48,
+          useNativeDriver: true,
+        }),
+        Animated.spring(position, {
+          toValue: { x: layout.fromX, y: layout.fromY },
+          bounciness: tokens.animation.spring.bounciness,
+          speed: 48,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setInternalVisible(false);
+      });
     }
-  }, [visible, show, ready]);
+  }, [visible, show, ready, layout, position, internalVisible]);
 
   const handlePressBackground = React.useCallback(() => {
     onRequestClose();
   }, [onRequestClose]);
 
   const handleLayout = React.useCallback(() => {
-    measure(ref).then((m) => setMeasurements(m));
-  }, []);
+    measure(ref).then((measurements) => {
+      const l = calculatePopoverLayout(anchor, measurements, placement);
+      setLayout(l);
+      setReady(true);
+    });
+  }, [anchor, placement]);
 
   const config: PressabilityConfig = React.useMemo(
     () => ({
@@ -105,9 +130,9 @@ export function Popover(props: PopoverProps) {
 
   return (
     <Modal
-      visible={visible}
+      visible={internalVisible}
       onRequestClose={onRequestClose}
-      animationType="fade"
+      animationType="none"
       transparent
     >
       <View style={styles.base}>
@@ -117,10 +142,18 @@ export function Popover(props: PopoverProps) {
           ref={ref}
           onLayout={handleLayout}
           style={[
-            layout,
             styles.popover,
             theme.container.shadow,
-            { opacity: show },
+            {
+              top: layout.top,
+              left: layout.left,
+              transform: [
+                { scale: show },
+                { translateX: position.x },
+                { translateY: position.y },
+              ],
+              opacity: show,
+            },
           ]}
         >
           {children}
@@ -133,53 +166,22 @@ export function Popover(props: PopoverProps) {
 function calculatePopoverLayout(
   anchor: PopoverAnchor,
   dimensions: Dimensions,
-  position: PopoverPosition,
+  placement: PopoverPlacement,
 ): PopoverLayout {
-  switch (position) {
-    case 'top-center':
-      return {
-        top: -dimensions.height,
-        left: dimensions.width / 2,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingBottom: 0,
-        paddingTop: 0,
-      };
+  switch (placement) {
     case 'bottom-right':
       return {
-        top: anchor.top,
-        left: 0 - dimensions.width,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingBottom: 0,
-        paddingTop: 0,
-      };
-    case 'bottom-left':
-      return {
-        top: anchor.top,
-        left: anchor.left,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingBottom: 0,
-        paddingTop: 0,
-      };
-    case 'bottom-center':
-      return {
-        top: anchor.top,
-        left: dimensions.width / 2,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingBottom: 0,
-        paddingTop: 0,
+        top: anchor.y,
+        left: anchor.x,
+        fromX: -dimensions.width,
+        fromY: -dimensions.height,
       };
     default:
       return {
-        top: -dimensions.height,
+        top: 0,
         left: 0,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingBottom: 0,
-        paddingTop: 0,
+        fromX: 0,
+        fromY: 0,
       };
   }
 }

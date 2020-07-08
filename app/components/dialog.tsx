@@ -30,7 +30,7 @@ export function Dialog(props: DialogProps) {
   } = props;
   const { height } = useWindowDimensions();
   const theme = useTheme();
-  const [internalIsOpen, setInternalIsOpen] = React.useState(visible);
+  const [internalVisible, setInternalVisible] = React.useState(visible);
   const slide = React.useRef(
     new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
   ).current;
@@ -44,16 +44,16 @@ export function Dialog(props: DialogProps) {
       return;
     }
     if (visible) {
-      setInternalIsOpen(visible);
+      setInternalVisible(visible);
       Animated.parallel([
         Animated.spring(fade, {
           toValue: 1,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
         Animated.spring(overlayFade, {
           toValue: 1,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
       ]).start();
@@ -61,16 +61,16 @@ export function Dialog(props: DialogProps) {
       Animated.parallel([
         Animated.spring(overlayFade, {
           toValue: 0,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
         Animated.spring(fade, {
           toValue: 0,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
       ]).start(() => {
-        setInternalIsOpen(false);
+        setInternalVisible(false);
       });
     }
   }, [
@@ -78,7 +78,7 @@ export function Dialog(props: DialogProps) {
     overlayFade,
     fade,
     visible,
-    internalIsOpen,
+    internalVisible,
     slide,
     height,
     onRequestClose,
@@ -89,16 +89,16 @@ export function Dialog(props: DialogProps) {
       return;
     }
     if (visible) {
-      setInternalIsOpen(visible);
+      setInternalVisible(visible);
       Animated.parallel([
         Animated.spring(slide, {
           toValue: OFFSET_TOP,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
         Animated.spring(overlayFade, {
           toValue: 1,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
       ]).start();
@@ -106,23 +106,23 @@ export function Dialog(props: DialogProps) {
       Animated.parallel([
         Animated.spring(overlayFade, {
           toValue: 0,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
         Animated.spring(slide, {
           toValue: height,
-          bounciness: 0,
+          bounciness: tokens.animation.spring.bounciness,
           useNativeDriver: true,
         }),
       ]).start(() => {
-        setInternalIsOpen(false);
+        setInternalVisible(false);
       });
     }
   }, [
     animationType,
     overlayFade,
     visible,
-    internalIsOpen,
+    internalVisible,
     slide,
     height,
     onRequestClose,

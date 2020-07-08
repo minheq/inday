@@ -38,6 +38,11 @@ export interface Tokens {
   text: {
     size: TextSizes;
   };
+  animation: {
+    spring: {
+      bounciness: number;
+    };
+  };
 }
 export const tokens: Tokens = {
   radius: 8,
@@ -66,6 +71,11 @@ export const tokens: Tokens = {
         fontSize: 12,
         lineHeight: 16,
       },
+    },
+  },
+  animation: {
+    spring: {
+      bounciness: 0,
     },
   },
 };
