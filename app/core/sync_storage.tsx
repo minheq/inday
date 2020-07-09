@@ -8,6 +8,7 @@ import {
   ListGroupDeletedEvent,
   ListGroupNameUpdatedEvent,
   WorkspaceUpdatedEvent,
+  ListGroupListAddedEvent,
 } from '../data/events';
 import {
   Event,
@@ -134,6 +135,18 @@ export function SyncStorage() {
     [],
   );
 
+  const handleListGroupListAdded = React.useCallback(
+    async (event: ListGroupListAddedEvent) => {
+      const { nextListGroup } = event;
+
+      await AsyncStorage.setItem(
+        `${StorageKeyPrefix.ListGroup}:${nextListGroup.id}`,
+        JSON.stringify(nextListGroup),
+      );
+    },
+    [],
+  );
+
   const handleEvent = React.useCallback(
     (event: Event) => {
       switch (event.name) {
@@ -157,11 +170,14 @@ export function SyncStorage() {
           return handleListGroupDeleted(event);
         case 'ListGroupNameUpdated':
           return handleListGroupNameUpdated(event);
+        case 'ListGroupListAdded':
+          return handleListGroupListAdded(event);
         default:
           break;
       }
     },
     [
+      handleWorkspaceUpdated,
       handleNoteCreated,
       handleNoteDeleted,
       handleNoteUpdated,
@@ -171,6 +187,7 @@ export function SyncStorage() {
       handleListGroupCreated,
       handleListGroupDeleted,
       handleListGroupNameUpdated,
+      handleListGroupListAdded,
     ],
   );
 

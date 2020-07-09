@@ -3,6 +3,7 @@ import { Note } from '../data/notes';
 import { useCreateNote } from '../data/api';
 import { Container, Row, Text, Spacer, Button } from '../components';
 import { StyleSheet } from 'react-native';
+import { tokens } from '../theme';
 
 interface NoteListHeaderProps {
   name: string;
@@ -36,5 +37,6 @@ export function NoteListHeader(props: NoteListHeaderProps) {
 const styles = StyleSheet.create({
   noteCreateButton: {
     padding: 8,
+    borderRadius: tokens.radius,
   },
 });

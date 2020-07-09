@@ -4,6 +4,7 @@ import { RecoilKey } from './constants';
 export interface List {
   id: string;
   name: string;
+  listGroupID: string | null;
   workspaceID: string;
   typename: 'List';
 }

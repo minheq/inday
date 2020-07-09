@@ -8,6 +8,7 @@ import {
   ListGroupDeletedEvent,
   ListGroupCreatedEvent,
   WorkspaceUpdatedEvent,
+  ListGroupListAddedEvent,
 } from '../data/events';
 import {
   Event,
@@ -154,6 +155,18 @@ export function SyncAtoms() {
     [setListGroups],
   );
 
+  const handleListGroupListAdded = React.useCallback(
+    (event: ListGroupListAddedEvent) => {
+      const { nextListGroup } = event;
+
+      setListGroups((previousListGroups) => ({
+        ...previousListGroups,
+        [nextListGroup.id]: nextListGroup,
+      }));
+    },
+    [setListGroups],
+  );
+
   const handleEvent = React.useCallback(
     (event: Event) => {
       switch (event.name) {
@@ -177,6 +190,8 @@ export function SyncAtoms() {
           return handleListGroupDeleted(event);
         case 'ListGroupNameUpdated':
           return handleListGroupNameUpdated(event);
+        case 'ListGroupListAdded':
+          return handleListGroupListAdded(event);
         default:
           break;
       }
@@ -192,6 +207,7 @@ export function SyncAtoms() {
       handleListGroupCreated,
       handleListGroupDeleted,
       handleListGroupNameUpdated,
+      handleListGroupListAdded,
     ],
   );
 

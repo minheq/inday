@@ -75,8 +75,15 @@ export interface ListGroupDeletedEvent extends EventBase {
 export interface ListGroupNameUpdatedEvent extends EventBase {
   name: 'ListGroupNameUpdated';
   prevListGroup: ListGroup;
-  workspaceID: string;
   nextListGroup: ListGroup;
+  workspaceID: string;
+}
+
+export interface ListGroupListAddedEvent extends EventBase {
+  name: 'ListGroupListAdded';
+  prevListGroup: ListGroup;
+  nextListGroup: ListGroup;
+  workspaceID: string;
 }
 
 export type Event =
@@ -90,7 +97,8 @@ export type Event =
   | ListNameUpdatedEvent
   | ListGroupCreatedEvent
   | ListGroupDeletedEvent
-  | ListGroupNameUpdatedEvent;
+  | ListGroupNameUpdatedEvent
+  | ListGroupListAddedEvent;
 
 type SubscriptionCallback = (event: Event) => void;
 

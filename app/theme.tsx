@@ -133,7 +133,7 @@ const lightTheme: Theme = {
       primary: 'rgba(0, 102, 204, 1)',
       muted: 'rgba(134, 134, 139, 1)',
       success: 'string',
-      error: 'string',
+      error: 'rgba(234, 0, 68, 1)',
       white: 'white',
     },
   },

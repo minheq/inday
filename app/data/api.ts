@@ -32,6 +32,10 @@ export function useGetListGroupLists(listGroupID: string) {
   return useRecoilValue(listGroupQuery(listGroupID));
 }
 
+export function useGetListGroups() {
+  return useRecoilValue(listGroupsState);
+}
+
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
 
@@ -205,38 +209,64 @@ function toPreview(content: Content): Preview {
 export function useCreateList() {
   const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
+  const listGroups = useGetListGroups();
 
-  const createList = React.useCallback(() => {
-    const list: List = {
-      id: v4(),
-      name: '',
-      workspaceID: workspace.id,
-      typename: 'List',
-    };
+  const createList = React.useCallback(
+    (listGroupID: string | null) => {
+      const list: List = {
+        id: v4(),
+        name: '',
+        listGroupID,
+        workspaceID: workspace.id,
+        typename: 'List',
+      };
 
-    const nextWorkspace: Workspace = {
-      ...workspace,
-      lists: [...workspace.lists, { type: 'List', id: list.id }],
-    };
+      emitEvent({
+        name: 'ListCreated',
+        list,
+        createdAt: new Date(),
+        workspaceID: workspace.id,
+        typename: 'Event',
+      });
 
-    emitEvent({
-      name: 'ListCreated',
-      list,
-      createdAt: new Date(),
-      workspaceID: workspace.id,
-      typename: 'Event',
-    });
+      if (listGroupID !== null) {
+        const prevListGroup = listGroups[listGroupID];
+        if (prevListGroup === undefined) {
+          throw new Error('ListGroup not found');
+        }
 
-    emitEvent({
-      name: 'WorkspaceUpdated',
-      nextWorkspace: nextWorkspace,
-      prevWorkspace: workspace,
-      createdAt: new Date(),
-      typename: 'Event',
-    });
+        const nextListGroup: ListGroup = {
+          ...prevListGroup,
+          listIDs: [...prevListGroup.listIDs, list.id],
+        };
 
-    return list;
-  }, [emitEvent, workspace]);
+        emitEvent({
+          name: 'ListGroupListAdded',
+          nextListGroup: nextListGroup,
+          prevListGroup,
+          createdAt: new Date(),
+          workspaceID: workspace.id,
+          typename: 'Event',
+        });
+      } else {
+        const nextWorkspace: Workspace = {
+          ...workspace,
+          lists: [...workspace.lists, { type: 'List', id: list.id }],
+        };
+
+        emitEvent({
+          name: 'WorkspaceUpdated',
+          nextWorkspace: nextWorkspace,
+          prevWorkspace: workspace,
+          createdAt: new Date(),
+          typename: 'Event',
+        });
+      }
+
+      return list;
+    },
+    [emitEvent, workspace, listGroups],
+  );
 
   return createList;
 }
