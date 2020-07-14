@@ -1,5 +1,10 @@
 import React from 'react';
-import { Animated, ViewStyle, StyleProp } from 'react-native';
+import {
+  Animated,
+  ViewStyle,
+  StyleProp,
+  GestureResponderEvent,
+} from 'react-native';
 import { Pressable, PressableChildrenProps } from './pressable';
 import { useTheme } from '../theme';
 
@@ -7,7 +12,7 @@ type ButtonVariant = 'filled' | 'flat';
 type ButtonColor = 'default' | 'primary';
 
 interface ButtonProps {
-  onPress?: () => void;
+  onPress?: (e: GestureResponderEvent) => void;
   disabled?: boolean;
   variant?: ButtonVariant;
   color?: ButtonColor;

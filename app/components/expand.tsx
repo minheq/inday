@@ -4,10 +4,17 @@ import { Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
 interface ExpandProps {
   open?: boolean;
   children?: React.ReactNode;
+  onExpanded?: () => void;
+  onCollapsed?: () => void;
 }
 
 export function Expand(props: ExpandProps) {
-  const { open, children } = props;
+  const {
+    open,
+    children,
+    onExpanded = () => {},
+    onCollapsed = () => {},
+  } = props;
   const height = React.useRef(new Animated.Value(0)).current;
   const translateY = React.useRef(new Animated.Value(0)).current;
   const [intrinsicHeight, setIntrinsicHeight] = React.useState(0);
@@ -28,8 +35,14 @@ export function Expand(props: ExpandProps) {
         bounciness: 0,
         useNativeDriver: false,
       }),
-    ]).start();
-  }, [height, translateY, open, intrinsicHeight]);
+    ]).start(() => {
+      if (open) {
+        onExpanded();
+      } else {
+        onCollapsed();
+      }
+    });
+  }, [height, translateY, open, intrinsicHeight, onExpanded, onCollapsed]);
 
   return (
     <Animated.View style={[styles.base, { height }]}>

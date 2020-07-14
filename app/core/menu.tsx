@@ -32,12 +32,13 @@ import {
 } from '../data/api';
 import { ListGroup } from '../data/list_group';
 import { tokens } from '../theme';
-import { initialMeasurements, measure } from '../utils/measurements';
+import { measure } from '../utils/measurements';
 import {
   useContextMenu,
   ContextMenuCoordinate,
 } from '../hooks/use_context_menu';
 import { Expand } from '../components/expand';
+import { useForceUpdate } from '../hooks/use_force_update';
 
 interface MenuContext {
   renameListOrListGroupID: string | null;
@@ -81,11 +82,6 @@ export function Menu() {
       >
         <Container flex={1} padding={16}>
           <FixedMenuItem icon="inbox" title="Inbox" location={Location.Inbox} />
-          <FixedMenuItem
-            icon="calendar"
-            title="Today"
-            location={Location.Today}
-          />
           <FixedMenuItem
             icon="navigation"
             title="All"
@@ -217,7 +213,6 @@ interface ListGroupMenuItemProps {
 function ListGroupMenuItem(props: ListGroupMenuItemProps) {
   const { listGroup } = props;
   const updateListName = useUpdateListGroupName();
-  const [measurements, setMeasurements] = React.useState(initialMeasurements);
   const [visible, setVisible] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
   const [anchor, setAnchor] = React.useState<PopoverAnchor>({
@@ -237,7 +232,7 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
     [updateListName, listGroup],
   );
 
-  const handlePress = React.useCallback(() => {
+  const handleExpand = React.useCallback(() => {
     setExpanded(!expanded);
   }, [expanded]);
 
@@ -245,17 +240,15 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
     menuContext.onClear();
   }, [menuContext]);
 
-  const handleLayout = React.useCallback(() => {
-    measure(ref).then((m) => setMeasurements(m));
-  }, []);
-
   const handlePressMore = React.useCallback(async () => {
-    setVisible(true);
-    setAnchor({
-      y: measurements.y + 28,
-      x: measurements.x + measurements.width - 32,
+    measure(ref).then((measurements) => {
+      setVisible(true);
+      setAnchor({
+        y: measurements.pageY + 28,
+        x: measurements.pageX + measurements.width - 24,
+      });
     });
-  }, [measurements]);
+  }, []);
 
   const handleOpenContextMenu = React.useCallback(
     (coordinate: ContextMenuCoordinate) => {
@@ -295,49 +288,57 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
   }, [menuContext, listGroup, createList]);
 
   return (
-    <View ref={ref} onLayout={handleLayout}>
-      {menuContext.renameListOrListGroupID === listGroup.id ? (
-        <ListNameEditTextInput
-          typename="ListGroup"
-          value={listGroup.name}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-      ) : (
-        <Button onPress={handlePress} style={{ borderRadius: tokens.radius }}>
-          {({ hovered }) => (
-            <Container height={40} paddingHorizontal={8}>
-              <Row alignItems="center" expanded>
-                <Animated.View
-                  style={{
-                    transform: [
-                      {
-                        rotate: chevron.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0deg', '90deg'],
-                        }),
-                      },
-                    ],
-                  }}
-                >
-                  <Icon name="chevron-right" size="lg" />
-                </Animated.View>
-                <Spacing width={8} />
-                <Container flex={1}>
-                  <Text>{listGroup.name}</Text>
-                </Container>
-                {hovered && (
-                  <Button onPress={handlePressMore} style={styles.menuItemMore}>
-                    <Container center width={32} height={32}>
-                      <Icon name="more-horizontal" size="lg" />
-                    </Container>
-                  </Button>
-                )}
-              </Row>
-            </Container>
-          )}
-        </Button>
-      )}
+    <>
+      <View ref={ref}>
+        {menuContext.renameListOrListGroupID === listGroup.id ? (
+          <ListNameEditTextInput
+            typename="ListGroup"
+            value={listGroup.name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
+        ) : (
+          <Button
+            onPress={handleExpand}
+            style={{ borderRadius: tokens.radius }}
+          >
+            {({ hovered }) => (
+              <Container height={40} paddingHorizontal={8}>
+                <Row alignItems="center" expanded>
+                  <Animated.View
+                    style={{
+                      transform: [
+                        {
+                          rotate: chevron.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '90deg'],
+                          }),
+                        },
+                      ],
+                    }}
+                  >
+                    <Icon name="chevron-right" size="lg" />
+                  </Animated.View>
+                  <Spacing width={8} />
+                  <Container flex={1}>
+                    <Text>{listGroup.name}</Text>
+                  </Container>
+                  {hovered && (
+                    <Button
+                      onPress={handlePressMore}
+                      style={styles.menuItemMore}
+                    >
+                      <Container center width={32} height={32}>
+                        <Icon name="more-horizontal" size="lg" />
+                      </Container>
+                    </Button>
+                  )}
+                </Row>
+              </Container>
+            )}
+          </Button>
+        )}
+      </View>
       <Expand open={expanded}>
         <Container paddingLeft={16}>
           {lists.map((list) => (
@@ -357,7 +358,7 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
           onPressRename={handlePressRename}
         />
       </Popover>
-    </View>
+    </>
   );
 }
 
@@ -369,7 +370,6 @@ function ListMenuItem(props: ListMenuItemProps) {
   const { list } = props;
   const navigation = useNavigation();
   const updateListName = useUpdateListName();
-  const [measurements, setMeasurements] = React.useState(initialMeasurements);
   const [visible, setVisible] = React.useState(false);
   const [anchor, setAnchor] = React.useState<PopoverAnchor>({
     y: 0,
@@ -397,17 +397,15 @@ function ListMenuItem(props: ListMenuItemProps) {
     menuContext.onClear();
   }, [menuContext]);
 
-  const handleLayout = React.useCallback(() => {
-    measure(ref).then((m) => setMeasurements(m));
-  }, []);
-
   const handlePressMore = React.useCallback(async () => {
-    setVisible(true);
-    setAnchor({
-      y: measurements.y + 28,
-      x: measurements.x + measurements.width - 32,
+    measure(ref).then((measurements) => {
+      setVisible(true);
+      setAnchor({
+        y: measurements.pageY + 28,
+        x: measurements.pageX + measurements.width - 24,
+      });
     });
-  }, [measurements]);
+  }, []);
 
   const handleOpenContextMenu = React.useCallback(
     (coordinate: ContextMenuCoordinate) => {
@@ -432,36 +430,41 @@ function ListMenuItem(props: ListMenuItemProps) {
   }, [menuContext, list]);
 
   return (
-    <View ref={ref} onLayout={handleLayout}>
-      {menuContext.renameListOrListGroupID === list.id ? (
-        <ListNameEditTextInput
-          typename="List"
-          value={list.name}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-      ) : (
-        <Button onPress={handlePress} style={{ borderRadius: tokens.radius }}>
-          {({ hovered }) => (
-            <Container height={40} paddingHorizontal={8}>
-              <Row alignItems="center" expanded>
-                <Icon name="list" size="lg" />
-                <Spacing width={8} />
-                <Container flex={1}>
-                  <Text>{list.name}</Text>
-                </Container>
-                {hovered && (
-                  <Button onPress={handlePressMore} style={styles.menuItemMore}>
-                    <Container center width={32} height={32}>
-                      <Icon name="more-horizontal" size="lg" />
-                    </Container>
-                  </Button>
-                )}
-              </Row>
-            </Container>
-          )}
-        </Button>
-      )}
+    <>
+      <View ref={ref}>
+        {menuContext.renameListOrListGroupID === list.id ? (
+          <ListNameEditTextInput
+            typename="List"
+            value={list.name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
+        ) : (
+          <Button onPress={handlePress} style={{ borderRadius: tokens.radius }}>
+            {({ hovered }) => (
+              <Container height={40} paddingHorizontal={8}>
+                <Row alignItems="center" expanded>
+                  <Icon name="list" size="lg" />
+                  <Spacing width={8} />
+                  <Container flex={1}>
+                    <Text>{list.name}</Text>
+                  </Container>
+                  {hovered && (
+                    <Button
+                      onPress={handlePressMore}
+                      style={styles.menuItemMore}
+                    >
+                      <Container center width={32} height={32}>
+                        <Icon name="more-horizontal" size="lg" />
+                      </Container>
+                    </Button>
+                  )}
+                </Row>
+              </Container>
+            )}
+          </Button>
+        )}
+      </View>
       <Popover
         onRequestClose={handleCloseMore}
         anchor={anchor}
@@ -471,25 +474,32 @@ function ListMenuItem(props: ListMenuItemProps) {
         <ListMenuItemContextMenu
           onDelete={handlePressRename}
           onPressRename={handlePressRename}
+          onAddNote={() => {}}
         />
       </Popover>
-    </View>
+    </>
   );
 }
 
 interface ListMenuItemContextMenuProps {
   onPressRename: () => void;
   onDelete: () => void;
+  onAddNote: () => void;
 }
 
 function ListMenuItemContextMenu(props: ListMenuItemContextMenuProps) {
-  const { onPressRename, onDelete } = props;
+  const { onPressRename, onDelete, onAddNote } = props;
 
   return (
     <Container width={160} color="content" shape="rounded">
       <Button onPress={onPressRename}>
         <Container padding={8}>
           <Text size="sm">Rename</Text>
+        </Container>
+      </Button>
+      <Button onPress={onAddNote}>
+        <Container padding={8}>
+          <Text size="sm">Add note</Text>
         </Container>
       </Button>
       <Button onPress={onDelete}>
