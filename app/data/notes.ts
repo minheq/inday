@@ -78,6 +78,28 @@ export const allNotesQuery = selector({
   },
 });
 
+export const inboxNotesQuery = selector({
+  key: RecoilKey.InboxNotes,
+  get: ({ get }) => {
+    const notes = get(notesState);
+    const workspace = get(workspaceState);
+
+    if (workspace === null) {
+      throw new Error('Workspace not found');
+    }
+
+    return workspace.inboxNoteIDs.map((id) => {
+      const note = notes[id];
+
+      if (note === undefined) {
+        throw new Error(`Note out of sync for id=${id}`);
+      }
+
+      return note;
+    });
+  },
+});
+
 export const noteQuery = selectorFamily<Note | null, string>({
   key: RecoilKey.AllNotes,
   get: (noteID: string) => ({ get }) => {

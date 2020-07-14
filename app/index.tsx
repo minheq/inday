@@ -16,6 +16,7 @@ import {
   useGetAllNotes,
   useGetList,
   useGetListNotes,
+  useGetInboxNotes,
 } from './data/api';
 import { NoteEditor } from './core/note_editor';
 import { Note, NotesState } from './data/notes';
@@ -186,7 +187,7 @@ function NoteListSwitch() {
     case Location.All:
       return <AllNoteList noteID={navigation.state.noteID} />;
     case Location.Inbox:
-      return <AllNoteList noteID={navigation.state.noteID} />;
+      return <InboxNoteList noteID={navigation.state.noteID} />;
     case Location.List:
       return (
         <ListNoteList
@@ -222,6 +223,37 @@ function AllNoteList(props: AllNoteListProps) {
   return (
     <Container>
       <NoteListHeader name="All" onViewNote={handleViewNote} />
+      <NoteList
+        selectedNoteID={noteID}
+        notes={notes}
+        onViewNote={handleViewNote}
+      />
+    </Container>
+  );
+}
+
+interface InboxNoteListProps {
+  noteID: string;
+}
+
+function InboxNoteList(props: InboxNoteListProps) {
+  const { noteID } = props;
+  const notes = useGetInboxNotes();
+  const navigation = useNavigation();
+
+  const handleViewNote = React.useCallback(
+    (note: Note) => {
+      navigation.navigate({
+        location: Location.Inbox,
+        noteID: note.id,
+      });
+    },
+    [navigation],
+  );
+
+  return (
+    <Container>
+      <NoteListHeader name="Inbox" onViewNote={handleViewNote} />
       <NoteList
         selectedNoteID={noteID}
         notes={notes}

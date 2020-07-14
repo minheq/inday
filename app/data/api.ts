@@ -6,6 +6,7 @@ import { BlockType } from '../editor/editable/nodes/element';
 import { useEventEmitter, eventsState, Event } from './events';
 import {
   allNotesQuery,
+  inboxNotesQuery,
   noteQuery,
   notesState,
   Note,
@@ -20,6 +21,10 @@ import { useStorage } from './storage';
 
 export function useGetAllNotes() {
   return useRecoilValue(allNotesQuery);
+}
+
+export function useGetInboxNotes() {
+  return useRecoilValue(inboxNotesQuery);
 }
 
 export function useGetNote(noteID: string) {
@@ -99,6 +104,11 @@ export function useCreateNote() {
         typename: 'Note',
       };
 
+      let nextWorkspace: Workspace = {
+        ...workspace,
+        allNoteIDs: [...workspace.allNoteIDs, newNote.id],
+      };
+
       switch (navigationState.location) {
         case Location.All:
           break;
@@ -125,15 +135,14 @@ export function useCreateNote() {
           break;
         case Location.Inbox:
           newNote.inbox = true;
+          nextWorkspace = {
+            ...nextWorkspace,
+            inboxNoteIDs: [...nextWorkspace.inboxNoteIDs, newNote.id],
+          };
           break;
         default:
           break;
       }
-
-      const nextWorkspace: Workspace = {
-        ...workspace,
-        allNoteIDs: [...workspace.allNoteIDs, newNote.id],
-      };
 
       setNotes((previousNotes) => ({
         ...previousNotes,
