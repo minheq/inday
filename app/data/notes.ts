@@ -66,7 +66,7 @@ export const allNotesQuery = selector({
       throw new Error('Workspace not found');
     }
 
-    return workspace.all.map((id) => {
+    return workspace.allNoteIDs.map((id) => {
       const note = notes[id];
 
       if (note === undefined) {

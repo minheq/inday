@@ -60,6 +60,13 @@ export interface ListNameUpdatedEvent extends EventBase {
   nextList: List;
 }
 
+export interface ListNoteAddedEvent extends EventBase {
+  name: 'ListNoteAddedEvent';
+  prevList: List;
+  nextList: List;
+  workspaceID: string;
+}
+
 export interface ListGroupCreatedEvent extends EventBase {
   name: 'ListGroupCreated';
   listGroup: ListGroup;
@@ -89,12 +96,14 @@ export interface ListGroupListAddedEvent extends EventBase {
 export type Event =
   | WorkspaceCreatedEvent
   | WorkspaceUpdatedEvent
+  | WorkspaceUpdatedEvent
   | NoteCreatedEvent
   | NoteDeletedEvent
   | NoteUpdatedEvent
   | ListCreatedEvent
   | ListDeletedEvent
   | ListNameUpdatedEvent
+  | ListNoteAddedEvent
   | ListGroupCreatedEvent
   | ListGroupDeletedEvent
   | ListGroupNameUpdatedEvent

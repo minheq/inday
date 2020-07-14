@@ -10,10 +10,13 @@ import { ErrorBoundary } from './core/error_boundary';
 import { getAtomWithKey } from './data/atoms';
 import { RecoilKey, StorageKey, StorageKeyPrefix } from './data/constants';
 import { Workspace } from './data/workspace';
-import { SyncStorage } from './core/sync_storage';
-import { SyncAtoms } from './core/sync_atoms';
 import { NoteList } from './core/note_list';
-import { useGetNote, useGetAllNotes } from './data/api';
+import {
+  useGetNote,
+  useGetAllNotes,
+  useGetList,
+  useGetListNotes,
+} from './data/api';
 import { NoteEditor } from './core/note_editor';
 import { Note, NotesState } from './data/notes';
 import { WorkspaceState } from './data/workspace';
@@ -129,8 +132,6 @@ export function App() {
       <ErrorBoundary>
         <Suspense fallback={<Text>Initializing workspace...</Text>}>
           <InitWorkspace />
-          <SyncAtoms />
-          <SyncStorage />
           <Suspense fallback={<Text>Loading...</Text>}>
             <ThemeProvider>
               <DragDropProvider>
@@ -183,20 +184,28 @@ function NoteListSwitch() {
 
   switch (navigation.state.location) {
     case Location.All:
-      return <AllNoteList />;
+      return <AllNoteList noteID={navigation.state.noteID} />;
     case Location.Inbox:
-      return <AllNoteList />;
-    case Location.Today:
-      return <AllNoteList />;
+      return <AllNoteList noteID={navigation.state.noteID} />;
     case Location.List:
-      return <AllNoteList />;
+      return (
+        <ListNoteList
+          listID={navigation.state.listID}
+          noteID={navigation.state.noteID}
+        />
+      );
 
     default:
-      return null;
+      throw new Error('Invalid location');
   }
 }
 
-function AllNoteList() {
+interface AllNoteListProps {
+  noteID: string;
+}
+
+function AllNoteList(props: AllNoteListProps) {
+  const { noteID } = props;
   const notes = useGetAllNotes();
   const navigation = useNavigation();
 
@@ -214,7 +223,41 @@ function AllNoteList() {
     <Container>
       <NoteListHeader name="All" onViewNote={handleViewNote} />
       <NoteList
-        selectedNoteID={navigation.state.noteID}
+        selectedNoteID={noteID}
+        notes={notes}
+        onViewNote={handleViewNote}
+      />
+    </Container>
+  );
+}
+
+interface ListNoteListProps {
+  listID: string;
+  noteID: string;
+}
+
+function ListNoteList(props: ListNoteListProps) {
+  const { listID, noteID } = props;
+  const navigation = useNavigation();
+  const list = useGetList(listID);
+  const notes = useGetListNotes(listID);
+
+  const handleViewNote = React.useCallback(
+    (note: Note) => {
+      navigation.navigate({
+        location: Location.List,
+        listID,
+        noteID: note.id,
+      });
+    },
+    [navigation, listID],
+  );
+
+  return (
+    <Container>
+      <NoteListHeader name={list.name} onViewNote={handleViewNote} />
+      <NoteList
+        selectedNoteID={noteID}
         notes={notes}
         onViewNote={handleViewNote}
       />

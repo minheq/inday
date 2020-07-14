@@ -4,6 +4,7 @@ import { useCreateNote } from '../data/api';
 import { Container, Row, Text, Spacer, Button } from '../components';
 import { StyleSheet } from 'react-native';
 import { tokens } from '../theme';
+import { useNavigation } from '../data/navigation';
 
 interface NoteListHeaderProps {
   name: string;
@@ -13,11 +14,12 @@ interface NoteListHeaderProps {
 export function NoteListHeader(props: NoteListHeaderProps) {
   const { name, onViewNote } = props;
   const createNote = useCreateNote();
+  const navigation = useNavigation();
 
   const handleCreateNote = React.useCallback(async () => {
-    const note = createNote();
+    const note = createNote(navigation.state);
     onViewNote(note);
-  }, [createNote, onViewNote]);
+  }, [createNote, onViewNote, navigation]);
 
   return (
     <Container paddingVertical={8} paddingHorizontal={16}>

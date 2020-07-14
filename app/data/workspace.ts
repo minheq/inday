@@ -12,9 +12,9 @@ type List = {
 export interface Workspace {
   id: string;
   name: string;
-  all: string[];
-  inbox: string[];
-  lists: List[];
+  allNoteIDs: string[];
+  inboxNoteIDs: string[];
+  listOrListGroupIDs: List[];
   typename: 'Workspace';
 }
 
@@ -35,9 +35,9 @@ export const allListsQuery = selector({
       throw new Error('Workspace not found');
     }
 
-    return workspace.lists.map((listSource) => {
-      if (listSource.type === 'List') {
-        const list = lists[listSource.id];
+    return workspace.listOrListGroupIDs.map((listOrListGroupID) => {
+      if (listOrListGroupID.type === 'List') {
+        const list = lists[listOrListGroupID.id];
         if (list === undefined) {
           throw new Error('List not found');
         }
@@ -45,7 +45,7 @@ export const allListsQuery = selector({
         return list;
       }
 
-      const listGroup = listGroups[listSource.id];
+      const listGroup = listGroups[listOrListGroupID.id];
       if (listGroup === undefined) {
         throw new Error('ListGroup not found');
       }

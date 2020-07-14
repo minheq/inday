@@ -15,9 +15,9 @@ function useInitWorkspace() {
       const newWorkspace: Workspace = {
         name: 'New workspace',
         id: v4(),
-        all: [],
-        inbox: [],
-        lists: [],
+        allNoteIDs: [],
+        inboxNoteIDs: [],
+        listOrListGroupIDs: [],
         typename: 'Workspace',
       };
 

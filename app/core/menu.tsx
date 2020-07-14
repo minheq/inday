@@ -38,7 +38,6 @@ import {
   ContextMenuCoordinate,
 } from '../hooks/use_context_menu';
 import { Expand } from '../components/expand';
-import { useForceUpdate } from '../hooks/use_force_update';
 
 interface MenuContext {
   renameListOrListGroupID: string | null;
@@ -82,11 +81,7 @@ export function Menu() {
       >
         <Container flex={1} padding={16}>
           <FixedMenuItem icon="inbox" title="Inbox" location={Location.Inbox} />
-          <FixedMenuItem
-            icon="navigation"
-            title="All"
-            location={Location.All}
-          />
+          <FixedMenuItem icon="book" title="All" location={Location.All} />
           <Spacing height={32} />
           <ListsMenu />
         </Container>
@@ -149,13 +144,15 @@ function NewListButton() {
           </Button>
         </Container>
       </Dialog>
-      <Row justifyContent="flex-end">
-        <Button onPress={toggle} style={{ borderRadius: tokens.radius }}>
-          <Container center height={40} paddingHorizontal={16}>
-            <Text color="primary">New list</Text>
-          </Container>
-        </Button>
-      </Row>
+      <Container padding={16}>
+        <Row justifyContent="flex-end">
+          <Button onPress={toggle} style={{ borderRadius: tokens.radius }}>
+            <Container center height={40} paddingHorizontal={16}>
+              <Text color="primary">New list</Text>
+            </Container>
+          </Button>
+        </Row>
+      </Container>
     </>
   );
 }
@@ -163,7 +160,7 @@ function NewListButton() {
 interface FixedMenuItemProps {
   icon: IconName;
   title: string;
-  location: Location.All | Location.Today | Location.Inbox;
+  location: Location.All | Location.Inbox;
 }
 
 function FixedMenuItem(props: FixedMenuItemProps) {
