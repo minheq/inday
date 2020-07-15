@@ -26,6 +26,7 @@ import { useNavigation, Location, NavigationState } from './data/navigation';
 import { NoteListHeader } from './core/note_list_header';
 import { ListsState } from './data/list';
 import { ListGroupsState } from './data/list_group';
+import { MenuState } from './data/menu';
 
 type Atoms = (
   | [RecoilKey.Notes, NotesState]
@@ -33,6 +34,7 @@ type Atoms = (
   | [RecoilKey.ListGroups, ListGroupsState]
   | [RecoilKey.Workspace, WorkspaceState]
   | [RecoilKey.Navigation, NavigationState]
+  | [RecoilKey.Menu, MenuState]
 )[];
 
 function preLoad(keys: string[]) {
@@ -84,6 +86,11 @@ async function init() {
   const navigation = await AsyncStorage.getItem(StorageKey.Navigation);
   if (navigation) {
     atoms.push([RecoilKey.Navigation, JSON.parse(navigation)]);
+  }
+
+  const menu = await AsyncStorage.getItem(StorageKey.Menu);
+  if (menu) {
+    atoms.push([RecoilKey.Menu, JSON.parse(menu)]);
   }
 
   return atoms;

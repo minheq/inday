@@ -5,6 +5,7 @@ import { notesState } from './notes';
 import { RecoilKey } from './constants';
 import { listsState } from './list';
 import { listGroupsState } from './list_group';
+import { menuState } from './menu';
 
 export function getAtomWithKey(key: RecoilKey): RecoilState<any> {
   switch (key) {
@@ -12,6 +13,8 @@ export function getAtomWithKey(key: RecoilKey): RecoilState<any> {
       return workspaceState;
     case RecoilKey.Navigation:
       return navigationState;
+    case RecoilKey.Menu:
+      return menuState;
     case RecoilKey.Notes:
       return notesState;
     case RecoilKey.Lists:

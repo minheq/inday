@@ -14,29 +14,20 @@ npm run ios
 npm run android
 ```
 
-## Reasons
+## Todo
 
-using array:
-Create
+- Preserve menu state
+- Keep hover state when opening more menu
+- Active menu item
+- Fix new list group icon
+- Delete lists
+- List reordering
 
-- append to all.
-- append to tag or append to inbox
-  Update
-- append to tag or append to inbox
-- append to date
-  delete
-- Traverse all lists in workspace
-- fint the id and eliminate
+- Note reordering
+- Note versioning
+- Server database and REST API
 
-using linked list
-Create
+## Ideas
 
-- get list tail, append the card
-  update
-- get index in the list.
--
-
-delete
-
-- see where the card exists from the Note
-- go to those lists and remove itself from there
+- Use as CMS for blog via REST API
+- Add commentary on links. Browse comments across inday for an article

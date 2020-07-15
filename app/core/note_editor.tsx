@@ -4,7 +4,7 @@ import { Button, Container, Icon, Row, Spacer, IconName } from '../components';
 import { useUpdateNoteContent, useDeleteNote } from '../data/api';
 import { EditorInstance, Editor } from '../editor';
 import { useDebouncedCallback } from '../hooks/use_debounced_callback';
-import { Content, Note } from '../data/types';
+import { Content, Note } from '../data/notes';
 
 interface NoteEditorProps {
   note: Note;
@@ -25,7 +25,7 @@ export function NoteEditor(props: NoteEditorProps) {
   const handleUpdateContent = useDebouncedCallback(
     (content: Content) => {
       updateNoteContent({
-        id: note.id,
+        noteID: note.id,
         content,
       });
     },

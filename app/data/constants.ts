@@ -3,6 +3,7 @@ export enum RecoilKey {
   Notes = 'Notes',
   Workspace = 'Workspace',
   Navigation = 'Navigation',
+  Menu = 'Menu',
   Events = 'Events',
   Lists = 'Lists',
   ListGroups = 'ListGroups',
@@ -17,6 +18,7 @@ export enum RecoilKey {
 export enum StorageKey {
   WorkspaceID = 'WorkspaceID',
   Navigation = 'Navigation',
+  Menu = 'Menu',
 }
 
 export enum StorageKeyPrefix {

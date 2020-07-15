@@ -18,6 +18,7 @@ import { List, listQuery, listsState, listNotesQuery } from './list';
 import { ListGroup, listGroupsState, listGroupQuery } from './list_group';
 import { NavigationState, Location } from './navigation';
 import { useStorage } from './storage';
+import { menuState, MenuState } from './menu';
 
 export function useGetAllNotes() {
   return useRecoilValue(allNotesQuery);
@@ -193,7 +194,7 @@ export function useDeleteNote() {
 }
 
 export interface UpdateNoteContentInput {
-  id: string;
+  noteID: string;
   content: Content;
 }
 
@@ -203,8 +204,8 @@ export function useUpdateNoteContent() {
 
   const updateNoteContent = React.useCallback(
     (input: UpdateNoteContentInput) => {
-      const { id, content } = input;
-      const prevNote = notes[id];
+      const { noteID, content } = input;
+      const prevNote = notes[noteID];
       if (prevNote === undefined) {
         throw new Error('Note not found');
       }
@@ -269,6 +270,11 @@ export function useCreateList() {
         typename: 'List',
       };
 
+      setLists((previousLists) => ({
+        ...previousLists,
+        [newList.id]: newList,
+      }));
+
       if (listGroupID !== null) {
         const prevListGroup = listGroups[listGroupID];
         if (prevListGroup === undefined) {
@@ -298,10 +304,6 @@ export function useCreateList() {
         storage.saveWorkspace(nextWorkspace);
       }
 
-      setLists((previousLists) => ({
-        ...previousLists,
-        [newList.id]: newList,
-      }));
       storage.saveList(newList);
 
       return newList;
@@ -346,7 +348,7 @@ export function useDeleteList() {
 }
 
 export interface UpdateListNameInput {
-  id: string;
+  listID: string;
   name: string;
 }
 
@@ -357,8 +359,8 @@ export function useUpdateListName() {
 
   const updateListName = React.useCallback(
     (input: UpdateListNameInput) => {
-      const { id, name } = input;
-      const prevList = lists[id];
+      const { listID, name } = input;
+      const prevList = lists[listID];
 
       if (prevList === undefined) {
         throw new Error('List not found');
@@ -454,7 +456,7 @@ export function useDeleteListGroup() {
 }
 
 export interface UpdateListGroupNameInput {
-  id: string;
+  listGroupID: string;
   name: string;
 }
 
@@ -465,8 +467,8 @@ export function useUpdateListGroupName() {
 
   const updateListGroupName = React.useCallback(
     (input: UpdateListGroupNameInput) => {
-      const { id, name } = input;
-      const prevListGroup = listGroups[id];
+      const { listGroupID, name } = input;
+      const prevListGroup = listGroups[listGroupID];
 
       if (prevListGroup === undefined) {
         throw new Error('ListGroup not found');
@@ -488,4 +490,38 @@ export function useUpdateListGroupName() {
   );
 
   return updateListGroupName;
+}
+
+export interface ExpandListGroupInput {
+  listGroupID: string;
+  expanded: boolean;
+}
+
+export function useExpandListGroup() {
+  const storage = useStorage();
+  const [menu, setMenu] = useRecoilState(menuState);
+
+  const expandListGroup = React.useCallback(
+    (input: ExpandListGroupInput) => {
+      const { listGroupID, expanded } = input;
+
+      const nextMenu: MenuState = {
+        ...menu,
+        listGroupIDs: {
+          ...menu.listGroupIDs,
+          [listGroupID]: { expanded },
+        },
+      };
+
+      setMenu(nextMenu);
+      storage.saveMenuState(nextMenu);
+    },
+    [menu, setMenu, storage],
+  );
+
+  return expandListGroup;
+}
+
+export function useGetMenu() {
+  return useRecoilValue(menuState);
 }

@@ -1,7 +1,7 @@
-import AsyncStorage from '@react-native-community/async-storage';
 import React from 'react';
 import { atom, useRecoilState } from 'recoil';
-import { StorageKey } from './constants';
+
+import { useStorage } from './storage';
 
 export const NavigationAtomKey = 'Navigation';
 
@@ -26,14 +26,16 @@ export type NavigationState =
     };
 
 export function useNavigation() {
+  const storage = useStorage();
   const [navigation, setNavigation] = useRecoilState(navigationState);
 
   const handleNavigate = React.useCallback(
     (newState: NavigationState) => {
       setNavigation(newState);
-      AsyncStorage.setItem(StorageKey.Navigation, JSON.stringify(newState));
+
+      storage.saveNavigationState(newState);
     },
-    [setNavigation],
+    [setNavigation, storage],
   );
 
   return {

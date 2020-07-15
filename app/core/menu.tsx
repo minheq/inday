@@ -23,12 +23,14 @@ import { Location, useNavigation } from '../data/navigation';
 import { useToggle } from '../hooks/use_toggle';
 import { List } from '../data/list';
 import {
-  useGetLists,
   useCreateList,
   useCreateListGroup,
   useUpdateListName,
   useUpdateListGroupName,
   useGetListGroupLists,
+  useGetLists,
+  useExpandListGroup,
+  useGetMenu,
 } from '../data/api';
 import { ListGroup } from '../data/list_group';
 import { tokens } from '../theme';
@@ -189,12 +191,25 @@ function FixedMenuItem(props: FixedMenuItemProps) {
 
 function ListsMenu() {
   const lists = useGetLists();
+  const menu = useGetMenu();
 
   return (
     <>
       {lists.map((list) => {
         if (list.typename === 'ListGroup') {
-          return <ListGroupMenuItem key={list.id} listGroup={list} />;
+          const listGroupMenuItem = menu.listGroupIDs[list.id];
+
+          const expanded = !!(
+            listGroupMenuItem && listGroupMenuItem.expanded === true
+          );
+
+          return (
+            <ListGroupMenuItem
+              key={list.id}
+              listGroup={list}
+              expanded={expanded}
+            />
+          );
         }
 
         return <ListMenuItem key={list.id} list={list} />;
@@ -205,13 +220,14 @@ function ListsMenu() {
 
 interface ListGroupMenuItemProps {
   listGroup: ListGroup;
+  expanded: boolean;
 }
 
 function ListGroupMenuItem(props: ListGroupMenuItemProps) {
-  const { listGroup } = props;
+  const { listGroup, expanded } = props;
   const updateListName = useUpdateListGroupName();
+  const expandListGroup = useExpandListGroup();
   const [visible, setVisible] = React.useState(false);
-  const [expanded, setExpanded] = React.useState(false);
   const [anchor, setAnchor] = React.useState<PopoverAnchor>({
     y: 0,
     x: 0,
@@ -224,14 +240,14 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
 
   const handleChange = React.useCallback(
     (name: string) => {
-      updateListName({ id: listGroup.id, name });
+      updateListName({ listGroupID: listGroup.id, name });
     },
     [updateListName, listGroup],
   );
 
   const handleExpand = React.useCallback(() => {
-    setExpanded(!expanded);
-  }, [expanded]);
+    expandListGroup({ listGroupID: listGroup.id, expanded: !expanded });
+  }, [listGroup, expanded, expandListGroup]);
 
   const handleBlur = React.useCallback(() => {
     menuContext.onClear();
@@ -279,10 +295,10 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
 
   const handleAddList = React.useCallback(() => {
     setVisible(false);
-    setExpanded(true);
+    expandListGroup({ listGroupID: listGroup.id, expanded: true });
     const list = createList(listGroup.id);
     menuContext.onSetRenameListOrListGroupID(list.id);
-  }, [menuContext, listGroup, createList]);
+  }, [menuContext, listGroup, expandListGroup, createList]);
 
   return (
     <>
@@ -385,7 +401,7 @@ function ListMenuItem(props: ListMenuItemProps) {
 
   const handleChange = React.useCallback(
     (name: string) => {
-      updateListName({ id: list.id, name });
+      updateListName({ listID: list.id, name });
     },
     [updateListName, list],
   );
