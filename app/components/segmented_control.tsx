@@ -37,7 +37,7 @@ export function SegmentedControl<TValue = any>(
             ]}
             onPress={() => onChange(option.value)}
           >
-            <Text color={selected ? 'white' : 'default'}>{option.label}</Text>
+            <Text>{option.label}</Text>
           </Button>
         );
       })}

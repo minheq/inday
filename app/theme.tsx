@@ -15,8 +15,6 @@ interface TextColors {
   default: string;
   primary: string;
   muted: string;
-  white: string;
-  success: string;
   error: string;
 }
 
@@ -84,6 +82,7 @@ interface ButtonAppearance {
   backgroundDefault: string;
   backgroundPressed: string;
   backgroundHovered: string;
+  backgroundActive: string;
 }
 
 interface Theme {
@@ -94,10 +93,7 @@ interface Theme {
   text: {
     color: TextColors;
   };
-  button: {
-    primary: ButtonAppearance;
-    flat: ButtonAppearance;
-  };
+  button: ButtonAppearance;
   border: {
     color: {
       transparent: string;
@@ -120,11 +116,11 @@ const lightTheme: Theme = {
     shadow: {
       shadowColor: 'rgba(0, 0, 0, 1)',
       shadowOffset: {
-        width: 6,
-        height: 6,
+        width: 8,
+        height: 8,
       },
-      shadowOpacity: 0.1,
-      shadowRadius: 24,
+      shadowOpacity: 0.15,
+      shadowRadius: 32,
     },
   },
   text: {
@@ -132,22 +128,14 @@ const lightTheme: Theme = {
       default: 'rgba(34, 34, 34, 1)',
       primary: 'rgba(0, 102, 204, 1)',
       muted: 'rgba(134, 134, 139, 1)',
-      success: 'string',
       error: 'rgba(234, 0, 68, 1)',
-      white: 'white',
     },
   },
   button: {
-    flat: {
-      backgroundDefault: 'rgba(255, 255, 255, 0)',
-      backgroundHovered: 'rgba(245, 245, 245, 1)',
-      backgroundPressed: 'rgba(230, 230, 230, 1)',
-    },
-    primary: {
-      backgroundDefault: 'rgba(255, 255, 255, 0)',
-      backgroundHovered: 'rgba(245, 245, 245, 1)',
-      backgroundPressed: 'rgba(230, 230, 230, 1)',
-    },
+    backgroundDefault: 'rgba(0, 0, 0, 0)',
+    backgroundHovered: 'rgba(0, 0, 0, 0.03)',
+    backgroundPressed: 'rgba(0, 0, 0, 0.06)',
+    backgroundActive: 'rgba(71, 158, 240, 0.2)',
   },
   border: {
     color: {

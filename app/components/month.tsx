@@ -176,9 +176,7 @@ const Day = (props: DayProps) => {
                 },
               ]}
             >
-              <Text color={isSelected ? 'white' : 'default'}>
-                {format(date, 'd')}
-              </Text>
+              <Text>{format(date, 'd')}</Text>
               {isToday && <View style={styles.todayMarker} />}
             </View>
           </>

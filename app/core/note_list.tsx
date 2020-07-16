@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
 import { Note } from '../data/notes';
 import { Text, Button, Container } from '../components';
-import { useTheme } from '../theme';
 
 interface NoteListProps {
   notes: Note[];
@@ -36,7 +35,6 @@ interface NoteListItemProps {
 function NoteListItem(props: NoteListItemProps) {
   const { note, onViewNote, selectedNoteID } = props;
   const { preview } = note;
-  const theme = useTheme();
   const selected = selectedNoteID === note.id;
 
   const handlePress = React.useCallback(() => {
@@ -45,19 +43,13 @@ function NoteListItem(props: NoteListItemProps) {
 
   return (
     <Button
-      style={[
-        styles.noteListItem,
-        {
-          backgroundColor: selected
-            ? theme.container.color.primary
-            : theme.container.color.content,
-        },
-      ]}
+      state={selected ? 'active' : 'default'}
+      style={[styles.noteListItem]}
       onPress={handlePress}
     >
       <Container paddingHorizontal={16}>
         {preview.title ? (
-          <Text color={selected ? 'white' : 'default'}>{preview.title}</Text>
+          <Text>{preview.title}</Text>
         ) : (
           <Text color="muted">New note</Text>
         )}

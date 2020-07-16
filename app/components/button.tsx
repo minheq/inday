@@ -8,14 +8,12 @@ import {
 import { Pressable, PressableChildrenProps } from './pressable';
 import { useTheme } from '../theme';
 
-type ButtonVariant = 'filled' | 'flat';
-type ButtonColor = 'default' | 'primary';
+type ButtonState = 'default' | 'hovered' | 'active' | 'disabled';
 
 interface ButtonProps {
   onPress?: (e: GestureResponderEvent) => void;
   disabled?: boolean;
-  variant?: ButtonVariant;
-  color?: ButtonColor;
+  state?: ButtonState;
   children?:
     | React.ReactNode
     | ((props: PressableChildrenProps) => React.ReactNode);
@@ -27,36 +25,41 @@ interface ButtonProps {
 }
 
 export function Button(props: ButtonProps) {
-  const {
-    onPress = () => {},
-    disabled,
-    style,
-    variant = 'flat',
-    color = 'default',
-    children,
-  } = props;
+  const { onPress = () => {}, state, style, children } = props;
   const background = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
   return (
     <Pressable
-      disabled={disabled}
+      disabled={state === 'disabled'}
       style={({ pressed, hovered }) => {
+        let toValue = 0;
+
+        if (state === 'active') {
+          toValue = 2;
+        } else if (state === 'hovered') {
+          toValue = 0.5;
+        } else if (pressed === true) {
+          toValue = 1;
+        } else if (hovered === true) {
+          toValue = 0.5;
+        }
+
         Animated.spring(background, {
-          toValue: pressed ? 1 : hovered ? 0.5 : 0,
+          toValue,
           useNativeDriver: false,
           bounciness: 0,
-          speed: 100,
         }).start();
 
         return [
           {
             backgroundColor: background.interpolate({
-              inputRange: [0, 0.5, 1],
+              inputRange: [0, 0.5, 1, 2],
               outputRange: [
-                theme.button.flat.backgroundDefault,
-                theme.button.flat.backgroundHovered,
-                theme.button.flat.backgroundPressed,
+                theme.button.backgroundDefault,
+                theme.button.backgroundHovered,
+                theme.button.backgroundPressed,
+                theme.button.backgroundActive,
               ],
             }),
           },

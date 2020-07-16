@@ -168,6 +168,7 @@ interface FixedMenuItemProps {
 function FixedMenuItem(props: FixedMenuItemProps) {
   const { icon, title, location } = props;
   const navigation = useNavigation();
+  const active = navigation.state.location === location;
 
   const handlePress = React.useCallback(() => {
     navigation.navigate({
@@ -177,7 +178,11 @@ function FixedMenuItem(props: FixedMenuItemProps) {
   }, [navigation, location]);
 
   return (
-    <Button onPress={handlePress} style={{ borderRadius: tokens.radius }}>
+    <Button
+      state={active ? 'active' : 'default'}
+      onPress={handlePress}
+      style={{ borderRadius: tokens.radius }}
+    >
       <Container height={40} paddingHorizontal={8}>
         <Row alignItems="center" expanded>
           <Icon name={icon} size="lg" />
@@ -314,6 +319,7 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
           <Button
             onPress={handleExpand}
             style={{ borderRadius: tokens.radius }}
+            state={visible ? 'hovered' : 'default'}
           >
             {({ hovered }) => (
               <Container height={40} paddingHorizontal={8}>
@@ -390,6 +396,9 @@ function ListMenuItem(props: ListMenuItemProps) {
   });
   const menuContext = React.useContext(MenuContext);
   const ref = React.useRef<View>(null);
+  const active =
+    navigation.state.location === Location.List &&
+    navigation.state.listID === list.id;
 
   const handlePress = React.useCallback(() => {
     navigation.navigate({
@@ -453,7 +462,11 @@ function ListMenuItem(props: ListMenuItemProps) {
             onBlur={handleBlur}
           />
         ) : (
-          <Button onPress={handlePress} style={{ borderRadius: tokens.radius }}>
+          <Button
+            state={active ? 'active' : visible ? 'hovered' : 'default'}
+            onPress={handlePress}
+            style={{ borderRadius: tokens.radius }}
+          >
             {({ hovered }) => (
               <Container height={40} paddingHorizontal={8}>
                 <Row alignItems="center" expanded>
