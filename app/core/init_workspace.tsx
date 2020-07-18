@@ -4,10 +4,10 @@ import { useRecoilState } from 'recoil';
 
 import { Workspace, workspaceState } from '../data/workspace';
 import { useAsync } from '../hooks/use_async';
-import { useStorage } from '../data/storage';
+import { useEmitEvent } from '../data/api';
 
 function useInitWorkspace() {
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
   const [workspace, setWorkspace] = useRecoilState(workspaceState);
 
   const init = React.useCallback(async () => {
@@ -23,10 +23,12 @@ function useInitWorkspace() {
 
       setWorkspace(newWorkspace);
 
-      await storage.saveWorkspaceID(newWorkspace);
-      await storage.saveWorkspace(newWorkspace);
+      emitEvent({
+        name: 'WorkspaceCreated',
+        workspace: newWorkspace,
+      });
     }
-  }, [workspace, setWorkspace, storage]);
+  }, [emitEvent, workspace, setWorkspace]);
 
   useAsync('initWorkspace', init);
 }

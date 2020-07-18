@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Container, Pressable, Text, Column } from '../components';
-import { Note } from '../data/types';
+import { Note } from '../data/notes';
 
 interface NoteReminderProps {
   note: Note;

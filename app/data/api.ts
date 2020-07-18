@@ -3,7 +3,13 @@ import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
 
 import { v4 } from 'uuid';
 import { BlockType } from '../editor/editable/nodes/element';
-import { useEventEmitter, eventsState, Event } from './events';
+import {
+  useEventEmitter,
+  eventsState,
+  Event,
+  EventWithMetadata,
+  EventMetadata,
+} from './events';
 import {
   allNotesQuery,
   inboxNotesQuery,
@@ -17,8 +23,11 @@ import { workspaceState, Workspace, allListsQuery } from './workspace';
 import { List, listQuery, listsState, listNotesQuery } from './list';
 import { ListGroup, listGroupsState, listGroupQuery } from './list_group';
 import { NavigationState, Location } from './navigation';
-import { useStorage } from './storage';
 import { menuState, MenuState } from './menu';
+
+export function useGetNotes() {
+  return useRecoilValue(notesState);
+}
 
 export function useGetAllNotes() {
   return useRecoilValue(allNotesQuery);
@@ -32,12 +41,73 @@ export function useGetNote(noteID: string) {
   return useRecoilValue(noteQuery(noteID));
 }
 
-export function useGetLists() {
+export function useGetListAndListGroups() {
   return useRecoilValue(allListsQuery);
+}
+
+export function useGetLists() {
+  return useRecoilValue(listsState);
 }
 
 export function useGetList(listID: string) {
   return useRecoilValue(listQuery(listID));
+}
+
+export function useGetNoteCallback() {
+  const notes = useGetNotes();
+
+  const getNote = React.useCallback(
+    (noteID: string) => {
+      const note = notes[noteID];
+
+      if (note === undefined) {
+        throw new Error('Note not found');
+      }
+
+      return note;
+    },
+    [notes],
+  );
+
+  return getNote;
+}
+
+export function useGetListCallback() {
+  const lists = useGetLists();
+
+  const getList = React.useCallback(
+    (listID: string) => {
+      const list = lists[listID];
+
+      if (list === undefined) {
+        throw new Error('List not found');
+      }
+
+      return list;
+    },
+    [lists],
+  );
+
+  return getList;
+}
+
+export function useGetListGroupCallback() {
+  const listGroups = useGetListGroups();
+
+  const getListGroup = React.useCallback(
+    (listGroupID: string) => {
+      const listGroup = listGroups[listGroupID];
+
+      if (listGroup === undefined) {
+        throw new Error('ListGroup not found');
+      }
+
+      return listGroup;
+    },
+    [listGroups],
+  );
+
+  return getListGroup;
 }
 
 export function useGetListNotes(listID: string) {
@@ -64,25 +134,38 @@ export function useGetWorkspace() {
 
 export function useEmitEvent() {
   const eventEmitter = useEventEmitter();
+  const workspace = useGetWorkspace();
   const setEvents = useSetRecoilState(eventsState);
 
   const emitEvent = React.useCallback(
     (event: Event) => {
-      setEvents((prevEvents) => [...prevEvents, event]);
-      eventEmitter.emit(event);
+      const metadata: EventMetadata = {
+        createdAt: new Date(),
+        typename: 'Event',
+        workspaceID: workspace.id,
+      };
+
+      const eventWithMetadata: EventWithMetadata = {
+        ...event,
+        ...metadata,
+      };
+
+      setEvents((prevEvents) => [...prevEvents, eventWithMetadata]);
+      eventEmitter.emit(eventWithMetadata);
     },
-    [setEvents, eventEmitter],
+    [workspace, setEvents, eventEmitter],
   );
 
   return emitEvent;
 }
 
 export function useCreateNote() {
+  const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
-  const storage = useStorage();
   const setNotes = useSetRecoilState(notesState);
   const setWorkspace = useSetRecoilState(workspaceState);
-  const [lists, setLists] = useRecoilState(listsState);
+  const setLists = useSetRecoilState(listsState);
+  const getList = useGetListCallback();
 
   const createNote = React.useCallback(
     (navigationState: NavigationState) => {
@@ -111,14 +194,8 @@ export function useCreateNote() {
       };
 
       switch (navigationState.location) {
-        case Location.All:
-          break;
         case Location.List:
-          const prevList = lists[navigationState.listID];
-
-          if (prevList === undefined) {
-            throw new Error('List not found');
-          }
+          const prevList = getList(navigationState.listID);
 
           const nextList: List = {
             ...prevList,
@@ -131,8 +208,6 @@ export function useCreateNote() {
             ...prevLists,
             [nextList.id]: nextList,
           }));
-
-          storage.saveList(nextList);
           break;
         case Location.Inbox:
           newNote.inbox = true;
@@ -151,20 +226,22 @@ export function useCreateNote() {
       }));
       setWorkspace(nextWorkspace);
 
-      storage.saveWorkspace(nextWorkspace);
-      storage.saveNote(newNote);
+      emitEvent({
+        name: 'NoteCreated',
+        note: newNote,
+      });
 
       return newNote;
     },
-    [workspace, setNotes, setWorkspace, storage, lists, setLists],
+    [emitEvent, workspace, setNotes, setWorkspace, setLists, getList],
   );
 
   return createNote;
 }
 
 export function useDeleteNote() {
+  const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
-  const storage = useStorage();
   const setNotes = useSetRecoilState(notesState);
   const setWorkspace = useSetRecoilState(workspaceState);
 
@@ -184,10 +261,12 @@ export function useDeleteNote() {
       });
       setWorkspace(nextWorkspace);
 
-      storage.removeNote(note);
-      storage.saveWorkspace(nextWorkspace);
+      emitEvent({
+        name: 'NoteDeleted',
+        note,
+      });
     },
-    [workspace, setNotes, setWorkspace, storage],
+    [emitEvent, workspace, setNotes, setWorkspace],
   );
 
   return deleteNote;
@@ -199,16 +278,15 @@ export interface UpdateNoteContentInput {
 }
 
 export function useUpdateNoteContent() {
-  const storage = useStorage();
-  const [notes, setNotes] = useRecoilState(notesState);
+  const emitEvent = useEmitEvent();
+  const getNote = useGetNoteCallback();
+  const setNotes = useSetRecoilState(notesState);
 
   const updateNoteContent = React.useCallback(
     (input: UpdateNoteContentInput) => {
       const { noteID, content } = input;
-      const prevNote = notes[noteID];
-      if (prevNote === undefined) {
-        throw new Error('Note not found');
-      }
+      const prevNote = getNote(noteID);
+
       const preview = toPreview(content);
       const nextNote: Note = {
         ...prevNote,
@@ -221,9 +299,12 @@ export function useUpdateNoteContent() {
         [nextNote.id]: nextNote,
       }));
 
-      storage.saveNote(nextNote);
+      emitEvent({
+        name: 'NoteContentUpdatedEvent',
+        note: nextNote,
+      });
     },
-    [notes, storage, setNotes],
+    [getNote, setNotes, emitEvent],
   );
 
   return updateNoteContent;
@@ -252,9 +333,9 @@ function toPreview(content: Content): Preview {
 }
 
 export function useCreateList() {
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
-  const listGroups = useGetListGroups();
+  const getListGroup = useGetListGroupCallback();
   const setListGroups = useSetRecoilState(listGroupsState);
   const setWorkspace = useSetRecoilState(workspaceState);
   const setLists = useSetRecoilState(listsState);
@@ -276,10 +357,7 @@ export function useCreateList() {
       }));
 
       if (listGroupID !== null) {
-        const prevListGroup = listGroups[listGroupID];
-        if (prevListGroup === undefined) {
-          throw new Error('ListGroup not found');
-        }
+        const prevListGroup = getListGroup(listGroupID);
 
         const nextListGroup: ListGroup = {
           ...prevListGroup,
@@ -290,7 +368,6 @@ export function useCreateList() {
           ...previousListGroups,
           [nextListGroup.id]: nextListGroup,
         }));
-        storage.saveListGroup(nextListGroup);
       } else {
         const nextWorkspace: Workspace = {
           ...workspace,
@@ -301,34 +378,31 @@ export function useCreateList() {
         };
 
         setWorkspace(nextWorkspace);
-        storage.saveWorkspace(nextWorkspace);
       }
 
-      storage.saveList(newList);
+      emitEvent({
+        name: 'ListCreated',
+        list: newList,
+      });
 
       return newList;
     },
-    [workspace, listGroups, setWorkspace, setListGroups, setLists, storage],
+    [emitEvent, workspace, setWorkspace, setListGroups, setLists, getListGroup],
   );
 
   return createList;
 }
 
 export function useDeleteList() {
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
   const setLists = useSetRecoilState(listsState);
+  const setListGroups = useSetRecoilState(listGroupsState);
   const setWorkspace = useSetRecoilState(workspaceState);
+  const getListGroup = useGetListGroupCallback();
 
   const deleteList = React.useCallback(
     (list: List) => {
-      const nextWorkspace: Workspace = {
-        ...workspace,
-        listOrListGroupIDs: workspace.listOrListGroupIDs.filter(
-          (l) => l.id !== list.id,
-        ),
-      };
-
       setLists((previousLists) => {
         const nextLists = { ...previousLists };
 
@@ -336,12 +410,35 @@ export function useDeleteList() {
 
         return nextLists;
       });
-      setWorkspace(nextWorkspace);
 
-      storage.saveWorkspace(nextWorkspace);
-      storage.removeList(list);
+      if (list.listGroupID !== null) {
+        const prevListGroup = getListGroup(list.listGroupID);
+
+        const nextListGroup: ListGroup = {
+          ...prevListGroup,
+          listIDs: prevListGroup.listIDs.filter((listID) => listID !== list.id),
+        };
+
+        setListGroups((prevListGroups) => ({
+          ...prevListGroups,
+          [nextListGroup.id]: nextListGroup,
+        }));
+      } else {
+        const nextWorkspace: Workspace = {
+          ...workspace,
+          listOrListGroupIDs: workspace.listOrListGroupIDs.filter(
+            (l) => l.id !== list.id,
+          ),
+        };
+        setWorkspace(nextWorkspace);
+      }
+
+      emitEvent({
+        name: 'ListDeleted',
+        list,
+      });
     },
-    [workspace, storage, setWorkspace, setLists],
+    [emitEvent, workspace, setWorkspace, setLists, setListGroups, getListGroup],
   );
 
   return deleteList;
@@ -353,18 +450,14 @@ export interface UpdateListNameInput {
 }
 
 export function useUpdateListName() {
-  const lists = useRecoilValue(listsState);
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
+  const getList = useGetListCallback();
   const setLists = useSetRecoilState(listsState);
 
   const updateListName = React.useCallback(
     (input: UpdateListNameInput) => {
       const { listID, name } = input;
-      const prevList = lists[listID];
-
-      if (prevList === undefined) {
-        throw new Error('List not found');
-      }
+      const prevList = getList(listID);
 
       const nextList: List = {
         ...prevList,
@@ -376,16 +469,19 @@ export function useUpdateListName() {
         [nextList.id]: nextList,
       }));
 
-      storage.saveList(nextList);
+      emitEvent({
+        name: 'ListNameUpdated',
+        list: nextList,
+      });
     },
-    [lists, setLists, storage],
+    [emitEvent, setLists, getList],
   );
 
   return updateListName;
 }
 
 export function useCreateListGroup() {
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
   const setListGroups = useSetRecoilState(listGroupsState);
   const setWorkspace = useSetRecoilState(workspaceState);
@@ -413,43 +509,47 @@ export function useCreateListGroup() {
     }));
     setWorkspace(nextWorkspace);
 
-    storage.saveListGroup(newListGroup);
-    storage.saveWorkspace(nextWorkspace);
+    emitEvent({
+      name: 'ListGroupCreated',
+      listGroup: newListGroup,
+    });
 
     return newListGroup;
-  }, [storage, workspace, setListGroups, setWorkspace]);
+  }, [emitEvent, workspace, setListGroups, setWorkspace]);
 
   return createListGroup;
 }
 
 export function useDeleteListGroup() {
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
   const workspace = useGetWorkspace();
   const setListGroups = useSetRecoilState(listsState);
   const setWorkspace = useSetRecoilState(workspaceState);
 
   const deleteListGroup = React.useCallback(
-    (list: ListGroup) => {
+    (listGroup: ListGroup) => {
       const nextWorkspace: Workspace = {
         ...workspace,
         listOrListGroupIDs: workspace.listOrListGroupIDs.filter(
-          (l) => l.id !== list.id,
+          (l) => l.id !== listGroup.id,
         ),
       };
 
       setListGroups((previousListGroups) => {
         const nextListGroups = { ...previousListGroups };
 
-        delete nextListGroups[list.id];
+        delete nextListGroups[listGroup.id];
 
         return nextListGroups;
       });
       setWorkspace(nextWorkspace);
 
-      storage.saveWorkspace(nextWorkspace);
-      storage.removeListGroup(list);
+      emitEvent({
+        name: 'ListGroupDeleted',
+        listGroup,
+      });
     },
-    [workspace, storage, setWorkspace, setListGroups],
+    [emitEvent, workspace, setWorkspace, setListGroups],
   );
 
   return deleteListGroup;
@@ -461,18 +561,14 @@ export interface UpdateListGroupNameInput {
 }
 
 export function useUpdateListGroupName() {
-  const listGroups = useRecoilValue(listGroupsState);
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
+  const getListGroup = useGetListGroupCallback();
   const setListGroups = useSetRecoilState(listGroupsState);
 
   const updateListGroupName = React.useCallback(
     (input: UpdateListGroupNameInput) => {
       const { listGroupID, name } = input;
-      const prevListGroup = listGroups[listGroupID];
-
-      if (prevListGroup === undefined) {
-        throw new Error('ListGroup not found');
-      }
+      const prevListGroup = getListGroup(listGroupID);
 
       const nextListGroup: ListGroup = {
         ...prevListGroup,
@@ -484,9 +580,12 @@ export function useUpdateListGroupName() {
         [nextListGroup.id]: nextListGroup,
       }));
 
-      storage.saveListGroup(nextListGroup);
+      emitEvent({
+        name: 'ListGroupNameUpdated',
+        listGroup: nextListGroup,
+      });
     },
-    [listGroups, setListGroups, storage],
+    [emitEvent, getListGroup, setListGroups],
   );
 
   return updateListGroupName;
@@ -498,12 +597,14 @@ export interface ExpandListGroupInput {
 }
 
 export function useExpandListGroup() {
-  const storage = useStorage();
+  const emitEvent = useEmitEvent();
+  const getListGroup = useGetListGroupCallback();
   const [menu, setMenu] = useRecoilState(menuState);
 
   const expandListGroup = React.useCallback(
     (input: ExpandListGroupInput) => {
       const { listGroupID, expanded } = input;
+      const listGroup = getListGroup(listGroupID);
 
       const nextMenu: MenuState = {
         ...menu,
@@ -514,9 +615,13 @@ export function useExpandListGroup() {
       };
 
       setMenu(nextMenu);
-      storage.saveMenuState(nextMenu);
+
+      emitEvent({
+        name: 'ListGroupExpanded',
+        listGroup,
+      });
     },
-    [menu, setMenu, storage],
+    [emitEvent, getListGroup, menu, setMenu],
   );
 
   return expandListGroup;

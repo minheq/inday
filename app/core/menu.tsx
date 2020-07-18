@@ -28,9 +28,9 @@ import {
   useUpdateListName,
   useUpdateListGroupName,
   useGetListGroupLists,
-  useGetLists,
   useExpandListGroup,
   useGetMenu,
+  useGetListAndListGroups,
 } from '../data/api';
 import { ListGroup } from '../data/list_group';
 import { tokens } from '../theme';
@@ -195,7 +195,7 @@ function FixedMenuItem(props: FixedMenuItemProps) {
 }
 
 function ListsMenu() {
-  const lists = useGetLists();
+  const lists = useGetListAndListGroups();
   const menu = useGetMenu();
 
   return (

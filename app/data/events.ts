@@ -6,110 +6,83 @@ import { Workspace } from './workspace';
 import { List } from './list';
 import { ListGroup } from './list_group';
 
-interface EventBase {
+export interface EventMetadata {
   createdAt: Date;
   typename: 'Event';
+  workspaceID: string;
 }
 
-export interface WorkspaceCreatedEvent extends EventBase {
+export interface WorkspaceCreatedEvent {
   name: 'WorkspaceCreated';
   workspace: Workspace;
 }
 
-export interface WorkspaceUpdatedEvent extends EventBase {
-  name: 'WorkspaceUpdated';
-  prevWorkspace: Workspace;
-  nextWorkspace: Workspace;
-}
-
-export interface NoteCreatedEvent extends EventBase {
+export interface NoteCreatedEvent {
   name: 'NoteCreated';
   note: Note;
-  workspaceID: string;
 }
 
-export interface NoteDeletedEvent extends EventBase {
+export interface NoteDeletedEvent {
   name: 'NoteDeleted';
   note: Note;
-  workspaceID: string;
 }
 
-export interface NoteUpdatedEvent extends EventBase {
-  name: 'NoteUpdated';
-  prevNote: Note;
-  workspaceID: string;
-  nextNote: Note;
+export interface NoteContentUpdatedEvent {
+  name: 'NoteContentUpdatedEvent';
+  note: Note;
 }
 
-export interface ListCreatedEvent extends EventBase {
+export interface ListCreatedEvent {
   name: 'ListCreated';
   list: List;
-  workspaceID: string;
 }
 
-export interface ListDeletedEvent extends EventBase {
+export interface ListNameUpdatedEvent {
+  name: 'ListNameUpdated';
+  list: List;
+}
+
+export interface ListDeletedEvent {
   name: 'ListDeleted';
   list: List;
-  workspaceID: string;
 }
 
-export interface ListNameUpdatedEvent extends EventBase {
-  name: 'ListNameUpdated';
-  prevList: List;
-  workspaceID: string;
-  nextList: List;
-}
-
-export interface ListNoteAddedEvent extends EventBase {
-  name: 'ListNoteAddedEvent';
-  prevList: List;
-  nextList: List;
-  workspaceID: string;
-}
-
-export interface ListGroupCreatedEvent extends EventBase {
+export interface ListGroupCreatedEvent {
   name: 'ListGroupCreated';
   listGroup: ListGroup;
-  workspaceID: string;
 }
 
-export interface ListGroupDeletedEvent extends EventBase {
+export interface ListGroupNameUpdatedEvent {
+  name: 'ListGroupNameUpdated';
+  listGroup: ListGroup;
+}
+
+export interface ListGroupDeletedEvent {
   name: 'ListGroupDeleted';
   listGroup: ListGroup;
-  workspaceID: string;
 }
 
-export interface ListGroupNameUpdatedEvent extends EventBase {
-  name: 'ListGroupNameUpdated';
-  prevListGroup: ListGroup;
-  nextListGroup: ListGroup;
-  workspaceID: string;
-}
-
-export interface ListGroupListAddedEvent extends EventBase {
-  name: 'ListGroupListAdded';
-  prevListGroup: ListGroup;
-  nextListGroup: ListGroup;
-  workspaceID: string;
+export interface ListGroupExpandedEvent {
+  name: 'ListGroupExpanded';
+  listGroup: ListGroup;
 }
 
 export type Event =
   | WorkspaceCreatedEvent
-  | WorkspaceUpdatedEvent
-  | WorkspaceUpdatedEvent
   | NoteCreatedEvent
   | NoteDeletedEvent
-  | NoteUpdatedEvent
+  | NoteContentUpdatedEvent
   | ListCreatedEvent
-  | ListDeletedEvent
   | ListNameUpdatedEvent
-  | ListNoteAddedEvent
+  | ListDeletedEvent
   | ListGroupCreatedEvent
-  | ListGroupDeletedEvent
   | ListGroupNameUpdatedEvent
-  | ListGroupListAddedEvent;
+  | ListGroupDeletedEvent
+  | ListGroupExpandedEvent;
 
-type SubscriptionCallback = (event: Event) => void;
+export type EventWithMetadata = Event & EventMetadata;
+
+type SubscriptionCallback = (event: EventWithMetadata) => void;
 
 class EventEmitter {
   private subscribers: SubscriptionCallback[] = [];
@@ -122,7 +95,7 @@ class EventEmitter {
     this.subscribers = this.subscribers.filter((c) => c !== callback);
   }
 
-  emit(event: Event) {
+  emit(event: EventWithMetadata) {
     this.subscribers.forEach((callback) => {
       callback(event);
     });
@@ -135,7 +108,7 @@ export function useEventEmitter() {
   return eventEmitter;
 }
 
-export type EventsState = Event[];
+export type EventsState = EventWithMetadata[];
 export const eventsState = atom<EventsState>({
   key: RecoilKey.Events,
   default: [],
