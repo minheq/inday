@@ -27,6 +27,7 @@ import { NoteListHeader } from './core/note_list_header';
 import { ListsState } from './data/list';
 import { ListGroupsState } from './data/list_group';
 import { MenuState } from './data/menu';
+import { SyncStorage } from './core/sync_storage';
 
 type Atoms = (
   | [RecoilKey.Notes, NotesState]
@@ -141,6 +142,7 @@ export function App() {
         <Suspense fallback={<Text>Initializing workspace...</Text>}>
           <InitWorkspace />
           <Suspense fallback={<Text>Loading...</Text>}>
+            <SyncStorage />
             <ThemeProvider>
               <DragDropProvider>
                 <Row expanded>

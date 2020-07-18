@@ -94,7 +94,6 @@ export function withShortcuts<T extends ReactEditor>(
 
   editor.insertText = (text) => {
     const { selection } = editor;
-    // console.log(editor.children, 'ed');
 
     if (BLOCK_SHORTCUTS[text] && selection && Range.isCollapsed(selection)) {
       const { anchor } = selection;

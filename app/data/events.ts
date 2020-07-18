@@ -96,9 +96,11 @@ class EventEmitter {
   }
 
   emit(event: EventWithMetadata) {
-    this.subscribers.forEach((callback) => {
-      callback(event);
-    });
+    setTimeout(() => {
+      this.subscribers.forEach((callback) => {
+        callback(event);
+      });
+    }, 0);
   }
 }
 

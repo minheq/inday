@@ -31,7 +31,6 @@ function StatefulCheckbox() {
           { label: 'December', value: 'December' },
         ]}
         onChange={(value) => {
-          console.log(value);
           setMonth(value);
         }}
       />
@@ -41,7 +40,6 @@ function StatefulCheckbox() {
           .fill(0)
           .map((v, i) => ({ label: `${i + 1}`, value: `${i + 1}` }))}
         onChange={(value) => {
-          console.log(value);
           setDay(value);
         }}
       />
@@ -51,7 +49,6 @@ function StatefulCheckbox() {
           .fill(0)
           .map((v, i) => ({ label: `${2000 + i}`, value: `${2000 + i}` }))}
         onChange={(value) => {
-          console.log(value);
           setYear(value);
         }}
       />

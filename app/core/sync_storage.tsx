@@ -25,9 +25,9 @@ export function SyncStorage() {
   const eventEmitter = useEventEmitter();
   const storage = useStorage();
   const workspace = useGetWorkspace();
+  const menu = useGetMenu();
   const getList = useGetListCallback();
   const getListGroup = useGetListGroupCallback();
-  const menu = useGetMenu();
 
   const handleWorkspaceCreated = React.useCallback(async () => {
     await storage.saveWorkspaceID(workspace);
