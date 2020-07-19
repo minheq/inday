@@ -9,13 +9,11 @@ export interface Note {
   id: string;
   content: Content;
   preview: Preview;
-  reminder: Reminder | null;
-  task: Task | null;
   createdAt: Date;
   updatedAt: Date;
   inbox: boolean;
   listID: string | null;
-  scheduledAt: Date | null;
+  deletedAt: Date | null;
   workspaceID: string;
   typename: 'Note';
 }

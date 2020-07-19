@@ -84,6 +84,7 @@ export function Menu() {
         <Container flex={1} padding={16}>
           <FixedMenuItem icon="inbox" title="Inbox" location={Location.Inbox} />
           <FixedMenuItem icon="book" title="All" location={Location.All} />
+          <FixedMenuItem icon="trash" title="Trash" location={Location.Trash} />
           <Spacing height={32} />
           <ListsMenu />
         </Container>
@@ -162,7 +163,7 @@ function NewListButton() {
 interface FixedMenuItemProps {
   icon: IconName;
   title: string;
-  location: Location.All | Location.Inbox;
+  location: Location.All | Location.Inbox | Location.Trash;
 }
 
 function FixedMenuItem(props: FixedMenuItemProps) {
@@ -594,12 +595,16 @@ function ListNameEditTextInput(props: ListNameEditTextInputProps) {
           onBlur={onBlur}
           onChangeText={onChange}
           // @ts-ignore
-          style={[styles.listNameEditTextInput, { outline: 'none' }]}
+          style={[styles.listNameEditTextInput, webStyle]}
         />
       </Row>
     </Container>
   );
 }
+
+const webStyle = {
+  outline: 'none',
+};
 
 const styles = StyleSheet.create({
   scrollView: {

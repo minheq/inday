@@ -9,6 +9,7 @@ export enum Location {
   All = 'All',
   Inbox = 'Inbox',
   List = 'List',
+  Trash = 'Trash',
 }
 
 export const navigationState = atom<NavigationState>({
@@ -19,6 +20,7 @@ export const navigationState = atom<NavigationState>({
 export type NavigationState =
   | { location: Location.All; noteID: string }
   | { location: Location.Inbox; noteID: string }
+  | { location: Location.Trash; noteID: string }
   | {
       location: Location.List;
       listID: string;
