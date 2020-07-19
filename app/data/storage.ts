@@ -3,8 +3,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { StorageKeyPrefix, StorageKey } from './constants';
 import { Workspace } from './workspace';
 import { Note } from './notes';
-import { List } from './list';
-import { ListGroup } from './list_group';
+import { Tag } from './tag';
 import { NavigationState } from './navigation';
 import { MenuState } from './menu';
 
@@ -36,28 +35,15 @@ async function removeNote(note: Note) {
   await AsyncStorage.removeItem(`${StorageKeyPrefix.Note}:${note.id}`);
 }
 
-async function saveList(list: List) {
+async function saveTag(tag: Tag) {
   await AsyncStorage.setItem(
-    `${StorageKeyPrefix.List}:${list.id}`,
-    JSON.stringify(list),
+    `${StorageKeyPrefix.Tag}:${tag.id}`,
+    JSON.stringify(tag),
   );
 }
 
-async function removeList(list: List) {
-  await AsyncStorage.removeItem(`${StorageKeyPrefix.List}:${list.id}`);
-}
-
-async function saveListGroup(listGroup: ListGroup) {
-  await AsyncStorage.setItem(
-    `${StorageKeyPrefix.ListGroup}:${listGroup.id}`,
-    JSON.stringify(listGroup),
-  );
-}
-
-async function removeListGroup(listGroup: ListGroup) {
-  await AsyncStorage.removeItem(
-    `${StorageKeyPrefix.ListGroup}:${listGroup.id}`,
-  );
+async function removeTag(tag: Tag) {
+  await AsyncStorage.removeItem(`${StorageKeyPrefix.Tag}:${tag.id}`);
 }
 
 async function saveNavigationState(navigationState: NavigationState) {
@@ -78,10 +64,8 @@ export function useStorage() {
     removeWorkspace,
     saveNote,
     removeNote,
-    saveList,
-    removeList,
-    saveListGroup,
-    removeListGroup,
+    saveTag,
+    removeTag,
     saveNavigationState,
     saveMenuState,
   };

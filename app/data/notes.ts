@@ -1,6 +1,5 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
-import { workspaceState } from './workspace';
 import { RecoilKey } from './constants';
 import { Recurrence } from '../modules/recurrence';
 import { Element } from '../editor/editable/nodes/element';
@@ -12,7 +11,10 @@ export interface Note {
   createdAt: Date;
   updatedAt: Date;
   inbox: boolean;
-  listID: string | null;
+  tags: {
+    [tagName: string]: true;
+  };
+  archivedAt: Date | null;
   deletedAt: Date | null;
   workspaceID: string;
   typename: 'Note';
@@ -54,52 +56,62 @@ export const notesState = atom<NotesState>({
   default: {},
 });
 
+export const noteListQuery = selector({
+  key: RecoilKey.NoteList,
+  get: ({ get }) => {
+    const notes = get(notesState);
+
+    return Object.values(notes) as Note[];
+  },
+});
+
 export const allNotesQuery = selector({
   key: RecoilKey.AllNotes,
   get: ({ get }) => {
-    const notes = get(notesState);
-    const workspace = get(workspaceState);
+    const noteList = get(noteListQuery);
 
-    if (workspace === null) {
-      throw new Error('Workspace not found');
-    }
-
-    return workspace.allNoteIDs.map((id) => {
-      const note = notes[id];
-
-      if (note === undefined) {
-        throw new Error(`Note out of sync for id=${id}`);
-      }
-
-      return note;
-    });
+    return noteList;
   },
 });
 
 export const inboxNotesQuery = selector({
   key: RecoilKey.InboxNotes,
   get: ({ get }) => {
-    const notes = get(notesState);
-    const workspace = get(workspaceState);
+    const noteList = get(noteListQuery);
 
-    if (workspace === null) {
-      throw new Error('Workspace not found');
-    }
+    return noteList.filter((note) => note.inbox === true);
+  },
+});
 
-    return workspace.inboxNoteIDs.map((id) => {
-      const note = notes[id];
+export const archivedNotesQuery = selector({
+  key: RecoilKey.ArchivedNotes,
+  get: ({ get }) => {
+    const noteList = get(noteListQuery);
 
-      if (note === undefined) {
-        throw new Error(`Note out of sync for id=${id}`);
-      }
+    return noteList.filter((note) => note.archivedAt !== null);
+  },
+});
 
-      return note;
-    });
+export const deletedNotesQuery = selector({
+  key: RecoilKey.DeletedNotes,
+  get: ({ get }) => {
+    const noteList = get(noteListQuery);
+
+    return noteList.filter((note) => note.deletedAt !== null);
+  },
+});
+
+export const tagNotesQuery = selectorFamily({
+  key: RecoilKey.InboxNotes,
+  get: (tagID: string) => ({ get }) => {
+    const noteList = get(noteListQuery);
+
+    return noteList.filter((note) => note.tags[tagID] === true);
   },
 });
 
 export const noteQuery = selectorFamily<Note | null, string>({
-  key: RecoilKey.AllNotes,
+  key: RecoilKey.Note,
   get: (noteID: string) => ({ get }) => {
     const notes = get(notesState);
     const note = notes[noteID];

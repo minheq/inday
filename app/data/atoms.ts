@@ -3,8 +3,7 @@ import { workspaceState } from './workspace';
 import { navigationState } from './navigation';
 import { notesState } from './notes';
 import { RecoilKey } from './constants';
-import { listsState } from './list';
-import { listGroupsState } from './list_group';
+import { tagsState } from './tag';
 import { menuState } from './menu';
 
 export function getAtomWithKey(key: RecoilKey): RecoilState<any> {
@@ -17,10 +16,8 @@ export function getAtomWithKey(key: RecoilKey): RecoilState<any> {
       return menuState;
     case RecoilKey.Notes:
       return notesState;
-    case RecoilKey.Lists:
-      return listsState;
-    case RecoilKey.ListGroups:
-      return listGroupsState;
+    case RecoilKey.Tags:
+      return tagsState;
     default:
       throw new Error('Invalid atom key');
   }

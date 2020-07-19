@@ -5,14 +5,18 @@ export enum RecoilKey {
   Navigation = 'Navigation',
   Menu = 'Menu',
   Events = 'Events',
-  Lists = 'Lists',
-  ListGroups = 'ListGroups',
+  Tags = 'Tags',
 
   // Selectors
   AllNotes = 'AllNotes',
-  AllLists = 'AllLists',
+  ArchivedNotes = 'ArchivedNotes',
+  DeletedNotes = 'DeletedNotes',
   InboxNotes = 'InboxNotes',
-  ListGroup = 'ListGroup',
+  TagNotes = 'TagNotes',
+  NoteList = 'NoteList',
+  MenuTags = 'MenuTags',
+  Tag = 'Tag',
+  Note = 'Note',
 }
 
 export enum StorageKey {
@@ -24,6 +28,5 @@ export enum StorageKey {
 export enum StorageKeyPrefix {
   Note = 'Note',
   Workspace = 'Workspace',
-  List = 'List',
-  ListGroup = 'ListGroup',
+  Tag = 'Tag',
 }

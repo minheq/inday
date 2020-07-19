@@ -3,8 +3,7 @@ import { atom } from 'recoil';
 import { RecoilKey } from './constants';
 import { Note } from './notes';
 import { Workspace } from './workspace';
-import { List } from './list';
-import { ListGroup } from './list_group';
+import { Tag } from './tag';
 
 export interface EventMetadata {
   createdAt: Date;
@@ -32,39 +31,24 @@ export interface NoteContentUpdatedEvent {
   note: Note;
 }
 
-export interface ListCreatedEvent {
-  name: 'ListCreated';
-  list: List;
+export interface TagCreatedEvent {
+  name: 'TagCreated';
+  tag: Tag;
 }
 
-export interface ListNameUpdatedEvent {
-  name: 'ListNameUpdated';
-  list: List;
+export interface TagNameUpdatedEvent {
+  name: 'TagNameUpdated';
+  tag: Tag;
 }
 
-export interface ListDeletedEvent {
-  name: 'ListDeleted';
-  list: List;
+export interface TagDeletedEvent {
+  name: 'TagDeleted';
+  tag: Tag;
 }
 
-export interface ListGroupCreatedEvent {
-  name: 'ListGroupCreated';
-  listGroup: ListGroup;
-}
-
-export interface ListGroupNameUpdatedEvent {
-  name: 'ListGroupNameUpdated';
-  listGroup: ListGroup;
-}
-
-export interface ListGroupDeletedEvent {
-  name: 'ListGroupDeleted';
-  listGroup: ListGroup;
-}
-
-export interface ListGroupExpandedEvent {
-  name: 'ListGroupExpanded';
-  listGroup: ListGroup;
+export interface TagExpandedEvent {
+  name: 'TagExpanded';
+  tag: Tag;
 }
 
 export type Event =
@@ -72,13 +56,10 @@ export type Event =
   | NoteCreatedEvent
   | NoteDeletedEvent
   | NoteContentUpdatedEvent
-  | ListCreatedEvent
-  | ListNameUpdatedEvent
-  | ListDeletedEvent
-  | ListGroupCreatedEvent
-  | ListGroupNameUpdatedEvent
-  | ListGroupDeletedEvent
-  | ListGroupExpandedEvent;
+  | TagCreatedEvent
+  | TagNameUpdatedEvent
+  | TagDeletedEvent
+  | TagExpandedEvent;
 
 export type EventWithMetadata = Event & EventMetadata;
 

@@ -14,9 +14,9 @@ import { NoteList } from './core/note_list';
 import {
   useGetNote,
   useGetAllNotes,
-  useGetList,
-  useGetListNotes,
   useGetInboxNotes,
+  useGetTag,
+  useGetTagNotes,
 } from './data/api';
 import { NoteEditor } from './core/note_editor';
 import { Note, NotesState } from './data/notes';
@@ -24,15 +24,13 @@ import { WorkspaceState } from './data/workspace';
 import { InitWorkspace } from './core/init_workspace';
 import { useNavigation, Location, NavigationState } from './data/navigation';
 import { NoteListHeader } from './core/note_list_header';
-import { ListsState } from './data/list';
-import { ListGroupsState } from './data/list_group';
+import { TagsState } from './data/tag';
 import { MenuState } from './data/menu';
 import { SyncStorage } from './core/sync_storage';
 
 type Atoms = (
   | [RecoilKey.Notes, NotesState]
-  | [RecoilKey.Lists, ListsState]
-  | [RecoilKey.ListGroups, ListGroupsState]
+  | [RecoilKey.Tags, TagsState]
   | [RecoilKey.Workspace, WorkspaceState]
   | [RecoilKey.Navigation, NavigationState]
   | [RecoilKey.Menu, MenuState]
@@ -63,15 +61,6 @@ async function init() {
   const keys = await AsyncStorage.getAllKeys();
   const load = preLoad(keys);
 
-  const notes: NotesState = await load(StorageKeyPrefix.Note);
-  atoms.push([RecoilKey.Notes, notes]);
-
-  const lists: ListsState = await load(StorageKeyPrefix.List);
-  atoms.push([RecoilKey.Lists, lists]);
-
-  const listGroups: ListGroupsState = await load(StorageKeyPrefix.ListGroup);
-  atoms.push([RecoilKey.ListGroups, listGroups]);
-
   const workspaceID = await AsyncStorage.getItem(StorageKey.WorkspaceID);
   const workspaces: { [id: string]: Workspace | undefined } = await load(
     StorageKeyPrefix.Workspace,
@@ -79,10 +68,21 @@ async function init() {
 
   if (workspaceID) {
     const workspace = workspaces[workspaceID];
+
     if (workspace) {
       atoms.push([RecoilKey.Workspace, workspace]);
+    } else {
+      return atoms;
     }
+  } else {
+    return atoms;
   }
+
+  const notes: NotesState = await load(StorageKeyPrefix.Note);
+  atoms.push([RecoilKey.Notes, notes]);
+
+  const tags: TagsState = await load(StorageKeyPrefix.Tag);
+  atoms.push([RecoilKey.Tags, tags]);
 
   const navigation = await AsyncStorage.getItem(StorageKey.Navigation);
   if (navigation) {
@@ -197,10 +197,10 @@ function NoteListSwitch() {
       return <AllNoteList noteID={navigation.state.noteID} />;
     case Location.Inbox:
       return <InboxNoteList noteID={navigation.state.noteID} />;
-    case Location.List:
+    case Location.Tag:
       return (
-        <ListNoteList
-          listID={navigation.state.listID}
+        <TagNoteList
+          tagID={navigation.state.tagID}
           noteID={navigation.state.noteID}
         />
       );
@@ -272,31 +272,31 @@ function InboxNoteList(props: InboxNoteListProps) {
   );
 }
 
-interface ListNoteListProps {
-  listID: string;
+interface TagNoteListProps {
+  tagID: string;
   noteID: string;
 }
 
-function ListNoteList(props: ListNoteListProps) {
-  const { listID, noteID } = props;
+function TagNoteList(props: TagNoteListProps) {
+  const { tagID, noteID } = props;
   const navigation = useNavigation();
-  const list = useGetList(listID);
-  const notes = useGetListNotes(listID);
+  const tag = useGetTag(tagID);
+  const notes = useGetTagNotes(tagID);
 
   const handleViewNote = React.useCallback(
     (note: Note) => {
       navigation.navigate({
-        location: Location.List,
-        listID,
+        location: Location.Tag,
+        tagID,
         noteID: note.id,
       });
     },
-    [navigation, listID],
+    [navigation, tagID],
   );
 
   return (
     <Container>
-      <NoteListHeader name={list.name} onViewNote={handleViewNote} />
+      <NoteListHeader name={tag.name} onViewNote={handleViewNote} />
       <NoteList
         selectedNoteID={noteID}
         notes={notes}
@@ -309,10 +309,6 @@ function ListNoteList(props: ListNoteListProps) {
 function NoteViewSection() {
   const navigation = useNavigation();
   const note = useGetNote(navigation.state.noteID);
-
-  if (note === null) {
-    return null;
-  }
 
   return (
     <Container flex={1}>

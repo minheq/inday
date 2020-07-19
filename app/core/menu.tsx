@@ -15,24 +15,17 @@ import {
   Row,
   Button,
   IconName,
-  Dialog,
   Popover,
   PopoverAnchor,
 } from '../components';
 import { Location, useNavigation } from '../data/navigation';
-import { useToggle } from '../hooks/use_toggle';
-import { List } from '../data/list';
+
 import {
-  useCreateList,
-  useCreateListGroup,
-  useUpdateListName,
-  useUpdateListGroupName,
-  useGetListGroupLists,
-  useExpandListGroup,
-  useGetMenu,
-  useGetListAndListGroups,
+  useExpandTag,
+  useGetMenuTags,
+  useCreateTag,
+  useUpdateTagName,
 } from '../data/api';
-import { ListGroup } from '../data/list_group';
 import { tokens } from '../theme';
 import { measure } from '../utils/measurements';
 import {
@@ -40,40 +33,37 @@ import {
   ContextMenuCoordinate,
 } from '../hooks/use_context_menu';
 import { Expand } from '../components/expand';
+import { MenuTag } from '../data/menu';
 
 interface MenuContext {
-  renameListOrListGroupID: string | null;
-  onSetRenameListOrListGroupID: (listOrListGroupID: string) => void;
+  renameTagID: string | null;
+  onSetRenameTagID: (tagID: string) => void;
   onClear: () => void;
 }
 
 const MenuContext = React.createContext<MenuContext>({
-  renameListOrListGroupID: null,
-  onSetRenameListOrListGroupID: () => {},
+  renameTagID: null,
+  onSetRenameTagID: () => {},
   onClear: () => {},
 });
 
 export function Menu() {
-  const [renameListOrListGroupID, setRenameListOrListGroupID] = React.useState<
-    string | null
-  >(null);
+  const menuTags = useGetMenuTags();
+  const [renameTagID, setRenameTagID] = React.useState<string | null>(null);
 
-  const handleSetRenameListOrListGroupID = React.useCallback(
-    (listOrListGroupID: string) => {
-      setRenameListOrListGroupID(listOrListGroupID);
-    },
-    [],
-  );
+  const handleSetRenameTagID = React.useCallback((tagID: string) => {
+    setRenameTagID(tagID);
+  }, []);
 
   const handleClear = React.useCallback(() => {
-    setRenameListOrListGroupID(null);
+    setRenameTagID(null);
   }, []);
 
   return (
     <MenuContext.Provider
       value={{
-        renameListOrListGroupID,
-        onSetRenameListOrListGroupID: handleSetRenameListOrListGroupID,
+        renameTagID,
+        onSetRenameTagID: handleSetRenameTagID,
         onClear: handleClear,
       }}
     >
@@ -84,86 +74,50 @@ export function Menu() {
         <Container flex={1} padding={16}>
           <FixedMenuItem icon="inbox" title="Inbox" location={Location.Inbox} />
           <FixedMenuItem icon="book" title="All" location={Location.All} />
+          <FixedMenuItem
+            icon="archive"
+            title="Archive"
+            location={Location.Archive}
+          />
           <FixedMenuItem icon="trash" title="Trash" location={Location.Trash} />
           <Spacing height={32} />
-          <ListsMenu />
+          <Tags menuTags={menuTags} />
         </Container>
       </ScrollView>
-      <NewListButton />
+      <MenuFooter />
     </MenuContext.Provider>
   );
 }
 
-function NewListButton() {
-  const [visible, { toggle, setFalse }] = useToggle();
-  const createList = useCreateList();
-  const createListGroup = useCreateListGroup();
+function MenuFooter() {
+  const createTag = useCreateTag();
   const menuContext = React.useContext(MenuContext);
 
-  const handleCreateList = React.useCallback(() => {
-    const list = createList(null);
-    menuContext.onSetRenameListOrListGroupID(list.id);
-    setFalse();
-  }, [createList, setFalse, menuContext]);
-
-  const handleCreateListGroup = React.useCallback(() => {
-    const listGroup = createListGroup();
-    menuContext.onSetRenameListOrListGroupID(listGroup.id);
-    setFalse();
-  }, [createListGroup, setFalse, menuContext]);
+  const handleCreateTag = React.useCallback(() => {
+    const tag = createTag(null);
+    menuContext.onSetRenameTagID(tag.id);
+  }, [createTag, menuContext]);
 
   return (
-    <>
-      <Dialog animationType="slide" visible={visible} onRequestClose={setFalse}>
-        <Container maxWidth={400}>
-          <Button onPress={handleCreateList} style={styles.newList}>
-            <Container padding={16}>
-              <Row alignItems="center" expanded>
-                <Icon name="list" size="lg" />
-                <Spacing width={16} />
-                <Container flex={1}>
-                  <Text bold>New list</Text>
-                  <Text>
-                    Create a single list of notes that follow similar topic
-                  </Text>
-                </Container>
-              </Row>
-            </Container>
-          </Button>
-          <Button onPress={handleCreateListGroup} style={styles.newListGroup}>
-            <Container padding={16}>
-              <Row alignItems="center" expanded>
-                <Icon name="layers" size="lg" />
-                <Spacing width={16} />
-                <Container flex={1}>
-                  <Text bold>New list group</Text>
-                  <Text>
-                    Group your lists based on different topic areas like
-                    Engineering or Design
-                  </Text>
-                </Container>
-              </Row>
-            </Container>
-          </Button>
-        </Container>
-      </Dialog>
-      <Container padding={16}>
-        <Row justifyContent="flex-end">
-          <Button onPress={toggle} style={{ borderRadius: tokens.radius }}>
-            <Container center height={40} paddingHorizontal={16}>
-              <Text color="primary">New list</Text>
-            </Container>
-          </Button>
-        </Row>
-      </Container>
-    </>
+    <Container padding={16}>
+      <Row justifyContent="flex-end">
+        <Button
+          onPress={handleCreateTag}
+          style={{ borderRadius: tokens.radius }}
+        >
+          <Container center height={40} paddingHorizontal={16}>
+            <Text color="primary">New tag</Text>
+          </Container>
+        </Button>
+      </Row>
+    </Container>
   );
 }
 
 interface FixedMenuItemProps {
   icon: IconName;
   title: string;
-  location: Location.All | Location.Inbox | Location.Trash;
+  location: Location.All | Location.Inbox | Location.Trash | Location.Archive;
 }
 
 function FixedMenuItem(props: FixedMenuItemProps) {
@@ -195,65 +149,56 @@ function FixedMenuItem(props: FixedMenuItemProps) {
   );
 }
 
-function ListsMenu() {
-  const lists = useGetListAndListGroups();
-  const menu = useGetMenu();
+interface TagsProps {
+  menuTags: MenuTag[];
+}
+
+function Tags(props: TagsProps) {
+  const { menuTags } = props;
 
   return (
     <>
-      {lists.map((list) => {
-        if (list.typename === 'ListGroup') {
-          const listGroupMenuItem = menu.listGroupIDs[list.id];
+      {menuTags.map((menuTag) => {
+        const { tag, expanded } = menuTag;
 
-          const expanded = !!(
-            listGroupMenuItem && listGroupMenuItem.expanded === true
-          );
-
-          return (
-            <ListGroupMenuItem
-              key={list.id}
-              listGroup={list}
-              expanded={expanded}
-            />
-          );
-        }
-
-        return <ListMenuItem key={list.id} list={list} />;
+        return (
+          <TagMenuItem key={tag.id} menuTag={menuTag} expanded={expanded} />
+        );
       })}
     </>
   );
 }
 
-interface ListGroupMenuItemProps {
-  listGroup: ListGroup;
+interface TagMenuItemProps {
+  menuTag: MenuTag;
   expanded: boolean;
 }
 
-function ListGroupMenuItem(props: ListGroupMenuItemProps) {
-  const { listGroup, expanded } = props;
-  const updateListName = useUpdateListGroupName();
-  const expandListGroup = useExpandListGroup();
+function TagMenuItem(props: TagMenuItemProps) {
+  const { menuTag, expanded } = props;
+  const { tag, children } = menuTag;
+  const updateTagName = useUpdateTagName();
+  const expandTag = useExpandTag();
   const [visible, setVisible] = React.useState(false);
   const [anchor, setAnchor] = React.useState<PopoverAnchor>({
     y: 0,
     x: 0,
   });
-  const createList = useCreateList();
+  const createList = useCreateTag();
   const chevron = React.useRef(new Animated.Value(0)).current;
   const menuContext = React.useContext(MenuContext);
   const ref = React.useRef<View>(null);
-  const lists = useGetListGroupLists(listGroup.id);
 
   const handleChange = React.useCallback(
     (name: string) => {
-      updateListName({ listGroupID: listGroup.id, name });
+      updateTagName({ tagID: tag.id, name });
     },
-    [updateListName, listGroup],
+    [updateTagName, tag],
   );
 
   const handleExpand = React.useCallback(() => {
-    expandListGroup({ listGroupID: listGroup.id, expanded: !expanded });
-  }, [listGroup, expanded, expandListGroup]);
+    expandTag({ tagID: tag.id, expanded: !expanded });
+  }, [tag, expanded, expandTag]);
 
   const handleBlur = React.useCallback(() => {
     menuContext.onClear();
@@ -296,23 +241,23 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
 
   const handlePressRename = React.useCallback(() => {
     setVisible(false);
-    menuContext.onSetRenameListOrListGroupID(listGroup.id);
-  }, [menuContext, listGroup]);
+    menuContext.onSetRenameTagID(tag.id);
+  }, [menuContext, tag]);
 
-  const handleAddList = React.useCallback(() => {
-    setVisible(false);
-    expandListGroup({ listGroupID: listGroup.id, expanded: true });
-    const list = createList(listGroup.id);
-    menuContext.onSetRenameListOrListGroupID(list.id);
-  }, [menuContext, listGroup, expandListGroup, createList]);
+  const handleAddNote = React.useCallback(() => {
+    // setVisible(false);
+    // expandTag({ tagID: tag.id, expanded: true });
+    // const tag = createList(tag.id);
+    // menuContext.onSetRenameTagID(tag.id);
+  }, [menuContext, tag, expandTag, createList]);
 
   return (
     <>
       <View ref={ref}>
-        {menuContext.renameListOrListGroupID === listGroup.id ? (
-          <ListNameEditTextInput
-            typename="ListGroup"
-            value={listGroup.name}
+        {menuContext.renameTagID === tag.id ? (
+          <TagNameEditTextInput
+            typename="ParentTag"
+            value={tag.name}
             onChange={handleChange}
             onBlur={handleBlur}
           />
@@ -341,7 +286,7 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
                   </Animated.View>
                   <Spacing width={8} />
                   <Container flex={1}>
-                    <Text>{listGroup.name}</Text>
+                    <Text>{tag.name}</Text>
                   </Container>
                   {hovered && (
                     <Button
@@ -361,9 +306,7 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
       </View>
       <Expand open={expanded}>
         <Container paddingLeft={16}>
-          {lists.map((list) => (
-            <ListMenuItem key={list.id} list={list} />
-          ))}
+          <Tags menuTags={children} />
         </Container>
       </Expand>
       <Popover
@@ -372,8 +315,8 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
         visible={visible}
         placement="bottom-right"
       >
-        <ListGroupMenuItemContextMenu
-          onAddList={handleAddList}
+        <TagMenuItemContextMenu
+          onAddNote={handleAddNote}
           onDelete={handlePressRename}
           onPressRename={handlePressRename}
         />
@@ -382,139 +325,13 @@ function ListGroupMenuItem(props: ListGroupMenuItemProps) {
   );
 }
 
-interface ListMenuItemProps {
-  list: List;
-}
-
-function ListMenuItem(props: ListMenuItemProps) {
-  const { list } = props;
-  const navigation = useNavigation();
-  const updateListName = useUpdateListName();
-  const [visible, setVisible] = React.useState(false);
-  const [anchor, setAnchor] = React.useState<PopoverAnchor>({
-    y: 0,
-    x: 0,
-  });
-  const menuContext = React.useContext(MenuContext);
-  const ref = React.useRef<View>(null);
-  const active =
-    navigation.state.location === Location.List &&
-    navigation.state.listID === list.id;
-
-  const handlePress = React.useCallback(() => {
-    navigation.navigate({
-      location: Location.List,
-      listID: list.id,
-      noteID: '',
-    });
-  }, [navigation, list]);
-
-  const handleChange = React.useCallback(
-    (name: string) => {
-      updateListName({ listID: list.id, name });
-    },
-    [updateListName, list],
-  );
-
-  const handleBlur = React.useCallback(() => {
-    menuContext.onClear();
-  }, [menuContext]);
-
-  const handlePressMore = React.useCallback(async () => {
-    measure(ref).then((measurements) => {
-      setVisible(true);
-      setAnchor({
-        y: measurements.pageY + 28,
-        x: measurements.pageX + measurements.width - 24,
-      });
-    });
-  }, []);
-
-  const handleOpenContextMenu = React.useCallback(
-    (coordinate: ContextMenuCoordinate) => {
-      setVisible(true);
-      setAnchor({
-        y: coordinate.y,
-        x: coordinate.x,
-      });
-    },
-    [],
-  );
-
-  useContextMenu({ ref, onOpen: handleOpenContextMenu });
-
-  const handleCloseMore = React.useCallback(async () => {
-    setVisible(false);
-  }, []);
-
-  const handlePressRename = React.useCallback(() => {
-    setVisible(false);
-    menuContext.onSetRenameListOrListGroupID(list.id);
-  }, [menuContext, list]);
-
-  return (
-    <>
-      <View ref={ref}>
-        {menuContext.renameListOrListGroupID === list.id ? (
-          <ListNameEditTextInput
-            typename="List"
-            value={list.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        ) : (
-          <Button
-            state={active ? 'active' : visible ? 'hovered' : 'default'}
-            onPress={handlePress}
-            style={{ borderRadius: tokens.radius }}
-          >
-            {({ hovered }) => (
-              <Container height={40} paddingHorizontal={8}>
-                <Row alignItems="center" expanded>
-                  <Icon name="list" size="lg" />
-                  <Spacing width={8} />
-                  <Container flex={1}>
-                    <Text>{list.name}</Text>
-                  </Container>
-                  {hovered && (
-                    <Button
-                      onPress={handlePressMore}
-                      style={styles.menuItemMore}
-                    >
-                      <Container center width={32} height={32}>
-                        <Icon name="more-horizontal" size="lg" />
-                      </Container>
-                    </Button>
-                  )}
-                </Row>
-              </Container>
-            )}
-          </Button>
-        )}
-      </View>
-      <Popover
-        onRequestClose={handleCloseMore}
-        anchor={anchor}
-        visible={visible}
-        placement="bottom-right"
-      >
-        <ListMenuItemContextMenu
-          onDelete={handlePressRename}
-          onPressRename={handlePressRename}
-          onAddNote={() => {}}
-        />
-      </Popover>
-    </>
-  );
-}
-
-interface ListMenuItemContextMenuProps {
+interface TagMenuItemContextMenuProps {
   onPressRename: () => void;
   onDelete: () => void;
   onAddNote: () => void;
 }
 
-function ListMenuItemContextMenu(props: ListMenuItemContextMenuProps) {
+function TagMenuItemContextMenu(props: TagMenuItemContextMenuProps) {
   const { onPressRename, onDelete, onAddNote } = props;
 
   return (
@@ -540,54 +357,20 @@ function ListMenuItemContextMenu(props: ListMenuItemContextMenuProps) {
   );
 }
 
-interface ListGroupMenuItemContextMenuProps {
-  onPressRename: () => void;
-  onAddList: () => void;
-  onDelete: () => void;
-}
-
-function ListGroupMenuItemContextMenu(
-  props: ListGroupMenuItemContextMenuProps,
-) {
-  const { onPressRename, onAddList } = props;
-
-  return (
-    <Container width={160} color="content" shape="rounded">
-      <Button onPress={onPressRename}>
-        <Container padding={8}>
-          <Text size="sm">Rename</Text>
-        </Container>
-      </Button>
-      <Button onPress={onAddList}>
-        <Container padding={8}>
-          <Text size="sm">Add list</Text>
-        </Container>
-      </Button>
-      <Button onPress={onAddList}>
-        <Container padding={8}>
-          <Text color="error" size="sm">
-            Delete
-          </Text>
-        </Container>
-      </Button>
-    </Container>
-  );
-}
-
-interface ListNameEditTextInputProps {
-  typename: 'List' | 'ListGroup';
+interface TagNameEditTextInputProps {
+  typename: 'List' | 'ParentTag';
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
 }
 
-function ListNameEditTextInput(props: ListNameEditTextInputProps) {
+function TagNameEditTextInput(props: TagNameEditTextInputProps) {
   const { typename, value, onChange, onBlur } = props;
 
   return (
     <Container height={40} paddingHorizontal={8}>
       <Row expanded alignItems="center">
-        <Icon name={typename === 'List' ? 'list' : 'layers'} size="lg" />
+        <Icon name={typename === 'List' ? 'tag' : 'layers'} size="lg" />
         <Spacing width={8} />
         <TextInput
           autoFocus
@@ -595,7 +378,7 @@ function ListNameEditTextInput(props: ListNameEditTextInputProps) {
           onBlur={onBlur}
           onChangeText={onChange}
           // @ts-ignore
-          style={[styles.listNameEditTextInput, webStyle]}
+          style={[styles.TagNameEditTextInput, webStyle]}
         />
       </Row>
     </Container>
@@ -615,7 +398,7 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'visible',
   },
-  listNameEditTextInput: {
+  TagNameEditTextInput: {
     flex: 1,
     ...tokens.text.size.md,
   },
@@ -623,7 +406,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: tokens.radius,
     borderTopRightRadius: tokens.radius,
   },
-  newListGroup: {
+  newParentTag: {
     borderBottomLeftRadius: tokens.radius,
     borderBottomRightRadius: tokens.radius,
   },
