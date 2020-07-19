@@ -34,6 +34,7 @@ import {
 } from '../hooks/use_context_menu';
 import { Expand } from '../components/expand';
 import { MenuTag } from '../data/menu';
+import { isEmpty } from '../utils/arrays';
 
 interface MenuContext {
   renameTagID: string | null;
@@ -177,6 +178,7 @@ interface TagMenuItemProps {
 function TagMenuItem(props: TagMenuItemProps) {
   const { menuTag, expanded } = props;
   const { tag, children } = menuTag;
+  const navigation = useNavigation();
   const updateTagName = useUpdateTagName();
   const expandTag = useExpandTag();
   const [visible, setVisible] = React.useState(false);
@@ -195,6 +197,14 @@ function TagMenuItem(props: TagMenuItemProps) {
     },
     [updateTagName, tag],
   );
+
+  const handlePress = React.useCallback(() => {
+    navigation.navigate({
+      location: Location.Tag,
+      tagID: tag.id,
+      noteID: '',
+    });
+  }, [tag, navigation]);
 
   const handleExpand = React.useCallback(() => {
     expandTag({ tagID: tag.id, expanded: !expanded });
@@ -251,39 +261,42 @@ function TagMenuItem(props: TagMenuItemProps) {
     // menuContext.onSetRenameTagID(tag.id);
   }, [menuContext, tag, expandTag, createList]);
 
+  const hasChildren = isEmpty(children) === false;
+
   return (
     <>
       <View ref={ref}>
         {menuContext.renameTagID === tag.id ? (
           <TagNameEditTextInput
-            typename="ParentTag"
             value={tag.name}
             onChange={handleChange}
             onBlur={handleBlur}
           />
         ) : (
           <Button
-            onPress={handleExpand}
+            onPress={handlePress}
             style={{ borderRadius: tokens.radius }}
             state={visible ? 'hovered' : 'default'}
           >
             {({ hovered }) => (
               <Container height={40} paddingHorizontal={8}>
                 <Row alignItems="center" expanded>
-                  <Animated.View
-                    style={{
-                      transform: [
-                        {
-                          rotate: chevron.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '90deg'],
-                          }),
-                        },
-                      ],
-                    }}
-                  >
-                    <Icon name="chevron-right" size="lg" />
-                  </Animated.View>
+                  {hasChildren && (
+                    <Animated.View
+                      style={{
+                        transform: [
+                          {
+                            rotate: chevron.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: ['0deg', '90deg'],
+                            }),
+                          },
+                        ],
+                      }}
+                    >
+                      <Icon name="chevron-right" size="lg" />
+                    </Animated.View>
+                  )}
                   <Spacing width={8} />
                   <Container flex={1}>
                     <Text>{tag.name}</Text>
@@ -358,19 +371,18 @@ function TagMenuItemContextMenu(props: TagMenuItemContextMenuProps) {
 }
 
 interface TagNameEditTextInputProps {
-  typename: 'List' | 'ParentTag';
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
 }
 
 function TagNameEditTextInput(props: TagNameEditTextInputProps) {
-  const { typename, value, onChange, onBlur } = props;
+  const { value, onChange, onBlur } = props;
 
   return (
     <Container height={40} paddingHorizontal={8}>
       <Row expanded alignItems="center">
-        <Icon name={typename === 'List' ? 'tag' : 'layers'} size="lg" />
+        <Icon name="tag" size="lg" />
         <Spacing width={8} />
         <TextInput
           autoFocus

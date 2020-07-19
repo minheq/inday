@@ -6,19 +6,11 @@ import {
   NoteCreatedEvent,
   NoteDeletedEvent,
   NoteContentUpdatedEvent,
-  ListCreatedEvent,
-  ListDeletedEvent,
-  ListNameUpdatedEvent,
-  ListGroupCreatedEvent,
-  ListGroupDeletedEvent,
-  ListGroupNameUpdatedEvent,
+  TagCreatedEvent,
+  TagDeletedEvent,
+  TagNameUpdatedEvent,
 } from '../data/events';
-import {
-  useGetWorkspace,
-  useGetListCallback,
-  useGetListGroupCallback,
-  useGetMenu,
-} from '../data/api';
+import { useGetWorkspace, useGetMenu } from '../data/api';
 import { useStorage } from '../data/storage';
 
 export function SyncStorage() {
@@ -26,8 +18,6 @@ export function SyncStorage() {
   const storage = useStorage();
   const workspace = useGetWorkspace();
   const menu = useGetMenu();
-  const getList = useGetListCallback();
-  const getListGroup = useGetListGroupCallback();
 
   const handleWorkspaceCreated = React.useCallback(async () => {
     await storage.saveWorkspaceID(workspace);
@@ -39,17 +29,8 @@ export function SyncStorage() {
       const { note } = event;
 
       await storage.saveNote(note);
-
-      // Note added to workspace `allNoteIDs` and/or `inboxNoteIDs` field
-      await storage.saveWorkspace(workspace);
-
-      // Note added to list's `noteIDs` field
-      if (note.listID !== null) {
-        const list = getList(note.listID);
-        await storage.saveList(list);
-      }
     },
-    [storage, getList, workspace],
+    [storage],
   );
 
   const handleNoteDeleted = React.useCallback(
@@ -57,17 +38,8 @@ export function SyncStorage() {
       const { note } = event;
 
       await storage.removeNote(note);
-
-      // Remove occurrences in workspace `allNoteIDs` and/or `inboxNoteIDs` field
-      await storage.saveWorkspace(workspace);
-
-      // Remove occurrences in list's `noteIDs` field
-      if (note.listID !== null) {
-        const list = getList(note.listID);
-        await storage.saveList(list);
-      }
     },
-    [storage, workspace, getList],
+    [storage],
   );
 
   const handleNoteContentUpdated = React.useCallback(
@@ -79,83 +51,33 @@ export function SyncStorage() {
     [storage],
   );
 
-  const handleListCreated = React.useCallback(
-    async (event: ListCreatedEvent) => {
-      const { list } = event;
+  const handleTagCreated = React.useCallback(
+    async (event: TagCreatedEvent) => {
+      const { tag } = event;
 
-      await storage.saveList(list);
-
-      if (list.listGroupID !== null) {
-        const listGroup = getListGroup(list.listGroupID);
-        await storage.saveListGroup(listGroup);
-      } else {
-        // List added to workspace `listOrListGroupIDs` field
-        await storage.saveWorkspace(workspace);
-      }
-    },
-    [storage, workspace, getListGroup],
-  );
-
-  const handleListDeleted = React.useCallback(
-    async (event: ListDeletedEvent) => {
-      const { list } = event;
-
-      await storage.removeList(list);
-
-      if (list.listGroupID !== null) {
-        const listGroup = getListGroup(list.listGroupID);
-        await storage.saveListGroup(listGroup);
-      } else {
-        // List added to workspace `listOrListGroupIDs` field
-        await storage.saveWorkspace(workspace);
-      }
-    },
-    [storage, getListGroup, workspace],
-  );
-
-  const handleListNameUpdated = React.useCallback(
-    async (event: ListNameUpdatedEvent) => {
-      const { list } = event;
-
-      await storage.saveList(list);
+      await storage.saveTag(tag);
     },
     [storage],
   );
 
-  const handleListGroupCreated = React.useCallback(
-    async (event: ListGroupCreatedEvent) => {
-      const { listGroup } = event;
-
-      await storage.saveListGroup(listGroup);
-
-      // ListGroup added to workspace `listOrListGroupIDs` field
-      await storage.saveWorkspace(workspace);
-    },
-    [storage, workspace],
-  );
-
-  const handleListGroupDeleted = React.useCallback(
-    async (event: ListGroupDeletedEvent) => {
-      const { listGroup } = event;
-
-      await storage.removeListGroup(listGroup);
-
-      // ListGroup removed from workspace `listOrListGroupIDs` field
-      await storage.saveWorkspace(workspace);
-    },
-    [storage, workspace],
-  );
-
-  const handleListGroupNameUpdated = React.useCallback(
-    async (event: ListGroupNameUpdatedEvent) => {
-      const { listGroup } = event;
-
-      await storage.saveListGroup(listGroup);
+  const handleTagDeleted = React.useCallback(
+    async (event: TagDeletedEvent) => {
+      const { tag } = event;
+      await storage.removeTag(tag);
     },
     [storage],
   );
 
-  const handleListGroupExpanded = React.useCallback(async () => {
+  const handleTagNameUpdated = React.useCallback(
+    async (event: TagNameUpdatedEvent) => {
+      const { tag } = event;
+
+      await storage.saveTag(tag);
+    },
+    [storage],
+  );
+
+  const handleTagExpanded = React.useCallback(async () => {
     await storage.saveMenuState(menu);
   }, [storage, menu]);
 
@@ -170,20 +92,14 @@ export function SyncStorage() {
           return handleNoteDeleted(event);
         case 'NoteContentUpdatedEvent':
           return handleNoteContentUpdated(event);
-        case 'ListCreated':
-          return handleListCreated(event);
-        case 'ListDeleted':
-          return handleListDeleted(event);
-        case 'ListNameUpdated':
-          return handleListNameUpdated(event);
-        case 'ListGroupCreated':
-          return handleListGroupCreated(event);
-        case 'ListGroupDeleted':
-          return handleListGroupDeleted(event);
-        case 'ListGroupNameUpdated':
-          return handleListGroupNameUpdated(event);
-        case 'ListGroupExpanded':
-          return handleListGroupExpanded();
+        case 'TagCreated':
+          return handleTagCreated(event);
+        case 'TagDeleted':
+          return handleTagDeleted(event);
+        case 'TagNameUpdated':
+          return handleTagNameUpdated(event);
+        case 'TagExpanded':
+          return handleTagExpanded();
         default:
           throw new Error(`Unhandled event ${event}`);
       }
@@ -193,13 +109,10 @@ export function SyncStorage() {
       handleNoteCreated,
       handleNoteDeleted,
       handleNoteContentUpdated,
-      handleListCreated,
-      handleListDeleted,
-      handleListNameUpdated,
-      handleListGroupCreated,
-      handleListGroupDeleted,
-      handleListGroupNameUpdated,
-      handleListGroupExpanded,
+      handleTagCreated,
+      handleTagDeleted,
+      handleTagNameUpdated,
+      handleTagExpanded,
     ],
   );
 

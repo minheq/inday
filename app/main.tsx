@@ -308,7 +308,24 @@ function TagNoteList(props: TagNoteListProps) {
 
 function NoteViewSection() {
   const navigation = useNavigation();
-  const note = useGetNote(navigation.state.noteID);
+
+  if (navigation.state.noteID === '') {
+    return <NoteEmptyView />;
+  }
+
+  return <NoteEditorView noteID={navigation.state.noteID} />;
+}
+
+function NoteEmptyView() {
+  return null;
+}
+
+interface NoteEditorViewProps {
+  noteID: string;
+}
+function NoteEditorView(props: NoteEditorViewProps) {
+  const { noteID } = props;
+  const note = useGetNote(noteID);
 
   return (
     <Container flex={1}>

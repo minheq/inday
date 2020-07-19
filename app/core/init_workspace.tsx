@@ -4,10 +4,10 @@ import { useRecoilState } from 'recoil';
 
 import { Workspace, workspaceState } from '../data/workspace';
 import { useAsync } from '../hooks/use_async';
-import { useEmitEvent } from '../data/api';
+import { useEventEmitter } from '../data/events';
 
 function useInitWorkspace() {
-  const emitEvent = useEmitEvent();
+  const eventEmitter = useEventEmitter();
   const [workspace, setWorkspace] = useRecoilState(workspaceState);
 
   const init = React.useCallback(async () => {
@@ -15,20 +15,21 @@ function useInitWorkspace() {
       const newWorkspace: Workspace = {
         name: 'New workspace',
         id: v4(),
-        allNoteIDs: [],
-        inboxNoteIDs: [],
-        listOrListGroupIDs: [],
         typename: 'Workspace',
       };
 
       setWorkspace(newWorkspace);
 
-      emitEvent({
+      // We cannot use useEmitEvent() yet because workspace has not been loaded
+      eventEmitter.emit({
         name: 'WorkspaceCreated',
         workspace: newWorkspace,
+        createdAt: new Date(),
+        workspaceID: newWorkspace.id,
+        typename: 'Event',
       });
     }
-  }, [emitEvent, workspace, setWorkspace]);
+  }, [eventEmitter, workspace, setWorkspace]);
 
   useAsync('initWorkspace', init);
 }
