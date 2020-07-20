@@ -14,7 +14,7 @@ export interface Note {
   tags: {
     [tagName: string]: true;
   };
-  archivedAt: Date | null;
+  archiveAt: Date | null;
   deletedAt: Date | null;
   workspaceID: string;
   typename: 'Note';
@@ -70,7 +70,9 @@ export const allNotesQuery = selector({
   get: ({ get }) => {
     const noteList = get(noteListQuery);
 
-    return noteList;
+    return noteList.filter(
+      (note) => note.archiveAt === null && note.deletedAt === null,
+    );
   },
 });
 
@@ -79,16 +81,23 @@ export const inboxNotesQuery = selector({
   get: ({ get }) => {
     const noteList = get(noteListQuery);
 
-    return noteList.filter((note) => note.inbox === true);
+    return noteList.filter(
+      (note) =>
+        note.inbox === true &&
+        note.archiveAt === null &&
+        note.deletedAt === null,
+    );
   },
 });
 
-export const archivedNotesQuery = selector({
-  key: RecoilKey.ArchivedNotes,
+export const archiveNotesQuery = selector({
+  key: RecoilKey.ArchiveNotes,
   get: ({ get }) => {
     const noteList = get(noteListQuery);
 
-    return noteList.filter((note) => note.archivedAt !== null);
+    return noteList.filter(
+      (note) => note.archiveAt !== null && note.deletedAt === null,
+    );
   },
 });
 
@@ -106,7 +115,12 @@ export const tagNotesQuery = selectorFamily({
   get: (tagID: string) => ({ get }) => {
     const noteList = get(noteListQuery);
 
-    return noteList.filter((note) => note.tags[tagID] === true);
+    return noteList.filter(
+      (note) =>
+        note.tags[tagID] === true &&
+        note.archiveAt === null &&
+        note.deletedAt === null,
+    );
   },
 });
 

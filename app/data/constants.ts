@@ -9,7 +9,7 @@ export enum RecoilKey {
 
   // Selectors
   AllNotes = 'AllNotes',
-  ArchivedNotes = 'ArchivedNotes',
+  ArchiveNotes = 'ArchiveNotes',
   DeletedNotes = 'DeletedNotes',
   InboxNotes = 'InboxNotes',
   TagNotes = 'TagNotes',

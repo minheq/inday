@@ -27,7 +27,6 @@ import {
   useUpdateTagName,
 } from '../data/api';
 import { tokens } from '../theme';
-import { measure } from '../utils/measurements';
 import {
   useContextMenu,
   ContextMenuCoordinate,
@@ -139,8 +138,9 @@ function FixedMenuItem(props: FixedMenuItemProps) {
       onPress={handlePress}
       style={{ borderRadius: tokens.radius }}
     >
-      <Container height={40} paddingHorizontal={8}>
+      <Container height={40} paddingHorizontal={4}>
         <Row alignItems="center" expanded>
+          <Container width={28} />
           <Icon name={icon} size="lg" />
           <Spacing width={16} />
           <Text>{title}</Text>
@@ -179,6 +179,9 @@ function TagMenuItem(props: TagMenuItemProps) {
   const { menuTag, expanded } = props;
   const { tag, children } = menuTag;
   const navigation = useNavigation();
+  const active =
+    navigation.state.location === Location.Tag &&
+    navigation.state.tagID === tag.id;
   const updateTagName = useUpdateTagName();
   const expandTag = useExpandTag();
   const [visible, setVisible] = React.useState(false);
@@ -186,7 +189,6 @@ function TagMenuItem(props: TagMenuItemProps) {
     y: 0,
     x: 0,
   });
-  const createList = useCreateTag();
   const chevron = React.useRef(new Animated.Value(0)).current;
   const menuContext = React.useContext(MenuContext);
   const ref = React.useRef<View>(null);
@@ -213,16 +215,6 @@ function TagMenuItem(props: TagMenuItemProps) {
   const handleBlur = React.useCallback(() => {
     menuContext.onClear();
   }, [menuContext]);
-
-  const handlePressMore = React.useCallback(async () => {
-    measure(ref).then((measurements) => {
-      setVisible(true);
-      setAnchor({
-        y: measurements.pageY + 28,
-        x: measurements.pageX + measurements.width - 24,
-      });
-    });
-  }, []);
 
   const handleOpenContextMenu = React.useCallback(
     (coordinate: ContextMenuCoordinate) => {
@@ -254,13 +246,6 @@ function TagMenuItem(props: TagMenuItemProps) {
     menuContext.onSetRenameTagID(tag.id);
   }, [menuContext, tag]);
 
-  const handleAddNote = React.useCallback(() => {
-    // setVisible(false);
-    // expandTag({ tagID: tag.id, expanded: true });
-    // const tag = createList(tag.id);
-    // menuContext.onSetRenameTagID(tag.id);
-  }, [menuContext, tag, expandTag, createList]);
-
   const hasChildren = isEmpty(children) === false;
 
   return (
@@ -276,44 +261,40 @@ function TagMenuItem(props: TagMenuItemProps) {
           <Button
             onPress={handlePress}
             style={{ borderRadius: tokens.radius }}
-            state={visible ? 'hovered' : 'default'}
+            state={active ? 'active' : visible ? 'hovered' : 'default'}
           >
-            {({ hovered }) => (
-              <Container height={40} paddingHorizontal={8}>
-                <Row alignItems="center" expanded>
-                  {hasChildren && (
-                    <Animated.View
-                      style={{
-                        transform: [
-                          {
-                            rotate: chevron.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: ['0deg', '90deg'],
-                            }),
-                          },
-                        ],
-                      }}
-                    >
-                      <Icon name="chevron-right" size="lg" />
-                    </Animated.View>
-                  )}
-                  <Spacing width={8} />
-                  <Container flex={1}>
-                    <Text>{tag.name}</Text>
-                  </Container>
-                  {hovered && (
-                    <Button
-                      onPress={handlePressMore}
-                      style={styles.menuItemMore}
-                    >
-                      <Container center width={32} height={32}>
-                        <Icon name="more-horizontal" size="lg" />
-                      </Container>
-                    </Button>
-                  )}
-                </Row>
-              </Container>
-            )}
+            <Container height={40} paddingHorizontal={4}>
+              <Row alignItems="center" expanded>
+                {hasChildren ? (
+                  <Button style={styles.menuItemMore} onPress={handleExpand}>
+                    <Container center width={24} height={24}>
+                      <Animated.View
+                        style={{
+                          transform: [
+                            {
+                              rotate: chevron.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ['0deg', '90deg'],
+                              }),
+                            },
+                          ],
+                        }}
+                      >
+                        <Icon name="chevron-right" size="lg" />
+                      </Animated.View>
+                    </Container>
+                  </Button>
+                ) : (
+                  <Container width={24} />
+                )}
+                <Spacing width={4} />
+                <Icon name="tag" size="lg" />
+                <Spacing width={8} />
+                <Container flex={1}>
+                  <Text>{tag.name}</Text>
+                </Container>
+              </Row>
+            </Container>
           </Button>
         )}
       </View>
@@ -329,7 +310,6 @@ function TagMenuItem(props: TagMenuItemProps) {
         placement="bottom-right"
       >
         <TagMenuItemContextMenu
-          onAddNote={handleAddNote}
           onDelete={handlePressRename}
           onPressRename={handlePressRename}
         />
@@ -341,22 +321,16 @@ function TagMenuItem(props: TagMenuItemProps) {
 interface TagMenuItemContextMenuProps {
   onPressRename: () => void;
   onDelete: () => void;
-  onAddNote: () => void;
 }
 
 function TagMenuItemContextMenu(props: TagMenuItemContextMenuProps) {
-  const { onPressRename, onDelete, onAddNote } = props;
+  const { onPressRename, onDelete } = props;
 
   return (
     <Container width={160} color="content" shape="rounded">
       <Button onPress={onPressRename}>
         <Container padding={8}>
           <Text size="sm">Rename</Text>
-        </Container>
-      </Button>
-      <Button onPress={onAddNote}>
-        <Container padding={8}>
-          <Text size="sm">Add note</Text>
         </Container>
       </Button>
       <Button onPress={onDelete}>
@@ -390,7 +364,7 @@ function TagNameEditTextInput(props: TagNameEditTextInputProps) {
           onBlur={onBlur}
           onChangeText={onChange}
           // @ts-ignore
-          style={[styles.TagNameEditTextInput, webStyle]}
+          style={[styles.tagNameEditTextInput, webStyle]}
         />
       </Row>
     </Container>
@@ -410,17 +384,9 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'visible',
   },
-  TagNameEditTextInput: {
+  tagNameEditTextInput: {
     flex: 1,
     ...tokens.text.size.md,
-  },
-  newList: {
-    borderTopLeftRadius: tokens.radius,
-    borderTopRightRadius: tokens.radius,
-  },
-  newParentTag: {
-    borderBottomLeftRadius: tokens.radius,
-    borderBottomRightRadius: tokens.radius,
   },
   menuItemMore: {
     borderRadius: 999,

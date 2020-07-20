@@ -17,6 +17,8 @@ import {
   useGetInboxNotes,
   useGetTag,
   useGetTagNotes,
+  useGetArchiveNotes,
+  useGetDeletedNotes,
 } from './data/api';
 import { NoteEditor } from './core/note_editor';
 import { Note, NotesState } from './data/notes';
@@ -197,6 +199,10 @@ function NoteListSwitch() {
       return <AllNoteList noteID={navigation.state.noteID} />;
     case Location.Inbox:
       return <InboxNoteList noteID={navigation.state.noteID} />;
+    case Location.Archive:
+      return <ArchiveNoteList noteID={navigation.state.noteID} />;
+    case Location.Trash:
+      return <TrashNoteList noteID={navigation.state.noteID} />;
     case Location.Tag:
       return (
         <TagNoteList
@@ -231,7 +237,7 @@ function AllNoteList(props: AllNoteListProps) {
 
   return (
     <Container>
-      <NoteListHeader name="All" onViewNote={handleViewNote} />
+      <NoteListHeader name={Location.All} onViewNote={handleViewNote} />
       <NoteList
         selectedNoteID={noteID}
         notes={notes}
@@ -262,7 +268,69 @@ function InboxNoteList(props: InboxNoteListProps) {
 
   return (
     <Container>
-      <NoteListHeader name="Inbox" onViewNote={handleViewNote} />
+      <NoteListHeader name={Location.Inbox} onViewNote={handleViewNote} />
+      <NoteList
+        selectedNoteID={noteID}
+        notes={notes}
+        onViewNote={handleViewNote}
+      />
+    </Container>
+  );
+}
+
+interface ArchiveNoteListProps {
+  noteID: string;
+}
+
+function ArchiveNoteList(props: ArchiveNoteListProps) {
+  const { noteID } = props;
+  const notes = useGetArchiveNotes();
+  const navigation = useNavigation();
+
+  const handleViewNote = React.useCallback(
+    (note: Note) => {
+      navigation.navigate({
+        location: Location.Archive,
+        noteID: note.id,
+      });
+    },
+    [navigation],
+  );
+
+  return (
+    <Container>
+      <NoteListHeader name={Location.Archive} onViewNote={handleViewNote} />
+      <NoteList
+        selectedNoteID={noteID}
+        notes={notes}
+        onViewNote={handleViewNote}
+      />
+    </Container>
+  );
+}
+
+interface TrashNoteListProps {
+  noteID: string;
+}
+
+function TrashNoteList(props: TrashNoteListProps) {
+  const { noteID } = props;
+  const notes = useGetDeletedNotes();
+  const navigation = useNavigation();
+
+  const handleViewNote = React.useCallback(
+    (note: Note) => {
+      navigation.navigate({
+        location: Location.Archive,
+        noteID: note.id,
+      });
+    },
+    [navigation],
+  );
+
+  return (
+    <Container>
+      <NoteListHeader name={Location.Trash} onViewNote={handleViewNote} />
       <NoteList
         selectedNoteID={noteID}
         notes={notes}

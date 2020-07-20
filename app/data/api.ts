@@ -20,7 +20,7 @@ import {
   Content,
   Preview,
   tagNotesQuery,
-  archivedNotesQuery,
+  archiveNotesQuery,
   deletedNotesQuery,
 } from './notes';
 import { workspaceState } from './workspace';
@@ -40,11 +40,15 @@ export function useGetInboxNotes() {
   return useRecoilValue(inboxNotesQuery);
 }
 
-export function useGetArchivedNotes() {
-  return useRecoilValue(archivedNotesQuery);
+export function useGetArchiveNotes() {
+  return useRecoilValue(archiveNotesQuery);
 }
 
 export function useGetDeletedNotes() {
+  return useRecoilValue(deletedNotesQuery);
+}
+
+export function useGetFixedLocationNotes() {
   return useRecoilValue(deletedNotesQuery);
 }
 
@@ -174,7 +178,7 @@ export function useCreateNote() {
         updatedAt: new Date(),
         inbox: false,
         tags: {},
-        archivedAt: null,
+        archiveAt: null,
         deletedAt: null,
         workspaceID: workspace.id,
         typename: 'Note',
