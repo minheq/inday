@@ -9,7 +9,6 @@ export enum Location {
   All = 'All',
   Inbox = 'Inbox',
   Tag = 'Tag',
-  Archive = 'Archive',
   Trash = 'Trash',
 }
 
@@ -21,7 +20,6 @@ export const navigationState = atom<NavigationState>({
 export type NavigationState =
   | { location: Location.All; noteID: string }
   | { location: Location.Inbox; noteID: string }
-  | { location: Location.Archive; noteID: string }
   | { location: Location.Trash; noteID: string }
   | {
       location: Location.Tag;

@@ -74,11 +74,7 @@ export function Menu() {
         <Container flex={1} padding={16}>
           <FixedMenuItem icon="inbox" title="Inbox" location={Location.Inbox} />
           <FixedMenuItem icon="book" title="All" location={Location.All} />
-          <FixedMenuItem
-            icon="archive"
-            title="Archive"
-            location={Location.Archive}
-          />
+
           <FixedMenuItem icon="trash" title="Trash" location={Location.Trash} />
           <Spacing height={32} />
           <Tags menuTags={menuTags} />
@@ -117,7 +113,7 @@ function MenuFooter() {
 interface FixedMenuItemProps {
   icon: IconName;
   title: string;
-  location: Location.All | Location.Inbox | Location.Trash | Location.Archive;
+  location: Location.All | Location.Inbox | Location.Trash;
 }
 
 function FixedMenuItem(props: FixedMenuItemProps) {

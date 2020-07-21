@@ -17,7 +17,6 @@ import {
   useGetInboxNotes,
   useGetTag,
   useGetTagNotes,
-  useGetArchiveNotes,
   useGetDeletedNotes,
 } from './data/api';
 import { NoteEditor } from './core/note_editor';
@@ -199,8 +198,6 @@ function NoteListSwitch() {
       return <AllNoteList noteID={navigation.state.noteID} />;
     case Location.Inbox:
       return <InboxNoteList noteID={navigation.state.noteID} />;
-    case Location.Archive:
-      return <ArchiveNoteList noteID={navigation.state.noteID} />;
     case Location.Trash:
       return <TrashNoteList noteID={navigation.state.noteID} />;
     case Location.Tag:
@@ -278,37 +275,6 @@ function InboxNoteList(props: InboxNoteListProps) {
   );
 }
 
-interface ArchiveNoteListProps {
-  noteID: string;
-}
-
-function ArchiveNoteList(props: ArchiveNoteListProps) {
-  const { noteID } = props;
-  const notes = useGetArchiveNotes();
-  const navigation = useNavigation();
-
-  const handleViewNote = React.useCallback(
-    (note: Note) => {
-      navigation.navigate({
-        location: Location.Archive,
-        noteID: note.id,
-      });
-    },
-    [navigation],
-  );
-
-  return (
-    <Container>
-      <NoteListHeader name={Location.Archive} onViewNote={handleViewNote} />
-      <NoteList
-        selectedNoteID={noteID}
-        notes={notes}
-        onViewNote={handleViewNote}
-      />
-    </Container>
-  );
-}
-
 interface TrashNoteListProps {
   noteID: string;
 }
@@ -321,7 +287,7 @@ function TrashNoteList(props: TrashNoteListProps) {
   const handleViewNote = React.useCallback(
     (note: Note) => {
       navigation.navigate({
-        location: Location.Archive,
+        location: Location.Trash,
         noteID: note.id,
       });
     },
