@@ -8,7 +8,6 @@ interface BaseView {
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
-  typename: 'View';
 }
 
 interface ListView extends BaseView {

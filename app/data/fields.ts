@@ -69,7 +69,6 @@ interface FieldMetadata {
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
-  typename: 'Field';
 }
 
 export type BaseField =

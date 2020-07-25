@@ -5,7 +5,6 @@ export interface Space {
   id: string;
   name: string;
   workspaceID: string;
-  typename: 'Space';
 }
 
 export type SpacesState = { [id: string]: Space | undefined };

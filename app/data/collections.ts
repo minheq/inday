@@ -8,7 +8,6 @@ export interface Collection {
   createdAt: Date;
   updatedAt: Date;
   spaceID: string;
-  typename: 'Collection';
 }
 
 export type CollectionsState = { [id: string]: Collection | undefined };

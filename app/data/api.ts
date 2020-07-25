@@ -35,7 +35,6 @@ export function useEmitEvent() {
     (event: Event) => {
       const metadata: EventMetadata = {
         createdAt: new Date(),
-        typename: 'Event',
         workspaceID: workspace.id,
       };
 
@@ -97,7 +96,6 @@ export function useCreateSpace() {
       id: v4(),
       name: '',
       workspaceID: workspace.id,
-      typename: 'Space',
     };
 
     setSpaces((previousSpaces) => ({
@@ -225,7 +223,6 @@ export function useCreateCollection() {
         createdAt: new Date(),
         updatedAt: new Date(),
         spaceID,
-        typename: 'Collection',
       };
 
       setCollections((previousCollections) => ({
@@ -351,7 +348,6 @@ export function useCreateView() {
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
-        typename: 'View',
       };
 
       setViews((previousViews) => ({
@@ -475,7 +471,6 @@ export function useCreateField() {
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
-        typename: 'Field',
         ...field,
       };
 
@@ -599,7 +594,6 @@ export function useCreateDocument() {
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
-        typename: 'Document',
       };
 
       setDocuments((previousDocuments) => ({

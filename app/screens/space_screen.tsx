@@ -22,5 +22,3 @@ export function SpaceScreen() {
 function SpaceHeader() {
   return null;
 }
-
-function CollectionsMenu() {}

@@ -10,7 +10,6 @@ import { Document } from './documents';
 
 export interface EventMetadata {
   createdAt: Date;
-  typename: 'Event';
   workspaceID: string;
 }
 

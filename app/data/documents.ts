@@ -8,7 +8,6 @@ export interface Document {
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
-  typename: 'Document';
 }
 
 export type DocumentsState = { [id: string]: Document | undefined };

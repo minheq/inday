@@ -5,7 +5,6 @@ import { RecoilKey } from './constants';
 export interface Workspace {
   id: string;
   name: string;
-  typename: 'Workspace';
 }
 
 export type WorkspaceState = Workspace | null;
