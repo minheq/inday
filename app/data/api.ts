@@ -13,7 +13,7 @@ import { Collection, collectionQuery, collectionsState } from './collections';
 import { workspaceState } from './workspace';
 import { spacesState, Space, spaceQuery } from './spaces';
 import { viewsState, View, viewQuery } from './views';
-import { Field, fieldsState, fieldQuery } from './fields';
+import { Field, fieldsState, fieldQuery, BaseField } from './fields';
 import { documentsState, documentQuery, Document } from './documents';
 
 export function useGetWorkspace() {
@@ -347,6 +347,7 @@ export function useCreateView() {
       let newView: View = {
         id: v4(),
         name: '',
+        type: 'list',
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
@@ -466,14 +467,16 @@ export function useCreateField() {
   const setFields = useSetRecoilState(fieldsState);
 
   const createField = React.useCallback(
-    (viewID: string) => {
+    (collectionID: string, name: string, field: BaseField) => {
       let newField: Field = {
         id: v4(),
-        name: '',
+        name,
+        description: '',
         createdAt: new Date(),
         updatedAt: new Date(),
-        viewID,
+        collectionID,
         typename: 'Field',
+        ...field,
       };
 
       setFields((previousFields) => ({

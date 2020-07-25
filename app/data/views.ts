@@ -2,7 +2,7 @@ import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
 
-export interface View {
+interface BaseView {
   id: string;
   name: string;
   createdAt: Date;
@@ -10,6 +10,16 @@ export interface View {
   collectionID: string;
   typename: 'View';
 }
+
+interface ListView extends BaseView {
+  type: 'list';
+}
+
+interface BoardView extends BaseView {
+  type: 'board';
+}
+
+export type View = ListView | BoardView;
 
 export type ViewsState = { [id: string]: View | undefined };
 export const viewsState = atom<ViewsState>({
