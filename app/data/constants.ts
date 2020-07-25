@@ -4,13 +4,19 @@ export enum RecoilKey {
   Spaces = 'Spaces',
   Collections = 'Collections',
   Views = 'Views',
+  Fields = 'Fields',
+  Documents = 'Documents',
   Events = 'Events',
 
   // Selectors
-  CollectionList = 'CollectionList',
   Collection = 'Collection',
-  ViewList = 'ViewList',
+  CollectionList = 'CollectionList',
   View = 'View',
+  ViewList = 'ViewList',
+  Field = 'Field',
+  FieldList = 'FieldList',
+  Document = 'Document',
+  DocumentList = 'DocumentList',
 }
 
 export enum StorageKey {

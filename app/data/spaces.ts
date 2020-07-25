@@ -8,10 +8,6 @@ export interface Space {
   typename: 'Space';
 }
 
-export const Space = {
-  getCollection: () => {},
-};
-
 export type SpacesState = { [id: string]: Space | undefined };
 export const spacesState = atom<SpacesState>({
   key: RecoilKey.Spaces,

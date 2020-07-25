@@ -4,6 +4,9 @@ import { RecoilKey } from './constants';
 import { Workspace } from './workspace';
 import { Space } from './spaces';
 import { Collection } from './collections';
+import { View } from './views';
+import { Field } from './fields';
+import { Document } from './documents';
 
 export interface EventMetadata {
   createdAt: Date;
@@ -46,6 +49,51 @@ export interface CollectionDeletedEvent {
   collection: Collection;
 }
 
+export interface ViewCreatedEvent {
+  name: 'ViewCreated';
+  view: View;
+}
+
+export interface ViewNameUpdatedEvent {
+  name: 'ViewNameUpdated';
+  view: View;
+}
+
+export interface ViewDeletedEvent {
+  name: 'ViewDeleted';
+  view: View;
+}
+
+export interface FieldCreatedEvent {
+  name: 'FieldCreated';
+  field: Field;
+}
+
+export interface FieldNameUpdatedEvent {
+  name: 'FieldNameUpdated';
+  field: Field;
+}
+
+export interface FieldDeletedEvent {
+  name: 'FieldDeleted';
+  field: Field;
+}
+
+export interface DocumentCreatedEvent {
+  name: 'DocumentCreated';
+  document: Document;
+}
+
+export interface DocumentNameUpdatedEvent {
+  name: 'DocumentNameUpdated';
+  document: Document;
+}
+
+export interface DocumentDeletedEvent {
+  name: 'DocumentDeleted';
+  document: Document;
+}
+
 export type Event =
   | WorkspaceCreatedEvent
   | SpaceCreatedEvent
@@ -53,7 +101,16 @@ export type Event =
   | SpaceNameUpdatedEvent
   | CollectionCreatedEvent
   | CollectionNameUpdatedEvent
-  | CollectionDeletedEvent;
+  | CollectionDeletedEvent
+  | ViewCreatedEvent
+  | ViewNameUpdatedEvent
+  | ViewDeletedEvent
+  | FieldCreatedEvent
+  | FieldNameUpdatedEvent
+  | FieldDeletedEvent
+  | DocumentCreatedEvent
+  | DocumentNameUpdatedEvent
+  | DocumentDeletedEvent;
 
 export type EventWithMetadata = Event & EventMetadata;
 
