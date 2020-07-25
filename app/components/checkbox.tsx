@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from './icon';
 import { StyleSheet, View, Animated } from 'react-native';
 import { Pressable } from './pressable';
-import { useTheme } from '../theme';
+import { useTheme } from './theme';
 
 interface CheckboxProps {
   value?: boolean;
@@ -48,7 +48,7 @@ export function Checkbox(props: CheckboxProps) {
     >
       {value && (
         <View style={styles.checkmark}>
-          <Icon name="check" color="white" size="lg" />
+          <Icon name="check" size="lg" />
         </View>
       )}
     </Pressable>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, TextInput as RNTextInput } from 'react-native';
-import { useTheme, tokens } from '../theme';
+import { useTheme, tokens } from './theme';
 
 export interface TextInputProps {
   testID?: string;
@@ -36,7 +36,7 @@ export function TextInput(props: TextInputProps) {
       placeholderTextColor={theme.text.color.muted}
       style={[
         styles.input,
-        theme.text.size.md,
+        tokens.text.size.md,
         // @ts-ignore
         webStyle,
       ]}

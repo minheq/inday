@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
-import { Note } from '../data/notes';
+import { Note } from '../data/collections';
 import { Text, Button, Container } from '../components';
 
 interface NoteListProps {

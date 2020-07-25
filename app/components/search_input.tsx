@@ -5,7 +5,7 @@ import {
   View,
   Animated,
 } from 'react-native';
-import { useTheme, tokens } from '../theme';
+import { useTheme, tokens } from './theme';
 import { IconName, Icon } from './icon';
 import { useHoverable } from '../hooks/use_hoverable';
 import { useFocusable } from '../hooks/use_focusable';

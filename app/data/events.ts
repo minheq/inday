@@ -1,9 +1,9 @@
 import { atom } from 'recoil';
 
 import { RecoilKey } from './constants';
-import { Note } from './notes';
 import { Workspace } from './workspace';
-import { Tag } from './tag';
+import { Space } from './spaces';
+import { Collection } from './collections';
 
 export interface EventMetadata {
   createdAt: Date;
@@ -16,50 +16,44 @@ export interface WorkspaceCreatedEvent {
   workspace: Workspace;
 }
 
-export interface NoteCreatedEvent {
-  name: 'NoteCreated';
-  note: Note;
+export interface SpaceCreatedEvent {
+  name: 'SpaceCreated';
+  space: Space;
 }
 
-export interface NoteDeletedEvent {
-  name: 'NoteDeleted';
-  note: Note;
+export interface SpaceDeletedEvent {
+  name: 'SpaceDeleted';
+  space: Space;
 }
 
-export interface NoteContentUpdatedEvent {
-  name: 'NoteContentUpdatedEvent';
-  note: Note;
+export interface SpaceNameUpdatedEvent {
+  name: 'SpaceNameUpdated';
+  space: Space;
 }
 
-export interface TagCreatedEvent {
-  name: 'TagCreated';
-  tag: Tag;
+export interface CollectionCreatedEvent {
+  name: 'CollectionCreated';
+  collection: Collection;
 }
 
-export interface TagNameUpdatedEvent {
-  name: 'TagNameUpdated';
-  tag: Tag;
+export interface CollectionNameUpdatedEvent {
+  name: 'CollectionNameUpdated';
+  collection: Collection;
 }
 
-export interface TagDeletedEvent {
-  name: 'TagDeleted';
-  tag: Tag;
-}
-
-export interface TagExpandedEvent {
-  name: 'TagExpanded';
-  tag: Tag;
+export interface CollectionDeletedEvent {
+  name: 'CollectionDeleted';
+  collection: Collection;
 }
 
 export type Event =
   | WorkspaceCreatedEvent
-  | NoteCreatedEvent
-  | NoteDeletedEvent
-  | NoteContentUpdatedEvent
-  | TagCreatedEvent
-  | TagNameUpdatedEvent
-  | TagDeletedEvent
-  | TagExpandedEvent;
+  | SpaceCreatedEvent
+  | SpaceDeletedEvent
+  | SpaceNameUpdatedEvent
+  | CollectionCreatedEvent
+  | CollectionNameUpdatedEvent
+  | CollectionDeletedEvent;
 
 export type EventWithMetadata = Event & EventMetadata;
 

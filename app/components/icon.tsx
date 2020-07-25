@@ -5,7 +5,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-import { TextColor, TextSize, useTheme, tokens } from '../theme';
+import { TextColor, TextSize, useTheme, tokens } from './theme';
 
 export interface IconProps {
   /**

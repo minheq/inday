@@ -16,7 +16,7 @@ import { FirstDayOfWeek, DEFAULT_FIRST_DAY_OF_WEEK } from '../utils/week';
 import { Text } from './text';
 import { Pressable } from './pressable';
 import { View, StyleSheet, Platform } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme } from './theme';
 
 const DEFAULT_MONTH_DAY_SIZE = 40;
 

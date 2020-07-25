@@ -26,7 +26,7 @@ import {
   useCreateTag,
   useUpdateTagName,
 } from '../data/api';
-import { tokens } from '../theme';
+import { tokens } from '../components/theme';
 import {
   useContextMenu,
   ContextMenuCoordinate,

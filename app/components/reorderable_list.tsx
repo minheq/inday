@@ -11,11 +11,11 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { useDropTarget } from '../drag_drop/use_drop_target';
+import { useDropTarget } from '../lib/drag_drop/use_drop_target';
 import { measure } from '../utils/measurements';
-import { Draggable, DragState } from '../drag_drop/draggable';
+import { Draggable, DragState } from '../lib/drag_drop/draggable';
 import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
-import { useDraggable } from '../drag_drop/use_draggable';
+import { useDraggable } from '../lib/drag_drop/use_draggable';
 import { Text } from './text';
 
 interface ReorderableListProps<T = any> {

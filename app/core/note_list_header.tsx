@@ -1,9 +1,9 @@
 import React from 'react';
-import { Note } from '../data/notes';
+import { Note } from '../data/collections';
 import { useCreateNote } from '../data/api';
 import { Container, Row, Text, Spacer, Button } from '../components';
 import { StyleSheet } from 'react-native';
-import { tokens } from '../theme';
+import { tokens } from '../components/theme';
 import { useNavigation } from '../data/navigation';
 
 interface NoteListHeaderProps {

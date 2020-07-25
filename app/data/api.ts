@@ -1,8 +1,7 @@
 import React from 'react';
-import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { v4 } from 'uuid';
-import { BlockType } from '../editor/editable/nodes/element';
 import {
   useEventEmitter,
   eventsState,
@@ -11,110 +10,78 @@ import {
   EventMetadata,
 } from './events';
 import {
-  noteListQuery,
-  allNotesQuery,
-  inboxNotesQuery,
-  noteQuery,
-  notesState,
-  Note,
-  Content,
-  Preview,
-  tagNotesQuery,
-  deletedNotesQuery,
-} from './notes';
+  Collection,
+  collectionQuery,
+  collectionListQuery,
+  collectionsState,
+} from './collections';
 import { workspaceState } from './workspace';
-import { tagsState, Tag, tagQuery } from './tag';
-import { NavigationState, Location } from './navigation';
-import { menuState, MenuState, menuTagsQuery } from './menu';
+import { spacesState, Space, spaceQuery } from './spaces';
 
-export function useGetNotes() {
-  return useRecoilValue(noteListQuery);
+export function useGetCollections() {
+  return useRecoilValue(collectionListQuery);
 }
 
-export function useGetAllNotes() {
-  return useRecoilValue(allNotesQuery);
+export function useGetSpaces() {
+  return useRecoilValue(spacesState);
 }
 
-export function useGetInboxNotes() {
-  return useRecoilValue(inboxNotesQuery);
-}
+export function useGetCollection(collectionID: string) {
+  const collection = useRecoilValue(collectionQuery(collectionID));
 
-export function useGetDeletedNotes() {
-  return useRecoilValue(deletedNotesQuery);
-}
-
-export function useGetFixedLocationNotes() {
-  return useRecoilValue(deletedNotesQuery);
-}
-
-export function useGetTagNotes(tagID: string) {
-  return useRecoilValue(tagNotesQuery(tagID));
-}
-
-export function useGetTags() {
-  return useRecoilValue(tagsState);
-}
-
-export function useGetMenuTags() {
-  return useRecoilValue(menuTagsQuery);
-}
-
-export function useGetNote(noteID: string) {
-  const note = useRecoilValue(noteQuery(noteID));
-
-  if (note === null) {
-    throw new Error('Note not found');
+  if (collection === null) {
+    throw new Error('Collection not found');
   }
 
-  return note;
+  return collection;
 }
 
-export function useGetTag(tagID: string) {
-  const tag = useRecoilValue(tagQuery(tagID));
+export function useGetSpace(spaceID: string) {
+  const space = useRecoilValue(spaceQuery(spaceID));
 
-  if (tag === null) {
-    throw new Error('Tag not found');
+  if (space === null) {
+    throw new Error('Space not found');
   }
 
-  return tag;
+  return space;
 }
 
-export function useGetNoteCallback() {
-  const notes = useRecoilValue(notesState);
+export function useGetCollectionCallback() {
+  const collections = useRecoilValue(collectionsState);
 
-  const getNote = React.useCallback(
-    (noteID: string) => {
-      const note = notes[noteID];
+  const getCollection = React.useCallback(
+    (collectionID: string) => {
+      const collection = collections[collectionID];
 
-      if (note === undefined) {
-        throw new Error('Note not found');
+      if (collection === undefined) {
+        throw new Error('Collection not found');
       }
 
-      return note;
+      return collection;
     },
-    [notes],
+    [collections],
   );
 
-  return getNote;
+  return getCollection;
 }
 
-export function useGetTagCallback() {
-  const tags = useGetTags();
+export function useGetSpaceCallback() {
+  const spaces = useGetSpaces();
 
-  const getTag = React.useCallback(
-    (tagID: string) => {
-      const tag = tags[tagID];
+  const getSpace = React.useCallback(
+    (spaceID: string) => {
+      const space = spaces[spaceID];
 
-      if (tag === undefined) {
-        throw new Error('Tag not found');
+      if (space === undefined) {
+        throw new Error('Space not found');
       }
 
-      return tag;
+      return space;
     },
-    [tags],
+    [spaces],
   );
 
-  return getTag;
+  return getSpace;
 }
 
 export function useGetWorkspace() {
@@ -154,270 +121,186 @@ export function useEmitEvent() {
   return emitEvent;
 }
 
-export function useCreateNote() {
+export function useCreateCollection() {
   const emitEvent = useEmitEvent();
-  const workspace = useGetWorkspace();
-  const setNotes = useSetRecoilState(notesState);
+  const setCollections = useSetRecoilState(collectionsState);
 
-  const createNote = React.useCallback(
-    (navigationState: NavigationState) => {
-      let newNote: Note = {
-        id: v4(),
-        content: [{ type: 'paragraph', children: [{ text: '' }] }],
-        preview: {
-          title: '',
-          description: '',
-          imageURL: '',
-        },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        inbox: false,
-        tags: {},
-        deletedAt: null,
-        workspaceID: workspace.id,
-        typename: 'Note',
-      };
-
-      if (navigationState.location === Location.Tag) {
-        newNote.tags = {
-          ...newNote.tags,
-          [navigationState.tagID]: true,
-        };
-      }
-
-      setNotes((previousNotes) => ({
-        ...previousNotes,
-        [newNote.id]: newNote,
-      }));
-
-      emitEvent({
-        name: 'NoteCreated',
-        note: newNote,
-      });
-
-      return newNote;
-    },
-    [emitEvent, workspace, setNotes],
-  );
-
-  return createNote;
-}
-
-export function useDeleteNote() {
-  const emitEvent = useEmitEvent();
-  const setNotes = useSetRecoilState(notesState);
-
-  const deleteNote = React.useCallback(
-    (note: Note) => {
-      setNotes((previousNotes) => {
-        const nextNotes = { ...previousNotes };
-
-        delete nextNotes[note.id];
-
-        return nextNotes;
-      });
-
-      emitEvent({
-        name: 'NoteDeleted',
-        note,
-      });
-    },
-    [emitEvent, setNotes],
-  );
-
-  return deleteNote;
-}
-
-export interface UpdateNoteContentInput {
-  noteID: string;
-  content: Content;
-}
-
-export function useUpdateNoteContent() {
-  const emitEvent = useEmitEvent();
-  const getNote = useGetNoteCallback();
-  const setNotes = useSetRecoilState(notesState);
-
-  const updateNoteContent = React.useCallback(
-    (input: UpdateNoteContentInput) => {
-      const { noteID, content } = input;
-      const prevNote = getNote(noteID);
-
-      const preview = toPreview(content);
-      const nextNote: Note = {
-        ...prevNote,
-        content,
-        preview,
-      };
-
-      setNotes((previousNotes) => ({
-        ...previousNotes,
-        [nextNote.id]: nextNote,
-      }));
-
-      emitEvent({
-        name: 'NoteContentUpdatedEvent',
-        note: nextNote,
-      });
-    },
-    [getNote, setNotes, emitEvent],
-  );
-
-  return updateNoteContent;
-}
-
-function toPreview(content: Content): Preview {
-  let title = '';
-  const firstNode = content[0];
-  const type = firstNode.type as BlockType;
-
-  switch (type) {
-    case 'paragraph':
-      title = firstNode.children[0].text as string;
-      break;
-
-    default:
-      title = firstNode.children[0].text as string;
-      break;
-  }
-
-  return {
-    title,
-    description: '',
-    imageURL: '',
-  };
-}
-
-export function useCreateTag() {
-  const emitEvent = useEmitEvent();
-  const workspace = useGetWorkspace();
-  const setTags = useSetRecoilState(tagsState);
-
-  const createTag = React.useCallback(
-    (parentTagID: string | null) => {
-      const newTag: Tag = {
+  const createCollection = React.useCallback(
+    (spaceID: string) => {
+      let newCollection: Collection = {
         id: v4(),
         name: '',
-        parentTagID,
-        workspaceID: workspace.id,
-        typename: 'Tag',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        spaceID,
+        typename: 'Collection',
       };
 
-      setTags((previousTags) => ({
-        ...previousTags,
-        [newTag.id]: newTag,
+      setCollections((previousCollections) => ({
+        ...previousCollections,
+        [newCollection.id]: newCollection,
       }));
 
       emitEvent({
-        name: 'TagCreated',
-        tag: newTag,
+        name: 'CollectionCreated',
+        collection: newCollection,
       });
 
-      return newTag;
+      return newCollection;
     },
-    [emitEvent, workspace, setTags],
+    [emitEvent, setCollections],
   );
 
-  return createTag;
+  return createCollection;
 }
 
-export function useDeleteTag() {
+export function useDeleteCollection() {
   const emitEvent = useEmitEvent();
-  const setTags = useSetRecoilState(tagsState);
+  const setCollections = useSetRecoilState(collectionsState);
 
-  const deleteTag = React.useCallback(
-    (tag: Tag) => {
-      setTags((previousTags) => {
-        const nextTags = { ...previousTags };
+  const deleteCollection = React.useCallback(
+    (collection: Collection) => {
+      setCollections((previousCollections) => {
+        const nextCollections = { ...previousCollections };
 
-        delete nextTags[tag.id];
+        delete nextCollections[collection.id];
 
-        return nextTags;
+        return nextCollections;
       });
 
       emitEvent({
-        name: 'TagDeleted',
-        tag,
+        name: 'CollectionDeleted',
+        collection,
       });
     },
-    [emitEvent, setTags],
+    [emitEvent, setCollections],
   );
 
-  return deleteTag;
+  return deleteCollection;
 }
 
-export interface UpdateTagNameInput {
-  tagID: string;
+export interface UpdateCollectionNameInput {
+  collectionID: string;
   name: string;
 }
 
-export function useUpdateTagName() {
+export function useUpdateCollectionName() {
   const emitEvent = useEmitEvent();
-  const getTag = useGetTagCallback();
-  const setTags = useSetRecoilState(tagsState);
+  const getCollection = useGetCollectionCallback();
+  const setCollections = useSetRecoilState(collectionsState);
 
-  const updateTagName = React.useCallback(
-    (input: UpdateTagNameInput) => {
-      const { tagID, name } = input;
-      const prevTag = getTag(tagID);
+  const updateCollectionName = React.useCallback(
+    (input: UpdateCollectionNameInput) => {
+      const { collectionID, name } = input;
+      const prevCollection = getCollection(collectionID);
 
-      const nextTag: Tag = {
-        ...prevTag,
+      const nextCollection: Collection = {
+        ...prevCollection,
         name,
       };
 
-      setTags((previousTags) => ({
-        ...previousTags,
-        [nextTag.id]: nextTag,
+      setCollections((previousCollections) => ({
+        ...previousCollections,
+        [nextCollection.id]: nextCollection,
       }));
 
       emitEvent({
-        name: 'TagNameUpdated',
-        tag: nextTag,
+        name: 'CollectionNameUpdated',
+        collection: nextCollection,
       });
     },
-    [emitEvent, setTags, getTag],
+    [getCollection, setCollections, emitEvent],
   );
 
-  return updateTagName;
+  return updateCollectionName;
 }
 
-export interface ExpandTagInput {
-  tagID: string;
-  expanded: boolean;
-}
-
-export function useExpandTag() {
+export function useCreateSpace() {
   const emitEvent = useEmitEvent();
-  const getTag = useGetTagCallback();
-  const [menu, setMenu] = useRecoilState(menuState);
+  const workspace = useGetWorkspace();
+  const setSpaces = useSetRecoilState(spacesState);
 
-  const expandTag = React.useCallback(
-    (input: ExpandTagInput) => {
-      const { tagID, expanded } = input;
-      const tag = getTag(tagID);
+  const createSpace = React.useCallback(() => {
+    const newSpace: Space = {
+      id: v4(),
+      name: '',
+      workspaceID: workspace.id,
+      typename: 'Space',
+    };
 
-      const nextMenu: MenuState = {
-        ...menu,
-        tagIDs: {
-          ...menu.tagIDs,
-          [tagID]: { expanded },
-        },
-      };
+    setSpaces((previousSpaces) => ({
+      ...previousSpaces,
+      [newSpace.id]: newSpace,
+    }));
 
-      setMenu(nextMenu);
+    emitEvent({
+      name: 'SpaceCreated',
+      space: newSpace,
+    });
+
+    return newSpace;
+  }, [emitEvent, workspace, setSpaces]);
+
+  return createSpace;
+}
+
+export function useDeleteSpace() {
+  const emitEvent = useEmitEvent();
+  const setSpaces = useSetRecoilState(spacesState);
+
+  const deleteSpace = React.useCallback(
+    (space: Space) => {
+      setSpaces((previousSpaces) => {
+        const nextSpaces = { ...previousSpaces };
+
+        delete nextSpaces[space.id];
+
+        return nextSpaces;
+      });
 
       emitEvent({
-        name: 'TagExpanded',
-        tag,
+        name: 'SpaceDeleted',
+        space,
       });
     },
-    [emitEvent, getTag, menu, setMenu],
+    [emitEvent, setSpaces],
   );
 
-  return expandTag;
+  return deleteSpace;
 }
 
-export function useGetMenu() {
-  return useRecoilValue(menuState);
+export interface UpdateSpaceNameInput {
+  spaceID: string;
+  name: string;
+}
+
+export function useUpdateSpaceName() {
+  const emitEvent = useEmitEvent();
+  const getSpace = useGetSpaceCallback();
+  const setSpaces = useSetRecoilState(spacesState);
+
+  const updateSpaceName = React.useCallback(
+    (input: UpdateSpaceNameInput) => {
+      const { spaceID, name } = input;
+      const prevSpace = getSpace(spaceID);
+
+      const nextSpace: Space = {
+        ...prevSpace,
+        name,
+      };
+
+      setSpaces((previousSpaces) => ({
+        ...previousSpaces,
+        [nextSpace.id]: nextSpace,
+      }));
+
+      emitEvent({
+        name: 'SpaceNameUpdated',
+        space: nextSpace,
+      });
+    },
+    [emitEvent, setSpaces, getSpace],
+  );
+
+  return updateSpaceName;
 }

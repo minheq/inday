@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { ContainerColor, useTheme, tokens } from '../theme';
+import { ContainerColor, useTheme, tokens } from './theme';
 
 type Shape = 'rounded' | 'square' | 'pill';
 

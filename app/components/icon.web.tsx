@@ -5,7 +5,7 @@ import * as Octicon from 'react-icons/go';
 import * as FontAwesome from 'react-icons/fa';
 import * as AntDesign from 'react-icons/ai';
 
-import { useTheme, tokens } from '../theme';
+import { useTheme, tokens } from './theme';
 
 import { IconProps } from './icon';
 

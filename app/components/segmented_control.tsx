@@ -2,7 +2,7 @@ import React from 'react';
 import { Text } from './text';
 import { StyleSheet, View } from 'react-native';
 import { Button } from './button';
-import { useTheme } from '../theme';
+import { useTheme } from './theme';
 
 interface Option<TValue = any> {
   label: string;

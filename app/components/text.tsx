@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as RNText, StyleSheet } from 'react-native';
-import { useTheme, TextSize, TextColor, tokens } from '../theme';
+import { useTheme, TextSize, TextColor, tokens } from './theme';
 
 type TextDecorationLine =
   | 'none'

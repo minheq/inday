@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Modal, ModalProps } from './modal';
 import { usePressability, PressabilityConfig } from './pressability';
-import { useTheme, tokens } from '../theme';
+import { useTheme, tokens } from './theme';
 
 const OFFSET_TOP = 64;
 

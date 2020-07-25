@@ -1,22 +1,16 @@
 export enum RecoilKey {
   // Atoms
-  Notes = 'Notes',
   Workspace = 'Workspace',
-  Navigation = 'Navigation',
-  Menu = 'Menu',
+  Spaces = 'Spaces',
+  Collections = 'Collections',
+  Views = 'Views',
   Events = 'Events',
-  Tags = 'Tags',
 
   // Selectors
-  AllNotes = 'AllNotes',
-  ArchiveNotes = 'ArchiveNotes',
-  DeletedNotes = 'DeletedNotes',
-  InboxNotes = 'InboxNotes',
-  TagNotes = 'TagNotes',
-  NoteList = 'NoteList',
-  MenuTags = 'MenuTags',
-  Tag = 'Tag',
-  Note = 'Note',
+  CollectionList = 'CollectionList',
+  Collection = 'Collection',
+  ViewList = 'ViewList',
+  View = 'View',
 }
 
 export enum StorageKey {
@@ -25,8 +19,4 @@ export enum StorageKey {
   Menu = 'Menu',
 }
 
-export enum StorageKeyPrefix {
-  Note = 'Note',
-  Workspace = 'Workspace',
-  Tag = 'Tag',
-}
+export enum StorageKeyPrefix {}

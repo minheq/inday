@@ -1,5 +1,5 @@
 import React from 'react';
-import { Frequency, Recurrence } from '../modules/recurrence';
+import { Frequency, Recurrence } from '../lib/datetime/recurrence';
 import { ListItem } from '../components/list_item';
 import { Container } from '../components/container';
 import { Spacing } from '../components/spacing';

@@ -6,7 +6,7 @@ import {
   GestureResponderEvent,
 } from 'react-native';
 import { Pressable, PressableChildrenProps } from './pressable';
-import { useTheme } from '../theme';
+import { useTheme } from './theme';
 
 type ButtonState = 'default' | 'hovered' | 'active' | 'disabled';
 

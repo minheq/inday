@@ -2,9 +2,9 @@ import React from 'react';
 
 import { Button, Container, Icon, Row, Spacer, IconName } from '../components';
 import { useUpdateNoteContent, useDeleteNote } from '../data/api';
-import { EditorInstance, Editor } from '../editor';
+import { EditorInstance, Editor } from '../lib/editor';
 import { useDebouncedCallback } from '../hooks/use_debounced_callback';
-import { Content, Note } from '../data/notes';
+import { Content, Note } from '../data/collections';
 
 interface NoteEditorProps {
   note: Note;

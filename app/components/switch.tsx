@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Animated } from 'react-native';
 import { Pressable } from './pressable';
-import { useTheme } from '../theme';
+import { useTheme } from './theme';
 
 interface SwitchProps {
   value?: boolean;
