@@ -5,7 +5,7 @@ import { Container } from '../components/container';
 import { Spacing } from '../components/spacing';
 import { BackButton } from '../components/back_button';
 import { Row } from '../components/row';
-import { useNavigation, NavigationProvider } from '../components/navigation';
+import { useTransition, TransitionProvider } from '../components/transition';
 import { Icon } from '../components/icon';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Button } from '../components/button';
@@ -26,9 +26,26 @@ import { Content } from '../components/content';
 import { DayPicker } from '../components/day_picker';
 import { TimePicker } from '../components/time_picker';
 import { Picker, ListPicker } from '../components';
-import { range } from '../utils/arrays';
-import { WeekDay, getWeekDaysOptions } from '../utils/week';
-import { Reminder } from '../data/types';
+import { range } from '../lib/data_structures/arrays';
+import { WeekDay, getWeekDaysOptions } from '../lib/datetime/week';
+
+export interface Reminder {
+  time: ReminderTime | null;
+  place: ReminderPlace | null;
+}
+
+interface ReminderTime {
+  date: Date;
+  time: Date | null;
+  recurrence: Recurrence | null;
+}
+
+interface ReminderPlace {
+  lat: number;
+  lng: number;
+  radius: number;
+  when: 'leaving' | 'arriving';
+}
 
 interface ReminderContext {
   value?: Reminder | null;
@@ -78,15 +95,15 @@ export function Reminder(props: ReminderProps) {
         onRecurrenceChange: handleRecurrenceChange,
       }}
     >
-      <NavigationProvider>
+      <TransitionProvider>
         <ReminderMenu />
-      </NavigationProvider>
+      </TransitionProvider>
     </ReminderContext.Provider>
   );
 }
 
 function ReminderMenu() {
-  const { navigate } = useNavigation();
+  const { navigate } = useTransition();
   return (
     <Container>
       <Row>
@@ -306,7 +323,7 @@ function useOptions() {
 
 export function RecurrencePicker() {
   const { value } = useReminder();
-  const { navigate } = useNavigation();
+  const { navigate } = useTransition();
   const options = useOptions();
 
   if (!value?.time?.date) {
@@ -344,7 +361,7 @@ export function RecurrencePicker() {
 
 function RecurrenceOptions() {
   const { value, onRecurrenceChange } = useReminder();
-  const { navigate, back } = useNavigation();
+  const { navigate, back } = useTransition();
   const options = useOptions();
   const selected = options.find((o) => o.selected);
   const custom = !selected && !!value?.time?.recurrence;
@@ -407,7 +424,7 @@ function RecurrenceOptions() {
 
 function RecurrenceCustomOptions() {
   const { value, onRecurrenceChange } = useReminder();
-  const { back } = useNavigation();
+  const { back } = useTransition();
   const recurrence = value?.time?.recurrence;
   const [monthOption, setMonthOption] = React.useState(1);
 
@@ -653,7 +670,7 @@ function RecurrenceCustomOptions() {
 
 function RecurrenceEndRepeatOptions() {
   const { value, onChange } = useReminder();
-  const { back } = useNavigation();
+  const { back } = useTransition();
   const recurrence = value?.time?.recurrence;
 
   if (!recurrence) {

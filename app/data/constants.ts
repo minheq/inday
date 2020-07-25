@@ -17,6 +17,8 @@ export enum RecoilKey {
   FieldList = 'FieldList',
   Document = 'Document',
   DocumentList = 'DocumentList',
+  Space = 'Space',
+  SpaceList = 'SpaceList',
 }
 
 export enum StorageKey {

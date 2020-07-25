@@ -1,25 +1,25 @@
 import React from 'react';
 import { Animated, StyleSheet, View, LayoutChangeEvent } from 'react-native';
-import { last, secondLast } from '../utils/arrays';
+import { last, secondLast } from '../lib/data_structures/arrays';
 
-interface NavigationContext {
+interface TransitionContext {
   navigate: (screen: React.ReactNode) => void;
   back: () => void;
   canGoBack: boolean;
 }
 
-const NavigationContext = React.createContext<NavigationContext>({
+const TransitionContext = React.createContext<TransitionContext>({
   navigate: () => {},
   back: () => {},
   canGoBack: false,
 });
 
-interface NavigationProviderProps {
+interface TransitionProviderProps {
   children?: React.ReactNode;
 }
 
-export function useNavigation() {
-  return React.useContext(NavigationContext);
+export function useTransition() {
+  return React.useContext(TransitionContext);
 }
 
 interface Screen {
@@ -34,7 +34,7 @@ interface State {
 
 const OFFSET_WIDTH = 160;
 
-export function NavigationProvider(props: NavigationProviderProps) {
+export function TransitionProvider(props: TransitionProviderProps) {
   const { children } = props;
   const [state, setState] = React.useState<State>({
     screens: [{ node: children, visibility: new Animated.Value(0) }],
@@ -109,7 +109,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
   const canGoBack = screens.length > 1;
 
   return (
-    <NavigationContext.Provider
+    <TransitionContext.Provider
       value={{
         navigate: handleNavigate,
         back: handleBack,
@@ -134,7 +134,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
           );
         })}
       </View>
-    </NavigationContext.Provider>
+    </TransitionContext.Provider>
   );
 }
 

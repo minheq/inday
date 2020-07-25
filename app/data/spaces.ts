@@ -15,7 +15,7 @@ export const spacesState = atom<SpacesState>({
 });
 
 export const spaceQuery = selectorFamily<Space | null, string>({
-  key: RecoilKey.Spaces,
+  key: RecoilKey.Space,
   get: (spaceID: string) => ({ get }) => {
     const spaces = get(spacesState);
     const space = spaces[spaceID];
@@ -29,7 +29,7 @@ export const spaceQuery = selectorFamily<Space | null, string>({
 });
 
 export const spaceListQuery = selector({
-  key: RecoilKey.Spaces,
+  key: RecoilKey.SpaceList,
   get: ({ get }) => {
     const spaces = get(spacesState);
 

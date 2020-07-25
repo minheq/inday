@@ -15,7 +15,7 @@ export * from './icon';
 export * from './segmented_control';
 export * from './search_input';
 export * from './modal';
-export * from './navigation';
+export * from './transition';
 export * from './list_item';
 export * from './close_button';
 export * from './back_button';
