@@ -3,10 +3,10 @@ import bodyParser from 'body-parser';
 
 import { connectDatabase } from './db';
 import { handleCreateWorkspace } from './handlers';
+import { env } from './env';
 
 async function main() {
   const app = express();
-  const port = 3000;
 
   await connectDatabase();
 
@@ -25,8 +25,8 @@ async function main() {
 
   app.use('/v0', routerV0);
 
-  app.listen(port, () =>
-    console.log(`Example app listening at http://localhost:${port}`),
+  app.listen(env.port, () =>
+    console.log(`Server listening at http://localhost:${env.port}`),
   );
 }
 
