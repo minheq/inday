@@ -2,7 +2,6 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { v4 } from 'uuid';
 import * as yup from 'yup';
 
-import { createContext, Context, AuthenticatedContext } from './context';
 import {
   createWorkspace,
   fullUpdateWorkspace,
@@ -10,10 +9,26 @@ import {
   getWorkspace,
   deleteWorkspace,
 } from './db';
-import { AuthenticationError } from './errors';
+import { AuthenticationError, UnauthorizedError } from './errors';
 
 type Request = FastifyRequest;
 type Response = FastifyReply;
+
+interface AuthenticatedContext {
+  userID: string;
+}
+
+interface UnauthenticatedContext {
+  userID: undefined;
+}
+
+type Context = AuthenticatedContext | UnauthenticatedContext;
+
+async function createContext(_req: Request): Promise<Context> {
+  return {
+    userID: '1',
+  };
+}
 
 function ensureAuthenticated(
   ctx: Context,
@@ -45,6 +60,7 @@ export async function handleCreateWorkspace(req: Request, res: Response) {
   await createWorkspaceInputSchema.validate(req.body);
   const ctx = await createContext(req);
   const currentUserID = getCurrentUserID(ctx);
+
   const { id, name } = req.body as CreateWorkspaceInput;
 
   const workspace = await createWorkspace(id ?? v4(), name, currentUserID);
@@ -102,21 +118,28 @@ export async function handlePartialUpdateWorkspace(
 }
 
 export async function handleGetWorkspace(req: Request, res: Response) {
-  const { id } = req.params as { id: string };
   const ctx = await createContext(req);
   ensureAuthenticated(ctx);
 
+  const { id } = req.params as { id: string };
   const workspace = await getWorkspace(id);
 
   res.send(workspace);
 }
 
 export async function handleDeleteWorkspace(req: Request, res: Response) {
-  const { id } = req.params as { id: string };
   const ctx = await createContext(req);
-  ensureAuthenticated(ctx);
+  const currentUserID = getCurrentUserID(ctx);
 
-  const workspace = await deleteWorkspace(id);
+  const { id } = req.params as { id: string };
 
-  res.send(workspace);
+  const workspace = await getWorkspace(id);
+
+  if (workspace.ownerID !== currentUserID) {
+    throw new UnauthorizedError();
+  }
+
+  await deleteWorkspace(id);
+
+  res.send({ id, deleted: true });
 }

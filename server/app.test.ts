@@ -84,8 +84,11 @@ describe('DELETE /v0/workspaces/:id', () => {
       url: `/v0/workspaces/${workspace.id}`,
       method: 'DELETE',
     });
+    const result = res.json();
 
     expect(res.statusCode).toEqual(200);
+    expect(result.id).toBe(workspace.id);
+    expect(result.deleted).toBeTruthy();
   });
 });
 

@@ -73,6 +73,7 @@ function toWorkspace(data: WorkspaceRow): Workspace {
   return {
     id: data.id,
     name: data.name,
+    ownerID: data.owner_id,
   };
 }
 
