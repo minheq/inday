@@ -16,7 +16,8 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "storybook": "start-storybook -p 6006",
     "db:create": "ts-node-dev ./scripts/create_db.ts",
-    "db:migrate": "ts-node-dev ./scripts/migrate.ts"
+    "db:migrate": "ts-node-dev ./scripts/migrate_up.ts",
+    "db:migrate:down": "ts-node-dev ./scripts/migrate_down.ts"
   },
   "dependencies": {
     "@babel/core": "^7.9.0",
@@ -43,6 +44,7 @@
     "@types/react-native-vector-icons": "^6.4.5",
     "@types/react-test-renderer": "16.9.2",
     "@types/uuid": "^8.0.0",
+    "@types/yup": "^0.29.3",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
     "babel-jest": "^24.9.0",
@@ -81,10 +83,11 @@
     "style-loader": "^1.2.1",
     "ts-node-dev": "^1.0.0-pre.56",
     "typescript": "^3.8.3",
-    "uuid": "^8.1.0",
+    "uuid": "^8.2.0",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.10.3"
+    "webpack-dev-server": "^3.10.3",
+    "yup": "^0.29.1"
   },
   "jest": {
     "preset": "react-native",

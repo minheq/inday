@@ -1,10 +1,3 @@
 {
-  "files.watcherExclude": {
-    "**/quill.css.js": true,
-    "**/quill.js": true
-  },
-  "search.exclude": {
-    "**/quill.css.js": true,
-    "**/quill.js": true
-  }
+  "jest.pathToJest": ""
 }

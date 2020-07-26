@@ -1,8 +1,9 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import { env } from './env';
 import { Workspace } from '../app/data/workspace';
+import { NotFoundError } from './errors';
 
-const db = new Pool({
+const pool = new Pool({
   user: env.database.username,
   host: env.database.host,
   port: env.database.port,
@@ -10,37 +11,48 @@ const db = new Pool({
   database: env.database.name,
 });
 
-export async function checkConnection() {
-  return db.query('SELECT NOW()');
-}
-
 export async function closeDB() {
-  return db.end();
+  return pool.end();
 }
 
-async function startTx() {
-  return db.query('BEGIN');
-}
+export async function wrapInTx<T>(
+  query: (client: PoolClient) => Promise<T>,
+): Promise<T> {
+  const client = await pool.connect();
 
-async function commitTx() {
-  return await db.query('COMMIT');
-}
-
-async function rollbackTx() {
-  return await db.query('ROLLBACK');
-}
-
-export async function wrapInTx<T>(query: () => Promise<T>): Promise<T> {
   try {
-    await startTx();
-    const result = await query();
-    await commitTx();
+    await client.query('BEGIN');
+    const result = await query(client);
+    await client.query('COMMIT');
 
     return result;
-  } catch (error) {
-    await rollbackTx();
-    throw error;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
   }
+}
+
+function buildPartialUpdateQuery<T extends { [field: string]: any }>(
+  fields: T,
+): [string, any[]] {
+  let setText = '';
+  let values: any[] = [];
+  // $1 is always assumed to be for ID, so we start from $2
+  let index = 2;
+
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value === undefined) {
+      return;
+    }
+
+    setText += `${key}=${index} `;
+    values.push(value);
+    index++;
+  });
+
+  return [setText, values];
 }
 
 interface WorkspaceRow {
@@ -58,12 +70,24 @@ function toWorkspace(data: WorkspaceRow): Workspace {
   };
 }
 
+export async function getWorkspace(id: string): Promise<Workspace> {
+  const result = await pool.query('SELECT * FROM workspace WHERE id=$1', [id]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('workspace');
+  }
+
+  const row = result.rows[0] as WorkspaceRow;
+
+  return toWorkspace(row);
+}
+
 export async function createWorkspace(
   id: string,
   name: string,
   userID: string,
 ): Promise<Workspace> {
-  const result = await db.query(
+  const result = await pool.query(
     'INSERT INTO workspace (id, name, owner_id) VALUES($1, $2, $3) RETURNING *',
     [id, name, userID],
   );
@@ -71,4 +95,50 @@ export async function createWorkspace(
   const row = result.rows[0] as WorkspaceRow;
 
   return toWorkspace(row);
+}
+
+export async function fullUpdateWorkspace(
+  id: string,
+  name: string,
+): Promise<Workspace> {
+  const result = await pool.query(
+    'UPDATE workspace SET name=$2 WHERE id=$1 RETURNING *',
+    [id, name],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('workspace');
+  }
+
+  const row = result.rows[0] as WorkspaceRow;
+
+  return toWorkspace(row);
+}
+
+export async function partialUpdateWorkspace(
+  id: string,
+  name?: string,
+): Promise<Workspace> {
+  const [setText, values] = buildPartialUpdateQuery({ name });
+
+  const result = await pool.query(
+    `UPDATE workspace SET ${setText} WHERE id=$1 RETURNING *`,
+    [id, ...values],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('workspace');
+  }
+
+  const row = result.rows[0] as WorkspaceRow;
+
+  return toWorkspace(row);
+}
+
+export async function deleteWorkspace(id: string): Promise<void> {
+  const result = await pool.query('DELETE FROM workspace where id=$1', [id]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('workspace');
+  }
 }
