@@ -1,20 +1,22 @@
 import { FastifyInstance } from 'fastify';
 import { createApp } from './app';
+import { v4 } from 'uuid';
 
 import { Workspace } from '../app/data/workspace';
-import { closeDB, createWorkspace, cleanDB } from './db';
-import { v4 } from 'uuid';
+import { DB, closeDB, getDB, createWorkspace, cleanDB } from './db';
 import { CreateWorkspaceInput, FullUpdateWorkspaceInput } from './handlers';
 
 let app: FastifyInstance;
+let db: DB;
 
 beforeAll(async () => {
   await cleanDB();
   app = createApp();
+  db = await getDB();
 });
 
 afterAll(async () => {
-  await closeDB();
+  await closeDB(db);
 });
 
 describe('POST /v0/workspaces', () => {
@@ -38,7 +40,7 @@ describe('POST /v0/workspaces', () => {
 
 describe('PUT /v0/workspaces/:id', () => {
   test('happy path', async () => {
-    const workspace = await createWorkspace(v4(), 'test2', '1');
+    const workspace = await createWorkspace(db, v4(), 'test2', '1');
     const input: FullUpdateWorkspaceInput = {
       name: 'test3',
     };
@@ -58,7 +60,7 @@ describe('PUT /v0/workspaces/:id', () => {
 
 describe('PATCH /v0/workspaces/:id', () => {
   test('happy path', async () => {
-    const workspace = await createWorkspace(v4(), 'test4', '1');
+    const workspace = await createWorkspace(db, v4(), 'test4', '1');
     const input: FullUpdateWorkspaceInput = {
       name: 'test5',
     };
@@ -78,7 +80,7 @@ describe('PATCH /v0/workspaces/:id', () => {
 
 describe('DELETE /v0/workspaces/:id', () => {
   test('happy path', async () => {
-    const workspace = await createWorkspace(v4(), 'test6', '1');
+    const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
     const res = await app.inject({
       url: `/v0/workspaces/${workspace.id}`,
@@ -94,7 +96,7 @@ describe('DELETE /v0/workspaces/:id', () => {
 
 describe('GET /v0/workspaces/:id', () => {
   test('happy path', async () => {
-    const workspace = await createWorkspace(v4(), 'test6', '1');
+    const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
     const res = await app.inject({
       url: `/v0/workspaces/${workspace.id}`,

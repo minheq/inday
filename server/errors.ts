@@ -10,6 +10,18 @@ export class AuthenticationError extends Error {
   }
 }
 
+type FieldError = { field: string; message: string };
+export class ValidationError extends Error {
+  fields: FieldError[];
+
+  constructor(fields: FieldError[]) {
+    super();
+    this.fields = fields;
+  }
+}
+
+export class BadRequestError extends Error {}
+
 export class UnauthorizedError extends Error {
   constructor() {
     super('not authorized');

@@ -3,6 +3,8 @@ import { v4 } from 'uuid';
 import * as yup from 'yup';
 
 import {
+  DB,
+  wrapInTx,
   createWorkspace,
   fullUpdateWorkspace,
   partialUpdateWorkspace,
@@ -14,11 +16,16 @@ import { AuthenticationError, UnauthorizedError } from './errors';
 type Request = FastifyRequest;
 type Response = FastifyReply;
 
-interface AuthenticatedContext {
+interface BaseContext {
+  /** Database client used for transaction of all queries within single request */
+  db: DB;
+}
+
+interface AuthenticatedContext extends BaseContext {
   userID: string;
 }
 
-interface UnauthenticatedContext {
+interface UnauthenticatedContext extends BaseContext {
   userID: undefined;
 }
 
@@ -37,11 +44,14 @@ type AH = (
 
 export function addContext(handler: H) {
   return async (req: Request, res: Response) => {
-    const ctx: Context = {
-      userID: '1',
-    };
+    await wrapInTx(async (db) => {
+      const ctx: Context = {
+        userID: '1',
+        db,
+      };
 
-    return handler(ctx, req, res);
+      return handler(ctx, req, res);
+    });
   };
 }
 
@@ -83,7 +93,12 @@ export const handleCreateWorkspace: AH = async (ctx, req, res) => {
 
   const { id, name } = req.body as CreateWorkspaceInput;
 
-  const workspace = await createWorkspace(id ?? v4(), name, currentUserID);
+  const workspace = await createWorkspace(
+    ctx.db,
+    id ?? v4(),
+    name,
+    currentUserID,
+  );
 
   res.send(workspace);
 };
@@ -104,7 +119,7 @@ export const handleFullUpdateWorkspace: AH = async (ctx, req, res) => {
   const { id } = req.params as { id: string };
   const { name } = req.body as FullUpdateWorkspaceInput;
 
-  const workspace = await fullUpdateWorkspace(id, name);
+  const workspace = await fullUpdateWorkspace(ctx.db, id, name);
 
   res.send(workspace);
 };
@@ -125,30 +140,29 @@ export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
   const { id } = req.params as { id: string };
   const { name } = req.body as PartialUpdateWorkspaceInput;
 
-  const workspace = await partialUpdateWorkspace(id, name);
+  const workspace = await partialUpdateWorkspace(ctx.db, id, name);
 
   res.send(workspace);
 };
 
 export const handleGetWorkspace: AH = async (ctx, req, res) => {
   const { id } = req.params as { id: string };
-  const workspace = await getWorkspace(id);
+  const workspace = await getWorkspace(ctx.db, id);
 
   res.send(workspace);
 };
 
 export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
   const currentUserID = getCurrentUserID(ctx);
-
   const { id } = req.params as { id: string };
 
-  const workspace = await getWorkspace(id);
+  const workspace = await getWorkspace(ctx.db, id);
 
   if (workspace.ownerID !== currentUserID) {
     throw new UnauthorizedError();
   }
 
-  await deleteWorkspace(id);
+  await deleteWorkspace(ctx.db, id);
 
   res.send({ id, deleted: true });
 };
