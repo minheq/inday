@@ -9,11 +9,11 @@ export const dbClient = new Client({
   database: env.database.name,
 });
 
-async function main() {
+async function runScript() {
   return dbClient.query(`CREATE DATABASE ${env.database.name};`);
 }
 
-main()
+runScript()
   .then((result) => {
     console.log(result);
     process.exit(0);

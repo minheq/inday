@@ -13,11 +13,11 @@ const postgrator = new Postgrator({
   schemaTable: 'migrations',
 });
 
-async function main() {
+async function runScript() {
   return postgrator.migrate();
 }
 
-main()
+runScript()
   .then((result) => {
     console.log(result);
     process.exit(0);

@@ -2,32 +2,26 @@ import express from 'express';
 import bodyParser from 'body-parser';
 
 import { connectDatabase } from './db';
-import { handleCreateWorkspace } from './handlers';
-import { env } from './env';
 
-async function main() {
+import { env } from './env';
+import { cors } from './middlewares';
+import { routesV0 } from './routes';
+
+export async function runServer() {
   const app = express();
 
   await connectDatabase();
 
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE');
-    next();
-  });
+  app.use(cors());
 
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
-  const routerV0 = express.Router();
+  app.use('/v0', routesV0());
 
-  routerV0.post('/workspace', handleCreateWorkspace);
-
-  app.use('/v0', routerV0);
-
-  app.listen(env.port, () =>
+  const server = app.listen(env.port, () =>
     console.log(`Server listening at http://localhost:${env.port}`),
   );
-}
 
-main();
+  return server;
+}
