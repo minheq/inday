@@ -10,11 +10,12 @@ export class AuthenticationError extends Error {
   }
 }
 
-type FieldError = { field: string; message: string };
-export class ValidationError extends Error {
-  fields: FieldError[];
+export type ValidationErrorField = { field: string; message: string };
 
-  constructor(fields: FieldError[]) {
+export class ValidationError extends Error {
+  fields: ValidationErrorField[];
+
+  constructor(fields: ValidationErrorField[]) {
     super();
     this.fields = fields;
   }

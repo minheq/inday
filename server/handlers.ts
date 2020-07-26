@@ -11,7 +11,12 @@ import {
   getWorkspace,
   deleteWorkspace,
 } from './db';
-import { AuthenticationError, UnauthorizedError } from './errors';
+import {
+  AuthenticationError,
+  UnauthorizedError,
+  ValidationErrorField,
+  ValidationError,
+} from './errors';
 
 type Request = FastifyRequest;
 type Response = FastifyReply;
@@ -55,6 +60,24 @@ export function addContext(handler: H) {
   };
 }
 
+async function validateInput<T>(
+  schema: yup.Schema<T>,
+  input: T,
+): Promise<void> {
+  try {
+    await schema.validate(input, { abortEarly: false });
+  } catch (error) {
+    const fields: ValidationErrorField[] = (error as yup.ValidationError).inner.map(
+      (validationError: yup.ValidationError) => ({
+        field: validationError.path,
+        message: validationError.message,
+      }),
+    );
+
+    throw new ValidationError(fields);
+  }
+}
+
 function assertAuthenticated(
   ctx: Context,
 ): asserts ctx is AuthenticatedContext {
@@ -88,7 +111,7 @@ const createWorkspaceInputSchema = yup
   .required();
 
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
-  await createWorkspaceInputSchema.validate(req.body);
+  await validateInput(createWorkspaceInputSchema, req.body);
   const currentUserID = getCurrentUserID(ctx);
 
   const { id, name } = req.body as CreateWorkspaceInput;
@@ -114,7 +137,7 @@ const fullUpdateWorkspaceInputSchema = yup
   .required();
 
 export const handleFullUpdateWorkspace: AH = async (ctx, req, res) => {
-  await fullUpdateWorkspaceInputSchema.validate(req.body);
+  await validateInput(fullUpdateWorkspaceInputSchema, req.body);
 
   const { id } = req.params as { id: string };
   const { name } = req.body as FullUpdateWorkspaceInput;
@@ -135,7 +158,7 @@ const partialUpdateWorkspaceInputSchema = yup
   .required();
 
 export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
-  await partialUpdateWorkspaceInputSchema.validate(req.body);
+  await validateInput(partialUpdateWorkspaceInputSchema, req.body);
 
   const { id } = req.params as { id: string };
   const { name } = req.body as PartialUpdateWorkspaceInput;
