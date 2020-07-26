@@ -22,15 +22,30 @@ interface UnauthenticatedContext {
   userID: undefined;
 }
 
+/** Context of the request. */
 type Context = AuthenticatedContext | UnauthenticatedContext;
 
-async function createContext(_req: Request): Promise<Context> {
-  return {
-    userID: '1',
+/** Generic Handler */
+type H = (ctx: Context, req: Request, res: Response) => Promise<void>;
+
+/** Authenticated Handler */
+type AH = (
+  ctx: AuthenticatedContext,
+  req: Request,
+  res: Response,
+) => Promise<void>;
+
+export function addContext(handler: H) {
+  return async (req: Request, res: Response) => {
+    const ctx: Context = {
+      userID: '1',
+    };
+
+    return handler(ctx, req, res);
   };
 }
 
-function ensureAuthenticated(
+function assertAuthenticated(
   ctx: Context,
 ): asserts ctx is AuthenticatedContext {
   if (ctx.userID === undefined) {
@@ -38,9 +53,15 @@ function ensureAuthenticated(
   }
 }
 
-function getCurrentUserID(ctx: Context): string {
-  ensureAuthenticated(ctx);
+export function ensureAuthenticated(handler: AH) {
+  return (ctx: Context, req: Request, res: Response) => {
+    assertAuthenticated(ctx);
 
+    return handler(ctx, req, res);
+  };
+}
+
+function getCurrentUserID(ctx: AuthenticatedContext): string {
   return ctx.userID;
 }
 
@@ -56,9 +77,8 @@ const createWorkspaceInputSchema = yup
   })
   .required();
 
-export async function handleCreateWorkspace(req: Request, res: Response) {
+export const handleCreateWorkspace: AH = async (ctx, req, res) => {
   await createWorkspaceInputSchema.validate(req.body);
-  const ctx = await createContext(req);
   const currentUserID = getCurrentUserID(ctx);
 
   const { id, name } = req.body as CreateWorkspaceInput;
@@ -66,7 +86,7 @@ export async function handleCreateWorkspace(req: Request, res: Response) {
   const workspace = await createWorkspace(id ?? v4(), name, currentUserID);
 
   res.send(workspace);
-}
+};
 
 export interface FullUpdateWorkspaceInput {
   name: string;
@@ -78,10 +98,8 @@ const fullUpdateWorkspaceInputSchema = yup
   })
   .required();
 
-export async function handleFullUpdateWorkspace(req: Request, res: Response) {
+export const handleFullUpdateWorkspace: AH = async (ctx, req, res) => {
   await fullUpdateWorkspaceInputSchema.validate(req.body);
-  const ctx = await createContext(req);
-  ensureAuthenticated(ctx);
 
   const { id } = req.params as { id: string };
   const { name } = req.body as FullUpdateWorkspaceInput;
@@ -89,7 +107,7 @@ export async function handleFullUpdateWorkspace(req: Request, res: Response) {
   const workspace = await fullUpdateWorkspace(id, name);
 
   res.send(workspace);
-}
+};
 
 export interface PartialUpdateWorkspaceInput {
   name?: string;
@@ -101,13 +119,8 @@ const partialUpdateWorkspaceInputSchema = yup
   })
   .required();
 
-export async function handlePartialUpdateWorkspace(
-  req: Request,
-  res: Response,
-) {
+export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
   await partialUpdateWorkspaceInputSchema.validate(req.body);
-  const ctx = await createContext(req);
-  ensureAuthenticated(ctx);
 
   const { id } = req.params as { id: string };
   const { name } = req.body as PartialUpdateWorkspaceInput;
@@ -115,20 +128,16 @@ export async function handlePartialUpdateWorkspace(
   const workspace = await partialUpdateWorkspace(id, name);
 
   res.send(workspace);
-}
+};
 
-export async function handleGetWorkspace(req: Request, res: Response) {
-  const ctx = await createContext(req);
-  ensureAuthenticated(ctx);
-
+export const handleGetWorkspace: AH = async (ctx, req, res) => {
   const { id } = req.params as { id: string };
   const workspace = await getWorkspace(id);
 
   res.send(workspace);
-}
+};
 
-export async function handleDeleteWorkspace(req: Request, res: Response) {
-  const ctx = await createContext(req);
+export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
   const currentUserID = getCurrentUserID(ctx);
 
   const { id } = req.params as { id: string };
@@ -142,4 +151,4 @@ export async function handleDeleteWorkspace(req: Request, res: Response) {
   await deleteWorkspace(id);
 
   res.send({ id, deleted: true });
-}
+};
