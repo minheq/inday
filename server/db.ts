@@ -1,7 +1,6 @@
 import { Pool } from 'pg';
 import { env } from './env';
 import { Workspace } from '../app/data/workspace';
-import { v4 } from 'uuid';
 
 const db = new Pool({
   user: env.database.username,
@@ -11,12 +10,16 @@ const db = new Pool({
   database: env.database.name,
 });
 
-export async function connectDatabase() {
-  return await db.connect();
+export async function checkConnection() {
+  return db.query('SELECT NOW()');
+}
+
+export async function closeDB() {
+  return db.end();
 }
 
 async function startTx() {
-  return await db.query('BEGIN');
+  return db.query('BEGIN');
 }
 
 async function commitTx() {
@@ -40,24 +43,32 @@ export async function wrapInTx<T>(query: () => Promise<T>): Promise<T> {
   }
 }
 
-enum Table {
-  Workspace = 'workspace',
+interface WorkspaceRow {
+  id: string;
+  name: string;
+  owner_id: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
-export interface CreateWorkspaceInput {
-  id?: string;
-  name: string;
+function toWorkspace(data: WorkspaceRow): Workspace {
+  return {
+    id: data.id,
+    name: data.name,
+  };
 }
 
 export async function createWorkspace(
-  input: CreateWorkspaceInput,
+  id: string,
+  name: string,
+  userID: string,
 ): Promise<Workspace> {
-  const { id, name } = input;
-
   const result = await db.query(
-    `INSERT INTO ${Table.Workspace} (id, name) VALUES($1, $2) RETURNING *`,
-    [id ?? v4(), name],
+    'INSERT INTO workspace (id, name, owner_id) VALUES($1, $2, $3) RETURNING *',
+    [id, name, userID],
   );
 
-  console.log(result);
+  const row = result.rows[0] as WorkspaceRow;
+
+  return toWorkspace(row);
 }

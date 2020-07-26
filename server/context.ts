@@ -1,7 +1,13 @@
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 
-export interface Context {}
+type Request = FastifyRequest;
+
+export interface Context {
+  userID: string;
+}
 
 export async function createContext(_req: Request): Promise<Context> {
-  return {};
+  return {
+    userID: '1',
+  };
 }

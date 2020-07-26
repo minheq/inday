@@ -31,6 +31,6 @@ export const env = {
   logger: {
     level: getOsEnv('LOGGER_LEVEL'),
   },
-  port: getOsEnv('PORT'),
+  port: toNumber(getOsEnv('PORT')),
   nodeEnv: getOsEnv('NODE_ENV'),
 };

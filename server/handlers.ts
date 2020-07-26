@@ -1,18 +1,30 @@
-import { Request, Response } from 'express';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { v4 } from 'uuid';
+
 import { createContext } from './context';
-import { createWorkspace, wrapInTx, CreateWorkspaceInput } from './db';
+import { wrapInTx, createWorkspace } from './db';
+
+type Request = FastifyRequest;
+type Response = FastifyReply;
+
+export interface CreateWorkspaceInput {
+  id?: string;
+  name: string;
+}
 
 function validateCreateWorkspaceInput(requestBody: any): CreateWorkspaceInput {
   return requestBody;
 }
 
 export async function handleCreateWorkspace(req: Request, res: Response) {
-  const ctx = createContext(req);
+  const ctx = await createContext(req);
   const input = validateCreateWorkspaceInput(req.body);
 
+  const { id, name } = input;
+
   const workspace = await wrapInTx(async () => {
-    return createWorkspace(input);
+    return createWorkspace(id ?? v4(), name, ctx.userID);
   });
 
-  res.json(workspace);
+  res.send(workspace);
 }
