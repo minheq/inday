@@ -2,13 +2,14 @@ import { FastifyInstance } from 'fastify';
 import { createApp } from './app';
 
 import { Workspace } from '../app/data/workspace';
-import { closeDB, createWorkspace } from './db';
+import { closeDB, createWorkspace, cleanDB } from './db';
 import { v4 } from 'uuid';
 import { CreateWorkspaceInput, FullUpdateWorkspaceInput } from './handlers';
 
 let app: FastifyInstance;
 
 beforeAll(async () => {
+  await cleanDB();
   app = createApp();
 });
 
@@ -19,7 +20,7 @@ afterAll(async () => {
 describe('POST /v0/workspaces', () => {
   test('happy path', async () => {
     const input: CreateWorkspaceInput = {
-      name: 'Hello',
+      name: 'test1',
     };
 
     const res = await app.inject({
@@ -37,9 +38,9 @@ describe('POST /v0/workspaces', () => {
 
 describe('PUT /v0/workspaces/:id', () => {
   test('happy path', async () => {
-    const workspace = await createWorkspace(v4(), 'Previous name', '1');
+    const workspace = await createWorkspace(v4(), 'test2', '1');
     const input: FullUpdateWorkspaceInput = {
-      name: 'Next name',
+      name: 'test3',
     };
 
     const res = await app.inject({
@@ -52,5 +53,53 @@ describe('PUT /v0/workspaces/:id', () => {
     expect(res.statusCode).toEqual(200);
     expect(result.name).toBe(input.name);
     expect(result.id).toBeTruthy();
+  });
+});
+
+describe('PATCH /v0/workspaces/:id', () => {
+  test('happy path', async () => {
+    const workspace = await createWorkspace(v4(), 'test4', '1');
+    const input: FullUpdateWorkspaceInput = {
+      name: 'test5',
+    };
+
+    const res = await app.inject({
+      url: `/v0/workspaces/${workspace.id}`,
+      method: 'PATCH',
+      payload: input,
+    });
+    const result = res.json() as Workspace;
+
+    expect(res.statusCode).toEqual(200);
+    expect(result.name).toBe(input.name);
+    expect(result.id).toBeTruthy();
+  });
+});
+
+describe('DELETE /v0/workspaces/:id', () => {
+  test('happy path', async () => {
+    const workspace = await createWorkspace(v4(), 'test6', '1');
+
+    const res = await app.inject({
+      url: `/v0/workspaces/${workspace.id}`,
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toEqual(200);
+  });
+});
+
+describe('GET /v0/workspaces/:id', () => {
+  test('happy path', async () => {
+    const workspace = await createWorkspace(v4(), 'test6', '1');
+
+    const res = await app.inject({
+      url: `/v0/workspaces/${workspace.id}`,
+      method: 'GET',
+    });
+    const result = res.json() as Workspace;
+
+    expect(res.statusCode).toEqual(200);
+    expect(result.name).toBe(workspace.name);
   });
 });

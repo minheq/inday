@@ -34,6 +34,12 @@ export async function wrapInTx<T>(
   }
 }
 
+export async function cleanDB() {
+  await wrapInTx(async (client) => {
+    await client.query('DELETE FROM workspace');
+  });
+}
+
 function buildPartialUpdateQuery<T extends { [field: string]: any }>(
   fields: T,
 ): [string, any[]] {
@@ -47,12 +53,12 @@ function buildPartialUpdateQuery<T extends { [field: string]: any }>(
       return;
     }
 
-    setText += `${key}=${index} `;
+    setText += `${key}=$${index} `;
     values.push(value);
     index++;
   });
 
-  return [setText, values];
+  return [setText.trim(), values];
 }
 
 interface WorkspaceRow {

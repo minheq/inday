@@ -16,7 +16,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "storybook": "start-storybook -p 6006",
     "db:create": "ts-node-dev ./scripts/create_db.ts",
-    "db:migrate": "ts-node-dev ./scripts/migrate_up.ts",
+    "db:migrate:up": "ts-node-dev ./scripts/migrate_up.ts",
     "db:migrate:down": "ts-node-dev ./scripts/migrate_down.ts"
   },
   "dependencies": {

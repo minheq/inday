@@ -3,3 +3,9 @@ export class NotFoundError extends Error {
     super(`${entity} not found`);
   }
 }
+
+export class AuthenticationError extends Error {
+  constructor() {
+    super('not authenticated');
+  }
+}

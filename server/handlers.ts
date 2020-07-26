@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { v4 } from 'uuid';
 import * as yup from 'yup';
 
-import { createContext } from './context';
+import { createContext, Context, AuthenticatedContext } from './context';
 import {
   createWorkspace,
   fullUpdateWorkspace,
@@ -10,9 +10,24 @@ import {
   getWorkspace,
   deleteWorkspace,
 } from './db';
+import { AuthenticationError } from './errors';
 
 type Request = FastifyRequest;
 type Response = FastifyReply;
+
+function ensureAuthenticated(
+  ctx: Context,
+): asserts ctx is AuthenticatedContext {
+  if (ctx.userID === undefined) {
+    throw new AuthenticationError();
+  }
+}
+
+function getCurrentUserID(ctx: Context): string {
+  ensureAuthenticated(ctx);
+
+  return ctx.userID;
+}
 
 export interface CreateWorkspaceInput {
   id?: string;
@@ -29,9 +44,10 @@ const createWorkspaceInputSchema = yup
 export async function handleCreateWorkspace(req: Request, res: Response) {
   await createWorkspaceInputSchema.validate(req.body);
   const ctx = await createContext(req);
+  const currentUserID = getCurrentUserID(ctx);
   const { id, name } = req.body as CreateWorkspaceInput;
 
-  const workspace = await createWorkspace(id ?? v4(), name, ctx.userID);
+  const workspace = await createWorkspace(id ?? v4(), name, currentUserID);
 
   res.send(workspace);
 }
@@ -48,6 +64,9 @@ const fullUpdateWorkspaceInputSchema = yup
 
 export async function handleFullUpdateWorkspace(req: Request, res: Response) {
   await fullUpdateWorkspaceInputSchema.validate(req.body);
+  const ctx = await createContext(req);
+  ensureAuthenticated(ctx);
+
   const { id } = req.params as { id: string };
   const { name } = req.body as FullUpdateWorkspaceInput;
 
@@ -71,6 +90,9 @@ export async function handlePartialUpdateWorkspace(
   res: Response,
 ) {
   await partialUpdateWorkspaceInputSchema.validate(req.body);
+  const ctx = await createContext(req);
+  ensureAuthenticated(ctx);
+
   const { id } = req.params as { id: string };
   const { name } = req.body as PartialUpdateWorkspaceInput;
 
@@ -81,6 +103,8 @@ export async function handlePartialUpdateWorkspace(
 
 export async function handleGetWorkspace(req: Request, res: Response) {
   const { id } = req.params as { id: string };
+  const ctx = await createContext(req);
+  ensureAuthenticated(ctx);
 
   const workspace = await getWorkspace(id);
 
@@ -89,6 +113,8 @@ export async function handleGetWorkspace(req: Request, res: Response) {
 
 export async function handleDeleteWorkspace(req: Request, res: Response) {
   const { id } = req.params as { id: string };
+  const ctx = await createContext(req);
+  ensureAuthenticated(ctx);
 
   const workspace = await deleteWorkspace(id);
 
