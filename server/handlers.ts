@@ -18,6 +18,7 @@ import {
   ValidationError,
 } from './errors';
 
+//#region Helpers
 type Request = FastifyRequest;
 type Response = FastifyReply;
 
@@ -60,12 +61,12 @@ export function addContext(handler: H) {
   };
 }
 
-async function validateInput<T>(
-  schema: yup.Schema<T>,
-  input: T,
-): Promise<void> {
+function validate<T extends object>(
+  schema: yup.ObjectSchema<T>,
+  input: unknown,
+): asserts input is T {
   try {
-    await schema.validate(input, { abortEarly: false });
+    schema.validateSync(input, { abortEarly: false });
   } catch (error) {
     const fields: ValidationErrorField[] = (error as yup.ValidationError).inner.map(
       (validationError: yup.ValidationError) => ({
@@ -75,6 +76,19 @@ async function validateInput<T>(
     );
 
     throw new ValidationError(fields);
+  }
+}
+
+function matchParams<T extends object>(
+  schema: yup.ObjectSchema<T>,
+  params: unknown,
+): asserts params is T {
+  try {
+    schema.validateSync(params);
+  } catch (error) {
+    throw new Error(
+      `Invalid params. ${(error as yup.ValidationError).message}`,
+    );
   }
 }
 
@@ -98,6 +112,18 @@ function getCurrentUserID(ctx: AuthenticatedContext): string {
   return ctx.userID;
 }
 
+interface IDParams {
+  id: string;
+}
+
+const idParamsSchema = yup
+  .object<IDParams>({
+    id: yup.string().required(),
+  })
+  .required();
+//#endregion Helpers
+
+//#region Handlers
 export interface CreateWorkspaceInput {
   id?: string;
   name: string;
@@ -111,10 +137,10 @@ const createWorkspaceInputSchema = yup
   .required();
 
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
-  await validateInput(createWorkspaceInputSchema, req.body);
+  validate(createWorkspaceInputSchema, req.body);
   const currentUserID = getCurrentUserID(ctx);
 
-  const { id, name } = req.body as CreateWorkspaceInput;
+  const { id, name } = req.body;
 
   const workspace = await createWorkspace(
     ctx.db,
@@ -137,10 +163,11 @@ const fullUpdateWorkspaceInputSchema = yup
   .required();
 
 export const handleFullUpdateWorkspace: AH = async (ctx, req, res) => {
-  await validateInput(fullUpdateWorkspaceInputSchema, req.body);
+  validate(fullUpdateWorkspaceInputSchema, req.body);
+  matchParams(idParamsSchema, req.params);
 
-  const { id } = req.params as { id: string };
-  const { name } = req.body as FullUpdateWorkspaceInput;
+  const { id } = req.params;
+  const { name } = req.body;
 
   const workspace = await fullUpdateWorkspace(ctx.db, id, name);
 
@@ -158,10 +185,11 @@ const partialUpdateWorkspaceInputSchema = yup
   .required();
 
 export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
-  await validateInput(partialUpdateWorkspaceInputSchema, req.body);
+  validate(partialUpdateWorkspaceInputSchema, req.body);
+  matchParams(idParamsSchema, req.params);
 
-  const { id } = req.params as { id: string };
-  const { name } = req.body as PartialUpdateWorkspaceInput;
+  const { id } = req.params;
+  const { name } = req.body;
 
   const workspace = await partialUpdateWorkspace(ctx.db, id, name);
 
@@ -169,15 +197,18 @@ export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
 };
 
 export const handleGetWorkspace: AH = async (ctx, req, res) => {
-  const { id } = req.params as { id: string };
+  matchParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
   const workspace = await getWorkspace(ctx.db, id);
 
   res.send(workspace);
 };
 
 export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
+  matchParams(idParamsSchema, req.params);
   const currentUserID = getCurrentUserID(ctx);
-  const { id } = req.params as { id: string };
+  const { id } = req.params;
 
   const workspace = await getWorkspace(ctx.db, id);
 
@@ -187,5 +218,7 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
 
   await deleteWorkspace(ctx.db, id);
 
-  res.send({ id, deleted: true });
+  res.send({ id: id, deleted: true });
 };
+
+//#endregion Handlers

@@ -38,7 +38,7 @@ describe('POST /v0/workspaces', () => {
   });
 });
 
-describe('PUT /v0/workspaces/:id', () => {
+describe('PUT /v0/workspaces/:workspaceID', () => {
   test('happy path', async () => {
     const workspace = await createWorkspace(db, v4(), 'test2', '1');
     const input: FullUpdateWorkspaceInput = {
@@ -58,7 +58,7 @@ describe('PUT /v0/workspaces/:id', () => {
   });
 });
 
-describe('PATCH /v0/workspaces/:id', () => {
+describe('PATCH /v0/workspaces/:workspaceID', () => {
   test('happy path', async () => {
     const workspace = await createWorkspace(db, v4(), 'test4', '1');
     const input: FullUpdateWorkspaceInput = {
@@ -78,7 +78,7 @@ describe('PATCH /v0/workspaces/:id', () => {
   });
 });
 
-describe('DELETE /v0/workspaces/:id', () => {
+describe('DELETE /v0/workspaces/:workspaceID', () => {
   test('happy path', async () => {
     const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
@@ -94,7 +94,7 @@ describe('DELETE /v0/workspaces/:id', () => {
   });
 });
 
-describe('GET /v0/workspaces/:id', () => {
+describe('GET /v0/workspaces/:workspaceID', () => {
   test('happy path', async () => {
     const workspace = await createWorkspace(db, v4(), 'test6', '1');
 

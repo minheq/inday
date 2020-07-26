@@ -1,6 +1,6 @@
 import React from 'react';
 import { Animated, StyleSheet, View, LayoutChangeEvent } from 'react-native';
-import { last, secondLast } from '../lib/data_structures/arrays';
+import { last, secondLast } from '../../lib/data_structures/arrays';
 
 interface TransitionContext {
   navigate: (screen: React.ReactNode) => void;

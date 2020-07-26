@@ -5,7 +5,7 @@ import { PickerButton } from './picker_button';
 import { useToggle } from '../hooks/use_toggle';
 import { WheelPicker } from './wheel_picker';
 import { Row } from './row';
-import { range } from '../lib/data_structures/arrays';
+import { range } from '../../lib/data_structures/arrays';
 import { format, roundToNearestMinutes, setHours, setMinutes } from 'date-fns';
 import { Expand } from './expand';
 
