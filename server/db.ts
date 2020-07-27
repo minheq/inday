@@ -516,7 +516,7 @@ function toField(data: FieldRow): Field {
 }
 
 export async function getFieldByID(db: DB, id: string): Promise<Field> {
-  const result = await db.query<FieldRow>('SELECT * FROM field WHERE id=$1', [
+  const result = await db.query<FieldRow>('SELECT * FROM fields WHERE id=$1', [
     id,
   ]);
 
@@ -532,11 +532,13 @@ export async function getFieldByID(db: DB, id: string): Promise<Field> {
 export async function createField(
   db: DB,
   id: string,
+  name: string,
+  type: FieldType,
   collectionID: string,
 ): Promise<Field> {
   const result = await db.query<FieldRow>(
-    'INSERT INTO field (id, collection_id) VALUES($1, $3) RETURNING *',
-    [id, collectionID],
+    'INSERT INTO fields (id, name, type, collection_id) VALUES($1, $2, $3, $4) RETURNING *',
+    [id, name, type, collectionID],
   );
 
   const row = first(result.rows);
@@ -550,7 +552,7 @@ export async function updateFieldName(
   name: string,
 ): Promise<Field> {
   const result = await db.query<FieldRow>(
-    'UPDATE field SET name=$2 WHERE id=$1 RETURNING *',
+    'UPDATE fields SET name=$2 WHERE id=$1 RETURNING *',
     [id, name],
   );
 
@@ -564,7 +566,7 @@ export async function updateFieldName(
 }
 
 export async function deleteField(db: DB, id: string): Promise<void> {
-  const result = await db.query<FieldRow>('DELETE FROM field where id=$1', [
+  const result = await db.query<FieldRow>('DELETE FROM fields where id=$1', [
     id,
   ]);
 

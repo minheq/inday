@@ -19,6 +19,10 @@ import {
   handleUpdateViewName,
   handleGetView,
   handleDeleteView,
+  handleCreateField,
+  handleUpdateFieldName,
+  handleGetField,
+  handleDeleteField,
 } from './handlers';
 import {
   ValidationError,
@@ -85,6 +89,17 @@ export function createAPI() {
   api.delete(
     '/v0/views/:id',
     addContext(ensureAuthenticated(handleDeleteView)),
+  );
+
+  api.post('/v0/fields', addContext(ensureAuthenticated(handleCreateField)));
+  api.post(
+    '/v0/fields/:id/updateName',
+    addContext(ensureAuthenticated(handleUpdateFieldName)),
+  );
+  api.get('/v0/fields/:id', addContext(ensureAuthenticated(handleGetField)));
+  api.delete(
+    '/v0/fields/:id',
+    addContext(ensureAuthenticated(handleDeleteField)),
   );
 
   api.setErrorHandler((err, req, res) => {

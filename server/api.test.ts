@@ -12,6 +12,7 @@ import {
   createSpace,
   createCollection,
   createView,
+  createField,
 } from './db';
 import {
   CreateWorkspaceInput,
@@ -22,10 +23,13 @@ import {
   UpdateCollectionNameInput,
   CreateViewInput,
   UpdateViewNameInput,
+  CreateFieldInput,
+  UpdateFieldNameInput,
 } from './handlers';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
 import { View } from '../app/data/views';
+import { Field } from '../app/data/fields';
 
 let api: FastifyInstance;
 let db: DB;
@@ -349,6 +353,108 @@ describe('Views', () => {
         method: 'GET',
       });
       const result = res.json() as View;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(view.name);
+    });
+  });
+});
+
+describe('Fields', () => {
+  let workspace: Workspace;
+  let space: Space;
+  let collection: Collection;
+
+  beforeAll(async () => {
+    workspace = await createWorkspace(db, v4(), 'fields', '1');
+    space = await createSpace(db, v4(), 'fields', workspace.id);
+    collection = await createCollection(db, v4(), 'fields', space.id);
+  });
+
+  describe('POST /v0/fields', () => {
+    test('happy path', async () => {
+      const input: CreateFieldInput = {
+        name: 'test1',
+        type: 'singleLineText',
+        collectionID: collection.id,
+      };
+
+      const res = await api.inject({
+        url: '/v0/fields',
+        method: 'POST',
+        payload: input,
+      });
+      const result = res.json() as Field;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(input.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
+  describe('POST /v0/fields/:id/updateName', () => {
+    test('happy path', async () => {
+      const view = await createField(
+        db,
+        v4(),
+        'test2',
+        'singleLineText',
+        collection.id,
+      );
+      const input: UpdateFieldNameInput = {
+        name: 'test3',
+      };
+
+      const res = await api.inject({
+        url: `/v0/fields/${view.id}/updateName`,
+        method: 'POST',
+        payload: input,
+      });
+      const result = res.json() as Field;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(input.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
+  describe('DELETE /v0/fields/:id', () => {
+    test('happy path', async () => {
+      const view = await createField(
+        db,
+        v4(),
+        'test6',
+        'singleLineText',
+        collection.id,
+      );
+
+      const res = await api.inject({
+        url: `/v0/fields/${view.id}`,
+        method: 'DELETE',
+      });
+      const result = res.json();
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.id).toBe(view.id);
+      expect(result.deleted).toBeTruthy();
+    });
+  });
+
+  describe('GET /v0/fields/:id', () => {
+    test('happy path', async () => {
+      const view = await createField(
+        db,
+        v4(),
+        'test6',
+        'singleLineText',
+        collection.id,
+      );
+
+      const res = await api.inject({
+        url: `/v0/fields/${view.id}`,
+        method: 'GET',
+      });
+      const result = res.json() as Field;
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(view.name);

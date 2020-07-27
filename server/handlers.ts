@@ -26,6 +26,10 @@ import {
   deleteView,
   updateViewName,
   getViewByID,
+  createField,
+  updateFieldName,
+  getFieldByID,
+  deleteField,
 } from './db';
 import {
   AuthenticationError,
@@ -34,6 +38,7 @@ import {
   ValidationError,
 } from './errors';
 import { ViewType } from '../app/data/views';
+import { FieldType } from '../app/data/fields';
 
 //#region Helpers
 type Request = FastifyRequest;
@@ -438,13 +443,12 @@ export interface CreateViewInput {
   collectionID: string;
 }
 
+const viewTypes: ViewType[] = ['list', 'board'];
 const createViewInputSchema = yup
   .object<CreateViewInput>({
     id: yup.string(),
     name: yup.string().required(),
-    type: yup.mixed().oneOf(['list', 'board']).required() as yup.MixedSchema<
-      ViewType
-    >,
+    type: yup.mixed().oneOf(viewTypes).required() as yup.MixedSchema<ViewType>,
     collectionID: yup.string().required(),
   })
   .required();
@@ -500,3 +504,92 @@ export const handleDeleteView: AH = async (ctx, req, res) => {
 };
 
 //#endregion View
+
+//#region Field
+export interface CreateFieldInput {
+  id?: string;
+  name: string;
+  type: FieldType;
+  collectionID: string;
+}
+
+const fieldTypes: FieldType[] = [
+  'singleLineText',
+  'multiLineText',
+  'singleSelect',
+  'multiSelect',
+  'singleCollaborator',
+  'multiCollaborator',
+  'singleDocumentLink',
+  'multiDocumentLink',
+  'date',
+  'phoneNumber',
+  'email',
+  'url',
+  'number',
+  'currency',
+  'checkbox',
+];
+
+const createFieldInputSchema = yup
+  .object<CreateFieldInput>({
+    id: yup.string(),
+    name: yup.string().required(),
+    type: yup.mixed().oneOf(fieldTypes).required() as yup.MixedSchema<
+      FieldType
+    >,
+    collectionID: yup.string().required(),
+  })
+  .required();
+
+export const handleCreateField: AH = async (ctx, req, res) => {
+  validateInput(createFieldInputSchema, req.body);
+
+  const { id, name, type, collectionID } = req.body;
+
+  const view = await createField(ctx.db, id ?? v4(), name, type, collectionID);
+
+  res.send(view);
+};
+
+export interface UpdateFieldNameInput {
+  name: string;
+}
+
+const updateFieldNameInputSchema = yup
+  .object<UpdateFieldNameInput>({
+    name: yup.string().required(),
+  })
+  .required();
+
+export const handleUpdateFieldName: AH = async (ctx, req, res) => {
+  validateInput(updateFieldNameInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const { name } = req.body;
+
+  const view = await updateFieldName(ctx.db, id, name);
+
+  res.send(view);
+};
+
+export const handleGetField: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const view = await getFieldByID(ctx.db, id);
+
+  res.send(view);
+};
+
+export const handleDeleteField: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+  const { id } = req.params;
+
+  await deleteField(ctx.db, id);
+
+  res.send({ id: id, deleted: true });
+};
+
+//#endregion Field
