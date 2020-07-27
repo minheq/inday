@@ -3,6 +3,7 @@ import { env } from './env';
 import { Workspace } from '../app/data/workspace';
 import { NotFoundError } from './errors';
 import { first } from '../lib/data_structures/arrays';
+import { Space } from '../app/data/spaces';
 
 const pool = new Pool({
   user: env.database.username,
@@ -43,7 +44,7 @@ export async function wrapInTx<T>(query: (db: DB) => Promise<T>): Promise<T> {
 
 export async function cleanDB() {
   await wrapInTx(async (db) => {
-    await db.query('DELETE FROM workspace');
+    await db.query('DELETE FROM workspaces');
   });
 }
 
@@ -71,6 +72,7 @@ function buildPartialUpdateQuery<T extends { [field: string]: any }>(
 
 //#endregion Helpers
 
+//#region Workspace
 interface WorkspaceRow {
   id: string;
   name: string;
@@ -89,7 +91,7 @@ function toWorkspace(data: WorkspaceRow): Workspace {
 
 export async function getWorkspace(db: DB, id: string): Promise<Workspace> {
   const result = await db.query<WorkspaceRow>(
-    'SELECT * FROM workspace WHERE id=$1',
+    'SELECT * FROM workspaces WHERE id=$1',
     [id],
   );
 
@@ -109,7 +111,7 @@ export async function createWorkspace(
   userID: string,
 ): Promise<Workspace> {
   const result = await db.query<WorkspaceRow>(
-    'INSERT INTO workspace (id, name, owner_id) VALUES($1, $2, $3) RETURNING *',
+    'INSERT INTO workspaces (id, name, owner_id) VALUES($1, $2, $3) RETURNING *',
     [id, name, userID],
   );
 
@@ -124,7 +126,7 @@ export async function fullUpdateWorkspace(
   name: string,
 ): Promise<Workspace> {
   const result = await db.query<WorkspaceRow>(
-    'UPDATE workspace SET name=$2 WHERE id=$1 RETURNING *',
+    'UPDATE workspaces SET name=$2 WHERE id=$1 RETURNING *',
     [id, name],
   );
 
@@ -145,7 +147,7 @@ export async function partialUpdateWorkspace(
   const [setText, values] = buildPartialUpdateQuery({ name });
 
   const result = await db.query<WorkspaceRow>(
-    `UPDATE workspace SET ${setText} WHERE id=$1 RETURNING *`,
+    `UPDATE workspaces SET ${setText} WHERE id=$1 RETURNING *`,
     [id, ...values],
   );
 
@@ -160,7 +162,7 @@ export async function partialUpdateWorkspace(
 
 export async function deleteWorkspace(db: DB, id: string): Promise<void> {
   const result = await db.query<WorkspaceRow>(
-    'DELETE FROM workspace where id=$1',
+    'DELETE FROM workspaces where id=$1',
     [id],
   );
 
@@ -168,3 +170,102 @@ export async function deleteWorkspace(db: DB, id: string): Promise<void> {
     throw new NotFoundError('workspace');
   }
 }
+//#endregion Workspace
+
+//#region Space
+interface SpaceRow {
+  id: string;
+  name: string;
+  workspace_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function toSpace(data: SpaceRow): Space {
+  return {
+    id: data.id,
+    name: data.name,
+    workspaceID: data.workspace_id,
+  };
+}
+
+export async function getSpace(db: DB, id: string): Promise<Space> {
+  const result = await db.query<SpaceRow>('SELECT * FROM spaces WHERE id=$1', [
+    id,
+  ]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('space');
+  }
+
+  const row = first(result.rows);
+
+  return toSpace(row);
+}
+
+export async function createSpace(
+  db: DB,
+  id: string,
+  name: string,
+  workspaceID: string,
+): Promise<Space> {
+  const result = await db.query<SpaceRow>(
+    'INSERT INTO spaces (id, name, workspace_id) VALUES($1, $2, $3) RETURNING *',
+    [id, name, workspaceID],
+  );
+
+  const row = first(result.rows);
+
+  return toSpace(row);
+}
+
+export async function fullUpdateSpace(
+  db: DB,
+  id: string,
+  name: string,
+): Promise<Space> {
+  const result = await db.query<SpaceRow>(
+    'UPDATE spaces SET name=$2 WHERE id=$1 RETURNING *',
+    [id, name],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('space');
+  }
+
+  const row = first(result.rows);
+
+  return toSpace(row);
+}
+
+export async function partialUpdateSpace(
+  db: DB,
+  id: string,
+  name?: string,
+): Promise<Space> {
+  const [setText, values] = buildPartialUpdateQuery({ name });
+
+  const result = await db.query<SpaceRow>(
+    `UPDATE spaces SET ${setText} WHERE id=$1 RETURNING *`,
+    [id, ...values],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('space');
+  }
+
+  const row = first(result.rows);
+
+  return toSpace(row);
+}
+
+export async function deleteSpace(db: DB, id: string): Promise<void> {
+  const result = await db.query<SpaceRow>('DELETE FROM spaces where id=$1', [
+    id,
+  ]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('space');
+  }
+}
+//#endregion Space

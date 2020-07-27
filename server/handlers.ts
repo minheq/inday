@@ -10,6 +10,11 @@ import {
   partialUpdateWorkspace,
   getWorkspace,
   deleteWorkspace,
+  createSpace,
+  fullUpdateSpace,
+  partialUpdateSpace,
+  getSpace,
+  deleteSpace,
 } from './db';
 import {
   AuthenticationError,
@@ -157,7 +162,7 @@ export interface FullUpdateWorkspaceInput {
 }
 
 const fullUpdateWorkspaceInputSchema = yup
-  .object<CreateWorkspaceInput>({
+  .object<FullUpdateWorkspaceInput>({
     name: yup.string().required(),
   })
   .required();
@@ -179,7 +184,7 @@ export interface PartialUpdateWorkspaceInput {
 }
 
 const partialUpdateWorkspaceInputSchema = yup
-  .object<CreateWorkspaceInput>({
+  .object<PartialUpdateWorkspaceInput>({
     name: yup.string().required(),
   })
   .required();
@@ -222,3 +227,92 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
 };
 
 //#endregion Workspace
+
+//#region Space
+export interface CreateSpaceInput {
+  id?: string;
+  name: string;
+  workspaceID: string;
+}
+
+const createSpaceInputSchema = yup
+  .object<CreateSpaceInput>({
+    id: yup.string(),
+    name: yup.string().required(),
+    workspaceID: yup.string().required(),
+  })
+  .required();
+
+export const handleCreateSpace: AH = async (ctx, req, res) => {
+  validateInput(createSpaceInputSchema, req.body);
+
+  const { id, name, workspaceID } = req.body;
+
+  const space = await createSpace(ctx.db, id ?? v4(), name, workspaceID);
+
+  res.send(space);
+};
+
+export interface FullUpdateSpaceInput {
+  name: string;
+}
+
+const fullUpdateSpaceInputSchema = yup
+  .object<FullUpdateSpaceInput>({
+    name: yup.string().required(),
+  })
+  .required();
+
+export const handleFullUpdateSpace: AH = async (ctx, req, res) => {
+  validateInput(fullUpdateSpaceInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const { name } = req.body;
+
+  const space = await fullUpdateSpace(ctx.db, id, name);
+
+  res.send(space);
+};
+
+export interface PartialUpdateSpaceInput {
+  name?: string;
+}
+
+const partialUpdateSpaceInputSchema = yup
+  .object<PartialUpdateSpaceInput>({
+    name: yup.string().required(),
+  })
+  .required();
+
+export const handlePartialUpdateSpace: AH = async (ctx, req, res) => {
+  validateInput(partialUpdateSpaceInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const { name } = req.body;
+
+  const space = await partialUpdateSpace(ctx.db, id, name);
+
+  res.send(space);
+};
+
+export const handleGetSpace: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const space = await getSpace(ctx.db, id);
+
+  res.send(space);
+};
+
+export const handleDeleteSpace: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+  const { id } = req.params;
+
+  await deleteSpace(ctx.db, id);
+
+  res.send({ id: id, deleted: true });
+};
+
+//#endregion Space

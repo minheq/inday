@@ -8,6 +8,11 @@ import {
   handleGetWorkspace,
   handleDeleteWorkspace,
   ensureAuthenticated,
+  handleCreateSpace,
+  handleFullUpdateSpace,
+  handlePartialUpdateSpace,
+  handleGetSpace,
+  handleDeleteSpace,
 } from './handlers';
 import {
   ValidationError,
@@ -39,6 +44,21 @@ export function createAPI() {
   api.delete(
     '/v0/workspaces/:id',
     addContext(ensureAuthenticated(handleDeleteWorkspace)),
+  );
+
+  api.post('/v0/spaces', addContext(ensureAuthenticated(handleCreateSpace)));
+  api.put(
+    '/v0/spaces/:id',
+    addContext(ensureAuthenticated(handleFullUpdateSpace)),
+  );
+  api.patch(
+    '/v0/spaces/:id',
+    addContext(ensureAuthenticated(handlePartialUpdateSpace)),
+  );
+  api.get('/v0/spaces/:id', addContext(ensureAuthenticated(handleGetSpace)));
+  api.delete(
+    '/v0/spaces/:id',
+    addContext(ensureAuthenticated(handleDeleteSpace)),
   );
 
   api.setErrorHandler((err, req, res) => {
