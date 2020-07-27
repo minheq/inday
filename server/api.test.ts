@@ -10,6 +10,7 @@ import {
   createWorkspace,
   cleanDB,
   createSpace,
+  createCollection,
 } from './db';
 import {
   CreateWorkspaceInput,
@@ -17,8 +18,12 @@ import {
   CreateSpaceInput,
   FullUpdateSpaceInput,
   PartialUpdateSpaceInput,
+  CreateCollectionInput,
+  FullUpdateCollectionInput,
+  PartialUpdateCollectionInput,
 } from './handlers';
 import { Space } from '../app/data/spaces';
+import { Collection } from '../app/data/collections';
 
 let api: FastifyInstance;
 let db: DB;
@@ -220,6 +225,107 @@ describe('Spaces', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(space.name);
+    });
+  });
+});
+
+describe('Collections', () => {
+  let workspace: Workspace;
+  let space: Space;
+
+  beforeAll(async () => {
+    workspace = await createWorkspace(db, v4(), 'collections', '1');
+    space = await createSpace(db, v4(), 'collections', workspace.id);
+  });
+
+  describe('POST /v0/collections', () => {
+    test('happy path', async () => {
+      const input: CreateCollectionInput = {
+        name: 'test1',
+        spaceID: space.id,
+      };
+
+      const res = await api.inject({
+        url: '/v0/collections',
+        method: 'POST',
+        payload: input,
+      });
+      const result = res.json() as Collection;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(input.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
+  describe('PUT /v0/collections/:id', () => {
+    test('happy path', async () => {
+      const collection = await createCollection(db, v4(), 'test2', space.id);
+      const input: FullUpdateCollectionInput = {
+        name: 'test3',
+      };
+
+      const res = await api.inject({
+        url: `/v0/collections/${collection.id}`,
+        method: 'PUT',
+        payload: input,
+      });
+      const result = res.json() as Collection;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(input.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
+  describe('PATCH /v0/collections/:id', () => {
+    test('happy path', async () => {
+      const collection = await createCollection(db, v4(), 'test4', space.id);
+      const input: PartialUpdateCollectionInput = {
+        name: 'test5',
+      };
+
+      const res = await api.inject({
+        url: `/v0/collections/${collection.id}`,
+        method: 'PATCH',
+        payload: input,
+      });
+      const result = res.json() as Collection;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(input.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
+  describe('DELETE /v0/collections/:id', () => {
+    test('happy path', async () => {
+      const collection = await createCollection(db, v4(), 'test6', space.id);
+
+      const res = await api.inject({
+        url: `/v0/collections/${collection.id}`,
+        method: 'DELETE',
+      });
+      const result = res.json();
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.id).toBe(collection.id);
+      expect(result.deleted).toBeTruthy();
+    });
+  });
+
+  describe('GET /v0/collections/:id', () => {
+    test('happy path', async () => {
+      const collection = await createCollection(db, v4(), 'test6', space.id);
+
+      const res = await api.inject({
+        url: `/v0/collections/${collection.id}`,
+        method: 'GET',
+      });
+      const result = res.json() as Collection;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(collection.name);
     });
   });
 });

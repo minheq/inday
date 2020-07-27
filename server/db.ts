@@ -4,6 +4,7 @@ import { Workspace } from '../app/data/workspace';
 import { NotFoundError } from './errors';
 import { first } from '../lib/data_structures/arrays';
 import { Space } from '../app/data/spaces';
+import { Collection } from '../app/data/collections';
 
 const pool = new Pool({
   user: env.database.username,
@@ -89,7 +90,7 @@ function toWorkspace(data: WorkspaceRow): Workspace {
   };
 }
 
-export async function getWorkspace(db: DB, id: string): Promise<Workspace> {
+export async function getWorkspaceByID(db: DB, id: string): Promise<Workspace> {
   const result = await db.query<WorkspaceRow>(
     'SELECT * FROM workspaces WHERE id=$1',
     [id],
@@ -189,7 +190,7 @@ function toSpace(data: SpaceRow): Space {
   };
 }
 
-export async function getSpace(db: DB, id: string): Promise<Space> {
+export async function getSpaceByID(db: DB, id: string): Promise<Space> {
   const result = await db.query<SpaceRow>('SELECT * FROM spaces WHERE id=$1', [
     id,
   ]);
@@ -269,3 +270,108 @@ export async function deleteSpace(db: DB, id: string): Promise<void> {
   }
 }
 //#endregion Space
+
+//#region Collection
+interface CollectionRow {
+  id: string;
+  name: string;
+  space_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function toCollection(data: CollectionRow): Collection {
+  return {
+    id: data.id,
+    name: data.name,
+    spaceID: data.space_id,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+export async function getCollectionByID(
+  db: DB,
+  id: string,
+): Promise<Collection> {
+  const result = await db.query<CollectionRow>(
+    'SELECT * FROM collections WHERE id=$1',
+    [id],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('collection');
+  }
+
+  const row = first(result.rows);
+
+  return toCollection(row);
+}
+
+export async function createCollection(
+  db: DB,
+  id: string,
+  name: string,
+  spaceID: string,
+): Promise<Collection> {
+  const result = await db.query<CollectionRow>(
+    'INSERT INTO collections (id, name, space_id) VALUES($1, $2, $3) RETURNING *',
+    [id, name, spaceID],
+  );
+
+  const row = first(result.rows);
+
+  return toCollection(row);
+}
+
+export async function fullUpdateCollection(
+  db: DB,
+  id: string,
+  name: string,
+): Promise<Collection> {
+  const result = await db.query<CollectionRow>(
+    'UPDATE collections SET name=$2 WHERE id=$1 RETURNING *',
+    [id, name],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('collection');
+  }
+
+  const row = first(result.rows);
+
+  return toCollection(row);
+}
+
+export async function partialUpdateCollection(
+  db: DB,
+  id: string,
+  name?: string,
+): Promise<Collection> {
+  const [setText, values] = buildPartialUpdateQuery({ name });
+
+  const result = await db.query<CollectionRow>(
+    `UPDATE collections SET ${setText} WHERE id=$1 RETURNING *`,
+    [id, ...values],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('collection');
+  }
+
+  const row = first(result.rows);
+
+  return toCollection(row);
+}
+
+export async function deleteCollection(db: DB, id: string): Promise<void> {
+  const result = await db.query<CollectionRow>(
+    'DELETE FROM collections where id=$1',
+    [id],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('collection');
+  }
+}
+//#endregion Collection

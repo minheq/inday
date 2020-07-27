@@ -8,13 +8,18 @@ import {
   createWorkspace,
   fullUpdateWorkspace,
   partialUpdateWorkspace,
-  getWorkspace,
+  getWorkspaceByID,
   deleteWorkspace,
   createSpace,
   fullUpdateSpace,
   partialUpdateSpace,
-  getSpace,
+  getSpaceByID,
   deleteSpace,
+  createCollection,
+  fullUpdateCollection,
+  partialUpdateCollection,
+  getCollectionByID,
+  deleteCollection,
 } from './db';
 import {
   AuthenticationError,
@@ -205,7 +210,7 @@ export const handleGetWorkspace: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
-  const workspace = await getWorkspace(ctx.db, id);
+  const workspace = await getWorkspaceByID(ctx.db, id);
 
   res.send(workspace);
 };
@@ -215,7 +220,7 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
   const currentUserID = getCurrentUserID(ctx);
   const { id } = req.params;
 
-  const workspace = await getWorkspace(ctx.db, id);
+  const workspace = await getWorkspaceByID(ctx.db, id);
 
   if (workspace.ownerID !== currentUserID) {
     throw new UnauthorizedError();
@@ -301,7 +306,7 @@ export const handleGetSpace: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
-  const space = await getSpace(ctx.db, id);
+  const space = await getSpaceByID(ctx.db, id);
 
   res.send(space);
 };
@@ -316,3 +321,92 @@ export const handleDeleteSpace: AH = async (ctx, req, res) => {
 };
 
 //#endregion Space
+
+//#region Collection
+export interface CreateCollectionInput {
+  id?: string;
+  name: string;
+  spaceID: string;
+}
+
+const createCollectionInputSchema = yup
+  .object<CreateCollectionInput>({
+    id: yup.string(),
+    name: yup.string().required(),
+    spaceID: yup.string().required(),
+  })
+  .required();
+
+export const handleCreateCollection: AH = async (ctx, req, res) => {
+  validateInput(createCollectionInputSchema, req.body);
+
+  const { id, name, spaceID } = req.body;
+
+  const collection = await createCollection(ctx.db, id ?? v4(), name, spaceID);
+
+  res.send(collection);
+};
+
+export interface FullUpdateCollectionInput {
+  name: string;
+}
+
+const fullUpdateCollectionInputSchema = yup
+  .object<FullUpdateCollectionInput>({
+    name: yup.string().required(),
+  })
+  .required();
+
+export const handleFullUpdateCollection: AH = async (ctx, req, res) => {
+  validateInput(fullUpdateCollectionInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const { name } = req.body;
+
+  const collection = await fullUpdateCollection(ctx.db, id, name);
+
+  res.send(collection);
+};
+
+export interface PartialUpdateCollectionInput {
+  name?: string;
+}
+
+const partialUpdateCollectionInputSchema = yup
+  .object<PartialUpdateCollectionInput>({
+    name: yup.string().required(),
+  })
+  .required();
+
+export const handlePartialUpdateCollection: AH = async (ctx, req, res) => {
+  validateInput(partialUpdateCollectionInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const { name } = req.body;
+
+  const collection = await partialUpdateCollection(ctx.db, id, name);
+
+  res.send(collection);
+};
+
+export const handleGetCollection: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const collection = await getCollectionByID(ctx.db, id);
+
+  res.send(collection);
+};
+
+export const handleDeleteCollection: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+  const { id } = req.params;
+
+  await deleteCollection(ctx.db, id);
+
+  res.send({ id: id, deleted: true });
+};
+
+//#endregion Collection

@@ -13,6 +13,11 @@ import {
   handlePartialUpdateSpace,
   handleGetSpace,
   handleDeleteSpace,
+  handleCreateCollection,
+  handleFullUpdateCollection,
+  handlePartialUpdateCollection,
+  handleGetCollection,
+  handleDeleteCollection,
 } from './handlers';
 import {
   ValidationError,
@@ -59,6 +64,27 @@ export function createAPI() {
   api.delete(
     '/v0/spaces/:id',
     addContext(ensureAuthenticated(handleDeleteSpace)),
+  );
+
+  api.post(
+    '/v0/collections',
+    addContext(ensureAuthenticated(handleCreateCollection)),
+  );
+  api.put(
+    '/v0/collections/:id',
+    addContext(ensureAuthenticated(handleFullUpdateCollection)),
+  );
+  api.patch(
+    '/v0/collections/:id',
+    addContext(ensureAuthenticated(handlePartialUpdateCollection)),
+  );
+  api.get(
+    '/v0/collections/:id',
+    addContext(ensureAuthenticated(handleGetCollection)),
+  );
+  api.delete(
+    '/v0/collections/:id',
+    addContext(ensureAuthenticated(handleDeleteCollection)),
   );
 
   api.setErrorHandler((err, req, res) => {
