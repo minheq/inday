@@ -36,69 +36,78 @@ export function createAPI() {
   const api = fastify();
 
   api.post(
-    '/v0/workspaces',
+    '/v0/workspaces/:id/create',
     addContext(ensureAuthenticated(handleCreateWorkspace)),
   );
   api.post(
     '/v0/workspaces/:id/updateName',
     addContext(ensureAuthenticated(handleUpdateWorkspaceName)),
   );
+  api.post(
+    '/v0/workspaces/:id/delete',
+    addContext(ensureAuthenticated(handleDeleteWorkspace)),
+  );
   api.get(
     '/v0/workspaces/:id',
     addContext(ensureAuthenticated(handleGetWorkspace)),
   );
-  api.delete(
-    '/v0/workspaces/:id',
-    addContext(ensureAuthenticated(handleDeleteWorkspace)),
-  );
 
-  api.post('/v0/spaces', addContext(ensureAuthenticated(handleCreateSpace)));
+  api.post(
+    '/v0/spaces/:id/create',
+    addContext(ensureAuthenticated(handleCreateSpace)),
+  );
   api.post(
     '/v0/spaces/:id/updateName',
     addContext(ensureAuthenticated(handleUpdateSpaceName)),
   );
-  api.get('/v0/spaces/:id', addContext(ensureAuthenticated(handleGetSpace)));
-  api.delete(
-    '/v0/spaces/:id',
+  api.post(
+    '/v0/spaces/:id/delete',
     addContext(ensureAuthenticated(handleDeleteSpace)),
   );
+  api.get('/v0/spaces/:id', addContext(ensureAuthenticated(handleGetSpace)));
 
   api.post(
-    '/v0/collections',
+    '/v0/collections/:id/create',
     addContext(ensureAuthenticated(handleCreateCollection)),
   );
   api.post(
     '/v0/collections/:id/updateName',
     addContext(ensureAuthenticated(handleUpdateCollectionName)),
   );
+  api.post(
+    '/v0/collections/:id/delete',
+    addContext(ensureAuthenticated(handleDeleteCollection)),
+  );
   api.get(
     '/v0/collections/:id',
     addContext(ensureAuthenticated(handleGetCollection)),
   );
-  api.delete(
-    '/v0/collections/:id',
-    addContext(ensureAuthenticated(handleDeleteCollection)),
-  );
 
-  api.post('/v0/views', addContext(ensureAuthenticated(handleCreateView)));
+  api.post(
+    '/v0/views/:id/create',
+    addContext(ensureAuthenticated(handleCreateView)),
+  );
   api.post(
     '/v0/views/:id/updateName',
     addContext(ensureAuthenticated(handleUpdateViewName)),
   );
   api.get('/v0/views/:id', addContext(ensureAuthenticated(handleGetView)));
-  api.delete(
-    '/v0/views/:id',
+  api.post(
+    '/v0/views/:id/delete',
     addContext(ensureAuthenticated(handleDeleteView)),
   );
 
-  api.post('/v0/fields', addContext(ensureAuthenticated(handleCreateField)));
+  api.post(
+    '/v0/fields/:id/create',
+    addContext(ensureAuthenticated(handleCreateField)),
+  );
   api.post(
     '/v0/fields/:id/updateName',
     addContext(ensureAuthenticated(handleUpdateFieldName)),
   );
   api.get('/v0/fields/:id', addContext(ensureAuthenticated(handleGetField)));
-  api.delete(
-    '/v0/fields/:id',
+  api.post(
+    '/v0/fields/:id/delete',
     addContext(ensureAuthenticated(handleDeleteField)),
   );
 

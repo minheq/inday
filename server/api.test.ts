@@ -45,14 +45,14 @@ afterAll(async () => {
 });
 
 describe('Workspaces', () => {
-  describe('POST /v0/workspaces', () => {
+  describe('create', () => {
     test('happy path', async () => {
       const input: CreateWorkspaceInput = {
         name: 'test1',
       };
 
       const res = await api.inject({
-        url: '/v0/workspaces',
+        url: `/v0/workspaces/${v4()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -64,7 +64,7 @@ describe('Workspaces', () => {
     });
   });
 
-  describe('POST /v0/workspaces/:id/updateName', () => {
+  describe('updateName', () => {
     test('happy path', async () => {
       const workspace = await createWorkspace(db, v4(), 'test2', '1');
       const input: UpdateWorkspaceNameInput = {
@@ -84,13 +84,13 @@ describe('Workspaces', () => {
     });
   });
 
-  describe('DELETE /v0/workspaces/:id', () => {
+  describe('delete', () => {
     test('happy path', async () => {
       const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
       const res = await api.inject({
-        url: `/v0/workspaces/${workspace.id}`,
-        method: 'DELETE',
+        url: `/v0/workspaces/${workspace.id}/delete`,
+        method: 'POST',
       });
       const result = res.json();
 
@@ -100,7 +100,7 @@ describe('Workspaces', () => {
     });
   });
 
-  describe('GET /v0/workspaces/:id', () => {
+  describe('get', () => {
     test('happy path', async () => {
       const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
@@ -123,7 +123,7 @@ describe('Spaces', () => {
     workspace = await createWorkspace(db, v4(), 'spaces', '1');
   });
 
-  describe('POST /v0/spaces', () => {
+  describe('create', () => {
     test('happy path', async () => {
       const input: CreateSpaceInput = {
         name: 'test1',
@@ -131,7 +131,7 @@ describe('Spaces', () => {
       };
 
       const res = await api.inject({
-        url: '/v0/spaces',
+        url: `/v0/spaces/${v4()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -143,7 +143,7 @@ describe('Spaces', () => {
     });
   });
 
-  describe('POST /v0/spaces/:id', () => {
+  describe('updateName', () => {
     test('happy path', async () => {
       const space = await createSpace(db, v4(), 'test2', workspace.id);
       const input: UpdateSpaceNameInput = {
@@ -163,13 +163,13 @@ describe('Spaces', () => {
     });
   });
 
-  describe('DELETE /v0/spaces/:id', () => {
+  describe('delete', () => {
     test('happy path', async () => {
       const space = await createSpace(db, v4(), 'test6', workspace.id);
 
       const res = await api.inject({
-        url: `/v0/spaces/${space.id}`,
-        method: 'DELETE',
+        url: `/v0/spaces/${space.id}/delete`,
+        method: 'POST',
       });
       const result = res.json();
 
@@ -179,7 +179,7 @@ describe('Spaces', () => {
     });
   });
 
-  describe('GET /v0/spaces/:id', () => {
+  describe('get', () => {
     test('happy path', async () => {
       const space = await createSpace(db, v4(), 'test6', workspace.id);
 
@@ -204,7 +204,7 @@ describe('Collections', () => {
     space = await createSpace(db, v4(), 'collections', workspace.id);
   });
 
-  describe('POST /v0/collections', () => {
+  describe('create', () => {
     test('happy path', async () => {
       const input: CreateCollectionInput = {
         name: 'test1',
@@ -212,7 +212,7 @@ describe('Collections', () => {
       };
 
       const res = await api.inject({
-        url: '/v0/collections',
+        url: `/v0/collections/${v4()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -224,7 +224,7 @@ describe('Collections', () => {
     });
   });
 
-  describe('POST /v0/collections/:id/updateName', () => {
+  describe('updateName', () => {
     test('happy path', async () => {
       const collection = await createCollection(db, v4(), 'test2', space.id);
       const input: UpdateCollectionNameInput = {
@@ -244,13 +244,13 @@ describe('Collections', () => {
     });
   });
 
-  describe('DELETE /v0/collections/:id', () => {
+  describe('delete', () => {
     test('happy path', async () => {
       const collection = await createCollection(db, v4(), 'test6', space.id);
 
       const res = await api.inject({
-        url: `/v0/collections/${collection.id}`,
-        method: 'DELETE',
+        url: `/v0/collections/${collection.id}/delete`,
+        method: 'POST',
       });
       const result = res.json();
 
@@ -260,7 +260,7 @@ describe('Collections', () => {
     });
   });
 
-  describe('GET /v0/collections/:id', () => {
+  describe('get', () => {
     test('happy path', async () => {
       const collection = await createCollection(db, v4(), 'test6', space.id);
 
@@ -287,7 +287,7 @@ describe('Views', () => {
     collection = await createCollection(db, v4(), 'views', space.id);
   });
 
-  describe('POST /v0/views', () => {
+  describe('create', () => {
     test('happy path', async () => {
       const input: CreateViewInput = {
         name: 'test1',
@@ -296,7 +296,7 @@ describe('Views', () => {
       };
 
       const res = await api.inject({
-        url: '/v0/views',
+        url: `/v0/views/${v4()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -308,7 +308,7 @@ describe('Views', () => {
     });
   });
 
-  describe('POST /v0/views/:id/updateName', () => {
+  describe('updateName', () => {
     test('happy path', async () => {
       const view = await createView(db, v4(), 'test2', 'list', collection.id);
       const input: UpdateViewNameInput = {
@@ -328,13 +328,13 @@ describe('Views', () => {
     });
   });
 
-  describe('DELETE /v0/views/:id', () => {
+  describe('delete', () => {
     test('happy path', async () => {
       const view = await createView(db, v4(), 'test6', 'list', collection.id);
 
       const res = await api.inject({
-        url: `/v0/views/${view.id}`,
-        method: 'DELETE',
+        url: `/v0/views/${view.id}/delete`,
+        method: 'POST',
       });
       const result = res.json();
 
@@ -344,7 +344,7 @@ describe('Views', () => {
     });
   });
 
-  describe('GET /v0/views/:id', () => {
+  describe('get', () => {
     test('happy path', async () => {
       const view = await createView(db, v4(), 'test6', 'list', collection.id);
 
@@ -371,7 +371,7 @@ describe('Fields', () => {
     collection = await createCollection(db, v4(), 'fields', space.id);
   });
 
-  describe('POST /v0/fields', () => {
+  describe('create', () => {
     test('happy path', async () => {
       const input: CreateFieldInput = {
         name: 'test1',
@@ -380,7 +380,7 @@ describe('Fields', () => {
       };
 
       const res = await api.inject({
-        url: '/v0/fields',
+        url: `/v0/fields/${v4()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -392,7 +392,7 @@ describe('Fields', () => {
     });
   });
 
-  describe('POST /v0/fields/:id/updateName', () => {
+  describe('updateName', () => {
     test('happy path', async () => {
       const view = await createField(
         db,
@@ -418,7 +418,7 @@ describe('Fields', () => {
     });
   });
 
-  describe('DELETE /v0/fields/:id', () => {
+  describe('delete', () => {
     test('happy path', async () => {
       const view = await createField(
         db,
@@ -429,8 +429,8 @@ describe('Fields', () => {
       );
 
       const res = await api.inject({
-        url: `/v0/fields/${view.id}`,
-        method: 'DELETE',
+        url: `/v0/fields/${view.id}/delete`,
+        method: 'POST',
       });
       const result = res.json();
 
@@ -440,7 +440,7 @@ describe('Fields', () => {
     });
   });
 
-  describe('GET /v0/fields/:id', () => {
+  describe('get', () => {
     test('happy path', async () => {
       const view = await createField(
         db,

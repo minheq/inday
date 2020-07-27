@@ -147,22 +147,22 @@ const idParamsSchema = yup
 
 //#region Workspace
 export interface CreateWorkspaceInput {
-  id?: string;
   name: string;
 }
 
 const createWorkspaceInputSchema = yup
   .object<CreateWorkspaceInput>({
-    id: yup.string(),
     name: yup.string().required(),
   })
   .required();
 
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
   validateInput(createWorkspaceInputSchema, req.body);
-  const currentUserID = getCurrentUserID(ctx);
+  validateParams(idParamsSchema, req.params);
 
-  const { id, name } = req.body;
+  const currentUserID = getCurrentUserID(ctx);
+  const { id } = req.params;
+  const { name } = req.body;
 
   const workspace = await createWorkspace(
     ctx.db,
@@ -207,6 +207,7 @@ export const handleGetWorkspace: AH = async (ctx, req, res) => {
 
 export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
+
   const currentUserID = getCurrentUserID(ctx);
   const { id } = req.params;
 
@@ -225,14 +226,12 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
 
 //#region Space
 export interface CreateSpaceInput {
-  id?: string;
   name: string;
   workspaceID: string;
 }
 
 const createSpaceInputSchema = yup
   .object<CreateSpaceInput>({
-    id: yup.string(),
     name: yup.string().required(),
     workspaceID: yup.string().required(),
   })
@@ -240,8 +239,10 @@ const createSpaceInputSchema = yup
 
 export const handleCreateSpace: AH = async (ctx, req, res) => {
   validateInput(createSpaceInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
 
-  const { id, name, workspaceID } = req.body;
+  const { id } = req.params;
+  const { name, workspaceID } = req.body;
 
   const space = await createSpace(ctx.db, id ?? v4(), name, workspaceID);
 
@@ -281,6 +282,7 @@ export const handleGetSpace: AH = async (ctx, req, res) => {
 
 export const handleDeleteSpace: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
+
   const { id } = req.params;
 
   await deleteSpace(ctx.db, id);
@@ -292,14 +294,12 @@ export const handleDeleteSpace: AH = async (ctx, req, res) => {
 
 //#region Collection
 export interface CreateCollectionInput {
-  id?: string;
   name: string;
   spaceID: string;
 }
 
 const createCollectionInputSchema = yup
   .object<CreateCollectionInput>({
-    id: yup.string(),
     name: yup.string().required(),
     spaceID: yup.string().required(),
   })
@@ -307,8 +307,10 @@ const createCollectionInputSchema = yup
 
 export const handleCreateCollection: AH = async (ctx, req, res) => {
   validateInput(createCollectionInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
 
-  const { id, name, spaceID } = req.body;
+  const { id } = req.params;
+  const { name, spaceID } = req.body;
 
   const collection = await createCollection(ctx.db, id ?? v4(), name, spaceID);
 
@@ -359,22 +361,21 @@ export const handleDeleteCollection: AH = async (ctx, req, res) => {
 
 //#region Document
 export interface CreateDocumentInput {
-  id?: string;
   collectionID: string;
 }
 
 const createDocumentInputSchema = yup
   .object<CreateDocumentInput>({
-    id: yup.string(),
-
     collectionID: yup.string().required(),
   })
   .required();
 
 export const handleCreateDocument: AH = async (ctx, req, res) => {
   validateInput(createDocumentInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
 
-  const { id, collectionID } = req.body;
+  const { id } = req.params;
+  const { collectionID } = req.body;
 
   const collection = await createDocument(ctx.db, id ?? v4(), collectionID);
 
@@ -426,6 +427,7 @@ export const handleGetDocument: AH = async (ctx, req, res) => {
 
 export const handleDeleteDocument: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
+
   const { id } = req.params;
 
   await deleteDocument(ctx.db, id);
@@ -437,7 +439,6 @@ export const handleDeleteDocument: AH = async (ctx, req, res) => {
 
 //#region View
 export interface CreateViewInput {
-  id?: string;
   name: string;
   type: ViewType;
   collectionID: string;
@@ -446,7 +447,6 @@ export interface CreateViewInput {
 const viewTypes: ViewType[] = ['list', 'board'];
 const createViewInputSchema = yup
   .object<CreateViewInput>({
-    id: yup.string(),
     name: yup.string().required(),
     type: yup.mixed().oneOf(viewTypes).required() as yup.MixedSchema<ViewType>,
     collectionID: yup.string().required(),
@@ -455,9 +455,10 @@ const createViewInputSchema = yup
 
 export const handleCreateView: AH = async (ctx, req, res) => {
   validateInput(createViewInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
 
-  const { id, name, type, collectionID } = req.body;
-
+  const { id } = req.params;
+  const { name, type, collectionID } = req.body;
   const view = await createView(ctx.db, id ?? v4(), name, type, collectionID);
 
   res.send(view);
@@ -496,6 +497,7 @@ export const handleGetView: AH = async (ctx, req, res) => {
 
 export const handleDeleteView: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
+
   const { id } = req.params;
 
   await deleteView(ctx.db, id);
@@ -507,7 +509,6 @@ export const handleDeleteView: AH = async (ctx, req, res) => {
 
 //#region Field
 export interface CreateFieldInput {
-  id?: string;
   name: string;
   type: FieldType;
   collectionID: string;
@@ -533,7 +534,6 @@ const fieldTypes: FieldType[] = [
 
 const createFieldInputSchema = yup
   .object<CreateFieldInput>({
-    id: yup.string(),
     name: yup.string().required(),
     type: yup.mixed().oneOf(fieldTypes).required() as yup.MixedSchema<
       FieldType
@@ -544,8 +544,10 @@ const createFieldInputSchema = yup
 
 export const handleCreateField: AH = async (ctx, req, res) => {
   validateInput(createFieldInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
 
-  const { id, name, type, collectionID } = req.body;
+  const { id } = req.params;
+  const { name, type, collectionID } = req.body;
 
   const view = await createField(ctx.db, id ?? v4(), name, type, collectionID);
 
@@ -585,6 +587,7 @@ export const handleGetField: AH = async (ctx, req, res) => {
 
 export const handleDeleteField: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
+
   const { id } = req.params;
 
   await deleteField(ctx.db, id);
