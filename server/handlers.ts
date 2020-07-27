@@ -61,7 +61,7 @@ export function addContext(handler: H) {
   };
 }
 
-function validate<T extends object>(
+function validateInput<T extends object>(
   schema: yup.ObjectSchema<T>,
   input: unknown,
 ): asserts input is T {
@@ -79,7 +79,7 @@ function validate<T extends object>(
   }
 }
 
-function matchParams<T extends object>(
+function validateParams<T extends object>(
   schema: yup.ObjectSchema<T>,
   params: unknown,
 ): asserts params is T {
@@ -123,7 +123,7 @@ const idParamsSchema = yup
   .required();
 //#endregion Helpers
 
-//#region Handlers
+//#region Workspace
 export interface CreateWorkspaceInput {
   id?: string;
   name: string;
@@ -137,7 +137,7 @@ const createWorkspaceInputSchema = yup
   .required();
 
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
-  validate(createWorkspaceInputSchema, req.body);
+  validateInput(createWorkspaceInputSchema, req.body);
   const currentUserID = getCurrentUserID(ctx);
 
   const { id, name } = req.body;
@@ -163,8 +163,8 @@ const fullUpdateWorkspaceInputSchema = yup
   .required();
 
 export const handleFullUpdateWorkspace: AH = async (ctx, req, res) => {
-  validate(fullUpdateWorkspaceInputSchema, req.body);
-  matchParams(idParamsSchema, req.params);
+  validateInput(fullUpdateWorkspaceInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
   const { name } = req.body;
@@ -185,8 +185,8 @@ const partialUpdateWorkspaceInputSchema = yup
   .required();
 
 export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
-  validate(partialUpdateWorkspaceInputSchema, req.body);
-  matchParams(idParamsSchema, req.params);
+  validateInput(partialUpdateWorkspaceInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
   const { name } = req.body;
@@ -197,7 +197,7 @@ export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
 };
 
 export const handleGetWorkspace: AH = async (ctx, req, res) => {
-  matchParams(idParamsSchema, req.params);
+  validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
   const workspace = await getWorkspace(ctx.db, id);
@@ -206,7 +206,7 @@ export const handleGetWorkspace: AH = async (ctx, req, res) => {
 };
 
 export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
-  matchParams(idParamsSchema, req.params);
+  validateParams(idParamsSchema, req.params);
   const currentUserID = getCurrentUserID(ctx);
   const { id } = req.params;
 
@@ -221,4 +221,4 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
   res.send({ id: id, deleted: true });
 };
 
-//#endregion Handlers
+//#endregion Workspace

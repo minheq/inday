@@ -17,31 +17,31 @@ import {
   AuthenticationError,
 } from './errors';
 
-export function createApp() {
-  const app = fastify();
+export function createAPI() {
+  const api = fastify();
 
-  app.post(
+  api.post(
     '/v0/workspaces',
     addContext(ensureAuthenticated(handleCreateWorkspace)),
   );
-  app.put(
+  api.put(
     '/v0/workspaces/:id',
     addContext(ensureAuthenticated(handleFullUpdateWorkspace)),
   );
-  app.patch(
+  api.patch(
     '/v0/workspaces/:id',
     addContext(ensureAuthenticated(handlePartialUpdateWorkspace)),
   );
-  app.get(
+  api.get(
     '/v0/workspaces/:id',
     addContext(ensureAuthenticated(handleGetWorkspace)),
   );
-  app.delete(
+  api.delete(
     '/v0/workspaces/:id',
     addContext(ensureAuthenticated(handleDeleteWorkspace)),
   );
 
-  app.setErrorHandler((err, req, res) => {
+  api.setErrorHandler((err, req, res) => {
     if (err instanceof ValidationError) {
       res.status(400).send({
         message: 'invalid input',
@@ -70,5 +70,5 @@ export function createApp() {
     }
   });
 
-  return app;
+  return api;
 }

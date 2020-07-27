@@ -1,10 +1,10 @@
 import { env } from './env';
-import { createApp } from './app';
+import { createAPI } from './api';
 
 async function main() {
-  const app = createApp();
+  const api = createAPI();
 
-  app.listen(env.port, () =>
+  api.listen(env.port, () =>
     console.log(`Server listening at http://localhost:${env.port}`),
   );
 }

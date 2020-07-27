@@ -1,17 +1,17 @@
 import { FastifyInstance } from 'fastify';
-import { createApp } from './app';
+import { createAPI } from './api';
 import { v4 } from 'uuid';
 
 import { Workspace } from '../app/data/workspace';
 import { DB, closeDB, getDB, createWorkspace, cleanDB } from './db';
 import { CreateWorkspaceInput, FullUpdateWorkspaceInput } from './handlers';
 
-let app: FastifyInstance;
+let api: FastifyInstance;
 let db: DB;
 
 beforeAll(async () => {
   await cleanDB();
-  app = createApp();
+  api = createAPI();
   db = await getDB();
 });
 
@@ -25,7 +25,7 @@ describe('POST /v0/workspaces', () => {
       name: 'test1',
     };
 
-    const res = await app.inject({
+    const res = await api.inject({
       url: '/v0/workspaces',
       method: 'POST',
       payload: input,
@@ -45,7 +45,7 @@ describe('PUT /v0/workspaces/:workspaceID', () => {
       name: 'test3',
     };
 
-    const res = await app.inject({
+    const res = await api.inject({
       url: `/v0/workspaces/${workspace.id}`,
       method: 'PUT',
       payload: input,
@@ -65,7 +65,7 @@ describe('PATCH /v0/workspaces/:workspaceID', () => {
       name: 'test5',
     };
 
-    const res = await app.inject({
+    const res = await api.inject({
       url: `/v0/workspaces/${workspace.id}`,
       method: 'PATCH',
       payload: input,
@@ -82,7 +82,7 @@ describe('DELETE /v0/workspaces/:workspaceID', () => {
   test('happy path', async () => {
     const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
-    const res = await app.inject({
+    const res = await api.inject({
       url: `/v0/workspaces/${workspace.id}`,
       method: 'DELETE',
     });
@@ -98,7 +98,7 @@ describe('GET /v0/workspaces/:workspaceID', () => {
   test('happy path', async () => {
     const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
-    const res = await app.inject({
+    const res = await api.inject({
       url: `/v0/workspaces/${workspace.id}`,
       method: 'GET',
     });
