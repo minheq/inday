@@ -11,6 +11,7 @@ import {
   cleanDB,
   createSpace,
   createCollection,
+  createView,
 } from './db';
 import {
   CreateWorkspaceInput,
@@ -19,9 +20,12 @@ import {
   UpdateSpaceNameInput,
   CreateCollectionInput,
   UpdateCollectionNameInput,
+  CreateViewInput,
+  UpdateViewNameInput,
 } from './handlers';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
+import { View } from '../app/data/views';
 
 let api: FastifyInstance;
 let db: DB;
@@ -264,6 +268,90 @@ describe('Collections', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(collection.name);
+    });
+  });
+});
+
+describe('Views', () => {
+  let workspace: Workspace;
+  let space: Space;
+  let collection: Collection;
+
+  beforeAll(async () => {
+    workspace = await createWorkspace(db, v4(), 'views', '1');
+    space = await createSpace(db, v4(), 'views', workspace.id);
+    collection = await createCollection(db, v4(), 'views', space.id);
+  });
+
+  describe('POST /v0/views', () => {
+    test('happy path', async () => {
+      const input: CreateViewInput = {
+        name: 'test1',
+        type: 'list',
+        collectionID: collection.id,
+      };
+
+      const res = await api.inject({
+        url: '/v0/views',
+        method: 'POST',
+        payload: input,
+      });
+      const result = res.json() as View;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(input.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
+  describe('POST /v0/views/:id/updateName', () => {
+    test('happy path', async () => {
+      const view = await createView(db, v4(), 'test2', 'list', collection.id);
+      const input: UpdateViewNameInput = {
+        name: 'test3',
+      };
+
+      const res = await api.inject({
+        url: `/v0/views/${view.id}/updateName`,
+        method: 'POST',
+        payload: input,
+      });
+      const result = res.json() as View;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(input.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
+  describe('DELETE /v0/views/:id', () => {
+    test('happy path', async () => {
+      const view = await createView(db, v4(), 'test6', 'list', collection.id);
+
+      const res = await api.inject({
+        url: `/v0/views/${view.id}`,
+        method: 'DELETE',
+      });
+      const result = res.json();
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.id).toBe(view.id);
+      expect(result.deleted).toBeTruthy();
+    });
+  });
+
+  describe('GET /v0/views/:id', () => {
+    test('happy path', async () => {
+      const view = await createView(db, v4(), 'test6', 'list', collection.id);
+
+      const res = await api.inject({
+        url: `/v0/views/${view.id}`,
+        method: 'GET',
+      });
+      const result = res.json() as View;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(view.name);
     });
   });
 });

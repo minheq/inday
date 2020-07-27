@@ -22,6 +22,10 @@ import {
   partialUpdateDocument,
   getDocumentByID,
   deleteDocument,
+  createView,
+  deleteView,
+  updateViewName,
+  getViewByID,
 } from './db';
 import {
   AuthenticationError,
@@ -29,6 +33,7 @@ import {
   ValidationErrorField,
   ValidationError,
 } from './errors';
+import { ViewType } from '../app/data/views';
 
 //#region Helpers
 type Request = FastifyRequest;
@@ -366,10 +371,7 @@ export const handleCreateDocument: AH = async (ctx, req, res) => {
 
   const { id, collectionID } = req.body;
 
-  const collection = await createDocument(ctx.db, {
-    id: id ?? v4(),
-    collectionID,
-  });
+  const collection = await createDocument(ctx.db, id ?? v4(), collectionID);
 
   res.send(collection);
 };
@@ -427,3 +429,74 @@ export const handleDeleteDocument: AH = async (ctx, req, res) => {
 };
 
 //#endregion Document
+
+//#region View
+export interface CreateViewInput {
+  id?: string;
+  name: string;
+  type: ViewType;
+  collectionID: string;
+}
+
+const createViewInputSchema = yup
+  .object<CreateViewInput>({
+    id: yup.string(),
+    name: yup.string().required(),
+    type: yup.mixed().oneOf(['list', 'board']).required() as yup.MixedSchema<
+      ViewType
+    >,
+    collectionID: yup.string().required(),
+  })
+  .required();
+
+export const handleCreateView: AH = async (ctx, req, res) => {
+  validateInput(createViewInputSchema, req.body);
+
+  const { id, name, type, collectionID } = req.body;
+
+  const view = await createView(ctx.db, id ?? v4(), name, type, collectionID);
+
+  res.send(view);
+};
+
+export interface UpdateViewNameInput {
+  name: string;
+}
+
+const updateViewNameInputSchema = yup
+  .object<UpdateViewNameInput>({
+    name: yup.string().required(),
+  })
+  .required();
+
+export const handleUpdateViewName: AH = async (ctx, req, res) => {
+  validateInput(updateViewNameInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const { name } = req.body;
+
+  const view = await updateViewName(ctx.db, id, name);
+
+  res.send(view);
+};
+
+export const handleGetView: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const view = await getViewByID(ctx.db, id);
+
+  res.send(view);
+};
+
+export const handleDeleteView: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+  const { id } = req.params;
+
+  await deleteView(ctx.db, id);
+
+  res.send({ id: id, deleted: true });
+};
+
+//#endregion View

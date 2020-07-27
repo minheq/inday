@@ -15,6 +15,10 @@ import {
   handleUpdateCollectionName,
   handleGetCollection,
   handleDeleteCollection,
+  handleCreateView,
+  handleUpdateViewName,
+  handleGetView,
+  handleDeleteView,
 } from './handlers';
 import {
   ValidationError,
@@ -70,6 +74,17 @@ export function createAPI() {
   api.delete(
     '/v0/collections/:id',
     addContext(ensureAuthenticated(handleDeleteCollection)),
+  );
+
+  api.post('/v0/views', addContext(ensureAuthenticated(handleCreateView)));
+  api.post(
+    '/v0/views/:id/updateName',
+    addContext(ensureAuthenticated(handleUpdateViewName)),
+  );
+  api.get('/v0/views/:id', addContext(ensureAuthenticated(handleGetView)));
+  api.delete(
+    '/v0/views/:id',
+    addContext(ensureAuthenticated(handleDeleteView)),
   );
 
   api.setErrorHandler((err, req, res) => {

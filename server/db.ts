@@ -351,12 +351,9 @@ export async function getDocumentByID(db: DB, id: string): Promise<Document> {
 
 export async function createDocument(
   db: DB,
-  input: {
-    id: string;
-    collectionID: string;
-  },
+  id: string,
+  collectionID: string,
 ): Promise<Document> {
-  const { id, collectionID } = input;
   const result = await db.query<DocumentRow>(
     'INSERT INTO documents (id, collection_id) VALUES($1, $3) RETURNING *',
     [id, collectionID],
@@ -453,11 +450,13 @@ export async function getViewByID(db: DB, id: string): Promise<View> {
 export async function createView(
   db: DB,
   id: string,
+  name: string,
+  type: ViewType,
   collectionID: string,
 ): Promise<View> {
   const result = await db.query<ViewRow>(
-    'INSERT INTO views (id, collection_id) VALUES($1, $3) RETURNING *',
-    [id, collectionID],
+    'INSERT INTO views (id, name, type, collection_id) VALUES($1, $2, $3, $4) RETURNING *',
+    [id, name, type, collectionID],
   );
 
   const row = first(result.rows);
