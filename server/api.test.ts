@@ -14,13 +14,11 @@ import {
 } from './db';
 import {
   CreateWorkspaceInput,
-  FullUpdateWorkspaceInput,
+  UpdateWorkspaceNameInput,
   CreateSpaceInput,
-  FullUpdateSpaceInput,
-  PartialUpdateSpaceInput,
+  UpdateSpaceNameInput,
   CreateCollectionInput,
-  FullUpdateCollectionInput,
-  PartialUpdateCollectionInput,
+  UpdateCollectionNameInput,
 } from './handlers';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
@@ -58,44 +56,16 @@ describe('Workspaces', () => {
     });
   });
 
-  describe('PUT /v0/workspaces/:id', () => {
+  describe('POST /v0/workspaces/:id/updateName', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, {
-        id: v4(),
-        name: 'test2',
-        userID: '1',
-      });
-      const input: FullUpdateWorkspaceInput = {
+      const workspace = await createWorkspace(db, v4(), 'test2', '1');
+      const input: UpdateWorkspaceNameInput = {
         name: 'test3',
       };
 
       const res = await api.inject({
-        url: `/v0/workspaces/${workspace.id}`,
-        method: 'PUT',
-        payload: input,
-      });
-      const result = res.json() as Workspace;
-
-      expect(res.statusCode).toEqual(200);
-      expect(result.name).toBe(input.name);
-      expect(result.id).toBeTruthy();
-    });
-  });
-
-  describe('PATCH /v0/workspaces/:id', () => {
-    test('happy path', async () => {
-      const workspace = await createWorkspace(db, {
-        id: v4(),
-        name: 'test4',
-        userID: '1',
-      });
-      const input: PartialUpdateSpaceInput = {
-        name: 'test5',
-      };
-
-      const res = await api.inject({
-        url: `/v0/workspaces/${workspace.id}`,
-        method: 'PATCH',
+        url: `/v0/workspaces/${workspace.id}/updateName`,
+        method: 'POST',
         payload: input,
       });
       const result = res.json() as Workspace;
@@ -108,11 +78,7 @@ describe('Workspaces', () => {
 
   describe('DELETE /v0/workspaces/:id', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, {
-        id: v4(),
-        name: 'test6',
-        userID: '1',
-      });
+      const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
       const res = await api.inject({
         url: `/v0/workspaces/${workspace.id}`,
@@ -128,11 +94,7 @@ describe('Workspaces', () => {
 
   describe('GET /v0/workspaces/:id', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, {
-        id: v4(),
-        name: 'test6',
-        userID: '1',
-      });
+      const workspace = await createWorkspace(db, v4(), 'test6', '1');
 
       const res = await api.inject({
         url: `/v0/workspaces/${workspace.id}`,
@@ -150,11 +112,7 @@ describe('Spaces', () => {
   let workspace: Workspace;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, {
-      id: v4(),
-      name: 'spaces',
-      userID: '1',
-    });
+    workspace = await createWorkspace(db, v4(), 'spaces', '1');
   });
 
   describe('POST /v0/spaces', () => {
@@ -177,44 +135,16 @@ describe('Spaces', () => {
     });
   });
 
-  describe('PUT /v0/spaces/:id', () => {
+  describe('POST /v0/spaces/:id', () => {
     test('happy path', async () => {
-      const space = await createSpace(db, {
-        id: v4(),
-        name: 'test2',
-        workspaceID: workspace.id,
-      });
-      const input: FullUpdateSpaceInput = {
+      const space = await createSpace(db, v4(), 'test2', workspace.id);
+      const input: UpdateSpaceNameInput = {
         name: 'test3',
       };
 
       const res = await api.inject({
-        url: `/v0/spaces/${space.id}`,
-        method: 'PUT',
-        payload: input,
-      });
-      const result = res.json() as Space;
-
-      expect(res.statusCode).toEqual(200);
-      expect(result.name).toBe(input.name);
-      expect(result.id).toBeTruthy();
-    });
-  });
-
-  describe('PATCH /v0/spaces/:id', () => {
-    test('happy path', async () => {
-      const space = await createSpace(db, {
-        id: v4(),
-        name: 'test4',
-        workspaceID: workspace.id,
-      });
-      const input: PartialUpdateSpaceInput = {
-        name: 'test5',
-      };
-
-      const res = await api.inject({
-        url: `/v0/spaces/${space.id}`,
-        method: 'PATCH',
+        url: `/v0/spaces/${space.id}/updateName`,
+        method: 'POST',
         payload: input,
       });
       const result = res.json() as Space;
@@ -227,11 +157,7 @@ describe('Spaces', () => {
 
   describe('DELETE /v0/spaces/:id', () => {
     test('happy path', async () => {
-      const space = await createSpace(db, {
-        id: v4(),
-        name: 'test6',
-        workspaceID: workspace.id,
-      });
+      const space = await createSpace(db, v4(), 'test6', workspace.id);
 
       const res = await api.inject({
         url: `/v0/spaces/${space.id}`,
@@ -247,11 +173,7 @@ describe('Spaces', () => {
 
   describe('GET /v0/spaces/:id', () => {
     test('happy path', async () => {
-      const space = await createSpace(db, {
-        id: v4(),
-        name: 'test6',
-        workspaceID: workspace.id,
-      });
+      const space = await createSpace(db, v4(), 'test6', workspace.id);
 
       const res = await api.inject({
         url: `/v0/spaces/${space.id}`,
@@ -270,16 +192,8 @@ describe('Collections', () => {
   let space: Space;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, {
-      id: v4(),
-      name: 'collections',
-      userID: '1',
-    });
-    space = await createSpace(db, {
-      id: v4(),
-      name: 'collections',
-      workspaceID: workspace.id,
-    });
+    workspace = await createWorkspace(db, v4(), 'collections', '1');
+    space = await createSpace(db, v4(), 'collections', workspace.id);
   });
 
   describe('POST /v0/collections', () => {
@@ -302,44 +216,16 @@ describe('Collections', () => {
     });
   });
 
-  describe('PUT /v0/collections/:id', () => {
+  describe('POST /v0/collections/:id/updateName', () => {
     test('happy path', async () => {
-      const collection = await createCollection(db, {
-        id: v4(),
-        name: 'test2',
-        spaceID: space.id,
-      });
-      const input: FullUpdateCollectionInput = {
+      const collection = await createCollection(db, v4(), 'test2', space.id);
+      const input: UpdateCollectionNameInput = {
         name: 'test3',
       };
 
       const res = await api.inject({
-        url: `/v0/collections/${collection.id}`,
-        method: 'PUT',
-        payload: input,
-      });
-      const result = res.json() as Collection;
-
-      expect(res.statusCode).toEqual(200);
-      expect(result.name).toBe(input.name);
-      expect(result.id).toBeTruthy();
-    });
-  });
-
-  describe('PATCH /v0/collections/:id', () => {
-    test('happy path', async () => {
-      const collection = await createCollection(db, {
-        id: v4(),
-        name: 'test4',
-        spaceID: space.id,
-      });
-      const input: PartialUpdateCollectionInput = {
-        name: 'test5',
-      };
-
-      const res = await api.inject({
-        url: `/v0/collections/${collection.id}`,
-        method: 'PATCH',
+        url: `/v0/collections/${collection.id}/updateName`,
+        method: 'POST',
         payload: input,
       });
       const result = res.json() as Collection;
@@ -352,11 +238,7 @@ describe('Collections', () => {
 
   describe('DELETE /v0/collections/:id', () => {
     test('happy path', async () => {
-      const collection = await createCollection(db, {
-        id: v4(),
-        name: 'test6',
-        spaceID: space.id,
-      });
+      const collection = await createCollection(db, v4(), 'test6', space.id);
 
       const res = await api.inject({
         url: `/v0/collections/${collection.id}`,
@@ -372,11 +254,7 @@ describe('Collections', () => {
 
   describe('GET /v0/collections/:id', () => {
     test('happy path', async () => {
-      const collection = await createCollection(db, {
-        id: v4(),
-        name: 'test6',
-        spaceID: space.id,
-      });
+      const collection = await createCollection(db, v4(), 'test6', space.id);
 
       const res = await api.inject({
         url: `/v0/collections/${collection.id}`,

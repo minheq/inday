@@ -3,19 +3,16 @@ import fastify from 'fastify';
 import {
   addContext,
   handleCreateWorkspace,
-  handleFullUpdateWorkspace,
-  handlePartialUpdateWorkspace,
+  handleUpdateWorkspaceName,
   handleGetWorkspace,
   handleDeleteWorkspace,
   ensureAuthenticated,
   handleCreateSpace,
-  handleFullUpdateSpace,
-  handlePartialUpdateSpace,
+  handleUpdateSpaceName,
   handleGetSpace,
   handleDeleteSpace,
   handleCreateCollection,
-  handleFullUpdateCollection,
-  handlePartialUpdateCollection,
+  handleUpdateCollectionName,
   handleGetCollection,
   handleDeleteCollection,
 } from './handlers';
@@ -34,13 +31,9 @@ export function createAPI() {
     '/v0/workspaces',
     addContext(ensureAuthenticated(handleCreateWorkspace)),
   );
-  api.put(
-    '/v0/workspaces/:id',
-    addContext(ensureAuthenticated(handleFullUpdateWorkspace)),
-  );
-  api.patch(
-    '/v0/workspaces/:id',
-    addContext(ensureAuthenticated(handlePartialUpdateWorkspace)),
+  api.post(
+    '/v0/workspaces/:id/updateName',
+    addContext(ensureAuthenticated(handleUpdateWorkspaceName)),
   );
   api.get(
     '/v0/workspaces/:id',
@@ -52,13 +45,9 @@ export function createAPI() {
   );
 
   api.post('/v0/spaces', addContext(ensureAuthenticated(handleCreateSpace)));
-  api.put(
-    '/v0/spaces/:id',
-    addContext(ensureAuthenticated(handleFullUpdateSpace)),
-  );
-  api.patch(
-    '/v0/spaces/:id',
-    addContext(ensureAuthenticated(handlePartialUpdateSpace)),
+  api.post(
+    '/v0/spaces/:id/updateName',
+    addContext(ensureAuthenticated(handleUpdateSpaceName)),
   );
   api.get('/v0/spaces/:id', addContext(ensureAuthenticated(handleGetSpace)));
   api.delete(
@@ -70,13 +59,9 @@ export function createAPI() {
     '/v0/collections',
     addContext(ensureAuthenticated(handleCreateCollection)),
   );
-  api.put(
-    '/v0/collections/:id',
-    addContext(ensureAuthenticated(handleFullUpdateCollection)),
-  );
-  api.patch(
-    '/v0/collections/:id',
-    addContext(ensureAuthenticated(handlePartialUpdateCollection)),
+  api.post(
+    '/v0/collections/:id/updateName',
+    addContext(ensureAuthenticated(handleUpdateCollectionName)),
   );
   api.get(
     '/v0/collections/:id',

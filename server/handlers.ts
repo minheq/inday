@@ -6,18 +6,15 @@ import {
   DB,
   wrapInTx,
   createWorkspace,
-  fullUpdateWorkspace,
-  partialUpdateWorkspace,
+  updateWorkspaceName,
   getWorkspaceByID,
   deleteWorkspace,
   createSpace,
-  fullUpdateSpace,
-  partialUpdateSpace,
+  updateSpaceName,
   getSpaceByID,
   deleteSpace,
   createCollection,
-  fullUpdateCollection,
-  partialUpdateCollection,
+  updateCollectionName,
   getCollectionByID,
   deleteCollection,
   createDocument,
@@ -157,55 +154,34 @@ export const handleCreateWorkspace: AH = async (ctx, req, res) => {
 
   const { id, name } = req.body;
 
-  const workspace = await createWorkspace(ctx.db, {
-    id: id ?? v4(),
+  const workspace = await createWorkspace(
+    ctx.db,
+    id ?? v4(),
     name,
-    userID: currentUserID,
-  });
+    currentUserID,
+  );
 
   res.send(workspace);
 };
 
-export interface FullUpdateWorkspaceInput {
+export interface UpdateWorkspaceNameInput {
   name: string;
 }
 
-const fullUpdateWorkspaceInputSchema = yup
-  .object<FullUpdateWorkspaceInput>({
+const updateWorkspaceNameInputSchema = yup
+  .object<UpdateWorkspaceNameInput>({
     name: yup.string().required(),
   })
   .required();
 
-export const handleFullUpdateWorkspace: AH = async (ctx, req, res) => {
-  validateInput(fullUpdateWorkspaceInputSchema, req.body);
+export const handleUpdateWorkspaceName: AH = async (ctx, req, res) => {
+  validateInput(updateWorkspaceNameInputSchema, req.body);
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
   const { name } = req.body;
 
-  const workspace = await fullUpdateWorkspace(ctx.db, { id, name });
-
-  res.send(workspace);
-};
-
-export interface PartialUpdateWorkspaceInput {
-  name?: string;
-}
-
-const partialUpdateWorkspaceInputSchema = yup
-  .object<PartialUpdateWorkspaceInput>({
-    name: yup.string().required(),
-  })
-  .required();
-
-export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
-  validateInput(partialUpdateWorkspaceInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
-
-  const { id } = req.params;
-  const { name } = req.body;
-
-  const workspace = await partialUpdateWorkspace(ctx.db, { id, name });
+  const workspace = await updateWorkspaceName(ctx.db, id, name);
 
   res.send(workspace);
 };
@@ -230,7 +206,7 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
     throw new UnauthorizedError();
   }
 
-  await deleteWorkspace(ctx.db, { id });
+  await deleteWorkspace(ctx.db, id);
 
   res.send({ id: id, deleted: true });
 };
@@ -257,55 +233,29 @@ export const handleCreateSpace: AH = async (ctx, req, res) => {
 
   const { id, name, workspaceID } = req.body;
 
-  const space = await createSpace(ctx.db, {
-    id: id ?? v4(),
-    name,
-    workspaceID,
-  });
+  const space = await createSpace(ctx.db, id ?? v4(), name, workspaceID);
 
   res.send(space);
 };
 
-export interface FullUpdateSpaceInput {
+export interface UpdateSpaceNameInput {
   name: string;
 }
 
-const fullUpdateSpaceInputSchema = yup
-  .object<FullUpdateSpaceInput>({
+const updateSpaceNameInputSchema = yup
+  .object<UpdateSpaceNameInput>({
     name: yup.string().required(),
   })
   .required();
 
-export const handleFullUpdateSpace: AH = async (ctx, req, res) => {
-  validateInput(fullUpdateSpaceInputSchema, req.body);
+export const handleUpdateSpaceName: AH = async (ctx, req, res) => {
+  validateInput(updateSpaceNameInputSchema, req.body);
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
   const { name } = req.body;
 
-  const space = await fullUpdateSpace(ctx.db, { id, name });
-
-  res.send(space);
-};
-
-export interface PartialUpdateSpaceInput {
-  name?: string;
-}
-
-const partialUpdateSpaceInputSchema = yup
-  .object<PartialUpdateSpaceInput>({
-    name: yup.string().required(),
-  })
-  .required();
-
-export const handlePartialUpdateSpace: AH = async (ctx, req, res) => {
-  validateInput(partialUpdateSpaceInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
-
-  const { id } = req.params;
-  const { name } = req.body;
-
-  const space = await partialUpdateSpace(ctx.db, { id, name });
+  const space = await updateSpaceName(ctx.db, id, name);
 
   res.send(space);
 };
@@ -323,7 +273,7 @@ export const handleDeleteSpace: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
   const { id } = req.params;
 
-  await deleteSpace(ctx.db, { id });
+  await deleteSpace(ctx.db, id);
 
   res.send({ id: id, deleted: true });
 };
@@ -350,55 +300,29 @@ export const handleCreateCollection: AH = async (ctx, req, res) => {
 
   const { id, name, spaceID } = req.body;
 
-  const collection = await createCollection(ctx.db, {
-    id: id ?? v4(),
-    name,
-    spaceID,
-  });
+  const collection = await createCollection(ctx.db, id ?? v4(), name, spaceID);
 
   res.send(collection);
 };
 
-export interface FullUpdateCollectionInput {
+export interface UpdateCollectionNameInput {
   name: string;
 }
 
-const fullUpdateCollectionInputSchema = yup
-  .object<FullUpdateCollectionInput>({
+const updateCollectionNameInputSchema = yup
+  .object<UpdateCollectionNameInput>({
     name: yup.string().required(),
   })
   .required();
 
-export const handleFullUpdateCollection: AH = async (ctx, req, res) => {
-  validateInput(fullUpdateCollectionInputSchema, req.body);
+export const handleUpdateCollectionName: AH = async (ctx, req, res) => {
+  validateInput(updateCollectionNameInputSchema, req.body);
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
   const { name } = req.body;
 
-  const collection = await fullUpdateCollection(ctx.db, { id, name });
-
-  res.send(collection);
-};
-
-export interface PartialUpdateCollectionInput {
-  name?: string;
-}
-
-const partialUpdateCollectionInputSchema = yup
-  .object<PartialUpdateCollectionInput>({
-    name: yup.string().required(),
-  })
-  .required();
-
-export const handlePartialUpdateCollection: AH = async (ctx, req, res) => {
-  validateInput(partialUpdateCollectionInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
-
-  const { id } = req.params;
-  const { name } = req.body;
-
-  const collection = await partialUpdateCollection(ctx.db, { id, name });
+  const collection = await updateCollectionName(ctx.db, id, name);
 
   res.send(collection);
 };
@@ -407,7 +331,7 @@ export const handleGetCollection: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
-  const collection = await getCollectionByID(ctx.db, { id });
+  const collection = await getCollectionByID(ctx.db, id);
 
   res.send(collection);
 };
@@ -416,7 +340,7 @@ export const handleDeleteCollection: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
   const { id } = req.params;
 
-  await deleteCollection(ctx.db, { id });
+  await deleteCollection(ctx.db, id);
 
   res.send({ id: id, deleted: true });
 };
@@ -462,7 +386,7 @@ export const handleFullUpdateDocument: AH = async (ctx, req, res) => {
 
   const { id } = req.params;
 
-  const collection = await fullUpdateDocument(ctx.db, { id });
+  const collection = await fullUpdateDocument(ctx.db, id);
 
   res.send(collection);
 };
@@ -479,7 +403,7 @@ export const handlePartialUpdateDocument: AH = async (ctx, req, res) => {
 
   const { id } = req.params;
 
-  const collection = await partialUpdateDocument(ctx.db, { id });
+  const collection = await partialUpdateDocument(ctx.db, id);
 
   res.send(collection);
 };
@@ -488,7 +412,7 @@ export const handleGetDocument: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
-  const collection = await getDocumentByID(ctx.db, { id });
+  const collection = await getDocumentByID(ctx.db, id);
 
   res.send(collection);
 };
@@ -497,9 +421,9 @@ export const handleDeleteDocument: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
   const { id } = req.params;
 
-  await deleteDocument(ctx.db, { id });
+  await deleteDocument(ctx.db, id);
 
   res.send({ id: id, deleted: true });
 };
 
-//#endregion Collection
+//#endregion Document
