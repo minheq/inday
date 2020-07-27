@@ -4,7 +4,6 @@ import { RecoilKey } from './constants';
 
 export interface Document {
   id: string;
-  name: string;
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
