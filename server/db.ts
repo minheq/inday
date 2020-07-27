@@ -5,6 +5,9 @@ import { NotFoundError } from './errors';
 import { first } from '../lib/data_structures/arrays';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
+import { Document } from '../app/data/documents';
+import { View, ViewType } from '../app/data/views';
+import { Field, FieldType } from '../app/data/fields';
 
 const pool = new Pool({
   user: env.database.username,
@@ -107,10 +110,14 @@ export async function getWorkspaceByID(db: DB, id: string): Promise<Workspace> {
 
 export async function createWorkspace(
   db: DB,
-  id: string,
-  name: string,
-  userID: string,
+  input: {
+    id: string;
+    name: string;
+    userID: string;
+  },
 ): Promise<Workspace> {
+  const { id, name, userID } = input;
+
   const result = await db.query<WorkspaceRow>(
     'INSERT INTO workspaces (id, name, owner_id) VALUES($1, $2, $3) RETURNING *',
     [id, name, userID],
@@ -123,9 +130,12 @@ export async function createWorkspace(
 
 export async function fullUpdateWorkspace(
   db: DB,
-  id: string,
-  name: string,
+  input: {
+    id: string;
+    name: string;
+  },
 ): Promise<Workspace> {
+  const { id, name } = input;
   const result = await db.query<WorkspaceRow>(
     'UPDATE workspaces SET name=$2 WHERE id=$1 RETURNING *',
     [id, name],
@@ -142,9 +152,12 @@ export async function fullUpdateWorkspace(
 
 export async function partialUpdateWorkspace(
   db: DB,
-  id: string,
-  name?: string,
+  input: {
+    id: string;
+    name?: string;
+  },
 ): Promise<Workspace> {
+  const { id, name } = input;
   const [setText, values] = buildPartialUpdateQuery({ name });
 
   const result = await db.query<WorkspaceRow>(
@@ -161,7 +174,11 @@ export async function partialUpdateWorkspace(
   return toWorkspace(row);
 }
 
-export async function deleteWorkspace(db: DB, id: string): Promise<void> {
+export async function deleteWorkspace(
+  db: DB,
+  input: { id: string },
+): Promise<void> {
+  const { id } = input;
   const result = await db.query<WorkspaceRow>(
     'DELETE FROM workspaces where id=$1',
     [id],
@@ -206,10 +223,13 @@ export async function getSpaceByID(db: DB, id: string): Promise<Space> {
 
 export async function createSpace(
   db: DB,
-  id: string,
-  name: string,
-  workspaceID: string,
+  input: {
+    id: string;
+    name: string;
+    workspaceID: string;
+  },
 ): Promise<Space> {
+  const { id, name, workspaceID } = input;
   const result = await db.query<SpaceRow>(
     'INSERT INTO spaces (id, name, workspace_id) VALUES($1, $2, $3) RETURNING *',
     [id, name, workspaceID],
@@ -222,9 +242,12 @@ export async function createSpace(
 
 export async function fullUpdateSpace(
   db: DB,
-  id: string,
-  name: string,
+  input: {
+    id: string;
+    name: string;
+  },
 ): Promise<Space> {
+  const { id, name } = input;
   const result = await db.query<SpaceRow>(
     'UPDATE spaces SET name=$2 WHERE id=$1 RETURNING *',
     [id, name],
@@ -241,9 +264,12 @@ export async function fullUpdateSpace(
 
 export async function partialUpdateSpace(
   db: DB,
-  id: string,
-  name?: string,
+  input: {
+    id: string;
+    name?: string;
+  },
 ): Promise<Space> {
+  const { id, name } = input;
   const [setText, values] = buildPartialUpdateQuery({ name });
 
   const result = await db.query<SpaceRow>(
@@ -260,7 +286,11 @@ export async function partialUpdateSpace(
   return toSpace(row);
 }
 
-export async function deleteSpace(db: DB, id: string): Promise<void> {
+export async function deleteSpace(
+  db: DB,
+  input: { id: string },
+): Promise<void> {
+  const { id } = input;
   const result = await db.query<SpaceRow>('DELETE FROM spaces where id=$1', [
     id,
   ]);
@@ -292,8 +322,9 @@ function toCollection(data: CollectionRow): Collection {
 
 export async function getCollectionByID(
   db: DB,
-  id: string,
+  input: { id: string },
 ): Promise<Collection> {
+  const { id } = input;
   const result = await db.query<CollectionRow>(
     'SELECT * FROM collections WHERE id=$1',
     [id],
@@ -310,10 +341,13 @@ export async function getCollectionByID(
 
 export async function createCollection(
   db: DB,
-  id: string,
-  name: string,
-  spaceID: string,
+  input: {
+    id: string;
+    name: string;
+    spaceID: string;
+  },
 ): Promise<Collection> {
+  const { id, name, spaceID } = input;
   const result = await db.query<CollectionRow>(
     'INSERT INTO collections (id, name, space_id) VALUES($1, $2, $3) RETURNING *',
     [id, name, spaceID],
@@ -326,9 +360,12 @@ export async function createCollection(
 
 export async function fullUpdateCollection(
   db: DB,
-  id: string,
-  name: string,
+  input: {
+    id: string;
+    name: string;
+  },
 ): Promise<Collection> {
+  const { id, name } = input;
   const result = await db.query<CollectionRow>(
     'UPDATE collections SET name=$2 WHERE id=$1 RETURNING *',
     [id, name],
@@ -345,9 +382,12 @@ export async function fullUpdateCollection(
 
 export async function partialUpdateCollection(
   db: DB,
-  id: string,
-  name?: string,
+  input: {
+    id: string;
+    name?: string;
+  },
 ): Promise<Collection> {
+  const { id, name } = input;
   const [setText, values] = buildPartialUpdateQuery({ name });
 
   const result = await db.query<CollectionRow>(
@@ -364,7 +404,11 @@ export async function partialUpdateCollection(
   return toCollection(row);
 }
 
-export async function deleteCollection(db: DB, id: string): Promise<void> {
+export async function deleteCollection(
+  db: DB,
+  input: { id: string },
+): Promise<void> {
+  const { id } = input;
   const result = await db.query<CollectionRow>(
     'DELETE FROM collections where id=$1',
     [id],
@@ -375,3 +419,350 @@ export async function deleteCollection(db: DB, id: string): Promise<void> {
   }
 }
 //#endregion Collection
+
+//#region Document
+interface DocumentRow {
+  id: string;
+  name: string;
+  collection_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function toDocument(data: DocumentRow): Document {
+  return {
+    id: data.id,
+    collectionID: data.collection_id,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+export async function getDocumentByID(
+  db: DB,
+  input: { id: string },
+): Promise<Document> {
+  const { id } = input;
+  const result = await db.query<DocumentRow>(
+    'SELECT * FROM documents WHERE id=$1',
+    [id],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('collection');
+  }
+
+  const row = first(result.rows);
+
+  return toDocument(row);
+}
+
+export async function createDocument(
+  db: DB,
+  input: {
+    id: string;
+    collectionID: string;
+  },
+): Promise<Document> {
+  const { id, collectionID } = input;
+  const result = await db.query<DocumentRow>(
+    'INSERT INTO documents (id, collection_id) VALUES($1, $3) RETURNING *',
+    [id, collectionID],
+  );
+
+  const row = first(result.rows);
+
+  return toDocument(row);
+}
+
+export async function fullUpdateDocument(
+  db: DB,
+  input: {
+    id: string;
+  },
+): Promise<Document> {
+  const { id } = input;
+  const result = await db.query<DocumentRow>(
+    'UPDATE documents SET WHERE id=$1 RETURNING *',
+    [id],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('document');
+  }
+
+  const row = first(result.rows);
+
+  return toDocument(row);
+}
+
+export async function partialUpdateDocument(
+  db: DB,
+  input: {
+    id: string;
+  },
+): Promise<Document> {
+  const { id } = input;
+
+  const result = await db.query<DocumentRow>(
+    'SELECT * FROM documents WHERE id=$1',
+    [id],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('document');
+  }
+
+  const row = first(result.rows);
+
+  return toDocument(row);
+}
+
+export async function deleteDocument(
+  db: DB,
+  input: { id: string },
+): Promise<void> {
+  const { id } = input;
+  const result = await db.query<DocumentRow>(
+    'DELETE FROM documents where id=$1',
+    [id],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('document');
+  }
+}
+//#endregion Document
+
+//#region View
+interface ViewRow {
+  id: string;
+  name: string;
+  type: ViewType;
+  collection_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function toView(data: ViewRow): View {
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    collectionID: data.collection_id,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+export async function getViewByID(
+  db: DB,
+  input: { id: string },
+): Promise<View> {
+  const { id } = input;
+  const result = await db.query<ViewRow>('SELECT * FROM views WHERE id=$1', [
+    id,
+  ]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('view');
+  }
+
+  const row = first(result.rows);
+
+  return toView(row);
+}
+
+export async function createView(
+  db: DB,
+  input: {
+    id: string;
+    collectionID: string;
+  },
+): Promise<View> {
+  const { id, collectionID } = input;
+  const result = await db.query<ViewRow>(
+    'INSERT INTO views (id, collection_id) VALUES($1, $3) RETURNING *',
+    [id, collectionID],
+  );
+
+  const row = first(result.rows);
+
+  return toView(row);
+}
+
+export async function fullUpdateView(
+  db: DB,
+  input: {
+    id: string;
+    name: string;
+  },
+): Promise<View> {
+  const { id, name } = input;
+  const result = await db.query<ViewRow>(
+    'UPDATE views SET name=$2 WHERE id=$1 RETURNING *',
+    [id, name],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('view');
+  }
+
+  const row = first(result.rows);
+
+  return toView(row);
+}
+
+export async function partialUpdateView(
+  db: DB,
+  input: {
+    id: string;
+    name?: string;
+  },
+): Promise<View> {
+  const { id, name } = input;
+  const [setText, values] = buildPartialUpdateQuery({ name });
+
+  const result = await db.query<ViewRow>(
+    `UPDATE views SET ${setText} WHERE id=$1 RETURNING *`,
+    [id, ...values],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('view');
+  }
+
+  const row = first(result.rows);
+
+  return toView(row);
+}
+
+export async function deleteView(db: DB, input: { id: string }): Promise<void> {
+  const { id } = input;
+  const result = await db.query<ViewRow>('DELETE FROM views where id=$1', [id]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('view');
+  }
+}
+//#endregion View
+
+//#region Field
+interface FieldRow {
+  id: string;
+  name: string;
+  description: string | null;
+  type: FieldType;
+  collection_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function toField(data: FieldRow): Field {
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    description: data.description,
+    collectionID: data.collection_id,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+export async function getFieldByID(
+  db: DB,
+  input: { id: string },
+): Promise<Field> {
+  const { id } = input;
+  const result = await db.query<FieldRow>('SELECT * FROM field WHERE id=$1', [
+    id,
+  ]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('field');
+  }
+
+  const row = first(result.rows);
+
+  return toField(row);
+}
+
+export async function createField(
+  db: DB,
+  input: {
+    id: string;
+    collectionID: string;
+  },
+): Promise<Field> {
+  const { id, collectionID } = input;
+  const result = await db.query<FieldRow>(
+    'INSERT INTO field (id, collection_id) VALUES($1, $3) RETURNING *',
+    [id, collectionID],
+  );
+
+  const row = first(result.rows);
+
+  return toField(row);
+}
+
+export async function fullUpdateField(
+  db: DB,
+  input: {
+    id: string;
+    name: string;
+  },
+): Promise<Field> {
+  const { id, name } = input;
+  const result = await db.query<FieldRow>(
+    'UPDATE field SET name=$2 WHERE id=$1 RETURNING *',
+    [id, name],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('field');
+  }
+
+  const row = first(result.rows);
+
+  return toField(row);
+}
+
+export async function partialUpdateField(
+  db: DB,
+  input: {
+    id: string;
+    name?: string;
+  },
+): Promise<Field> {
+  const { id, name } = input;
+  const [setText, values] = buildPartialUpdateQuery({ name });
+
+  const result = await db.query<FieldRow>(
+    `UPDATE field SET ${setText} WHERE id=$1 RETURNING *`,
+    [id, ...values],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('field');
+  }
+
+  const row = first(result.rows);
+
+  return toField(row);
+}
+
+export async function deleteField(
+  db: DB,
+  input: { id: string },
+): Promise<void> {
+  const { id } = input;
+  const result = await db.query<FieldRow>('DELETE FROM field where id=$1', [
+    id,
+  ]);
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('field');
+  }
+}
+//#endregion Field

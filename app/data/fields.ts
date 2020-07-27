@@ -5,7 +5,7 @@ import { RecoilKey } from './constants';
 interface BaseField {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;

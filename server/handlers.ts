@@ -20,6 +20,11 @@ import {
   partialUpdateCollection,
   getCollectionByID,
   deleteCollection,
+  createDocument,
+  fullUpdateDocument,
+  partialUpdateDocument,
+  getDocumentByID,
+  deleteDocument,
 } from './db';
 import {
   AuthenticationError,
@@ -152,12 +157,11 @@ export const handleCreateWorkspace: AH = async (ctx, req, res) => {
 
   const { id, name } = req.body;
 
-  const workspace = await createWorkspace(
-    ctx.db,
-    id ?? v4(),
+  const workspace = await createWorkspace(ctx.db, {
+    id: id ?? v4(),
     name,
-    currentUserID,
-  );
+    userID: currentUserID,
+  });
 
   res.send(workspace);
 };
@@ -179,7 +183,7 @@ export const handleFullUpdateWorkspace: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const workspace = await fullUpdateWorkspace(ctx.db, id, name);
+  const workspace = await fullUpdateWorkspace(ctx.db, { id, name });
 
   res.send(workspace);
 };
@@ -201,7 +205,7 @@ export const handlePartialUpdateWorkspace: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const workspace = await partialUpdateWorkspace(ctx.db, id, name);
+  const workspace = await partialUpdateWorkspace(ctx.db, { id, name });
 
   res.send(workspace);
 };
@@ -226,7 +230,7 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
     throw new UnauthorizedError();
   }
 
-  await deleteWorkspace(ctx.db, id);
+  await deleteWorkspace(ctx.db, { id });
 
   res.send({ id: id, deleted: true });
 };
@@ -253,7 +257,11 @@ export const handleCreateSpace: AH = async (ctx, req, res) => {
 
   const { id, name, workspaceID } = req.body;
 
-  const space = await createSpace(ctx.db, id ?? v4(), name, workspaceID);
+  const space = await createSpace(ctx.db, {
+    id: id ?? v4(),
+    name,
+    workspaceID,
+  });
 
   res.send(space);
 };
@@ -275,7 +283,7 @@ export const handleFullUpdateSpace: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const space = await fullUpdateSpace(ctx.db, id, name);
+  const space = await fullUpdateSpace(ctx.db, { id, name });
 
   res.send(space);
 };
@@ -297,7 +305,7 @@ export const handlePartialUpdateSpace: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const space = await partialUpdateSpace(ctx.db, id, name);
+  const space = await partialUpdateSpace(ctx.db, { id, name });
 
   res.send(space);
 };
@@ -315,7 +323,7 @@ export const handleDeleteSpace: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
   const { id } = req.params;
 
-  await deleteSpace(ctx.db, id);
+  await deleteSpace(ctx.db, { id });
 
   res.send({ id: id, deleted: true });
 };
@@ -342,7 +350,11 @@ export const handleCreateCollection: AH = async (ctx, req, res) => {
 
   const { id, name, spaceID } = req.body;
 
-  const collection = await createCollection(ctx.db, id ?? v4(), name, spaceID);
+  const collection = await createCollection(ctx.db, {
+    id: id ?? v4(),
+    name,
+    spaceID,
+  });
 
   res.send(collection);
 };
@@ -364,7 +376,7 @@ export const handleFullUpdateCollection: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const collection = await fullUpdateCollection(ctx.db, id, name);
+  const collection = await fullUpdateCollection(ctx.db, { id, name });
 
   res.send(collection);
 };
@@ -386,7 +398,7 @@ export const handlePartialUpdateCollection: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const collection = await partialUpdateCollection(ctx.db, id, name);
+  const collection = await partialUpdateCollection(ctx.db, { id, name });
 
   res.send(collection);
 };
@@ -395,7 +407,7 @@ export const handleGetCollection: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
-  const collection = await getCollectionByID(ctx.db, id);
+  const collection = await getCollectionByID(ctx.db, { id });
 
   res.send(collection);
 };
@@ -404,7 +416,88 @@ export const handleDeleteCollection: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
   const { id } = req.params;
 
-  await deleteCollection(ctx.db, id);
+  await deleteCollection(ctx.db, { id });
+
+  res.send({ id: id, deleted: true });
+};
+
+//#endregion Collection
+
+//#region Document
+export interface CreateDocumentInput {
+  id?: string;
+  collectionID: string;
+}
+
+const createDocumentInputSchema = yup
+  .object<CreateDocumentInput>({
+    id: yup.string(),
+
+    collectionID: yup.string().required(),
+  })
+  .required();
+
+export const handleCreateDocument: AH = async (ctx, req, res) => {
+  validateInput(createDocumentInputSchema, req.body);
+
+  const { id, collectionID } = req.body;
+
+  const collection = await createDocument(ctx.db, {
+    id: id ?? v4(),
+    collectionID,
+  });
+
+  res.send(collection);
+};
+
+export interface FullUpdateDocumentInput {}
+
+const fullUpdateDocumentInputSchema = yup
+  .object<FullUpdateDocumentInput>({})
+  .required();
+
+export const handleFullUpdateDocument: AH = async (ctx, req, res) => {
+  validateInput(fullUpdateDocumentInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+
+  const collection = await fullUpdateDocument(ctx.db, { id });
+
+  res.send(collection);
+};
+
+export interface PartialUpdateDocumentInput {}
+
+const partialUpdateDocumentInputSchema = yup
+  .object<PartialUpdateDocumentInput>({})
+  .required();
+
+export const handlePartialUpdateDocument: AH = async (ctx, req, res) => {
+  validateInput(partialUpdateDocumentInputSchema, req.body);
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+
+  const collection = await partialUpdateDocument(ctx.db, { id });
+
+  res.send(collection);
+};
+
+export const handleGetDocument: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+
+  const { id } = req.params;
+  const collection = await getDocumentByID(ctx.db, { id });
+
+  res.send(collection);
+};
+
+export const handleDeleteDocument: AH = async (ctx, req, res) => {
+  validateParams(idParamsSchema, req.params);
+  const { id } = req.params;
+
+  await deleteDocument(ctx.db, { id });
 
   res.send({ id: id, deleted: true });
 };

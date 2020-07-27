@@ -19,6 +19,7 @@ interface BoardView extends BaseView {
 }
 
 export type View = ListView | BoardView;
+export type ViewType = View['type'];
 
 export type ViewsState = { [id: string]: View | undefined };
 export const viewsState = atom<ViewsState>({
