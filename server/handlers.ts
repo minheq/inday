@@ -1,5 +1,4 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { v4 } from 'uuid';
 import * as yup from 'yup';
 
 import {
@@ -164,12 +163,7 @@ export const handleCreateWorkspace: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const workspace = await createWorkspace(
-    ctx.db,
-    id ?? v4(),
-    name,
-    currentUserID,
-  );
+  const workspace = await createWorkspace(ctx.db, id, name, currentUserID);
 
   res.send(workspace);
 };
@@ -244,7 +238,7 @@ export const handleCreateSpace: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name, workspaceID } = req.body;
 
-  const space = await createSpace(ctx.db, id ?? v4(), name, workspaceID);
+  const space = await createSpace(ctx.db, id, name, workspaceID);
 
   res.send(space);
 };
@@ -312,7 +306,7 @@ export const handleCreateCollection: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name, spaceID } = req.body;
 
-  const collection = await createCollection(ctx.db, id ?? v4(), name, spaceID);
+  const collection = await createCollection(ctx.db, id, name, spaceID);
 
   res.send(collection);
 };
@@ -377,7 +371,7 @@ export const handleCreateDocument: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { collectionID } = req.body;
 
-  const collection = await createDocument(ctx.db, id ?? v4(), collectionID);
+  const collection = await createDocument(ctx.db, id, collectionID);
 
   res.send(collection);
 };
@@ -459,7 +453,7 @@ export const handleCreateView: AH = async (ctx, req, res) => {
 
   const { id } = req.params;
   const { name, type, collectionID } = req.body;
-  const view = await createView(ctx.db, id ?? v4(), name, type, collectionID);
+  const view = await createView(ctx.db, id, name, type, collectionID);
 
   res.send(view);
 };
@@ -549,7 +543,7 @@ export const handleCreateField: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name, type, collectionID } = req.body;
 
-  const view = await createField(ctx.db, id ?? v4(), name, type, collectionID);
+  const view = await createField(ctx.db, id, name, type, collectionID);
 
   res.send(view);
 };

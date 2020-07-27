@@ -14,8 +14,7 @@ const postgrator = new Postgrator({
 });
 
 async function runScript() {
-  const version = await postgrator.getDatabaseVersion();
-  return postgrator.migrate(`${version - 1}`);
+  return postgrator.migrate('0000');
 }
 
 runScript()

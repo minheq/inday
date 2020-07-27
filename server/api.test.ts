@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import { createAPI } from './api';
-import { v4 } from 'uuid';
 
 import { Workspace } from '../app/data/workspace';
 import {
@@ -30,6 +29,7 @@ import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
 import { View } from '../app/data/views';
 import { Field } from '../app/data/fields';
+import { generateID } from '../lib/id/id';
 
 let api: FastifyInstance;
 let db: DB;
@@ -52,7 +52,7 @@ describe('Workspaces', () => {
       };
 
       const res = await api.inject({
-        url: `/v0/workspaces/${v4()}/create`,
+        url: `/v0/workspaces/${generateID()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -66,7 +66,7 @@ describe('Workspaces', () => {
 
   describe('updateName', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, v4(), 'test2', '1');
+      const workspace = await createWorkspace(db, generateID(), 'test2', '1');
       const input: UpdateWorkspaceNameInput = {
         name: 'test3',
       };
@@ -86,7 +86,7 @@ describe('Workspaces', () => {
 
   describe('delete', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, v4(), 'test6', '1');
+      const workspace = await createWorkspace(db, generateID(), 'test6', '1');
 
       const res = await api.inject({
         url: `/v0/workspaces/${workspace.id}/delete`,
@@ -102,7 +102,7 @@ describe('Workspaces', () => {
 
   describe('get', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, v4(), 'test6', '1');
+      const workspace = await createWorkspace(db, generateID(), 'test6', '1');
 
       const res = await api.inject({
         url: `/v0/workspaces/${workspace.id}`,
@@ -120,7 +120,7 @@ describe('Spaces', () => {
   let workspace: Workspace;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, v4(), 'spaces', '1');
+    workspace = await createWorkspace(db, generateID(), 'spaces', '1');
   });
 
   describe('create', () => {
@@ -131,7 +131,7 @@ describe('Spaces', () => {
       };
 
       const res = await api.inject({
-        url: `/v0/spaces/${v4()}/create`,
+        url: `/v0/spaces/${generateID()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -145,7 +145,7 @@ describe('Spaces', () => {
 
   describe('updateName', () => {
     test('happy path', async () => {
-      const space = await createSpace(db, v4(), 'test2', workspace.id);
+      const space = await createSpace(db, generateID(), 'test2', workspace.id);
       const input: UpdateSpaceNameInput = {
         name: 'test3',
       };
@@ -165,7 +165,7 @@ describe('Spaces', () => {
 
   describe('delete', () => {
     test('happy path', async () => {
-      const space = await createSpace(db, v4(), 'test6', workspace.id);
+      const space = await createSpace(db, generateID(), 'test6', workspace.id);
 
       const res = await api.inject({
         url: `/v0/spaces/${space.id}/delete`,
@@ -181,7 +181,7 @@ describe('Spaces', () => {
 
   describe('get', () => {
     test('happy path', async () => {
-      const space = await createSpace(db, v4(), 'test6', workspace.id);
+      const space = await createSpace(db, generateID(), 'test6', workspace.id);
 
       const res = await api.inject({
         url: `/v0/spaces/${space.id}`,
@@ -200,8 +200,8 @@ describe('Collections', () => {
   let space: Space;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, v4(), 'collections', '1');
-    space = await createSpace(db, v4(), 'collections', workspace.id);
+    workspace = await createWorkspace(db, generateID(), 'collections', '1');
+    space = await createSpace(db, generateID(), 'collections', workspace.id);
   });
 
   describe('create', () => {
@@ -212,7 +212,7 @@ describe('Collections', () => {
       };
 
       const res = await api.inject({
-        url: `/v0/collections/${v4()}/create`,
+        url: `/v0/collections/${generateID()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -226,7 +226,12 @@ describe('Collections', () => {
 
   describe('updateName', () => {
     test('happy path', async () => {
-      const collection = await createCollection(db, v4(), 'test2', space.id);
+      const collection = await createCollection(
+        db,
+        generateID(),
+        'test2',
+        space.id,
+      );
       const input: UpdateCollectionNameInput = {
         name: 'test3',
       };
@@ -246,7 +251,12 @@ describe('Collections', () => {
 
   describe('delete', () => {
     test('happy path', async () => {
-      const collection = await createCollection(db, v4(), 'test6', space.id);
+      const collection = await createCollection(
+        db,
+        generateID(),
+        'test6',
+        space.id,
+      );
 
       const res = await api.inject({
         url: `/v0/collections/${collection.id}/delete`,
@@ -262,7 +272,12 @@ describe('Collections', () => {
 
   describe('get', () => {
     test('happy path', async () => {
-      const collection = await createCollection(db, v4(), 'test6', space.id);
+      const collection = await createCollection(
+        db,
+        generateID(),
+        'test6',
+        space.id,
+      );
 
       const res = await api.inject({
         url: `/v0/collections/${collection.id}`,
@@ -282,9 +297,9 @@ describe('Views', () => {
   let collection: Collection;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, v4(), 'views', '1');
-    space = await createSpace(db, v4(), 'views', workspace.id);
-    collection = await createCollection(db, v4(), 'views', space.id);
+    workspace = await createWorkspace(db, generateID(), 'views', '1');
+    space = await createSpace(db, generateID(), 'views', workspace.id);
+    collection = await createCollection(db, generateID(), 'views', space.id);
   });
 
   describe('create', () => {
@@ -296,7 +311,7 @@ describe('Views', () => {
       };
 
       const res = await api.inject({
-        url: `/v0/views/${v4()}/create`,
+        url: `/v0/views/${generateID()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -310,7 +325,13 @@ describe('Views', () => {
 
   describe('updateName', () => {
     test('happy path', async () => {
-      const view = await createView(db, v4(), 'test2', 'list', collection.id);
+      const view = await createView(
+        db,
+        generateID(),
+        'test2',
+        'list',
+        collection.id,
+      );
       const input: UpdateViewNameInput = {
         name: 'test3',
       };
@@ -330,7 +351,13 @@ describe('Views', () => {
 
   describe('delete', () => {
     test('happy path', async () => {
-      const view = await createView(db, v4(), 'test6', 'list', collection.id);
+      const view = await createView(
+        db,
+        generateID(),
+        'test6',
+        'list',
+        collection.id,
+      );
 
       const res = await api.inject({
         url: `/v0/views/${view.id}/delete`,
@@ -346,7 +373,13 @@ describe('Views', () => {
 
   describe('get', () => {
     test('happy path', async () => {
-      const view = await createView(db, v4(), 'test6', 'list', collection.id);
+      const view = await createView(
+        db,
+        generateID(),
+        'test6',
+        'list',
+        collection.id,
+      );
 
       const res = await api.inject({
         url: `/v0/views/${view.id}`,
@@ -366,9 +399,9 @@ describe('Fields', () => {
   let collection: Collection;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, v4(), 'fields', '1');
-    space = await createSpace(db, v4(), 'fields', workspace.id);
-    collection = await createCollection(db, v4(), 'fields', space.id);
+    workspace = await createWorkspace(db, generateID(), 'fields', '1');
+    space = await createSpace(db, generateID(), 'fields', workspace.id);
+    collection = await createCollection(db, generateID(), 'fields', space.id);
   });
 
   describe('create', () => {
@@ -380,7 +413,7 @@ describe('Fields', () => {
       };
 
       const res = await api.inject({
-        url: `/v0/fields/${v4()}/create`,
+        url: `/v0/fields/${generateID()}/create`,
         method: 'POST',
         payload: input,
       });
@@ -396,7 +429,7 @@ describe('Fields', () => {
     test('happy path', async () => {
       const view = await createField(
         db,
-        v4(),
+        generateID(),
         'test2',
         'singleLineText',
         collection.id,
@@ -422,7 +455,7 @@ describe('Fields', () => {
     test('happy path', async () => {
       const view = await createField(
         db,
-        v4(),
+        generateID(),
         'test6',
         'singleLineText',
         collection.id,
@@ -444,7 +477,7 @@ describe('Fields', () => {
     test('happy path', async () => {
       const view = await createField(
         db,
-        v4(),
+        generateID(),
         'test6',
         'singleLineText',
         collection.id,
