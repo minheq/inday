@@ -2,7 +2,17 @@ import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
 
-interface BaseView {
+interface ListView {
+  type: 'list';
+}
+
+interface BoardView {
+  type: 'board';
+}
+
+export type BaseView = ListView | BoardView;
+
+interface ViewMetadata {
   id: string;
   name: string;
   createdAt: Date;
@@ -10,15 +20,7 @@ interface BaseView {
   collectionID: string;
 }
 
-interface ListView extends BaseView {
-  type: 'list';
-}
-
-interface BoardView extends BaseView {
-  type: 'board';
-}
-
-export type View = ListView | BoardView;
+export type View = BaseView & ViewMetadata;
 export type ViewType = View['type'];
 
 export type ViewsState = { [id: string]: View | undefined };

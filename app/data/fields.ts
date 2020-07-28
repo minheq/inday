@@ -2,76 +2,76 @@ import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
 
-interface BaseField {
+interface SingleLineTextField {
+  type: 'singleLineText';
+}
+
+interface MultiLineTextField {
+  type: 'multiLineText';
+}
+
+interface SingleSelectField {
+  type: 'singleSelect';
+}
+
+interface MultiSelectField {
+  type: 'multiSelect';
+}
+
+interface SingleCollaboratorField {
+  type: 'singleCollaborator';
+}
+
+interface MultiCollaboratorField {
+  type: 'multiCollaborator';
+}
+
+interface SingleDocumentLinkField {
+  type: 'singleDocumentLink';
+}
+
+interface MultiDocumentLinkField {
+  type: 'multiDocumentLink';
+}
+
+interface DateField {
+  type: 'date';
+}
+
+interface PhoneNumberField {
+  type: 'phoneNumber';
+}
+
+interface EmailField {
+  type: 'email';
+}
+
+interface URLField {
+  type: 'url';
+}
+
+interface NumberField {
+  type: 'number';
+}
+
+interface CurrencyField {
+  type: 'currency';
+}
+
+interface CheckboxField {
+  type: 'checkbox';
+}
+
+interface FieldMetadata {
   id: string;
   name: string;
-  description: string | null;
+  description: string;
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
 }
 
-interface SingleLineTextField extends BaseField {
-  type: 'singleLineText';
-}
-
-interface MultiLineTextField extends BaseField {
-  type: 'multiLineText';
-}
-
-interface SingleSelectField extends BaseField {
-  type: 'singleSelect';
-}
-
-interface MultiSelectField extends BaseField {
-  type: 'multiSelect';
-}
-
-interface SingleCollaboratorField extends BaseField {
-  type: 'singleCollaborator';
-}
-
-interface MultiCollaboratorField extends BaseField {
-  type: 'multiCollaborator';
-}
-
-interface SingleDocumentLinkField extends BaseField {
-  type: 'singleDocumentLink';
-}
-
-interface MultiDocumentLinkField extends BaseField {
-  type: 'multiDocumentLink';
-}
-
-interface DateField extends BaseField {
-  type: 'date';
-}
-
-interface PhoneNumberField extends BaseField {
-  type: 'phoneNumber';
-}
-
-interface EmailField extends BaseField {
-  type: 'email';
-}
-
-interface URLField extends BaseField {
-  type: 'url';
-}
-
-interface NumberField extends BaseField {
-  type: 'number';
-}
-
-interface CurrencyField extends BaseField {
-  type: 'currency';
-}
-
-interface CheckboxField extends BaseField {
-  type: 'checkbox';
-}
-
-export type Field =
+export type BaseField =
   | SingleLineTextField
   | MultiLineTextField
   | SingleSelectField
@@ -87,7 +87,9 @@ export type Field =
   | NumberField
   | CurrencyField
   | CheckboxField;
-export type FieldType = Field['type'];
+
+export type FieldType = BaseField['type'];
+export type Field = BaseField & FieldMetadata;
 
 export type FieldsState = { [id: string]: Field | undefined };
 export const fieldsState = atom<FieldsState>({

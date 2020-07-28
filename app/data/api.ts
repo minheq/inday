@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import { v4 } from 'uuid';
 import {
   useEventEmitter,
   eventsState,
@@ -15,6 +14,7 @@ import { spacesState, Space, spaceQuery } from './spaces';
 import { viewsState, View, viewQuery } from './views';
 import { Field, fieldsState, fieldQuery, BaseField } from './fields';
 import { documentsState, documentQuery, Document } from './documents';
+import { generateID } from '../../lib/id/id';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
@@ -93,7 +93,7 @@ export function useCreateSpace() {
 
   const createSpace = React.useCallback(() => {
     const newSpace: Space = {
-      id: v4(),
+      id: generateID(),
       name: '',
       workspaceID: workspace.id,
     };
@@ -218,7 +218,7 @@ export function useCreateCollection() {
   const createCollection = React.useCallback(
     (spaceID: string) => {
       let newCollection: Collection = {
-        id: v4(),
+        id: generateID(),
         name: '',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -342,7 +342,7 @@ export function useCreateView() {
   const createView = React.useCallback(
     (collectionID: string) => {
       let newView: View = {
-        id: v4(),
+        id: generateID(),
         name: '',
         type: 'list',
         createdAt: new Date(),
@@ -463,11 +463,16 @@ export function useCreateField() {
   const setFields = useSetRecoilState(fieldsState);
 
   const createField = React.useCallback(
-    (collectionID: string, name: string, field: BaseField) => {
+    (
+      collectionID: string,
+      name: string,
+      description: string,
+      field: BaseField,
+    ) => {
       let newField: Field = {
-        id: v4(),
+        id: generateID(),
         name,
-        description: '',
+        description,
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
@@ -589,8 +594,7 @@ export function useCreateDocument() {
   const createDocument = React.useCallback(
     (collectionID: string) => {
       let newDocument: Document = {
-        id: v4(),
-        name: '',
+        id: generateID(),
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
@@ -641,7 +645,6 @@ export function useDeleteDocument() {
 
 export interface UpdateDocumentNameInput {
   documentID: string;
-  name: string;
 }
 
 export function useUpdateDocumentName() {
@@ -651,12 +654,11 @@ export function useUpdateDocumentName() {
 
   const updateDocumentName = React.useCallback(
     (input: UpdateDocumentNameInput) => {
-      const { documentID, name } = input;
+      const { documentID } = input;
       const prevDocument = getDocument(documentID);
 
       const nextDocument: Document = {
         ...prevDocument,
-        name,
       };
 
       setDocuments((previousDocuments) => ({
