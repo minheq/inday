@@ -1,6 +1,11 @@
 export class NotFoundError extends Error {
-  constructor(entity: string) {
-    super(`${entity} not found`);
+  entity: string;
+  id: string;
+
+  constructor(entity: string, id: string) {
+    super(`${entity} not found with id=${id}`);
+    this.entity = entity;
+    this.id = id;
   }
 }
 
