@@ -53,33 +53,11 @@ export async function cleanDB() {
   });
 }
 
-//#region Helpers
-function buildPartialUpdateQuery<T extends { [field: string]: any }>(
-  fields: T,
-): [string, any[]] {
-  let setText = '';
-  let values: any[] = [];
-  // $1 is always assumed to be for ID, so we start from $2
-  let index = 2;
-
-  Object.entries(fields).forEach(([key, value]) => {
-    if (value === undefined) {
-      return;
-    }
-
-    setText += `${key}=$${index} `;
-    values.push(value);
-    index++;
-  });
-
-  return [setText.trim(), values];
-}
-
 //#endregion Helpers
 
 //#region Workspace
 interface WorkspaceRow {
-  id: string;
+  workspace_id: string;
   name: string;
   owner_id: string;
   created_at: Date;
@@ -88,20 +66,23 @@ interface WorkspaceRow {
 
 function toWorkspace(data: WorkspaceRow): Workspace {
   return {
-    id: data.id,
+    id: data.workspace_id,
     name: data.name,
     ownerID: data.owner_id,
   };
 }
 
-export async function getWorkspaceByID(db: DB, id: string): Promise<Workspace> {
+export async function getWorkspaceByID(
+  db: DB,
+  workspaceID: string,
+): Promise<Workspace> {
   const result = await db.query<WorkspaceRow>(
-    'SELECT * FROM workspaces WHERE id=$1',
-    [id],
+    'SELECT * FROM workspaces WHERE workspace_id=$1',
+    [workspaceID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('workspace', id);
+    throw new NotFoundError('workspace', workspaceID);
   }
 
   const row = first(result.rows);
@@ -111,13 +92,13 @@ export async function getWorkspaceByID(db: DB, id: string): Promise<Workspace> {
 
 export async function createWorkspace(
   db: DB,
-  id: string,
+  workspaceID: string,
   name: string,
   userID: string,
 ): Promise<Workspace> {
   const result = await db.query<WorkspaceRow>(
-    'INSERT INTO workspaces (id, name, owner_id) VALUES($1, $2, $3) RETURNING *',
-    [id, name, userID],
+    'INSERT INTO workspaces (workspace_id, name, owner_id) VALUES($1, $2, $3) RETURNING *',
+    [workspaceID, name, userID],
   );
 
   const row = first(result.rows);
@@ -127,16 +108,16 @@ export async function createWorkspace(
 
 export async function updateWorkspaceName(
   db: DB,
-  id: string,
+  workspaceID: string,
   name: string,
 ): Promise<Workspace> {
   const result = await db.query<WorkspaceRow>(
-    'UPDATE workspaces SET name=$2 WHERE id=$1 RETURNING *',
-    [id, name],
+    'UPDATE workspaces SET name=$2 WHERE workspace_id=$1 RETURNING *',
+    [workspaceID, name],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('workspace', id);
+    throw new NotFoundError('workspace', workspaceID);
   }
 
   const row = first(result.rows);
@@ -144,21 +125,24 @@ export async function updateWorkspaceName(
   return toWorkspace(row);
 }
 
-export async function deleteWorkspace(db: DB, id: string): Promise<void> {
+export async function deleteWorkspace(
+  db: DB,
+  workspaceID: string,
+): Promise<void> {
   const result = await db.query<WorkspaceRow>(
-    'DELETE FROM workspaces where id=$1',
-    [id],
+    'DELETE FROM workspaces where workspace_id=$1',
+    [workspaceID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('workspace', id);
+    throw new NotFoundError('workspace', workspaceID);
   }
 }
 //#endregion Workspace
 
 //#region Space
 interface SpaceRow {
-  id: string;
+  space_id: string;
   name: string;
   workspace_id: string;
   created_at: Date;
@@ -167,19 +151,20 @@ interface SpaceRow {
 
 function toSpace(data: SpaceRow): Space {
   return {
-    id: data.id,
+    id: data.space_id,
     name: data.name,
     workspaceID: data.workspace_id,
   };
 }
 
-export async function getSpaceByID(db: DB, id: string): Promise<Space> {
-  const result = await db.query<SpaceRow>('SELECT * FROM spaces WHERE id=$1', [
-    id,
-  ]);
+export async function getSpaceByID(db: DB, spaceID: string): Promise<Space> {
+  const result = await db.query<SpaceRow>(
+    'SELECT * FROM spaces WHERE space_id=$1',
+    [spaceID],
+  );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('space', id);
+    throw new NotFoundError('space', spaceID);
   }
 
   const row = first(result.rows);
@@ -189,13 +174,13 @@ export async function getSpaceByID(db: DB, id: string): Promise<Space> {
 
 export async function createSpace(
   db: DB,
-  id: string,
+  spaceID: string,
   name: string,
   workspaceID: string,
 ): Promise<Space> {
   const result = await db.query<SpaceRow>(
-    'INSERT INTO spaces (id, name, workspace_id) VALUES($1, $2, $3) RETURNING *',
-    [id, name, workspaceID],
+    'INSERT INTO spaces (space_id, name, workspace_id) VALUES($1, $2, $3) RETURNING *',
+    [spaceID, name, workspaceID],
   );
 
   const row = first(result.rows);
@@ -205,16 +190,16 @@ export async function createSpace(
 
 export async function updateSpaceName(
   db: DB,
-  id: string,
+  spaceID: string,
   name: string,
 ): Promise<Space> {
   const result = await db.query<SpaceRow>(
-    'UPDATE spaces SET name=$2 WHERE id=$1 RETURNING *',
-    [id, name],
+    'UPDATE spaces SET name=$2 WHERE space_id=$1 RETURNING *',
+    [spaceID, name],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('space', id);
+    throw new NotFoundError('space', spaceID);
   }
 
   const row = first(result.rows);
@@ -222,20 +207,21 @@ export async function updateSpaceName(
   return toSpace(row);
 }
 
-export async function deleteSpace(db: DB, id: string): Promise<void> {
-  const result = await db.query<SpaceRow>('DELETE FROM spaces where id=$1', [
-    id,
-  ]);
+export async function deleteSpace(db: DB, spaceID: string): Promise<void> {
+  const result = await db.query<SpaceRow>(
+    'DELETE FROM spaces where space_id=$1',
+    [spaceID],
+  );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('space', id);
+    throw new NotFoundError('space', spaceID);
   }
 }
 //#endregion Space
 
 //#region Collection
 interface CollectionRow {
-  id: string;
+  collection_id: string;
   name: string;
   space_id: string;
   created_at: Date;
@@ -244,7 +230,7 @@ interface CollectionRow {
 
 function toCollection(data: CollectionRow): Collection {
   return {
-    id: data.id,
+    id: data.collection_id,
     name: data.name,
     spaceID: data.space_id,
     createdAt: data.created_at,
@@ -254,15 +240,15 @@ function toCollection(data: CollectionRow): Collection {
 
 export async function getCollectionByID(
   db: DB,
-  id: string,
+  collectionID: string,
 ): Promise<Collection> {
   const result = await db.query<CollectionRow>(
-    'SELECT * FROM collections WHERE id=$1',
-    [id],
+    'SELECT * FROM collections WHERE collection_id=$1',
+    [collectionID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('collection', id);
+    throw new NotFoundError('collection', collectionID);
   }
 
   const row = first(result.rows);
@@ -272,13 +258,13 @@ export async function getCollectionByID(
 
 export async function createCollection(
   db: DB,
-  id: string,
+  collectionID: string,
   name: string,
   spaceID: string,
 ): Promise<Collection> {
   const result = await db.query<CollectionRow>(
-    'INSERT INTO collections (id, name, space_id) VALUES($1, $2, $3) RETURNING *',
-    [id, name, spaceID],
+    'INSERT INTO collections (collection_id, name, space_id) VALUES($1, $2, $3) RETURNING *',
+    [collectionID, name, spaceID],
   );
 
   const row = first(result.rows);
@@ -288,16 +274,16 @@ export async function createCollection(
 
 export async function updateCollectionName(
   db: DB,
-  id: string,
+  collectionID: string,
   name: string,
 ): Promise<Collection> {
   const result = await db.query<CollectionRow>(
-    'UPDATE collections SET name=$2 WHERE id=$1 RETURNING *',
-    [id, name],
+    'UPDATE collections SET name=$2 WHERE collection_id=$1 RETURNING *',
+    [collectionID, name],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('collection', id);
+    throw new NotFoundError('collection', collectionID);
   }
 
   const row = first(result.rows);
@@ -305,21 +291,24 @@ export async function updateCollectionName(
   return toCollection(row);
 }
 
-export async function deleteCollection(db: DB, id: string): Promise<void> {
+export async function deleteCollection(
+  db: DB,
+  collectionID: string,
+): Promise<void> {
   const result = await db.query<CollectionRow>(
-    'DELETE FROM collections where id=$1',
-    [id],
+    'DELETE FROM collections where collection_id=$1',
+    [collectionID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('collection', id);
+    throw new NotFoundError('collection', collectionID);
   }
 }
 //#endregion Collection
 
 //#region Document
 interface DocumentRow {
-  id: string;
+  document_id: string;
   name: string;
   collection_id: string;
   created_at: Date;
@@ -328,21 +317,24 @@ interface DocumentRow {
 
 function toDocument(data: DocumentRow): Document {
   return {
-    id: data.id,
+    id: data.document_id,
     collectionID: data.collection_id,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
 }
 
-export async function getDocumentByID(db: DB, id: string): Promise<Document> {
+export async function getDocumentByID(
+  db: DB,
+  documentID: string,
+): Promise<Document> {
   const result = await db.query<DocumentRow>(
-    'SELECT * FROM documents WHERE id=$1',
-    [id],
+    'SELECT * FROM documents WHERE document_id=$1',
+    [documentID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('collection', id);
+    throw new NotFoundError('collection', documentID);
   }
 
   const row = first(result.rows);
@@ -352,12 +344,28 @@ export async function getDocumentByID(db: DB, id: string): Promise<Document> {
 
 export async function createDocument(
   db: DB,
-  id: string,
+  documentID: string,
   collectionID: string,
 ): Promise<Document> {
   const result = await db.query<DocumentRow>(
-    'INSERT INTO documents (id, collection_id) VALUES($1, $3) RETURNING *',
-    [id, collectionID],
+    'INSERT INTO documents (document_id, collection_id) VALUES($1, $2) RETURNING *',
+    [documentID, collectionID],
+  );
+
+  const row = first(result.rows);
+
+  return toDocument(row);
+}
+
+export async function updateDocumentFieldValue(
+  db: DB,
+  documentID: string,
+  fieldID: string,
+  value: string,
+): Promise<Document> {
+  const result = await db.query<DocumentRow>(
+    'INSERT INTO document_field_values (value, document_id, field_id) VALUES($1, $2, $3) RETURNING *',
+    [value, documentID, fieldID],
   );
 
   const row = first(result.rows);
@@ -367,15 +375,15 @@ export async function createDocument(
 
 export async function fullUpdateDocument(
   db: DB,
-  id: string,
+  documentID: string,
 ): Promise<Document> {
   const result = await db.query<DocumentRow>(
-    'UPDATE documents SET WHERE id=$1 RETURNING *',
-    [id],
+    'UPDATE documents SET WHERE document_id=$1 RETURNING *',
+    [documentID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('document', id);
+    throw new NotFoundError('document', documentID);
   }
 
   const row = first(result.rows);
@@ -385,15 +393,15 @@ export async function fullUpdateDocument(
 
 export async function partialUpdateDocument(
   db: DB,
-  id: string,
+  documentID: string,
 ): Promise<Document> {
   const result = await db.query<DocumentRow>(
-    'SELECT * FROM documents WHERE id=$1',
-    [id],
+    'SELECT * FROM documents WHERE document_id=$1',
+    [documentID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('document', id);
+    throw new NotFoundError('document', documentID);
   }
 
   const row = first(result.rows);
@@ -401,21 +409,24 @@ export async function partialUpdateDocument(
   return toDocument(row);
 }
 
-export async function deleteDocument(db: DB, id: string): Promise<void> {
+export async function deleteDocument(
+  db: DB,
+  documentID: string,
+): Promise<void> {
   const result = await db.query<DocumentRow>(
-    'DELETE FROM documents where id=$1',
-    [id],
+    'DELETE FROM documents where document_id=$1',
+    [documentID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('document', id);
+    throw new NotFoundError('document', documentID);
   }
 }
 //#endregion Document
 
 //#region View
 interface ViewRow {
-  id: string;
+  view_id: string;
   name: string;
   type: ViewType;
   collection_id: string;
@@ -425,7 +436,7 @@ interface ViewRow {
 
 function toView(data: ViewRow): View {
   return {
-    id: data.id,
+    id: data.view_id,
     name: data.name,
     type: data.type,
     collectionID: data.collection_id,
@@ -434,13 +445,14 @@ function toView(data: ViewRow): View {
   };
 }
 
-export async function getViewByID(db: DB, id: string): Promise<View> {
-  const result = await db.query<ViewRow>('SELECT * FROM views WHERE id=$1', [
-    id,
-  ]);
+export async function getViewByID(db: DB, viewID: string): Promise<View> {
+  const result = await db.query<ViewRow>(
+    'SELECT * FROM views WHERE view_id=$1',
+    [viewID],
+  );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('view', id);
+    throw new NotFoundError('view', viewID);
   }
 
   const row = first(result.rows);
@@ -450,14 +462,14 @@ export async function getViewByID(db: DB, id: string): Promise<View> {
 
 export async function createView(
   db: DB,
-  id: string,
+  viewID: string,
   name: string,
   type: ViewType,
   collectionID: string,
 ): Promise<View> {
   const result = await db.query<ViewRow>(
-    'INSERT INTO views (id, name, type, collection_id) VALUES($1, $2, $3, $4) RETURNING *',
-    [id, name, type, collectionID],
+    'INSERT INTO views (view_id, name, type, collection_id) VALUES($1, $2, $3, $4) RETURNING *',
+    [viewID, name, type, collectionID],
   );
 
   const row = first(result.rows);
@@ -467,16 +479,16 @@ export async function createView(
 
 export async function updateViewName(
   db: DB,
-  id: string,
+  viewID: string,
   name: string,
 ): Promise<View> {
   const result = await db.query<ViewRow>(
-    'UPDATE views SET name=$2 WHERE id=$1 RETURNING *',
-    [id, name],
+    'UPDATE views SET name=$2 WHERE view_id=$1 RETURNING *',
+    [viewID, name],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('view', id);
+    throw new NotFoundError('view', viewID);
   }
 
   const row = first(result.rows);
@@ -484,18 +496,20 @@ export async function updateViewName(
   return toView(row);
 }
 
-export async function deleteView(db: DB, id: string): Promise<void> {
-  const result = await db.query<ViewRow>('DELETE FROM views where id=$1', [id]);
+export async function deleteView(db: DB, viewID: string): Promise<void> {
+  const result = await db.query<ViewRow>('DELETE FROM views where view_id=$1', [
+    viewID,
+  ]);
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('view', id);
+    throw new NotFoundError('view', viewID);
   }
 }
 //#endregion View
 
 //#region Field
 interface FieldRow {
-  id: string;
+  field_id: string;
   name: string;
   description: string;
   type: FieldType;
@@ -506,7 +520,7 @@ interface FieldRow {
 
 function toField(data: FieldRow): Field {
   return {
-    id: data.id,
+    id: data.field_id,
     name: data.name,
     type: data.type,
     description: data.description,
@@ -516,13 +530,14 @@ function toField(data: FieldRow): Field {
   };
 }
 
-export async function getFieldByID(db: DB, id: string): Promise<Field> {
-  const result = await db.query<FieldRow>('SELECT * FROM fields WHERE id=$1', [
-    id,
-  ]);
+export async function getFieldByID(db: DB, fieldID: string): Promise<Field> {
+  const result = await db.query<FieldRow>(
+    'SELECT * FROM fields WHERE field_id=$1',
+    [fieldID],
+  );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('field', id);
+    throw new NotFoundError('field', fieldID);
   }
 
   const row = first(result.rows);
@@ -532,15 +547,34 @@ export async function getFieldByID(db: DB, id: string): Promise<Field> {
 
 export async function createField(
   db: DB,
-  id: string,
+  fieldID: string,
   name: string,
   type: FieldType,
   collectionID: string,
 ): Promise<Field> {
   const result = await db.query<FieldRow>(
-    'INSERT INTO fields (id, name, type, collection_id) VALUES($1, $2, $3, $4) RETURNING *',
-    [id, name, type, collectionID],
+    'INSERT INTO fields (field_id, name, type, collection_id) VALUES($1, $2, $3, $4) RETURNING *',
+    [fieldID, name, type, collectionID],
   );
+
+  const row = first(result.rows);
+
+  return toField(row);
+}
+
+export async function duplicateField(
+  db: DB,
+  fieldID: string,
+  fromFieldID: string,
+): Promise<Field> {
+  const result = await db.query<FieldRow>(
+    'INSERT INTO fields (field_id, name, type, description, collection_id) SELECT $1, name, type, description, collection_id FROM fields WHERE field_id=$2 RETURNING *',
+    [fieldID, fromFieldID],
+  );
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError('field', fromFieldID);
+  }
 
   const row = first(result.rows);
 
@@ -549,16 +583,16 @@ export async function createField(
 
 export async function updateFieldName(
   db: DB,
-  id: string,
+  fieldID: string,
   name: string,
 ): Promise<Field> {
   const result = await db.query<FieldRow>(
-    'UPDATE fields SET name=$2 WHERE id=$1 RETURNING *',
-    [id, name],
+    'UPDATE fields SET name=$2 WHERE field_id=$1 RETURNING *',
+    [fieldID, name],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('field', id);
+    throw new NotFoundError('field', fieldID);
   }
 
   const row = first(result.rows);
@@ -566,46 +600,50 @@ export async function updateFieldName(
   return toField(row);
 }
 
-export async function deleteField(db: DB, id: string): Promise<void> {
-  const result = await db.query<FieldRow>('DELETE FROM fields where id=$1', [
-    id,
-  ]);
+export async function deleteField(db: DB, fieldID: string): Promise<void> {
+  const result = await db.query<FieldRow>(
+    'DELETE FROM fields where field_id=$1',
+    [fieldID],
+  );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('field', id);
+    throw new NotFoundError('field', fieldID);
   }
 }
 //#endregion Field
 
 //#region Template
 interface TemplateRow {
-  id: string;
+  template_id: string;
   name: string;
   description: string;
-  collection_id: string;
+  space_id: string;
   created_at: Date;
   updated_at: Date;
 }
 
 function toTemplate(data: TemplateRow): Template {
   return {
-    id: data.id,
+    id: data.template_id,
     name: data.name,
     description: data.description,
-
+    spaceID: data.space_id,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
 }
 
-export async function getTemplateByID(db: DB, id: string): Promise<Template> {
+export async function getTemplateByID(
+  db: DB,
+  templateID: string,
+): Promise<Template> {
   const result = await db.query<TemplateRow>(
-    'SELECT * FROM templates WHERE id=$1',
-    [id],
+    'SELECT * FROM templates WHERE template_id=$1',
+    [templateID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('template', id);
+    throw new NotFoundError('template', templateID);
   }
 
   const row = first(result.rows);
@@ -615,13 +653,13 @@ export async function getTemplateByID(db: DB, id: string): Promise<Template> {
 
 export async function createTemplate(
   db: DB,
-  id: string,
+  templateID: string,
   name: string,
   collectionID: string,
 ): Promise<Template> {
   const result = await db.query<TemplateRow>(
-    'INSERT INTO templates (id, name, collection_id) VALUES($1, $2, $3) RETURNING *',
-    [id, name, collectionID],
+    'INSERT INTO templates (template_id, name, collection_id) VALUES($1, $2, $3) RETURNING *',
+    [templateID, name, collectionID],
   );
 
   const row = first(result.rows);
@@ -631,16 +669,16 @@ export async function createTemplate(
 
 export async function updateTemplateName(
   db: DB,
-  id: string,
+  templateID: string,
   name: string,
 ): Promise<Template> {
   const result = await db.query<TemplateRow>(
-    'UPDATE templates SET name=$2 WHERE id=$1 RETURNING *',
-    [id, name],
+    'UPDATE templates SET name=$2 WHERE template_id=$1 RETURNING *',
+    [templateID, name],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('template', id);
+    throw new NotFoundError('template', templateID);
   }
 
   const row = first(result.rows);
@@ -648,14 +686,17 @@ export async function updateTemplateName(
   return toTemplate(row);
 }
 
-export async function deleteTemplate(db: DB, id: string): Promise<void> {
+export async function deleteTemplate(
+  db: DB,
+  templateID: string,
+): Promise<void> {
   const result = await db.query<TemplateRow>(
-    'DELETE FROM templates where id=$1',
-    [id],
+    'DELETE FROM templates where template_id=$1',
+    [templateID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('template', id);
+    throw new NotFoundError('template', templateID);
   }
 }
 //#endregion Template

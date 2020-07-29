@@ -1,5 +1,5 @@
 CREATE TABLE fields (
-  id TEXT PRIMARY KEY,
+  field_id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   type TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',

@@ -24,6 +24,7 @@ import {
   UpdateViewNameInput,
   CreateFieldInput,
   UpdateFieldNameInput,
+  DuplicateFieldInput,
 } from './handlers';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
@@ -33,6 +34,7 @@ import { generateID } from '../lib/id/id';
 
 let api: FastifyInstance;
 let db: DB;
+const userID = '1';
 
 beforeAll(async () => {
   await cleanDB();
@@ -66,7 +68,12 @@ describe('Workspaces', () => {
 
   describe('updateName', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, generateID(), 'test2', '1');
+      const workspace = await createWorkspace(
+        db,
+        generateID(),
+        'test2',
+        userID,
+      );
       const input: UpdateWorkspaceNameInput = {
         name: 'test3',
       };
@@ -86,7 +93,12 @@ describe('Workspaces', () => {
 
   describe('delete', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, generateID(), 'test6', '1');
+      const workspace = await createWorkspace(
+        db,
+        generateID(),
+        'test6',
+        userID,
+      );
 
       const res = await api.inject({
         url: `/v0/workspaces/${workspace.id}/delete`,
@@ -102,7 +114,12 @@ describe('Workspaces', () => {
 
   describe('get', () => {
     test('happy path', async () => {
-      const workspace = await createWorkspace(db, generateID(), 'test6', '1');
+      const workspace = await createWorkspace(
+        db,
+        generateID(),
+        'test6',
+        userID,
+      );
 
       const res = await api.inject({
         url: `/v0/workspaces/${workspace.id}`,
@@ -120,7 +137,7 @@ describe('Spaces', () => {
   let workspace: Workspace;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, generateID(), 'spaces', '1');
+    workspace = await createWorkspace(db, generateID(), 'spaces', userID);
   });
 
   describe('create', () => {
@@ -200,7 +217,7 @@ describe('Collections', () => {
   let space: Space;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, generateID(), 'collections', '1');
+    workspace = await createWorkspace(db, generateID(), 'collections', userID);
     space = await createSpace(db, generateID(), 'collections', workspace.id);
   });
 
@@ -297,7 +314,7 @@ describe('Views', () => {
   let collection: Collection;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, generateID(), 'views', '1');
+    workspace = await createWorkspace(db, generateID(), 'views', userID);
     space = await createSpace(db, generateID(), 'views', workspace.id);
     collection = await createCollection(db, generateID(), 'views', space.id);
   });
@@ -399,7 +416,7 @@ describe('Fields', () => {
   let collection: Collection;
 
   beforeAll(async () => {
-    workspace = await createWorkspace(db, generateID(), 'fields', '1');
+    workspace = await createWorkspace(db, generateID(), 'fields', userID);
     space = await createSpace(db, generateID(), 'fields', workspace.id);
     collection = await createCollection(db, generateID(), 'fields', space.id);
   });
@@ -425,9 +442,36 @@ describe('Fields', () => {
     });
   });
 
+  describe('duplicate', () => {
+    test('happy path', async () => {
+      const field = await createField(
+        db,
+        generateID(),
+        'test2',
+        'singleLineText',
+        collection.id,
+      );
+
+      const input: DuplicateFieldInput = {
+        fromID: field.id,
+      };
+
+      const res = await api.inject({
+        url: `/v0/fields/${generateID()}/duplicate`,
+        method: 'POST',
+        payload: input,
+      });
+      const result = res.json() as Field;
+
+      expect(res.statusCode).toEqual(200);
+      expect(result.name).toBe(field.name);
+      expect(result.id).toBeTruthy();
+    });
+  });
+
   describe('updateName', () => {
     test('happy path', async () => {
-      const view = await createField(
+      const field = await createField(
         db,
         generateID(),
         'test2',
@@ -439,7 +483,7 @@ describe('Fields', () => {
       };
 
       const res = await api.inject({
-        url: `/v0/fields/${view.id}/updateName`,
+        url: `/v0/fields/${field.id}/updateName`,
         method: 'POST',
         payload: input,
       });
@@ -453,7 +497,7 @@ describe('Fields', () => {
 
   describe('delete', () => {
     test('happy path', async () => {
-      const view = await createField(
+      const field = await createField(
         db,
         generateID(),
         'test6',
@@ -462,20 +506,20 @@ describe('Fields', () => {
       );
 
       const res = await api.inject({
-        url: `/v0/fields/${view.id}/delete`,
+        url: `/v0/fields/${field.id}/delete`,
         method: 'POST',
       });
       const result = res.json();
 
       expect(res.statusCode).toEqual(200);
-      expect(result.id).toBe(view.id);
+      expect(result.id).toBe(field.id);
       expect(result.deleted).toBeTruthy();
     });
   });
 
   describe('get', () => {
     test('happy path', async () => {
-      const view = await createField(
+      const field = await createField(
         db,
         generateID(),
         'test6',
@@ -484,13 +528,13 @@ describe('Fields', () => {
       );
 
       const res = await api.inject({
-        url: `/v0/fields/${view.id}`,
+        url: `/v0/fields/${field.id}`,
         method: 'GET',
       });
       const result = res.json() as Field;
 
       expect(res.statusCode).toEqual(200);
-      expect(result.name).toBe(view.name);
+      expect(result.name).toBe(field.name);
     });
   });
 });

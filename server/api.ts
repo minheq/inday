@@ -23,6 +23,7 @@ import {
   handleUpdateFieldName,
   handleGetField,
   handleDeleteField,
+  handleDuplicateField,
 } from './handlers';
 import {
   ValidationError,
@@ -100,6 +101,10 @@ export function createAPI() {
   api.post(
     '/v0/fields/:id/create',
     addContext(ensureAuthenticated(handleCreateField)),
+  );
+  api.post(
+    '/v0/fields/:id/duplicate',
+    addContext(ensureAuthenticated(handleDuplicateField)),
   );
   api.post(
     '/v0/fields/:id/updateName',

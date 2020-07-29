@@ -29,6 +29,7 @@ import {
   updateFieldName,
   getFieldByID,
   deleteField,
+  duplicateField,
 } from './db';
 import {
   AuthenticationError,
@@ -38,7 +39,7 @@ import {
 } from './errors';
 import { ViewType } from '../app/data/views';
 import { FieldType } from '../app/data/fields';
-import { shortIDSchema } from '../lib/id/id';
+import { idSchema } from '../lib/id/id';
 
 //#region Helpers
 type Request = FastifyRequest;
@@ -146,7 +147,7 @@ const idParamsSchema = yup
 
 const newIDParamsSchema = yup
   .object<IDParams>({
-    id: shortIDSchema,
+    id: idSchema,
   })
   .required();
 
@@ -379,9 +380,9 @@ export const handleCreateDocument: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { collectionID } = req.body;
 
-  const collection = await createDocument(ctx.db, id, collectionID);
+  const document = await createDocument(ctx.db, id, collectionID);
 
-  res.send(collection);
+  res.send(document);
 };
 
 export interface FullUpdateDocumentInput {}
@@ -396,9 +397,9 @@ export const handleFullUpdateDocument: AH = async (ctx, req, res) => {
 
   const { id } = req.params;
 
-  const collection = await fullUpdateDocument(ctx.db, id);
+  const document = await fullUpdateDocument(ctx.db, id);
 
-  res.send(collection);
+  res.send(document);
 };
 
 export interface PartialUpdateDocumentInput {}
@@ -413,18 +414,18 @@ export const handlePartialUpdateDocument: AH = async (ctx, req, res) => {
 
   const { id } = req.params;
 
-  const collection = await partialUpdateDocument(ctx.db, id);
+  const document = await partialUpdateDocument(ctx.db, id);
 
-  res.send(collection);
+  res.send(document);
 };
 
 export const handleGetDocument: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
-  const collection = await getDocumentByID(ctx.db, id);
+  const document = await getDocumentByID(ctx.db, id);
 
-  res.send(collection);
+  res.send(document);
 };
 
 export const handleDeleteDocument: AH = async (ctx, req, res) => {
@@ -510,12 +511,6 @@ export const handleDeleteView: AH = async (ctx, req, res) => {
 //#endregion View
 
 //#region Field
-export interface CreateFieldInput {
-  name: string;
-  type: FieldType;
-  collectionID: string;
-}
-
 const fieldTypes: FieldType[] = [
   'singleLineText',
   'multiLineText',
@@ -534,6 +529,12 @@ const fieldTypes: FieldType[] = [
   'checkbox',
 ];
 
+export interface CreateFieldInput {
+  name: string;
+  type: FieldType;
+  collectionID: string;
+}
+
 const createFieldInputSchema = yup
   .object<CreateFieldInput>({
     name: yup.string().defined(),
@@ -551,9 +552,31 @@ export const handleCreateField: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name, type, collectionID } = req.body;
 
-  const view = await createField(ctx.db, id, name, type, collectionID);
+  const field = await createField(ctx.db, id, name, type, collectionID);
 
-  res.send(view);
+  res.send(field);
+};
+
+export interface DuplicateFieldInput {
+  fromID: string;
+}
+
+const duplicateFieldInputSchema = yup
+  .object<DuplicateFieldInput>({
+    fromID: yup.string().defined(),
+  })
+  .required();
+
+export const handleDuplicateField: AH = async (ctx, req, res) => {
+  validateInput(duplicateFieldInputSchema, req.body);
+  validateParams(newIDParamsSchema, req.params);
+
+  const { id } = req.params;
+  const { fromID } = req.body;
+
+  const field = await duplicateField(ctx.db, id, fromID);
+
+  res.send(field);
 };
 
 export interface UpdateFieldNameInput {
@@ -573,18 +596,18 @@ export const handleUpdateFieldName: AH = async (ctx, req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const view = await updateFieldName(ctx.db, id, name);
+  const field = await updateFieldName(ctx.db, id, name);
 
-  res.send(view);
+  res.send(field);
 };
 
 export const handleGetField: AH = async (ctx, req, res) => {
   validateParams(idParamsSchema, req.params);
 
   const { id } = req.params;
-  const view = await getFieldByID(ctx.db, id);
+  const field = await getFieldByID(ctx.db, id);
 
-  res.send(view);
+  res.send(field);
 };
 
 export const handleDeleteField: AH = async (ctx, req, res) => {

@@ -1,17 +1,8 @@
-import short from 'short-uuid';
 import { v4 } from 'uuid';
 import * as yup from 'yup';
 
-const translator = short();
-
 export function generateID() {
-  const uuid = v4();
-  return translator.fromUUID(uuid);
-}
-
-/** Transform ID generated from `generateID` to UUIDV4 */
-export function toUUID(id: string) {
-  return translator.toUUID(id);
+  return v4();
 }
 
 function isUUID(uuid: string): boolean {
@@ -19,11 +10,9 @@ function isUUID(uuid: string): boolean {
   return yup.string().isValidSync(uuid);
 }
 
-export const shortIDSchema = yup
+export const idSchema = yup
   .string()
   .required()
-  .test('shortid', 'id is not uuid', (value: string) => {
-    const uuid = toUUID(value);
-
-    return isUUID(uuid);
+  .test('id', 'id is not uuid', (value: string) => {
+    return isUUID(value);
   });

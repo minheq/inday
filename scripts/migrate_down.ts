@@ -19,7 +19,7 @@ async function runScript() {
 
 runScript()
   .then((result) => {
-    console.log(result);
+    console.log(`Successfully applied ${result.length} downward migrations.`);
     process.exit(0);
   })
   .catch((e) => {

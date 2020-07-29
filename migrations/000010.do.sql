@@ -1,5 +1,5 @@
 CREATE TABLE workspaces (
-  id TEXT PRIMARY KEY,
+  workspace_id TEXT PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   owner_id TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
