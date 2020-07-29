@@ -38,6 +38,7 @@ import {
 } from './errors';
 import { ViewType } from '../app/data/views';
 import { FieldType } from '../app/data/fields';
+import { shortIDSchema } from '../lib/id/id';
 
 //#region Helpers
 type Request = FastifyRequest;
@@ -142,6 +143,13 @@ const idParamsSchema = yup
     id: yup.string().required(),
   })
   .required();
+
+const newIDParamsSchema = yup
+  .object<IDParams>({
+    id: shortIDSchema,
+  })
+  .required();
+
 //#endregion Helpers
 
 //#region Workspace
@@ -151,13 +159,13 @@ export interface CreateWorkspaceInput {
 
 const createWorkspaceInputSchema = yup
   .object<CreateWorkspaceInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
   })
   .required();
 
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
   validateInput(createWorkspaceInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(newIDParamsSchema, req.params);
 
   const currentUserID = getCurrentUserID(ctx);
   const { id } = req.params;
@@ -174,7 +182,7 @@ export interface UpdateWorkspaceNameInput {
 
 const updateWorkspaceNameInputSchema = yup
   .object<UpdateWorkspaceNameInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
   })
   .required();
 
@@ -226,14 +234,14 @@ export interface CreateSpaceInput {
 
 const createSpaceInputSchema = yup
   .object<CreateSpaceInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
     workspaceID: yup.string().required(),
   })
   .required();
 
 export const handleCreateSpace: AH = async (ctx, req, res) => {
   validateInput(createSpaceInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(newIDParamsSchema, req.params);
 
   const { id } = req.params;
   const { name, workspaceID } = req.body;
@@ -249,7 +257,7 @@ export interface UpdateSpaceNameInput {
 
 const updateSpaceNameInputSchema = yup
   .object<UpdateSpaceNameInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
   })
   .required();
 
@@ -294,14 +302,14 @@ export interface CreateCollectionInput {
 
 const createCollectionInputSchema = yup
   .object<CreateCollectionInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
     spaceID: yup.string().required(),
   })
   .required();
 
 export const handleCreateCollection: AH = async (ctx, req, res) => {
   validateInput(createCollectionInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(newIDParamsSchema, req.params);
 
   const { id } = req.params;
   const { name, spaceID } = req.body;
@@ -317,7 +325,7 @@ export interface UpdateCollectionNameInput {
 
 const updateCollectionNameInputSchema = yup
   .object<UpdateCollectionNameInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
   })
   .required();
 
@@ -366,7 +374,7 @@ const createDocumentInputSchema = yup
 
 export const handleCreateDocument: AH = async (ctx, req, res) => {
   validateInput(createDocumentInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(newIDParamsSchema, req.params);
 
   const { id } = req.params;
   const { collectionID } = req.body;
@@ -441,7 +449,7 @@ export interface CreateViewInput {
 const viewTypes: ViewType[] = ['list', 'board'];
 const createViewInputSchema = yup
   .object<CreateViewInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
     type: yup.mixed().oneOf(viewTypes).required() as yup.MixedSchema<ViewType>,
     collectionID: yup.string().required(),
   })
@@ -449,7 +457,7 @@ const createViewInputSchema = yup
 
 export const handleCreateView: AH = async (ctx, req, res) => {
   validateInput(createViewInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(newIDParamsSchema, req.params);
 
   const { id } = req.params;
   const { name, type, collectionID } = req.body;
@@ -464,7 +472,7 @@ export interface UpdateViewNameInput {
 
 const updateViewNameInputSchema = yup
   .object<UpdateViewNameInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
   })
   .required();
 
@@ -528,7 +536,7 @@ const fieldTypes: FieldType[] = [
 
 const createFieldInputSchema = yup
   .object<CreateFieldInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
     type: yup.mixed().oneOf(fieldTypes).required() as yup.MixedSchema<
       FieldType
     >,
@@ -538,7 +546,7 @@ const createFieldInputSchema = yup
 
 export const handleCreateField: AH = async (ctx, req, res) => {
   validateInput(createFieldInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(newIDParamsSchema, req.params);
 
   const { id } = req.params;
   const { name, type, collectionID } = req.body;
@@ -554,7 +562,7 @@ export interface UpdateFieldNameInput {
 
 const updateFieldNameInputSchema = yup
   .object<UpdateFieldNameInput>({
-    name: yup.string().required(),
+    name: yup.string().defined(),
   })
   .required();
 
