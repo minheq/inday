@@ -315,6 +315,22 @@ interface DocumentRow {
   updated_at: Date;
 }
 
+interface DocumentFieldValueRow {
+  document_id: string;
+  value: string;
+  field_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface DocumentFieldValueRow {
+  document_id: string;
+  value: string;
+  field_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
 function toDocument(data: DocumentRow): Document {
   return {
     id: data.document_id,
@@ -566,6 +582,7 @@ export async function duplicateField(
   db: DB,
   fieldID: string,
   fromFieldID: string,
+  duplicateDocumentFieldValues: boolean,
 ): Promise<Field> {
   const result = await db.query<FieldRow>(
     'INSERT INTO fields (field_id, name, type, description, collection_id) SELECT $1, name, type, description, collection_id FROM fields WHERE field_id=$2 RETURNING *',
@@ -577,8 +594,16 @@ export async function duplicateField(
   }
 
   const row = first(result.rows);
+  const field = toField(row);
 
-  return toField(row);
+  if (duplicateDocumentFieldValues === true) {
+    await db.query<FieldRow>(
+      'INSERT INTO document_field_values (value, field_id, document_id) SELECT value, $1, document_id FROM document_field_values WHERE field_id=$2 RETURNING *',
+      [field.id, fromFieldID],
+    );
+  }
+
+  return field;
 }
 
 export async function updateFieldName(

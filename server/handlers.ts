@@ -39,6 +39,7 @@ import {
 } from './errors';
 import { ViewType } from '../app/data/views';
 import { FieldType } from '../app/data/fields';
+import { validateID } from '../lib/id/id';
 
 //#region Helpers
 type Request = FastifyRequest;
@@ -160,6 +161,7 @@ const createWorkspaceInputSchema = yup
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
   validateInput(createWorkspaceInputSchema, req.body);
   validateParams(workspaceIDParamsSchema, req.params);
+  validateID(req.params.workspaceID);
 
   const currentUserID = getCurrentUserID(ctx);
   const { workspaceID } = req.params;
@@ -252,6 +254,7 @@ const createSpaceInputSchema = yup
 export const handleCreateSpace: AH = async (ctx, req, res) => {
   validateInput(createSpaceInputSchema, req.body);
   validateParams(spaceIDParamsSchema, req.params);
+  validateID(req.params.spaceID);
 
   const { spaceID } = req.params;
   const { name, workspaceID } = req.body;
@@ -330,6 +333,7 @@ const createCollectionInputSchema = yup
 export const handleCreateCollection: AH = async (ctx, req, res) => {
   validateInput(createCollectionInputSchema, req.body);
   validateParams(collectionIDParamsSchema, req.params);
+  validateID(req.params.collectionID);
 
   const { collectionID } = req.params;
   const { name, spaceID } = req.body;
@@ -410,6 +414,7 @@ const createDocumentInputSchema = yup
 export const handleCreateDocument: AH = async (ctx, req, res) => {
   validateInput(createDocumentInputSchema, req.body);
   validateParams(documentIDParamsSchema, req.params);
+  validateID(req.params.documentID);
 
   const { documentID } = req.params;
   const { collectionID } = req.body;
@@ -503,6 +508,7 @@ const createViewInputSchema = yup
 export const handleCreateView: AH = async (ctx, req, res) => {
   validateInput(createViewInputSchema, req.body);
   validateParams(viewIDParamsSchema, req.params);
+  validateID(req.params.viewID);
 
   const { viewID } = req.params;
   const { name, type, collectionID } = req.body;
@@ -602,6 +608,7 @@ const createFieldInputSchema = yup
 export const handleCreateField: AH = async (ctx, req, res) => {
   validateInput(createFieldInputSchema, req.body);
   validateParams(fieldIDParamsSchema, req.params);
+  validateID(req.params.fieldID);
 
   const { fieldID } = req.params;
   const { name, type, collectionID } = req.body;
@@ -612,12 +619,14 @@ export const handleCreateField: AH = async (ctx, req, res) => {
 };
 
 export interface DuplicateFieldInput {
-  fromID: string;
+  fromFieldID: string;
+  duplicateDocumentFieldValues: boolean;
 }
 
 const duplicateFieldInputSchema = yup
   .object<DuplicateFieldInput>({
-    fromID: yup.string().defined(),
+    fromFieldID: yup.string().defined(),
+    duplicateDocumentFieldValues: yup.boolean().defined(),
   })
   .required();
 
@@ -626,9 +635,14 @@ export const handleDuplicateField: AH = async (ctx, req, res) => {
   validateParams(fieldIDParamsSchema, req.params);
 
   const { fieldID } = req.params;
-  const { fromID } = req.body;
+  const { fromFieldID, duplicateDocumentFieldValues } = req.body;
 
-  const field = await duplicateField(ctx.db, fieldID, fromID);
+  const field = await duplicateField(
+    ctx.db,
+    fieldID,
+    fromFieldID,
+    duplicateDocumentFieldValues,
+  );
 
   res.send(field);
 };
