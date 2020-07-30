@@ -1,6 +1,6 @@
 import React from 'react';
 import { Note } from '../data/collections';
-import { useCreateNote } from '../data/api';
+import { useCreateNote } from '../data/store';
 import { Container, Row, Text, Spacer, Button } from '../components';
 import { StyleSheet } from 'react-native';
 import { tokens } from '../components/theme';

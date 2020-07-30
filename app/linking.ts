@@ -5,7 +5,7 @@ export enum ScreenName {
 }
 
 export type RootStackParamsMap = {
-  Space: { spaceID: string };
+  Space: { spaceID: string; viewID: string };
 };
 
 export let linking: LinkingOptions = {
@@ -13,7 +13,7 @@ export let linking: LinkingOptions = {
   config: {
     screens: {
       Space: {
-        path: 'space/:spaceID',
+        path: 'space/:spaceID/:viewID',
       },
     },
   },

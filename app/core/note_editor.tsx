@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button, Container, Icon, Row, Spacer, IconName } from '../components';
-import { useUpdateNoteContent, useDeleteNote } from '../data/api';
+import { useUpdateNoteContent, useDeleteNote } from '../data/store';
 import { EditorInstance, Editor } from '../lib/editor';
 import { useDebouncedCallback } from '../hooks/use_debounced_callback';
 import { Content, Note } from '../data/collections';

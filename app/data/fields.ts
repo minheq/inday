@@ -1,68 +1,9 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
+import { field1, field2 } from './fake_data';
 
-interface SingleLineTextField {
-  type: 'singleLineText';
-}
-
-interface MultiLineTextField {
-  type: 'multiLineText';
-}
-
-interface SingleSelectField {
-  type: 'singleSelect';
-}
-
-interface MultiSelectField {
-  type: 'multiSelect';
-}
-
-interface SingleCollaboratorField {
-  type: 'singleCollaborator';
-}
-
-interface MultiCollaboratorField {
-  type: 'multiCollaborator';
-}
-
-interface SingleDocumentLinkField {
-  type: 'singleDocumentLink';
-}
-
-interface MultiDocumentLinkField {
-  type: 'multiDocumentLink';
-}
-
-interface DateField {
-  type: 'date';
-}
-
-interface PhoneNumberField {
-  type: 'phoneNumber';
-}
-
-interface EmailField {
-  type: 'email';
-}
-
-interface URLField {
-  type: 'url';
-}
-
-interface NumberField {
-  type: 'number';
-}
-
-interface CurrencyField {
-  type: 'currency';
-}
-
-interface CheckboxField {
-  type: 'checkbox';
-}
-
-interface FieldMetadata {
+interface BaseField {
   id: string;
   name: string;
   description: string;
@@ -71,7 +12,111 @@ interface FieldMetadata {
   collectionID: string;
 }
 
-export type BaseField =
+export interface SingleLineTextFieldConfig {
+  type: 'singleLineText';
+}
+export interface SingleLineTextField
+  extends BaseField,
+    SingleLineTextFieldConfig {}
+
+export interface MultiLineTextFieldConfig {
+  type: 'multiLineText';
+}
+export interface MultiLineTextField
+  extends BaseField,
+    MultiLineTextFieldConfig {}
+
+export interface SingleSelectFieldConfig {
+  type: 'singleSelect';
+}
+export interface SingleSelectField extends BaseField, SingleSelectFieldConfig {}
+
+export interface MultiSelectFieldConfig {
+  type: 'multiSelect';
+}
+export interface MultiSelectField extends BaseField, MultiSelectFieldConfig {}
+
+export interface SingleCollaboratorFieldConfig {
+  type: 'singleCollaborator';
+}
+export interface SingleCollaboratorField
+  extends BaseField,
+    SingleCollaboratorFieldConfig {}
+
+export interface MultiCollaboratorFieldConfig {
+  type: 'multiCollaborator';
+}
+export interface MultiCollaboratorField
+  extends BaseField,
+    MultiCollaboratorFieldConfig {}
+
+export interface SingleDocumentLinkFieldConfig {
+  type: 'singleDocumentLink';
+}
+export interface SingleDocumentLinkField
+  extends BaseField,
+    SingleDocumentLinkFieldConfig {}
+
+export interface MultiDocumentLinkFieldConfig {
+  type: 'multiDocumentLink';
+}
+export interface MultiDocumentLinkField
+  extends BaseField,
+    MultiDocumentLinkFieldConfig {}
+
+export interface DateFieldConfig {
+  type: 'date';
+}
+export interface DateField extends BaseField, DateFieldConfig {}
+
+export interface PhoneNumberFieldConfig {
+  type: 'phoneNumber';
+}
+export interface PhoneNumberField extends BaseField, PhoneNumberFieldConfig {}
+
+export interface EmailFieldConfig {
+  type: 'email';
+}
+export interface EmailField extends BaseField, EmailFieldConfig {}
+
+export interface URLFieldConfig {
+  type: 'url';
+}
+export interface URLField extends BaseField, URLFieldConfig {}
+
+export interface NumberFieldConfig {
+  type: 'number';
+}
+export interface NumberField extends BaseField, NumberFieldConfig {}
+
+export interface CurrencyFieldConfig {
+  type: 'currency';
+}
+export interface CurrencyField extends BaseField, CurrencyFieldConfig {}
+
+export interface CheckboxFieldConfig {
+  type: 'checkbox';
+}
+export interface CheckboxField extends BaseField, CheckboxFieldConfig {}
+
+export type FieldConfig =
+  | SingleLineTextFieldConfig
+  | MultiLineTextFieldConfig
+  | SingleSelectFieldConfig
+  | MultiSelectFieldConfig
+  | SingleCollaboratorFieldConfig
+  | MultiCollaboratorFieldConfig
+  | SingleDocumentLinkFieldConfig
+  | MultiDocumentLinkFieldConfig
+  | DateFieldConfig
+  | PhoneNumberFieldConfig
+  | EmailFieldConfig
+  | URLFieldConfig
+  | NumberFieldConfig
+  | CurrencyFieldConfig
+  | CheckboxFieldConfig;
+
+export type Field =
   | SingleLineTextField
   | MultiLineTextField
   | SingleSelectField
@@ -88,13 +133,15 @@ export type BaseField =
   | CurrencyField
   | CheckboxField;
 
-export type FieldType = BaseField['type'];
-export type Field = BaseField & FieldMetadata;
+export type FieldType = Field['type'];
 
 export type FieldsState = { [id: string]: Field | undefined };
 export const fieldsState = atom<FieldsState>({
   key: RecoilKey.Fields,
-  default: {},
+  default: {
+    [field1.id]: field1,
+    [field2.id]: field2,
+  },
 });
 
 export const fieldListQuery = selector({

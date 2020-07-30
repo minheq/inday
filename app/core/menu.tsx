@@ -25,7 +25,7 @@ import {
   useGetMenuTags,
   useCreateTag,
   useUpdateTagName,
-} from '../data/api';
+} from '../data/store';
 import { tokens } from '../components/theme';
 import {
   useContextMenu,

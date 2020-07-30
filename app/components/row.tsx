@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { ContainerProvider } from './container';
 
 interface RowProps {
+  flex?: number;
   children?: React.ReactNode;
   justifyContent?: 'flex-start' | 'flex-end' | 'space-between' | 'center';
   alignItems?: 'flex-start' | 'flex-end' | 'center';

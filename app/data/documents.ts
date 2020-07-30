@@ -1,6 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
+import { doc1, doc2 } from './fake_data';
 
 interface SingleLineTextFieldValue {
   type: 'singleLineText';
@@ -92,17 +93,40 @@ interface CheckboxFieldValue {
   value: boolean;
 }
 
+export type DocumentFieldValue =
+  | SingleLineTextFieldValue
+  | MultiLineTextFieldValue
+  | SingleSelectFieldValue
+  | MultiSelectFieldValue
+  | SingleCollaboratorFieldValue
+  | MultiCollaboratorFieldValue
+  | SingleDocumentLinkFieldValue
+  | MultiDocumentLinkFieldValue
+  | DateFieldValue
+  | PhoneNumberFieldValue
+  | EmailFieldValue
+  | URLFieldValue
+  | NumberFieldValue
+  | CurrencyFieldValue
+  | CheckboxFieldValue;
+
 export interface Document {
   id: string;
   createdAt: Date;
   updatedAt: Date;
+  fields: {
+    [fieldID: string]: DocumentFieldValue;
+  };
   collectionID: string;
 }
 
 export type DocumentsState = { [id: string]: Document | undefined };
 export const documentsState = atom<DocumentsState>({
   key: RecoilKey.Documents,
-  default: {},
+  default: {
+    [doc1.id]: doc1,
+    [doc2.id]: doc2,
+  },
 });
 
 export const documentListQuery = selector({

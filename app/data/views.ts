@@ -1,18 +1,9 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
+import { view1 } from './fake_data';
 
-interface ListView {
-  type: 'list';
-}
-
-interface BoardView {
-  type: 'board';
-}
-
-export type BaseView = ListView | BoardView;
-
-interface ViewMetadata {
+interface BaseView {
   id: string;
   name: string;
   createdAt: Date;
@@ -20,13 +11,36 @@ interface ViewMetadata {
   collectionID: string;
 }
 
-export type View = BaseView & ViewMetadata;
+export interface ListViewFieldConfig {
+  visible: boolean;
+  width: number;
+}
+
+interface ListViewConfig {
+  type: 'list';
+  fieldsOrder: string[];
+  fieldsConfig: {
+    [fieldID: string]: ListViewFieldConfig;
+  };
+}
+
+export interface ListView extends BaseView, ListViewConfig {}
+
+interface BoardViewConfig {
+  type: 'board';
+}
+
+export interface BoardView extends BaseView, BoardViewConfig {}
+
+export type View = ListView | BoardView;
 export type ViewType = View['type'];
 
 export type ViewsState = { [id: string]: View | undefined };
 export const viewsState = atom<ViewsState>({
   key: RecoilKey.Views,
-  default: {},
+  default: {
+    [view1.id]: view1,
+  },
 });
 
 export const viewListQuery = selector({

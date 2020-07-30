@@ -8,90 +8,144 @@ import { View } from './views';
 import { Field } from './fields';
 import { Document } from './documents';
 
-export interface EventMetadata {
+export interface BaseEvent {
   createdAt: Date;
   workspaceID: string;
 }
 
-export interface WorkspaceCreatedEvent {
+export interface WorkspaceCreatedEventConfig {
   name: 'WorkspaceCreated';
   workspace: Workspace;
 }
+export interface WorkspaceCreatedEvent
+  extends BaseEvent,
+    WorkspaceCreatedEventConfig {}
 
-export interface SpaceCreatedEvent {
+export interface SpaceCreatedEventConfig {
   name: 'SpaceCreated';
   space: Space;
 }
+export interface SpaceCreatedEvent extends BaseEvent, SpaceCreatedEventConfig {}
 
-export interface SpaceDeletedEvent {
+export interface SpaceDeletedEventConfig {
   name: 'SpaceDeleted';
   space: Space;
 }
+export interface SpaceDeletedEvent extends BaseEvent, SpaceDeletedEventConfig {}
 
-export interface SpaceNameUpdatedEvent {
+export interface SpaceNameUpdatedEventConfig {
   name: 'SpaceNameUpdated';
   space: Space;
 }
+export interface SpaceNameUpdatedEvent
+  extends BaseEvent,
+    SpaceNameUpdatedEventConfig {}
 
-export interface CollectionCreatedEvent {
+export interface CollectionCreatedEventConfig {
   name: 'CollectionCreated';
   collection: Collection;
 }
+export interface CollectionCreatedEvent
+  extends BaseEvent,
+    CollectionCreatedEventConfig {}
 
-export interface CollectionNameUpdatedEvent {
+export interface CollectionNameUpdatedEventConfig {
   name: 'CollectionNameUpdated';
   collection: Collection;
 }
+export interface CollectionNameUpdatedEvent
+  extends BaseEvent,
+    CollectionNameUpdatedEventConfig {}
 
-export interface CollectionDeletedEvent {
+export interface CollectionDeletedEventConfig {
   name: 'CollectionDeleted';
   collection: Collection;
 }
+export interface CollectionDeletedEvent
+  extends BaseEvent,
+    CollectionDeletedEventConfig {}
 
-export interface ViewCreatedEvent {
+export interface ViewCreatedEventConfig {
   name: 'ViewCreated';
   view: View;
 }
+export interface ViewCreatedEvent extends BaseEvent, ViewCreatedEventConfig {}
 
-export interface ViewNameUpdatedEvent {
+export interface ViewNameUpdatedEventConfig {
   name: 'ViewNameUpdated';
   view: View;
 }
+export interface ViewNameUpdatedEvent
+  extends BaseEvent,
+    ViewNameUpdatedEventConfig {}
 
-export interface ViewDeletedEvent {
+export interface ViewDeletedEventConfig {
   name: 'ViewDeleted';
   view: View;
 }
+export interface ViewDeletedEvent extends BaseEvent, ViewDeletedEventConfig {}
 
-export interface FieldCreatedEvent {
+export interface FieldCreatedEventConfig {
   name: 'FieldCreated';
   field: Field;
 }
+export interface FieldCreatedEvent extends BaseEvent, FieldCreatedEventConfig {}
 
-export interface FieldNameUpdatedEvent {
+export interface FieldNameUpdatedEventConfig {
   name: 'FieldNameUpdated';
   field: Field;
 }
+export interface FieldNameUpdatedEvent
+  extends BaseEvent,
+    FieldNameUpdatedEventConfig {}
 
-export interface FieldDeletedEvent {
+export interface FieldDeletedEventConfig {
   name: 'FieldDeleted';
   field: Field;
 }
+export interface FieldDeletedEvent extends BaseEvent, FieldDeletedEventConfig {}
 
-export interface DocumentCreatedEvent {
+export interface DocumentCreatedEventConfig {
   name: 'DocumentCreated';
   document: Document;
 }
+export interface DocumentCreatedEvent
+  extends BaseEvent,
+    DocumentCreatedEventConfig {}
 
-export interface DocumentNameUpdatedEvent {
+export interface DocumentNameUpdatedEventConfig {
   name: 'DocumentNameUpdated';
   document: Document;
 }
+export interface DocumentNameUpdatedEvent
+  extends BaseEvent,
+    DocumentNameUpdatedEventConfig {}
 
-export interface DocumentDeletedEvent {
+export interface DocumentDeletedEventConfig {
   name: 'DocumentDeleted';
   document: Document;
 }
+export interface DocumentDeletedEvent
+  extends BaseEvent,
+    DocumentDeletedEventConfig {}
+
+export type EventConfig =
+  | WorkspaceCreatedEventConfig
+  | SpaceCreatedEventConfig
+  | SpaceDeletedEventConfig
+  | SpaceNameUpdatedEventConfig
+  | CollectionCreatedEventConfig
+  | CollectionNameUpdatedEventConfig
+  | CollectionDeletedEventConfig
+  | ViewCreatedEventConfig
+  | ViewNameUpdatedEventConfig
+  | ViewDeletedEventConfig
+  | FieldCreatedEventConfig
+  | FieldNameUpdatedEventConfig
+  | FieldDeletedEventConfig
+  | DocumentCreatedEventConfig
+  | DocumentNameUpdatedEventConfig
+  | DocumentDeletedEventConfig;
 
 export type Event =
   | WorkspaceCreatedEvent
@@ -111,9 +165,7 @@ export type Event =
   | DocumentNameUpdatedEvent
   | DocumentDeletedEvent;
 
-export type EventWithMetadata = Event & EventMetadata;
-
-type SubscriptionCallback = (event: EventWithMetadata) => void;
+type SubscriptionCallback = (event: Event) => void;
 
 class EventEmitter {
   private subscribers: SubscriptionCallback[] = [];
@@ -126,7 +178,7 @@ class EventEmitter {
     this.subscribers = this.subscribers.filter((c) => c !== callback);
   }
 
-  emit(event: EventWithMetadata) {
+  emit(event: Event) {
     setTimeout(() => {
       this.subscribers.forEach((callback) => {
         callback(event);
@@ -141,7 +193,7 @@ export function useEventEmitter() {
   return eventEmitter;
 }
 
-export type EventsState = EventWithMetadata[];
+export type EventsState = Event[];
 export const eventsState = atom<EventsState>({
   key: RecoilKey.Events,
   default: [],

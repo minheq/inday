@@ -1,18 +1,23 @@
 import React from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
+import { useEventEmitter, eventsState, EventConfig, Event } from './events';
 import {
-  useEventEmitter,
-  eventsState,
-  Event,
-  EventWithMetadata,
-  EventMetadata,
-} from './events';
-import { Collection, collectionQuery, collectionsState } from './collections';
+  Collection,
+  collectionQuery,
+  collectionsState,
+  collectionFieldsQuery,
+  collectionDocumentListQuery,
+} from './collections';
 import { workspaceState } from './workspace';
-import { spacesState, Space, spaceQuery } from './spaces';
+import {
+  spacesState,
+  Space,
+  spaceQuery,
+  spaceCollectionListQuery,
+} from './spaces';
 import { viewsState, View, viewQuery } from './views';
-import { Field, fieldsState, fieldQuery, BaseField } from './fields';
+import { Field, fieldsState, fieldQuery, FieldConfig } from './fields';
 import { documentsState, documentQuery, Document } from './documents';
 import { generateID } from '../../lib/id/id';
 
@@ -32,19 +37,15 @@ export function useEmitEvent() {
   const setEvents = useSetRecoilState(eventsState);
 
   const emitEvent = React.useCallback(
-    (event: Event) => {
-      const metadata: EventMetadata = {
+    (eventConfig: EventConfig) => {
+      const event: Event = {
+        ...eventConfig,
         createdAt: new Date(),
         workspaceID: workspace.id,
       };
 
-      const eventWithMetadata: EventWithMetadata = {
-        ...event,
-        ...metadata,
-      };
-
-      setEvents((prevEvents) => [...prevEvents, eventWithMetadata]);
-      eventEmitter.emit(eventWithMetadata);
+      setEvents((prevEvents) => [...prevEvents, event]);
+      eventEmitter.emit(event);
     },
     [workspace, setEvents, eventEmitter],
   );
@@ -83,6 +84,12 @@ export function useGetSpace(spaceID: string) {
   }
 
   return space;
+}
+
+export function useGetSpaceCollectionList(spaceID: string): Collection[] {
+  const collectionList = useRecoilValue(spaceCollectionListQuery(spaceID));
+
+  return collectionList;
 }
 
 export function useCreateSpace() {
@@ -208,6 +215,18 @@ export function useGetCollection(collectionID: string) {
   }
 
   return collection;
+}
+
+export function useGetCollectionFields(collectionID: string) {
+  const fields = useRecoilValue(collectionFieldsQuery(collectionID));
+  return fields;
+}
+
+export function useGetCollectionDocumentList(collectionID: string) {
+  const documentList = useRecoilValue(
+    collectionDocumentListQuery(collectionID),
+  );
+  return documentList;
 }
 
 export function useCreateCollection() {
@@ -467,7 +486,7 @@ export function useCreateField() {
       collectionID: string,
       name: string,
       description: string,
-      field: BaseField,
+      fieldConfig: FieldConfig,
     ) => {
       let newField: Field = {
         id: generateID(),
@@ -476,7 +495,7 @@ export function useCreateField() {
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
-        ...field,
+        ...fieldConfig,
       };
 
       setFields((previousFields) => ({
@@ -595,6 +614,7 @@ export function useCreateDocument() {
     (collectionID: string) => {
       let newDocument: Document = {
         id: generateID(),
+        fields: {},
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,

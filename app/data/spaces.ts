@@ -1,16 +1,22 @@
 import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
+import { collectionListQuery, Collection } from './collections';
+import { space1 } from './fake_data';
 
 export interface Space {
   id: string;
   name: string;
   workspaceID: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type SpacesState = { [id: string]: Space | undefined };
 export const spacesState = atom<SpacesState>({
   key: RecoilKey.Spaces,
-  default: {},
+  default: {
+    [space1.id]: space1,
+  },
 });
 
 export const spaceQuery = selectorFamily<Space | null, string>({
@@ -24,6 +30,15 @@ export const spaceQuery = selectorFamily<Space | null, string>({
     }
 
     return space;
+  },
+});
+
+export const spaceCollectionListQuery = selectorFamily<Collection[], string>({
+  key: RecoilKey.Space,
+  get: (spaceID: string) => ({ get }) => {
+    const collectionList = get(collectionListQuery);
+
+    return collectionList.filter((c) => c.spaceID === spaceID);
   },
 });
 
