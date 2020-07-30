@@ -39,7 +39,6 @@ import {
 } from './errors';
 import { ViewType } from '../app/data/views';
 import { FieldType } from '../app/data/fields';
-import { idSchema } from '../lib/id/id';
 
 //#region Helpers
 type Request = FastifyRequest;
@@ -135,25 +134,19 @@ function getCurrentUserID(ctx: AuthenticatedContext): string {
   return ctx.userID;
 }
 
-interface IDParams {
-  id: string;
-}
-
-const idParamsSchema = yup
-  .object<IDParams>({
-    id: yup.string().required(),
-  })
-  .required();
-
-const newIDParamsSchema = yup
-  .object<IDParams>({
-    id: idSchema,
-  })
-  .required();
-
 //#endregion Helpers
 
 //#region Workspace
+interface WorkspaceIDParams {
+  workspaceID: string;
+}
+
+const workspaceIDParamsSchema = yup
+  .object<WorkspaceIDParams>({
+    workspaceID: yup.string().required(),
+  })
+  .required();
+
 export interface CreateWorkspaceInput {
   name: string;
 }
@@ -166,13 +159,18 @@ const createWorkspaceInputSchema = yup
 
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
   validateInput(createWorkspaceInputSchema, req.body);
-  validateParams(newIDParamsSchema, req.params);
+  validateParams(workspaceIDParamsSchema, req.params);
 
   const currentUserID = getCurrentUserID(ctx);
-  const { id } = req.params;
+  const { workspaceID } = req.params;
   const { name } = req.body;
 
-  const workspace = await createWorkspace(ctx.db, id, name, currentUserID);
+  const workspace = await createWorkspace(
+    ctx.db,
+    workspaceID,
+    name,
+    currentUserID,
+  );
 
   res.send(workspace);
 };
@@ -189,45 +187,56 @@ const updateWorkspaceNameInputSchema = yup
 
 export const handleUpdateWorkspaceName: AH = async (ctx, req, res) => {
   validateInput(updateWorkspaceNameInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(workspaceIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { workspaceID } = req.params;
   const { name } = req.body;
 
-  const workspace = await updateWorkspaceName(ctx.db, id, name);
+  const workspace = await updateWorkspaceName(ctx.db, workspaceID, name);
 
   res.send(workspace);
 };
 
 export const handleGetWorkspace: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(workspaceIDParamsSchema, req.params);
 
-  const { id } = req.params;
-  const workspace = await getWorkspaceByID(ctx.db, id);
+  const { workspaceID } = req.params;
+  const workspace = await getWorkspaceByID(ctx.db, workspaceID);
 
   res.send(workspace);
 };
 
 export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(workspaceIDParamsSchema, req.params);
 
   const currentUserID = getCurrentUserID(ctx);
-  const { id } = req.params;
+  const { workspaceID } = req.params;
 
-  const workspace = await getWorkspaceByID(ctx.db, id);
+  const workspace = await getWorkspaceByID(ctx.db, workspaceID);
 
   if (workspace.ownerID !== currentUserID) {
     throw new UnauthorizedError();
   }
 
-  await deleteWorkspace(ctx.db, id);
+  await deleteWorkspace(ctx.db, workspaceID);
 
-  res.send({ id: id, deleted: true });
+  res.send({ id: workspaceID, deleted: true });
 };
 
 //#endregion Workspace
 
 //#region Space
+
+interface SpaceIDParams {
+  spaceID: string;
+}
+
+const spaceIDParamsSchema = yup
+  .object<SpaceIDParams>({
+    spaceID: yup.string().required(),
+  })
+  .required();
+
 export interface CreateSpaceInput {
   name: string;
   workspaceID: string;
@@ -242,12 +251,12 @@ const createSpaceInputSchema = yup
 
 export const handleCreateSpace: AH = async (ctx, req, res) => {
   validateInput(createSpaceInputSchema, req.body);
-  validateParams(newIDParamsSchema, req.params);
+  validateParams(spaceIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { spaceID } = req.params;
   const { name, workspaceID } = req.body;
 
-  const space = await createSpace(ctx.db, id, name, workspaceID);
+  const space = await createSpace(ctx.db, spaceID, name, workspaceID);
 
   res.send(space);
 };
@@ -264,38 +273,48 @@ const updateSpaceNameInputSchema = yup
 
 export const handleUpdateSpaceName: AH = async (ctx, req, res) => {
   validateInput(updateSpaceNameInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(spaceIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { spaceID } = req.params;
   const { name } = req.body;
 
-  const space = await updateSpaceName(ctx.db, id, name);
+  const space = await updateSpaceName(ctx.db, spaceID, name);
 
   res.send(space);
 };
 
 export const handleGetSpace: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(spaceIDParamsSchema, req.params);
 
-  const { id } = req.params;
-  const space = await getSpaceByID(ctx.db, id);
+  const { spaceID } = req.params;
+  const space = await getSpaceByID(ctx.db, spaceID);
 
   res.send(space);
 };
 
 export const handleDeleteSpace: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(spaceIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { spaceID } = req.params;
 
-  await deleteSpace(ctx.db, id);
+  await deleteSpace(ctx.db, spaceID);
 
-  res.send({ id: id, deleted: true });
+  res.send({ id: spaceID, deleted: true });
 };
 
 //#endregion Space
 
 //#region Collection
+interface CollectionIDParams {
+  collectionID: string;
+}
+
+const collectionIDParamsSchema = yup
+  .object<CollectionIDParams>({
+    collectionID: yup.string().required(),
+  })
+  .required();
+
 export interface CreateCollectionInput {
   name: string;
   spaceID: string;
@@ -310,12 +329,17 @@ const createCollectionInputSchema = yup
 
 export const handleCreateCollection: AH = async (ctx, req, res) => {
   validateInput(createCollectionInputSchema, req.body);
-  validateParams(newIDParamsSchema, req.params);
+  validateParams(collectionIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { collectionID } = req.params;
   const { name, spaceID } = req.body;
 
-  const collection = await createCollection(ctx.db, id, name, spaceID);
+  const collection = await createCollection(
+    ctx.db,
+    collectionID,
+    name,
+    spaceID,
+  );
 
   res.send(collection);
 };
@@ -332,37 +356,47 @@ const updateCollectionNameInputSchema = yup
 
 export const handleUpdateCollectionName: AH = async (ctx, req, res) => {
   validateInput(updateCollectionNameInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(collectionIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { collectionID } = req.params;
   const { name } = req.body;
 
-  const collection = await updateCollectionName(ctx.db, id, name);
+  const collection = await updateCollectionName(ctx.db, collectionID, name);
 
   res.send(collection);
 };
 
 export const handleGetCollection: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(collectionIDParamsSchema, req.params);
 
-  const { id } = req.params;
-  const collection = await getCollectionByID(ctx.db, id);
+  const { collectionID } = req.params;
+  const collection = await getCollectionByID(ctx.db, collectionID);
 
   res.send(collection);
 };
 
 export const handleDeleteCollection: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
-  const { id } = req.params;
+  validateParams(collectionIDParamsSchema, req.params);
+  const { collectionID } = req.params;
 
-  await deleteCollection(ctx.db, id);
+  await deleteCollection(ctx.db, collectionID);
 
-  res.send({ id: id, deleted: true });
+  res.send({ id: collectionID, deleted: true });
 };
 
 //#endregion Collection
 
 //#region Document
+interface DocumentIDParams {
+  documentID: string;
+}
+
+const documentIDParamsSchema = yup
+  .object<DocumentIDParams>({
+    documentID: yup.string().required(),
+  })
+  .required();
+
 export interface CreateDocumentInput {
   collectionID: string;
 }
@@ -375,12 +409,12 @@ const createDocumentInputSchema = yup
 
 export const handleCreateDocument: AH = async (ctx, req, res) => {
   validateInput(createDocumentInputSchema, req.body);
-  validateParams(newIDParamsSchema, req.params);
+  validateParams(documentIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { documentID } = req.params;
   const { collectionID } = req.body;
 
-  const document = await createDocument(ctx.db, id, collectionID);
+  const document = await createDocument(ctx.db, documentID, collectionID);
 
   res.send(document);
 };
@@ -393,11 +427,11 @@ const fullUpdateDocumentInputSchema = yup
 
 export const handleFullUpdateDocument: AH = async (ctx, req, res) => {
   validateInput(fullUpdateDocumentInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(documentIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { documentID } = req.params;
 
-  const document = await fullUpdateDocument(ctx.db, id);
+  const document = await fullUpdateDocument(ctx.db, documentID);
 
   res.send(document);
 };
@@ -410,37 +444,47 @@ const partialUpdateDocumentInputSchema = yup
 
 export const handlePartialUpdateDocument: AH = async (ctx, req, res) => {
   validateInput(partialUpdateDocumentInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(documentIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { documentID } = req.params;
 
-  const document = await partialUpdateDocument(ctx.db, id);
+  const document = await partialUpdateDocument(ctx.db, documentID);
 
   res.send(document);
 };
 
 export const handleGetDocument: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(documentIDParamsSchema, req.params);
 
-  const { id } = req.params;
-  const document = await getDocumentByID(ctx.db, id);
+  const { documentID } = req.params;
+  const document = await getDocumentByID(ctx.db, documentID);
 
   res.send(document);
 };
 
 export const handleDeleteDocument: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(documentIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { documentID } = req.params;
 
-  await deleteDocument(ctx.db, id);
+  await deleteDocument(ctx.db, documentID);
 
-  res.send({ id: id, deleted: true });
+  res.send({ id: documentID, deleted: true });
 };
 
 //#endregion Document
 
 //#region View
+interface ViewIDParams {
+  viewID: string;
+}
+
+const viewIDParamsSchema = yup
+  .object<ViewIDParams>({
+    viewID: yup.string().required(),
+  })
+  .required();
+
 export interface CreateViewInput {
   name: string;
   type: ViewType;
@@ -458,11 +502,11 @@ const createViewInputSchema = yup
 
 export const handleCreateView: AH = async (ctx, req, res) => {
   validateInput(createViewInputSchema, req.body);
-  validateParams(newIDParamsSchema, req.params);
+  validateParams(viewIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { viewID } = req.params;
   const { name, type, collectionID } = req.body;
-  const view = await createView(ctx.db, id, name, type, collectionID);
+  const view = await createView(ctx.db, viewID, name, type, collectionID);
 
   res.send(view);
 };
@@ -479,33 +523,33 @@ const updateViewNameInputSchema = yup
 
 export const handleUpdateViewName: AH = async (ctx, req, res) => {
   validateInput(updateViewNameInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(viewIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { viewID } = req.params;
   const { name } = req.body;
 
-  const view = await updateViewName(ctx.db, id, name);
+  const view = await updateViewName(ctx.db, viewID, name);
 
   res.send(view);
 };
 
 export const handleGetView: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(viewIDParamsSchema, req.params);
 
-  const { id } = req.params;
-  const view = await getViewByID(ctx.db, id);
+  const { viewID } = req.params;
+  const view = await getViewByID(ctx.db, viewID);
 
   res.send(view);
 };
 
 export const handleDeleteView: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(viewIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { viewID } = req.params;
 
-  await deleteView(ctx.db, id);
+  await deleteView(ctx.db, viewID);
 
-  res.send({ id: id, deleted: true });
+  res.send({ id: viewID, deleted: true });
 };
 
 //#endregion View
@@ -529,6 +573,16 @@ const fieldTypes: FieldType[] = [
   'checkbox',
 ];
 
+interface FieldIDParams {
+  fieldID: string;
+}
+
+const fieldIDParamsSchema = yup
+  .object<FieldIDParams>({
+    fieldID: yup.string().required(),
+  })
+  .required();
+
 export interface CreateFieldInput {
   name: string;
   type: FieldType;
@@ -547,12 +601,12 @@ const createFieldInputSchema = yup
 
 export const handleCreateField: AH = async (ctx, req, res) => {
   validateInput(createFieldInputSchema, req.body);
-  validateParams(newIDParamsSchema, req.params);
+  validateParams(fieldIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { fieldID } = req.params;
   const { name, type, collectionID } = req.body;
 
-  const field = await createField(ctx.db, id, name, type, collectionID);
+  const field = await createField(ctx.db, fieldID, name, type, collectionID);
 
   res.send(field);
 };
@@ -569,12 +623,12 @@ const duplicateFieldInputSchema = yup
 
 export const handleDuplicateField: AH = async (ctx, req, res) => {
   validateInput(duplicateFieldInputSchema, req.body);
-  validateParams(newIDParamsSchema, req.params);
+  validateParams(fieldIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { fieldID } = req.params;
   const { fromID } = req.body;
 
-  const field = await duplicateField(ctx.db, id, fromID);
+  const field = await duplicateField(ctx.db, fieldID, fromID);
 
   res.send(field);
 };
@@ -591,33 +645,33 @@ const updateFieldNameInputSchema = yup
 
 export const handleUpdateFieldName: AH = async (ctx, req, res) => {
   validateInput(updateFieldNameInputSchema, req.body);
-  validateParams(idParamsSchema, req.params);
+  validateParams(fieldIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { fieldID } = req.params;
   const { name } = req.body;
 
-  const field = await updateFieldName(ctx.db, id, name);
+  const field = await updateFieldName(ctx.db, fieldID, name);
 
   res.send(field);
 };
 
 export const handleGetField: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(fieldIDParamsSchema, req.params);
 
-  const { id } = req.params;
-  const field = await getFieldByID(ctx.db, id);
+  const { fieldID } = req.params;
+  const field = await getFieldByID(ctx.db, fieldID);
 
   res.send(field);
 };
 
 export const handleDeleteField: AH = async (ctx, req, res) => {
-  validateParams(idParamsSchema, req.params);
+  validateParams(fieldIDParamsSchema, req.params);
 
-  const { id } = req.params;
+  const { fieldID } = req.params;
 
-  await deleteField(ctx.db, id);
+  await deleteField(ctx.db, fieldID);
 
-  res.send({ id: id, deleted: true });
+  res.send({ id: fieldID, deleted: true });
 };
 
 //#endregion Field
