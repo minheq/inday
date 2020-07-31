@@ -103,6 +103,8 @@ export function useCreateSpace() {
       id: generateID(),
       name: '',
       workspaceID: workspace.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     setSpaces((previousSpaces) => ({
@@ -364,6 +366,8 @@ export function useCreateView() {
         id: generateID(),
         name: '',
         type: 'list',
+        fieldsConfig: {},
+        fieldsOrder: [],
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,

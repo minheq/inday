@@ -7,10 +7,9 @@ import {
 import { Screen, Container, Text, Row, Column } from '../components';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamsMap } from '../linking';
-import { Field, ListViewFieldConfig } from '../data/fields';
 import { View, ListView } from '../data/views';
 import { Space } from '../data/spaces';
-import { Document, DocumentFieldValue } from '../data/documents';
+import { DocumentFieldValue } from '../data/documents';
 import { Collection } from '../data/collections';
 import {
   useGetSpace,
@@ -90,6 +89,10 @@ interface ListViewDisplayProps {
   view: ListView;
 }
 
+const LEFT_COLUMN_WIDTH = 40;
+const DOCUMENT_HEIGHT = 32;
+const FIELD_HEIGHT = 40;
+
 function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
   const collection = useGetCollection(view.collectionID);
@@ -130,9 +133,15 @@ function ListViewDisplay(props: ListViewDisplayProps) {
 
   return (
     <Container flex={1}>
-      <Container height={48}>
+      <Container height={FIELD_HEIGHT}>
         <Row>
-          <Container />
+          <Container
+            color="content"
+            width={LEFT_COLUMN_WIDTH}
+            height={FIELD_HEIGHT}
+            borderBottomWidth={1}
+            borderRightWidth={1}
+          />
           <ScrollView
             horizontal
             ref={headerScrollView}
@@ -143,7 +152,14 @@ function ListViewDisplay(props: ListViewDisplayProps) {
               const fieldConfig = fieldsConfig[field.id];
 
               return (
-                <Container key={field.id} width={fieldConfig.width}>
+                <Container
+                  color="content"
+                  key={field.id}
+                  height={FIELD_HEIGHT}
+                  width={fieldConfig.width}
+                  borderBottomWidth={1}
+                  borderRightWidth={1}
+                >
                   <Text>{field.name}</Text>
                 </Container>
               );
@@ -153,7 +169,20 @@ function ListViewDisplay(props: ListViewDisplayProps) {
       </Container>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flex: 1 }}>
         <Row flex={1}>
-          {/* <LeftColumn /> */}
+          <Container color="content" width={LEFT_COLUMN_WIDTH}>
+            <Column>
+              {documentList.map((doc, i) => (
+                <Container
+                  borderBottomWidth={1}
+                  borderRightWidth={1}
+                  height={DOCUMENT_HEIGHT}
+                >
+                  <Text>{i + 1}</Text>
+                </Container>
+              ))}
+            </Column>
+          </Container>
+
           <ScrollView
             horizontal
             ref={gridHorizontalScrollView}
@@ -162,22 +191,30 @@ function ListViewDisplay(props: ListViewDisplayProps) {
           >
             <Column>
               {documentList.map((doc) => (
-                <Row key={doc.id}>
-                  {fieldList.map((field) => {
-                    const fieldConfig = fieldsConfig[field.id];
+                <Container
+                  color="content"
+                  borderBottomWidth={1}
+                  height={DOCUMENT_HEIGHT}
+                >
+                  <Row key={doc.id}>
+                    {fieldList.map((field) => {
+                      const fieldConfig = fieldsConfig[field.id];
 
-                    return (
-                      <Container
-                        key={`${field.id}${doc.id}`}
-                        width={fieldConfig.width}
-                      >
-                        <ListViewDocumentFieldValueContainer
-                          value={doc.fields[field.id]}
-                        />
-                      </Container>
-                    );
-                  })}
-                </Row>
+                      return (
+                        <Container
+                          key={`${field.id}${doc.id}`}
+                          width={fieldConfig.width}
+                          height="100%"
+                          borderRightWidth={1}
+                        >
+                          <ListViewDocumentFieldValueContainer
+                            value={doc.fields[field.id]}
+                          />
+                        </Container>
+                      );
+                    })}
+                  </Row>
+                </Container>
               ))}
             </Column>
           </ScrollView>
