@@ -2,7 +2,7 @@ import React from 'react';
 import { Text } from './text';
 import { StyleSheet, View } from 'react-native';
 import { Button } from './button';
-import { useTheme } from './theme';
+import { Spacer } from './spacer';
 
 interface Option<TValue = any> {
   label: string;
@@ -19,7 +19,6 @@ export function SegmentedControl<TValue = any>(
   props: SegmentedControlProps<TValue>,
 ) {
   const { value, onChange = () => {}, options = [] } = props;
-  const theme = useTheme();
 
   return (
     <View style={styles.root}>
@@ -27,18 +26,17 @@ export function SegmentedControl<TValue = any>(
         const selected = value === option.value;
 
         return (
-          <Button
-            key={option.label}
-            style={[
-              styles.control,
-              selected && {
-                backgroundColor: theme.container.color.primary,
-              },
-            ]}
-            onPress={() => onChange(option.value)}
-          >
-            <Text>{option.label}</Text>
-          </Button>
+          <>
+            <Button
+              key={option.label}
+              state={selected ? 'active' : 'default'}
+              style={styles.control}
+              onPress={() => onChange(option.value)}
+            >
+              <Text>{option.label}</Text>
+            </Button>
+            <Spacer size={4} />
+          </>
         );
       })}
     </View>

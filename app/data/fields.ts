@@ -3,6 +3,24 @@ import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import { field1, field2 } from './fake_data';
 
+export enum FieldType {
+  SingleLineText = 'SingleLineText',
+  MultiLineText = 'MultiLineText',
+  SingleSelect = 'SingleSelect',
+  MultiSelect = 'MultiSelect',
+  SingleCollaborator = 'SingleCollaborator',
+  MultiCollaborator = 'MultiCollaborator',
+  SingleDocumentLink = 'SingleDocumentLink',
+  MultiDocumentLink = 'MultiDocumentLink',
+  Date = 'Date',
+  PhoneNumber = 'PhoneNumber',
+  Email = 'Email',
+  URL = 'URL',
+  Number = 'Number',
+  Currency = 'Currency',
+  Checkbox = 'Checkbox',
+}
+
 interface BaseField {
   id: string;
   name: string;
@@ -13,89 +31,89 @@ interface BaseField {
 }
 
 export interface SingleLineTextFieldConfig {
-  type: 'singleLineText';
+  type: FieldType.SingleLineText;
 }
 export interface SingleLineTextField
   extends BaseField,
     SingleLineTextFieldConfig {}
 
 export interface MultiLineTextFieldConfig {
-  type: 'multiLineText';
+  type: FieldType.MultiLineText;
 }
 export interface MultiLineTextField
   extends BaseField,
     MultiLineTextFieldConfig {}
 
 export interface SingleSelectFieldConfig {
-  type: 'singleSelect';
+  type: FieldType.SingleSelect;
 }
 export interface SingleSelectField extends BaseField, SingleSelectFieldConfig {}
 
 export interface MultiSelectFieldConfig {
-  type: 'multiSelect';
+  type: FieldType.MultiSelect;
 }
 export interface MultiSelectField extends BaseField, MultiSelectFieldConfig {}
 
 export interface SingleCollaboratorFieldConfig {
-  type: 'singleCollaborator';
+  type: FieldType.SingleCollaborator;
 }
 export interface SingleCollaboratorField
   extends BaseField,
     SingleCollaboratorFieldConfig {}
 
 export interface MultiCollaboratorFieldConfig {
-  type: 'multiCollaborator';
+  type: FieldType.MultiCollaborator;
 }
 export interface MultiCollaboratorField
   extends BaseField,
     MultiCollaboratorFieldConfig {}
 
 export interface SingleDocumentLinkFieldConfig {
-  type: 'singleDocumentLink';
+  type: FieldType.SingleDocumentLink;
 }
 export interface SingleDocumentLinkField
   extends BaseField,
     SingleDocumentLinkFieldConfig {}
 
 export interface MultiDocumentLinkFieldConfig {
-  type: 'multiDocumentLink';
+  type: FieldType.MultiDocumentLink;
 }
 export interface MultiDocumentLinkField
   extends BaseField,
     MultiDocumentLinkFieldConfig {}
 
 export interface DateFieldConfig {
-  type: 'date';
+  type: FieldType.Date;
 }
 export interface DateField extends BaseField, DateFieldConfig {}
 
 export interface PhoneNumberFieldConfig {
-  type: 'phoneNumber';
+  type: FieldType.PhoneNumber;
 }
 export interface PhoneNumberField extends BaseField, PhoneNumberFieldConfig {}
 
 export interface EmailFieldConfig {
-  type: 'email';
+  type: FieldType.Email;
 }
 export interface EmailField extends BaseField, EmailFieldConfig {}
 
 export interface URLFieldConfig {
-  type: 'url';
+  type: FieldType.URL;
 }
 export interface URLField extends BaseField, URLFieldConfig {}
 
 export interface NumberFieldConfig {
-  type: 'number';
+  type: FieldType.Number;
 }
 export interface NumberField extends BaseField, NumberFieldConfig {}
 
 export interface CurrencyFieldConfig {
-  type: 'currency';
+  type: FieldType.Currency;
 }
 export interface CurrencyField extends BaseField, CurrencyFieldConfig {}
 
 export interface CheckboxFieldConfig {
-  type: 'checkbox';
+  type: FieldType.Checkbox;
 }
 export interface CheckboxField extends BaseField, CheckboxFieldConfig {}
 
@@ -132,8 +150,6 @@ export type Field =
   | NumberField
   | CurrencyField
   | CheckboxField;
-
-export type FieldType = Field['type'];
 
 export type FieldsState = { [id: string]: Field | undefined };
 export const fieldsState = atom<FieldsState>({

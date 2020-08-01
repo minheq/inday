@@ -3,6 +3,7 @@ import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  StyleSheet,
 } from 'react-native';
 import {
   Screen,
@@ -37,6 +38,7 @@ import {
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
+import { FieldType } from '../data/fields';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -180,7 +182,7 @@ function CollectionMenuItem(props: CollectionMenuItemProps) {
   return (
     <Button
       state={active ? 'active' : 'default'}
-      style={{ borderRadius: 'none' }}
+      style={styles.collectionMenuItem}
     >
       <Container center height={40} paddingHorizontal={16}>
         <Text>{collection.name}</Text>
@@ -231,21 +233,8 @@ function MainContent() {
         </Slide>
         <ViewDisplay view={view} />
         <Slide width={360} open={slide === 'organize'}>
-          <Container
-            padding={8}
-            width={360}
-            expanded
-            color="content"
-            borderLeftWidth={1}
-          >
-            <SegmentedControl
-              options={[
-                { label: 'Filter', value: '1' },
-                { label: 'Sort', value: '2' },
-                { label: 'Group', value: '3' },
-                { label: 'Hide', value: '4' },
-              ]}
-            />
+          <Container width={360} expanded color="content" borderLeftWidth={1}>
+            <OrganizeMenu />
           </Container>
         </Slide>
       </Row>
@@ -282,6 +271,37 @@ function ViewsMenu() {
       <Text color="muted" size="sm" bold>
         PERSONAL VIEWS
       </Text>
+    </Container>
+  );
+}
+
+function OrganizeMenu() {
+  const [tab, setTab] = React.useState(1);
+
+  return (
+    <Container padding={8}>
+      <SegmentedControl
+        onChange={setTab}
+        value={tab}
+        options={[
+          { label: 'Filter', value: 1 },
+          { label: 'Sort', value: 2 },
+          { label: 'Group', value: 3 },
+          { label: 'Hide', value: 4 },
+        ]}
+      />
+      <Spacer size={16} />
+      {tab === 1 && <FilterMenu />}
+    </Container>
+  );
+}
+
+function FilterMenu() {
+  return (
+    <Container>
+      <Button>
+        <Text>+ Add filter</Text>
+      </Button>
     </Container>
   );
 }
@@ -417,7 +437,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
       </Container>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flex: 1 }}>
         <Row flex={1}>
-          <Container color="content" width={LEFT_COLUMN_WIDTH}>
+          <Container width={LEFT_COLUMN_WIDTH}>
             <Column>
               {documentList.map((doc, i) => (
                 <Container
@@ -487,12 +507,18 @@ function ListViewDocumentFieldValueContainer(
   const { value } = props;
 
   switch (value.type) {
-    case 'singleLineText':
+    case FieldType.SingleLineText:
       return <Text>{value.value}</Text>;
-    case 'number':
+    case FieldType.Number:
       return <Text>{value.value}</Text>;
 
     default:
       return null;
   }
 }
+
+const styles = StyleSheet.create({
+  collectionMenuItem: {
+    borderRadius: 0,
+  },
+});

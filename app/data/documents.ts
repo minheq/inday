@@ -2,24 +2,25 @@ import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
 import { doc1, doc2 } from './fake_data';
+import { FieldType } from './fields';
 
 interface SingleLineTextFieldValue {
-  type: 'singleLineText';
+  type: FieldType.SingleLineText;
   value: string;
 }
 
 interface MultiLineTextFieldValue {
-  type: 'multiLineText';
+  type: FieldType.MultiLineText;
   value: string;
 }
 
 interface SingleSelectFieldValue {
-  type: 'singleSelect';
+  type: FieldType.SingleSelect;
   value: string;
 }
 
 interface MultiSelectFieldValue {
-  type: 'multiSelect';
+  type: FieldType.MultiSelect;
   value: string[];
 }
 
@@ -30,12 +31,12 @@ interface CollaboratorValue {
 }
 
 interface SingleCollaboratorFieldValue {
-  type: 'singleCollaborator';
+  type: FieldType.SingleCollaborator;
   value: CollaboratorValue;
 }
 
 interface MultiCollaboratorFieldValue {
-  type: 'multiCollaborator';
+  type: FieldType.MultiCollaborator;
   value: CollaboratorValue[];
 }
 
@@ -46,42 +47,42 @@ interface DocumentLinkValue {
 }
 
 interface SingleDocumentLinkFieldValue {
-  type: 'singleDocumentLink';
+  type: FieldType.SingleDocumentLink;
   value: DocumentLinkValue;
 }
 
 interface MultiDocumentLinkFieldValue {
-  type: 'multiDocumentLink';
+  type: FieldType.MultiDocumentLink;
   value: DocumentLinkValue[];
 }
 
 interface DateFieldValue {
-  type: 'date';
+  type: FieldType.Date;
   value: Date;
 }
 
 interface PhoneNumberFieldValue {
-  type: 'phoneNumber';
+  type: FieldType.PhoneNumber;
   value: string;
 }
 
 interface EmailFieldValue {
-  type: 'email';
+  type: FieldType.Email;
   value: string;
 }
 
 interface URLFieldValue {
-  type: 'url';
+  type: FieldType.URL;
   value: string;
 }
 
 interface NumberFieldValue {
-  type: 'number';
+  type: FieldType.Number;
   value: number;
 }
 
 interface CurrencyFieldValue {
-  type: 'currency';
+  type: FieldType.Currency;
   value: {
     amount: number;
     currency: string;
@@ -89,7 +90,7 @@ interface CurrencyFieldValue {
 }
 
 interface CheckboxFieldValue {
-  type: 'checkbox';
+  type: FieldType.Checkbox;
   value: boolean;
 }
 
