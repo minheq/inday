@@ -14,7 +14,7 @@ interface RowProps {
  * Displays its children in a vertical array.
  */
 export function Row(props: RowProps) {
-  const { children, justifyContent, alignItems, expanded } = props;
+  const { children, flex, justifyContent, alignItems, expanded } = props;
 
   return (
     <ContainerProvider direction="row">
@@ -25,6 +25,7 @@ export function Row(props: RowProps) {
           {
             justifyContent,
             alignItems,
+            flex,
           },
         ]}
       >

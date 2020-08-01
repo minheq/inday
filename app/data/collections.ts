@@ -4,6 +4,7 @@ import { RecoilKey } from './constants';
 import { fieldListQuery, Field } from './fields';
 import { Document, documentListQuery } from './documents';
 import { collection1, collection2 } from './fake_data';
+import { View, viewListQuery } from './views';
 
 export interface Collection {
   id: string;
@@ -62,6 +63,15 @@ export const collectionFieldsQuery = selectorFamily<
     }
 
     return fields;
+  },
+});
+
+export const collectionViewListQuery = selectorFamily<View[], string>({
+  key: RecoilKey.Collection,
+  get: (collectionID: string) => ({ get }) => {
+    const viewList = get(viewListQuery);
+
+    return viewList.filter((v) => v.collectionID === collectionID);
   },
 });
 

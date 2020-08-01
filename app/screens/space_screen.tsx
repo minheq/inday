@@ -15,6 +15,7 @@ import {
   IconName,
   Spacer,
   Icon,
+  SegmentedControl,
 } from '../components';
 import {
   useRoute,
@@ -32,8 +33,10 @@ import {
   useGetCollection,
   useGetCollectionFields,
   useGetCollectionDocumentList,
+  useGetCollectionViewList,
 } from '../data/store';
 import { Space } from '../data/spaces';
+import { Slide } from '../components/slide';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -98,9 +101,9 @@ function SpaceTitle(props: SpaceTitleProps) {
   const { space } = props;
 
   return (
-    <Row alignItems="center" justifyContent="center">
+    <Row alignItems="center" justifyContent="center" expanded>
       <Button>
-        <Container center height={48} paddingHorizontal={16}>
+        <Container center height={40} paddingHorizontal={16}>
           <Text>{space.name}</Text>
         </Container>
       </Button>
@@ -110,7 +113,7 @@ function SpaceTitle(props: SpaceTitleProps) {
 
 function TopMenu() {
   return (
-    <Row alignItems="center" justifyContent="flex-end">
+    <Row expanded alignItems="center" justifyContent="flex-end">
       <TopMenuItem onPress={() => {}} text="Collaborator" iconName="user" />
       <TopMenuItem onPress={() => {}} text="Automation" iconName="settings" />
       <TopMenuItem onPress={() => {}} text="More" iconName="more-horizontal" />
@@ -129,7 +132,7 @@ function TopMenuItem(props: TopMenuItemProps) {
 
   return (
     <Button onPress={onPress}>
-      <Container height={48} paddingHorizontal={16}>
+      <Container center height={40} paddingHorizontal={16}>
         <Row expanded alignItems="center">
           <Icon name={iconName} size="lg" />
           <Spacer size={8} />
@@ -187,32 +190,116 @@ function CollectionMenuItem(props: CollectionMenuItemProps) {
 }
 
 function MainContent() {
+  const [slide, setSlide] = React.useState<'views' | 'organize' | null>(null);
   const context = useContext(SpaceScreenContext);
   const space = useGetSpace(context.spaceID);
   const view = useGetView(context.viewID);
   const collections = useGetSpaceCollectionList(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
+  const handleToggleView = React.useCallback(() => {
+    if (slide !== 'views') {
+      setSlide('views');
+    } else {
+      setSlide(null);
+    }
+  }, [slide]);
+
+  const handleToggleOrganize = React.useCallback(() => {
+    if (slide !== 'organize') {
+      setSlide('organize');
+    } else {
+      setSlide(null);
+    }
+  }, [slide]);
+
   if (activeCollection === undefined) {
     throw new Error('Invalid collection');
   }
 
   return (
-    <Container>
-      <ViewBar />
-      <ViewDisplay view={view} />
+    <Container flex={1}>
+      <ViewBar
+        onToggleView={handleToggleView}
+        onToggleOrganize={handleToggleOrganize}
+      />
+      <Row flex={1}>
+        <Slide width={240} open={slide === 'views'}>
+          <Container width={240} expanded color="content" borderRightWidth={1}>
+            <ViewsMenu />
+          </Container>
+        </Slide>
+        <ViewDisplay view={view} />
+        <Slide width={360} open={slide === 'organize'}>
+          <Container
+            padding={8}
+            width={360}
+            expanded
+            color="content"
+            borderLeftWidth={1}
+          >
+            <SegmentedControl
+              options={[
+                { label: 'Filter', value: '1' },
+                { label: 'Sort', value: '2' },
+                { label: 'Group', value: '3' },
+                { label: 'Hide', value: '4' },
+              ]}
+            />
+          </Container>
+        </Slide>
+      </Row>
     </Container>
   );
 }
 
-function ViewBar() {
+function ViewsMenu() {
+  const context = useContext(SpaceScreenContext);
+  const activeView = useGetView(context.viewID);
+  const viewList = useGetCollectionViewList(activeView.collectionID);
+
+  return (
+    <Container padding={8} color="content" borderRightWidth={1}>
+      <Text color="muted" size="sm" bold>
+        TEAM VIEWS
+      </Text>
+      <Spacer size={16} />
+      {viewList.map((v) => (
+        <>
+          <Button state={activeView.id === v.id ? 'active' : 'default'}>
+            <Container height={40} paddingHorizontal={16}>
+              <Row expanded alignItems="center">
+                <Icon name="layout" />
+                <Spacer size={8} />
+                <Text>{v.name}</Text>
+              </Row>
+            </Container>
+          </Button>
+          <Spacer size={4} />
+        </>
+      ))}
+      <Spacer size={32} />
+      <Text color="muted" size="sm" bold>
+        PERSONAL VIEWS
+      </Text>
+    </Container>
+  );
+}
+
+interface ViewBarProps {
+  onToggleView: () => void;
+  onToggleOrganize: () => void;
+}
+
+function ViewBar(props: ViewBarProps) {
+  const { onToggleView, onToggleOrganize } = props;
   const context = useContext(SpaceScreenContext);
   const view = useGetView(context.viewID);
 
   return (
     <Container borderBottomWidth={1} color="content" padding={4}>
       <Row alignItems="center" justifyContent="space-between">
-        <Button>
+        <Button onPress={onToggleView}>
           <Container center height={40} paddingHorizontal={16}>
             <Row alignItems="center">
               <Icon name="layout" />
@@ -221,7 +308,7 @@ function ViewBar() {
             </Row>
           </Container>
         </Button>
-        <Button>
+        <Button onPress={onToggleOrganize}>
           <Container center height={40} paddingHorizontal={16}>
             <Text>Organize</Text>
           </Container>

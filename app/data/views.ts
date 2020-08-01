@@ -1,7 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
-import { view1 } from './fake_data';
+import { view1, view2 } from './fake_data';
 
 interface BaseView {
   id: string;
@@ -40,6 +40,7 @@ export const viewsState = atom<ViewsState>({
   key: RecoilKey.Views,
   default: {
     [view1.id]: view1,
+    [view2.id]: view2,
   },
 });
 

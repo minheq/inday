@@ -50,7 +50,27 @@ export const field2: Field = {
 
 export const view1: View = {
   id: '1',
-  name: 'List view',
+  name: 'All opportunities',
+  type: 'list',
+  collectionID: collection1.id,
+  fieldsOrder: [field1.id, field2.id],
+  fieldsConfig: {
+    [field1.id]: {
+      visible: true,
+      width: 240,
+    },
+    [field2.id]: {
+      visible: true,
+      width: 180,
+    },
+  },
+  updatedAt: new Date(),
+  createdAt: new Date(),
+};
+
+export const view2: View = {
+  id: '2',
+  name: 'Grouped by owner',
   type: 'list',
   collectionID: collection1.id,
   fieldsOrder: [field1.id, field2.id],

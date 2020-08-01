@@ -8,6 +8,7 @@ import {
   collectionsState,
   collectionFieldsQuery,
   collectionDocumentListQuery,
+  collectionViewListQuery,
 } from './collections';
 import { workspaceState } from './workspace';
 import {
@@ -221,6 +222,7 @@ export function useGetCollection(collectionID: string) {
 
 export function useGetCollectionFields(collectionID: string) {
   const fields = useRecoilValue(collectionFieldsQuery(collectionID));
+
   return fields;
 }
 
@@ -228,7 +230,14 @@ export function useGetCollectionDocumentList(collectionID: string) {
   const documentList = useRecoilValue(
     collectionDocumentListQuery(collectionID),
   );
+
   return documentList;
+}
+
+export function useGetCollectionViewList(collectionID: string) {
+  const viewList = useRecoilValue(collectionViewListQuery(collectionID));
+
+  return viewList;
 }
 
 export function useCreateCollection() {
