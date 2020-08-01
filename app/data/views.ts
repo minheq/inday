@@ -2,7 +2,7 @@ import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
 import { view1, view2 } from './fake_data';
-import { FieldType } from './fields';
+import { FieldType } from './constants';
 
 type TextFilterCondition =
   | 'contains'

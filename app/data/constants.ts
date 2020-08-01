@@ -28,3 +28,21 @@ export enum StorageKey {
 }
 
 export enum StorageKeyPrefix {}
+
+export enum FieldType {
+  SingleLineText = 'SingleLineText',
+  MultiLineText = 'MultiLineText',
+  SingleSelect = 'SingleSelect',
+  MultiSelect = 'MultiSelect',
+  SingleCollaborator = 'SingleCollaborator',
+  MultiCollaborator = 'MultiCollaborator',
+  SingleDocumentLink = 'SingleDocumentLink',
+  MultiDocumentLink = 'MultiDocumentLink',
+  Date = 'Date',
+  PhoneNumber = 'PhoneNumber',
+  Email = 'Email',
+  URL = 'URL',
+  Number = 'Number',
+  Currency = 'Currency',
+  Checkbox = 'Checkbox',
+}

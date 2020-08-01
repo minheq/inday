@@ -38,7 +38,7 @@ import {
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
-import { FieldType } from '../data/fields';
+import { FieldType } from '../data/constants';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 

@@ -1,8 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
-import { RecoilKey } from './constants';
+import { FieldType, RecoilKey } from './constants';
 import { doc1, doc2 } from './fake_data';
-import { FieldType } from './fields';
 
 interface SingleLineTextFieldValue {
   type: FieldType.SingleLineText;

@@ -1,25 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
-import { RecoilKey } from './constants';
+import { RecoilKey, FieldType } from './constants';
 import { field1, field2 } from './fake_data';
-
-export enum FieldType {
-  SingleLineText = 'SingleLineText',
-  MultiLineText = 'MultiLineText',
-  SingleSelect = 'SingleSelect',
-  MultiSelect = 'MultiSelect',
-  SingleCollaborator = 'SingleCollaborator',
-  MultiCollaborator = 'MultiCollaborator',
-  SingleDocumentLink = 'SingleDocumentLink',
-  MultiDocumentLink = 'MultiDocumentLink',
-  Date = 'Date',
-  PhoneNumber = 'PhoneNumber',
-  Email = 'Email',
-  URL = 'URL',
-  Number = 'Number',
-  Currency = 'Currency',
-  Checkbox = 'Checkbox',
-}
 
 interface BaseField {
   id: string;
