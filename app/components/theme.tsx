@@ -43,7 +43,7 @@ export interface Tokens {
   };
 }
 export const tokens: Tokens = {
-  radius: 8,
+  radius: 12,
   fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI",
   "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
   "Helvetica Neue", sans-serif`,

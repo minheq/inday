@@ -1,14 +1,28 @@
-import React from 'react';
+import React, { useCallback, createContext, useContext } from 'react';
 import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import { Screen, Container, Text, Row, Column } from '../components';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import {
+  Screen,
+  Container,
+  Text,
+  Row,
+  Column,
+  BackButton,
+  Button,
+  IconName,
+  Spacer,
+  Icon,
+} from '../components';
+import {
+  useRoute,
+  RouteProp,
+  NavigationHelpers,
+} from '@react-navigation/native';
 import { RootStackParamsMap } from '../linking';
 import { View, ListView } from '../data/views';
-import { Space } from '../data/spaces';
 import { DocumentFieldValue } from '../data/documents';
 import { Collection } from '../data/collections';
 import {
@@ -19,53 +33,199 @@ import {
   useGetCollectionFields,
   useGetCollectionDocumentList,
 } from '../data/store';
+import { Space } from '../data/spaces';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
+const SpaceScreenContext = createContext({
+  spaceID: '1',
+  viewID: '1',
+});
+
 export function SpaceScreen() {
   const route = useRoute<SpaceScreenParams>();
-  const space = useGetSpace(route.params.spaceID);
-  const view = useGetView(route.params.viewID);
-  const collections = useGetSpaceCollectionList(space.id);
 
   return (
-    <Screen>
-      <SpaceHeader space={space} />
-      <CollectionsMenu collections={collections} />
-      <ViewDisplay view={view} />
-    </Screen>
+    <SpaceScreenContext.Provider
+      value={{ spaceID: route.params.spaceID, viewID: route.params.viewID }}
+    >
+      <Screen>
+        <CollectionsMenu />
+        <MainContent />
+      </Screen>
+    </SpaceScreenContext.Provider>
   );
 }
 
-interface SpaceHeaderProps {
+interface SpaceScreenHeaderProps {
+  route: RouteProp<RootStackParamsMap, 'Space'>;
+  navigation: NavigationHelpers<RootStackParamsMap>;
+}
+
+export function SpaceScreenHeader(props: SpaceScreenHeaderProps) {
+  const { route, navigation } = props;
+
+  const space = useGetSpace(route.params.spaceID);
+
+  const handlePressBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const canGoBack = navigation.canGoBack();
+
+  return (
+    <Row>
+      <Container flex={1}>
+        <Row alignItems="center">
+          {canGoBack && <BackButton onPress={handlePressBack} />}
+        </Row>
+      </Container>
+      <Container flex={1}>
+        <SpaceTitle space={space} />
+      </Container>
+      <Container flex={1}>
+        <TopMenu />
+      </Container>
+    </Row>
+  );
+}
+
+interface SpaceTitleProps {
   space: Space;
 }
 
-function SpaceHeader(props: SpaceHeaderProps) {
+function SpaceTitle(props: SpaceTitleProps) {
   const { space } = props;
 
   return (
-    <Container>
-      <Text>{space.name}</Text>
+    <Row alignItems="center" justifyContent="center">
+      <Button>
+        <Container center height={48} paddingHorizontal={16}>
+          <Text>{space.name}</Text>
+        </Container>
+      </Button>
+    </Row>
+  );
+}
+
+function TopMenu() {
+  return (
+    <Row alignItems="center" justifyContent="flex-end">
+      <TopMenuItem onPress={() => {}} text="Collaborator" iconName="user" />
+      <TopMenuItem onPress={() => {}} text="Automation" iconName="settings" />
+      <TopMenuItem onPress={() => {}} text="More" iconName="more-horizontal" />
+    </Row>
+  );
+}
+
+interface TopMenuItemProps {
+  onPress: () => void;
+  text: string;
+  iconName: IconName;
+}
+
+function TopMenuItem(props: TopMenuItemProps) {
+  const { onPress, text, iconName } = props;
+
+  return (
+    <Button onPress={onPress}>
+      <Container height={48} paddingHorizontal={16}>
+        <Row expanded alignItems="center">
+          <Icon name={iconName} size="lg" />
+          <Spacer size={8} />
+          <Text>{text}</Text>
+        </Row>
+      </Container>
+    </Button>
+  );
+}
+
+function CollectionsMenu() {
+  const context = useContext(SpaceScreenContext);
+  const space = useGetSpace(context.spaceID);
+  const view = useGetView(context.viewID);
+  const collections = useGetSpaceCollectionList(space.id);
+  const activeCollection = collections.find((c) => c.id === view.collectionID);
+
+  if (activeCollection === undefined) {
+    throw new Error('Invalid collection');
+  }
+
+  return (
+    <Container color="content" borderBottomWidth={1}>
+      <Row>
+        {collections.map((collection) => (
+          <CollectionMenuItem
+            active={activeCollection.id === collection.id}
+            key={collection.id}
+            collection={collection}
+          />
+        ))}
+      </Row>
     </Container>
   );
 }
 
-interface CollectionsMenuProps {
-  collections: Collection[];
+interface CollectionMenuItemProps {
+  collection: Collection;
+  active: boolean;
 }
 
-function CollectionsMenu(props: CollectionsMenuProps) {
-  const { collections } = props;
+function CollectionMenuItem(props: CollectionMenuItemProps) {
+  const { collection, active } = props;
+
+  return (
+    <Button
+      state={active ? 'active' : 'default'}
+      style={{ borderRadius: 'none' }}
+    >
+      <Container center height={40} paddingHorizontal={16}>
+        <Text>{collection.name}</Text>
+      </Container>
+    </Button>
+  );
+}
+
+function MainContent() {
+  const context = useContext(SpaceScreenContext);
+  const space = useGetSpace(context.spaceID);
+  const view = useGetView(context.viewID);
+  const collections = useGetSpaceCollectionList(space.id);
+  const activeCollection = collections.find((c) => c.id === view.collectionID);
+
+  if (activeCollection === undefined) {
+    throw new Error('Invalid collection');
+  }
 
   return (
     <Container>
-      <Row>
-        {collections.map((collection) => (
-          <Container key={collection.id}>
-            <Text>{collection.name}</Text>
+      <ViewBar />
+      <ViewDisplay view={view} />
+    </Container>
+  );
+}
+
+function ViewBar() {
+  const context = useContext(SpaceScreenContext);
+  const view = useGetView(context.viewID);
+
+  return (
+    <Container borderBottomWidth={1} color="content" padding={4}>
+      <Row alignItems="center" justifyContent="space-between">
+        <Button>
+          <Container center height={40} paddingHorizontal={16}>
+            <Row alignItems="center">
+              <Icon name="layout" />
+              <Spacer size={8} />
+              <Text>{view.name}</Text>
+            </Row>
           </Container>
-        ))}
+        </Button>
+        <Button>
+          <Container center height={40} paddingHorizontal={16}>
+            <Text>Organize</Text>
+          </Container>
+        </Button>
       </Row>
     </Container>
   );
@@ -136,7 +296,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
       <Container height={FIELD_HEIGHT}>
         <Row>
           <Container
-            color="content"
+            color="tint"
             width={LEFT_COLUMN_WIDTH}
             height={FIELD_HEIGHT}
             borderBottomWidth={1}
@@ -153,12 +313,13 @@ function ListViewDisplay(props: ListViewDisplayProps) {
 
               return (
                 <Container
-                  color="content"
+                  color="tint"
                   key={field.id}
                   height={FIELD_HEIGHT}
                   width={fieldConfig.width}
                   borderBottomWidth={1}
                   borderRightWidth={1}
+                  padding={8}
                 >
                   <Text>{field.name}</Text>
                 </Container>
@@ -173,9 +334,11 @@ function ListViewDisplay(props: ListViewDisplayProps) {
             <Column>
               {documentList.map((doc, i) => (
                 <Container
+                  key={doc.id}
                   borderBottomWidth={1}
                   borderRightWidth={1}
                   height={DOCUMENT_HEIGHT}
+                  center
                 >
                   <Text>{i + 1}</Text>
                 </Container>
@@ -192,6 +355,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
             <Column>
               {documentList.map((doc) => (
                 <Container
+                  key={doc.id}
                   color="content"
                   borderBottomWidth={1}
                   height={DOCUMENT_HEIGHT}
@@ -206,6 +370,8 @@ function ListViewDisplay(props: ListViewDisplayProps) {
                           width={fieldConfig.width}
                           height="100%"
                           borderRightWidth={1}
+                          padding={4}
+                          paddingHorizontal={8}
                         >
                           <ListViewDocumentFieldValueContainer
                             value={doc.fields[field.id]}

@@ -12,7 +12,7 @@ export function BackButton(props: BackButtonProps) {
 
   return (
     <Button onPress={onPress}>
-      <Container center width={40} height={40}>
+      <Container center width={32} height={32}>
         <Icon name="arrow-left" size="xl" />
       </Container>
     </Button>
