@@ -5,168 +5,30 @@ import { view1, view2 } from './fake_data';
 import { FieldType } from './constants';
 import { FieldID, fieldQuery } from './fields';
 import {
+  assertNumberFieldValue,
+  assertSingleLineTextFieldValue,
   SingleLineTextFieldValue,
   Document,
   DocumentFieldValue,
+  NumberFieldValue,
 } from './documents';
 import { collectionDocumentsQuery } from './collections';
-
-type TextFilterCondition =
-  | 'contains'
-  | 'does_not_contain'
-  | 'is'
-  | 'is_not'
-  | 'is_empty'
-  | 'is_not_empty';
-
-interface SingleLineTextFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-interface MultiLineTextFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-type SingleSelectFilterCondition =
-  | 'is'
-  | 'is_not'
-  | 'is_any_of'
-  | 'is_none_of'
-  | 'is_empty'
-  | 'is_not_empty';
-
-interface SingleSelectFilter {
-  condition: SingleSelectFilterCondition;
-  value: string;
-}
-
-type MultiSelectFilterCondition =
-  | 'has_any_of'
-  | 'has_all_of'
-  | 'is_exactly'
-  | 'has_none_of'
-  | 'is_empty'
-  | 'is_not_empty';
-
-interface MultiSelectFilter {
-  condition: MultiSelectFilterCondition;
-  value: string[];
-}
-
-interface SingleCollaboratorFilter {
-  condition: SingleSelectFilterCondition;
-  value: string;
-}
-
-interface MultiCollaboratorFilter {
-  condition: MultiSelectFilterCondition;
-  value: string[];
-}
-
-type DocumentLinkFilterCondition =
-  | 'contains'
-  | 'does_not_contain'
-  | 'is_empty'
-  | 'is_not_empty';
-
-interface SingleDocumentLinkFilter {
-  condition: DocumentLinkFilterCondition;
-  value: string;
-}
-
-interface MultiDocumentLinkFilter {
-  condition: DocumentLinkFilterCondition;
-  value: string;
-}
-
-type DateFilterCondition =
-  | 'is'
-  | 'is_within'
-  | 'is_before'
-  | 'is_after'
-  | 'is_on_or_before'
-  | 'is_on_or_after'
-  | 'is_not'
-  | 'is_empty'
-  | 'is_not_empty';
-
-interface DateFilter {
-  condition: DateFilterCondition;
-  value: Date;
-}
-
-interface PhoneNumberFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-interface EmailFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-interface URLFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-type NumberFilterCondition =
-  | 'equal'
-  | 'not_equal'
-  | 'less_than'
-  | 'greater_than'
-  | 'less_than_or_equal'
-  | 'greater_than_or_equal'
-  | 'is_empty'
-  | 'is_not_empty';
-
-interface NumberFilter {
-  condition: NumberFilterCondition;
-  value: number;
-}
-
-interface CurrencyFilter {
-  condition: NumberFilterCondition;
-  value: {
-    amount: number;
-    currency: string;
-  };
-}
-
-interface CheckboxFilter {
-  value: boolean;
-}
-
-type Filter =
-  | SingleLineTextFilter
-  | MultiLineTextFilter
-  | SingleSelectFilter
-  | MultiSelectFilter
-  | SingleCollaboratorFilter
-  | MultiCollaboratorFilter
-  | SingleDocumentLinkFilter
-  | MultiDocumentLinkFilter
-  | DateFilter
-  | PhoneNumberFilter
-  | EmailFilter
-  | URLFilter
-  | NumberFilter
-  | CurrencyFilter
-  | CheckboxFilter;
-
-interface FieldFilter {
-  fieldID: string;
-  value: Filter;
-}
+import {
+  Filter,
+  TextFilterCondition,
+  assertNumberFieldFilter,
+  assertSingleLineTextFieldFilter,
+  SingleLineTextFieldFilter,
+  NumberFieldFilter,
+  NumberFilterCondition,
+} from './filters';
 
 export type ViewID = string;
 
 interface BaseView {
   id: ViewID;
   name: string;
-  filters: FieldFilter[];
+  filters: [FieldID, Filter][];
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
@@ -235,54 +97,159 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
     const documents = get(collectionDocumentsQuery(view.collectionID));
     const { filters } = view;
 
-    let filteredDocuments = documents;
+    let finalDocuments = documents;
 
-    for (const filter of filters) {
-      const { fieldID } = filter;
+    // TODO: Apply view. List, Board, Calendar
+
+    // Apply filters
+    for (const [fieldID, filter] of filters) {
       const field = get(fieldQuery(fieldID));
 
-      filteredDocuments = filteredDocuments.filter((doc) => {
-        if (field.type === FieldType.SingleLineText) {
-          const fieldValue = getDocumentSingleTextValue(doc.fields[fieldID]);
-          const filterValue = getSingleTextFilter(filter.value);
+      finalDocuments = finalDocuments.filter((doc) => {
+        const applyFilter = applyFilterMap[field.type];
 
-          if (filterValue.condition === 'contains') {
-            return fieldValue.includes(filterValue.value);
-          } else if (filterValue.condition === 'does_not_contain') {
-            return !fieldValue.includes(filterValue.value);
-          } else if (filterValue.condition === 'is') {
-            return fieldValue === filterValue.value;
-          } else if (filterValue.condition === 'is_empty') {
-            return fieldValue === '';
-          } else if (filterValue.condition === 'is_not') {
-            return fieldValue !== filterValue.value;
-          } else if (filterValue.condition === 'is_not_empty') {
-            return fieldValue !== '';
-          }
-
-          return false;
-        }
+        return applyFilter(doc.fields[fieldID], filter);
       });
     }
 
-    return filteredDocuments;
+    // TODO: Apply sorting
+
+    // TODO: Apply grouping
+
+    return finalDocuments;
   },
 });
 
-function getDocumentSingleTextValue(
-  value: DocumentFieldValue,
-): SingleLineTextFieldValue {
-  if (typeof value !== 'string') {
-    throw new Error('');
-  }
+const applyFilterMap: {
+  [fieldType in FieldType]: (
+    value: DocumentFieldValue | null,
+    filter: Filter,
+  ) => boolean;
+} = {
+  [FieldType.SingleLineText]: (value, filter) => {
+    assertSingleLineTextFieldValue(value);
+    assertSingleLineTextFieldFilter(filter);
 
-  return value;
+    return bySingleLineTextField(value, filter);
+  },
+  [FieldType.MultiLineText]: (value, filter) => {
+    assertSingleLineTextFieldValue(value);
+    assertSingleLineTextFieldFilter(filter);
+
+    return bySingleLineTextField(value, filter);
+  },
+  [FieldType.Number]: (value, filter) => {
+    assertNumberFieldValue(value);
+    assertNumberFieldFilter(filter);
+
+    return byNumberField(value, filter);
+  },
+  [FieldType.SingleSelect]: (value, filter) => {
+    return true;
+  },
+  [FieldType.MultiSelect]: (value, filter) => {
+    return true;
+  },
+  [FieldType.SingleCollaborator]: (value, filter) => {
+    return true;
+  },
+  [FieldType.MultiCollaborator]: (value, filter) => {
+    return true;
+  },
+  [FieldType.SingleDocumentLink]: (value, filter) => {
+    return true;
+  },
+  [FieldType.MultiDocumentLink]: (value, filter) => {
+    return true;
+  },
+  [FieldType.Date]: (value, filter) => {
+    return true;
+  },
+  [FieldType.PhoneNumber]: (value, filter) => {
+    return true;
+  },
+  [FieldType.Email]: (value, filter) => {
+    return true;
+  },
+  [FieldType.URL]: (value, filter) => {
+    return true;
+  },
+  [FieldType.Currency]: (value, filter) => {
+    return true;
+  },
+  [FieldType.Checkbox]: (value, filter) => {
+    return true;
+  },
+};
+
+function byNumberField(
+  value: NumberFieldValue | null,
+  filter: NumberFieldFilter,
+) {
+  return byNumberFilterCondition(value, filter.condition, filter.value);
 }
 
-function getSingleTextFilter(value: Filter): SingleLineTextFilter {
-  if (typeof value !== 'string') {
-    throw new Error('');
+function byNumberFilterCondition(
+  value: number | null,
+  condition: NumberFilterCondition,
+  filterValue: number,
+): boolean {
+  if (value !== null) {
+    if (condition === 'equal') {
+      return value === filterValue;
+    } else if (condition === 'not_equal') {
+      return value !== filterValue;
+    } else if (condition === 'less_than') {
+      return value < filterValue;
+    } else if (condition === 'greater_than') {
+      return value > filterValue;
+    } else if (condition === 'less_than_or_equal') {
+      return value <= filterValue;
+    } else if (condition === 'greater_than_or_equal') {
+      return value >= filterValue;
+    } else if (condition === 'is_not_empty') {
+      return true;
+    }
+  } else {
+    if (condition === 'is_empty') {
+      return true;
+    }
   }
 
-  return value;
+  return false;
+}
+
+function bySingleLineTextField(
+  value: SingleLineTextFieldValue | null,
+  filter: SingleLineTextFieldFilter,
+) {
+  return byTextFilterCondition(value, filter.condition, filter.value);
+}
+
+function byTextFilterCondition(
+  value: string | null,
+  condition: TextFilterCondition,
+  filterValue: string,
+): boolean {
+  if (value !== null) {
+    if (condition === 'contains') {
+      return value.includes(filterValue);
+    } else if (condition === 'does_not_contain') {
+      return !value.includes(filterValue);
+    } else if (condition === 'is') {
+      return value === filterValue;
+    } else if (condition === 'is_empty') {
+      return value === '';
+    } else if (condition === 'is_not') {
+      return value !== filterValue;
+    } else if (condition === 'is_not_empty') {
+      return value !== '';
+    }
+  } else {
+    if (condition === 'is_empty') {
+      return true;
+    }
+  }
+
+  return false;
 }

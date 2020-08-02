@@ -18,10 +18,7 @@ export type PhoneNumberFieldValue = string;
 export type EmailFieldValue = string;
 export type URLFieldValue = string;
 export type NumberFieldValue = number;
-export type CurrencyFieldValue = {
-  amount: number;
-  currency: string;
-};
+export type CurrencyFieldValue = number;
 
 type CheckboxFieldValue = boolean;
 
@@ -49,7 +46,7 @@ export interface Document {
   createdAt: Date;
   updatedAt: Date;
   fields: {
-    [fieldID: string]: DocumentFieldValue;
+    [fieldID: string]: DocumentFieldValue | null;
   };
   collectionID: string;
 }
@@ -85,3 +82,191 @@ export const documentQuery = selectorFamily<Document, string>({
     return document;
   },
 });
+
+export function assertSingleLineTextFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is SingleLineTextFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected SingleLineTextFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertMultiLineTextFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is MultiLineTextFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected MultiLineTextFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertSingleSelectFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is SingleSelectFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected SingleSelectFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertMultiSelectFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is MultiSelectFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected MultiSelectFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertSingleCollaboratorFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is SingleCollaboratorFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected SingleCollaboratorFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertMultiCollaboratorFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is MultiCollaboratorFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected MultiCollaboratorFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertSingleDocumentLinkFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is SingleDocumentLinkFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected SingleDocumentLinkFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertMultiDocumentLinkFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is MultiDocumentLinkFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected MultiDocumentLinkFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertDateFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is DateFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (!(value instanceof Date)) {
+    throw new Error(`Expected DateFieldValue to be Date. Receive ${value}`);
+  }
+}
+
+export function assertPhoneNumberFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is PhoneNumberFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected PhoneNumberFieldValue to be string. Receive ${value}`,
+    );
+  }
+}
+
+export function assertEmailFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is EmailFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(`Expected EmailFieldValue to be string. Receive ${value}`);
+  }
+}
+
+export function assertURLFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is URLFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(`Expected URLFieldValue to be string. Receive ${value}`);
+  }
+}
+
+export function assertNumberFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is NumberFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'number') {
+    throw new Error(`Expected NumberFieldValue to be number. Receive ${value}`);
+  }
+}
+
+export function assertCurrencyFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is CurrencyFieldValue | null {
+  if (value === null) {
+    return;
+  }
+
+  if (typeof value !== 'number') {
+    throw new Error(
+      `Expected CurrencyFieldValue to be number. Receive ${value}`,
+    );
+  }
+}

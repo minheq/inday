@@ -2,6 +2,7 @@ import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey, FieldType } from './constants';
 import { field1, field2 } from './fake_data';
+import { CollaboratorID, DocumentID } from './documents';
 
 export type FieldID = string;
 
@@ -16,6 +17,7 @@ interface BaseField {
 
 export interface SingleLineTextFieldConfig {
   type: FieldType.SingleLineText;
+  default: string;
 }
 export interface SingleLineTextField
   extends BaseField,
@@ -23,23 +25,34 @@ export interface SingleLineTextField
 
 export interface MultiLineTextFieldConfig {
   type: FieldType.MultiLineText;
+  richText: boolean;
 }
 export interface MultiLineTextField
   extends BaseField,
     MultiLineTextFieldConfig {}
 
+interface SelectOption {
+  value: string;
+  color: string;
+}
+
 export interface SingleSelectFieldConfig {
   type: FieldType.SingleSelect;
+  options: SelectOption[];
+  order: string[];
 }
 export interface SingleSelectField extends BaseField, SingleSelectFieldConfig {}
 
 export interface MultiSelectFieldConfig {
   type: FieldType.MultiSelect;
+  options: SelectOption[];
+  order: string[];
 }
 export interface MultiSelectField extends BaseField, MultiSelectFieldConfig {}
 
 export interface SingleCollaboratorFieldConfig {
   type: FieldType.SingleCollaborator;
+  options: CollaboratorID[];
 }
 export interface SingleCollaboratorField
   extends BaseField,
@@ -47,6 +60,7 @@ export interface SingleCollaboratorField
 
 export interface MultiCollaboratorFieldConfig {
   type: FieldType.MultiCollaborator;
+  options: CollaboratorID[];
 }
 export interface MultiCollaboratorField
   extends BaseField,
@@ -54,6 +68,7 @@ export interface MultiCollaboratorField
 
 export interface SingleDocumentLinkFieldConfig {
   type: FieldType.SingleDocumentLink;
+  options: DocumentID[];
 }
 export interface SingleDocumentLinkField
   extends BaseField,
@@ -61,6 +76,7 @@ export interface SingleDocumentLinkField
 
 export interface MultiDocumentLinkFieldConfig {
   type: FieldType.MultiDocumentLink;
+  options: DocumentID[];
 }
 export interface MultiDocumentLinkField
   extends BaseField,
@@ -68,6 +84,9 @@ export interface MultiDocumentLinkField
 
 export interface DateFieldConfig {
   type: FieldType.Date;
+  format: string;
+  includeTime: boolean;
+  timeFormat: '12hour' | '24hour';
 }
 export interface DateField extends BaseField, DateFieldConfig {}
 
@@ -86,18 +105,31 @@ export interface URLFieldConfig {
 }
 export interface URLField extends BaseField, URLFieldConfig {}
 
-export interface NumberFieldConfig {
+export interface DecimalFieldConfig {
   type: FieldType.Number;
+  default: number;
+  format: 'decimal';
+  precision: number;
 }
-export interface NumberField extends BaseField, NumberFieldConfig {}
+export interface IntegerFieldConfig {
+  type: FieldType.Number;
+  default: number;
+  format: 'integer';
+}
+export type NumberFieldConfig = DecimalFieldConfig | IntegerFieldConfig;
+export type NumberField = BaseField & NumberFieldConfig;
 
 export interface CurrencyFieldConfig {
   type: FieldType.Currency;
+  currency: string;
+  precision: number;
+  allowNegative: boolean;
 }
 export interface CurrencyField extends BaseField, CurrencyFieldConfig {}
 
 export interface CheckboxFieldConfig {
   type: FieldType.Checkbox;
+  emoji: string;
 }
 export interface CheckboxField extends BaseField, CheckboxFieldConfig {}
 
