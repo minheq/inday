@@ -54,7 +54,7 @@ export const view1: View = {
   name: 'All opportunities',
   type: 'list',
   collectionID: collection1.id,
-  filterList: [],
+  filters: [],
   fieldsOrder: [field1.id, field2.id],
   fieldsConfig: {
     [field1.id]: {
@@ -75,7 +75,7 @@ export const view2: View = {
   name: 'Grouped by owner',
   type: 'list',
   collectionID: collection1.id,
-  filterList: [],
+  filters: [],
   fieldsOrder: [field1.id, field2.id],
   fieldsConfig: {
     [field1.id]: {

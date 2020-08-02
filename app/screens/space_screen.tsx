@@ -18,6 +18,7 @@ import {
   Icon,
   SegmentedControl,
   Picker,
+  Option,
 } from '../components';
 import {
   useRoute,
@@ -31,18 +32,18 @@ import { Collection } from '../data/collections';
 import {
   useGetSpace,
   useGetView,
-  useGetSpaceCollectionList,
+  useGetSpaceCollections,
   useGetCollection,
+  useGetCollectionDocuments,
+  useGetCollectionViews,
   useGetCollectionFields,
-  useGetCollectionDocumentList,
-  useGetCollectionViewList,
-  useGetCollectionFieldList,
+  useGetCollectionFieldsByID,
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
 import { FieldType } from '../data/constants';
 import { first } from '../../lib/data_structures/arrays';
-import { FieldID } from '../data/fields';
+import { FieldID, Field } from '../data/fields';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -156,7 +157,7 @@ function CollectionsMenu() {
   const context = useContext(SpaceScreenContext);
   const space = useGetSpace(context.spaceID);
   const view = useGetView(context.viewID);
-  const collections = useGetSpaceCollectionList(space.id);
+  const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   if (activeCollection === undefined) {
@@ -205,7 +206,7 @@ function MainContent() {
   const context = useContext(SpaceScreenContext);
   const space = useGetSpace(context.spaceID);
   const view = useGetView(context.viewID);
-  const collections = useGetSpaceCollectionList(space.id);
+  const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   const handleToggleView = React.useCallback(() => {
@@ -254,7 +255,7 @@ function MainContent() {
 function ViewsMenu() {
   const context = useContext(SpaceScreenContext);
   const activeView = useGetView(context.viewID);
-  const viewList = useGetCollectionViewList(activeView.collectionID);
+  const views = useGetCollectionViews(activeView.collectionID);
 
   return (
     <Container padding={8} color="content" borderRightWidth={1}>
@@ -262,7 +263,7 @@ function ViewsMenu() {
         TEAM VIEWS
       </Text>
       <Spacer size={16} />
-      {viewList.map((v) => (
+      {views.map((v) => (
         <>
           <Button state={activeView.id === v.id ? 'active' : 'default'}>
             <Container height={40} paddingHorizontal={16}>
@@ -318,7 +319,8 @@ function FilterMenu() {
 
 function AddFilter() {
   const context = useContext(SpaceScreenContext);
-  const fields = useGetCollectionFieldList(context.collectionID);
+  const fieldsByID = useGetCollectionFieldsByID(context.collectionID);
+  const fields = useGetCollectionFields(context.collectionID);
   const firstFieldID = first(fields).id;
   const [selectedFieldID, setSelectedFieldID] = React.useState(firstFieldID);
 
@@ -333,6 +335,8 @@ function AddFilter() {
     [firstFieldID],
   );
 
+  const selectedField = fieldsByID[selectedFieldID];
+
   return (
     <Container>
       <Picker
@@ -342,6 +346,69 @@ function AddFilter() {
           label: f.name,
           value: f.id,
         }))}
+      />
+      <Spacer size={4} />
+      <FilterConditionInput field={selectedField} />
+    </Container>
+  );
+}
+
+interface FilterConditionInputProps {
+  field: Field;
+}
+
+function FilterConditionInput(props: FilterConditionInputProps) {
+  const { field } = props;
+
+  switch (field.type) {
+    case FieldType.SingleLineText:
+      return <TextFilterConditionInput />;
+    case FieldType.Number:
+      return <NumberFilterConditionInput />;
+    default:
+      return null;
+  }
+}
+
+function TextFilterConditionInput() {
+  const options = [
+    { value: 'contains', label: 'contains' },
+    { value: 'does_not_contain', label: 'does not contain' },
+    { value: 'is', label: 'is' },
+    { value: 'is_not', label: 'is not' },
+    { value: 'is_empty', label: 'is empty' },
+    { value: 'is_not_empty', label: 'is not empty' },
+  ];
+
+  return (
+    <Container>
+      <Picker
+        // value={selectedFieldID}
+        // onChange={handleChangeField}
+        options={options}
+      />
+    </Container>
+  );
+}
+
+function NumberFilterConditionInput() {
+  const options: Option<string>[] = [
+    { value: 'equal', label: 'equal' },
+    { value: 'not_equal', label: 'not equal' },
+    { value: 'less_than', label: 'less than' },
+    { value: 'greater_than', label: 'greater than' },
+    { value: 'less_than_or_equal', label: 'less than or equal' },
+    { value: 'greater_than_or_equal', label: 'greater than or equal' },
+    { value: 'is_empty', label: 'is empty' },
+    { value: 'is_not_empty', label: 'is not empty' },
+  ];
+
+  return (
+    <Container>
+      <Picker
+        // value={selectedFieldID}
+        // onChange={handleChangeField}
+        options={options}
       />
     </Container>
   );
@@ -404,8 +471,8 @@ const FIELD_HEIGHT = 40;
 function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
   const collection = useGetCollection(view.collectionID);
-  const fields = useGetCollectionFields(collection.id);
-  const documentList = useGetCollectionDocumentList(collection.id);
+  const fieldsByID = useGetCollectionFieldsByID(collection.id);
+  const documents = useGetCollectionDocuments(collection.id);
   const { fieldsOrder, fieldsConfig } = view;
 
   const headerScrollView = React.useRef<ScrollView>(null);
@@ -437,7 +504,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
 
   const fieldList = fieldsOrder
     .filter((fieldID) => fieldsConfig[fieldID].visible)
-    .map((fieldID) => fields[fieldID]);
+    .map((fieldID) => fieldsByID[fieldID]);
 
   return (
     <Container flex={1}>
@@ -480,7 +547,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
         <Row flex={1}>
           <Container width={LEFT_COLUMN_WIDTH}>
             <Column>
-              {documentList.map((doc, i) => (
+              {documents.map((doc, i) => (
                 <Container
                   key={doc.id}
                   borderBottomWidth={1}
@@ -501,7 +568,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
             scrollEventThrottle={24}
           >
             <Column>
-              {documentList.map((doc) => (
+              {documents.map((doc) => (
                 <Container
                   key={doc.id}
                   color="content"

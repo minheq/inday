@@ -3,7 +3,13 @@ import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import { view1, view2 } from './fake_data';
 import { FieldType } from './constants';
-import { FieldID } from './fields';
+import { FieldID, fieldQuery } from './fields';
+import {
+  SingleLineTextFieldValue,
+  Document,
+  DocumentFieldValue,
+} from './documents';
+import { collectionDocumentsQuery } from './collections';
 
 type TextFilterCondition =
   | 'contains'
@@ -13,14 +19,12 @@ type TextFilterCondition =
   | 'is_empty'
   | 'is_not_empty';
 
-interface SingleLineTextFilterValue {
-  type: FieldType.SingleLineText;
+interface SingleLineTextFilter {
   condition: TextFilterCondition;
   value: string;
 }
 
-interface MultiLineTextFilterValue {
-  type: FieldType.MultiLineText;
+interface MultiLineTextFilter {
   condition: TextFilterCondition;
   value: string;
 }
@@ -33,8 +37,7 @@ type SingleSelectFilterCondition =
   | 'is_empty'
   | 'is_not_empty';
 
-interface SingleSelectFilterValue {
-  type: FieldType.SingleSelect;
+interface SingleSelectFilter {
   condition: SingleSelectFilterCondition;
   value: string;
 }
@@ -47,20 +50,17 @@ type MultiSelectFilterCondition =
   | 'is_empty'
   | 'is_not_empty';
 
-interface MultiSelectFilterValue {
-  type: FieldType.MultiSelect;
+interface MultiSelectFilter {
   condition: MultiSelectFilterCondition;
   value: string[];
 }
 
-interface SingleCollaboratorFilterValue {
-  type: FieldType.SingleCollaborator;
+interface SingleCollaboratorFilter {
   condition: SingleSelectFilterCondition;
   value: string;
 }
 
-interface MultiCollaboratorFilterValue {
-  type: FieldType.MultiCollaborator;
+interface MultiCollaboratorFilter {
   condition: MultiSelectFilterCondition;
   value: string[];
 }
@@ -71,14 +71,12 @@ type DocumentLinkFilterCondition =
   | 'is_empty'
   | 'is_not_empty';
 
-interface SingleDocumentLinkFilterValue {
-  type: FieldType.SingleDocumentLink;
+interface SingleDocumentLinkFilter {
   condition: DocumentLinkFilterCondition;
   value: string;
 }
 
-interface MultiDocumentLinkFilterValue {
-  type: FieldType.MultiDocumentLink;
+interface MultiDocumentLinkFilter {
   condition: DocumentLinkFilterCondition;
   value: string;
 }
@@ -94,26 +92,22 @@ type DateFilterCondition =
   | 'is_empty'
   | 'is_not_empty';
 
-interface DateFilterValue {
-  type: FieldType.Date;
+interface DateFilter {
   condition: DateFilterCondition;
   value: Date;
 }
 
-interface PhoneNumberFilterValue {
-  type: FieldType.PhoneNumber;
+interface PhoneNumberFilter {
   condition: TextFilterCondition;
   value: string;
 }
 
-interface EmailFilterValue {
-  type: FieldType.Email;
+interface EmailFilter {
   condition: TextFilterCondition;
   value: string;
 }
 
-interface URLFilterValue {
-  type: FieldType.URL;
+interface URLFilter {
   condition: TextFilterCondition;
   value: string;
 }
@@ -128,14 +122,12 @@ type NumberFilterCondition =
   | 'is_empty'
   | 'is_not_empty';
 
-interface NumberFilterValue {
-  type: FieldType.Number;
+interface NumberFilter {
   condition: NumberFilterCondition;
   value: number;
 }
 
-interface CurrencyFilterValue {
-  type: FieldType.Currency;
+interface CurrencyFilter {
   condition: NumberFilterCondition;
   value: {
     amount: number;
@@ -143,31 +135,30 @@ interface CurrencyFilterValue {
   };
 }
 
-interface CheckboxFilterValue {
-  type: FieldType.Checkbox;
+interface CheckboxFilter {
   value: boolean;
 }
 
-type FilterValue =
-  | SingleLineTextFilterValue
-  | MultiLineTextFilterValue
-  | SingleSelectFilterValue
-  | MultiSelectFilterValue
-  | SingleCollaboratorFilterValue
-  | MultiCollaboratorFilterValue
-  | SingleDocumentLinkFilterValue
-  | MultiDocumentLinkFilterValue
-  | DateFilterValue
-  | PhoneNumberFilterValue
-  | EmailFilterValue
-  | URLFilterValue
-  | NumberFilterValue
-  | CurrencyFilterValue
-  | CheckboxFilterValue;
+type Filter =
+  | SingleLineTextFilter
+  | MultiLineTextFilter
+  | SingleSelectFilter
+  | MultiSelectFilter
+  | SingleCollaboratorFilter
+  | MultiCollaboratorFilter
+  | SingleDocumentLinkFilter
+  | MultiDocumentLinkFilter
+  | DateFilter
+  | PhoneNumberFilter
+  | EmailFilter
+  | URLFilter
+  | NumberFilter
+  | CurrencyFilter
+  | CheckboxFilter;
 
-interface Filter {
+interface FieldFilter {
   fieldID: string;
-  value: FilterValue;
+  value: Filter;
 }
 
 export type ViewID = string;
@@ -175,7 +166,7 @@ export type ViewID = string;
 interface BaseView {
   id: ViewID;
   name: string;
-  filters: Filter[];
+  filters: FieldFilter[];
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
@@ -205,34 +196,93 @@ export interface BoardView extends BaseView, BoardViewConfig {}
 export type View = ListView | BoardView;
 export type ViewType = View['type'];
 
-export type ViewsState = { [viewID: string]: View | undefined };
-export const viewsState = atom<ViewsState>({
-  key: RecoilKey.Views,
+export type ViewsByIDState = { [viewID: string]: View | undefined };
+export const viewsByIDState = atom<ViewsByIDState>({
+  key: RecoilKey.ViewsByID,
   default: {
     [view1.id]: view1,
     [view2.id]: view2,
   },
 });
 
-export const viewListQuery = selector({
-  key: RecoilKey.ViewList,
+export const viewsQuery = selector({
+  key: RecoilKey.Views,
   get: ({ get }) => {
-    const views = get(viewsState);
+    const viewsByID = get(viewsByIDState);
 
-    return Object.values(views) as View[];
+    return Object.values(viewsByID) as View[];
   },
 });
 
-export const viewQuery = selectorFamily<View | null, string>({
+export const viewQuery = selectorFamily<View, string>({
   key: RecoilKey.View,
   get: (viewID: string) => ({ get }) => {
-    const views = get(viewsState);
-    const view = views[viewID];
+    const viewsByID = get(viewsByIDState);
+    const view = viewsByID[viewID];
 
     if (view === undefined) {
-      return null;
+      throw new Error('View not found');
     }
 
     return view;
   },
 });
+
+export const viewDocumentsQuery = selectorFamily<Document[], string>({
+  key: RecoilKey.Collection,
+  get: (viewID: string) => ({ get }) => {
+    const view = get(viewQuery(viewID));
+    const documents = get(collectionDocumentsQuery(view.collectionID));
+    const { filters } = view;
+
+    let filteredDocuments = documents;
+
+    for (const filter of filters) {
+      const { fieldID } = filter;
+      const field = get(fieldQuery(fieldID));
+
+      filteredDocuments = filteredDocuments.filter((doc) => {
+        if (field.type === FieldType.SingleLineText) {
+          const fieldValue = getDocumentSingleTextValue(doc.fields[fieldID]);
+          const filterValue = getSingleTextFilter(filter.value);
+
+          if (filterValue.condition === 'contains') {
+            return fieldValue.includes(filterValue.value);
+          } else if (filterValue.condition === 'does_not_contain') {
+            return !fieldValue.includes(filterValue.value);
+          } else if (filterValue.condition === 'is') {
+            return fieldValue === filterValue.value;
+          } else if (filterValue.condition === 'is_empty') {
+            return fieldValue === '';
+          } else if (filterValue.condition === 'is_not') {
+            return fieldValue !== filterValue.value;
+          } else if (filterValue.condition === 'is_not_empty') {
+            return fieldValue !== '';
+          }
+
+          return false;
+        }
+      });
+    }
+
+    return filteredDocuments;
+  },
+});
+
+function getDocumentSingleTextValue(
+  value: DocumentFieldValue,
+): SingleLineTextFieldValue {
+  if (typeof value !== 'string') {
+    throw new Error('');
+  }
+
+  return value;
+}
+
+function getSingleTextFilter(value: Filter): SingleLineTextFilter {
+  if (typeof value !== 'string') {
+    throw new Error('');
+  }
+
+  return value;
+}

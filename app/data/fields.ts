@@ -135,32 +135,32 @@ export type Field =
   | CurrencyField
   | CheckboxField;
 
-export type FieldsState = { [fieldID: string]: Field | undefined };
-export const fieldsState = atom<FieldsState>({
-  key: RecoilKey.Fields,
+export type FieldsByIDState = { [fieldID: string]: Field | undefined };
+export const fieldsByIDState = atom<FieldsByIDState>({
+  key: RecoilKey.FieldsByID,
   default: {
     [field1.id]: field1,
     [field2.id]: field2,
   },
 });
 
-export const fieldListQuery = selector({
-  key: RecoilKey.FieldList,
+export const fieldsQuery = selector({
+  key: RecoilKey.Fields,
   get: ({ get }) => {
-    const fields = get(fieldsState);
+    const fieldsByID = get(fieldsByIDState);
 
-    return Object.values(fields) as Field[];
+    return Object.values(fieldsByID) as Field[];
   },
 });
 
-export const fieldQuery = selectorFamily<Field | null, string>({
+export const fieldQuery = selectorFamily<Field, string>({
   key: RecoilKey.Field,
   get: (fieldID: string) => ({ get }) => {
-    const fields = get(fieldsState);
-    const field = fields[fieldID];
+    const fieldsByID = get(fieldsByIDState);
+    const field = fieldsByID[fieldID];
 
     if (field === undefined) {
-      return null;
+      throw new Error('Field not found');
     }
 
     return field;

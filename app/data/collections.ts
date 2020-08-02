@@ -1,10 +1,10 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
-import { fieldListQuery, Field } from './fields';
-import { Document, documentListQuery } from './documents';
+import { fieldsQuery, Field } from './fields';
+import { Document, documentsQuery } from './documents';
 import { collection1, collection2 } from './fake_data';
-import { View, viewListQuery } from './views';
+import { View, viewsQuery } from './views';
 
 export interface Collection {
   id: string;
@@ -14,29 +14,29 @@ export interface Collection {
   spaceID: string;
 }
 
-export type CollectionsState = { [id: string]: Collection | undefined };
-export const collectionsState = atom<CollectionsState>({
-  key: RecoilKey.Collections,
+export type CollectionsByIDState = { [id: string]: Collection | undefined };
+export const collectionsByIDState = atom<CollectionsByIDState>({
+  key: RecoilKey.CollectionsByID,
   default: {
     [collection1.id]: collection1,
     [collection2.id]: collection2,
   },
 });
 
-export const collectionListQuery = selector({
-  key: RecoilKey.CollectionList,
+export const collectionsQuery = selector({
+  key: RecoilKey.Collections,
   get: ({ get }) => {
-    const collections = get(collectionsState);
+    const collectionsByID = get(collectionsByIDState);
 
-    return Object.values(collections) as Collection[];
+    return Object.values(collectionsByID) as Collection[];
   },
 });
 
 export const collectionQuery = selectorFamily<Collection | null, string>({
   key: RecoilKey.Collection,
   get: (collectionID: string) => ({ get }) => {
-    const collections = get(collectionsState);
-    const collection = collections[collectionID];
+    const collectionsByID = get(collectionsByIDState);
+    const collection = collectionsByID[collectionID];
 
     if (collection === undefined) {
       return null;
@@ -46,49 +46,49 @@ export const collectionQuery = selectorFamily<Collection | null, string>({
   },
 });
 
-export const collectionFieldsQuery = selectorFamily<
+export const collectionFieldsByIDQuery = selectorFamily<
   { [fieldID: string]: Field },
   string
 >({
   key: RecoilKey.Collection,
   get: (collectionID: string) => ({ get }) => {
-    const fieldList = get(fieldListQuery);
+    const fields = get(fieldsQuery);
 
-    const fields: { [fieldID: string]: Field } = {};
+    const fieldsByID: { [fieldID: string]: Field } = {};
 
-    for (const field of fieldList) {
+    for (const field of fields) {
       if (field.collectionID === collectionID) {
-        fields[field.id] = field;
+        fieldsByID[field.id] = field;
       }
     }
 
-    return fields;
+    return fieldsByID;
   },
 });
 
-export const collectionFieldListQuery = selectorFamily<Field[], string>({
+export const collectionFieldsQuery = selectorFamily<Field[], string>({
   key: RecoilKey.Collection,
   get: (collectionID: string) => ({ get }) => {
-    const fieldList = get(fieldListQuery);
+    const fields = get(fieldsQuery);
 
-    return fieldList.filter((f) => f.collectionID === collectionID);
+    return fields.filter((f) => f.collectionID === collectionID);
   },
 });
 
-export const collectionViewListQuery = selectorFamily<View[], string>({
+export const collectionViewsQuery = selectorFamily<View[], string>({
   key: RecoilKey.Collection,
   get: (collectionID: string) => ({ get }) => {
-    const viewList = get(viewListQuery);
+    const views = get(viewsQuery);
 
-    return viewList.filter((v) => v.collectionID === collectionID);
+    return views.filter((v) => v.collectionID === collectionID);
   },
 });
 
-export const collectionDocumentListQuery = selectorFamily<Document[], string>({
+export const collectionDocumentsQuery = selectorFamily<Document[], string>({
   key: RecoilKey.Collection,
   get: (collectionID: string) => ({ get }) => {
-    const documentList = get(documentListQuery);
+    const documents = get(documentsQuery);
 
-    return documentList.filter((doc) => doc.collectionID === collectionID);
+    return documents.filter((doc) => doc.collectionID === collectionID);
   },
 });

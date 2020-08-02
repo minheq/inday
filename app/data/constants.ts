@@ -1,24 +1,24 @@
 export enum RecoilKey {
   // Atoms
   Workspace = 'Workspace',
-  Spaces = 'Spaces',
-  Collections = 'Collections',
-  Views = 'Views',
-  Fields = 'Fields',
-  Documents = 'Documents',
+  SpacesByID = 'SpacesByID',
+  CollectionsByID = 'CollectionsByID',
+  ViewsByID = 'ViewsByID',
+  FieldsByID = 'FieldsByID',
+  DocumentsByID = 'DocumentsByID',
   Events = 'Events',
 
   // Selectors
   Collection = 'Collection',
-  CollectionList = 'CollectionList',
+  Collections = 'Collections',
   View = 'View',
-  ViewList = 'ViewList',
+  Views = 'Views',
   Field = 'Field',
-  FieldList = 'FieldList',
+  Fields = 'Fields',
   Document = 'Document',
-  DocumentList = 'DocumentList',
+  Documents = 'Documents',
   Space = 'Space',
-  SpaceList = 'SpaceList',
+  Spaces = 'Spaces',
 }
 
 export enum StorageKey {

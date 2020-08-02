@@ -1,6 +1,6 @@
 import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
-import { collectionListQuery, Collection } from './collections';
+import { collectionsQuery, Collection } from './collections';
 import { space1 } from './fake_data';
 
 export type SpaceID = string;
@@ -13,9 +13,9 @@ export interface Space {
   updatedAt: Date;
 }
 
-export type SpacesState = { [spaceID: string]: Space | undefined };
-export const spacesState = atom<SpacesState>({
-  key: RecoilKey.Spaces,
+export type SpacesByIDState = { [spaceID: string]: Space | undefined };
+export const spacesByIDState = atom<SpacesByIDState>({
+  key: RecoilKey.SpacesByID,
   default: {
     [space1.id]: space1,
   },
@@ -24,8 +24,8 @@ export const spacesState = atom<SpacesState>({
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: RecoilKey.Space,
   get: (spaceID: SpaceID) => ({ get }) => {
-    const spaces = get(spacesState);
-    const space = spaces[spaceID];
+    const spacesByID = get(spacesByIDState);
+    const space = spacesByID[spaceID];
 
     if (space === undefined) {
       return null;
@@ -35,20 +35,20 @@ export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   },
 });
 
-export const spaceCollectionListQuery = selectorFamily<Collection[], string>({
+export const spaceCollectionsQuery = selectorFamily<Collection[], string>({
   key: RecoilKey.Space,
   get: (spaceID: SpaceID) => ({ get }) => {
-    const collectionList = get(collectionListQuery);
+    const collections = get(collectionsQuery);
 
-    return collectionList.filter((c) => c.spaceID === spaceID);
+    return collections.filter((c) => c.spaceID === spaceID);
   },
 });
 
-export const spaceListQuery = selector({
-  key: RecoilKey.SpaceList,
+export const spacesQuery = selector({
+  key: RecoilKey.Spaces,
   get: ({ get }) => {
-    const spaces = get(spacesState);
+    const spacesByID = get(spacesByIDState);
 
-    return Object.values(spaces) as Space[];
+    return Object.values(spacesByID) as Space[];
   },
 });
