@@ -1,52 +1,58 @@
-import React from 'react';
-import { Container } from './container';
-import { useToggle } from '../hooks/use_toggle';
-import { WheelPicker } from './wheel_picker';
-import { PickerButton } from './picker_button';
-import { Expand } from './expand';
+import React, { useCallback } from 'react';
+import { Picker as RNPicker } from '@react-native-community/picker';
 
-export interface Option<TValue = any> {
+import { StyleSheet } from 'react-native';
+import { tokens, useTheme } from './theme';
+
+export interface Option<TValue extends string | number = any> {
   value: TValue;
   label: string;
   disabled?: boolean;
 }
 
-interface PickerProps<TValue = any> {
+interface PickerProps<TValue extends string | number = any> {
   value?: TValue;
   options: Option<TValue>[];
   onChange?: (value?: TValue) => void;
   disabled?: boolean;
-  label?: string;
-  placeholder?: string;
-  clearable?: boolean;
 }
 
-export function Picker<TValue = any>(props: PickerProps<TValue>) {
-  const {
-    value,
-    options,
-    clearable,
-    onChange = () => {},
-    label,
-    placeholder,
-  } = props;
-  const [open, popover] = useToggle();
+export function Picker<TValue extends string | number = any>(
+  props: PickerProps<TValue>,
+) {
+  const { value, options, onChange = () => {} } = props;
+  const theme = useTheme();
 
-  const selected = value && options.find((o) => o.value === value);
+  const handleChange = useCallback(
+    (newValue: string | number) => {
+      onChange(newValue as TValue);
+    },
+    [onChange],
+  );
 
   return (
-    <Container>
-      <PickerButton
-        label={label}
-        description={selected?.label}
-        placeholder={placeholder}
-        clearable={clearable && !!value}
-        onPress={popover.toggle}
-        onClear={onChange}
-      />
-      <Expand open={open}>
-        <WheelPicker options={options} onChange={onChange} value={value} />
-      </Expand>
-    </Container>
+    <RNPicker
+      style={[
+        styles.picker,
+        {
+          borderColor: theme.border.color.default,
+          color: theme.text.color.default,
+        },
+      ]}
+      selectedValue={value}
+      onValueChange={handleChange}
+    >
+      {options.map((o) => (
+        <RNPicker.Item label={o.label} value={o.value} />
+      ))}
+    </RNPicker>
   );
 }
+
+const styles = StyleSheet.create({
+  picker: {
+    padding: 8,
+    borderRadius: tokens.radius,
+    ...tokens.text.size.md,
+  },
+});

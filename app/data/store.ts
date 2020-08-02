@@ -9,6 +9,7 @@ import {
   collectionFieldsQuery,
   collectionDocumentListQuery,
   collectionViewListQuery,
+  collectionFieldListQuery,
 } from './collections';
 import { workspaceState } from './workspace';
 import {
@@ -232,6 +233,12 @@ export function useGetCollectionDocumentList(collectionID: string) {
   );
 
   return documentList;
+}
+
+export function useGetCollectionFieldList(collectionID: string) {
+  const fieldList = useRecoilValue(collectionFieldListQuery(collectionID));
+
+  return fieldList;
 }
 
 export function useGetCollectionViewList(collectionID: string) {

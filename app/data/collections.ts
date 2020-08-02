@@ -66,6 +66,15 @@ export const collectionFieldsQuery = selectorFamily<
   },
 });
 
+export const collectionFieldListQuery = selectorFamily<Field[], string>({
+  key: RecoilKey.Collection,
+  get: (collectionID: string) => ({ get }) => {
+    const fieldList = get(fieldListQuery);
+
+    return fieldList.filter((f) => f.collectionID === collectionID);
+  },
+});
+
 export const collectionViewListQuery = selectorFamily<View[], string>({
   key: RecoilKey.Collection,
   get: (collectionID: string) => ({ get }) => {

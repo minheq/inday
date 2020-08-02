@@ -13,8 +13,8 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts|tsx)$/,
-        exclude: /node_modules/,
         loader: 'babel-loader',
+        exclude: /node_modules\/(?!(@react-native-community\/picker)\/).*/,
         options: {
           presets: [
             '@babel/preset-env',
@@ -42,7 +42,17 @@ module.exports = {
     alias: {
       'react-native$': 'react-native-web',
     },
-    extensions: ['.web.tsx', '.web.ts', '.tsx', '.ts', '.jsx', '.js', '.json'],
+    extensions: [
+      '.web.tsx',
+      '.web.ts',
+      '.tsx',
+      '.ts',
+      '.web.jsx',
+      '.web.js',
+      '.jsx',
+      '.js',
+      '.json',
+    ],
   },
   devtool: 'source-map',
   devServer: {

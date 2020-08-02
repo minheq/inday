@@ -17,6 +17,7 @@ import {
   Spacer,
   Icon,
   SegmentedControl,
+  Picker,
 } from '../components';
 import {
   useRoute,
@@ -35,24 +36,30 @@ import {
   useGetCollectionFields,
   useGetCollectionDocumentList,
   useGetCollectionViewList,
+  useGetCollectionFieldList,
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
 import { FieldType } from '../data/constants';
+import { first } from '../../lib/data_structures/arrays';
+import { FieldID } from '../data/fields';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
 const SpaceScreenContext = createContext({
   spaceID: '1',
   viewID: '1',
+  collectionID: '1',
 });
 
 export function SpaceScreen() {
   const route = useRoute<SpaceScreenParams>();
+  const { spaceID, viewID } = route.params;
+  const view = useGetView(viewID);
 
   return (
     <SpaceScreenContext.Provider
-      value={{ spaceID: route.params.spaceID, viewID: route.params.viewID }}
+      value={{ spaceID, viewID, collectionID: view.collectionID }}
     >
       <Screen>
         <CollectionsMenu />
@@ -192,7 +199,9 @@ function CollectionMenuItem(props: CollectionMenuItemProps) {
 }
 
 function MainContent() {
-  const [slide, setSlide] = React.useState<'views' | 'organize' | null>(null);
+  const [slide, setSlide] = React.useState<'views' | 'organize' | null>(
+    'organize',
+  );
   const context = useContext(SpaceScreenContext);
   const space = useGetSpace(context.spaceID);
   const view = useGetView(context.viewID);
@@ -299,9 +308,41 @@ function OrganizeMenu() {
 function FilterMenu() {
   return (
     <Container>
-      <Button>
+      <AddFilter />
+      {/* <Button>
         <Text>+ Add filter</Text>
-      </Button>
+      </Button> */}
+    </Container>
+  );
+}
+
+function AddFilter() {
+  const context = useContext(SpaceScreenContext);
+  const fields = useGetCollectionFieldList(context.collectionID);
+  const firstFieldID = first(fields).id;
+  const [selectedFieldID, setSelectedFieldID] = React.useState(firstFieldID);
+
+  const handleChangeField = useCallback(
+    (value?: FieldID) => {
+      if (value === undefined) {
+        setSelectedFieldID(firstFieldID);
+      } else {
+        setSelectedFieldID(value);
+      }
+    },
+    [firstFieldID],
+  );
+
+  return (
+    <Container>
+      <Picker
+        value={selectedFieldID}
+        onChange={handleChangeField}
+        options={fields.map((f) => ({
+          label: f.name,
+          value: f.id,
+        }))}
+      />
     </Container>
   );
 }

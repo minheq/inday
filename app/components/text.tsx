@@ -42,8 +42,8 @@ export function Text(props: TextProps) {
       testID={testID}
       style={[
         styles[align],
+        styles[size],
         bold && styles.bold,
-        tokens.text.size[size],
         {
           color: theme.text.color[color],
           textDecorationLine: decoration,
@@ -64,6 +64,11 @@ const styles = StyleSheet.create({
     fontWeight: 'normal',
     fontFamily: tokens.fontFamily,
   },
+  xl: tokens.text.size.xl,
+  lg: tokens.text.size.lg,
+  md: tokens.text.size.md,
+  sm: tokens.text.size.sm,
+  xs: tokens.text.size.xs,
   left: {
     textAlign: 'left',
   },
