@@ -92,7 +92,7 @@ export function assertSingleLineTextFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleLineTextFieldValue to be string. Receive ${value}`,
+      `Expected SingleLineTextFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -106,7 +106,7 @@ export function assertMultiLineTextFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected MultiLineTextFieldValue to be string. Receive ${value}`,
+      `Expected MultiLineTextFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -120,7 +120,7 @@ export function assertSingleSelectFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleSelectFieldValue to be string. Receive ${value}`,
+      `Expected SingleSelectFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -134,7 +134,7 @@ export function assertMultiSelectFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected MultiSelectFieldValue to be string. Receive ${value}`,
+      `Expected MultiSelectFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -148,7 +148,7 @@ export function assertSingleCollaboratorFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleCollaboratorFieldValue to be string. Receive ${value}`,
+      `Expected SingleCollaboratorFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -162,7 +162,7 @@ export function assertMultiCollaboratorFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected MultiCollaboratorFieldValue to be string. Receive ${value}`,
+      `Expected MultiCollaboratorFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -176,7 +176,7 @@ export function assertSingleDocumentLinkFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleDocumentLinkFieldValue to be string. Receive ${value}`,
+      `Expected SingleDocumentLinkFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -190,7 +190,7 @@ export function assertMultiDocumentLinkFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected MultiDocumentLinkFieldValue to be string. Receive ${value}`,
+      `Expected MultiDocumentLinkFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -203,7 +203,7 @@ export function assertDateFieldValue(
   }
 
   if (!(value instanceof Date)) {
-    throw new Error(`Expected DateFieldValue to be Date. Receive ${value}`);
+    throw new Error(`Expected DateFieldValue to be Date. Received ${value}`);
   }
 }
 
@@ -216,7 +216,7 @@ export function assertPhoneNumberFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected PhoneNumberFieldValue to be string. Receive ${value}`,
+      `Expected PhoneNumberFieldValue to be string. Received ${value}`,
     );
   }
 }
@@ -229,7 +229,7 @@ export function assertEmailFieldValue(
   }
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected EmailFieldValue to be string. Receive ${value}`);
+    throw new Error(`Expected EmailFieldValue to be string. Received ${value}`);
   }
 }
 
@@ -241,7 +241,7 @@ export function assertURLFieldValue(
   }
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected URLFieldValue to be string. Receive ${value}`);
+    throw new Error(`Expected URLFieldValue to be string. Received ${value}`);
   }
 }
 
@@ -253,7 +253,9 @@ export function assertNumberFieldValue(
   }
 
   if (typeof value !== 'number') {
-    throw new Error(`Expected NumberFieldValue to be number. Receive ${value}`);
+    throw new Error(
+      `Expected NumberFieldValue to be number. Received ${value}`,
+    );
   }
 }
 
@@ -266,7 +268,17 @@ export function assertCurrencyFieldValue(
 
   if (typeof value !== 'number') {
     throw new Error(
-      `Expected CurrencyFieldValue to be number. Receive ${value}`,
+      `Expected CurrencyFieldValue to be number. Received ${value}`,
+    );
+  }
+}
+
+export function assertCheckboxFieldValue(
+  value: DocumentFieldValue | null,
+): asserts value is CheckboxFieldValue {
+  if (typeof value !== 'boolean') {
+    throw new Error(
+      `Expected CurrencyFieldValue to be boolean. Received ${value}`,
     );
   }
 }

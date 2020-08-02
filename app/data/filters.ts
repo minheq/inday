@@ -65,7 +65,7 @@ export interface SingleDocumentLinkFieldFilter {
 
 export interface MultiDocumentLinkFieldFilter {
   condition: DocumentLinkFilterCondition;
-  value: string;
+  value: string[];
 }
 
 export type DateFilterCondition =
