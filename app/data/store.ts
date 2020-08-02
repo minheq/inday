@@ -375,7 +375,7 @@ export function useCreateView() {
         id: generateID(),
         name: '',
         type: 'list',
-        filterList: [],
+        filters: [],
         fieldsConfig: {},
         fieldsOrder: [],
         createdAt: new Date(),

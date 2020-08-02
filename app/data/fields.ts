@@ -3,8 +3,10 @@ import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey, FieldType } from './constants';
 import { field1, field2 } from './fake_data';
 
+export type FieldID = string;
+
 interface BaseField {
-  id: string;
+  id: FieldID;
   name: string;
   description: string;
   createdAt: Date;
@@ -133,7 +135,7 @@ export type Field =
   | CurrencyField
   | CheckboxField;
 
-export type FieldsState = { [id: string]: Field | undefined };
+export type FieldsState = { [fieldID: string]: Field | undefined };
 export const fieldsState = atom<FieldsState>({
   key: RecoilKey.Fields,
   default: {

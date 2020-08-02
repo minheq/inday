@@ -3,6 +3,7 @@ import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import { view1, view2 } from './fake_data';
 import { FieldType } from './constants';
+import { FieldID } from './fields';
 
 type TextFilterCondition =
   | 'contains'
@@ -24,75 +25,118 @@ interface MultiLineTextFilterValue {
   value: string;
 }
 
+type SingleSelectFilterCondition =
+  | 'is'
+  | 'is_not'
+  | 'is_any_of'
+  | 'is_none_of'
+  | 'is_empty'
+  | 'is_not_empty';
+
 interface SingleSelectFilterValue {
   type: FieldType.SingleSelect;
+  condition: SingleSelectFilterCondition;
   value: string;
 }
 
+type MultiSelectFilterCondition =
+  | 'has_any_of'
+  | 'has_all_of'
+  | 'is_exactly'
+  | 'has_none_of'
+  | 'is_empty'
+  | 'is_not_empty';
+
 interface MultiSelectFilterValue {
   type: FieldType.MultiSelect;
+  condition: MultiSelectFilterCondition;
   value: string[];
-}
-
-interface CollaboratorValue {
-  id: string;
-  email: string;
-  name: string;
 }
 
 interface SingleCollaboratorFilterValue {
   type: FieldType.SingleCollaborator;
-  value: CollaboratorValue;
+  condition: SingleSelectFilterCondition;
+  value: string;
 }
 
 interface MultiCollaboratorFilterValue {
   type: FieldType.MultiCollaborator;
-  value: CollaboratorValue[];
+  condition: MultiSelectFilterCondition;
+  value: string[];
 }
 
-interface DocumentLinkValue {
-  id: string;
-  email: string;
-  name: string;
-}
+type DocumentLinkFilterCondition =
+  | 'contains'
+  | 'does_not_contain'
+  | 'is_empty'
+  | 'is_not_empty';
 
 interface SingleDocumentLinkFilterValue {
   type: FieldType.SingleDocumentLink;
-  value: DocumentLinkValue;
+  condition: DocumentLinkFilterCondition;
+  value: string;
 }
 
 interface MultiDocumentLinkFilterValue {
   type: FieldType.MultiDocumentLink;
-  value: DocumentLinkValue[];
+  condition: DocumentLinkFilterCondition;
+  value: string;
 }
+
+type DateFilterCondition =
+  | 'is'
+  | 'is_within'
+  | 'is_before'
+  | 'is_after'
+  | 'is_on_or_before'
+  | 'is_on_or_after'
+  | 'is_not'
+  | 'is_empty'
+  | 'is_not_empty';
 
 interface DateFilterValue {
   type: FieldType.Date;
+  condition: DateFilterCondition;
   value: Date;
 }
 
 interface PhoneNumberFilterValue {
   type: FieldType.PhoneNumber;
+  condition: TextFilterCondition;
   value: string;
 }
 
 interface EmailFilterValue {
   type: FieldType.Email;
+  condition: TextFilterCondition;
   value: string;
 }
 
 interface URLFilterValue {
   type: FieldType.URL;
+  condition: TextFilterCondition;
   value: string;
 }
 
+type NumberFilterCondition =
+  | 'equal'
+  | 'not_equal'
+  | 'less_than'
+  | 'greater_than'
+  | 'less_than_or_equal'
+  | 'greater_than_or_equal'
+  | 'is_empty'
+  | 'is_not_empty';
+
 interface NumberFilterValue {
   type: FieldType.Number;
+  condition: NumberFilterCondition;
   value: number;
 }
 
 interface CurrencyFilterValue {
   type: FieldType.Currency;
+  condition: NumberFilterCondition;
   value: {
     amount: number;
     currency: string;
@@ -126,10 +170,12 @@ interface Filter {
   value: FilterValue;
 }
 
+export type ViewID = string;
+
 interface BaseView {
-  id: string;
+  id: ViewID;
   name: string;
-  filterList: Filter[];
+  filters: Filter[];
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
@@ -142,7 +188,7 @@ export interface ListViewFieldConfig {
 
 interface ListViewConfig {
   type: 'list';
-  fieldsOrder: string[];
+  fieldsOrder: FieldID[];
   fieldsConfig: {
     [fieldID: string]: ListViewFieldConfig;
   };
@@ -159,7 +205,7 @@ export interface BoardView extends BaseView, BoardViewConfig {}
 export type View = ListView | BoardView;
 export type ViewType = View['type'];
 
-export type ViewsState = { [id: string]: View | undefined };
+export type ViewsState = { [viewID: string]: View | undefined };
 export const viewsState = atom<ViewsState>({
   key: RecoilKey.Views,
   default: {
