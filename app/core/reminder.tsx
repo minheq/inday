@@ -1,5 +1,5 @@
 import React from 'react';
-import { Frequency, Recurrence } from '../lib/datetime/recurrence';
+import { Frequency, Recurrence } from '../../lib/datetime/recurrence';
 import { ListItem } from '../components/list_item';
 import { Container } from '../components/container';
 import { Spacing } from '../components/spacing';
@@ -27,7 +27,7 @@ import { DayPicker } from '../components/day_picker';
 import { TimePicker } from '../components/time_picker';
 import { Picker, ListPicker } from '../components';
 import { range } from '../../lib/data_structures/arrays';
-import { WeekDay, getWeekDaysOptions } from '../lib/datetime/week';
+import { WeekDay, getWeekDaysOptions } from '../../lib/datetime/week';
 
 export interface Reminder {
   time: ReminderTime | null;

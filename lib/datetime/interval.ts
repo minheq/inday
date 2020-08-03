@@ -1,4 +1,9 @@
-import { Interval, isBefore, toDate } from 'date-fns';
+import { isBefore, toDate } from 'date-fns';
+
+export type Interval = {
+  start: Date;
+  end: Date;
+};
 
 export const datesInInterval = (
   interval: Interval,
@@ -38,7 +43,9 @@ export function validateInterval(interval: Interval) {
 }
 
 export function isInterval(value: Date | Interval | null): value is Interval {
-  if (!value) return false;
+  if (!value) {
+    return false;
+  }
 
   return !(value instanceof Date);
 }

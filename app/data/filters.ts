@@ -1,10 +1,17 @@
+import { isSameDay, isWithinInterval, isBefore, isAfter } from 'date-fns';
+import {
+  hasAnyOf,
+  hasAllOf,
+  hasNoneOf,
+} from '../../lib/data_structures/arrays';
+
 export type TextFilterCondition =
   | 'contains'
-  | 'does_not_contain'
+  | 'doesNotContain'
   | 'is'
-  | 'is_not'
-  | 'is_empty'
-  | 'is_not_empty';
+  | 'isNot'
+  | 'isEmpty'
+  | 'isNotEmpty';
 
 export interface SingleLineTextFieldFilter {
   condition: TextFilterCondition;
@@ -18,24 +25,23 @@ export interface MultiLineTextFieldFilter {
 
 export type SingleSelectFilterCondition =
   | 'is'
-  | 'is_not'
-  | 'is_any_of'
-  | 'is_none_of'
-  | 'is_empty'
-  | 'is_not_empty';
+  | 'isNot'
+  | 'isAnyOf'
+  | 'isNoneOf'
+  | 'isEmpty'
+  | 'isNotEmpty';
 
 export interface SingleSelectFieldFilter {
   condition: SingleSelectFilterCondition;
-  value: string;
+  value: string | string[];
 }
 
 export type MultiSelectFilterCondition =
-  | 'has_any_of'
-  | 'has_all_of'
-  | 'is_exactly'
-  | 'has_none_of'
-  | 'is_empty'
-  | 'is_not_empty';
+  | 'hasAnyOf'
+  | 'hasAllOf'
+  | 'hasNoneOf'
+  | 'isEmpty'
+  | 'isNotEmpty';
 
 export interface MultiSelectFieldFilter {
   condition: MultiSelectFilterCondition;
@@ -44,7 +50,7 @@ export interface MultiSelectFieldFilter {
 
 export interface SingleCollaboratorFieldFilter {
   condition: SingleSelectFilterCondition;
-  value: string;
+  value: string | string[];
 }
 
 export interface MultiCollaboratorFieldFilter {
@@ -52,36 +58,30 @@ export interface MultiCollaboratorFieldFilter {
   value: string[];
 }
 
-export type DocumentLinkFilterCondition =
-  | 'contains'
-  | 'does_not_contain'
-  | 'is_empty'
-  | 'is_not_empty';
-
 export interface SingleDocumentLinkFieldFilter {
-  condition: DocumentLinkFilterCondition;
-  value: string;
+  condition: SingleSelectFilterCondition;
+  value: string | string[];
 }
 
 export interface MultiDocumentLinkFieldFilter {
-  condition: DocumentLinkFilterCondition;
+  condition: MultiSelectFilterCondition;
   value: string[];
 }
 
 export type DateFilterCondition =
   | 'is'
-  | 'is_within'
-  | 'is_before'
-  | 'is_after'
-  | 'is_on_or_before'
-  | 'is_on_or_after'
-  | 'is_not'
-  | 'is_empty'
-  | 'is_not_empty';
+  | 'isWithin'
+  | 'isBefore'
+  | 'isAfter'
+  | 'isOnOrBefore'
+  | 'isOnOrAfter'
+  | 'isNot'
+  | 'isEmpty'
+  | 'isNotEmpty';
 
 export interface DateFieldFilter {
   condition: DateFilterCondition;
-  value: Date;
+  value: Date | Interval;
 }
 
 export interface PhoneNumberFieldFilter {
@@ -101,13 +101,13 @@ export interface URLFieldFilter {
 
 export type NumberFilterCondition =
   | 'equal'
-  | 'not_equal'
-  | 'less_than'
-  | 'greater_than'
-  | 'less_than_or_equal'
-  | 'greater_than_or_equal'
-  | 'is_empty'
-  | 'is_not_empty';
+  | 'notEqual'
+  | 'lessThan'
+  | 'greaterThan'
+  | 'lessThanOrEqual'
+  | 'greaterThanOrEqual'
+  | 'isEmpty'
+  | 'isNotEmpty';
 
 export interface NumberFieldFilter {
   condition: NumberFilterCondition;
@@ -130,7 +130,6 @@ export type FilterCondition =
   | NumberFilterCondition
   | TextFilterCondition
   | DateFilterCondition
-  | DocumentLinkFilterCondition
   | MultiSelectFilterCondition
   | SingleSelectFilterCondition;
 
@@ -334,16 +333,7 @@ export function assertCheckboxFieldFilter(
 export function assertNumberFilterCondition(
   condition: FilterCondition,
 ): asserts condition is NumberFilterCondition {
-  if (
-    condition === 'equal' ||
-    condition === 'not_equal' ||
-    condition === 'less_than' ||
-    condition === 'greater_than' ||
-    condition === 'less_than_or_equal' ||
-    condition === 'greater_than_or_equal' ||
-    condition === 'is_empty' ||
-    condition === 'is_not_empty'
-  ) {
+  if (condition in numberFiltersByCondition) {
     return;
   }
 
@@ -355,14 +345,7 @@ export function assertNumberFilterCondition(
 export function assertTextFilterCondition(
   condition: FilterCondition,
 ): asserts condition is TextFilterCondition {
-  if (
-    condition === 'contains' ||
-    condition === 'does_not_contain' ||
-    condition === 'is' ||
-    condition === 'is_not' ||
-    condition === 'is_empty' ||
-    condition === 'is_not_empty'
-  ) {
+  if (condition in textFiltersByCondition) {
     return;
   }
 
@@ -374,17 +357,7 @@ export function assertTextFilterCondition(
 export function assertDateFilterCondition(
   condition: FilterCondition,
 ): asserts condition is DateFilterCondition {
-  if (
-    condition === 'is' ||
-    condition === 'is_within' ||
-    condition === 'is_before' ||
-    condition === 'is_after' ||
-    condition === 'is_on_or_before' ||
-    condition === 'is_on_or_after' ||
-    condition === 'is_not' ||
-    condition === 'is_empty' ||
-    condition === 'is_not_empty'
-  ) {
+  if (condition in dateFiltersByCondition) {
     return;
   }
 
@@ -393,34 +366,10 @@ export function assertDateFilterCondition(
   );
 }
 
-export function assertDocumentLinkFilterCondition(
-  condition: FilterCondition,
-): asserts condition is DocumentLinkFilterCondition {
-  if (
-    condition === 'contains' ||
-    condition === 'does_not_contain' ||
-    condition === 'is_empty' ||
-    condition === 'is_not_empty'
-  ) {
-    return;
-  }
-
-  throw Error(
-    `Expected one of valid DocumentLinkFilterCondition. Received ${condition}`,
-  );
-}
-
 export function assertMultiSelectFilterCondition(
   condition: FilterCondition,
 ): asserts condition is MultiSelectFilterCondition {
-  if (
-    condition === 'has_any_of' ||
-    condition === 'has_all_of' ||
-    condition === 'is_exactly' ||
-    condition === 'has_none_of' ||
-    condition === 'is_empty' ||
-    condition === 'is_not_empty'
-  ) {
+  if (condition in multiSelectFiltersByCondition) {
     return;
   }
 
@@ -432,14 +381,7 @@ export function assertMultiSelectFilterCondition(
 export function assertSingleSelectFilterCondition(
   condition: FilterCondition,
 ): asserts condition is SingleSelectFilterCondition {
-  if (
-    condition === 'is' ||
-    condition === 'is_not' ||
-    condition === 'is_any_of' ||
-    condition === 'is_none_of' ||
-    condition === 'is_empty' ||
-    condition === 'is_not_empty'
-  ) {
+  if (condition in singleSelectFiltersByCondition) {
     return;
   }
 
@@ -451,7 +393,7 @@ export function assertSingleSelectFilterCondition(
 export function assertBooleanFilterCondition(
   condition: FilterCondition,
 ): asserts condition is BooleanFilterCondition {
-  if (condition === 'is') {
+  if (condition in booleanFiltersByCondition) {
     return;
   }
 
@@ -459,3 +401,310 @@ export function assertBooleanFilterCondition(
     `Expected one of valid BooleanFilterCondition. Received ${condition}`,
   );
 }
+
+export const numberFiltersByCondition: {
+  [condition in NumberFilterCondition]: (
+    value: number | null,
+    filterValue: number,
+  ) => boolean;
+} = {
+  equal: (value, filterValue) => {
+    return value === filterValue;
+  },
+  notEqual: (value, filterValue) => {
+    return value !== filterValue;
+  },
+  lessThan: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return value < filterValue;
+  },
+  greaterThan: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return value > filterValue;
+  },
+  lessThanOrEqual: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return value <= filterValue;
+  },
+  greaterThanOrEqual: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return value >= filterValue;
+  },
+  isEmpty: (value) => {
+    return value === null;
+  },
+  isNotEmpty: (value) => {
+    return value !== null;
+  },
+};
+
+export const textFiltersByCondition: {
+  [condition in TextFilterCondition]: (
+    value: string | null,
+    filterValue: string,
+  ) => boolean;
+} = {
+  contains: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return value.includes(filterValue);
+  },
+  doesNotContain: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return !value.includes(filterValue);
+  },
+  is: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return value === filterValue;
+  },
+  isNot: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return value !== filterValue;
+  },
+  isEmpty: (value) => {
+    return value === null || value === '';
+  },
+  isNotEmpty: (value) => {
+    return value !== null && value !== '';
+  },
+};
+
+export const dateFiltersByCondition: {
+  [condition in DateFilterCondition]: (
+    value: Date | null,
+    filterValue: Date | Interval,
+  ) => boolean;
+} = {
+  is: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (!(filterValue instanceof Date)) {
+      throw new Error(
+        `Expected filterValue to be Date. Received ${filterValue}`,
+      );
+    }
+
+    return isSameDay(value, filterValue);
+  },
+  isWithin: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (filterValue instanceof Date) {
+      throw new Error(
+        `Expected filterValue to be Interval. Received ${filterValue}`,
+      );
+    }
+
+    return isWithinInterval(value, filterValue);
+  },
+  isBefore: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (!(filterValue instanceof Date)) {
+      throw new Error(
+        `Expected filterValue to be Date. Received ${filterValue}`,
+      );
+    }
+
+    return isBefore(value, filterValue);
+  },
+  isAfter: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (!(filterValue instanceof Date)) {
+      throw new Error(
+        `Expected filterValue to be Date. Received ${filterValue}`,
+      );
+    }
+
+    return isAfter(value, filterValue);
+  },
+  isOnOrBefore: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (!(filterValue instanceof Date)) {
+      throw new Error(
+        `Expected filterValue to be Date. Received ${filterValue}`,
+      );
+    }
+
+    return isBefore(value, filterValue) || isSameDay(value, filterValue);
+  },
+  isOnOrAfter: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (!(filterValue instanceof Date)) {
+      throw new Error(
+        `Expected filterValue to be Date. Received ${filterValue}`,
+      );
+    }
+
+    return isAfter(value, filterValue) || isSameDay(value, filterValue);
+  },
+  isNot: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (!(filterValue instanceof Date)) {
+      throw new Error(
+        `Expected filterValue to be Date. Received ${filterValue}`,
+      );
+    }
+
+    return !isSameDay(value, filterValue);
+  },
+  isEmpty: (value) => {
+    return value === null;
+  },
+  isNotEmpty: (value) => {
+    return value !== null;
+  },
+};
+
+export const singleSelectFiltersByCondition: {
+  [condition in SingleSelectFilterCondition]: (
+    value: string | null,
+    filterValue: string | string[],
+  ) => boolean;
+} = {
+  is: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (typeof filterValue !== 'string') {
+      throw new Error(
+        `Expected filterValue to be string. Received ${filterValue}`,
+      );
+    }
+
+    return value === filterValue;
+  },
+  isNot: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (typeof filterValue !== 'string') {
+      throw new Error(
+        `Expected filterValue to be string. Received ${filterValue}`,
+      );
+    }
+
+    return value !== filterValue;
+  },
+  isAnyOf: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (typeof filterValue === 'string') {
+      throw new Error(
+        `Expected filterValue to be string[]. Received ${filterValue}`,
+      );
+    }
+
+    return hasAnyOf([value], filterValue);
+  },
+  isNoneOf: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    if (typeof filterValue === 'string') {
+      throw new Error(
+        `Expected filterValue to be string[]. Received ${filterValue}`,
+      );
+    }
+
+    return hasNoneOf([value], filterValue);
+  },
+  isEmpty: (value) => {
+    return value === null;
+  },
+  isNotEmpty: (value) => {
+    return value !== null;
+  },
+};
+
+export const multiSelectFiltersByCondition: {
+  [condition in MultiSelectFilterCondition]: (
+    value: string[] | null,
+    filterValue: string[],
+  ) => boolean;
+} = {
+  hasAnyOf: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return hasAnyOf(value, filterValue);
+  },
+  hasAllOf: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return hasAllOf(value, filterValue);
+  },
+  hasNoneOf: (value, filterValue) => {
+    if (value === null) {
+      return false;
+    }
+
+    return hasNoneOf(value, filterValue);
+  },
+  isEmpty: (value) => {
+    return value === null;
+  },
+  isNotEmpty: (value) => {
+    return value !== null;
+  },
+};
+
+export const booleanFiltersByCondition: {
+  [condition in BooleanFilterCondition]: (
+    value: boolean | null,
+    filterValue: boolean | Interval,
+  ) => boolean;
+} = {
+  is: (value, filterValue) => {
+    return value === filterValue;
+  },
+};

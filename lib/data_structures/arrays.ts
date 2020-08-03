@@ -33,3 +33,29 @@ export function secondLast<T = any>(arr: T[]): T {
 export function isEmpty<T = any>(arr: T[]): boolean {
   return arr.length === 0;
 }
+
+export function isNotEmpty<T = any>(arr: T[]): boolean {
+  return arr.length > 0;
+}
+
+export function intersect<T>(a: T[], b: T[]): T[] {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  const intersection = new Set([...setA].filter((x) => setB.has(x)));
+
+  return Array.from(intersection);
+}
+
+export function hasAnyOf<T>(a: T[], b: T[]): boolean {
+  return isNotEmpty(intersect(a, b));
+}
+
+export function hasAllOf<T>(a: T[], b: T[]): boolean {
+  const intersection = intersect(a, b);
+
+  return intersection.length === a.length && a.length === b.length;
+}
+
+export function hasNoneOf<T>(a: T[], b: T[]): boolean {
+  return isEmpty(intersect(a, b));
+}

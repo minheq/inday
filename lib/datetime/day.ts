@@ -8,7 +8,7 @@ import {
   endOfDay,
 } from 'date-fns';
 
-export const DAY_FORMAT = `yyyy-MM-dd`;
+export const DAY_FORMAT = 'yyyy-MM-dd';
 
 export function setSameDay(date: Date, toDate: Date) {
   date = setYear(date, toDate.getFullYear());
@@ -37,6 +37,9 @@ export function toDay(date: Date): string {
 export function isValidDay(day: string): boolean {
   const ok = parseDay(day);
 
-  if (!ok) return false;
+  if (!ok) {
+    return false;
+  }
+
   return true;
 }
