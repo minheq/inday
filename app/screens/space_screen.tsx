@@ -543,7 +543,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
           </ScrollView>
         </Row>
       </Container>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flex: 1 }}>
+      <ScrollView style={styles.stretch} contentContainerStyle={styles.stretch}>
         <Row flex={1}>
           <Container width={LEFT_COLUMN_WIDTH}>
             <Column>
@@ -628,5 +628,8 @@ function ListViewDocumentFieldValueContainer(
 const styles = StyleSheet.create({
   collectionMenuItem: {
     borderRadius: 0,
+  },
+  stretch: {
+    flex: 1,
   },
 });

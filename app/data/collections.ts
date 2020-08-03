@@ -3,7 +3,7 @@ import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import { fieldsQuery, Field } from './fields';
 import { Document, documentsQuery } from './documents';
-import { collection1, collection2 } from './fake_data';
+import { collection1, collection2 } from './fixtures';
 import { View, viewsQuery } from './views';
 
 export interface Collection {

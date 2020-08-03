@@ -1,24 +1,23 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
-import { doc1, doc2 } from './fake_data';
-
-export type CollaboratorID = string;
+import { documentsByIDFixtures } from './fixtures';
+import { CollaboratorID } from './collaborators';
 
 export type SingleLineTextFieldValue = string;
 export type MultiLineTextFieldValue = string;
-export type SingleSelectFieldValue = string;
+export type SingleSelectFieldValue = string | null;
 export type MultiSelectFieldValue = string[];
-export type SingleCollaboratorFieldValue = CollaboratorID;
+export type SingleCollaboratorFieldValue = CollaboratorID | null;
 export type MultiCollaboratorFieldValue = CollaboratorID[];
-export type SingleDocumentLinkFieldValue = DocumentID;
+export type SingleDocumentLinkFieldValue = DocumentID | null;
 export type MultiDocumentLinkFieldValue = DocumentID[];
-export type DateFieldValue = Date;
+export type DateFieldValue = Date | null;
 export type PhoneNumberFieldValue = string;
 export type EmailFieldValue = string;
 export type URLFieldValue = string;
-export type NumberFieldValue = number;
-export type CurrencyFieldValue = number;
+export type NumberFieldValue = number | null;
+export type CurrencyFieldValue = number | null;
 
 type CheckboxFieldValue = boolean;
 
@@ -46,7 +45,7 @@ export interface Document {
   createdAt: Date;
   updatedAt: Date;
   fields: {
-    [fieldID: string]: DocumentFieldValue | null;
+    [fieldID: string]: DocumentFieldValue;
   };
   collectionID: string;
 }
@@ -54,10 +53,7 @@ export interface Document {
 export type DocumentsByIDState = { [documentID: string]: Document | undefined };
 export const documentsByIDState = atom<DocumentsByIDState>({
   key: RecoilKey.DocumentsByID,
-  default: {
-    [doc1.id]: doc1,
-    [doc2.id]: doc2,
-  },
+  default: documentsByIDFixtures,
 });
 
 export const documentsQuery = selector({
@@ -84,8 +80,8 @@ export const documentQuery = selectorFamily<Document, string>({
 });
 
 export function assertSingleLineTextFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is SingleLineTextFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is SingleLineTextFieldValue {
   if (value === null) {
     return;
   }
@@ -98,8 +94,8 @@ export function assertSingleLineTextFieldValue(
 }
 
 export function assertMultiLineTextFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is MultiLineTextFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is MultiLineTextFieldValue {
   if (value === null) {
     return;
   }
@@ -112,8 +108,8 @@ export function assertMultiLineTextFieldValue(
 }
 
 export function assertSingleSelectFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is SingleSelectFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is SingleSelectFieldValue {
   if (value === null) {
     return;
   }
@@ -126,8 +122,8 @@ export function assertSingleSelectFieldValue(
 }
 
 export function assertMultiSelectFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is MultiSelectFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is MultiSelectFieldValue {
   if (value === null) {
     return;
   }
@@ -140,8 +136,8 @@ export function assertMultiSelectFieldValue(
 }
 
 export function assertSingleCollaboratorFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is SingleCollaboratorFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is SingleCollaboratorFieldValue {
   if (value === null) {
     return;
   }
@@ -154,8 +150,8 @@ export function assertSingleCollaboratorFieldValue(
 }
 
 export function assertMultiCollaboratorFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is MultiCollaboratorFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is MultiCollaboratorFieldValue {
   if (value === null) {
     return;
   }
@@ -168,8 +164,8 @@ export function assertMultiCollaboratorFieldValue(
 }
 
 export function assertSingleDocumentLinkFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is SingleDocumentLinkFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is SingleDocumentLinkFieldValue {
   if (value === null) {
     return;
   }
@@ -182,8 +178,8 @@ export function assertSingleDocumentLinkFieldValue(
 }
 
 export function assertMultiDocumentLinkFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is MultiDocumentLinkFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is MultiDocumentLinkFieldValue {
   if (value === null) {
     return;
   }
@@ -196,8 +192,8 @@ export function assertMultiDocumentLinkFieldValue(
 }
 
 export function assertDateFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is DateFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is DateFieldValue {
   if (value === null) {
     return;
   }
@@ -208,8 +204,8 @@ export function assertDateFieldValue(
 }
 
 export function assertPhoneNumberFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is PhoneNumberFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is PhoneNumberFieldValue {
   if (value === null) {
     return;
   }
@@ -222,8 +218,8 @@ export function assertPhoneNumberFieldValue(
 }
 
 export function assertEmailFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is EmailFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is EmailFieldValue {
   if (value === null) {
     return;
   }
@@ -234,8 +230,8 @@ export function assertEmailFieldValue(
 }
 
 export function assertURLFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is URLFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is URLFieldValue {
   if (value === null) {
     return;
   }
@@ -246,8 +242,8 @@ export function assertURLFieldValue(
 }
 
 export function assertNumberFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is NumberFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is NumberFieldValue {
   if (value === null) {
     return;
   }
@@ -260,8 +256,8 @@ export function assertNumberFieldValue(
 }
 
 export function assertCurrencyFieldValue(
-  value: DocumentFieldValue | null,
-): asserts value is CurrencyFieldValue | null {
+  value: DocumentFieldValue,
+): asserts value is CurrencyFieldValue {
   if (value === null) {
     return;
   }
@@ -274,7 +270,7 @@ export function assertCurrencyFieldValue(
 }
 
 export function assertCheckboxFieldValue(
-  value: DocumentFieldValue | null,
+  value: DocumentFieldValue,
 ): asserts value is CheckboxFieldValue {
   if (typeof value !== 'boolean') {
     throw new Error(

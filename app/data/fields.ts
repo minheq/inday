@@ -1,8 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey, FieldType } from './constants';
-import { field1, field2 } from './fake_data';
-import { CollaboratorID, DocumentID } from './documents';
+import { fieldsByIDFixtures } from './fixtures';
 
 export type FieldID = string;
 
@@ -17,7 +16,7 @@ interface BaseField {
 
 export interface SingleLineTextFieldConfig {
   type: FieldType.SingleLineText;
-  default: string;
+  default: string | null;
 }
 export interface SingleLineTextField
   extends BaseField,
@@ -52,7 +51,6 @@ export interface MultiSelectField extends BaseField, MultiSelectFieldConfig {}
 
 export interface SingleCollaboratorFieldConfig {
   type: FieldType.SingleCollaborator;
-  options: CollaboratorID[];
 }
 export interface SingleCollaboratorField
   extends BaseField,
@@ -60,7 +58,6 @@ export interface SingleCollaboratorField
 
 export interface MultiCollaboratorFieldConfig {
   type: FieldType.MultiCollaborator;
-  options: CollaboratorID[];
 }
 export interface MultiCollaboratorField
   extends BaseField,
@@ -68,7 +65,7 @@ export interface MultiCollaboratorField
 
 export interface SingleDocumentLinkFieldConfig {
   type: FieldType.SingleDocumentLink;
-  options: DocumentID[];
+  documentsFromCollectionID: string;
 }
 export interface SingleDocumentLinkField
   extends BaseField,
@@ -76,7 +73,7 @@ export interface SingleDocumentLinkField
 
 export interface MultiDocumentLinkFieldConfig {
   type: FieldType.MultiDocumentLink;
-  options: DocumentID[];
+  documentsFromCollectionID: string;
 }
 export interface MultiDocumentLinkField
   extends BaseField,
@@ -113,7 +110,7 @@ export interface DecimalFieldConfig {
 }
 export interface IntegerFieldConfig {
   type: FieldType.Number;
-  default: number;
+  default: number | null;
   format: 'integer';
 }
 export type NumberFieldConfig = DecimalFieldConfig | IntegerFieldConfig;
@@ -170,10 +167,7 @@ export type Field =
 export type FieldsByIDState = { [fieldID: string]: Field | undefined };
 export const fieldsByIDState = atom<FieldsByIDState>({
   key: RecoilKey.FieldsByID,
-  default: {
-    [field1.id]: field1,
-    [field2.id]: field2,
-  },
+  default: fieldsByIDFixtures,
 });
 
 export const fieldsQuery = selector({

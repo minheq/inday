@@ -402,6 +402,32 @@ export function assertBooleanFilterCondition(
   );
 }
 
+export const textFiltersByCondition: {
+  [condition in TextFilterCondition]: (
+    value: string,
+    filterValue: string,
+  ) => boolean;
+} = {
+  contains: (value, filterValue) => {
+    return value.includes(filterValue);
+  },
+  doesNotContain: (value, filterValue) => {
+    return !value.includes(filterValue);
+  },
+  is: (value, filterValue) => {
+    return value === filterValue;
+  },
+  isNot: (value, filterValue) => {
+    return value !== filterValue;
+  },
+  isEmpty: (value) => {
+    return value === '';
+  },
+  isNotEmpty: (value) => {
+    return value !== '';
+  },
+};
+
 export const numberFiltersByCondition: {
   [condition in NumberFilterCondition]: (
     value: number | null,
@@ -447,48 +473,6 @@ export const numberFiltersByCondition: {
   },
   isNotEmpty: (value) => {
     return value !== null;
-  },
-};
-
-export const textFiltersByCondition: {
-  [condition in TextFilterCondition]: (
-    value: string | null,
-    filterValue: string,
-  ) => boolean;
-} = {
-  contains: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    return value.includes(filterValue);
-  },
-  doesNotContain: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    return !value.includes(filterValue);
-  },
-  is: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    return value === filterValue;
-  },
-  isNot: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    return value !== filterValue;
-  },
-  isEmpty: (value) => {
-    return value === null || value === '';
-  },
-  isNotEmpty: (value) => {
-    return value !== null && value !== '';
   },
 };
 

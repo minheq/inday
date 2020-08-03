@@ -1,7 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import { collectionsQuery, Collection } from './collections';
-import { space1 } from './fake_data';
+import { spacesByIDFixtures } from './fixtures';
 
 export type SpaceID = string;
 
@@ -16,9 +16,7 @@ export interface Space {
 export type SpacesByIDState = { [spaceID: string]: Space | undefined };
 export const spacesByIDState = atom<SpacesByIDState>({
   key: RecoilKey.SpacesByID,
-  default: {
-    [space1.id]: space1,
-  },
+  default: spacesByIDFixtures,
 });
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({

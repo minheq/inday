@@ -1,29 +1,15 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
-import { view1, view2 } from './fake_data';
+import { viewsByIDFixtures } from './fixtures';
 import { FieldType } from './constants';
-import { FieldID, fieldQuery } from './fields';
+import { FieldID, fieldQuery, Field } from './fields';
 import {
   assertNumberFieldValue,
   assertSingleLineTextFieldValue,
-  SingleLineTextFieldValue,
   Document,
   DocumentFieldValue,
-  NumberFieldValue,
   assertMultiLineTextFieldValue,
-  MultiLineTextFieldValue,
-  PhoneNumberFieldValue,
-  MultiDocumentLinkFieldValue,
-  SingleDocumentLinkFieldValue,
-  MultiCollaboratorFieldValue,
-  SingleSelectFieldValue,
-  SingleCollaboratorFieldValue,
-  MultiSelectFieldValue,
-  CurrencyFieldValue,
-  URLFieldValue,
-  EmailFieldValue,
-  DateFieldValue,
   assertSingleSelectFieldValue,
   assertMultiSelectFieldValue,
   assertSingleCollaboratorFieldValue,
@@ -101,10 +87,7 @@ export type ViewType = View['type'];
 export type ViewsByIDState = { [viewID: string]: View | undefined };
 export const viewsByIDState = atom<ViewsByIDState>({
   key: RecoilKey.ViewsByID,
-  default: {
-    [view1.id]: view1,
-    [view2.id]: view2,
-  },
+  default: viewsByIDFixtures,
 });
 
 export const viewsQuery = selector({
@@ -135,33 +118,46 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
   get: (viewID: string) => ({ get }) => {
     const view = get(viewQuery(viewID));
     const documents = get(collectionDocumentsQuery(view.collectionID));
-    const { filters } = view;
+
+    function getField(fieldID: string) {
+      return get(fieldQuery(fieldID));
+    }
 
     let finalDocuments = documents;
 
-    // Apply filters
-    for (const [fieldID, filter] of filters) {
-      const field = get(fieldQuery(fieldID));
-      const applyFilter = filtersByFieldType[field.type];
-
-      finalDocuments = finalDocuments.filter((doc) => {
-        return applyFilter(doc.fields[fieldID], filter);
-      });
-    }
-
+    finalDocuments = filterDocumentsByView(view, finalDocuments, getField);
     // TODO: Apply sorting
-
     // TODO: Apply view. List, Board, Calendar
-
     // TODO: Apply grouping
 
     return finalDocuments;
   },
 });
 
+export function filterDocumentsByView(
+  view: View,
+  documents: Document[],
+  getField: (fieldID: string) => Field,
+) {
+  const { filters } = view;
+
+  let filteredDocuments = documents;
+
+  for (const [fieldID, filter] of filters) {
+    const field = getField(fieldID);
+    const applyFilter = filtersByFieldType[field.type];
+
+    filteredDocuments = filteredDocuments.filter((doc) => {
+      return applyFilter(doc.fields[fieldID], filter);
+    });
+  }
+
+  return filteredDocuments;
+}
+
 const filtersByFieldType: {
   [fieldType in FieldType]: (
-    value: DocumentFieldValue | null,
+    value: DocumentFieldValue,
     filter: Filter,
   ) => boolean;
 } = {
