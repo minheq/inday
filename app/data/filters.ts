@@ -3,6 +3,7 @@ import {
   hasAnyOf,
   hasAllOf,
   hasNoneOf,
+  isEmpty,
 } from '../../lib/data_structures/arrays';
 
 export type TextFilterCondition =
@@ -649,7 +650,7 @@ export const singleSelectFiltersByCondition: {
 
 export const multiSelectFiltersByCondition: {
   [condition in MultiSelectFilterCondition]: (
-    value: string[] | null,
+    value: string[],
     filterValue: string[],
   ) => boolean;
 } = {
@@ -675,10 +676,10 @@ export const multiSelectFiltersByCondition: {
     return hasNoneOf(value, filterValue);
   },
   isEmpty: (value) => {
-    return value === null;
+    return isEmpty(value);
   },
   isNotEmpty: (value) => {
-    return value !== null;
+    return !isEmpty(value);
   },
 };
 

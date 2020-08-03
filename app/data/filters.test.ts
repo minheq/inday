@@ -2,6 +2,9 @@ import {
   textFiltersByCondition,
   numberFiltersByCondition,
   dateFiltersByCondition,
+  singleSelectFiltersByCondition,
+  multiSelectFiltersByCondition,
+  booleanFiltersByCondition,
 } from './filters';
 import { parseDay } from '../../lib/datetime/day';
 
@@ -215,6 +218,266 @@ describe('dateFiltersByCondition', () => {
           end: parseDay('2020-08-04'),
         }),
       ).toBeFalsy();
+    });
+  });
+
+  describe('isBefore', () => {
+    const filter = dateFiltersByCondition.isBefore;
+
+    test('ok', () => {
+      expect(
+        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+      ).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(
+        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('isAfter', () => {
+    const filter = dateFiltersByCondition.isAfter;
+
+    test('ok', () => {
+      expect(
+        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+      ).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(
+        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('isOnOrBefore', () => {
+    const filter = dateFiltersByCondition.isOnOrBefore;
+
+    test('ok', () => {
+      expect(
+        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+      ).toBeTruthy();
+      expect(
+        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
+      ).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(
+        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('isOnOrAfter', () => {
+    const filter = dateFiltersByCondition.isOnOrAfter;
+
+    test('ok', () => {
+      expect(
+        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+      ).toBeTruthy();
+      expect(
+        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
+      ).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(
+        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('isNot', () => {
+    const filter = dateFiltersByCondition.isNot;
+
+    test('ok', () => {
+      expect(
+        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+      ).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(
+        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('isEmpty', () => {
+    const filter = dateFiltersByCondition.isEmpty;
+
+    test('ok', () => {
+      expect(filter(null, new Date())).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(parseDay('2020-08-04'), new Date())).toBeFalsy();
+    });
+  });
+
+  describe('isNotEmpty', () => {
+    const filter = dateFiltersByCondition.isNotEmpty;
+
+    test('ok', () => {
+      expect(filter(parseDay('2020-08-04'), new Date())).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(null, new Date())).toBeFalsy();
+    });
+  });
+});
+
+describe('singleSelectFiltersByCondition', () => {
+  describe('is', () => {
+    const filter = singleSelectFiltersByCondition.is;
+
+    test('ok', () => {
+      expect(filter('a', 'a')).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter('a', 'b')).toBeFalsy();
+    });
+  });
+
+  describe('isNot', () => {
+    const filter = singleSelectFiltersByCondition.isNot;
+
+    test('ok', () => {
+      expect(filter('ab', 'a')).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter('a', 'a')).toBeFalsy();
+    });
+  });
+
+  describe('isAnyOf', () => {
+    const filter = singleSelectFiltersByCondition.isAnyOf;
+
+    test('ok', () => {
+      expect(filter('a', ['a', 'b'])).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter('a', ['b', 'c'])).toBeFalsy();
+    });
+  });
+
+  describe('isNoneOf', () => {
+    const filter = singleSelectFiltersByCondition.isNoneOf;
+
+    test('ok', () => {
+      expect(filter('a', ['b', 'c'])).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter('a', ['a', 'b'])).toBeFalsy();
+    });
+  });
+
+  describe('isEmpty', () => {
+    const filter = singleSelectFiltersByCondition.isEmpty;
+
+    test('ok', () => {
+      expect(filter(null, '')).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter('abc', '')).toBeFalsy();
+    });
+  });
+
+  describe('isNotEmpty', () => {
+    const filter = singleSelectFiltersByCondition.isNotEmpty;
+
+    test('ok', () => {
+      expect(filter('abc', '')).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(null, '')).toBeFalsy();
+    });
+  });
+});
+
+describe('multiSelectFiltersByCondition', () => {
+  describe('hasAnyOf', () => {
+    const filter = multiSelectFiltersByCondition.hasAnyOf;
+
+    test('ok', () => {
+      expect(filter(['a'], ['a', 'b'])).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(['a'], ['b', 'c'])).toBeFalsy();
+    });
+  });
+
+  describe('hasAllOf', () => {
+    const filter = multiSelectFiltersByCondition.hasAllOf;
+
+    test('ok', () => {
+      expect(filter(['b', 'a'], ['a', 'b'])).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(['a'], ['a', 'b'])).toBeFalsy();
+    });
+  });
+
+  describe('hasNoneOf', () => {
+    const filter = multiSelectFiltersByCondition.hasNoneOf;
+
+    test('ok', () => {
+      expect(filter(['a'], ['b', 'c'])).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(['a'], ['a', 'b'])).toBeFalsy();
+    });
+  });
+
+  describe('isEmpty', () => {
+    const filter = multiSelectFiltersByCondition.isEmpty;
+
+    test('ok', () => {
+      expect(filter([], [])).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(['a'], [])).toBeFalsy();
+    });
+  });
+
+  describe('isNotEmpty', () => {
+    const filter = multiSelectFiltersByCondition.isNotEmpty;
+
+    test('ok', () => {
+      expect(filter(['a'], [])).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter([], [])).toBeFalsy();
+    });
+  });
+});
+
+describe('booleanFiltersByCondition', () => {
+  describe('is', () => {
+    const filter = booleanFiltersByCondition.is;
+
+    test('ok', () => {
+      expect(filter(true, true)).toBeTruthy();
+    });
+
+    test('not ok', () => {
+      expect(filter(true, false)).toBeFalsy();
     });
   });
 });
