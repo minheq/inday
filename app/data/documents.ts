@@ -128,9 +128,9 @@ export function assertMultiSelectFieldValue(
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiSelectFieldValue to be string. Received ${value}`,
+      `Expected MultiSelectFieldValue to be string[]. Received ${value}`,
     );
   }
 }
@@ -156,9 +156,9 @@ export function assertMultiCollaboratorFieldValue(
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiCollaboratorFieldValue to be string. Received ${value}`,
+      `Expected MultiCollaboratorFieldValue to be string[]. Received ${value}`,
     );
   }
 }
@@ -184,9 +184,9 @@ export function assertMultiDocumentLinkFieldValue(
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiDocumentLinkFieldValue to be string. Received ${value}`,
+      `Expected MultiDocumentLinkFieldValue to be string[]. Received ${value}`,
     );
   }
 }

@@ -5,10 +5,10 @@ import { viewsByIDFixtures } from './fixtures';
 import { FieldType } from './constants';
 import { FieldID, fieldQuery, Field } from './fields';
 import {
-  assertNumberFieldValue,
-  assertSingleLineTextFieldValue,
   Document,
   DocumentFieldValue,
+  assertNumberFieldValue,
+  assertSingleLineTextFieldValue,
   assertMultiLineTextFieldValue,
   assertSingleSelectFieldValue,
   assertMultiSelectFieldValue,

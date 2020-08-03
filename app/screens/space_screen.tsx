@@ -27,7 +27,6 @@ import {
 } from '@react-navigation/native';
 import { RootStackParamsMap } from '../linking';
 import { View, ListView } from '../data/views';
-import { DocumentFieldValue } from '../data/documents';
 import { Collection } from '../data/collections';
 import {
   useGetSpace,
@@ -44,7 +43,42 @@ import { Slide } from '../components/slide';
 import { FieldType } from '../data/constants';
 import { first } from '../../lib/data_structures/arrays';
 import { FieldID, Field } from '../data/fields';
-
+import {
+  DocumentFieldValue,
+  assertCheckboxFieldValue,
+  assertCurrencyFieldValue,
+  assertDateFieldValue,
+  assertEmailFieldValue,
+  assertMultiCollaboratorFieldValue,
+  assertMultiDocumentLinkFieldValue,
+  assertMultiLineTextFieldValue,
+  assertMultiSelectFieldValue,
+  assertNumberFieldValue,
+  assertPhoneNumberFieldValue,
+  assertSingleCollaboratorFieldValue,
+  assertSingleDocumentLinkFieldValue,
+  assertSingleLineTextFieldValue,
+  assertSingleSelectFieldValue,
+  assertURLFieldValue,
+} from '../data/documents';
+import {
+  assertCheckboxField,
+  assertCurrencyField,
+  assertDateField,
+  assertEmailField,
+  assertMultiCollaboratorField,
+  assertMultiDocumentLinkField,
+  assertMultiLineTextField,
+  assertMultiSelectField,
+  assertNumberField,
+  assertPhoneNumberField,
+  assertSingleCollaboratorField,
+  assertSingleDocumentLinkField,
+  assertSingleLineTextField,
+  assertSingleSelectField,
+  assertURLField,
+} from '../data/fields';
+import { format } from 'date-fns';
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
 const SpaceScreenContext = createContext({
@@ -578,6 +612,10 @@ function ListViewDisplay(props: ListViewDisplayProps) {
                   <Row key={doc.id}>
                     {fieldList.map((field) => {
                       const fieldConfig = fieldsConfig[field.id];
+                      const cell = componentsByFieldType[field.type](
+                        doc.fields[field.id],
+                        field,
+                      );
 
                       return (
                         <Container
@@ -588,9 +626,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
                           padding={4}
                           paddingHorizontal={8}
                         >
-                          <ListViewDocumentFieldValueContainer
-                            value={doc.fields[field.id]}
-                          />
+                          {cell}
                         </Container>
                       );
                     })}
@@ -605,25 +641,107 @@ function ListViewDisplay(props: ListViewDisplayProps) {
   );
 }
 
-interface ListViewDocumentFieldValueContainerProps {
-  value: DocumentFieldValue;
-}
+const componentsByFieldType: {
+  [fieldType in FieldType]: (
+    value: DocumentFieldValue,
+    field: Field,
+  ) => React.ReactNode;
+} = {
+  [FieldType.SingleLineText]: (value, field) => {
+    assertSingleLineTextFieldValue(value);
+    assertSingleLineTextField(field);
 
-function ListViewDocumentFieldValueContainer(
-  props: ListViewDocumentFieldValueContainerProps,
-) {
-  const { value } = props;
+    return <Text>{value}</Text>;
+  },
+  [FieldType.MultiLineText]: (value, field) => {
+    assertMultiLineTextFieldValue(value);
+    assertMultiLineTextField(field);
 
-  switch (value.type) {
-    case FieldType.SingleLineText:
-      return <Text>{value.value}</Text>;
-    case FieldType.Number:
-      return <Text>{value.value}</Text>;
+    return <Text>{value}</Text>;
+  },
+  [FieldType.SingleSelect]: (value, field) => {
+    assertSingleSelectFieldValue(value);
+    assertSingleSelectField(field);
 
-    default:
+    return <Text>{value}</Text>;
+  },
+  [FieldType.MultiSelect]: (value, field) => {
+    assertMultiSelectFieldValue(value);
+    assertMultiSelectField(field);
+
+    return <Text>{value[0]}</Text>;
+  },
+  [FieldType.SingleCollaborator]: (value, field) => {
+    assertSingleCollaboratorFieldValue(value);
+    assertSingleCollaboratorField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.MultiCollaborator]: (value, field) => {
+    assertMultiCollaboratorFieldValue(value);
+    assertMultiCollaboratorField(field);
+
+    return <Text>{value[0]}</Text>;
+  },
+  [FieldType.SingleDocumentLink]: (value, field) => {
+    assertSingleDocumentLinkFieldValue(value);
+    assertSingleDocumentLinkField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.MultiDocumentLink]: (value, field) => {
+    assertMultiDocumentLinkFieldValue(value);
+    assertMultiDocumentLinkField(field);
+
+    return <Text>{value[0]}</Text>;
+  },
+  [FieldType.Date]: (value, field) => {
+    assertDateFieldValue(value);
+    assertDateField(field);
+
+    if (value === null) {
       return null;
-  }
-}
+    }
+
+    return <Text>{format(value, field.format)}</Text>;
+  },
+  [FieldType.PhoneNumber]: (value, field) => {
+    assertPhoneNumberFieldValue(value);
+    assertPhoneNumberField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.Email]: (value, field) => {
+    assertEmailFieldValue(value);
+    assertEmailField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.URL]: (value, field) => {
+    assertURLFieldValue(value);
+    assertURLField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.Number]: (value, field) => {
+    assertNumberFieldValue(value);
+    assertNumberField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.Currency]: (value, field) => {
+    assertCurrencyFieldValue(value);
+    assertCurrencyField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.Checkbox]: (value, field) => {
+    assertCheckboxFieldValue(value);
+    assertCheckboxField(field);
+
+    return <Text>{value ? 'checked' : 'unchecked'}</Text>;
+  },
+};
 
 const styles = StyleSheet.create({
   collectionMenuItem: {

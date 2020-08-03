@@ -192,3 +192,137 @@ export const fieldQuery = selectorFamily<Field, string>({
     return field;
   },
 });
+
+export function assertSingleLineTextField(
+  field: Field,
+): asserts field is SingleLineTextField {
+  if (field.type !== FieldType.SingleLineText) {
+    throw new Error(
+      `Expected field to be SingleLineTextField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertMultiLineTextField(
+  field: Field,
+): asserts field is MultiLineTextField {
+  if (field.type !== FieldType.MultiLineText) {
+    throw new Error(
+      `Expected field to be MultiLineTextField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertSingleSelectField(
+  field: Field,
+): asserts field is SingleSelectField {
+  if (field.type !== FieldType.SingleSelect) {
+    throw new Error(
+      `Expected field to be SingleSelectField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertMultiSelectField(
+  field: Field,
+): asserts field is MultiSelectField {
+  if (field.type !== FieldType.MultiSelect) {
+    throw new Error(
+      `Expected field to be MultiSelectField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertSingleCollaboratorField(
+  field: Field,
+): asserts field is SingleCollaboratorField {
+  if (field.type !== FieldType.SingleCollaborator) {
+    throw new Error(
+      `Expected field to be SingleCollaboratorField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertMultiCollaboratorField(
+  field: Field,
+): asserts field is MultiCollaboratorField {
+  if (field.type !== FieldType.MultiCollaborator) {
+    throw new Error(
+      `Expected field to be MultiCollaboratorField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertSingleDocumentLinkField(
+  field: Field,
+): asserts field is SingleDocumentLinkField {
+  if (field.type !== FieldType.SingleDocumentLink) {
+    throw new Error(
+      `Expected field to be SingleDocumentLinkField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertMultiDocumentLinkField(
+  field: Field,
+): asserts field is MultiDocumentLinkField {
+  if (field.type !== FieldType.MultiDocumentLink) {
+    throw new Error(
+      `Expected field to be MultiDocumentLinkField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertDateField(field: Field): asserts field is DateField {
+  if (field.type !== FieldType.Date) {
+    throw new Error(`Expected field to be DateField. Received ${field.type}`);
+  }
+}
+
+export function assertPhoneNumberField(
+  field: Field,
+): asserts field is PhoneNumberField {
+  if (field.type !== FieldType.PhoneNumber) {
+    throw new Error(
+      `Expected field to be PhoneNumberField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertEmailField(field: Field): asserts field is EmailField {
+  if (field.type !== FieldType.Email) {
+    throw new Error(`Expected field to be EmailField. Received ${field.type}`);
+  }
+}
+
+export function assertURLField(field: Field): asserts field is URLField {
+  if (field.type !== FieldType.URL) {
+    throw new Error(`Expected field to be URLField. Received ${field.type}`);
+  }
+}
+
+export function assertNumberField(field: Field): asserts field is NumberField {
+  if (field.type !== FieldType.Number) {
+    throw new Error(`Expected field to be NumberField. Received ${field.type}`);
+  }
+}
+
+export function assertCurrencyField(
+  field: Field,
+): asserts field is CurrencyField {
+  if (field.type !== FieldType.Currency) {
+    throw new Error(
+      `Expected field to be CurrencyField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertCheckboxField(
+  field: Field,
+): asserts field is CheckboxField {
+  if (field.type !== FieldType.Checkbox) {
+    throw new Error(
+      `Expected field to be CheckboxField. Received ${field.type}`,
+    );
+  }
+}
