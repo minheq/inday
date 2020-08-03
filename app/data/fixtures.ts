@@ -329,7 +329,7 @@ export const col1Doc1: Document = {
   id: '11',
   collectionID: collection1.id,
   fields: {
-    [col1Field1.id]: 'muchos',
+    [col1Field1.id]: 'col1Doc1',
     [col1Field2.id]: 'buenos',
     [col1Field3.id]: 'Qualification',
     [col1Field4.id]: ['Proposal', 'Evaluation'],
@@ -353,7 +353,7 @@ export const col1Doc2: Document = {
   id: '12',
   collectionID: collection1.id,
   fields: {
-    [col1Field1.id]: 'muchos',
+    [col1Field1.id]: 'col1Doc2',
     [col1Field2.id]: 'buenos',
     [col1Field3.id]: 'Qualification',
     [col1Field4.id]: ['Proposal', 'Evaluation'],
@@ -377,7 +377,7 @@ export const col1Doc3: Document = {
   id: '13',
   collectionID: collection1.id,
   fields: {
-    [col1Field1.id]: 'muchos',
+    [col1Field1.id]: 'col1Doc3',
     [col1Field2.id]: 'buenos',
     [col1Field3.id]: 'Qualification',
     [col1Field4.id]: ['Proposal', 'Evaluation'],
