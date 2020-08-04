@@ -320,7 +320,7 @@ function ViewsMenu() {
 }
 
 function OrganizeMenu() {
-  const [tab, setTab] = React.useState(1);
+  const [tab, setTab] = React.useState(2);
 
   return (
     <Container padding={8}>
@@ -328,14 +328,14 @@ function OrganizeMenu() {
         onChange={setTab}
         value={tab}
         options={[
-          { label: 'Filter', value: 1 },
-          { label: 'Sort', value: 2 },
-          { label: 'Group', value: 3 },
-          { label: 'Fields', value: 4 },
+          { label: 'Fields', value: 1 },
+          { label: 'Filter', value: 2 },
+          { label: 'Sort', value: 3 },
+          { label: 'Group', value: 4 },
         ]}
       />
       <Spacer size={16} />
-      {tab === 1 && <FilterMenu />}
+      {tab === 2 && <FilterMenu />}
     </Container>
   );
 }

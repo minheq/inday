@@ -1,8 +1,10 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
+
 import { Text } from './text';
-import { StyleSheet, View } from 'react-native';
 import { Button } from './button';
 import { Spacer } from './spacer';
+import { Row } from './row';
 
 interface Option<TValue = any> {
   label: string;
@@ -21,7 +23,7 @@ export function SegmentedControl<TValue = any>(
   const { value, onChange = () => {}, options = [] } = props;
 
   return (
-    <View style={styles.root}>
+    <Row>
       {options.map((option) => {
         const selected = value === option.value;
 
@@ -39,15 +41,11 @@ export function SegmentedControl<TValue = any>(
           </>
         );
       })}
-    </View>
+    </Row>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    display: 'flex',
-    flexDirection: 'row',
-  },
   control: {
     alignItems: 'center',
     justifyContent: 'center',

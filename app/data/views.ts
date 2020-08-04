@@ -7,54 +7,60 @@ import { FieldID, fieldQuery, Field } from './fields';
 import {
   Document,
   DocumentFieldValue,
-  assertNumberFieldValue,
-  assertSingleLineTextFieldValue,
-  assertMultiLineTextFieldValue,
-  assertSingleSelectFieldValue,
-  assertMultiSelectFieldValue,
-  assertSingleCollaboratorFieldValue,
-  assertMultiCollaboratorFieldValue,
-  assertSingleDocumentLinkFieldValue,
-  assertMultiDocumentLinkFieldValue,
-  assertDateFieldValue,
-  assertPhoneNumberFieldValue,
-  assertEmailFieldValue,
-  assertURLFieldValue,
-  assertCurrencyFieldValue,
   assertCheckboxFieldValue,
+  assertCurrencyFieldValue,
+  assertDateFieldValue,
+  assertEmailFieldValue,
+  assertMultiCollaboratorFieldValue,
+  assertMultiDocumentLinkFieldValue,
+  assertMultiLineTextFieldValue,
+  assertMultiSelectFieldValue,
+  assertNumberFieldValue,
+  assertPhoneNumberFieldValue,
+  assertSingleCollaboratorFieldValue,
+  assertSingleDocumentLinkFieldValue,
+  assertSingleLineTextFieldValue,
+  assertSingleSelectFieldValue,
+  assertURLFieldValue,
 } from './documents';
 import { collectionDocumentsQuery } from './collections';
 import {
   Filter,
-  assertNumberFieldFilter,
-  assertSingleLineTextFieldFilter,
-  assertMultiLineTextFieldFilter,
-  assertSingleSelectFieldFilter,
-  assertMultiSelectFieldFilter,
-  assertSingleCollaboratorFieldFilter,
-  assertMultiCollaboratorFieldFilter,
-  assertSingleDocumentLinkFieldFilter,
-  assertMultiDocumentLinkFieldFilter,
-  assertDateFieldFilter,
-  assertPhoneNumberFieldFilter,
-  assertEmailFieldFilter,
-  assertURLFieldFilter,
-  assertCurrencyFieldFilter,
   assertCheckboxFieldFilter,
-  textFiltersByCondition,
-  singleSelectFiltersByCondition,
-  multiSelectFiltersByCondition,
-  dateFiltersByCondition,
-  numberFiltersByCondition,
+  assertCurrencyFieldFilter,
+  assertDateFieldFilter,
+  assertEmailFieldFilter,
+  assertMultiCollaboratorFieldFilter,
+  assertMultiDocumentLinkFieldFilter,
+  assertMultiLineTextFieldFilter,
+  assertMultiSelectFieldFilter,
+  assertNumberFieldFilter,
+  assertPhoneNumberFieldFilter,
+  assertSingleCollaboratorFieldFilter,
+  assertSingleDocumentLinkFieldFilter,
+  assertSingleLineTextFieldFilter,
+  assertSingleSelectFieldFilter,
+  assertURLFieldFilter,
   booleanFiltersByCondition,
+  dateFiltersByCondition,
+  multiSelectFiltersByCondition,
+  numberFiltersByCondition,
+  singleSelectFiltersByCondition,
+  textFiltersByCondition,
 } from './filters';
 
 export type ViewID = string;
+
+export enum Sort {
+  Ascending,
+  Descending,
+}
 
 interface BaseView {
   id: ViewID;
   name: string;
   filters: [FieldID, Filter][];
+  sorts: [FieldID, Sort][];
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
@@ -67,6 +73,7 @@ export interface ListViewFieldConfig {
 
 interface ListViewConfig {
   type: 'list';
+  groups: [FieldID, Sort][];
   fieldsOrder: FieldID[];
   fieldsConfig: {
     [fieldID: string]: ListViewFieldConfig;
@@ -77,6 +84,7 @@ export interface ListView extends BaseView, ListViewConfig {}
 
 interface BoardViewConfig {
   type: 'board';
+  stackFieldID: FieldID;
 }
 
 export interface BoardView extends BaseView, BoardViewConfig {}
@@ -161,107 +169,11 @@ const filtersByFieldType: {
     filter: Filter,
   ) => boolean;
 } = {
-  [FieldType.SingleLineText]: (value, filter) => {
-    assertSingleLineTextFieldValue(value);
-    assertSingleLineTextFieldFilter(filter);
+  [FieldType.Checkbox]: (value, filter) => {
+    assertCheckboxFieldValue(value);
+    assertCheckboxFieldFilter(filter);
 
-    const applyFilter = textFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiLineText]: (value, filter) => {
-    assertMultiLineTextFieldValue(value);
-    assertMultiLineTextFieldFilter(filter);
-
-    const applyFilter = textFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.SingleSelect]: (value, filter) => {
-    assertSingleSelectFieldValue(value);
-    assertSingleSelectFieldFilter(filter);
-
-    const applyFilter = singleSelectFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiSelect]: (value, filter) => {
-    assertMultiSelectFieldValue(value);
-    assertMultiSelectFieldFilter(filter);
-
-    const applyFilter = multiSelectFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.SingleCollaborator]: (value, filter) => {
-    assertSingleCollaboratorFieldValue(value);
-    assertSingleCollaboratorFieldFilter(filter);
-
-    const applyFilter = singleSelectFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiCollaborator]: (value, filter) => {
-    assertMultiCollaboratorFieldValue(value);
-    assertMultiCollaboratorFieldFilter(filter);
-
-    const applyFilter = multiSelectFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.SingleDocumentLink]: (value, filter) => {
-    assertSingleDocumentLinkFieldValue(value);
-    assertSingleDocumentLinkFieldFilter(filter);
-
-    const applyFilter = singleSelectFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiDocumentLink]: (value, filter) => {
-    assertMultiDocumentLinkFieldValue(value);
-    assertMultiDocumentLinkFieldFilter(filter);
-
-    const applyFilter = multiSelectFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.Date]: (value, filter) => {
-    assertDateFieldValue(value);
-    assertDateFieldFilter(filter);
-
-    const applyFilter = dateFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.PhoneNumber]: (value, filter) => {
-    assertPhoneNumberFieldValue(value);
-    assertPhoneNumberFieldFilter(filter);
-
-    const applyFilter = textFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.Email]: (value, filter) => {
-    assertEmailFieldValue(value);
-    assertEmailFieldFilter(filter);
-
-    const applyFilter = textFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.URL]: (value, filter) => {
-    assertURLFieldValue(value);
-    assertURLFieldFilter(filter);
-
-    const applyFilter = textFiltersByCondition[filter.condition];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.Number]: (value, filter) => {
-    assertNumberFieldValue(value);
-    assertNumberFieldFilter(filter);
-
-    const applyFilter = numberFiltersByCondition[filter.condition];
+    const applyFilter = booleanFiltersByCondition[filter.condition];
 
     return applyFilter(value, filter.value);
   },
@@ -273,11 +185,109 @@ const filtersByFieldType: {
 
     return applyFilter(value, filter.value);
   },
-  [FieldType.Checkbox]: (value, filter) => {
-    assertCheckboxFieldValue(value);
-    assertCheckboxFieldFilter(filter);
+  [FieldType.Date]: (value, filter) => {
+    assertDateFieldValue(value);
+    assertDateFieldFilter(filter);
 
-    const applyFilter = booleanFiltersByCondition[filter.condition];
+    const applyFilter = dateFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.Email]: (value, filter) => {
+    assertEmailFieldValue(value);
+    assertEmailFieldFilter(filter);
+
+    const applyFilter = textFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.MultiCollaborator]: (value, filter) => {
+    assertMultiCollaboratorFieldValue(value);
+    assertMultiCollaboratorFieldFilter(filter);
+
+    const applyFilter = multiSelectFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.MultiDocumentLink]: (value, filter) => {
+    assertMultiDocumentLinkFieldValue(value);
+    assertMultiDocumentLinkFieldFilter(filter);
+
+    const applyFilter = multiSelectFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.MultiLineText]: (value, filter) => {
+    assertMultiLineTextFieldValue(value);
+    assertMultiLineTextFieldFilter(filter);
+
+    const applyFilter = textFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.MultiSelect]: (value, filter) => {
+    assertMultiSelectFieldValue(value);
+    assertMultiSelectFieldFilter(filter);
+
+    const applyFilter = multiSelectFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.Number]: (value, filter) => {
+    assertNumberFieldValue(value);
+    assertNumberFieldFilter(filter);
+
+    const applyFilter = numberFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.PhoneNumber]: (value, filter) => {
+    assertPhoneNumberFieldValue(value);
+    assertPhoneNumberFieldFilter(filter);
+
+    const applyFilter = textFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.SingleCollaborator]: (value, filter) => {
+    assertSingleCollaboratorFieldValue(value);
+    assertSingleCollaboratorFieldFilter(filter);
+
+    const applyFilter = singleSelectFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+
+  [FieldType.SingleDocumentLink]: (value, filter) => {
+    assertSingleDocumentLinkFieldValue(value);
+    assertSingleDocumentLinkFieldFilter(filter);
+
+    const applyFilter = singleSelectFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.SingleLineText]: (value, filter) => {
+    assertSingleLineTextFieldValue(value);
+    assertSingleLineTextFieldFilter(filter);
+
+    const applyFilter = textFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+
+  [FieldType.SingleSelect]: (value, filter) => {
+    assertSingleSelectFieldValue(value);
+    assertSingleSelectFieldFilter(filter);
+
+    const applyFilter = singleSelectFiltersByCondition[filter.condition];
+
+    return applyFilter(value, filter.value);
+  },
+  [FieldType.URL]: (value, filter) => {
+    assertURLFieldValue(value);
+    assertURLFieldFilter(filter);
+
+    const applyFilter = textFiltersByCondition[filter.condition];
 
     return applyFilter(value, filter.value);
   },

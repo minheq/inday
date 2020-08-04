@@ -131,38 +131,38 @@ export interface CheckboxFieldConfig {
 export interface CheckboxField extends BaseField, CheckboxFieldConfig {}
 
 export type FieldConfig =
-  | SingleLineTextFieldConfig
-  | MultiLineTextFieldConfig
-  | SingleSelectFieldConfig
-  | MultiSelectFieldConfig
-  | SingleCollaboratorFieldConfig
-  | MultiCollaboratorFieldConfig
-  | SingleDocumentLinkFieldConfig
-  | MultiDocumentLinkFieldConfig
-  | DateFieldConfig
-  | PhoneNumberFieldConfig
-  | EmailFieldConfig
-  | URLFieldConfig
-  | NumberFieldConfig
+  | CheckboxFieldConfig
   | CurrencyFieldConfig
-  | CheckboxFieldConfig;
+  | DateFieldConfig
+  | EmailFieldConfig
+  | MultiCollaboratorFieldConfig
+  | MultiDocumentLinkFieldConfig
+  | MultiLineTextFieldConfig
+  | MultiSelectFieldConfig
+  | NumberFieldConfig
+  | PhoneNumberFieldConfig
+  | SingleCollaboratorFieldConfig
+  | SingleDocumentLinkFieldConfig
+  | SingleLineTextFieldConfig
+  | SingleSelectFieldConfig
+  | URLFieldConfig;
 
 export type Field =
-  | SingleLineTextField
-  | MultiLineTextField
-  | SingleSelectField
-  | MultiSelectField
-  | SingleCollaboratorField
-  | MultiCollaboratorField
-  | SingleDocumentLinkField
-  | MultiDocumentLinkField
-  | DateField
-  | PhoneNumberField
-  | EmailField
-  | URLField
-  | NumberField
+  | CheckboxField
   | CurrencyField
-  | CheckboxField;
+  | DateField
+  | EmailField
+  | MultiCollaboratorField
+  | MultiDocumentLinkField
+  | MultiLineTextField
+  | MultiSelectField
+  | NumberField
+  | PhoneNumberField
+  | SingleCollaboratorField
+  | SingleDocumentLinkField
+  | SingleLineTextField
+  | SingleSelectField
+  | URLField;
 
 export type FieldsByIDState = { [fieldID: string]: Field | undefined };
 export const fieldsByIDState = atom<FieldsByIDState>({

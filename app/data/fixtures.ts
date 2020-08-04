@@ -19,7 +19,7 @@ import {
   CheckboxField,
   Field,
 } from './fields';
-import { View } from './views';
+import { View, ListView } from './views';
 import { FieldType } from './constants';
 import { Collaborator } from './collaborators';
 
@@ -261,12 +261,14 @@ export const col1Field15: CheckboxField = {
   createdAt: new Date(),
 };
 
-export const col1View1: View = {
+export const col1View1: ListView = {
   id: '1',
   name: 'All opportunities',
   type: 'list',
   collectionID: collection1.id,
   filters: [],
+  sorts: [],
+  groups: [],
   fieldsOrder: [
     col1Field1.id,
     col1Field2.id,
@@ -305,12 +307,14 @@ export const col1View1: View = {
   createdAt: new Date(),
 };
 
-export const col1View2: View = {
+export const col1View2: ListView = {
   id: '2',
   name: 'Grouped by owner',
   type: 'list',
   collectionID: collection1.id,
   filters: [],
+  sorts: [],
+  groups: [],
   fieldsOrder: [
     col1Field1.id,
     col1Field2.id,

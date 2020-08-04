@@ -128,28 +128,28 @@ export interface CheckboxFieldFilter {
 }
 
 export type FilterCondition =
-  | NumberFilterCondition
-  | TextFilterCondition
   | DateFilterCondition
   | MultiSelectFilterCondition
-  | SingleSelectFilterCondition;
+  | NumberFilterCondition
+  | SingleSelectFilterCondition
+  | TextFilterCondition;
 
 export type Filter =
-  | SingleLineTextFieldFilter
-  | MultiLineTextFieldFilter
-  | SingleSelectFieldFilter
-  | MultiSelectFieldFilter
-  | SingleCollaboratorFieldFilter
-  | MultiCollaboratorFieldFilter
-  | SingleDocumentLinkFieldFilter
-  | MultiDocumentLinkFieldFilter
-  | DateFieldFilter
-  | PhoneNumberFieldFilter
-  | EmailFieldFilter
-  | URLFieldFilter
-  | NumberFieldFilter
+  | CheckboxFieldFilter
   | CurrencyFieldFilter
-  | CheckboxFieldFilter;
+  | DateFieldFilter
+  | EmailFieldFilter
+  | MultiCollaboratorFieldFilter
+  | MultiDocumentLinkFieldFilter
+  | MultiLineTextFieldFilter
+  | MultiSelectFieldFilter
+  | NumberFieldFilter
+  | PhoneNumberFieldFilter
+  | SingleCollaboratorFieldFilter
+  | SingleDocumentLinkFieldFilter
+  | SingleLineTextFieldFilter
+  | SingleSelectFieldFilter
+  | URLFieldFilter;
 
 export function assertSingleLineTextFieldFilter(
   filter: Filter,
