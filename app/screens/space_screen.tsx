@@ -331,7 +331,7 @@ function OrganizeMenu() {
           { label: 'Filter', value: 1 },
           { label: 'Sort', value: 2 },
           { label: 'Group', value: 3 },
-          { label: 'Hide', value: 4 },
+          { label: 'Fields', value: 4 },
         ]}
       />
       <Spacer size={16} />
@@ -555,7 +555,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
             horizontal
             ref={headerScrollView}
             onScroll={handleHeaderHorizontalScroll}
-            scrollEventThrottle={24}
+            scrollEventThrottle={16}
           >
             {fieldList.map((field) => {
               const fieldConfig = fieldsConfig[field.id];
@@ -599,7 +599,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
             horizontal
             ref={gridHorizontalScrollView}
             onScroll={handleGridHorizontalScroll}
-            scrollEventThrottle={24}
+            scrollEventThrottle={16}
           >
             <Column>
               {documents.map((doc) => (

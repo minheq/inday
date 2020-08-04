@@ -88,7 +88,7 @@ export const col2Field2: URLField = {
 
 export const col1Field1: SingleLineTextField = {
   id: '11',
-  name: 'SingleLineTextField',
+  name: 'Opportunity Name',
   description: '',
   default: null,
   type: FieldType.SingleLineText,
@@ -99,7 +99,7 @@ export const col1Field1: SingleLineTextField = {
 
 export const col1Field2: MultiLineTextField = {
   id: '12',
-  name: 'MultiLineTextField',
+  name: 'Additional notes',
   description: '',
   richText: false,
   type: FieldType.MultiLineText,
@@ -110,7 +110,7 @@ export const col1Field2: MultiLineTextField = {
 
 export const col1Field3: SingleSelectField = {
   id: '13',
-  name: 'SingleSelectField',
+  name: 'Status',
   description: '',
   options: [
     { value: 'Qualification', color: 'black' },
@@ -126,7 +126,7 @@ export const col1Field3: SingleSelectField = {
 
 export const col1Field4: MultiSelectField = {
   id: '14',
-  name: 'MultiSelectField',
+  name: 'Tags',
   description: '',
   options: [
     { value: 'Qualification', color: 'black' },
@@ -142,7 +142,7 @@ export const col1Field4: MultiSelectField = {
 
 export const col1Field5: SingleCollaboratorField = {
   id: '15',
-  name: 'SingleCollaboratorField',
+  name: 'Owner',
   description: '',
   type: FieldType.SingleCollaborator,
   collectionID: collection1.id,
@@ -152,7 +152,7 @@ export const col1Field5: SingleCollaboratorField = {
 
 export const col1Field6: MultiCollaboratorField = {
   id: '16',
-  name: 'MultiCollaboratorField',
+  name: 'Watchers',
   description: '',
   type: FieldType.MultiCollaborator,
   collectionID: collection1.id,
@@ -162,7 +162,7 @@ export const col1Field6: MultiCollaboratorField = {
 
 export const col1Field7: SingleDocumentLinkField = {
   id: '17',
-  name: 'SingleDocumentLinkField',
+  name: 'Account',
   description: '',
   documentsFromCollectionID: collection2.id,
   type: FieldType.SingleDocumentLink,
@@ -173,7 +173,7 @@ export const col1Field7: SingleDocumentLinkField = {
 
 export const col1Field8: MultiDocumentLinkField = {
   id: '18',
-  name: 'MultiDocumentLinkField',
+  name: 'Relevant Accounts',
   description: '',
   documentsFromCollectionID: collection2.id,
   type: FieldType.MultiDocumentLink,
@@ -184,7 +184,7 @@ export const col1Field8: MultiDocumentLinkField = {
 
 export const col1Field9: DateField = {
   id: '19',
-  name: 'DateField',
+  name: 'Deadline',
   description: '',
   format: 'yyyy-MM-dd',
   includeTime: false,
@@ -197,7 +197,7 @@ export const col1Field9: DateField = {
 
 export const col1Field10: PhoneNumberField = {
   id: '110',
-  name: 'PhoneNumberField',
+  name: 'Phone Number',
   description: '',
   type: FieldType.PhoneNumber,
   collectionID: collection1.id,
@@ -207,7 +207,7 @@ export const col1Field10: PhoneNumberField = {
 
 export const col1Field11: EmailField = {
   id: '111',
-  name: 'EmailField',
+  name: 'Email',
   description: '',
   type: FieldType.Email,
   collectionID: collection1.id,
@@ -217,7 +217,7 @@ export const col1Field11: EmailField = {
 
 export const col1Field12: URLField = {
   id: '112',
-  name: 'URLField',
+  name: 'Company website',
   description: '',
   type: FieldType.URL,
   collectionID: collection1.id,
@@ -227,7 +227,7 @@ export const col1Field12: URLField = {
 
 export const col1Field13: NumberField = {
   id: '113',
-  name: 'NumberField',
+  name: 'Interactions Count',
   description: '',
   default: null,
   format: 'integer',
@@ -239,7 +239,7 @@ export const col1Field13: NumberField = {
 
 export const col1Field14: CurrencyField = {
   id: '114',
-  name: 'CurrencyField',
+  name: 'Revenue',
   description: '',
   currency: '$',
   precision: 2,
@@ -252,7 +252,7 @@ export const col1Field14: CurrencyField = {
 
 export const col1Field15: CheckboxField = {
   id: '115',
-  name: 'CheckboxField',
+  name: 'Closed',
   description: '',
   emoji: ':thumbsup:',
   type: FieldType.Checkbox,
