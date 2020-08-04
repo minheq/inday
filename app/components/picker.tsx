@@ -13,7 +13,7 @@ export interface Option<TValue extends string | number = any> {
 interface PickerProps<TValue extends string | number = any> {
   value?: TValue;
   options: Option<TValue>[];
-  onChange?: (value?: TValue) => void;
+  onChange?: (value: TValue) => void;
   disabled?: boolean;
 }
 

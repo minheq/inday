@@ -5,6 +5,149 @@ import {
   hasNoneOf,
   isEmpty,
 } from '../../lib/data_structures/arrays';
+import { atom, selector } from 'recoil';
+import { RecoilKey, FieldType } from './constants';
+import { FieldID } from './fields';
+import { ViewID } from './views';
+import {
+  DateFieldValue,
+  CurrencyFieldValue,
+  NumberFieldValue,
+  SingleLineTextFieldValue,
+  MultiLineTextFieldValue,
+  URLFieldValue,
+  PhoneNumberFieldValue,
+  EmailFieldValue,
+  SingleCollaboratorFieldValue,
+  SingleSelectFieldValue,
+  SingleDocumentLinkFieldValue,
+  MultiCollaboratorFieldValue,
+  MultiDocumentLinkFieldValue,
+  MultiSelectFieldValue,
+  CheckboxFieldValue,
+} from './documents';
+
+export type FilterID = string;
+
+export interface BaseFilter {
+  id: FilterID;
+  fieldID: FieldID;
+  viewID: ViewID;
+}
+
+export interface CheckboxFieldFilterConfig {
+  condition: BooleanFilterCondition;
+  value: BooleanFilterConditionValue;
+}
+export interface CheckboxFieldFilter
+  extends BaseFilter,
+    CheckboxFieldFilterConfig {}
+
+export interface CurrencyFieldFilterConfig {
+  condition: NumberFilterCondition;
+  value: NumberFilterConditionValue;
+}
+export interface CurrencyFieldFilter
+  extends BaseFilter,
+    CurrencyFieldFilterConfig {}
+
+export interface DateFieldFilterConfig {
+  condition: DateFilterCondition;
+  value: DateFilterConditionValue;
+}
+export interface DateFieldFilter extends BaseFilter, DateFieldFilterConfig {}
+
+export interface EmailFieldFilterConfig {
+  condition: TextFilterCondition;
+  value: TextFilterConditionValue;
+}
+export interface EmailFieldFilter extends BaseFilter, EmailFieldFilterConfig {}
+
+export interface MultiCollaboratorFieldFilterConfig {
+  condition: MultiSelectFilterCondition;
+  value: MultiSelectFilterConditionValue;
+}
+export interface MultiCollaboratorFieldFilter
+  extends BaseFilter,
+    MultiCollaboratorFieldFilterConfig {}
+
+export interface MultiDocumentLinkFieldFilterConfig {
+  condition: MultiSelectFilterCondition;
+  value: MultiSelectFilterConditionValue;
+}
+export interface MultiDocumentLinkFieldFilter
+  extends BaseFilter,
+    MultiDocumentLinkFieldFilterConfig {}
+
+export interface MultiLineTextFieldFilterConfig {
+  condition: TextFilterCondition;
+  value: TextFilterConditionValue;
+}
+export interface MultiLineTextFieldFilter
+  extends BaseFilter,
+    MultiLineTextFieldFilterConfig {}
+
+export interface MultiSelectFieldFilterConfig {
+  condition: MultiSelectFilterCondition;
+  value: MultiSelectFilterConditionValue;
+}
+export interface MultiSelectFieldFilter
+  extends BaseFilter,
+    MultiSelectFieldFilterConfig {}
+
+export interface NumberFieldFilterConfig {
+  condition: NumberFilterCondition;
+  value: NumberFilterConditionValue;
+}
+export interface NumberFieldFilter
+  extends BaseFilter,
+    NumberFieldFilterConfig {}
+
+export interface PhoneNumberFieldFilterConfig {
+  condition: TextFilterCondition;
+  value: TextFilterConditionValue;
+}
+export interface PhoneNumberFieldFilter
+  extends BaseFilter,
+    PhoneNumberFieldFilterConfig {}
+
+export interface SingleCollaboratorFieldFilterConfig {
+  condition: SingleSelectFilterCondition;
+  value: SingleSelectFilterConditionValue;
+}
+export interface SingleCollaboratorFieldFilter
+  extends BaseFilter,
+    SingleCollaboratorFieldFilterConfig {}
+
+export interface SingleDocumentLinkFieldFilterConfig {
+  condition: SingleSelectFilterCondition;
+  value: SingleSelectFilterConditionValue;
+}
+export interface SingleDocumentLinkFieldFilter
+  extends BaseFilter,
+    SingleDocumentLinkFieldFilterConfig {}
+
+export interface SingleLineTextFieldFilterConfig {
+  condition: TextFilterCondition;
+  value: TextFilterConditionValue;
+}
+export interface SingleLineTextFieldFilter
+  extends BaseFilter,
+    SingleLineTextFieldFilterConfig {}
+
+export interface SingleSelectFieldFilterConfig {
+  condition: SingleSelectFilterCondition;
+  value: SingleSelectFilterConditionValue;
+}
+export interface SingleSelectFieldFilter
+  extends BaseFilter,
+    SingleSelectFieldFilterConfig {}
+
+export interface URLFieldFilterConfig {
+  condition: TextFilterCondition;
+  value: TextFilterConditionValue;
+}
+export interface URLFieldFilter extends BaseFilter, URLFieldFilterConfig {}
 
 export type TextFilterCondition =
   | 'contains'
@@ -13,16 +156,7 @@ export type TextFilterCondition =
   | 'isNot'
   | 'isEmpty'
   | 'isNotEmpty';
-
-export interface SingleLineTextFieldFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-export interface MultiLineTextFieldFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
+export type TextFilterConditionValue = string;
 
 export type SingleSelectFilterCondition =
   | 'is'
@@ -31,11 +165,7 @@ export type SingleSelectFilterCondition =
   | 'isNoneOf'
   | 'isEmpty'
   | 'isNotEmpty';
-
-export interface SingleSelectFieldFilter {
-  condition: SingleSelectFilterCondition;
-  value: string | string[];
-}
+export type SingleSelectFilterConditionValue = string | string[] | null;
 
 export type MultiSelectFilterCondition =
   | 'hasAnyOf'
@@ -43,31 +173,7 @@ export type MultiSelectFilterCondition =
   | 'hasNoneOf'
   | 'isEmpty'
   | 'isNotEmpty';
-
-export interface MultiSelectFieldFilter {
-  condition: MultiSelectFilterCondition;
-  value: string[];
-}
-
-export interface SingleCollaboratorFieldFilter {
-  condition: SingleSelectFilterCondition;
-  value: string | string[];
-}
-
-export interface MultiCollaboratorFieldFilter {
-  condition: MultiSelectFilterCondition;
-  value: string[];
-}
-
-export interface SingleDocumentLinkFieldFilter {
-  condition: SingleSelectFilterCondition;
-  value: string | string[];
-}
-
-export interface MultiDocumentLinkFieldFilter {
-  condition: MultiSelectFilterCondition;
-  value: string[];
-}
+export type MultiSelectFilterConditionValue = string[];
 
 export type DateFilterCondition =
   | 'is'
@@ -79,26 +185,7 @@ export type DateFilterCondition =
   | 'isNot'
   | 'isEmpty'
   | 'isNotEmpty';
-
-export interface DateFieldFilter {
-  condition: DateFilterCondition;
-  value: Date | Interval;
-}
-
-export interface PhoneNumberFieldFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-export interface EmailFieldFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
-
-export interface URLFieldFilter {
-  condition: TextFilterCondition;
-  value: string;
-}
+export type DateFilterConditionValue = Date | Interval | null;
 
 export type NumberFilterCondition =
   | 'equal'
@@ -109,23 +196,10 @@ export type NumberFilterCondition =
   | 'greaterThanOrEqual'
   | 'isEmpty'
   | 'isNotEmpty';
-
-export interface NumberFieldFilter {
-  condition: NumberFilterCondition;
-  value: number;
-}
-
-export interface CurrencyFieldFilter {
-  condition: NumberFilterCondition;
-  value: number;
-}
+export type NumberFilterConditionValue = number | null;
 
 export type BooleanFilterCondition = 'is';
-
-export interface CheckboxFieldFilter {
-  condition: BooleanFilterCondition;
-  value: boolean;
-}
+export type BooleanFilterConditionValue = boolean;
 
 export type FilterCondition =
   | DateFilterCondition
@@ -133,6 +207,23 @@ export type FilterCondition =
   | NumberFilterCondition
   | SingleSelectFilterCondition
   | TextFilterCondition;
+
+export type FilterConfig =
+  | CheckboxFieldFilterConfig
+  | CurrencyFieldFilterConfig
+  | DateFieldFilterConfig
+  | EmailFieldFilterConfig
+  | MultiCollaboratorFieldFilterConfig
+  | MultiDocumentLinkFieldFilterConfig
+  | MultiLineTextFieldFilterConfig
+  | MultiSelectFieldFilterConfig
+  | NumberFieldFilterConfig
+  | PhoneNumberFieldFilterConfig
+  | SingleCollaboratorFieldFilterConfig
+  | SingleDocumentLinkFieldFilterConfig
+  | SingleLineTextFieldFilterConfig
+  | SingleSelectFieldFilterConfig
+  | URLFieldFilterConfig;
 
 export type Filter =
   | CheckboxFieldFilter
@@ -151,16 +242,119 @@ export type Filter =
   | SingleSelectFieldFilter
   | URLFieldFilter;
 
-export function assertSingleLineTextFieldFilter(
+export type FiltersByIDState = { [filterID: string]: Filter | undefined };
+export const filtersByIDState = atom<FiltersByIDState>({
+  key: RecoilKey.FiltersByID,
+  default: {},
+});
+
+export const filtersQuery = selector({
+  key: RecoilKey.Filters,
+  get: ({ get }) => {
+    const viewsByID = get(filtersByIDState);
+
+    return Object.values(viewsByID) as Filter[];
+  },
+});
+
+export function getDefaultFilterConfig(fieldType: FieldType): FilterConfig {
+  switch (fieldType) {
+    case FieldType.Checkbox:
+      return { condition: 'is', value: false };
+    case FieldType.Date:
+      return { condition: 'is', value: null };
+    case FieldType.SingleLineText:
+    case FieldType.MultiLineText:
+    case FieldType.URL:
+    case FieldType.PhoneNumber:
+    case FieldType.Email:
+      return { condition: 'contains', value: '' };
+    case FieldType.Number:
+    case FieldType.Currency:
+      return { condition: 'equal', value: null };
+    case FieldType.MultiCollaborator:
+    case FieldType.MultiDocumentLink:
+    case FieldType.MultiSelect:
+      return { condition: 'hasAnyOf', value: [] };
+    case FieldType.SingleSelect:
+    case FieldType.SingleDocumentLink:
+    case FieldType.SingleCollaborator:
+      return { condition: 'is', value: null };
+    default:
+      throw new Error(`Expected default filter config for ${fieldType}`);
+  }
+}
+
+export function assertCheckboxFieldFilter(
   filter: Filter,
-): asserts filter is SingleLineTextFieldFilter {
+): asserts filter is CheckboxFieldFilter {
   if (typeof filter.value !== 'string') {
     throw new Error(
-      `Expected SingleLineTextFieldFilter to be string. Received ${filter.value}`,
+      `Expected CheckboxFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertBooleanFilterCondition(filter.condition);
+}
+
+export function assertCurrencyFieldFilter(
+  filter: Filter,
+): asserts filter is CurrencyFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected CurrencyFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertNumberFilterCondition(filter.condition);
+}
+
+export function assertDateFieldFilter(
+  filter: Filter,
+): asserts filter is DateFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected DateFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertDateFilterCondition(filter.condition);
+}
+
+export function assertEmailFieldFilter(
+  filter: Filter,
+): asserts filter is EmailFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected EmailFieldFilter to be string. Received ${filter.value}`,
     );
   }
 
   assertTextFilterCondition(filter.condition);
+}
+
+export function assertMultiCollaboratorFieldFilter(
+  filter: Filter,
+): asserts filter is MultiCollaboratorFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected MultiCollaboratorFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertMultiSelectFilterCondition(filter.condition);
+}
+
+export function assertMultiDocumentLinkFieldFilter(
+  filter: Filter,
+): asserts filter is MultiDocumentLinkFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected MultiDocumentLinkFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertMultiSelectFilterCondition(filter.condition);
 }
 
 export function assertMultiLineTextFieldFilter(
@@ -169,6 +363,77 @@ export function assertMultiLineTextFieldFilter(
   if (typeof filter.value !== 'string') {
     throw new Error(
       `Expected MultiLineTextFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertTextFilterCondition(filter.condition);
+}
+
+export function assertMultiSelectFieldFilter(
+  filter: Filter,
+): asserts filter is MultiSelectFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected MultiSelectFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertMultiSelectFilterCondition(filter.condition);
+}
+
+export function assertNumberFieldFilter(
+  filter: Filter,
+): asserts filter is NumberFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected NumberFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertNumberFilterCondition(filter.condition);
+}
+
+export function assertPhoneNumberFieldFilter(
+  filter: Filter,
+): asserts filter is PhoneNumberFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected PhoneNumberFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertTextFilterCondition(filter.condition);
+}
+
+export function assertSingleCollaboratorFieldFilter(
+  filter: Filter,
+): asserts filter is SingleCollaboratorFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected SingleCollaboratorFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertSingleSelectFilterCondition(filter.condition);
+}
+export function assertSingleDocumentLinkFieldFilter(
+  filter: Filter,
+): asserts filter is SingleDocumentLinkFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected SingleDocumentLinkFieldFilter to be string. Received ${filter.value}`,
+    );
+  }
+
+  assertSingleSelectFilterCondition(filter.condition);
+}
+
+export function assertSingleLineTextFieldFilter(
+  filter: Filter,
+): asserts filter is SingleLineTextFieldFilter {
+  if (typeof filter.value !== 'string') {
+    throw new Error(
+      `Expected SingleLineTextFieldFilter to be string. Received ${filter.value}`,
     );
   }
 
@@ -187,102 +452,6 @@ export function assertSingleSelectFieldFilter(
   assertSingleSelectFilterCondition(filter.condition);
 }
 
-export function assertMultiSelectFieldFilter(
-  filter: Filter,
-): asserts filter is MultiSelectFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected MultiSelectFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertMultiSelectFilterCondition(filter.condition);
-}
-
-export function assertSingleCollaboratorFieldFilter(
-  filter: Filter,
-): asserts filter is SingleCollaboratorFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected SingleCollaboratorFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertSingleSelectFilterCondition(filter.condition);
-}
-
-export function assertMultiCollaboratorFieldFilter(
-  filter: Filter,
-): asserts filter is MultiCollaboratorFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected MultiCollaboratorFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertMultiSelectFilterCondition(filter.condition);
-}
-
-export function assertSingleDocumentLinkFieldFilter(
-  filter: Filter,
-): asserts filter is SingleDocumentLinkFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected SingleDocumentLinkFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertSingleSelectFilterCondition(filter.condition);
-}
-
-export function assertMultiDocumentLinkFieldFilter(
-  filter: Filter,
-): asserts filter is MultiDocumentLinkFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected MultiDocumentLinkFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertMultiSelectFilterCondition(filter.condition);
-}
-
-export function assertDateFieldFilter(
-  filter: Filter,
-): asserts filter is DateFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected DateFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertDateFilterCondition(filter.condition);
-}
-
-export function assertPhoneNumberFieldFilter(
-  filter: Filter,
-): asserts filter is PhoneNumberFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected PhoneNumberFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertTextFilterCondition(filter.condition);
-}
-
-export function assertEmailFieldFilter(
-  filter: Filter,
-): asserts filter is EmailFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected EmailFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertTextFilterCondition(filter.condition);
-}
-
 export function assertURLFieldFilter(
   filter: Filter,
 ): asserts filter is URLFieldFilter {
@@ -293,42 +462,6 @@ export function assertURLFieldFilter(
   }
 
   assertTextFilterCondition(filter.condition);
-}
-
-export function assertNumberFieldFilter(
-  filter: Filter,
-): asserts filter is NumberFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected NumberFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertNumberFilterCondition(filter.condition);
-}
-
-export function assertCurrencyFieldFilter(
-  filter: Filter,
-): asserts filter is CurrencyFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected CurrencyFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertNumberFilterCondition(filter.condition);
-}
-
-export function assertCheckboxFieldFilter(
-  filter: Filter,
-): asserts filter is CheckboxFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected CheckboxFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertBooleanFilterCondition(filter.condition);
 }
 
 export function assertNumberFilterCondition(
@@ -405,8 +538,13 @@ export function assertBooleanFilterCondition(
 
 export const textFiltersByCondition: {
   [condition in TextFilterCondition]: (
-    value: string,
-    filterValue: string,
+    value:
+      | SingleLineTextFieldValue
+      | MultiLineTextFieldValue
+      | URLFieldValue
+      | PhoneNumberFieldValue
+      | EmailFieldValue,
+    filterValue: TextFilterConditionValue,
   ) => boolean;
 } = {
   contains: (value, filterValue) => {
@@ -431,8 +569,8 @@ export const textFiltersByCondition: {
 
 export const numberFiltersByCondition: {
   [condition in NumberFilterCondition]: (
-    value: number | null,
-    filterValue: number,
+    value: CurrencyFieldValue | NumberFieldValue,
+    filterValue: NumberFilterConditionValue,
   ) => boolean;
 } = {
   equal: (value, filterValue) => {
@@ -446,11 +584,19 @@ export const numberFiltersByCondition: {
       return false;
     }
 
+    if (filterValue === null) {
+      return true;
+    }
+
     return value < filterValue;
   },
   greaterThan: (value, filterValue) => {
     if (value === null) {
       return false;
+    }
+
+    if (filterValue === null) {
+      return true;
     }
 
     return value > filterValue;
@@ -460,11 +606,19 @@ export const numberFiltersByCondition: {
       return false;
     }
 
+    if (filterValue === null) {
+      return true;
+    }
+
     return value <= filterValue;
   },
   greaterThanOrEqual: (value, filterValue) => {
     if (value === null) {
       return false;
+    }
+
+    if (filterValue === null) {
+      return true;
     }
 
     return value >= filterValue;
@@ -479,8 +633,8 @@ export const numberFiltersByCondition: {
 
 export const dateFiltersByCondition: {
   [condition in DateFilterCondition]: (
-    value: Date | null,
-    filterValue: Date | Interval,
+    value: DateFieldValue,
+    filterValue: DateFilterConditionValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {
@@ -499,6 +653,10 @@ export const dateFiltersByCondition: {
   isWithin: (value, filterValue) => {
     if (value === null) {
       return false;
+    }
+
+    if (filterValue === null) {
+      return true;
     }
 
     if (filterValue instanceof Date) {
@@ -584,8 +742,11 @@ export const dateFiltersByCondition: {
 
 export const singleSelectFiltersByCondition: {
   [condition in SingleSelectFilterCondition]: (
-    value: string | null,
-    filterValue: string | string[],
+    value:
+      | SingleCollaboratorFieldValue
+      | SingleSelectFieldValue
+      | SingleDocumentLinkFieldValue,
+    filterValue: SingleSelectFilterConditionValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {
@@ -619,6 +780,10 @@ export const singleSelectFiltersByCondition: {
       return false;
     }
 
+    if (filterValue === null) {
+      return true;
+    }
+
     if (typeof filterValue === 'string') {
       throw new Error(
         `Expected filterValue to be string[]. Received ${filterValue}`,
@@ -630,6 +795,10 @@ export const singleSelectFiltersByCondition: {
   isNoneOf: (value, filterValue) => {
     if (value === null) {
       return false;
+    }
+
+    if (filterValue === null) {
+      return true;
     }
 
     if (typeof filterValue === 'string') {
@@ -650,8 +819,11 @@ export const singleSelectFiltersByCondition: {
 
 export const multiSelectFiltersByCondition: {
   [condition in MultiSelectFilterCondition]: (
-    value: string[],
-    filterValue: string[],
+    value:
+      | MultiCollaboratorFieldValue
+      | MultiDocumentLinkFieldValue
+      | MultiSelectFieldValue,
+    filterValue: MultiSelectFilterConditionValue,
   ) => boolean;
 } = {
   hasAnyOf: (value, filterValue) => {
@@ -685,8 +857,8 @@ export const multiSelectFiltersByCondition: {
 
 export const booleanFiltersByCondition: {
   [condition in BooleanFilterCondition]: (
-    value: boolean | null,
-    filterValue: boolean | Interval,
+    value: CheckboxFieldValue,
+    filterValue: BooleanFilterConditionValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {

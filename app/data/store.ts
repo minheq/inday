@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { useEventEmitter, eventsState, EventConfig, Event } from './events';
@@ -18,10 +18,11 @@ import {
   spaceQuery,
   spaceCollectionsQuery,
 } from './spaces';
-import { viewsByIDState, View, viewQuery } from './views';
+import { viewsByIDState, View, viewQuery, viewFiltersQuery } from './views';
 import { Field, fieldsByIDState, fieldQuery, FieldConfig } from './fields';
 import { documentsByIDState, documentQuery, Document } from './documents';
 import { generateID } from '../../lib/id/id';
+import { Filter, FilterConfig, filtersByIDState } from './filters';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
@@ -38,7 +39,7 @@ export function useEmitEvent() {
   const workspace = useGetWorkspace();
   const setEvents = useSetRecoilState(eventsState);
 
-  const emitEvent = React.useCallback(
+  const emitEvent = useCallback(
     (eventConfig: EventConfig) => {
       const event: Event = {
         ...eventConfig,
@@ -62,7 +63,7 @@ export function useGetSpaces() {
 export function useGetSpaceCallback() {
   const spaces = useGetSpaces();
 
-  const getSpace = React.useCallback(
+  const getSpace = useCallback(
     (spaceID: string) => {
       const space = spaces[spaceID];
 
@@ -100,7 +101,7 @@ export function useCreateSpace() {
   const setSpaces = useSetRecoilState(spacesByIDState);
   const createCollection = useCreateCollection();
 
-  const createSpace = React.useCallback(() => {
+  const createSpace = useCallback(() => {
     const newSpace: Space = {
       id: generateID(),
       name: '',
@@ -131,7 +132,7 @@ export function useDeleteSpace() {
   const emitEvent = useEmitEvent();
   const setSpaces = useSetRecoilState(spacesByIDState);
 
-  const deleteSpace = React.useCallback(
+  const deleteSpace = useCallback(
     (space: Space) => {
       setSpaces((previousSpaces) => {
         const nextSpaces = { ...previousSpaces };
@@ -162,7 +163,7 @@ export function useUpdateSpaceName() {
   const getSpace = useGetSpaceCallback();
   const setSpaces = useSetRecoilState(spacesByIDState);
 
-  const updateSpaceName = React.useCallback(
+  const updateSpaceName = useCallback(
     (input: UpdateSpaceNameInput) => {
       const { spaceID, name } = input;
       const prevSpace = getSpace(spaceID);
@@ -195,7 +196,7 @@ export function useGetCollections() {
 export function useGetCollectionCallback() {
   const collections = useGetCollections();
 
-  const getCollection = React.useCallback(
+  const getCollection = useCallback(
     (collectionID: string) => {
       const collection = collections[collectionID];
 
@@ -227,6 +228,12 @@ export function useGetCollectionFields(collectionID: string) {
   return fields;
 }
 
+export function useGetViewFilters(viewID: string) {
+  const filters = useRecoilValue(viewFiltersQuery(viewID));
+
+  return filters;
+}
+
 export function useGetCollectionDocuments(collectionID: string) {
   const documents = useRecoilValue(collectionDocumentsQuery(collectionID));
 
@@ -250,7 +257,7 @@ export function useCreateCollection() {
   const setCollections = useSetRecoilState(collectionsByIDState);
   const createView = useCreateView();
 
-  const createCollection = React.useCallback(
+  const createCollection = useCallback(
     (spaceID: string) => {
       let newCollection: Collection = {
         id: generateID(),
@@ -284,7 +291,7 @@ export function useDeleteCollection() {
   const emitEvent = useEmitEvent();
   const setCollections = useSetRecoilState(collectionsByIDState);
 
-  const deleteCollection = React.useCallback(
+  const deleteCollection = useCallback(
     (collection: Collection) => {
       setCollections((previousCollections) => {
         const nextCollections = { ...previousCollections };
@@ -315,7 +322,7 @@ export function useUpdateCollectionName() {
   const getCollection = useGetCollectionCallback();
   const setCollections = useSetRecoilState(collectionsByIDState);
 
-  const updateCollectionName = React.useCallback(
+  const updateCollectionName = useCallback(
     (input: UpdateCollectionNameInput) => {
       const { collectionID, name } = input;
       const prevCollection = getCollection(collectionID);
@@ -344,7 +351,7 @@ export function useUpdateCollectionName() {
 export function useGetViewCallback() {
   const views = useRecoilValue(viewsByIDState);
 
-  const getView = React.useCallback(
+  const getView = useCallback(
     (viewID: string) => {
       const view = views[viewID];
 
@@ -370,17 +377,104 @@ export function useGetView(viewID: string) {
   return view;
 }
 
+export function useGetFiltersByID() {
+  const filtersByID = useRecoilValue(filtersByIDState);
+
+  return filtersByID;
+}
+
+export function useGetFilterCallback() {
+  const filtersByID = useGetFiltersByID();
+
+  const getFilter = useCallback(
+    (filterID: string) => {
+      const filter = filtersByID[filterID];
+
+      if (filter === undefined) {
+        throw new Error('Filter not found');
+      }
+
+      return filter;
+    },
+    [filtersByID],
+  );
+
+  return getFilter;
+}
+
+export function useCreateFilter() {
+  const emitEvent = useEmitEvent();
+  const setFilters = useSetRecoilState(filtersByIDState);
+
+  const createFilter = useCallback(
+    (viewID: string, fieldID: string, filterConfig: FilterConfig) => {
+      let newFilter: Filter = {
+        id: generateID(),
+        viewID,
+        fieldID,
+        ...filterConfig,
+      };
+
+      setFilters((previousFilters) => ({
+        ...previousFilters,
+        [newFilter.id]: newFilter,
+      }));
+
+      emitEvent({
+        name: 'FilterCreated',
+        filter: newFilter,
+      });
+
+      return newFilter;
+    },
+    [emitEvent, setFilters],
+  );
+
+  return createFilter;
+}
+
+export function useUpdateFilterConfig() {
+  const emitEvent = useEmitEvent();
+  const setFilters = useSetRecoilState(filtersByIDState);
+  const getFilter = useGetFilterCallback();
+
+  const updateFilterConfig = useCallback(
+    (filterID: string, fieldID: string, filterConfig: FilterConfig) => {
+      const prevFilter = getFilter(filterID);
+
+      const nextFilter: Filter = {
+        ...prevFilter,
+        fieldID,
+        ...filterConfig,
+      };
+      setFilters((previousFilters) => ({
+        ...previousFilters,
+        [nextFilter.id]: nextFilter,
+      }));
+
+      emitEvent({
+        name: 'FilterConfigUpdated',
+        filter: nextFilter,
+      });
+
+      return nextFilter;
+    },
+    [emitEvent, setFilters, getFilter],
+  );
+
+  return updateFilterConfig;
+}
+
 export function useCreateView() {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState(viewsByIDState);
 
-  const createView = React.useCallback(
+  const createView = useCallback(
     (collectionID: string) => {
       let newView: View = {
         id: generateID(),
         name: '',
         type: 'list',
-        filters: [],
         fieldsConfig: {},
         fieldsOrder: [],
         createdAt: new Date(),
@@ -410,7 +504,7 @@ export function useDeleteView() {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState(viewsByIDState);
 
-  const deleteView = React.useCallback(
+  const deleteView = useCallback(
     (view: View) => {
       setViews((previousViews) => {
         const nextViews = { ...previousViews };
@@ -441,7 +535,7 @@ export function useUpdateViewName() {
   const getView = useGetViewCallback();
   const setViews = useSetRecoilState(viewsByIDState);
 
-  const updateViewName = React.useCallback(
+  const updateViewName = useCallback(
     (input: UpdateViewNameInput) => {
       const { viewID, name } = input;
       const prevView = getView(viewID);
@@ -470,7 +564,7 @@ export function useUpdateViewName() {
 export function useGetFieldCallback() {
   const fields = useRecoilValue(fieldsByIDState);
 
-  const getField = React.useCallback(
+  const getField = useCallback(
     (fieldID: string) => {
       const field = fields[fieldID];
 
@@ -500,7 +594,7 @@ export function useCreateField() {
   const emitEvent = useEmitEvent();
   const setFields = useSetRecoilState(fieldsByIDState);
 
-  const createField = React.useCallback(
+  const createField = useCallback(
     (
       collectionID: string,
       name: string,
@@ -539,7 +633,7 @@ export function useDeleteField() {
   const emitEvent = useEmitEvent();
   const setFields = useSetRecoilState(fieldsByIDState);
 
-  const deleteField = React.useCallback(
+  const deleteField = useCallback(
     (field: Field) => {
       setFields((previousFields) => {
         const nextFields = { ...previousFields };
@@ -570,7 +664,7 @@ export function useUpdateFieldName() {
   const getField = useGetFieldCallback();
   const setFields = useSetRecoilState(fieldsByIDState);
 
-  const updateFieldName = React.useCallback(
+  const updateFieldName = useCallback(
     (input: UpdateFieldNameInput) => {
       const { fieldID, name } = input;
       const prevField = getField(fieldID);
@@ -599,7 +693,7 @@ export function useUpdateFieldName() {
 export function useGetDocumentCallback() {
   const documents = useRecoilValue(documentsByIDState);
 
-  const getDocument = React.useCallback(
+  const getDocument = useCallback(
     (documentID: string) => {
       const document = documents[documentID];
 
@@ -629,7 +723,7 @@ export function useCreateDocument() {
   const emitEvent = useEmitEvent();
   const setDocuments = useSetRecoilState(documentsByIDState);
 
-  const createDocument = React.useCallback(
+  const createDocument = useCallback(
     (collectionID: string) => {
       let newDocument: Document = {
         id: generateID(),
@@ -661,7 +755,7 @@ export function useDeleteDocument() {
   const emitEvent = useEmitEvent();
   const setDocuments = useSetRecoilState(documentsByIDState);
 
-  const deleteDocument = React.useCallback(
+  const deleteDocument = useCallback(
     (document: Document) => {
       setDocuments((previousDocuments) => {
         const nextDocuments = { ...previousDocuments };
@@ -691,7 +785,7 @@ export function useUpdateDocumentName() {
   const getDocument = useGetDocumentCallback();
   const setDocuments = useSetRecoilState(documentsByIDState);
 
-  const updateDocumentName = React.useCallback(
+  const updateDocumentName = useCallback(
     (input: UpdateDocumentNameInput) => {
       const { documentID } = input;
       const prevDocument = getDocument(documentID);

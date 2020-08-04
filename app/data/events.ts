@@ -7,6 +7,7 @@ import { Collection } from './collections';
 import { View } from './views';
 import { Field } from './fields';
 import { Document } from './documents';
+import { Filter } from './filters';
 
 export interface BaseEvent {
   createdAt: Date;
@@ -129,6 +130,30 @@ export interface DocumentDeletedEvent
   extends BaseEvent,
     DocumentDeletedEventConfig {}
 
+export interface FilterCreatedEventConfig {
+  name: 'FilterCreated';
+  filter: Filter;
+}
+export interface FilterCreatedEvent
+  extends BaseEvent,
+    FilterCreatedEventConfig {}
+
+export interface FilterConfigUpdatedEventConfig {
+  name: 'FilterConfigUpdated';
+  filter: Filter;
+}
+export interface FilterConfigUpdatedEvent
+  extends BaseEvent,
+    FilterConfigUpdatedEventConfig {}
+
+export interface FilterDeletedEventConfig {
+  name: 'FilterDeleted';
+  filter: Filter;
+}
+export interface FilterDeletedEvent
+  extends BaseEvent,
+    FilterDeletedEventConfig {}
+
 export type EventConfig =
   | WorkspaceCreatedEventConfig
   | SpaceCreatedEventConfig
@@ -145,7 +170,10 @@ export type EventConfig =
   | FieldDeletedEventConfig
   | DocumentCreatedEventConfig
   | DocumentNameUpdatedEventConfig
-  | DocumentDeletedEventConfig;
+  | DocumentDeletedEventConfig
+  | FilterCreatedEventConfig
+  | FilterConfigUpdatedEventConfig
+  | FilterDeletedEventConfig;
 
 export type Event =
   | WorkspaceCreatedEvent
@@ -163,7 +191,10 @@ export type Event =
   | FieldDeletedEvent
   | DocumentCreatedEvent
   | DocumentNameUpdatedEvent
-  | DocumentDeletedEvent;
+  | DocumentDeletedEvent
+  | FilterCreatedEvent
+  | FilterConfigUpdatedEvent
+  | FilterDeletedEvent;
 
 type SubscriptionCallback = (event: Event) => void;
 

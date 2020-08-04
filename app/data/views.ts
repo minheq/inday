@@ -47,6 +47,7 @@ import {
   numberFiltersByCondition,
   singleSelectFiltersByCondition,
   textFiltersByCondition,
+  filtersQuery,
 } from './filters';
 
 export type ViewID = string;
@@ -59,8 +60,6 @@ export enum Sort {
 interface BaseView {
   id: ViewID;
   name: string;
-  filters: [FieldID, Filter][];
-  sorts: [FieldID, Sort][];
   createdAt: Date;
   updatedAt: Date;
   collectionID: string;
@@ -73,7 +72,6 @@ export interface ListViewFieldConfig {
 
 interface ListViewConfig {
   type: 'list';
-  groups: [FieldID, Sort][];
   fieldsOrder: FieldID[];
   fieldsConfig: {
     [fieldID: string]: ListViewFieldConfig;
@@ -121,19 +119,35 @@ export const viewQuery = selectorFamily<View, string>({
   },
 });
 
+export const viewFiltersQuery = selectorFamily<Filter[], string>({
+  key: RecoilKey.ViewFilters,
+  get: (viewID: string) => ({ get }) => {
+    const view = get(viewQuery(viewID));
+    const filters = get(filtersQuery);
+
+    return filters.filter((f) => f.viewID === view.id);
+  },
+});
+
 export const viewDocumentsQuery = selectorFamily<Document[], string>({
-  key: RecoilKey.Collection,
+  key: RecoilKey.ViewDocuments,
   get: (viewID: string) => ({ get }) => {
     const view = get(viewQuery(viewID));
     const documents = get(collectionDocumentsQuery(view.collectionID));
+    const filters = get(viewFiltersQuery(viewID));
 
     function getField(fieldID: string) {
       return get(fieldQuery(fieldID));
     }
 
     let finalDocuments = documents;
+    const filterPairs: [FieldID, Filter][] = filters.map((f) => [f.fieldID, f]);
 
-    finalDocuments = filterDocumentsByView(view, finalDocuments, getField);
+    finalDocuments = filterDocumentsByView(
+      filterPairs,
+      finalDocuments,
+      getField,
+    );
     // TODO: Apply sorting
     // TODO: Apply view. List, Board, Calendar
     // TODO: Apply grouping
@@ -143,12 +157,10 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
 });
 
 export function filterDocumentsByView(
-  view: View,
+  filters: [FieldID, Filter][],
   documents: Document[],
   getField: (fieldID: string) => Field,
 ) {
-  const { filters } = view;
-
   let filteredDocuments = documents;
 
   for (const [fieldID, filter] of filters) {

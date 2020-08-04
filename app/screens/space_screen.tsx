@@ -19,6 +19,7 @@ import {
   SegmentedControl,
   Picker,
   Option,
+  TextInput,
 } from '../components';
 import {
   useRoute,
@@ -37,6 +38,11 @@ import {
   useGetCollectionViews,
   useGetCollectionFields,
   useGetCollectionFieldsByID,
+  useCreateFilter,
+  useGetViewFilters,
+  useGetField,
+  useUpdateFilterConfig,
+  useGetFieldCallback,
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
@@ -79,6 +85,12 @@ import {
   assertURLField,
 } from '../data/fields';
 import { format } from 'date-fns';
+import {
+  NumberFilterCondition,
+  TextFilterCondition,
+  getDefaultFilterConfig,
+  Filter,
+} from '../data/filters';
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
 const SpaceScreenContext = createContext({
@@ -341,40 +353,58 @@ function OrganizeMenu() {
 }
 
 function FilterMenu() {
+  const context = useContext(SpaceScreenContext);
+  const createFilter = useCreateFilter();
+  const fields = useGetCollectionFields(context.collectionID);
+  const filters = useGetViewFilters(context.viewID);
+  const firstField = first(fields);
+
+  const handlePressAddFilter = useCallback(() => {
+    const filterConfig = getDefaultFilterConfig(firstField.type);
+
+    createFilter(context.viewID, firstField.id, filterConfig);
+  }, [createFilter, context, firstField]);
+
   return (
     <Container>
-      <AddFilter />
-      {/* <Button>
+      {filters.map((filter) => (
+        <FilterEdit filter={filter} />
+      ))}
+      <Button onPress={handlePressAddFilter}>
         <Text>+ Add filter</Text>
-      </Button> */}
+      </Button>
     </Container>
   );
 }
 
-function AddFilter() {
+interface FilterEditProps {
+  filter: Filter;
+}
+
+function FilterEdit(props: FilterEditProps) {
+  const { filter } = props;
   const context = useContext(SpaceScreenContext);
-  const fieldsByID = useGetCollectionFieldsByID(context.collectionID);
+  const field = useGetField(filter.fieldID);
   const fields = useGetCollectionFields(context.collectionID);
-  const firstFieldID = first(fields).id;
-  const [selectedFieldID, setSelectedFieldID] = React.useState(firstFieldID);
+  const getField = useGetFieldCallback();
+  const updateFilterConfig = useUpdateFilterConfig();
 
   const handleChangeField = useCallback(
-    (value?: FieldID) => {
-      if (value === undefined) {
-        setSelectedFieldID(firstFieldID);
-      } else {
-        setSelectedFieldID(value);
-      }
+    (fieldID: FieldID) => {
+      const newField = getField(fieldID);
+      const filterConfig = getDefaultFilterConfig(newField.type);
+
+      updateFilterConfig(filter.id, fieldID, filterConfig);
     },
-    [firstFieldID],
+    [filter, getField, updateFilterConfig],
   );
 
-  const selectedField = fieldsByID[selectedFieldID];
+  const input = filterConditionInputComponentByFieldType[field.type](field);
 
   return (
     <Container>
       <Picker
-        value={selectedFieldID}
+        value={field.id}
         onChange={handleChangeField}
         options={fields.map((f) => ({
           label: f.name,
@@ -382,36 +412,101 @@ function AddFilter() {
         }))}
       />
       <Spacer size={4} />
-      <FilterConditionInput field={selectedField} />
+      {input}
     </Container>
   );
 }
 
-interface FilterConditionInputProps {
-  field: Field;
-}
+const filterConditionInputComponentByFieldType: {
+  [fieldType in FieldType]: (field: Field) => React.ReactNode;
+} = {
+  [FieldType.Checkbox]: (field) => {
+    assertCheckboxField(field);
 
-function FilterConditionInput(props: FilterConditionInputProps) {
-  const { field } = props;
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.Currency]: (field) => {
+    assertCurrencyField(field);
 
-  switch (field.type) {
-    case FieldType.SingleLineText:
-      return <TextFilterConditionInput />;
-    case FieldType.Number:
-      return <NumberFilterConditionInput />;
-    default:
-      return null;
-  }
-}
+    return <NumberFilterConditionInput />;
+  },
+  [FieldType.Date]: (field) => {
+    assertDateField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.Email]: (field) => {
+    assertEmailField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.MultiCollaborator]: (field) => {
+    assertMultiCollaboratorField(field);
+
+    return <TextFilterConditionInput />;
+  },
+
+  [FieldType.MultiDocumentLink]: (field) => {
+    assertMultiDocumentLinkField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.MultiLineText]: (field) => {
+    assertMultiLineTextField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.MultiSelect]: (field) => {
+    assertMultiSelectField(field);
+
+    return <TextFilterConditionInput />;
+  },
+
+  [FieldType.Number]: (field) => {
+    assertNumberField(field);
+
+    return <NumberFilterConditionInput />;
+  },
+  [FieldType.PhoneNumber]: (field) => {
+    assertPhoneNumberField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.SingleCollaborator]: (field) => {
+    assertSingleCollaboratorField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.SingleDocumentLink]: (field) => {
+    assertSingleDocumentLinkField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.SingleLineText]: (field) => {
+    assertSingleLineTextField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.SingleSelect]: (field) => {
+    assertSingleSelectField(field);
+
+    return <TextFilterConditionInput />;
+  },
+  [FieldType.URL]: (field) => {
+    assertURLField(field);
+
+    return <TextFilterConditionInput />;
+  },
+};
 
 function TextFilterConditionInput() {
-  const options = [
+  const options: Option<TextFilterCondition>[] = [
     { value: 'contains', label: 'contains' },
-    { value: 'does_not_contain', label: 'does not contain' },
+    { value: 'doesNotContain', label: 'does not contain' },
     { value: 'is', label: 'is' },
-    { value: 'is_not', label: 'is not' },
-    { value: 'is_empty', label: 'is empty' },
-    { value: 'is_not_empty', label: 'is not empty' },
+    { value: 'isNot', label: 'is not' },
+    { value: 'isEmpty', label: 'is empty' },
+    { value: 'isNotEmpty', label: 'is not empty' },
   ];
 
   return (
@@ -421,20 +516,22 @@ function TextFilterConditionInput() {
         // onChange={handleChangeField}
         options={options}
       />
+      <Spacer size={4} />
+      <TextInput />
     </Container>
   );
 }
 
 function NumberFilterConditionInput() {
-  const options: Option<string>[] = [
+  const options: Option<NumberFilterCondition>[] = [
     { value: 'equal', label: 'equal' },
-    { value: 'not_equal', label: 'not equal' },
-    { value: 'less_than', label: 'less than' },
-    { value: 'greater_than', label: 'greater than' },
-    { value: 'less_than_or_equal', label: 'less than or equal' },
-    { value: 'greater_than_or_equal', label: 'greater than or equal' },
-    { value: 'is_empty', label: 'is empty' },
-    { value: 'is_not_empty', label: 'is not empty' },
+    { value: 'notEqual', label: 'not equal' },
+    { value: 'lessThan', label: 'less than' },
+    { value: 'greaterThan', label: 'greater than' },
+    { value: 'lessThanOrEqual', label: 'less than or equal' },
+    { value: 'greaterThanOrEqual', label: 'greater than or equal' },
+    { value: 'isEmpty', label: 'is empty' },
+    { value: 'isNotEmpty', label: 'is not empty' },
   ];
 
   return (
@@ -444,6 +541,8 @@ function NumberFilterConditionInput() {
         // onChange={handleChangeField}
         options={options}
       />
+      <Spacer size={4} />
+      <TextInput />
     </Container>
   );
 }
@@ -612,10 +711,9 @@ function ListViewDisplay(props: ListViewDisplayProps) {
                   <Row key={doc.id}>
                     {fieldList.map((field) => {
                       const fieldConfig = fieldsConfig[field.id];
-                      const cell = componentsByFieldType[field.type](
-                        doc.fields[field.id],
-                        field,
-                      );
+                      const cell = documentFieldValueComponentByFieldType[
+                        field.type
+                      ](doc.fields[field.id], field);
 
                       return (
                         <Container
@@ -641,59 +739,23 @@ function ListViewDisplay(props: ListViewDisplayProps) {
   );
 }
 
-const componentsByFieldType: {
+const documentFieldValueComponentByFieldType: {
   [fieldType in FieldType]: (
     value: DocumentFieldValue,
     field: Field,
   ) => React.ReactNode;
 } = {
-  [FieldType.SingleLineText]: (value, field) => {
-    assertSingleLineTextFieldValue(value);
-    assertSingleLineTextField(field);
+  [FieldType.Checkbox]: (value, field) => {
+    assertCheckboxFieldValue(value);
+    assertCheckboxField(field);
+
+    return <Text>{value ? 'checked' : 'unchecked'}</Text>;
+  },
+  [FieldType.Currency]: (value, field) => {
+    assertCurrencyFieldValue(value);
+    assertCurrencyField(field);
 
     return <Text>{value}</Text>;
-  },
-  [FieldType.MultiLineText]: (value, field) => {
-    assertMultiLineTextFieldValue(value);
-    assertMultiLineTextField(field);
-
-    return <Text>{value}</Text>;
-  },
-  [FieldType.SingleSelect]: (value, field) => {
-    assertSingleSelectFieldValue(value);
-    assertSingleSelectField(field);
-
-    return <Text>{value}</Text>;
-  },
-  [FieldType.MultiSelect]: (value, field) => {
-    assertMultiSelectFieldValue(value);
-    assertMultiSelectField(field);
-
-    return <Text>{value[0]}</Text>;
-  },
-  [FieldType.SingleCollaborator]: (value, field) => {
-    assertSingleCollaboratorFieldValue(value);
-    assertSingleCollaboratorField(field);
-
-    return <Text>{value}</Text>;
-  },
-  [FieldType.MultiCollaborator]: (value, field) => {
-    assertMultiCollaboratorFieldValue(value);
-    assertMultiCollaboratorField(field);
-
-    return <Text>{value[0]}</Text>;
-  },
-  [FieldType.SingleDocumentLink]: (value, field) => {
-    assertSingleDocumentLinkFieldValue(value);
-    assertSingleDocumentLinkField(field);
-
-    return <Text>{value}</Text>;
-  },
-  [FieldType.MultiDocumentLink]: (value, field) => {
-    assertMultiDocumentLinkFieldValue(value);
-    assertMultiDocumentLinkField(field);
-
-    return <Text>{value[0]}</Text>;
   },
   [FieldType.Date]: (value, field) => {
     assertDateFieldValue(value);
@@ -705,15 +767,71 @@ const componentsByFieldType: {
 
     return <Text>{format(value, field.format)}</Text>;
   },
+  [FieldType.Email]: (value, field) => {
+    assertEmailFieldValue(value);
+    assertEmailField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.MultiCollaborator]: (value, field) => {
+    assertMultiCollaboratorFieldValue(value);
+    assertMultiCollaboratorField(field);
+
+    return <Text>{value[0]}</Text>;
+  },
+
+  [FieldType.MultiDocumentLink]: (value, field) => {
+    assertMultiDocumentLinkFieldValue(value);
+    assertMultiDocumentLinkField(field);
+
+    return <Text>{value[0]}</Text>;
+  },
+  [FieldType.MultiLineText]: (value, field) => {
+    assertMultiLineTextFieldValue(value);
+    assertMultiLineTextField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.MultiSelect]: (value, field) => {
+    assertMultiSelectFieldValue(value);
+    assertMultiSelectField(field);
+
+    return <Text>{value[0]}</Text>;
+  },
+
+  [FieldType.Number]: (value, field) => {
+    assertNumberFieldValue(value);
+    assertNumberField(field);
+
+    return <Text>{value}</Text>;
+  },
   [FieldType.PhoneNumber]: (value, field) => {
     assertPhoneNumberFieldValue(value);
     assertPhoneNumberField(field);
 
     return <Text>{value}</Text>;
   },
-  [FieldType.Email]: (value, field) => {
-    assertEmailFieldValue(value);
-    assertEmailField(field);
+  [FieldType.SingleCollaborator]: (value, field) => {
+    assertSingleCollaboratorFieldValue(value);
+    assertSingleCollaboratorField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.SingleDocumentLink]: (value, field) => {
+    assertSingleDocumentLinkFieldValue(value);
+    assertSingleDocumentLinkField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.SingleLineText]: (value, field) => {
+    assertSingleLineTextFieldValue(value);
+    assertSingleLineTextField(field);
+
+    return <Text>{value}</Text>;
+  },
+  [FieldType.SingleSelect]: (value, field) => {
+    assertSingleSelectFieldValue(value);
+    assertSingleSelectField(field);
 
     return <Text>{value}</Text>;
   },
@@ -722,24 +840,6 @@ const componentsByFieldType: {
     assertURLField(field);
 
     return <Text>{value}</Text>;
-  },
-  [FieldType.Number]: (value, field) => {
-    assertNumberFieldValue(value);
-    assertNumberField(field);
-
-    return <Text>{value}</Text>;
-  },
-  [FieldType.Currency]: (value, field) => {
-    assertCurrencyFieldValue(value);
-    assertCurrencyField(field);
-
-    return <Text>{value}</Text>;
-  },
-  [FieldType.Checkbox]: (value, field) => {
-    assertCheckboxFieldValue(value);
-    assertCheckboxField(field);
-
-    return <Text>{value ? 'checked' : 'unchecked'}</Text>;
   },
 };
 

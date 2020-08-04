@@ -11,5 +11,9 @@ export interface Workspace {
 export type WorkspaceState = Workspace | null;
 export const workspaceState = atom<WorkspaceState>({
   key: RecoilKey.Workspace,
-  default: null,
+  default: {
+    id: '1',
+    name: 'My Workspace',
+    ownerID: '1',
+  },
 });
