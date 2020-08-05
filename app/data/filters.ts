@@ -233,21 +233,12 @@ export type FilterConfig =
   | URLFieldFilterConfig;
 
 export type Filter =
-  | CheckboxFieldFilter
-  | CurrencyFieldFilter
-  | DateFieldFilter
-  | EmailFieldFilter
-  | MultiCollaboratorFieldFilter
-  | MultiDocumentLinkFieldFilter
-  | MultiLineTextFieldFilter
-  | MultiSelectFieldFilter
-  | NumberFieldFilter
-  | PhoneNumberFieldFilter
-  | SingleCollaboratorFieldFilter
-  | SingleDocumentLinkFieldFilter
-  | SingleLineTextFieldFilter
-  | SingleSelectFieldFilter
-  | URLFieldFilter;
+  | BooleanFilter
+  | DateFilter
+  | MultiSelectFilter
+  | NumberFilter
+  | SingleSelectFilter
+  | TextFilter;
 
 export type TextFilter =
   | EmailFieldFilter
@@ -255,6 +246,20 @@ export type TextFilter =
   | PhoneNumberFieldFilter
   | SingleLineTextFieldFilter
   | URLFieldFilter;
+
+export type NumberFilter = CurrencyFieldFilter | NumberFieldFilter;
+export type SingleSelectFilter =
+  | SingleCollaboratorFieldFilter
+  | SingleDocumentLinkFieldFilter
+  | SingleSelectFieldFilter;
+
+export type MultiSelectFilter =
+  | MultiCollaboratorFieldFilter
+  | MultiDocumentLinkFieldFilter
+  | MultiSelectFieldFilter;
+
+export type BooleanFilter = CheckboxFieldFilter;
+export type DateFilter = DateFieldFilter;
 
 export type FiltersByIDState = { [filterID: string]: Filter | undefined };
 export const filtersByIDState = atom<FiltersByIDState>({
