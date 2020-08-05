@@ -1,14 +1,15 @@
 import React from 'react';
 
-import { ListPicker } from '../app/components';
+import { ListPicker } from './list_picker';
 
 export default {
   title: 'ListPicker',
   component: ListPicker,
 };
 
-function StatefulCheckbox() {
+export const Default = () => {
   const [value, setValue] = React.useState(['January', 'Februrary']);
+
   return (
     <ListPicker
       multi
@@ -30,6 +31,4 @@ function StatefulCheckbox() {
       onChange={setValue}
     />
   );
-}
-
-export const Default = () => <StatefulCheckbox />;
+};

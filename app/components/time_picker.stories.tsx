@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TimePicker } from '../app/components';
+import { TimePicker } from './time_picker';
 
 export default {
   title: 'TimePicker',

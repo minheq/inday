@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Container } from '../app/components';
-import { Reminder } from '../app/components/reminder';
+import { Reminder } from './reminder';
+import { Container } from './container';
 
 export default {
   title: 'Reminder',

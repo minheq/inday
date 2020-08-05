@@ -1,12 +1,17 @@
 import React from 'react';
-import { TextStyle, ViewStyle } from 'react-native';
+import { ViewStyle } from 'react-native';
+
+interface TextSizeStyle {
+  fontSize: number;
+  lineHeight: number;
+}
 
 interface TextSizes {
-  xl: TextStyle;
-  lg: TextStyle;
-  md: TextStyle;
-  sm: TextStyle;
-  xs: TextStyle;
+  xl: TextSizeStyle;
+  lg: TextSizeStyle;
+  md: TextSizeStyle;
+  sm: TextSizeStyle;
+  xs: TextSizeStyle;
 }
 
 export type TextSize = keyof TextSizes;
@@ -16,6 +21,7 @@ interface TextColors {
   primary: string;
   muted: string;
   error: string;
+  white: string;
 }
 
 export type TextColor = keyof TextColors;
@@ -132,6 +138,7 @@ const lightTheme: Theme = {
       primary: 'rgba(0, 102, 204, 1)',
       muted: 'rgba(134, 134, 139, 1)',
       error: 'rgba(234, 0, 68, 1)',
+      white: 'rgba(255, 255, 255, 1)',
     },
   },
   button: {
@@ -145,7 +152,7 @@ const lightTheme: Theme = {
       transparent: 'rgba(255, 255, 255, 0)',
       default: 'rgba(34, 34, 34, 0.15)',
       dark: 'rgba(34, 34, 34, 0.4)',
-      focus: 'rgba(34, 34, 34, 1)',
+      focus: 'rgba(0, 102, 204, 1)',
     },
   },
 };

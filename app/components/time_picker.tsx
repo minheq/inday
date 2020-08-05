@@ -1,13 +1,9 @@
 import React from 'react';
 import { Option } from './picker';
-import { Container } from './container';
-import { PickerButton } from './picker_button';
-import { useToggle } from '../hooks/use_toggle';
 import { Picker } from './picker';
 import { Row } from './row';
 import { range } from '../../lib/data_structures/arrays';
-import { format, roundToNearestMinutes, setHours, setMinutes } from 'date-fns';
-import { Expand } from './expand';
+import { setHours, setMinutes } from 'date-fns';
 
 interface TimePickerProps {
   /** Sets year, month and day of this date on the operated values */
@@ -15,21 +11,13 @@ interface TimePickerProps {
   onChange?: (value?: Date) => void;
   placeholder?: string;
   disabled?: boolean;
-  clearable?: boolean;
 }
 
 /**
  * Control for selecting a time.
  */
 export function TimePicker(props: TimePickerProps) {
-  const {
-    value,
-    onChange = () => {},
-    placeholder,
-    clearable,
-    disabled = false,
-  } = props;
-  const [open, popover] = useToggle();
+  const { value, onChange = () => {} } = props;
 
   const valueHours = value?.getHours();
   const valueMinutes = value?.getMinutes();
@@ -56,50 +44,15 @@ export function TimePicker(props: TimePickerProps) {
     [onChange, value],
   );
 
-  const handleClear = React.useCallback(() => {
-    onChange();
-    popover.setFalse();
-  }, [onChange, popover]);
-
-  const handleToggle = React.useCallback(() => {
-    if (open) {
-      popover.setFalse();
-    } else {
-      if (!value) {
-        onChange(roundToNearestMinutes(new Date(), { nearestTo: 5 }));
-      }
-
-      popover.setTrue();
-    }
-  }, [open, value, onChange, popover]);
-
   return (
-    <Container>
-      <PickerButton
-        label="Time"
-        description={value ? format(value, 'HH:mm') : undefined}
-        placeholder={placeholder}
-        clearable={clearable && !!value}
-        open={open}
-        onPress={handleToggle}
-        disabled={disabled}
-        onClear={handleClear}
+    <Row>
+      <Picker options={hours} onChange={handleHourChange} value={valueHours} />
+      <Picker
+        options={minutes}
+        onChange={handleMinutesChange}
+        value={valueMinutes}
       />
-      <Expand open={open}>
-        <Row>
-          <Picker
-            options={hours}
-            onChange={handleHourChange}
-            value={valueHours}
-          />
-          <Picker
-            options={minutes}
-            onChange={handleMinutesChange}
-            value={valueMinutes}
-          />
-        </Row>
-      </Expand>
-    </Container>
+    </Row>
   );
 }
 

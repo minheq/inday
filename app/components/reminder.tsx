@@ -187,7 +187,6 @@ function ReminderTime() {
           placeholder="Set time"
           value={value.time.time ?? undefined}
           onChange={handleTimeChange}
-          clearable
         />
       )}
       {value?.time?.date && <RecurrencePicker />}

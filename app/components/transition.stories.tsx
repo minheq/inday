@@ -7,7 +7,7 @@ import {
   Pressable,
   Text,
   Spacer,
-} from '../app/components';
+} from '../components';
 
 export default {
   title: 'TransitionProvider',
@@ -15,9 +15,11 @@ export default {
 };
 
 export const Default = () => (
-  <TransitionProvider>
-    <ScreenOne />
-  </TransitionProvider>
+  <Container height={800}>
+    <TransitionProvider>
+      <ScreenOne />
+    </TransitionProvider>
+  </Container>
 );
 
 function ScreenOne() {

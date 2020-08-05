@@ -34,8 +34,6 @@ export function Checkbox(props: CheckboxProps) {
         styles.root,
         {
           borderColor: theme.border.color.default,
-        },
-        {
           backgroundColor: checked.interpolate({
             inputRange: [0, 1],
             outputRange: [
@@ -48,7 +46,7 @@ export function Checkbox(props: CheckboxProps) {
     >
       {value && (
         <View style={styles.checkmark}>
-          <Icon name="check" size="lg" />
+          <Icon name="check" size="lg" color="white" />
         </View>
       )}
     </Pressable>

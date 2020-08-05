@@ -2,7 +2,8 @@ import React from 'react';
 import { Container } from './container';
 import { ListItem } from './list_item';
 import { Text } from './text';
-import { Icon } from './icon';
+import { Checkbox } from './checkbox';
+import { Spacer } from './spacer';
 
 type Value<
   TValue extends any,
@@ -69,13 +70,19 @@ export function ListPicker<TValue = any, TMulti extends boolean = false>(
           : false;
 
         return (
-          <ListItem
-            description={o.label}
-            onPress={() => handleSelect(o.value, selected)}
-            actions={
-              selected && <Icon name="check" color="primary" size="lg" />
-            }
-          />
+          <>
+            <ListItem
+              description={o.label}
+              onPress={() => handleSelect(o.value, selected)}
+              actions={
+                <Checkbox
+                  value={selected}
+                  onChange={() => handleSelect(o.value, selected)}
+                />
+              }
+            />
+            <Spacer size={4} />
+          </>
         );
       })}
     </Container>

@@ -1,15 +1,15 @@
 import React from 'react';
 
-import { Checkbox } from '../app/components';
+import { Switch } from './switch';
 
 export default {
-  title: 'Checkbox',
-  component: Checkbox,
+  title: 'Switch',
+  component: Switch,
 };
 
 function StatefulCheckbox() {
   const [value, setValue] = React.useState(false);
-  return <Checkbox value={value} onChange={setValue} />;
+  return <Switch value={value} onChange={setValue} />;
 }
 
 export const Default = () => <StatefulCheckbox />;

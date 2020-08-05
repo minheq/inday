@@ -51,7 +51,8 @@ export function Picker<TValue extends string | number = any>(
 
 const styles = StyleSheet.create({
   picker: {
-    padding: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: tokens.radius,
     ...tokens.text.size.md,
   },

@@ -19,7 +19,7 @@ export function ListItem(props: ListItemProps) {
 
   return (
     <Button onPress={onPress}>
-      <Container height={40} paddingHorizontal={16}>
+      <Container paddingVertical={8} paddingHorizontal={16}>
         <Row expanded justifyContent="space-between">
           <Container flex={1}>
             <Row expanded>

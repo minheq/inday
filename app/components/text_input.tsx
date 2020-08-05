@@ -6,8 +6,6 @@ import {
   Animated,
 } from 'react-native';
 import { IconName, Icon } from './icon';
-import { useHoverable } from '../hooks/use_hoverable';
-import { useFocusable } from '../hooks/use_focusable';
 import { tokens, useTheme } from './theme';
 
 export interface TextInputProps {
@@ -30,59 +28,43 @@ export function TextInput(props: TextInputProps) {
     onChange = () => {},
     placeholder,
   } = props;
-  const {
-    onHoverIn,
-    onHoverOut,
-    onPressIn,
-    onPressOut,
-    isHovered,
-  } = useHoverable();
-  const { onBlur, onFocus, isFocused } = useFocusable();
+  const [focused, setFocused] = React.useState(false);
   const theme = useTheme();
-  const interaction = React.useRef(new Animated.Value(0)).current;
+  const borderColor = React.useRef(new Animated.Value(0)).current;
+
+  const handleBlur = React.useCallback(() => {
+    setFocused(false);
+  }, []);
+
+  const handleFocus = React.useCallback(() => {
+    setFocused(true);
+  }, []);
 
   React.useEffect(() => {
-    if (isFocused) {
-      Animated.spring(interaction, {
+    if (focused) {
+      Animated.spring(borderColor, {
         toValue: 1,
         useNativeDriver: true,
         bounciness: 0,
       }).start();
-    } else if (isHovered) {
-      Animated.spring(interaction, {
-        toValue: 0.5,
-        useNativeDriver: true,
-        bounciness: 0,
-      }).start();
     } else {
-      Animated.spring(interaction, {
+      Animated.spring(borderColor, {
         toValue: 0,
         useNativeDriver: true,
         bounciness: 0,
       }).start();
     }
-  }, [interaction, isHovered, isFocused]);
+  }, [borderColor, focused]);
 
   return (
     <Animated.View
-      // @ts-ignore
-      onMouseEnter={onHoverIn}
-      // @ts-ignore
-      onMouseLeave={onHoverOut}
-      onResponderStart={onPressIn}
-      onResponderRelease={onPressOut}
       style={[
         styles.base,
-        theme.container.shadow,
         {
           backgroundColor: theme.container.color.content,
-          borderColor: interaction.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [
-              theme.border.color.default,
-              theme.border.color.dark,
-              theme.border.color.focus,
-            ],
+          borderColor: borderColor.interpolate({
+            inputRange: [0, 1],
+            outputRange: [theme.border.color.default, theme.border.color.focus],
           }),
         },
       ]}
@@ -98,10 +80,8 @@ export function TextInput(props: TextInputProps) {
         autoFocus={autoFocus}
         placeholder={placeholder}
         onChangeText={onChange}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        onResponderStart={onPressIn}
-        onResponderRelease={onPressOut}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         placeholderTextColor={theme.text.color.muted}
         style={[
           styles.input,
@@ -124,7 +104,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: tokens.radius,
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
   },
   icon: {
     paddingHorizontal: 8,
@@ -134,8 +114,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 38,
-    paddingLeft: 8,
-    paddingRight: 8,
+    paddingHorizontal: 16,
     borderRadius: tokens.radius,
     flex: 1,
   },
