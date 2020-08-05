@@ -46,7 +46,7 @@ export function Checkbox(props: CheckboxProps) {
     >
       {value && (
         <View style={styles.checkmark}>
-          <Icon name="check" size="lg" color="white" />
+          <Icon name="check" color="white" />
         </View>
       )}
     </Pressable>
@@ -56,8 +56,8 @@ export function Checkbox(props: CheckboxProps) {
 const styles = StyleSheet.create({
   root: {
     borderRadius: 999,
-    width: 32,
-    height: 32,
+    width: 24,
+    height: 24,
     padding: 4,
     borderWidth: 1,
   },

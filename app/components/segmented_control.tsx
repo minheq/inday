@@ -5,6 +5,7 @@ import { Text } from './text';
 import { Button } from './button';
 import { Spacer } from './spacer';
 import { Row } from './row';
+import { Container } from './container';
 
 interface Option<TValue = any> {
   label: string;
@@ -35,7 +36,9 @@ export function SegmentedControl<TValue = any>(
               style={styles.control}
               onPress={() => onChange(option.value)}
             >
-              <Text>{option.label}</Text>
+              <Container height={40} center>
+                <Text>{option.label}</Text>
+              </Container>
             </Button>
             <Spacer size={4} />
           </>
@@ -47,9 +50,6 @@ export function SegmentedControl<TValue = any>(
 
 const styles = StyleSheet.create({
   control: {
-    alignItems: 'center',
-    justifyContent: 'center',
     flex: 1,
-    height: 40,
   },
 });

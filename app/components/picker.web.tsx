@@ -91,6 +91,7 @@ export function Picker<TValue extends string | number = any>(
 const webStyles = css.create({
   picker: {
     height: 38,
+    minWidth: 80,
     paddingLeft: 16,
     paddingRight: 16,
     paddingTop: 8,
