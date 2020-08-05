@@ -41,7 +41,9 @@ export interface Tokens {
       bounciness: number;
     };
   };
+  contentWidth: number;
 }
+
 export const tokens: Tokens = {
   radius: 12,
   fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -76,6 +78,7 @@ export const tokens: Tokens = {
       bounciness: 0,
     },
   },
+  contentWidth: 1366,
 };
 
 interface ButtonAppearance {

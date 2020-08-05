@@ -11,8 +11,11 @@ import {
 } from 'date-fns';
 import * as React from 'react';
 
-import { getWeeksInMonth } from '../utils/month';
-import { FirstDayOfWeek, DEFAULT_FIRST_DAY_OF_WEEK } from '../utils/week';
+import {
+  FirstDayOfWeek,
+  DEFAULT_FIRST_DAY_OF_WEEK,
+  getWeeksInMonth,
+} from '../../lib/datetime';
 import { Text } from './text';
 import { Pressable } from './pressable';
 import { View, StyleSheet, Platform } from 'react-native';

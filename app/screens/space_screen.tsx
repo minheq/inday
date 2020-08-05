@@ -249,10 +249,7 @@ function CollectionMenuItem(props: CollectionMenuItemProps) {
   const { collection, active } = props;
 
   return (
-    <Button
-      state={active ? 'active' : 'default'}
-      style={styles.collectionMenuItem}
-    >
+    <Button state={active ? 'active' : 'default'} radius={0}>
       <Container center height={40} paddingHorizontal={16}>
         <Text>{collection.name}</Text>
       </Container>
@@ -895,9 +892,6 @@ const documentFieldValueComponentByFieldType: {
 };
 
 const styles = StyleSheet.create({
-  collectionMenuItem: {
-    borderRadius: 0,
-  },
   stretch: {
     flex: 1,
   },

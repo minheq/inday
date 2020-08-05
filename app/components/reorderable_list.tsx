@@ -14,7 +14,7 @@ import {
 import { useDropTarget } from '../lib/drag_drop/use_drop_target';
 import { measure } from '../lib/measurements/measurements';
 import { Draggable, DragState } from '../lib/drag_drop/draggable';
-import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
+import { useGesture, GestureConfig } from '../hooks/use_gesture';
 import { useDraggable } from '../lib/drag_drop/use_draggable';
 import { Text } from './text';
 
@@ -278,7 +278,7 @@ function ReorderableListItem(props: ReorderableListItemProps) {
     item: card,
   });
 
-  const config: GestureDetectorConfig = React.useMemo(() => {
+  const config: GestureConfig = React.useMemo(() => {
     let isLongPress = false;
 
     return {
@@ -326,7 +326,7 @@ function ReorderableListItem(props: ReorderableListItemProps) {
     };
   }, [card, draggable, position, setDragging, onDragStart, onDragEnd, onPress]);
 
-  const eventHandlers = useGestureDetector(config);
+  const eventHandlers = useGesture(config);
 
   const handleLayout = React.useCallback(() => {
     measure(ref).then((measurements) => {

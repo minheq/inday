@@ -22,8 +22,8 @@ import { Icon } from './icon';
 import { Month } from './month';
 import { View, StyleSheet } from 'react-native';
 import { Button } from './button';
-import { Hoverable } from './hoverable';
 import { Container } from './container';
+import { useHoverable } from '../hooks/use_hoverable';
 
 interface DayPickerProps<TIsRange extends boolean = false> {
   /** Selected value */
@@ -181,6 +181,10 @@ export function DayPicker<TIsRange extends boolean = false>(
       : { start: value, end: value }
     : undefined) as Interval | undefined;
 
+  const { onHoverIn, onHoverOut } = useHoverable({
+    onHoverOut: handleHoverOut,
+  });
+
   if (selected) {
     validateInterval(selected);
   }
@@ -211,24 +215,27 @@ export function DayPicker<TIsRange extends boolean = false>(
           return (
             <React.Fragment key={month.getMonth()}>
               <View style={styles.monthWrapper}>
-                <Hoverable onHoverOut={handleHoverOut}>
-                  <View style={styles.monthRoot}>
-                    <View style={styles.monthNameWrapper}>
-                      <Text align="center">{format(month, 'MMMM yyyy')}</Text>
-                    </View>
-                    <Spacer size={16} />
-                    <WeekDates />
-                    <Spacer size={16} />
-                    <Month
-                      selected={selected}
-                      date={month}
-                      onSelect={handleSelect}
-                      isOutsideRange={isOutsideRange}
-                      isBlocked={isBlocked}
-                      onHoverIn={handleHoverIn}
-                    />
+                <View
+                  // @ts-ignore
+                  onMouseEnter={onHoverIn}
+                  onMouseLeave={onHoverOut}
+                  style={styles.monthRoot}
+                >
+                  <View style={styles.monthNameWrapper}>
+                    <Text align="center">{format(month, 'MMMM yyyy')}</Text>
                   </View>
-                </Hoverable>
+                  <Spacer size={16} />
+                  <WeekDates />
+                  <Spacer size={16} />
+                  <Month
+                    selected={selected}
+                    date={month}
+                    onSelect={handleSelect}
+                    isOutsideRange={isOutsideRange}
+                    isBlocked={isBlocked}
+                    onHoverIn={handleHoverIn}
+                  />
+                </View>
               </View>
               {!last && <Container width={48} height={48} />}
             </React.Fragment>

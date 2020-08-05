@@ -29,7 +29,7 @@ export function normalizeRect(rectOrSize?: RectOrSize): Rect | undefined {
 type FocusEvent = React.FocusEvent;
 type BlurEvent = React.FocusEvent;
 
-export type GestureDetectorConfig = {
+export type GestureConfig = {
   /**
    * Whether a press gesture can be interrupted by a parent gesture such as a
    * scroll event. Defaults to true.
@@ -300,8 +300,8 @@ const DEFAULT_PRESS_RECT_OFFSETS = {
 
 type TimeoutID = number;
 
-export class GestureDetector {
-  _config: GestureDetectorConfig;
+export class Gesture {
+  _config: GestureConfig;
   _eventHandlers: EventHandlers | null = null;
   _hoverInDelayTimeout: TimeoutID | null = null;
   _hoverOutDelayTimeout: TimeoutID | null = null;
@@ -322,11 +322,11 @@ export class GestureDetector {
   } | null = null;
   _touchState: TouchState = TouchState.NotResponder;
 
-  constructor(config: GestureDetectorConfig) {
+  constructor(config: GestureConfig) {
     this._config = config;
   }
 
-  configure(config: GestureDetectorConfig) {
+  configure(config: GestureConfig) {
     this._config = config;
   }
 
@@ -424,7 +424,7 @@ export class GestureDetector {
           return;
         }
 
-        const touch = getTouchFromGestureDetectorResponderEvent(event);
+        const touch = getTouchFromGestureResponderEvent(event);
         if (touch == null) {
           this._cancelLongPressDelayTimeout();
           this._receiveSignal(TouchSignal.LeavePressRect, event, state);
@@ -561,7 +561,7 @@ export class GestureDetector {
 
     if (nextState === null || nextState === TouchState.Error) {
       throw new Error(
-        `GestureDetector: Invalid signal '${signal}' for state '${prevState}' on responder: ${
+        `Gesture: Invalid signal '${signal}' for state '${prevState}' on responder: ${
           typeof this._responderID === 'number'
             ? this._responderID
             : '<<host component>>'
@@ -668,7 +668,7 @@ export class GestureDetector {
 
   _activate(event: GestureResponderEvent): void {
     const { onPressIn } = this._config;
-    const touch = getTouchFromGestureDetectorResponderEvent(event);
+    const touch = getTouchFromGestureResponderEvent(event);
     this._touchActivatePosition = {
       pageX: touch.pageX,
       pageY: touch.pageY,
@@ -817,9 +817,7 @@ function normalizeDelay(delay?: number, min = 0, fallback = 0): number {
   return Math.max(min, delay ?? fallback);
 }
 
-const getTouchFromGestureDetectorResponderEvent = (
-  event: GestureResponderEvent,
-) => {
+const getTouchFromGestureResponderEvent = (event: GestureResponderEvent) => {
   const { changedTouches, touches } = event.nativeEvent;
 
   if (touches != null && touches.length > 0) {
@@ -831,28 +829,26 @@ const getTouchFromGestureDetectorResponderEvent = (
   return event.nativeEvent;
 };
 
-export function useGestureDetector(
-  config: GestureDetectorConfig,
-): EventHandlers {
-  const gestureDetectorRef = React.useRef<GestureDetector | null>(null);
-  if (gestureDetectorRef.current == null) {
-    gestureDetectorRef.current = new GestureDetector(config);
+export function useGesture(config: GestureConfig): EventHandlers {
+  const gestureRef = React.useRef<Gesture | null>(null);
+  if (gestureRef.current == null) {
+    gestureRef.current = new Gesture(config);
   }
-  const gestureDetector = gestureDetectorRef.current;
+  const gesture = gestureRef.current;
 
-  // On the initial mount, this is a no-op. On updates, `gestureDetector` will be
+  // On the initial mount, this is a no-op. On updates, `gesture` will be
   // re-configured to use the new configuration.
   React.useEffect(() => {
-    gestureDetector.configure(config);
-  }, [config, gestureDetector]);
+    gesture.configure(config);
+  }, [config, gesture]);
 
-  // On unmount, reset pending state and timers inside `gestureDetector`. This is
+  // On unmount, reset pending state and timers inside `gesture`. This is
   // a separate effect because we do not want to reset when `config` changes.
   React.useEffect(() => {
     return () => {
-      gestureDetector.reset();
+      gesture.reset();
     };
-  }, [gestureDetector]);
+  }, [gesture]);
 
-  return gestureDetector.getEventHandlers();
+  return gesture.getEventHandlers();
 }

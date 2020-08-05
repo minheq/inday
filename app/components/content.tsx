@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { tokens } from './theme';
 
 interface ContentProps {
   children?: React.ReactNode;
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
   inner: {
     width: '100%',
     flex: 1,
-    maxWidth: 1366,
+    maxWidth: tokens.contentWidth,
     padding: 16,
   },
 });

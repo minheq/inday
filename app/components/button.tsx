@@ -6,7 +6,7 @@ import {
   GestureResponderEvent,
 } from 'react-native';
 import { Pressable, PressableChildrenProps } from './pressable';
-import { useTheme } from './theme';
+import { useTheme, tokens } from './theme';
 
 type ButtonState = 'default' | 'hovered' | 'active' | 'disabled';
 
@@ -14,6 +14,7 @@ interface ButtonProps {
   onPress?: (e: GestureResponderEvent) => void;
   disabled?: boolean;
   state?: ButtonState;
+  radius?: number;
   children?:
     | React.ReactNode
     | ((props: PressableChildrenProps) => React.ReactNode);
@@ -25,7 +26,13 @@ interface ButtonProps {
 }
 
 export function Button(props: ButtonProps) {
-  const { onPress = () => {}, state, style, children } = props;
+  const {
+    onPress = () => {},
+    state,
+    style,
+    children,
+    radius = tokens.radius,
+  } = props;
   const background = React.useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
@@ -53,6 +60,7 @@ export function Button(props: ButtonProps) {
 
         return [
           {
+            borderRadius: radius,
             backgroundColor: background.interpolate({
               inputRange: [0, 0.5, 1, 2],
               outputRange: [
