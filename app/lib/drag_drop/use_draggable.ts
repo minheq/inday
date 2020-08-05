@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDragDrop } from './drag_drop_provider';
 import { Draggable, DraggableProps } from './draggable';
-import { measure } from '../../utils/measurements';
+import { measure } from '../measurements/measurements';
 
 export function useDraggable<TItem = any, TElement = any>(
   props: DraggableProps<TItem>,

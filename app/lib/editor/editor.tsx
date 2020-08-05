@@ -11,7 +11,7 @@ import {
   measure,
   Measurements,
   initialMeasurements,
-} from '../../utils/measurements';
+} from '../measurements/measurements';
 
 // TODO
 // - Insert

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { measure } from '../utils/measurements';
+import { measure } from '../lib/measurements/measurements';
 import { useTheme, tokens } from './theme';
 import { Modal } from './modal';
 import { PressabilityConfig, usePressability } from './pressability';

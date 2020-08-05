@@ -1,6 +1,6 @@
 import React from 'react';
 import { GestureResponderEvent, Platform, UIManager } from 'react-native';
-import { isHoverEnabled } from '../utils/execution_environment';
+import { isHoverEnabled } from '../lib/env/execution_environment';
 
 export type Rect = {
   bottom?: number;

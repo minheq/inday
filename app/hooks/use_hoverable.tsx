@@ -1,5 +1,5 @@
 import React from 'react';
-import { isHoverEnabled } from '../utils/execution_environment';
+import { isHoverEnabled } from '../lib/env/execution_environment';
 
 export interface UseHoverableProps {
   onHoverIn?: () => void;

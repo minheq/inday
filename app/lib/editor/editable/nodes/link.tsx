@@ -3,7 +3,7 @@ import { Element } from 'slate';
 import { useSelected } from 'slate-react';
 
 import { ElementProps } from './types';
-import { css } from '../../../../utils/css';
+import { css } from '../../../css/css';
 
 export interface LinkValue {
   display: string;

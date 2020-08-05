@@ -1,16 +1,16 @@
 import React from 'react';
 import { Frequency, Recurrence } from '../../lib/datetime/recurrence';
-import { ListItem } from '../components/list_item';
-import { Container } from '../components/container';
-import { Spacing } from '../components/spacing';
-import { BackButton } from '../components/back_button';
-import { Row } from '../components/row';
-import { useTransition, TransitionProvider } from '../components/transition';
-import { Icon } from '../components/icon';
+import { ListItem } from './list_item';
+import { Container } from './container';
+import { Spacing } from './spacing';
+import { BackButton } from './back_button';
+import { Row } from './row';
+import { useTransition, TransitionProvider } from './transition';
+import { Icon } from './icon';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Button } from '../components/button';
-import { Column } from '../components/column';
-import { Text } from '../components/text';
+import { Button } from './button';
+import { Column } from './column';
+import { Text } from './text';
 import {
   format,
   setDay,
@@ -21,11 +21,11 @@ import {
   addWeeks,
   addDays,
 } from 'date-fns';
-import { SegmentedControl } from '../components/segmented_control';
-import { Content } from '../components/content';
-import { DayPicker } from '../components/day_picker';
-import { TimePicker } from '../components/time_picker';
-import { Picker, ListPicker } from '../components';
+import { SegmentedControl } from './segmented_control';
+import { Content } from './content';
+import { DayPicker } from './day_picker';
+import { TimePicker } from './time_picker';
+import { Picker, ListPicker } from '.';
 import { range } from '../../lib/data_structures/arrays';
 import { WeekDay, getWeekDaysOptions } from '../../lib/datetime/week';
 
@@ -595,8 +595,8 @@ function RecurrenceCustomOptions() {
           )}
           {monthOption === 2 && (
             <>
+              <Text>On</Text>
               <Picker
-                label="On"
                 options={[
                   { value: 1, label: 'First' },
                   { value: 2, label: 'Second' },
@@ -607,8 +607,8 @@ function RecurrenceCustomOptions() {
                 value={value?.time?.recurrence?.bySetPosition?.[0] ?? 1}
                 onChange={handleChangeSetPosition}
               />
+              <Text>Weekday</Text>
               <Picker
-                label="Weekday"
                 value={recurrence.byWeekDay?.[0]}
                 options={[
                   { value: WeekDay.Monday, label: 'Monday' },
@@ -653,8 +653,8 @@ function RecurrenceCustomOptions() {
         ]}
       />
       <Spacing height={16} />
+      <Text>Every</Text>
       <Picker
-        label="Every"
         options={range(1, 999).map((i) => ({
           value: i,
           label: `${i} ${label}`,
@@ -813,15 +813,17 @@ function RecurrenceEndRepeatOptions() {
       break;
     case 3:
       content = (
-        <Picker
-          label="After"
-          options={range(1, 999).map((i) => ({
-            value: i,
-            label: `${i} occurrences`,
-          }))}
-          value={recurrence.count ?? undefined}
-          onChange={handleChangeCount}
-        />
+        <>
+          <Text>After</Text>
+          <Picker
+            options={range(1, 999).map((i) => ({
+              value: i,
+              label: `${i} occurrences`,
+            }))}
+            value={recurrence.count ?? undefined}
+            onChange={handleChangeCount}
+          />
+        </>
       );
       break;
     default:

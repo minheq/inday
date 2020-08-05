@@ -1,4 +1,4 @@
-import { Measurements } from '../../utils/measurements';
+import { Measurements } from '../measurements/measurements';
 
 export interface DraggableProps<TItem = any> {
   /** The item this draggable corresponds to */

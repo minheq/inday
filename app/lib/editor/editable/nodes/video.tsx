@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Element } from 'slate';
 import { ElementProps } from './types';
-import { css } from '../../../../utils/css';
+import { css } from '../../../css/css';
 import { useSelected } from 'slate-react';
 
 export interface Video extends Element {

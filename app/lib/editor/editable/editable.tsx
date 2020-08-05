@@ -25,7 +25,7 @@ import {
   insertLink,
 } from './plugins/handlers';
 import { LinkValue, Link } from './nodes/link';
-import { css } from '../../../utils/css';
+import { css } from '../../css/css';
 import { usePrevious } from '../../../hooks/use_previous';
 import { withImages } from './plugins/images';
 import { withVideos } from './plugins/videos';

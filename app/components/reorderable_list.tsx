@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { useDropTarget } from '../lib/drag_drop/use_drop_target';
-import { measure } from '../utils/measurements';
+import { measure } from '../lib/measurements/measurements';
 import { Draggable, DragState } from '../lib/drag_drop/draggable';
 import { useGestureDetector, GestureDetectorConfig } from './gesture_detector';
 import { useDraggable } from '../lib/drag_drop/use_draggable';

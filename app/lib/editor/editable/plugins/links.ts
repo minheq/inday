@@ -1,4 +1,4 @@
-import { isURL } from '../../../../utils/is_url';
+import { isURL } from '../../utils/is_url';
 import { ReactEditor } from 'slate-react';
 import { wrapLink } from './handlers';
 

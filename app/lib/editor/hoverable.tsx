@@ -1,7 +1,7 @@
 import React from 'react';
 import { Animated, StyleSheet, View, findNodeHandle } from 'react-native';
 import { tokens, useTheme } from '../../components/theme';
-import { measure } from '../../utils/measurements';
+import { measure } from '../measurements/measurements';
 import { useEditor } from './editor';
 import { LinkValue } from './editable/nodes/link';
 import { SelectionToolbar } from './selection_toolbar';

@@ -1,5 +1,5 @@
 import { Transforms, Editor } from 'slate';
-import { isURL } from '../../../../utils/is_url';
+import { isURL } from '../../utils/is_url';
 import { ReactEditor } from 'slate-react';
 import { Video } from '../nodes/video';
 
