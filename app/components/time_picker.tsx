@@ -3,7 +3,7 @@ import { Option } from './picker';
 import { Container } from './container';
 import { PickerButton } from './picker_button';
 import { useToggle } from '../hooks/use_toggle';
-import { WheelPicker } from './wheel_picker';
+import { Picker } from './picker';
 import { Row } from './row';
 import { range } from '../../lib/data_structures/arrays';
 import { format, roundToNearestMinutes, setHours, setMinutes } from 'date-fns';
@@ -87,12 +87,12 @@ export function TimePicker(props: TimePickerProps) {
       />
       <Expand open={open}>
         <Row>
-          <WheelPicker
+          <Picker
             options={hours}
             onChange={handleHourChange}
             value={valueHours}
           />
-          <WheelPicker
+          <Picker
             options={minutes}
             onChange={handleMinutesChange}
             value={valueMinutes}

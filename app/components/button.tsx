@@ -4,10 +4,9 @@ import {
   ViewStyle,
   StyleProp,
   GestureResponderEvent,
-  StyleSheet,
 } from 'react-native';
 import { Pressable, PressableChildrenProps } from './pressable';
-import { useTheme, tokens } from './theme';
+import { useTheme } from './theme';
 
 type ButtonState = 'default' | 'hovered' | 'active' | 'disabled';
 
@@ -64,7 +63,6 @@ export function Button(props: ButtonProps) {
               ],
             }),
           },
-          styles.base,
           style,
         ];
       }}
@@ -73,9 +71,3 @@ export function Button(props: ButtonProps) {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: tokens.radius,
-  },
-});

@@ -3,7 +3,7 @@ import { View, StyleSheet, Animated } from 'react-native';
 import { measure } from '../lib/measurements/measurements';
 import { useTheme, tokens } from './theme';
 import { Modal } from './modal';
-import { PressabilityConfig, usePressability } from './pressability';
+import { PressabilityConfig, usePressability } from '../hooks/use_pressability';
 
 export type PopoverPlacement =
   | 'top-center'

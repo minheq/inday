@@ -2,7 +2,7 @@ import React from 'react';
 import { Frequency, Recurrence } from '../../lib/datetime/recurrence';
 import { ListItem } from './list_item';
 import { Container } from './container';
-import { Spacing } from './spacing';
+import { Spacer } from './spacer';
 import { BackButton } from './back_button';
 import { Row } from './row';
 import { useTransition, TransitionProvider } from './transition';
@@ -396,7 +396,7 @@ function RecurrenceOptions() {
           }
         />
       ))}
-      <Spacing height={16} />
+      <Spacer size={16} />
       <ListItem
         description="Custom"
         onPress={() => {
@@ -576,7 +576,7 @@ function RecurrenceCustomOptions() {
               { value: 2, label: 'On the...' },
             ]}
           />
-          <Spacing height={16} />
+          <Spacer size={16} />
           {monthOption === 1 && (
             <Container flex={1}>
               <ScrollView>
@@ -641,7 +641,7 @@ function RecurrenceCustomOptions() {
       <Text size="lg" bold>
         Custom repeat by
       </Text>
-      <Spacing height={8} />
+      <Spacer size={8} />
       <SegmentedControl
         value={selected}
         onChange={handleChangeOption}
@@ -652,7 +652,7 @@ function RecurrenceCustomOptions() {
           { value: 4, label: 'Year' },
         ]}
       />
-      <Spacing height={16} />
+      <Spacer size={16} />
       <Text>Every</Text>
       <Picker
         options={range(1, 999).map((i) => ({
@@ -662,7 +662,7 @@ function RecurrenceCustomOptions() {
         value={value?.time?.recurrence?.interval ?? 1}
         onChange={handleChangeInterval}
       />
-      <Spacing height={8} />
+      <Spacer size={8} />
       {content}
     </Container>
   );
@@ -840,7 +840,7 @@ function RecurrenceEndRepeatOptions() {
         <Text size="lg" bold>
           Ends repeat
         </Text>
-        <Spacing height={8} />
+        <Spacer size={8} />
         <SegmentedControl
           value={selected}
           onChange={handleChangeOption}
@@ -850,7 +850,7 @@ function RecurrenceEndRepeatOptions() {
             { value: 3, label: 'By count' },
           ]}
         />
-        <Spacing height={16} />
+        <Spacer size={16} />
         {content}
       </Content>
     </Container>

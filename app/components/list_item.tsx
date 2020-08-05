@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from './container';
 import { Row } from './row';
-import { Spacing } from './spacing';
+import { Spacer } from './spacer';
 import { Column } from './column';
 import { Text } from './text';
 import { Button } from './button';
@@ -26,7 +26,7 @@ export function ListItem(props: ListItemProps) {
               {leading && (
                 <>
                   {leading}
-                  <Spacing width={8} />
+                  <Spacer size={8} />
                 </>
               )}
               <Column justifyContent="center">
@@ -37,7 +37,7 @@ export function ListItem(props: ListItemProps) {
           </Container>
           {actions && (
             <Row alignItems="center">
-              <Spacing width={8} />
+              <Spacer size={8} />
               {actions}
             </Row>
           )}

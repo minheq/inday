@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { usePressability, PressabilityConfig } from './pressability';
+import { usePressability, PressabilityConfig } from '../hooks/use_pressability';
 
 export interface PressableChildrenProps {
   pressed: boolean;

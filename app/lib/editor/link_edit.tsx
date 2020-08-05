@@ -3,7 +3,7 @@ import React from 'react';
 import {
   Container,
   Text,
-  Spacing,
+  Spacer,
   TextInput,
   Button,
   Dialog,
@@ -108,10 +108,10 @@ export function LinkEdit(props: LinkEditProps) {
         value={display}
         onChange={setDisplay}
       />
-      <Spacing height={16} />
+      <Spacer size={16} />
       <Text>URL</Text>
       <TextInput autoFocus={focus === 'url'} value={url} onChange={setURL} />
-      <Spacing height={24} />
+      <Spacer size={24} />
       <Button onPress={handleSubmit}>
         <Text>Submit</Text>
       </Button>

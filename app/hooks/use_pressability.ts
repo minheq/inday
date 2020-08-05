@@ -734,25 +734,25 @@ const getTouchFromGestureResponderEvent = (event: GestureResponderEvent) => {
 };
 
 export function usePressability(config: PressabilityConfig): EventHandlers {
-  const interactivityRef = React.useRef<Pressability | null>(null);
-  if (interactivityRef.current == null) {
-    interactivityRef.current = new Pressability(config);
+  const pressabilityRef = React.useRef<Pressability | null>(null);
+  if (pressabilityRef.current == null) {
+    pressabilityRef.current = new Pressability(config);
   }
-  const interactivity = interactivityRef.current;
+  const pressability = pressabilityRef.current;
 
-  // On the initial mount, this is a no-op. On updates, `interactivity` will be
+  // On the initial mount, this is a no-op. On updates, `pressability` will be
   // re-configured to use the new configuration.
   React.useEffect(() => {
-    interactivity.configure(config);
-  }, [config, interactivity]);
+    pressability.configure(config);
+  }, [config, pressability]);
 
-  // On unmount, reset pending state and timers inside `interactivity`. This is
+  // On unmount, reset pending state and timers inside `pressability`. This is
   // a separate effect because we do not want to reset when `config` changes.
   React.useEffect(() => {
     return () => {
-      interactivity.reset();
+      pressability.reset();
     };
-  }, [interactivity]);
+  }, [pressability]);
 
-  return interactivity.getEventHandlers();
+  return pressability.getEventHandlers();
 }

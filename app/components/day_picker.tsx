@@ -1,5 +1,4 @@
 import {
-  Interval,
   format,
   isSameDay,
   addMonths,
@@ -9,19 +8,22 @@ import {
 } from 'date-fns';
 import * as React from 'react';
 
-import { validateInterval, datesInInterval } from '../utils/interval';
 import {
+  validateInterval,
+  datesInInterval,
   FirstDayOfWeek,
   DEFAULT_FIRST_DAY_OF_WEEK,
   eachDayOfWeek,
-} from '../utils/week';
+  Interval,
+} from '../../lib/datetime';
 import { Text } from './text';
-import { Spacing } from './spacing';
+import { Spacer } from './spacer';
 import { Icon } from './icon';
 import { Month } from './month';
 import { View, StyleSheet } from 'react-native';
 import { Button } from './button';
 import { Hoverable } from './hoverable';
+import { Container } from './container';
 
 interface DayPickerProps<TIsRange extends boolean = false> {
   /** Selected value */
@@ -214,9 +216,9 @@ export function DayPicker<TIsRange extends boolean = false>(
                     <View style={styles.monthNameWrapper}>
                       <Text align="center">{format(month, 'MMMM yyyy')}</Text>
                     </View>
-                    <Spacing height={16} />
+                    <Spacer size={16} />
                     <WeekDates />
-                    <Spacing height={16} />
+                    <Spacer size={16} />
                     <Month
                       selected={selected}
                       date={month}
@@ -228,14 +230,14 @@ export function DayPicker<TIsRange extends boolean = false>(
                   </View>
                 </Hoverable>
               </View>
-              {!last && <Spacing width={48} height={48} />}
+              {!last && <Container width={48} height={48} />}
             </React.Fragment>
           );
         })}
       </View>
       {orientation === 'vertical' && (
         <>
-          <Spacing height={48} />
+          <Spacer size={48} />
           <Button style={styles.moreButton} onPress={handlePressMore}>
             <Icon name="chevron-down" size="lg" />
           </Button>
@@ -293,7 +295,7 @@ const styles = StyleSheet.create({
   },
   monthWrapper: {},
   arrow: {
-    height: 40,
+    size: 40,
     width: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    height: 40,
+    size: 40,
   },
   monthRoot: {
     width: '100%',

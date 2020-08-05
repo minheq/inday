@@ -1,34 +1,34 @@
 import React from 'react';
 
 import {
-  NavigationProvider,
-  useNavigation,
+  TransitionProvider,
+  useTransition,
   Container,
   Pressable,
   Text,
-  Spacing,
+  Spacer,
 } from '../app/components';
 
 export default {
-  title: 'NavigationProvider',
-  component: NavigationProvider,
+  title: 'TransitionProvider',
+  component: TransitionProvider,
 };
 
 export const Default = () => (
-  <NavigationProvider>
+  <TransitionProvider>
     <ScreenOne />
-  </NavigationProvider>
+  </TransitionProvider>
 );
 
 function ScreenOne() {
-  const { navigate } = useNavigation();
+  const { navigate } = useTransition();
 
   return (
     <Container expanded>
       <Text size="xl" bold>
         Screen one
       </Text>
-      <Spacing height={8} />
+      <Spacer size={8} />
       <Pressable onPress={() => navigate(<ScreenTwo />)}>
         <Text>Next</Text>
       </Pressable>
@@ -37,14 +37,14 @@ function ScreenOne() {
 }
 
 function ScreenTwo() {
-  const { navigate, back } = useNavigation();
+  const { navigate, back } = useTransition();
 
   return (
     <Container expanded>
       <Text size="xl" bold>
         Screen two
       </Text>
-      <Spacing height={8} />
+      <Spacer size={8} />
       <Pressable onPress={() => back()}>
         <Text>Previous</Text>
       </Pressable>
@@ -56,14 +56,14 @@ function ScreenTwo() {
 }
 
 function ScreenThree() {
-  const { back } = useNavigation();
+  const { back } = useTransition();
 
   return (
     <Container expanded>
       <Text size="xl" bold>
         Screen three
       </Text>
-      <Spacing height={8} />
+      <Spacer size={8} />
       <Pressable onPress={() => back()}>
         <Text>Previous</Text>
       </Pressable>
