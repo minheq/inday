@@ -18,7 +18,13 @@ import {
   spaceQuery,
   spaceCollectionsQuery,
 } from './spaces';
-import { viewsByIDState, View, viewQuery, viewFiltersQuery } from './views';
+import {
+  viewsByIDState,
+  View,
+  viewQuery,
+  viewFiltersQuery,
+  viewDocumentsQuery,
+} from './views';
 import { Field, fieldsByIDState, fieldQuery, FieldConfig } from './fields';
 import { documentsByIDState, documentQuery, Document } from './documents';
 import { generateID } from '../../lib/id/id';
@@ -375,6 +381,12 @@ export function useGetView(viewID: string) {
   }
 
   return view;
+}
+
+export function useGetViewDocuments(viewID: string) {
+  const documents = useRecoilValue(viewDocumentsQuery(viewID));
+
+  return documents;
 }
 
 export function useGetFiltersByID() {

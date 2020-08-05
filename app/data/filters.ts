@@ -208,6 +208,13 @@ export type FilterCondition =
   | SingleSelectFilterCondition
   | TextFilterCondition;
 
+export type FilterConditionValue =
+  | DateFilterConditionValue
+  | MultiSelectFilterConditionValue
+  | NumberFilterConditionValue
+  | SingleSelectFilterConditionValue
+  | TextFilterConditionValue;
+
 export type FilterConfig =
   | CheckboxFieldFilterConfig
   | CurrencyFieldFilterConfig
@@ -240,6 +247,13 @@ export type Filter =
   | SingleDocumentLinkFieldFilter
   | SingleLineTextFieldFilter
   | SingleSelectFieldFilter
+  | URLFieldFilter;
+
+export type TextFilter =
+  | EmailFieldFilter
+  | MultiLineTextFieldFilter
+  | PhoneNumberFieldFilter
+  | SingleLineTextFieldFilter
   | URLFieldFilter;
 
 export type FiltersByIDState = { [filterID: string]: Filter | undefined };

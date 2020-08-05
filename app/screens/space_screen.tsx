@@ -43,6 +43,7 @@ import {
   useGetField,
   useUpdateFilterConfig,
   useGetFieldCallback,
+  useGetViewDocuments,
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
@@ -66,6 +67,10 @@ import {
   assertSingleLineTextFieldValue,
   assertSingleSelectFieldValue,
   assertURLFieldValue,
+  SingleLineTextFieldValue,
+  MultiLineTextFieldValue,
+  URLFieldValue,
+  PhoneNumberFieldValue,
 } from '../data/documents';
 import {
   assertCheckboxField,
@@ -90,6 +95,16 @@ import {
   TextFilterCondition,
   getDefaultFilterConfig,
   Filter,
+  TextFilterConditionValue,
+  FilterCondition,
+  FilterConditionValue,
+  SingleLineTextFieldFilter,
+  TextFilter,
+  assertEmailFieldFilter,
+  assertMultiLineTextFieldFilter,
+  assertPhoneNumberFieldFilter,
+  assertSingleLineTextFieldFilter,
+  assertURLFieldFilter,
 } from '../data/filters';
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -399,7 +414,10 @@ function FilterEdit(props: FilterEditProps) {
     [filter, getField, updateFilterConfig],
   );
 
-  const input = filterConditionInputComponentByFieldType[field.type](field);
+  const input = filterConditionInputComponentByFieldType[field.type](
+    field,
+    filter,
+  );
 
   return (
     <Container>
@@ -418,88 +436,121 @@ function FilterEdit(props: FilterEditProps) {
 }
 
 const filterConditionInputComponentByFieldType: {
-  [fieldType in FieldType]: (field: Field) => React.ReactNode;
+  [fieldType in FieldType]: (field: Field, filter: Filter) => React.ReactNode;
 } = {
-  [FieldType.Checkbox]: (field) => {
+  [FieldType.Checkbox]: (field, filter) => {
     assertCheckboxField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.Currency]: (field) => {
+  [FieldType.Currency]: (field, filter) => {
     assertCurrencyField(field);
 
-    return <NumberFilterConditionInput />;
+    return <NumberFilterConditionInput filter={filter} />;
   },
-  [FieldType.Date]: (field) => {
+  [FieldType.Date]: (field, filter) => {
     assertDateField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.Email]: (field) => {
+  [FieldType.Email]: (field, filter) => {
     assertEmailField(field);
+    assertEmailFieldFilter(filter);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.MultiCollaborator]: (field) => {
+  [FieldType.MultiCollaborator]: (field, filter) => {
     assertMultiCollaboratorField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
 
-  [FieldType.MultiDocumentLink]: (field) => {
+  [FieldType.MultiDocumentLink]: (field, filter) => {
     assertMultiDocumentLinkField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.MultiLineText]: (field) => {
+  [FieldType.MultiLineText]: (field, filter) => {
     assertMultiLineTextField(field);
+    assertMultiLineTextFieldFilter(filter);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.MultiSelect]: (field) => {
+  [FieldType.MultiSelect]: (field, filter) => {
     assertMultiSelectField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
 
-  [FieldType.Number]: (field) => {
+  [FieldType.Number]: (field, filter) => {
     assertNumberField(field);
 
-    return <NumberFilterConditionInput />;
+    return <NumberFilterConditionInput filter={filter} />;
   },
-  [FieldType.PhoneNumber]: (field) => {
+  [FieldType.PhoneNumber]: (field, filter) => {
     assertPhoneNumberField(field);
+    assertPhoneNumberFieldFilter(filter);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.SingleCollaborator]: (field) => {
+  [FieldType.SingleCollaborator]: (field, filter) => {
     assertSingleCollaboratorField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.SingleDocumentLink]: (field) => {
+  [FieldType.SingleDocumentLink]: (field, filter) => {
     assertSingleDocumentLinkField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.SingleLineText]: (field) => {
+  [FieldType.SingleLineText]: (field, filter) => {
     assertSingleLineTextField(field);
+    assertSingleLineTextFieldFilter(filter);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.SingleSelect]: (field) => {
+  [FieldType.SingleSelect]: (field, filter) => {
     assertSingleSelectField(field);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
-  [FieldType.URL]: (field) => {
+  [FieldType.URL]: (field, filter) => {
     assertURLField(field);
+    assertURLFieldFilter(filter);
 
-    return <TextFilterConditionInput />;
+    return <TextFilterConditionInput filter={filter} />;
   },
 };
 
-function TextFilterConditionInput() {
+interface TextFilterConditionInputProps {
+  filter: TextFilter;
+}
+
+function TextFilterConditionInput(props: TextFilterConditionInputProps) {
+  const { filter } = props;
+  const { condition, value } = filter;
+  const updateFilterConfig = useUpdateFilterConfig();
+
+  const handleChangeCondition = useCallback(
+    (newCondition: TextFilterCondition) => {
+      updateFilterConfig(filter.id, filter.fieldID, {
+        condition: newCondition,
+        value: '',
+      });
+    },
+    [filter, updateFilterConfig],
+  );
+
+  const handleChangeValue = useCallback(
+    (newValue: TextFilterConditionValue) => {
+      updateFilterConfig(filter.id, filter.fieldID, {
+        condition: filter.condition,
+        value: newValue,
+      });
+    },
+    [filter, updateFilterConfig],
+  );
+
   const options: Option<TextFilterCondition>[] = [
     { value: 'contains', label: 'contains' },
     { value: 'doesNotContain', label: 'does not contain' },
@@ -512,12 +563,12 @@ function TextFilterConditionInput() {
   return (
     <Container>
       <Picker
-        // value={selectedFieldID}
-        // onChange={handleChangeField}
+        value={condition}
+        onChange={handleChangeCondition}
         options={options}
       />
       <Spacer size={4} />
-      <TextInput />
+      <TextInput value={value} onChange={handleChangeValue} />
     </Container>
   );
 }
@@ -605,7 +656,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
   const collection = useGetCollection(view.collectionID);
   const fieldsByID = useGetCollectionFieldsByID(collection.id);
-  const documents = useGetCollectionDocuments(collection.id);
+  const documents = useGetViewDocuments(view.id);
   const { fieldsOrder, fieldsConfig } = view;
 
   const headerScrollView = React.useRef<ScrollView>(null);
