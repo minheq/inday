@@ -19,7 +19,7 @@ describe('filtering', () => {
   test('happy path', () => {
     const view: View = {
       ...col1View1,
-      filters: [[col1Field1.id, { condition: 'contains', value: 'col1' }]],
+      filters: [[col1Field1.id, { rule: 'contains', value: 'col1' }]],
     };
 
     const result = filterDocumentsByView(view, docs, getField);
@@ -30,7 +30,7 @@ describe('filtering', () => {
   test('specific', () => {
     const view: View = {
       ...col1View1,
-      filters: [[col1Field1.id, { condition: 'contains', value: 'col1Doc1' }]],
+      filters: [[col1Field1.id, { rule: 'contains', value: 'col1Doc1' }]],
     };
 
     const result = filterDocumentsByView(view, docs, getField);

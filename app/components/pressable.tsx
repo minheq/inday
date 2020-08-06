@@ -7,6 +7,7 @@ import {
   Platform,
 } from 'react-native';
 import { usePressability, PressabilityConfig } from '../hooks/use_pressability';
+import { useTheme } from './theme';
 
 export interface PressableChildrenProps {
   pressed: boolean;
@@ -41,10 +42,11 @@ export function Pressable(props: PressableProps) {
     onFocus: propOnFocus = () => {},
     onBlur: propOnBlur = () => {},
   } = props;
-
-  const [isFocused, setIsFocused] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isPressed, setIsPressed] = React.useState(false);
+  const theme = useTheme();
+  const background = React.useRef(new Animated.Value(0)).current;
+  const [focused, setFocused] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
+  const [pressed, setPressed] = React.useState(false);
 
   const config: PressabilityConfig = React.useMemo(
     () => ({
@@ -56,26 +58,26 @@ export function Pressable(props: PressableProps) {
       disabled,
       onPress,
       onHoverIn: (e) => {
-        setIsHovered(true);
+        setHovered(true);
         onHoverIn(e);
       },
       onHoverOut: (e) => {
-        setIsHovered(false);
+        setHovered(false);
         onHoverOut(e);
       },
       onFocus: (e) => {
-        setIsFocused(true);
+        setFocused(true);
         propOnFocus(e);
       },
       onBlur: (e) => {
-        setIsFocused(false);
+        setFocused(false);
         propOnBlur(e);
       },
       onPressIn: () => {
-        setIsPressed(true);
+        setPressed(true);
       },
       onPressOut: () => {
-        setIsPressed(false);
+        setPressed(false);
       },
     }),
     [
@@ -108,10 +110,16 @@ export function Pressable(props: PressableProps) {
   } = usePressability(config);
 
   const childrenProps: PressableChildrenProps = {
-    pressed: isPressed,
-    focused: isFocused,
-    hovered: !isPressed && isHovered,
+    pressed: pressed,
+    focused: focused,
+    hovered: !pressed && hovered,
   };
+
+  Animated.spring(background, {
+    toValue: pressed ? 1 : hovered ? 0.5 : 0,
+    useNativeDriver: false,
+    bounciness: 0,
+  }).start();
 
   return (
     <Animated.View
@@ -119,6 +127,16 @@ export function Pressable(props: PressableProps) {
         styles.base,
         webStyle.outline,
         disabled && styles.disabled,
+        {
+          backgroundColor: background.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [
+              theme.button.backgroundDefault,
+              theme.button.backgroundHovered,
+              theme.button.backgroundPressed,
+            ],
+          }),
+        },
         typeof style === 'function' ? style(childrenProps) : style,
       ]}
       onResponderGrant={onResponderGrant}

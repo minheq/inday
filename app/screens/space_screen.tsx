@@ -13,13 +13,6 @@ import {
   Column,
   BackButton,
   Button,
-  IconName,
-  Spacer,
-  Icon,
-  SegmentedControl,
-  Picker,
-  Option,
-  TextInput,
 } from '../components';
 import {
   useRoute,
@@ -28,28 +21,18 @@ import {
 } from '@react-navigation/native';
 import { RootStackParamsMap } from '../linking';
 import { View, ListView } from '../data/views';
-import { Collection } from '../data/collections';
 import {
   useGetSpace,
   useGetView,
   useGetSpaceCollections,
   useGetCollection,
-  useGetCollectionDocuments,
-  useGetCollectionViews,
-  useGetCollectionFields,
   useGetCollectionFieldsByID,
-  useCreateFilter,
-  useGetViewFilters,
-  useGetField,
-  useUpdateFilterConfig,
-  useGetFieldCallback,
   useGetViewDocuments,
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
 import { FieldType } from '../data/constants';
-import { first } from '../../lib/data_structures/arrays';
-import { FieldID, Field } from '../data/fields';
+import { Field } from '../data/fields';
 import {
   DocumentFieldValue,
   assertCheckboxFieldValue,
@@ -67,10 +50,6 @@ import {
   assertSingleLineTextFieldValue,
   assertSingleSelectFieldValue,
   assertURLFieldValue,
-  SingleLineTextFieldValue,
-  MultiLineTextFieldValue,
-  URLFieldValue,
-  PhoneNumberFieldValue,
 } from '../data/documents';
 import {
   assertCheckboxField,
@@ -90,22 +69,9 @@ import {
   assertURLField,
 } from '../data/fields';
 import { format } from 'date-fns';
-import {
-  NumberFilterCondition,
-  TextFilterCondition,
-  getDefaultFilterConfig,
-  Filter,
-  TextFilterConditionValue,
-  FilterCondition,
-  FilterConditionValue,
-  SingleLineTextFieldFilter,
-  TextFilter,
-  assertEmailFieldFilter,
-  assertMultiLineTextFieldFilter,
-  assertPhoneNumberFieldFilter,
-  assertSingleLineTextFieldFilter,
-  assertURLFieldFilter,
-} from '../data/filters';
+import { OrganizeMenu } from '../core/organize_menu';
+import { ViewsMenu } from '../core/views_menu';
+
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
 const SpaceScreenContext = createContext({
@@ -116,6 +82,7 @@ const SpaceScreenContext = createContext({
 
 export function SpaceScreen() {
   const route = useRoute<SpaceScreenParams>();
+
   const { spaceID, viewID } = route.params;
   const view = useGetView(viewID);
 
@@ -173,11 +140,7 @@ function SpaceTitle(props: SpaceTitleProps) {
 
   return (
     <Row alignItems="center" justifyContent="center" expanded>
-      <Button>
-        <Container center height={40} paddingHorizontal={16}>
-          <Text>{space.name}</Text>
-        </Container>
-      </Button>
+      <Button title={space.name} />
     </Row>
   );
 }
@@ -185,32 +148,10 @@ function SpaceTitle(props: SpaceTitleProps) {
 function TopMenu() {
   return (
     <Row expanded alignItems="center" justifyContent="flex-end">
-      <TopMenuItem onPress={() => {}} text="Collaborator" iconName="user" />
-      <TopMenuItem onPress={() => {}} text="Automation" iconName="settings" />
-      <TopMenuItem onPress={() => {}} text="More" iconName="more-horizontal" />
+      <Button onPress={() => {}} title="Collaborator" iconBefore="user" />
+      <Button onPress={() => {}} title="Automation" iconBefore="settings" />
+      <Button onPress={() => {}} title="More" iconBefore="more-horizontal" />
     </Row>
-  );
-}
-
-interface TopMenuItemProps {
-  onPress: () => void;
-  text: string;
-  iconName: IconName;
-}
-
-function TopMenuItem(props: TopMenuItemProps) {
-  const { onPress, text, iconName } = props;
-
-  return (
-    <Button onPress={onPress}>
-      <Container center height={40} paddingHorizontal={16}>
-        <Row expanded alignItems="center">
-          <Icon name={iconName} size="lg" />
-          <Spacer size={8} />
-          <Text>{text}</Text>
-        </Row>
-      </Container>
-    </Button>
   );
 }
 
@@ -229,31 +170,15 @@ function CollectionsMenu() {
     <Container color="content" borderBottomWidth={1}>
       <Row>
         {collections.map((collection) => (
-          <CollectionMenuItem
-            active={activeCollection.id === collection.id}
+          <Button
             key={collection.id}
-            collection={collection}
+            state={activeCollection.id === collection.id ? 'active' : 'default'}
+            radius={0}
+            title={collection.name}
           />
         ))}
       </Row>
     </Container>
-  );
-}
-
-interface CollectionMenuItemProps {
-  collection: Collection;
-  active: boolean;
-}
-
-function CollectionMenuItem(props: CollectionMenuItemProps) {
-  const { collection, active } = props;
-
-  return (
-    <Button state={active ? 'active' : 'default'} radius={0}>
-      <Container center height={40} paddingHorizontal={16}>
-        <Text>{collection.name}</Text>
-      </Container>
-    </Button>
   );
 }
 
@@ -262,8 +187,9 @@ function MainContent() {
     'organize',
   );
   const context = useContext(SpaceScreenContext);
-  const space = useGetSpace(context.spaceID);
-  const view = useGetView(context.viewID);
+  const { spaceID, viewID, collectionID } = context;
+  const space = useGetSpace(spaceID);
+  const view = useGetView(viewID);
   const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
@@ -296,301 +222,24 @@ function MainContent() {
       <Row flex={1}>
         <Slide width={240} open={slide === 'views'}>
           <Container width={240} expanded color="content" borderRightWidth={1}>
-            <ViewsMenu />
+            {slide === 'views' && (
+              <ViewsMenu spaceID={spaceID} viewID={viewID} />
+            )}
           </Container>
         </Slide>
         <ViewDisplay view={view} />
         <Slide width={360} open={slide === 'organize'}>
           <Container width={360} expanded color="content" borderLeftWidth={1}>
-            <OrganizeMenu />
+            {slide === 'organize' && (
+              <OrganizeMenu
+                spaceID={spaceID}
+                viewID={viewID}
+                collectionID={collectionID}
+              />
+            )}
           </Container>
         </Slide>
       </Row>
-    </Container>
-  );
-}
-
-function ViewsMenu() {
-  const context = useContext(SpaceScreenContext);
-  const activeView = useGetView(context.viewID);
-  const views = useGetCollectionViews(activeView.collectionID);
-
-  return (
-    <Container padding={8} color="content" borderRightWidth={1}>
-      <Text color="muted" size="sm" bold>
-        TEAM VIEWS
-      </Text>
-      <Spacer size={16} />
-      {views.map((v) => (
-        <>
-          <Button state={activeView.id === v.id ? 'active' : 'default'}>
-            <Container height={40} paddingHorizontal={16}>
-              <Row expanded alignItems="center">
-                <Icon name="layout" />
-                <Spacer size={8} />
-                <Text>{v.name}</Text>
-              </Row>
-            </Container>
-          </Button>
-          <Spacer size={4} />
-        </>
-      ))}
-      <Spacer size={32} />
-      <Text color="muted" size="sm" bold>
-        PERSONAL VIEWS
-      </Text>
-    </Container>
-  );
-}
-
-function OrganizeMenu() {
-  const [tab, setTab] = React.useState(2);
-
-  return (
-    <Container padding={8}>
-      <SegmentedControl
-        onChange={setTab}
-        value={tab}
-        options={[
-          { label: 'Fields', value: 1 },
-          { label: 'Filter', value: 2 },
-          { label: 'Sort', value: 3 },
-          { label: 'Group', value: 4 },
-        ]}
-      />
-      <Spacer size={16} />
-      {tab === 2 && <FilterMenu />}
-    </Container>
-  );
-}
-
-function FilterMenu() {
-  const context = useContext(SpaceScreenContext);
-  const createFilter = useCreateFilter();
-  const fields = useGetCollectionFields(context.collectionID);
-  const filters = useGetViewFilters(context.viewID);
-  const firstField = first(fields);
-
-  const handlePressAddFilter = useCallback(() => {
-    const filterConfig = getDefaultFilterConfig(firstField.type);
-
-    createFilter(context.viewID, firstField.id, filterConfig);
-  }, [createFilter, context, firstField]);
-
-  return (
-    <Container>
-      {filters.map((filter) => (
-        <FilterEdit filter={filter} />
-      ))}
-      <Button onPress={handlePressAddFilter}>
-        <Text>+ Add filter</Text>
-      </Button>
-    </Container>
-  );
-}
-
-interface FilterEditProps {
-  filter: Filter;
-}
-
-function FilterEdit(props: FilterEditProps) {
-  const { filter } = props;
-  const context = useContext(SpaceScreenContext);
-  const field = useGetField(filter.fieldID);
-  const fields = useGetCollectionFields(context.collectionID);
-  const getField = useGetFieldCallback();
-  const updateFilterConfig = useUpdateFilterConfig();
-
-  const handleChangeField = useCallback(
-    (fieldID: FieldID) => {
-      const newField = getField(fieldID);
-      const filterConfig = getDefaultFilterConfig(newField.type);
-
-      updateFilterConfig(filter.id, fieldID, filterConfig);
-    },
-    [filter, getField, updateFilterConfig],
-  );
-
-  const input = filterConditionInputComponentByFieldType[field.type](
-    field,
-    filter,
-  );
-
-  return (
-    <Container>
-      <Picker
-        value={field.id}
-        onChange={handleChangeField}
-        options={fields.map((f) => ({
-          label: f.name,
-          value: f.id,
-        }))}
-      />
-      <Spacer size={4} />
-      {input}
-    </Container>
-  );
-}
-
-const filterConditionInputComponentByFieldType: {
-  [fieldType in FieldType]: (field: Field, filter: Filter) => React.ReactNode;
-} = {
-  [FieldType.Checkbox]: (field, filter) => {
-    assertCheckboxField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.Currency]: (field, filter) => {
-    assertCurrencyField(field);
-
-    return <NumberFilterConditionInput filter={filter} />;
-  },
-  [FieldType.Date]: (field, filter) => {
-    assertDateField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.Email]: (field, filter) => {
-    assertEmailField(field);
-    assertEmailFieldFilter(filter);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.MultiCollaborator]: (field, filter) => {
-    assertMultiCollaboratorField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-
-  [FieldType.MultiDocumentLink]: (field, filter) => {
-    assertMultiDocumentLinkField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.MultiLineText]: (field, filter) => {
-    assertMultiLineTextField(field);
-    assertMultiLineTextFieldFilter(filter);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.MultiSelect]: (field, filter) => {
-    assertMultiSelectField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-
-  [FieldType.Number]: (field, filter) => {
-    assertNumberField(field);
-
-    return <NumberFilterConditionInput filter={filter} />;
-  },
-  [FieldType.PhoneNumber]: (field, filter) => {
-    assertPhoneNumberField(field);
-    assertPhoneNumberFieldFilter(filter);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.SingleCollaborator]: (field, filter) => {
-    assertSingleCollaboratorField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.SingleDocumentLink]: (field, filter) => {
-    assertSingleDocumentLinkField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.SingleLineText]: (field, filter) => {
-    assertSingleLineTextField(field);
-    assertSingleLineTextFieldFilter(filter);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.SingleSelect]: (field, filter) => {
-    assertSingleSelectField(field);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-  [FieldType.URL]: (field, filter) => {
-    assertURLField(field);
-    assertURLFieldFilter(filter);
-
-    return <TextFilterConditionInput filter={filter} />;
-  },
-};
-
-interface TextFilterConditionInputProps {
-  filter: TextFilter;
-}
-
-function TextFilterConditionInput(props: TextFilterConditionInputProps) {
-  const { filter } = props;
-  const { condition, value } = filter;
-  const updateFilterConfig = useUpdateFilterConfig();
-
-  const handleChangeCondition = useCallback(
-    (newCondition: TextFilterCondition) => {
-      updateFilterConfig(filter.id, filter.fieldID, {
-        condition: newCondition,
-        value: '',
-      });
-    },
-    [filter, updateFilterConfig],
-  );
-
-  const handleChangeValue = useCallback(
-    (newValue: TextFilterConditionValue) => {
-      updateFilterConfig(filter.id, filter.fieldID, {
-        condition: filter.condition,
-        value: newValue,
-      });
-    },
-    [filter, updateFilterConfig],
-  );
-
-  const options: Option<TextFilterCondition>[] = [
-    { value: 'contains', label: 'contains' },
-    { value: 'doesNotContain', label: 'does not contain' },
-    { value: 'is', label: 'is' },
-    { value: 'isNot', label: 'is not' },
-    { value: 'isEmpty', label: 'is empty' },
-    { value: 'isNotEmpty', label: 'is not empty' },
-  ];
-
-  return (
-    <Container>
-      <Picker
-        value={condition}
-        onChange={handleChangeCondition}
-        options={options}
-      />
-      <Spacer size={4} />
-      <TextInput value={value} onChange={handleChangeValue} />
-    </Container>
-  );
-}
-
-function NumberFilterConditionInput() {
-  const options: Option<NumberFilterCondition>[] = [
-    { value: 'equal', label: 'equal' },
-    { value: 'notEqual', label: 'not equal' },
-    { value: 'lessThan', label: 'less than' },
-    { value: 'greaterThan', label: 'greater than' },
-    { value: 'lessThanOrEqual', label: 'less than or equal' },
-    { value: 'greaterThanOrEqual', label: 'greater than or equal' },
-    { value: 'isEmpty', label: 'is empty' },
-    { value: 'isNotEmpty', label: 'is not empty' },
-  ];
-
-  return (
-    <Container>
-      <Picker
-        // value={selectedFieldID}
-        // onChange={handleChangeField}
-        options={options}
-      />
-      <Spacer size={4} />
-      <TextInput />
     </Container>
   );
 }
@@ -608,20 +257,8 @@ function ViewBar(props: ViewBarProps) {
   return (
     <Container borderBottomWidth={1} color="content" padding={4}>
       <Row alignItems="center" justifyContent="space-between">
-        <Button onPress={onToggleView}>
-          <Container center height={40} paddingHorizontal={16}>
-            <Row alignItems="center">
-              <Icon name="layout" />
-              <Spacer size={8} />
-              <Text>{view.name}</Text>
-            </Row>
-          </Container>
-        </Button>
-        <Button onPress={onToggleOrganize}>
-          <Container center height={40} paddingHorizontal={16}>
-            <Text>Organize</Text>
-          </Container>
-        </Button>
+        <Button onPress={onToggleView} title={view.name} iconBefore="layout" />
+        <Button onPress={onToggleOrganize} title="Organize" />
       </Row>
     </Container>
   );

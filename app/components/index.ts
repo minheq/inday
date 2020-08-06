@@ -19,7 +19,7 @@ export * from './close_button';
 export * from './back_button';
 export * from './list_picker';
 export * from './fade';
-export * from './picker';
+export * from './option';
 export * from './time_picker';
 export * from './pressable';
 export * from './spacer';

@@ -7,17 +7,25 @@ import {
 } from 'react-native';
 import { Pressable, PressableChildrenProps } from './pressable';
 import { useTheme, tokens } from './theme';
+import { Container } from './container';
+import { Row } from './row';
+import { Icon, IconName } from './icon';
+import { Spacer } from './spacer';
+import { Text } from './text';
 
 type ButtonState = 'default' | 'hovered' | 'active' | 'disabled';
+
+type ButtonTitleAlignment = 'left' | 'center' | 'right';
 
 interface ButtonProps {
   onPress?: (e: GestureResponderEvent) => void;
   disabled?: boolean;
   state?: ButtonState;
   radius?: number;
-  children?:
-    | React.ReactNode
-    | ((props: PressableChildrenProps) => React.ReactNode);
+  title?: string;
+  iconTitle?: IconName;
+  iconBefore?: IconName;
+  alignTitle?: ButtonTitleAlignment;
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
     | ((
@@ -30,7 +38,10 @@ export function Button(props: ButtonProps) {
     onPress = () => {},
     state,
     style,
-    children,
+    title,
+    iconTitle,
+    alignTitle = 'center',
+    iconBefore,
     radius = tokens.radius,
   } = props;
   const background = React.useRef(new Animated.Value(0)).current;
@@ -75,7 +86,36 @@ export function Button(props: ButtonProps) {
         ];
       }}
       onPress={onPress}
-      children={children}
-    />
+    >
+      <Container center height={40} paddingHorizontal={16}>
+        <Row
+          expanded
+          alignItems="center"
+          justifyContent={alignmentToJustifyContent(alignTitle)}
+        >
+          {iconBefore && (
+            <>
+              <Icon name={iconBefore} size="lg" />
+              <Spacer size={8} />
+            </>
+          )}
+          {title && <Text>{title}</Text>}
+          {iconTitle && <Icon name={iconTitle} size="xl" />}
+        </Row>
+      </Container>
+    </Pressable>
   );
+}
+
+function alignmentToJustifyContent(
+  alignTitle: ButtonTitleAlignment,
+): 'center' | 'flex-start' | 'flex-end' | 'space-between' {
+  switch (alignTitle) {
+    case 'left':
+      return 'flex-start';
+    case 'right':
+      return 'flex-end';
+    default:
+      return 'center';
+  }
 }

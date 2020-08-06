@@ -14,6 +14,11 @@ export let linking: LinkingOptions = {
     screens: {
       Space: {
         path: 'space/:spaceID/:viewID',
+        screens: {
+          Organize: '*',
+          NewFilter: '*',
+          Views: '*',
+        },
       },
     },
   },

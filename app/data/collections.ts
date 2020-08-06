@@ -6,8 +6,10 @@ import { Document, documentsQuery } from './documents';
 import { collection1, collection2 } from './fixtures';
 import { View, viewsQuery } from './views';
 
+export type CollectionID = string;
+
 export interface Collection {
-  id: string;
+  id: CollectionID;
   name: string;
   createdAt: Date;
   updatedAt: Date;
@@ -34,7 +36,7 @@ export const collectionsQuery = selector({
 
 export const collectionQuery = selectorFamily<Collection | null, string>({
   key: RecoilKey.Collection,
-  get: (collectionID: string) => ({ get }) => {
+  get: (collectionID: CollectionID) => ({ get }) => {
     const collectionsByID = get(collectionsByIDState);
     const collection = collectionsByID[collectionID];
 

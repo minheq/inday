@@ -4,7 +4,9 @@ import { Row } from './row';
 import { Spacer } from './spacer';
 import { Column } from './column';
 import { Text } from './text';
-import { Button } from './button';
+import { Pressable } from './pressable';
+import { StyleSheet } from 'react-native';
+import { tokens } from './theme';
 
 interface ListItemProps {
   onPress?: () => void;
@@ -18,7 +20,7 @@ export function ListItem(props: ListItemProps) {
   const { onPress, title, description, leading, actions } = props;
 
   return (
-    <Button onPress={onPress}>
+    <Pressable style={styles.base} onPress={onPress}>
       <Container paddingVertical={8} paddingHorizontal={16}>
         <Row expanded justifyContent="space-between">
           <Container flex={1}>
@@ -43,6 +45,12 @@ export function ListItem(props: ListItemProps) {
           )}
         </Row>
       </Container>
-    </Button>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  base: {
+    borderRadius: tokens.radius,
+  },
+});

@@ -9,7 +9,7 @@ import { ErrorBoundary } from './core/error_boundary';
 import { SpaceScreen, SpaceScreenHeader } from './screens/space_screen';
 import { linking, ScreenName, RootStackParamsMap } from './linking';
 
-const Stack = createStackNavigator<RootStackParamsMap>();
+const RootStack = createStackNavigator<RootStackParamsMap>();
 
 export function App() {
   return (
@@ -21,8 +21,8 @@ export function App() {
               linking={linking}
               fallback={<Text>Loading...</Text>}
             >
-              <Stack.Navigator>
-                <Stack.Screen
+              <RootStack.Navigator>
+                <RootStack.Screen
                   name={ScreenName.Space}
                   component={SpaceScreen}
                   options={({ route, navigation }) => ({
@@ -34,7 +34,7 @@ export function App() {
                     ),
                   })}
                 />
-              </Stack.Navigator>
+              </RootStack.Navigator>
             </NavigationContainer>
           </ThemeProvider>
         </Suspense>

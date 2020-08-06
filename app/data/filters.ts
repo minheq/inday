@@ -36,146 +36,146 @@ export interface BaseFilter {
 }
 
 export interface CheckboxFieldFilterConfig {
-  condition: BooleanFilterCondition;
-  value: BooleanFilterConditionValue;
+  rule: BooleanFilterRule;
+  value: BooleanFilterRuleValue;
 }
 export interface CheckboxFieldFilter
   extends BaseFilter,
     CheckboxFieldFilterConfig {}
 
 export interface CurrencyFieldFilterConfig {
-  condition: NumberFilterCondition;
-  value: NumberFilterConditionValue;
+  rule: NumberFilterRule;
+  value: NumberFilterRuleValue;
 }
 export interface CurrencyFieldFilter
   extends BaseFilter,
     CurrencyFieldFilterConfig {}
 
 export interface DateFieldFilterConfig {
-  condition: DateFilterCondition;
-  value: DateFilterConditionValue;
+  rule: DateFilterRule;
+  value: DateFilterRuleValue;
 }
 export interface DateFieldFilter extends BaseFilter, DateFieldFilterConfig {}
 
 export interface EmailFieldFilterConfig {
-  condition: TextFilterCondition;
-  value: TextFilterConditionValue;
+  rule: TextFilterRule;
+  value: TextFilterRuleValue;
 }
 export interface EmailFieldFilter extends BaseFilter, EmailFieldFilterConfig {}
 
 export interface MultiCollaboratorFieldFilterConfig {
-  condition: MultiSelectFilterCondition;
-  value: MultiSelectFilterConditionValue;
+  rule: MultiSelectFilterRule;
+  value: MultiSelectFilterRuleValue;
 }
 export interface MultiCollaboratorFieldFilter
   extends BaseFilter,
     MultiCollaboratorFieldFilterConfig {}
 
 export interface MultiDocumentLinkFieldFilterConfig {
-  condition: MultiSelectFilterCondition;
-  value: MultiSelectFilterConditionValue;
+  rule: MultiSelectFilterRule;
+  value: MultiSelectFilterRuleValue;
 }
 export interface MultiDocumentLinkFieldFilter
   extends BaseFilter,
     MultiDocumentLinkFieldFilterConfig {}
 
 export interface MultiLineTextFieldFilterConfig {
-  condition: TextFilterCondition;
-  value: TextFilterConditionValue;
+  rule: TextFilterRule;
+  value: TextFilterRuleValue;
 }
 export interface MultiLineTextFieldFilter
   extends BaseFilter,
     MultiLineTextFieldFilterConfig {}
 
 export interface MultiSelectFieldFilterConfig {
-  condition: MultiSelectFilterCondition;
-  value: MultiSelectFilterConditionValue;
+  rule: MultiSelectFilterRule;
+  value: MultiSelectFilterRuleValue;
 }
 export interface MultiSelectFieldFilter
   extends BaseFilter,
     MultiSelectFieldFilterConfig {}
 
 export interface NumberFieldFilterConfig {
-  condition: NumberFilterCondition;
-  value: NumberFilterConditionValue;
+  rule: NumberFilterRule;
+  value: NumberFilterRuleValue;
 }
 export interface NumberFieldFilter
   extends BaseFilter,
     NumberFieldFilterConfig {}
 
 export interface PhoneNumberFieldFilterConfig {
-  condition: TextFilterCondition;
-  value: TextFilterConditionValue;
+  rule: TextFilterRule;
+  value: TextFilterRuleValue;
 }
 export interface PhoneNumberFieldFilter
   extends BaseFilter,
     PhoneNumberFieldFilterConfig {}
 
 export interface SingleCollaboratorFieldFilterConfig {
-  condition: SingleSelectFilterCondition;
-  value: SingleSelectFilterConditionValue;
+  rule: SingleSelectFilterRule;
+  value: SingleSelectFilterRuleValue;
 }
 export interface SingleCollaboratorFieldFilter
   extends BaseFilter,
     SingleCollaboratorFieldFilterConfig {}
 
 export interface SingleDocumentLinkFieldFilterConfig {
-  condition: SingleSelectFilterCondition;
-  value: SingleSelectFilterConditionValue;
+  rule: SingleSelectFilterRule;
+  value: SingleSelectFilterRuleValue;
 }
 export interface SingleDocumentLinkFieldFilter
   extends BaseFilter,
     SingleDocumentLinkFieldFilterConfig {}
 
 export interface SingleLineTextFieldFilterConfig {
-  condition: TextFilterCondition;
-  value: TextFilterConditionValue;
+  rule: TextFilterRule;
+  value: TextFilterRuleValue;
 }
 export interface SingleLineTextFieldFilter
   extends BaseFilter,
     SingleLineTextFieldFilterConfig {}
 
 export interface SingleSelectFieldFilterConfig {
-  condition: SingleSelectFilterCondition;
-  value: SingleSelectFilterConditionValue;
+  rule: SingleSelectFilterRule;
+  value: SingleSelectFilterRuleValue;
 }
 export interface SingleSelectFieldFilter
   extends BaseFilter,
     SingleSelectFieldFilterConfig {}
 
 export interface URLFieldFilterConfig {
-  condition: TextFilterCondition;
-  value: TextFilterConditionValue;
+  rule: TextFilterRule;
+  value: TextFilterRuleValue;
 }
 export interface URLFieldFilter extends BaseFilter, URLFieldFilterConfig {}
 
-export type TextFilterCondition =
+export type TextFilterRule =
   | 'contains'
   | 'doesNotContain'
   | 'is'
   | 'isNot'
   | 'isEmpty'
   | 'isNotEmpty';
-export type TextFilterConditionValue = string;
+export type TextFilterRuleValue = string;
 
-export type SingleSelectFilterCondition =
+export type SingleSelectFilterRule =
   | 'is'
   | 'isNot'
   | 'isAnyOf'
   | 'isNoneOf'
   | 'isEmpty'
   | 'isNotEmpty';
-export type SingleSelectFilterConditionValue = string | string[] | null;
+export type SingleSelectFilterRuleValue = string | string[] | null;
 
-export type MultiSelectFilterCondition =
+export type MultiSelectFilterRule =
   | 'hasAnyOf'
   | 'hasAllOf'
   | 'hasNoneOf'
   | 'isEmpty'
   | 'isNotEmpty';
-export type MultiSelectFilterConditionValue = string[];
+export type MultiSelectFilterRuleValue = string[];
 
-export type DateFilterCondition =
+export type DateFilterRule =
   | 'is'
   | 'isWithin'
   | 'isBefore'
@@ -185,9 +185,9 @@ export type DateFilterCondition =
   | 'isNot'
   | 'isEmpty'
   | 'isNotEmpty';
-export type DateFilterConditionValue = Date | Interval | null;
+export type DateFilterRuleValue = Date | Interval | null;
 
-export type NumberFilterCondition =
+export type NumberFilterRule =
   | 'equal'
   | 'notEqual'
   | 'lessThan'
@@ -196,24 +196,24 @@ export type NumberFilterCondition =
   | 'greaterThanOrEqual'
   | 'isEmpty'
   | 'isNotEmpty';
-export type NumberFilterConditionValue = number | null;
+export type NumberFilterRuleValue = number | null;
 
-export type BooleanFilterCondition = 'is';
-export type BooleanFilterConditionValue = boolean;
+export type BooleanFilterRule = 'is';
+export type BooleanFilterRuleValue = boolean;
 
-export type FilterCondition =
-  | DateFilterCondition
-  | MultiSelectFilterCondition
-  | NumberFilterCondition
-  | SingleSelectFilterCondition
-  | TextFilterCondition;
+export type FilterRule =
+  | DateFilterRule
+  | MultiSelectFilterRule
+  | NumberFilterRule
+  | SingleSelectFilterRule
+  | TextFilterRule;
 
-export type FilterConditionValue =
-  | DateFilterConditionValue
-  | MultiSelectFilterConditionValue
-  | NumberFilterConditionValue
-  | SingleSelectFilterConditionValue
-  | TextFilterConditionValue;
+export type FilterRuleValue =
+  | DateFilterRuleValue
+  | MultiSelectFilterRuleValue
+  | NumberFilterRuleValue
+  | SingleSelectFilterRuleValue
+  | TextFilterRuleValue;
 
 export type FilterConfig =
   | CheckboxFieldFilterConfig
@@ -279,26 +279,26 @@ export const filtersQuery = selector({
 export function getDefaultFilterConfig(fieldType: FieldType): FilterConfig {
   switch (fieldType) {
     case FieldType.Checkbox:
-      return { condition: 'is', value: false };
+      return { rule: 'is', value: false };
     case FieldType.Date:
-      return { condition: 'is', value: null };
+      return { rule: 'is', value: null };
     case FieldType.SingleLineText:
     case FieldType.MultiLineText:
     case FieldType.URL:
     case FieldType.PhoneNumber:
     case FieldType.Email:
-      return { condition: 'contains', value: '' };
+      return { rule: 'contains', value: '' };
     case FieldType.Number:
     case FieldType.Currency:
-      return { condition: 'equal', value: null };
+      return { rule: 'equal', value: null };
     case FieldType.MultiCollaborator:
     case FieldType.MultiDocumentLink:
     case FieldType.MultiSelect:
-      return { condition: 'hasAnyOf', value: [] };
+      return { rule: 'hasAnyOf', value: [] };
     case FieldType.SingleSelect:
     case FieldType.SingleDocumentLink:
     case FieldType.SingleCollaborator:
-      return { condition: 'is', value: null };
+      return { rule: 'is', value: null };
     default:
       throw new Error(`Expected default filter config for ${fieldType}`);
   }
@@ -313,7 +313,7 @@ export function assertCheckboxFieldFilter(
     );
   }
 
-  assertBooleanFilterCondition(filter.condition);
+  assertBooleanFilterRule(filter.rule);
 }
 
 export function assertCurrencyFieldFilter(
@@ -325,7 +325,7 @@ export function assertCurrencyFieldFilter(
     );
   }
 
-  assertNumberFilterCondition(filter.condition);
+  assertNumberFilterRule(filter.rule);
 }
 
 export function assertDateFieldFilter(
@@ -337,7 +337,7 @@ export function assertDateFieldFilter(
     );
   }
 
-  assertDateFilterCondition(filter.condition);
+  assertDateFilterRule(filter.rule);
 }
 
 export function assertEmailFieldFilter(
@@ -349,7 +349,7 @@ export function assertEmailFieldFilter(
     );
   }
 
-  assertTextFilterCondition(filter.condition);
+  assertTextFilterRule(filter.rule);
 }
 
 export function assertMultiCollaboratorFieldFilter(
@@ -361,7 +361,7 @@ export function assertMultiCollaboratorFieldFilter(
     );
   }
 
-  assertMultiSelectFilterCondition(filter.condition);
+  assertMultiSelectFilterRule(filter.rule);
 }
 
 export function assertMultiDocumentLinkFieldFilter(
@@ -373,7 +373,7 @@ export function assertMultiDocumentLinkFieldFilter(
     );
   }
 
-  assertMultiSelectFilterCondition(filter.condition);
+  assertMultiSelectFilterRule(filter.rule);
 }
 
 export function assertMultiLineTextFieldFilter(
@@ -385,7 +385,7 @@ export function assertMultiLineTextFieldFilter(
     );
   }
 
-  assertTextFilterCondition(filter.condition);
+  assertTextFilterRule(filter.rule);
 }
 
 export function assertMultiSelectFieldFilter(
@@ -397,7 +397,7 @@ export function assertMultiSelectFieldFilter(
     );
   }
 
-  assertMultiSelectFilterCondition(filter.condition);
+  assertMultiSelectFilterRule(filter.rule);
 }
 
 export function assertNumberFieldFilter(
@@ -409,7 +409,7 @@ export function assertNumberFieldFilter(
     );
   }
 
-  assertNumberFilterCondition(filter.condition);
+  assertNumberFilterRule(filter.rule);
 }
 
 export function assertPhoneNumberFieldFilter(
@@ -421,7 +421,7 @@ export function assertPhoneNumberFieldFilter(
     );
   }
 
-  assertTextFilterCondition(filter.condition);
+  assertTextFilterRule(filter.rule);
 }
 
 export function assertSingleCollaboratorFieldFilter(
@@ -433,7 +433,7 @@ export function assertSingleCollaboratorFieldFilter(
     );
   }
 
-  assertSingleSelectFilterCondition(filter.condition);
+  assertSingleSelectFilterRule(filter.rule);
 }
 export function assertSingleDocumentLinkFieldFilter(
   filter: Filter,
@@ -444,7 +444,7 @@ export function assertSingleDocumentLinkFieldFilter(
     );
   }
 
-  assertSingleSelectFilterCondition(filter.condition);
+  assertSingleSelectFilterRule(filter.rule);
 }
 
 export function assertSingleLineTextFieldFilter(
@@ -456,7 +456,7 @@ export function assertSingleLineTextFieldFilter(
     );
   }
 
-  assertTextFilterCondition(filter.condition);
+  assertTextFilterRule(filter.rule);
 }
 
 export function assertSingleSelectFieldFilter(
@@ -468,7 +468,7 @@ export function assertSingleSelectFieldFilter(
     );
   }
 
-  assertSingleSelectFilterCondition(filter.condition);
+  assertSingleSelectFilterRule(filter.rule);
 }
 
 export function assertURLFieldFilter(
@@ -480,90 +480,78 @@ export function assertURLFieldFilter(
     );
   }
 
-  assertTextFilterCondition(filter.condition);
+  assertTextFilterRule(filter.rule);
 }
 
-export function assertNumberFilterCondition(
-  condition: FilterCondition,
-): asserts condition is NumberFilterCondition {
-  if (condition in numberFiltersByCondition) {
+export function assertNumberFilterRule(
+  rule: FilterRule,
+): asserts rule is NumberFilterRule {
+  if (rule in numberFiltersByRule) {
     return;
   }
 
-  throw Error(
-    `Expected one of valid NumberFilterCondition. Received ${condition}`,
-  );
+  throw Error(`Expected one of valid NumberFilterRule. Received ${rule}`);
 }
 
-export function assertTextFilterCondition(
-  condition: FilterCondition,
-): asserts condition is TextFilterCondition {
-  if (condition in textFiltersByCondition) {
+export function assertTextFilterRule(
+  rule: FilterRule,
+): asserts rule is TextFilterRule {
+  if (rule in textFiltersByRule) {
     return;
   }
 
-  throw Error(
-    `Expected one of valid TextFilterCondition. Received ${condition}`,
-  );
+  throw Error(`Expected one of valid TextFilterRule. Received ${rule}`);
 }
 
-export function assertDateFilterCondition(
-  condition: FilterCondition,
-): asserts condition is DateFilterCondition {
-  if (condition in dateFiltersByCondition) {
+export function assertDateFilterRule(
+  rule: FilterRule,
+): asserts rule is DateFilterRule {
+  if (rule in dateFiltersByRule) {
     return;
   }
 
-  throw Error(
-    `Expected one of valid DateFilterCondition. Received ${condition}`,
-  );
+  throw Error(`Expected one of valid DateFilterRule. Received ${rule}`);
 }
 
-export function assertMultiSelectFilterCondition(
-  condition: FilterCondition,
-): asserts condition is MultiSelectFilterCondition {
-  if (condition in multiSelectFiltersByCondition) {
+export function assertMultiSelectFilterRule(
+  rule: FilterRule,
+): asserts rule is MultiSelectFilterRule {
+  if (rule in multiSelectFiltersByRule) {
     return;
   }
 
-  throw Error(
-    `Expected one of valid MultiSelectFilterCondition. Received ${condition}`,
-  );
+  throw Error(`Expected one of valid MultiSelectFilterRule. Received ${rule}`);
 }
 
-export function assertSingleSelectFilterCondition(
-  condition: FilterCondition,
-): asserts condition is SingleSelectFilterCondition {
-  if (condition in singleSelectFiltersByCondition) {
+export function assertSingleSelectFilterRule(
+  rule: FilterRule,
+): asserts rule is SingleSelectFilterRule {
+  if (rule in singleSelectFiltersByRule) {
     return;
   }
 
-  throw Error(
-    `Expected one of valid SingleSelectFilterCondition. Received ${condition}`,
-  );
+  throw Error(`Expected one of valid SingleSelectFilterRule. Received ${rule}`);
 }
 
-export function assertBooleanFilterCondition(
-  condition: FilterCondition,
-): asserts condition is BooleanFilterCondition {
-  if (condition in booleanFiltersByCondition) {
+export function assertBooleanFilterRule(
+  rule: FilterRule,
+): asserts rule is BooleanFilterRule {
+  if (rule in booleanFiltersByRule) {
     return;
   }
 
-  throw Error(
-    `Expected one of valid BooleanFilterCondition. Received ${condition}`,
-  );
+  throw Error(`Expected one of valid BooleanFilterRule. Received ${rule}`);
 }
 
-export const textFiltersByCondition: {
-  [condition in TextFilterCondition]: (
+export const textFiltersByRule: {
+  [rule in TextFilterRule]: (
     value:
       | SingleLineTextFieldValue
       | MultiLineTextFieldValue
       | URLFieldValue
       | PhoneNumberFieldValue
       | EmailFieldValue,
-    filterValue: TextFilterConditionValue,
+    filterValue: TextFilterRuleValue,
   ) => boolean;
 } = {
   contains: (value, filterValue) => {
@@ -586,10 +574,10 @@ export const textFiltersByCondition: {
   },
 };
 
-export const numberFiltersByCondition: {
-  [condition in NumberFilterCondition]: (
+export const numberFiltersByRule: {
+  [rule in NumberFilterRule]: (
     value: CurrencyFieldValue | NumberFieldValue,
-    filterValue: NumberFilterConditionValue,
+    filterValue: NumberFilterRuleValue,
   ) => boolean;
 } = {
   equal: (value, filterValue) => {
@@ -650,10 +638,10 @@ export const numberFiltersByCondition: {
   },
 };
 
-export const dateFiltersByCondition: {
-  [condition in DateFilterCondition]: (
+export const dateFiltersByRule: {
+  [rule in DateFilterRule]: (
     value: DateFieldValue,
-    filterValue: DateFilterConditionValue,
+    filterValue: DateFilterRuleValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {
@@ -759,13 +747,13 @@ export const dateFiltersByCondition: {
   },
 };
 
-export const singleSelectFiltersByCondition: {
-  [condition in SingleSelectFilterCondition]: (
+export const singleSelectFiltersByRule: {
+  [rule in SingleSelectFilterRule]: (
     value:
       | SingleCollaboratorFieldValue
       | SingleSelectFieldValue
       | SingleDocumentLinkFieldValue,
-    filterValue: SingleSelectFilterConditionValue,
+    filterValue: SingleSelectFilterRuleValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {
@@ -836,13 +824,13 @@ export const singleSelectFiltersByCondition: {
   },
 };
 
-export const multiSelectFiltersByCondition: {
-  [condition in MultiSelectFilterCondition]: (
+export const multiSelectFiltersByRule: {
+  [rule in MultiSelectFilterRule]: (
     value:
       | MultiCollaboratorFieldValue
       | MultiDocumentLinkFieldValue
       | MultiSelectFieldValue,
-    filterValue: MultiSelectFilterConditionValue,
+    filterValue: MultiSelectFilterRuleValue,
   ) => boolean;
 } = {
   hasAnyOf: (value, filterValue) => {
@@ -874,10 +862,10 @@ export const multiSelectFiltersByCondition: {
   },
 };
 
-export const booleanFiltersByCondition: {
-  [condition in BooleanFilterCondition]: (
+export const booleanFiltersByRule: {
+  [rule in BooleanFilterRule]: (
     value: CheckboxFieldValue,
-    filterValue: BooleanFilterConditionValue,
+    filterValue: BooleanFilterRuleValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {

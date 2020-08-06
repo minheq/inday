@@ -41,12 +41,12 @@ import {
   assertSingleLineTextFieldFilter,
   assertSingleSelectFieldFilter,
   assertURLFieldFilter,
-  booleanFiltersByCondition,
-  dateFiltersByCondition,
-  multiSelectFiltersByCondition,
-  numberFiltersByCondition,
-  singleSelectFiltersByCondition,
-  textFiltersByCondition,
+  booleanFiltersByRule,
+  dateFiltersByRule,
+  multiSelectFiltersByRule,
+  numberFiltersByRule,
+  singleSelectFiltersByRule,
+  textFiltersByRule,
   filtersQuery,
 } from './filters';
 
@@ -185,7 +185,7 @@ const filtersByFieldType: {
     assertCheckboxFieldValue(value);
     assertCheckboxFieldFilter(filter);
 
-    const applyFilter = booleanFiltersByCondition[filter.condition];
+    const applyFilter = booleanFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -193,7 +193,7 @@ const filtersByFieldType: {
     assertCurrencyFieldValue(value);
     assertCurrencyFieldFilter(filter);
 
-    const applyFilter = numberFiltersByCondition[filter.condition];
+    const applyFilter = numberFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -201,7 +201,7 @@ const filtersByFieldType: {
     assertDateFieldValue(value);
     assertDateFieldFilter(filter);
 
-    const applyFilter = dateFiltersByCondition[filter.condition];
+    const applyFilter = dateFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -209,7 +209,7 @@ const filtersByFieldType: {
     assertEmailFieldValue(value);
     assertEmailFieldFilter(filter);
 
-    const applyFilter = textFiltersByCondition[filter.condition];
+    const applyFilter = textFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -217,7 +217,7 @@ const filtersByFieldType: {
     assertMultiCollaboratorFieldValue(value);
     assertMultiCollaboratorFieldFilter(filter);
 
-    const applyFilter = multiSelectFiltersByCondition[filter.condition];
+    const applyFilter = multiSelectFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -225,7 +225,7 @@ const filtersByFieldType: {
     assertMultiDocumentLinkFieldValue(value);
     assertMultiDocumentLinkFieldFilter(filter);
 
-    const applyFilter = multiSelectFiltersByCondition[filter.condition];
+    const applyFilter = multiSelectFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -233,7 +233,7 @@ const filtersByFieldType: {
     assertMultiLineTextFieldValue(value);
     assertMultiLineTextFieldFilter(filter);
 
-    const applyFilter = textFiltersByCondition[filter.condition];
+    const applyFilter = textFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -241,7 +241,7 @@ const filtersByFieldType: {
     assertMultiSelectFieldValue(value);
     assertMultiSelectFieldFilter(filter);
 
-    const applyFilter = multiSelectFiltersByCondition[filter.condition];
+    const applyFilter = multiSelectFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -249,7 +249,7 @@ const filtersByFieldType: {
     assertNumberFieldValue(value);
     assertNumberFieldFilter(filter);
 
-    const applyFilter = numberFiltersByCondition[filter.condition];
+    const applyFilter = numberFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -257,7 +257,7 @@ const filtersByFieldType: {
     assertPhoneNumberFieldValue(value);
     assertPhoneNumberFieldFilter(filter);
 
-    const applyFilter = textFiltersByCondition[filter.condition];
+    const applyFilter = textFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -265,7 +265,7 @@ const filtersByFieldType: {
     assertSingleCollaboratorFieldValue(value);
     assertSingleCollaboratorFieldFilter(filter);
 
-    const applyFilter = singleSelectFiltersByCondition[filter.condition];
+    const applyFilter = singleSelectFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -274,7 +274,7 @@ const filtersByFieldType: {
     assertSingleDocumentLinkFieldValue(value);
     assertSingleDocumentLinkFieldFilter(filter);
 
-    const applyFilter = singleSelectFiltersByCondition[filter.condition];
+    const applyFilter = singleSelectFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -282,7 +282,7 @@ const filtersByFieldType: {
     assertSingleLineTextFieldValue(value);
     assertSingleLineTextFieldFilter(filter);
 
-    const applyFilter = textFiltersByCondition[filter.condition];
+    const applyFilter = textFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -291,7 +291,7 @@ const filtersByFieldType: {
     assertSingleSelectFieldValue(value);
     assertSingleSelectFieldFilter(filter);
 
-    const applyFilter = singleSelectFiltersByCondition[filter.condition];
+    const applyFilter = singleSelectFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },
@@ -299,7 +299,7 @@ const filtersByFieldType: {
     assertURLFieldValue(value);
     assertURLFieldFilter(filter);
 
-    const applyFilter = textFiltersByCondition[filter.condition];
+    const applyFilter = textFiltersByRule[filter.rule];
 
     return applyFilter(value, filter.value);
   },

@@ -1,11 +1,9 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 
-import { Text } from './text';
 import { Button } from './button';
 import { Spacer } from './spacer';
 import { Row } from './row';
-import { Container } from './container';
 
 interface Option<TValue = any> {
   label: string;
@@ -35,11 +33,8 @@ export function SegmentedControl<TValue = any>(
               state={selected ? 'active' : 'default'}
               style={styles.control}
               onPress={() => onChange(option.value)}
-            >
-              <Container height={40} center>
-                <Text>{option.label}</Text>
-              </Container>
-            </Button>
+              title={option.label}
+            />
             <Spacer size={4} />
           </>
         );
