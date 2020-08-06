@@ -1,6 +1,4 @@
 import React from 'react';
-import { Option } from './picker';
-import { Picker } from './picker';
 import { Row } from './row';
 import { range } from '../../lib/data_structures/arrays';
 import { setHours, setMinutes } from 'date-fns';
@@ -46,18 +44,19 @@ export function TimePicker(props: TimePickerProps) {
 
   return (
     <Row>
-      <Picker options={hours} onChange={handleHourChange} value={valueHours} />
+      {/* TODO */}
+      {/* <Picker options={hours} onChange={handleHourChange} value={valueHours} />
       <Picker
         options={minutes}
         onChange={handleMinutesChange}
         value={valueMinutes}
-      />
+      /> */}
     </Row>
   );
 }
 
-const hours: Option[] = range(24).map((i) => ({ label: `${i}`, value: i }));
-const minutes: Option[] = range(0, 60, 5).map((i) => ({
+const hours = range(24).map((i) => ({ label: `${i}`, value: i }));
+const minutes = range(0, 60, 5).map((i) => ({
   label: `${i}`,
   value: i,
 }));
