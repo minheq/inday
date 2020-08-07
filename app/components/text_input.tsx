@@ -4,9 +4,13 @@ import {
   TextInput as RNTextInput,
   View,
   Animated,
+  NativeSyntheticEvent,
+  TextInputKeyPressEventData,
+  TextInputSubmitEditingEventData,
 } from 'react-native';
 import { IconName, Icon } from './icon';
 import { tokens, useTheme } from './theme';
+import { Pressable } from './pressable';
 
 export interface TextInputProps {
   icon?: IconName;
@@ -14,9 +18,14 @@ export interface TextInputProps {
   value?: string;
   autoFocus?: boolean;
   onChange?: (value: string) => void;
+  onKeyPress?: (
+    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
+  ) => void;
+  onSubmitEditing?: (
+    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
+  ) => void;
+  clearable?: boolean;
   placeholder?: string;
-  onFocus?: () => void;
-  onBlur?: () => void;
 }
 
 export function TextInput(props: TextInputProps) {
@@ -25,7 +34,10 @@ export function TextInput(props: TextInputProps) {
     autoFocus,
     icon,
     value,
+    clearable,
     onChange = () => {},
+    onKeyPress = () => {},
+    onSubmitEditing = () => {},
     placeholder,
   } = props;
   const [focused, setFocused] = React.useState(false);
@@ -39,6 +51,10 @@ export function TextInput(props: TextInputProps) {
   const handleFocus = React.useCallback(() => {
     setFocused(true);
   }, []);
+
+  const handleClear = React.useCallback(() => {
+    onChange('');
+  }, [onChange]);
 
   React.useEffect(() => {
     if (focused) {
@@ -82,6 +98,8 @@ export function TextInput(props: TextInputProps) {
         onChangeText={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onKeyPress={onKeyPress}
+        onSubmitEditing={onSubmitEditing}
         placeholderTextColor={theme.text.color.muted}
         style={[
           styles.input,
@@ -91,6 +109,11 @@ export function TextInput(props: TextInputProps) {
           webStyle,
         ]}
       />
+      {clearable && value !== undefined && value !== '' && (
+        <Pressable onPress={handleClear} style={styles.clearButton}>
+          <Icon name="x" size="lg" />
+        </Pressable>
+      )}
     </Animated.View>
   );
 }
@@ -112,9 +135,17 @@ const styles = StyleSheet.create({
   hasIcon: {
     paddingLeft: 0,
   },
+  clearButton: {
+    width: 24,
+    height: 24,
+    position: 'absolute',
+    right: 8,
+    borderRadius: tokens.radius,
+  },
   input: {
     height: 38,
-    paddingHorizontal: 16,
+    paddingLeft: 16,
+    paddingRight: 40,
     borderRadius: tokens.radius,
     flex: 1,
   },

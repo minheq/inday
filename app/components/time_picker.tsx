@@ -1,7 +1,9 @@
 import React from 'react';
+import { Picker } from './picker';
 import { Row } from './row';
 import { range } from '../../lib/data_structures/arrays';
 import { setHours, setMinutes } from 'date-fns';
+import { Option } from './option';
 
 interface TimePickerProps {
   /** Sets year, month and day of this date on the operated values */
@@ -44,19 +46,21 @@ export function TimePicker(props: TimePickerProps) {
 
   return (
     <Row>
-      {/* TODO */}
-      {/* <Picker options={hours} onChange={handleHourChange} value={valueHours} />
+      <Picker options={hours} onChange={handleHourChange} value={valueHours} />
       <Picker
         options={minutes}
         onChange={handleMinutesChange}
         value={valueMinutes}
-      /> */}
+      />
     </Row>
   );
 }
 
-const hours = range(24).map((i) => ({ label: `${i}`, value: i }));
-const minutes = range(0, 60, 5).map((i) => ({
+const hours: Option<number>[] = range(24).map((i) => ({
+  label: `${i}`,
+  value: i,
+}));
+const minutes: Option<number>[] = range(0, 60, 5).map((i) => ({
   label: `${i}`,
   value: i,
 }));

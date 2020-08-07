@@ -1,125 +1,42 @@
-import React from 'react';
+import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { measure } from '../lib/measurements/measurements';
 import { useTheme, tokens } from './theme';
 import { Modal } from './modal';
 import { PressabilityConfig, usePressability } from '../hooks/use_pressability';
 
-export type PopoverPlacement =
-  | 'top-center'
-  | 'top-left'
-  | 'top-right'
-  | 'left'
-  | 'right'
-  | 'bottom-center'
-  | 'bottom-left'
-  | 'bottom-right';
-
+export const initialPopoverAnchor: PopoverAnchor = { y: 0, x: 0 };
 export type PopoverAnchor = { y: number; x: number };
 
 interface PopoverProps {
   visible?: boolean;
   onRequestClose?: () => void;
   children: React.ReactNode;
-  placement?: PopoverPlacement;
   anchor: PopoverAnchor;
 }
-
-interface PopoverLayout {
-  top: number;
-  left: number;
-  fromX: number;
-  fromY: number;
-}
-
-interface Dimensions {
-  height: number;
-  width: number;
-}
-
-const initialLayout: PopoverLayout = {
-  top: 0,
-  left: 0,
-  fromX: 0,
-  fromY: 0,
-};
 
 export function Popover(props: PopoverProps) {
   const {
     visible = false,
-    placement = 'top-center',
     onRequestClose = () => {},
     anchor,
     children,
   } = props;
-  const show = React.useRef(new Animated.Value(0)).current;
-  const position = React.useRef(new Animated.ValueXY()).current;
-  const ref = React.useRef<View | null>(null);
-  const [layout, setLayout] = React.useState(initialLayout);
-  const [ready, setReady] = React.useState(false);
-  const [internalVisible, setInternalVisible] = React.useState(false);
+  const show = useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
-  React.useEffect(() => {
-    if (visible === true) {
-      if (internalVisible === false) {
-        setInternalVisible(true);
-      }
+  useEffect(() => {
+    Animated.spring(show, {
+      toValue: visible ? 1 : 0,
+      bounciness: 0,
+      useNativeDriver: true,
+    }).start();
+  }, [visible, show]);
 
-      if (ready) {
-        position.setValue({
-          x: layout.fromX,
-          y: layout.fromY,
-        });
-
-        Animated.parallel([
-          Animated.spring(show, {
-            toValue: 1,
-            bounciness: tokens.animation.spring.bounciness,
-            speed: 48,
-            useNativeDriver: true,
-          }),
-          Animated.spring(position, {
-            toValue: { x: 0, y: 0 },
-            bounciness: tokens.animation.spring.bounciness,
-            speed: 48,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-    } else {
-      Animated.parallel([
-        Animated.spring(show, {
-          toValue: 0,
-          bounciness: tokens.animation.spring.bounciness,
-          speed: 48,
-          useNativeDriver: true,
-        }),
-        Animated.spring(position, {
-          toValue: { x: layout.fromX, y: layout.fromY },
-          bounciness: tokens.animation.spring.bounciness,
-          speed: 48,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setInternalVisible(false);
-      });
-    }
-  }, [visible, show, ready, layout, position, internalVisible]);
-
-  const handlePressBackground = React.useCallback(() => {
+  const handlePressBackground = useCallback(() => {
     onRequestClose();
   }, [onRequestClose]);
 
-  const handleLayout = React.useCallback(() => {
-    measure(ref).then((measurements) => {
-      const l = calculatePopoverLayout(anchor, measurements, placement);
-      setLayout(l);
-      setReady(true);
-    });
-  }, [anchor, placement]);
-
-  const config: PressabilityConfig = React.useMemo(
+  const config: PressabilityConfig = useMemo(
     () => ({
       onPress: handlePressBackground,
     }),
@@ -130,7 +47,7 @@ export function Popover(props: PopoverProps) {
 
   return (
     <Modal
-      visible={internalVisible}
+      visible={visible}
       onRequestClose={onRequestClose}
       animationType="none"
       transparent
@@ -138,20 +55,12 @@ export function Popover(props: PopoverProps) {
       <View style={styles.base}>
         <View style={styles.background} {...eventHandlers} />
         <Animated.View
-          // @ts-ignore
-          ref={ref}
-          onLayout={handleLayout}
           style={[
             styles.popover,
             theme.container.shadow,
             {
-              top: layout.top,
-              left: layout.left,
-              transform: [
-                { scale: show },
-                { translateX: position.x },
-                { translateY: position.y },
-              ],
+              top: anchor.y,
+              left: anchor.x,
               opacity: show,
             },
           ]}
@@ -161,29 +70,6 @@ export function Popover(props: PopoverProps) {
       </View>
     </Modal>
   );
-}
-
-function calculatePopoverLayout(
-  anchor: PopoverAnchor,
-  dimensions: Dimensions,
-  placement: PopoverPlacement,
-): PopoverLayout {
-  switch (placement) {
-    case 'bottom-right':
-      return {
-        top: anchor.y,
-        left: anchor.x,
-        fromX: -dimensions.width,
-        fromY: -dimensions.height,
-      };
-    default:
-      return {
-        top: 0,
-        left: 0,
-        fromX: 0,
-        fromY: 0,
-      };
-  }
 }
 
 const styles = StyleSheet.create({
