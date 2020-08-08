@@ -477,6 +477,31 @@ export function useUpdateFilterConfig() {
   return updateFilterConfig;
 }
 
+export function useDeleteFilter() {
+  const emitEvent = useEmitEvent();
+  const setFilters = useSetRecoilState(fieldsByIDState);
+
+  const deleteFilter = useCallback(
+    (filter: Filter) => {
+      setFilters((previousFilters) => {
+        const nextFilters = { ...previousFilters };
+
+        delete nextFilters[filter.id];
+
+        return nextFilters;
+      });
+
+      emitEvent({
+        name: 'FilterDeleted',
+        filter,
+      });
+    },
+    [emitEvent, setFilters],
+  );
+
+  return deleteFilter;
+}
+
 export function useCreateView() {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState(viewsByIDState);

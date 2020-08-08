@@ -216,21 +216,12 @@ export type FilterRuleValue =
   | TextFilterRuleValue;
 
 export type FilterConfig =
-  | CheckboxFieldFilterConfig
-  | CurrencyFieldFilterConfig
-  | DateFieldFilterConfig
-  | EmailFieldFilterConfig
-  | MultiCollaboratorFieldFilterConfig
-  | MultiDocumentLinkFieldFilterConfig
-  | MultiLineTextFieldFilterConfig
-  | MultiSelectFieldFilterConfig
-  | NumberFieldFilterConfig
-  | PhoneNumberFieldFilterConfig
-  | SingleCollaboratorFieldFilterConfig
-  | SingleDocumentLinkFieldFilterConfig
-  | SingleLineTextFieldFilterConfig
-  | SingleSelectFieldFilterConfig
-  | URLFieldFilterConfig;
+  | BooleanFilterConfig
+  | DateFilterConfig
+  | MultiSelectFilterConfig
+  | NumberFilterConfig
+  | SingleSelectFilterConfig
+  | TextFilterConfig;
 
 export type Filter =
   | BooleanFilter
@@ -240,6 +231,17 @@ export type Filter =
   | SingleSelectFilter
   | TextFilter;
 
+export type BooleanFilter = CheckboxFieldFilter;
+export type DateFilter = DateFieldFilter;
+export type MultiSelectFilter =
+  | MultiCollaboratorFieldFilter
+  | MultiDocumentLinkFieldFilter
+  | MultiSelectFieldFilter;
+export type NumberFilter = CurrencyFieldFilter | NumberFieldFilter;
+export type SingleSelectFilter =
+  | SingleCollaboratorFieldFilter
+  | SingleDocumentLinkFieldFilter
+  | SingleSelectFieldFilter;
 export type TextFilter =
   | EmailFieldFilter
   | MultiLineTextFieldFilter
@@ -247,19 +249,25 @@ export type TextFilter =
   | SingleLineTextFieldFilter
   | URLFieldFilter;
 
-export type NumberFilter = CurrencyFieldFilter | NumberFieldFilter;
-export type SingleSelectFilter =
-  | SingleCollaboratorFieldFilter
-  | SingleDocumentLinkFieldFilter
-  | SingleSelectFieldFilter;
-
-export type MultiSelectFilter =
-  | MultiCollaboratorFieldFilter
-  | MultiDocumentLinkFieldFilter
-  | MultiSelectFieldFilter;
-
-export type BooleanFilter = CheckboxFieldFilter;
-export type DateFilter = DateFieldFilter;
+export type BooleanFilterConfig = CheckboxFieldFilterConfig;
+export type DateFilterConfig = DateFieldFilterConfig;
+export type MultiSelectFilterConfig =
+  | MultiCollaboratorFieldFilterConfig
+  | MultiDocumentLinkFieldFilterConfig
+  | MultiSelectFieldFilterConfig;
+export type NumberFilterConfig =
+  | CurrencyFieldFilterConfig
+  | NumberFieldFilterConfig;
+export type SingleSelectFilterConfig =
+  | SingleCollaboratorFieldFilterConfig
+  | SingleDocumentLinkFieldFilterConfig
+  | SingleSelectFieldFilterConfig;
+export type TextFilterConfig =
+  | EmailFieldFilterConfig
+  | MultiLineTextFieldFilterConfig
+  | PhoneNumberFieldFilterConfig
+  | SingleLineTextFieldFilterConfig
+  | URLFieldFilterConfig;
 
 export type FiltersByIDState = { [filterID: string]: Filter | undefined };
 export const filtersByIDState = atom<FiltersByIDState>({
@@ -903,4 +911,40 @@ export function assertSingleSelectFilter(
 
 export function assertTextFilter(filter: Filter): asserts filter is TextFilter {
   assertTextFilterRule(filter.rule);
+}
+
+export function assertBooleanFilterConfig(
+  filterConfig: FilterConfig,
+): asserts filterConfig is BooleanFilterConfig {
+  assertBooleanFilterRule(filterConfig.rule);
+}
+
+export function assertDateFilterConfig(
+  filterConfig: FilterConfig,
+): asserts filterConfig is DateFilterConfig {
+  assertDateFilterRule(filterConfig.rule);
+}
+
+export function assertMultiSelectFilterConfig(
+  filterConfig: FilterConfig,
+): asserts filterConfig is MultiSelectFilterConfig {
+  assertMultiSelectFilterRule(filterConfig.rule);
+}
+
+export function assertNumberFilterConfig(
+  filterConfig: FilterConfig,
+): asserts filterConfig is NumberFilterConfig {
+  assertNumberFilterRule(filterConfig.rule);
+}
+
+export function assertSingleSelectFilterConfig(
+  filterConfig: FilterConfig,
+): asserts filterConfig is SingleSelectFilterConfig {
+  assertSingleSelectFilterRule(filterConfig.rule);
+}
+
+export function assertTextFilterConfig(
+  filterConfig: FilterConfig,
+): asserts filterConfig is TextFilterConfig {
+  assertTextFilterRule(filterConfig.rule);
 }

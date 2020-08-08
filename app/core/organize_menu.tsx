@@ -4,6 +4,7 @@ import React, {
   createContext,
   useContext,
   Fragment,
+  useEffect,
 } from 'react';
 
 import {
@@ -11,20 +12,10 @@ import {
   TextFilterRule,
   getDefaultFilterConfig,
   Filter,
-  TextFilterRuleValue,
-  TextFilter,
-  assertEmailFieldFilter,
-  assertMultiLineTextFieldFilter,
-  assertPhoneNumberFieldFilter,
-  assertSingleLineTextFieldFilter,
-  assertURLFieldFilter,
   FilterID,
-  FilterRuleValue,
-  FilterRule,
   FilterConfig,
-  assertTextFilterRule,
-  assertTextFilter,
-  assertNumberFilter,
+  assertNumberFilterConfig,
+  assertTextFilterConfig,
 } from '../data/filters';
 import {
   Container,
@@ -42,6 +33,7 @@ import {
   useCreateFilter,
   useGetCollectionFields,
   useGetViewFilters,
+  useDeleteFilter,
   useUpdateFilterConfig,
   useGetField,
   useGetFieldCallback,
@@ -142,16 +134,14 @@ function FilterListItem(props: FilterListItemProps) {
   const field = useGetField(filter.fieldID);
   const fields = useGetCollectionFields(context.collectionID);
   const getField = useGetFieldCallback();
+  const deleteFilter = useDeleteFilter();
   const updateFilterConfig = useUpdateFilterConfig();
   const [filterConfig, setFilterConfig] = useState<FilterConfig>(filter);
   const edit = filterEditID === filter.id;
 
-  const handleChangeFilterConfig = useCallback(
-    (config: FilterConfig) => {
-      updateFilterConfig(filter.id, filter.fieldID, config);
-    },
-    [filter, updateFilterConfig],
-  );
+  const handleChangeFilterConfig = useCallback((config: FilterConfig) => {
+    setFilterConfig(config);
+  }, []);
 
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {
@@ -170,11 +160,20 @@ function FilterListItem(props: FilterListItemProps) {
   const handlePressCancel = useCallback(() => {
     setFilterEditID('');
   }, [setFilterEditID]);
-  
-  const handlePressDone = useCallback(() => {
-    updateFilterConfig(filter.id, filter.id, filterConfig);
+
+  const handleRemove = useCallback(() => {
+    deleteFilter(filter);
     setFilterEditID('');
-  }, [updateFilterConfig, filter, filterConfig]);
+  }, [deleteFilter, setFilterEditID, filter]);
+
+  const handlePressDone = useCallback(() => {
+    updateFilterConfig(filter.id, filter.fieldID, filterConfig);
+    setFilterEditID('');
+  }, [updateFilterConfig, setFilterEditID, filter, filterConfig]);
+
+  useEffect(() => {
+    setFilterConfig(filter);
+  }, [filterEditID, filter]);
 
   const FilterConfigEdit = filterConfigEditComponentByFieldType[field.type];
 
@@ -204,23 +203,31 @@ function FilterListItem(props: FilterListItemProps) {
         }))}
       />
       <Spacer size={4} />
-      <FilterConfigEdit onChange={handleChangeFilterConfig} filter={filter} />
+      <FilterConfigEdit
+        onChange={handleChangeFilterConfig}
+        filterConfig={filterConfig}
+      />
       <Spacer size={16} />
-      <Row justifyContent="flex-end">
-        <Pressable onPress={handlePressCancel}>
-          <Text>Cancel</Text>
+      <Row justifyContent="space-between">
+        <Pressable onPress={handleRemove}>
+          <Text>Remove</Text>
         </Pressable>
-        <Spacer size={16} />
-        <Pressable onPress={handlePressDone}>
-          <Text color="primary">Done</Text>
-        </Pressable>
+        <Row>
+          <Pressable onPress={handlePressCancel}>
+            <Text>Cancel</Text>
+          </Pressable>
+          <Spacer size={16} />
+          <Pressable onPress={handlePressDone}>
+            <Text color="primary">Done</Text>
+          </Pressable>
+        </Row>
       </Row>
     </Container>
   );
 }
 
 interface FilterRuleInputProps {
-  filter: Filter;
+  filterConfig: FilterConfig;
   onChange: (filterConfig: FilterConfig) => void;
 }
 
@@ -245,25 +252,31 @@ const filterConfigEditComponentByFieldType: {
 };
 
 function TextFilterRuleInput(props: FilterRuleInputProps) {
-  const { filter, onChange } = props;
-  assertTextFilter(filter);
+  const { filterConfig, onChange } = props;
 
-  const { rule, value } = filter;
+  assertTextFilterConfig(filterConfig);
 
-  const handleChangeRule = useCallback((newRule: TextFilterRule) {
-    onChange({
-      rule: newRule,
-      value: '',
-    })
-  }, [onChange])
-  
-  const handleChangeValue = useCallback((newValue: string) {
-    onChange({
-      rule,
-      value: newValue,
-    });
+  const { rule, value } = filterConfig;
 
-  }, [onChange, rule])
+  const handleChangeRule = useCallback(
+    (newRule: TextFilterRule) => {
+      onChange({
+        rule: newRule,
+        value: '',
+      });
+    },
+    [onChange],
+  );
+
+  const handleChangeValue = useCallback(
+    (newValue: string) => {
+      onChange({
+        rule,
+        value: newValue,
+      });
+    },
+    [onChange, rule],
+  );
 
   const options: Option<TextFilterRule>[] = [
     { value: 'contains', label: 'contains' },
@@ -284,25 +297,30 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
 }
 
 function NumberFilterRuleInput(props: FilterRuleInputProps) {
-  const { filter, onChange } = props;
-  assertNumberFilter(filter);
+  const { filterConfig, onChange } = props;
+  assertNumberFilterConfig(filterConfig);
 
-  const { rule, value } = filter;
+  const { rule, value } = filterConfig;
 
-  const handleChangeRule = useCallback((newRule: NumberFilterRule) {
-    onChange({
-      rule: newRule,
-      value: null,
-    })
-  }, [onChange])
-  
-  const handleChangeValue = useCallback((newValue: string) {
-    onChange({
-      rule,
-      value: Number(newValue),
-    });
+  const handleChangeRule = useCallback(
+    (newRule: NumberFilterRule) => {
+      onChange({
+        rule: newRule,
+        value: null,
+      });
+    },
+    [onChange],
+  );
 
-  }, [onChange, rule])
+  const handleChangeValue = useCallback(
+    (newValue: string) => {
+      onChange({
+        rule,
+        value: Number(newValue),
+      });
+    },
+    [onChange, rule],
+  );
 
   const options: Option<NumberFilterRule>[] = [
     { value: 'equal', label: 'equal' },
@@ -317,11 +335,7 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
 
   return (
     <Container>
-      <Picker
-        value={rule}
-        onChange={handleChangeRule}
-        options={options}
-      />
+      <Picker value={rule} onChange={handleChangeRule} options={options} />
       <Spacer size={4} />
       <TextInput value={value ? `${value}` : ''} onChange={handleChangeValue} />
     </Container>
