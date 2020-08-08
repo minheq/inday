@@ -1,40 +1,59 @@
-import React, { useState, useCallback, createContext, useContext } from 'react';
-import { ScrollView } from 'react-native';
+import React, {
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  Fragment,
+} from 'react';
 
 import {
   NumberFilterRule,
   TextFilterRule,
+  getDefaultFilterConfig,
   Filter,
-  FilterID,
-  FilterRule,
-  FilterRuleValue,
   TextFilterRuleValue,
-  NumberFilterRuleValue,
+  TextFilter,
+  assertEmailFieldFilter,
+  assertMultiLineTextFieldFilter,
+  assertPhoneNumberFieldFilter,
+  assertSingleLineTextFieldFilter,
+  assertURLFieldFilter,
+  FilterID,
+  FilterRuleValue,
+  FilterRule,
+  FilterConfig,
+  assertTextFilterRule,
+  assertTextFilter,
+  assertNumberFilter,
 } from '../data/filters';
 import {
   Container,
   SegmentedControl,
   Spacer,
   Button,
-  Text,
-  Option,
-  ListItem,
-  BackButton,
-  Row,
   TextInput,
+  Picker,
+  Option,
+  Text,
+  Row,
+  Pressable,
 } from '../components';
 import {
+  useCreateFilter,
   useGetCollectionFields,
   useGetViewFilters,
+  useUpdateFilterConfig,
   useGetField,
+  useGetFieldCallback,
 } from '../data/store';
+import { first } from '../../lib/data_structures/arrays';
 import { FieldType } from '../data/constants';
-import { Field, FieldID } from '../data/fields';
+import { FieldID } from '../data/fields';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
 import { CollectionID } from '../data/collections';
-import { createStackNavigator } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
+import { atom, useRecoilState, useSetRecoilState } from 'recoil';
+import { tokens } from '../components/theme';
 
 const OrganizeMenuContext = createContext({
   spaceID: '1',
@@ -48,112 +67,66 @@ interface OrganizeMenuProps {
   collectionID: CollectionID;
 }
 
-const OrganizeMenuStack = createStackNavigator();
-
-interface FilterEdit {
-  id: FilterID;
-  fieldID: FieldID;
-  rule: FilterRule | null;
-  value: FilterRuleValue | null;
-}
-
-interface FilterMenuContext {
-  filter: FilterEdit;
-  setFilter: (filter: FilterEdit) => void;
-}
-
-const FilterMenuContext = createContext<FilterMenuContext>({
-  filter: {
-    id: '',
-    fieldID: '',
-    rule: null,
-    value: null,
-  },
-  setFilter: () => {},
-});
-
 export function OrganizeMenu(props: OrganizeMenuProps) {
   const { spaceID, viewID, collectionID } = props;
-  const [filter, setFilter] = useState<FilterEdit>({
-    id: '',
-    fieldID: '',
-    rule: null,
-    value: null,
-  });
+
+  const [tab, setTab] = useState(2);
 
   return (
     <OrganizeMenuContext.Provider value={{ spaceID, viewID, collectionID }}>
-      <FilterMenuContext.Provider value={{ filter, setFilter }}>
-        <OrganizeMenuStack.Navigator>
-          <OrganizeMenuStack.Screen name="Organize" component={Organize} />
-          <OrganizeMenuStack.Screen
-            name="FilterFieldSelect"
-            component={FilterFieldSelect}
-          />
-          <OrganizeMenuStack.Screen
-            name="FilterRuleSelect"
-            component={FilterRuleSelect}
-          />
-          <OrganizeMenuStack.Screen
-            name="FilterRuleValueEdit"
-            component={FilterRuleValueEdit}
-          />
-        </OrganizeMenuStack.Navigator>
-      </FilterMenuContext.Provider>
+      <Container padding={8}>
+        <SegmentedControl
+          onChange={setTab}
+          value={tab}
+          options={[
+            { label: 'Fields', value: 1 },
+            { label: 'Filter', value: 2 },
+            { label: 'Sort', value: 3 },
+            { label: 'Group', value: 4 },
+          ]}
+        />
+        <Spacer size={16} />
+
+        {tab === 2 && <FilterMenu />}
+      </Container>
     </OrganizeMenuContext.Provider>
   );
 }
 
-function Organize() {
-  const [tab, setTab] = useState(2);
-
-  return (
-    <Container flex={1} color="content" padding={8}>
-      <SegmentedControl
-        onChange={setTab}
-        value={tab}
-        options={[
-          { label: 'Fields', value: 1 },
-          { label: 'Filter', value: 2 },
-          { label: 'Sort', value: 3 },
-          { label: 'Group', value: 4 },
-        ]}
-      />
-      <Spacer size={16} />
-      {tab === 2 && <FilterMenu />}
-    </Container>
-  );
-}
+const filterEditIDState = atom<FilterID>({
+  key: 'FilterMenuFilterEditID',
+  default: '',
+});
 
 function FilterMenu() {
-  const navigation = useNavigation();
-  const organizeMenuContext = useContext(OrganizeMenuContext);
-  const filterMenuContext = useContext(FilterMenuContext);
-  const filters = useGetViewFilters(organizeMenuContext.viewID);
+  const context = useContext(OrganizeMenuContext);
+  const createFilter = useCreateFilter();
+  const fields = useGetCollectionFields(context.collectionID);
+  const setFilterEditID = useSetRecoilState(filterEditIDState);
+  const filters = useGetViewFilters(context.viewID);
+  const firstField = first(fields);
 
   const handlePressAddFilter = useCallback(() => {
-    filterMenuContext.setFilter({
-      id: 'new',
-      fieldID: '',
-      rule: null,
-      value: null,
-    });
+    const filterConfig = getDefaultFilterConfig(firstField.type);
 
-    navigation.navigate('FilterFieldSelect');
-  }, [navigation, filterMenuContext]);
+    const filter = createFilter(context.viewID, firstField.id, filterConfig);
+
+    setFilterEditID(filter.id);
+  }, [createFilter, setFilterEditID, context, firstField]);
 
   return (
-    <Container color="content" flex={1}>
-      <ScrollView>
-        {filters.map((filter) => (
+    <Container>
+      {filters.map((filter) => (
+        <Fragment key={filter.id}>
           <FilterListItem filter={filter} />
-        ))}
-        <Button
-          alignTitle="left"
-          onPress={handlePressAddFilter}
-          title="+ Add filter"
-        />
-      </ScrollView>
+          <Spacer size={24} />
+        </Fragment>
+      ))}
+      <Button
+        alignTitle="left"
+        onPress={handlePressAddFilter}
+        title="+ Add filter"
+      />
     </Container>
   );
 }
@@ -164,179 +137,133 @@ interface FilterListItemProps {
 
 function FilterListItem(props: FilterListItemProps) {
   const { filter } = props;
+  const [filterEditID, setFilterEditID] = useRecoilState(filterEditIDState);
+  const context = useContext(OrganizeMenuContext);
   const field = useGetField(filter.fieldID);
+  const fields = useGetCollectionFields(context.collectionID);
+  const getField = useGetFieldCallback();
+  const updateFilterConfig = useUpdateFilterConfig();
+  const [filterConfig, setFilterConfig] = useState<FilterConfig>(filter);
+  const edit = filterEditID === filter.id;
 
-  return (
-    <Container>
-      <Text>{field.name}</Text>
-      <Button title={`${filter.rule} ${filter.value}`} />
-    </Container>
-  );
-}
-
-function FilterFieldSelect() {
-  const navigation = useNavigation();
-  const organizeMenuContext = useContext(OrganizeMenuContext);
-  const filterMenuContext = useContext(FilterMenuContext);
-  const fields = useGetCollectionFields(organizeMenuContext.collectionID);
-
-  const handlePressField = useCallback(
-    (field: Field) => {
-      const prevFilter = filterMenuContext.filter;
-
-      filterMenuContext.setFilter({
-        id: prevFilter.id,
-        fieldID: field.id,
-        rule: null,
-        value: null,
-      });
-
-      navigation.navigate('FilterRuleSelect');
+  const handleChangeFilterConfig = useCallback(
+    (config: FilterConfig) => {
+      updateFilterConfig(filter.id, filter.fieldID, config);
     },
-    [navigation, filterMenuContext],
+    [filter, updateFilterConfig],
   );
 
-  return (
-    <Container color="content" flex={1}>
-      <Container padding={16}>
-        <Row>
-          <BackButton onPress={() => navigation.goBack()} />
-        </Row>
-      </Container>
-      <Spacer size={16} />
-      <ScrollView>
-        <Container paddingHorizontal={16}>
-          {fields.map((field) => (
-            <>
-              <ListItem
-                key={field.id}
-                onPress={() => handlePressField(field)}
-                description={field.name}
-              />
-              <Spacer size={4} />
-            </>
-          ))}
-        </Container>
-      </ScrollView>
-    </Container>
-  );
-}
+  const handleChangeField = useCallback(
+    (fieldID: FieldID) => {
+      const newField = getField(fieldID);
+      const defaultFilterConfig = getDefaultFilterConfig(newField.type);
 
-function FilterRuleSelect() {
-  const navigation = useNavigation();
-  const filterMenuContext = useContext(FilterMenuContext);
-  const field = useGetField(filterMenuContext.filter.fieldID);
-
-  const handleSelectFilterRule = useCallback(
-    (rule: FilterRule) => {
-      filterMenuContext.setFilter({
-        id: filterMenuContext.filter.fieldID,
-        fieldID: field.id,
-        rule,
-        value: filterMenuContext.filter.value,
-      });
-
-      console.log('navigate!');
-
-      navigation.navigate('FilterRuleValueEdit');
+      updateFilterConfig(filter.id, fieldID, defaultFilterConfig);
     },
-    [navigation, field, filterMenuContext],
+    [filter, getField, updateFilterConfig],
   );
 
-  const Select = filterRuleSelectComponentByFieldType[field.type];
+  const handlePressEdit = useCallback(() => {
+    setFilterEditID(filter.id);
+  }, [setFilterEditID, filter]);
+
+  const handlePressCancel = useCallback(() => {
+    setFilterEditID('');
+  }, [setFilterEditID]);
+  
+  const handlePressDone = useCallback(() => {
+    updateFilterConfig(filter.id, filter.id, filterConfig);
+    setFilterEditID('');
+  }, [updateFilterConfig, filter, filterConfig]);
+
+  const FilterConfigEdit = filterConfigEditComponentByFieldType[field.type];
+
+  if (edit === false) {
+    return (
+      <Container padding={16} borderRadius={tokens.radius} shadow>
+        <Row justifyContent="flex-end">
+          <Pressable onPress={handlePressEdit}>
+            <Text color="primary">Edit</Text>
+          </Pressable>
+        </Row>
+        <Text>{field.name}</Text>
+        <Text>{filter.rule}</Text>
+        <Text>{filter.value}</Text>
+      </Container>
+    );
+  }
 
   return (
-    <Container color="content" flex={1}>
-      <Container padding={16}>
-        <Row>
-          <BackButton onPress={() => navigation.goBack()} />
-        </Row>
-      </Container>
-      <Container padding={8}>
-        <Text bold>{field.name}</Text>
-      </Container>
+    <Container padding={16} borderRadius={tokens.radius} shadow>
+      <Picker
+        value={field.id}
+        onChange={handleChangeField}
+        options={fields.map((f) => ({
+          label: f.name,
+          value: f.id,
+        }))}
+      />
+      <Spacer size={4} />
+      <FilterConfigEdit onChange={handleChangeFilterConfig} filter={filter} />
       <Spacer size={16} />
-      <ScrollView>
-        <Container paddingHorizontal={16}>
-          <Select onSelect={handleSelectFilterRule} />
-        </Container>
-      </ScrollView>
+      <Row justifyContent="flex-end">
+        <Pressable onPress={handlePressCancel}>
+          <Text>Cancel</Text>
+        </Pressable>
+        <Spacer size={16} />
+        <Pressable onPress={handlePressDone}>
+          <Text color="primary">Done</Text>
+        </Pressable>
+      </Row>
     </Container>
   );
 }
 
-function FilterRuleValueEdit() {
-  const navigation = useNavigation();
-  const filterMenuContext = useContext(FilterMenuContext);
-  const field = useGetField(filterMenuContext.filter.fieldID);
-
-  const handleSelectFilterRuleValueChange = useCallback(
-    (value: FilterRuleValue) => {
-      filterMenuContext.setFilter({
-        id: filterMenuContext.filter.fieldID,
-        fieldID: field.id,
-        rule: filterMenuContext.filter.rule,
-        value,
-      });
-    },
-    [field, filterMenuContext],
-  );
-
-  const ValueEdit = filterRuleValueEditComponentByFieldType[field.type];
-
-  return (
-    <Container color="content" flex={1}>
-      <Container padding={16}>
-        <Row>
-          <BackButton onPress={() => navigation.goBack()} />
-        </Row>
-      </Container>
-      <Container padding={8}>
-        <Text bold>{field.name}</Text>
-      </Container>
-      <Spacer size={16} />
-      <ScrollView>
-        <Container paddingHorizontal={16}>
-          <ValueEdit
-            value={filterMenuContext.filter.value}
-            onChange={handleSelectFilterRuleValueChange}
-          />
-        </Container>
-      </ScrollView>
-    </Container>
-  );
+interface FilterRuleInputProps {
+  filter: Filter;
+  onChange: (filterConfig: FilterConfig) => void;
 }
 
-interface FilterRuleSelectProps {
-  onSelect: (rule: FilterRule) => void;
-}
-
-const filterRuleSelectComponentByFieldType: {
-  [fieldType in FieldType]: (props: FilterRuleSelectProps) => JSX.Element;
+const filterConfigEditComponentByFieldType: {
+  [fieldType in FieldType]: React.ComponentType<FilterRuleInputProps>;
 } = {
-  [FieldType.Checkbox]: TextFilterRuleSelect,
-  [FieldType.Currency]: NumberFilterRuleSelect,
-  [FieldType.Date]: TextFilterRuleSelect,
-  [FieldType.Email]: TextFilterRuleSelect,
-  [FieldType.MultiCollaborator]: TextFilterRuleSelect,
-  [FieldType.MultiDocumentLink]: TextFilterRuleSelect,
-  [FieldType.MultiLineText]: TextFilterRuleSelect,
-  [FieldType.MultiSelect]: TextFilterRuleSelect,
-  [FieldType.Number]: NumberFilterRuleSelect,
-  [FieldType.PhoneNumber]: TextFilterRuleSelect,
-  [FieldType.SingleCollaborator]: TextFilterRuleSelect,
-  [FieldType.SingleDocumentLink]: TextFilterRuleSelect,
-  [FieldType.SingleLineText]: TextFilterRuleSelect,
-  [FieldType.SingleSelect]: TextFilterRuleSelect,
-  [FieldType.URL]: TextFilterRuleSelect,
+  [FieldType.Checkbox]: TextFilterRuleInput,
+  [FieldType.Currency]: NumberFilterRuleInput,
+  [FieldType.Date]: TextFilterRuleInput,
+  [FieldType.Email]: TextFilterRuleInput,
+  [FieldType.MultiCollaborator]: TextFilterRuleInput,
+  [FieldType.MultiDocumentLink]: TextFilterRuleInput,
+  [FieldType.MultiLineText]: TextFilterRuleInput,
+  [FieldType.MultiSelect]: TextFilterRuleInput,
+  [FieldType.Number]: NumberFilterRuleInput,
+  [FieldType.PhoneNumber]: TextFilterRuleInput,
+  [FieldType.SingleCollaborator]: TextFilterRuleInput,
+  [FieldType.SingleDocumentLink]: TextFilterRuleInput,
+  [FieldType.SingleLineText]: TextFilterRuleInput,
+  [FieldType.SingleSelect]: TextFilterRuleInput,
+  [FieldType.URL]: TextFilterRuleInput,
 };
 
-interface TextFilterRuleSelectProps {
-  onSelect: (rule: TextFilterRule) => void;
-}
+function TextFilterRuleInput(props: FilterRuleInputProps) {
+  const { filter, onChange } = props;
+  assertTextFilter(filter);
 
-function TextFilterRuleSelect(props: TextFilterRuleSelectProps) {
-  const { onSelect } = props;
+  const { rule, value } = filter;
+
+  const handleChangeRule = useCallback((newRule: TextFilterRule) {
+    onChange({
+      rule: newRule,
+      value: '',
+    })
+  }, [onChange])
+  
+  const handleChangeValue = useCallback((newValue: string) {
+    onChange({
+      rule,
+      value: newValue,
+    });
+
+  }, [onChange, rule])
 
   const options: Option<TextFilterRule>[] = [
     { value: 'contains', label: 'contains' },
@@ -349,18 +276,33 @@ function TextFilterRuleSelect(props: TextFilterRuleSelectProps) {
 
   return (
     <Container>
-      {options.map((o) => (
-        <>
-          <ListItem onPress={() => onSelect(o.value)} description={o.label} />
-          <Spacer size={4} />
-        </>
-      ))}
+      <Picker value={rule} onChange={handleChangeRule} options={options} />
+      <Spacer size={4} />
+      <TextInput value={value} onChange={handleChangeValue} />
     </Container>
   );
 }
 
-function NumberFilterRuleSelect(props: FilterRuleSelectProps) {
-  const { onSelect } = props;
+function NumberFilterRuleInput(props: FilterRuleInputProps) {
+  const { filter, onChange } = props;
+  assertNumberFilter(filter);
+
+  const { rule, value } = filter;
+
+  const handleChangeRule = useCallback((newRule: NumberFilterRule) {
+    onChange({
+      rule: newRule,
+      value: null,
+    })
+  }, [onChange])
+  
+  const handleChangeValue = useCallback((newValue: string) {
+    onChange({
+      rule,
+      value: Number(newValue),
+    });
+
+  }, [onChange, rule])
 
   const options: Option<NumberFilterRule>[] = [
     { value: 'equal', label: 'equal' },
@@ -375,70 +317,13 @@ function NumberFilterRuleSelect(props: FilterRuleSelectProps) {
 
   return (
     <Container>
-      {options.map((o) => (
-        <>
-          <ListItem onPress={() => onSelect(o.value)} description={o.label} />
-          <Spacer size={4} />
-        </>
-      ))}
-    </Container>
-  );
-}
-
-interface FilterRuleValueEditProps {
-  value: FilterRuleValue;
-  onChange: (value: FilterRuleValue) => void;
-}
-
-const filterRuleValueEditComponentByFieldType: {
-  [fieldType in FieldType]: (props: FilterRuleValueEditProps) => JSX.Element;
-} = {
-  [FieldType.Checkbox]: TextFilterRuleValueEdit,
-  [FieldType.Currency]: NumberFilterRuleValueEdit,
-  [FieldType.Date]: TextFilterRuleValueEdit,
-  [FieldType.Email]: TextFilterRuleValueEdit,
-  [FieldType.MultiCollaborator]: TextFilterRuleValueEdit,
-  [FieldType.MultiDocumentLink]: TextFilterRuleValueEdit,
-  [FieldType.MultiLineText]: TextFilterRuleValueEdit,
-  [FieldType.MultiSelect]: TextFilterRuleValueEdit,
-  [FieldType.Number]: NumberFilterRuleValueEdit,
-  [FieldType.PhoneNumber]: TextFilterRuleValueEdit,
-  [FieldType.SingleCollaborator]: TextFilterRuleValueEdit,
-  [FieldType.SingleDocumentLink]: TextFilterRuleValueEdit,
-  [FieldType.SingleLineText]: TextFilterRuleValueEdit,
-  [FieldType.SingleSelect]: TextFilterRuleValueEdit,
-  [FieldType.URL]: TextFilterRuleValueEdit,
-};
-
-interface TextFilterRuleValueEditProps {
-  value: TextFilterRuleValue;
-  onChange: (value: TextFilterRuleValue) => void;
-}
-
-function TextFilterRuleValueEdit(props: TextFilterRuleValueEditProps) {
-  const { onChange, value } = props;
-
-  return (
-    <Container>
-      <TextInput value={value} onChange={onChange} />
-    </Container>
-  );
-}
-
-interface NumberFilterRuleValueEditProps {
-  value: NumberFilterRuleValue;
-  onChange: (value: NumberFilterRuleValue) => void;
-}
-
-function NumberFilterRuleValueEdit(props: NumberFilterRuleValueEditProps) {
-  const { onChange, value } = props;
-
-  return (
-    <Container>
-      <TextInput
-        value={value ? `${value}` : ''}
-        onChange={(v) => onChange(Number(v))}
+      <Picker
+        value={rule}
+        onChange={handleChangeRule}
+        options={options}
       />
+      <Spacer size={4} />
+      <TextInput value={value ? `${value}` : ''} onChange={handleChangeValue} />
     </Container>
   );
 }

@@ -202,38 +202,35 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
             return renderOption ? (
               renderOption(o, active)
             ) : (
-              <Fragment key={`${o.value}`}>
-                <Pressable
-                  onHoverIn={() => handleHoverIn(i)}
-                  onPress={() => handleSelectOption(o)}
-                  style={[
-                    styles.option,
-                    {
-                      backgroundColor: active
-                        ? theme.button.backgroundActive
-                        : theme.button.backgroundDefault,
-                    },
-                  ]}
+              <Pressable
+                onHoverIn={() => handleHoverIn(i)}
+                onPress={() => handleSelectOption(o)}
+                style={[
+                  styles.option,
+                  {
+                    backgroundColor: active
+                      ? theme.button.backgroundActive
+                      : theme.button.backgroundDefault,
+                  },
+                ]}
+              >
+                <Container
+                  height={32}
+                  paddingHorizontal={8}
+                  borderRadius={tokens.radius}
                 >
-                  <Container
-                    height={32}
-                    paddingHorizontal={8}
-                    borderRadius={tokens.radius}
+                  <Row
+                    expanded
+                    alignItems="center"
+                    justifyContent="space-between"
                   >
-                    <Row
-                      expanded
-                      alignItems="center"
-                      justifyContent="space-between"
-                    >
-                      <Text>{o.label}</Text>
-                      {selected && selected.value === o.value && (
-                        <Checkbox value={true} />
-                      )}
-                    </Row>
-                  </Container>
-                </Pressable>
-                <Spacer size={4} />
-              </Fragment>
+                    <Text>{o.label}</Text>
+                    {selected && selected.value === o.value && (
+                      <Checkbox value={true} />
+                    )}
+                  </Row>
+                </Container>
+              </Pressable>
             );
           })}
         </Container>

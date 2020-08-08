@@ -872,3 +872,35 @@ export const booleanFiltersByRule: {
     return value === filterValue;
   },
 };
+
+export function assertBooleanFilter(
+  filter: Filter,
+): asserts filter is BooleanFilter {
+  assertBooleanFilterRule(filter.rule);
+}
+
+export function assertDateFilter(filter: Filter): asserts filter is DateFilter {
+  assertDateFilterRule(filter.rule);
+}
+
+export function assertMultiSelectFilter(
+  filter: Filter,
+): asserts filter is MultiSelectFilter {
+  assertMultiSelectFilterRule(filter.rule);
+}
+
+export function assertNumberFilter(
+  filter: Filter,
+): asserts filter is NumberFilter {
+  assertNumberFilterRule(filter.rule);
+}
+
+export function assertSingleSelectFilter(
+  filter: Filter,
+): asserts filter is SingleSelectFilter {
+  assertSingleSelectFilterRule(filter.rule);
+}
+
+export function assertTextFilter(filter: Filter): asserts filter is TextFilter {
+  assertTextFilterRule(filter.rule);
+}
