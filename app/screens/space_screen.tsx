@@ -71,6 +71,7 @@ import {
 import { format } from 'date-fns';
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
+import { AutoSizer } from '../lib/autosizer/autosizer';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -219,7 +220,7 @@ function MainContent() {
         onToggleView={handleToggleView}
         onToggleOrganize={handleToggleOrganize}
       />
-      <Row flex={1}>
+      <Row expanded flex={1}>
         <Slide width={240} open={slide === 'views'}>
           <Container width={240} expanded color="content" borderRightWidth={1}>
             {slide === 'views' && (
@@ -229,14 +230,20 @@ function MainContent() {
         </Slide>
         <ViewDisplay view={view} />
         <Slide width={360} open={slide === 'organize'}>
-          <Container width={360} expanded color="content" borderLeftWidth={1}>
-            {slide === 'organize' && (
-              <OrganizeMenu
-                spaceID={spaceID}
-                viewID={viewID}
-                collectionID={collectionID}
-              />
-            )}
+          <Container flex={1} width={360} color="content" borderLeftWidth={1}>
+            <AutoSizer>
+              {({ height }) => (
+                <Container height={height}>
+                  {slide === 'organize' && (
+                    <OrganizeMenu
+                      spaceID={spaceID}
+                      viewID={viewID}
+                      collectionID={collectionID}
+                    />
+                  )}
+                </Container>
+              )}
+            </AutoSizer>
           </Container>
         </Slide>
       </Row>

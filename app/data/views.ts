@@ -129,6 +129,15 @@ export const viewFiltersQuery = selectorFamily<Filter[], string>({
   },
 });
 
+export const viewFiltersGroupMaxQuery = selectorFamily<number, string>({
+  key: RecoilKey.ViewFilters,
+  get: (viewID: string) => ({ get }) => {
+    const filters = get(viewFiltersQuery(viewID));
+
+    return Math.max(Math.max(...filters.map((f) => f.group)), 0);
+  },
+});
+
 export const viewDocumentsQuery = selectorFamily<Document[], string>({
   key: RecoilKey.ViewDocuments,
   get: (viewID: string) => ({ get }) => {

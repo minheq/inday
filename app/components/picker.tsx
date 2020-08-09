@@ -28,15 +28,17 @@ interface PickerProps<TValue = any> {
   renderOption?: (option: Option<TValue>, active: boolean) => React.ReactNode;
   disabled?: boolean;
   placeholder?: string;
+  searchable?: boolean;
 }
 
 export function Picker<TValue = any>(props: PickerProps<TValue>) {
   const {
     value,
-    placeholder,
+    placeholder = '',
     options,
     renderOption,
     onChange = () => {},
+    searchable = false,
   } = props;
   const ref = useRef<View>(null);
   const borderColor = React.useRef(new Animated.Value(0)).current;
@@ -156,6 +158,7 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
           style={[
             styles.button,
             {
+              backgroundColor: theme.container.color.content,
               borderColor: borderColor.interpolate({
                 inputRange: [0, 1],
                 outputRange: [
@@ -186,16 +189,20 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
           borderWidth={1}
           borderRadius={tokens.radius}
         >
-          <TextInput
-            clearable
-            placeholder="Search option"
-            autoFocus
-            value={search}
-            onChange={handleChangeSearch}
-            onKeyPress={handleKeyPress}
-            onSubmitEditing={handleSubmitEditing}
-          />
-          <Spacer size={8} />
+          {searchable === true && (
+            <Fragment>
+              <TextInput
+                clearable
+                placeholder="Search option"
+                autoFocus
+                value={search}
+                onChange={handleChangeSearch}
+                onKeyPress={handleKeyPress}
+                onSubmitEditing={handleSubmitEditing}
+              />
+              <Spacer size={8} />
+            </Fragment>
+          )}
           {filteredOptions.map((o, i) => {
             const active = i === activeIndex;
 

@@ -20,30 +20,30 @@ class Logger {
     this.level = level;
   }
 
-  private log(level: Level, message: string) {
+  private log(level: Level, message: string, data: object = {}) {
     if (levelValueMap[level] >= levelValueMap[this.level]) {
-      console.log(message);
+      console.log(message, JSON.stringify(data));
     }
   }
 
-  public fatal(message: string) {
-    this.log('error', message);
+  public fatal(message: string, data?: object) {
+    this.log('error', message, data);
   }
 
-  public error(message: string) {
-    this.log('error', message);
+  public error(message: string, data?: object) {
+    this.log('error', message, data);
   }
 
-  public warn(message: string) {
-    this.log('warn', message);
+  public warn(message: string, data?: object) {
+    this.log('warn', message, data);
   }
 
-  public info(message: string) {
-    this.log('info', message);
+  public info(message: string, data?: object) {
+    this.log('info', message, data);
   }
 
-  public debug(message: string) {
-    this.log('debug', message);
+  public debug(message: string, data?: object) {
+    this.log('debug', message, data);
   }
 }
 

@@ -32,6 +32,7 @@ export type FilterID = string;
 export interface BaseFilter {
   id: FilterID;
   viewID: ViewID;
+  group: number;
 }
 
 export interface CheckboxFieldFilterConfig {

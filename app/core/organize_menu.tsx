@@ -37,6 +37,7 @@ import {
   useUpdateFilterConfig,
   useGetField,
   useGetFieldCallback,
+  useGetFiltersGroupMax,
 } from '../data/store';
 import { first } from '../../lib/data_structures/arrays';
 import { FieldType } from '../data/constants';
@@ -44,8 +45,9 @@ import { FieldID } from '../data/fields';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
 import { CollectionID } from '../data/collections';
-import { atom, useRecoilState } from 'recoil';
+import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { tokens } from '../components/theme';
+import { ScrollView } from 'react-native';
 
 const OrganizeMenuContext = createContext({
   spaceID: '1',
@@ -66,19 +68,20 @@ export function OrganizeMenu(props: OrganizeMenuProps) {
 
   return (
     <OrganizeMenuContext.Provider value={{ spaceID, viewID, collectionID }}>
-      <Container padding={8}>
-        <SegmentedControl
-          onChange={setTab}
-          value={tab}
-          options={[
-            { label: 'Fields', value: 1 },
-            { label: 'Filter', value: 2 },
-            { label: 'Sort', value: 3 },
-            { label: 'Group', value: 4 },
-          ]}
-        />
+      <Container flex={1}>
+        <Container padding={16}>
+          <SegmentedControl
+            onChange={setTab}
+            value={tab}
+            options={[
+              { label: 'Fields', value: 1 },
+              { label: 'Filter', value: 2 },
+              { label: 'Sort', value: 3 },
+              { label: 'Group', value: 4 },
+            ]}
+          />
+        </Container>
         <Spacer size={16} />
-
         {tab === 2 && <FilterMenu />}
       </Container>
     </OrganizeMenuContext.Provider>
@@ -95,14 +98,18 @@ function FilterMenu() {
   const filters = useGetViewFilters(context.viewID);
 
   return (
-    <Container>
-      {filters.map((filter) => (
-        <Fragment key={filter.id}>
-          <FilterListItem filter={filter} />
-          <Spacer size={24} />
-        </Fragment>
-      ))}
-      <FilterNew />
+    <Container flex={1}>
+      <ScrollView>
+        <Container paddingHorizontal={16}>
+          {filters.map((filter) => (
+            <Fragment key={filter.id}>
+              <FilterListItem filter={filter} />
+              <Spacer size={24} />
+            </Fragment>
+          ))}
+          <FilterNew />
+        </Container>
+      </ScrollView>
     </Container>
   );
 }
@@ -137,8 +144,8 @@ function FilterListItem(props: FilterListItemProps) {
     setFilterEditID('');
   }, [deleteFilter, setFilterEditID, filter]);
 
-  const handlePressDone = useCallback(() => {
-    updateFilterConfig(filter.id, filterConfig);
+  const handleSubmit = useCallback(() => {
+    updateFilterConfig(filter.id, filter.group, filterConfig);
     setFilterEditID('');
   }, [updateFilterConfig, setFilterEditID, filter, filterConfig]);
 
@@ -146,9 +153,11 @@ function FilterListItem(props: FilterListItemProps) {
     setFilterConfig(filter);
   }, [filterEditID, filter]);
 
+  let content: JSX.Element = <Fragment />;
+
   if (edit === false) {
-    return (
-      <Container padding={16} borderRadius={tokens.radius} shadow>
+    content = (
+      <Fragment>
         <Row justifyContent="flex-end">
           <Pressable onPress={handlePressEdit}>
             <Text color="primary">Edit</Text>
@@ -157,40 +166,67 @@ function FilterListItem(props: FilterListItemProps) {
         <Text>{field.name}</Text>
         <Text>{filter.rule}</Text>
         <Text>{filter.value}</Text>
-      </Container>
+      </Fragment>
+    );
+  } else {
+    content = (
+      <Fragment>
+        <FilterEdit
+          onSubmit={handleSubmit}
+          filterConfig={filterConfig}
+          onChange={handleChangeFilterConfig}
+        />
+        <Spacer size={16} />
+        <Row justifyContent="space-between">
+          <Pressable onPress={handleRemove}>
+            <Text color="error">Remove</Text>
+          </Pressable>
+          <Row>
+            <Pressable onPress={handlePressCancel}>
+              <Text>Cancel</Text>
+            </Pressable>
+            <Spacer size={16} />
+            <Pressable onPress={handleSubmit}>
+              <Text color="primary">Done</Text>
+            </Pressable>
+          </Row>
+        </Row>
+      </Fragment>
     );
   }
 
   return (
-    <Container padding={16} borderRadius={tokens.radius} shadow>
-      <FilterEdit filterConfig={filter} onChange={handleChangeFilterConfig} />
-      <Spacer size={16} />
-      <Row justifyContent="space-between">
-        <Pressable onPress={handleRemove}>
-          <Text color="error">Remove</Text>
-        </Pressable>
-        <Row>
-          <Pressable onPress={handlePressCancel}>
-            <Text>Cancel</Text>
-          </Pressable>
+    <Container>
+      {filter.group !== 1 && (
+        <Fragment>
           <Spacer size={16} />
-          <Pressable onPress={handlePressDone}>
-            <Text color="primary">Done</Text>
-          </Pressable>
-        </Row>
-      </Row>
+          <Picker
+            value={1}
+            options={[
+              { label: 'And', value: 1 },
+              { label: 'Or', value: 0 },
+            ]}
+          />
+          <Spacer size={16} />
+        </Fragment>
+      )}
+      <Container padding={16} borderRadius={tokens.radius} shadow>
+        {content}
+      </Container>
     </Container>
   );
 }
 
 function FilterNew() {
   const [open, setOpen] = useState(false);
+  const filterEditID = useRecoilValue(filterEditIDState);
   const context = useContext(OrganizeMenuContext);
   const fields = useGetCollectionFields(context.collectionID);
   const createFilter = useCreateFilter();
   const firstField = first(fields);
   const defaultFilterConfig = getDefaultFilterConfig(firstField);
   const [filterConfig, setFilterConfig] = useState(defaultFilterConfig);
+  const groupMax = useGetFiltersGroupMax(context.viewID);
 
   const handleClose = useCallback(() => {
     setOpen(false);
@@ -201,23 +237,35 @@ function FilterNew() {
     setOpen(true);
   }, []);
 
-  const handlePressSave = useCallback(() => {
+  const handleSubmit = useCallback(() => {
     handleClose();
 
-    createFilter(context.viewID, filterConfig);
-  }, [handleClose, createFilter, context, filterConfig]);
+    createFilter(context.viewID, groupMax + 1, filterConfig);
+  }, [handleClose, createFilter, context, filterConfig, groupMax]);
+
+  useEffect(() => {
+    if (filterEditID !== '') {
+      setOpen(false);
+    }
+  }, [filterEditID]);
 
   if (open) {
     return (
       <Container padding={16} borderRadius={tokens.radius} shadow>
-        <FilterEdit filterConfig={filterConfig} onChange={setFilterConfig} />
+        <Text bold>New filter</Text>
+        <Spacer size={16} />
+        <FilterEdit
+          onSubmit={handleSubmit}
+          filterConfig={filterConfig}
+          onChange={setFilterConfig}
+        />
         <Spacer size={16} />
         <Row justifyContent="flex-end">
           <Pressable onPress={handleClose}>
             <Text>Cancel</Text>
           </Pressable>
           <Spacer size={16} />
-          <Pressable onPress={handlePressSave}>
+          <Pressable onPress={handleSubmit}>
             <Text color="primary">Save</Text>
           </Pressable>
         </Row>
@@ -237,10 +285,11 @@ function FilterNew() {
 interface FilterEditProps {
   filterConfig: FilterConfig;
   onChange: (filterConfig: FilterConfig) => void;
+  onSubmit: () => void;
 }
 
 function FilterEdit(props: FilterEditProps) {
-  const { filterConfig, onChange } = props;
+  const { filterConfig, onChange, onSubmit } = props;
   const context = useContext(OrganizeMenuContext);
   const field = useGetField(filterConfig.fieldID);
   const fields = useGetCollectionFields(context.collectionID);
@@ -262,7 +311,7 @@ function FilterEdit(props: FilterEditProps) {
   const FilterConfigEdit = filterConfigEditComponentByFieldType[field.type];
 
   return (
-    <Container padding={16} borderRadius={tokens.radius} shadow>
+    <Fragment>
       <Picker
         value={field.id}
         onChange={handleChangeField}
@@ -272,14 +321,19 @@ function FilterEdit(props: FilterEditProps) {
         }))}
       />
       <Spacer size={4} />
-      <FilterConfigEdit onChange={onChange} filterConfig={filterConfig} />
-    </Container>
+      <FilterConfigEdit
+        onSubmit={onSubmit}
+        onChange={onChange}
+        filterConfig={filterConfig}
+      />
+    </Fragment>
   );
 }
 
 interface FilterRuleInputProps {
   filterConfig: FilterConfig;
   onChange: (filterConfig: FilterConfig) => void;
+  onSubmit: () => void;
 }
 
 const filterConfigEditComponentByFieldType: {
@@ -303,7 +357,7 @@ const filterConfigEditComponentByFieldType: {
 };
 
 function TextFilterRuleInput(props: FilterRuleInputProps) {
-  const { filterConfig, onChange } = props;
+  const { filterConfig, onChange, onSubmit } = props;
 
   assertTextFilterConfig(filterConfig);
 
@@ -344,13 +398,17 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
     <Container>
       <Picker value={rule} onChange={handleChangeRule} options={options} />
       <Spacer size={4} />
-      <TextInput value={value} onChange={handleChangeValue} />
+      <TextInput
+        onSubmitEditing={onSubmit}
+        value={value}
+        onChange={handleChangeValue}
+      />
     </Container>
   );
 }
 
 function NumberFilterRuleInput(props: FilterRuleInputProps) {
-  const { filterConfig, onChange } = props;
+  const { filterConfig, onChange, onSubmit } = props;
   assertNumberFilterConfig(filterConfig);
 
   const { rule, value, fieldID } = filterConfig;
@@ -392,7 +450,11 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
     <Container>
       <Picker value={rule} onChange={handleChangeRule} options={options} />
       <Spacer size={4} />
-      <TextInput value={value ? `${value}` : ''} onChange={handleChangeValue} />
+      <TextInput
+        onSubmitEditing={onSubmit}
+        value={value ? `${value}` : ''}
+        onChange={handleChangeValue}
+      />
     </Container>
   );
 }

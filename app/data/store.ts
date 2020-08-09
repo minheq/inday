@@ -24,11 +24,19 @@ import {
   viewQuery,
   viewFiltersQuery,
   viewDocumentsQuery,
+  ViewsByIDState,
+  viewFiltersGroupMaxQuery,
 } from './views';
 import { Field, fieldsByIDState, fieldQuery, FieldConfig } from './fields';
 import { documentsByIDState, documentQuery, Document } from './documents';
 import { generateID } from '../../lib/id/id';
-import { Filter, FilterConfig, filtersByIDState } from './filters';
+import {
+  Filter,
+  FilterConfig,
+  filtersByIDState,
+  FiltersByIDState,
+} from './filters';
+import { useLogger } from '../../lib/logger/logger';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
@@ -41,6 +49,7 @@ export function useGetWorkspace() {
 }
 
 export function useEmitEvent() {
+  const logger = useLogger();
   const eventEmitter = useEventEmitter();
   const workspace = useGetWorkspace();
   const setEvents = useSetRecoilState(eventsState);
@@ -54,9 +63,12 @@ export function useEmitEvent() {
       };
 
       setEvents((prevEvents) => [...prevEvents, event]);
+
+      logger.info('Emit event', event);
+
       eventEmitter.emit(event);
     },
-    [workspace, setEvents, eventEmitter],
+    [workspace, setEvents, eventEmitter, logger],
   );
 
   return emitEvent;
@@ -234,12 +246,6 @@ export function useGetCollectionFields(collectionID: string) {
   return fields;
 }
 
-export function useGetViewFilters(viewID: string) {
-  const filters = useRecoilValue(viewFiltersQuery(viewID));
-
-  return filters;
-}
-
 export function useGetCollectionDocuments(collectionID: string) {
   const documents = useRecoilValue(collectionDocumentsQuery(collectionID));
 
@@ -414,15 +420,28 @@ export function useGetFilterCallback() {
   return getFilter;
 }
 
+export function useGetViewFilters(viewID: string) {
+  const filters = useRecoilValue(viewFiltersQuery(viewID));
+
+  return filters;
+}
+
+export function useGetFiltersGroupMax(viewID: string) {
+  const groupMax = useRecoilValue(viewFiltersGroupMaxQuery(viewID));
+
+  return groupMax;
+}
+
 export function useCreateFilter() {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
 
   const createFilter = useCallback(
-    (viewID: string, filterConfig: FilterConfig) => {
+    (viewID: string, group: number, filterConfig: FilterConfig) => {
       let newFilter: Filter = {
         id: generateID(),
         viewID,
+        group,
         ...filterConfig,
       };
 
@@ -450,12 +469,13 @@ export function useUpdateFilterConfig() {
   const getFilter = useGetFilterCallback();
 
   const updateFilterConfig = useCallback(
-    (filterID: string, filterConfig: FilterConfig) => {
+    (filterID: string, group: number, filterConfig: FilterConfig) => {
       const prevFilter = getFilter(filterID);
 
       const nextFilter: Filter = {
         ...prevFilter,
         ...filterConfig,
+        group,
       };
       setFilters((previousFilters) => ({
         ...previousFilters,
@@ -477,7 +497,7 @@ export function useUpdateFilterConfig() {
 
 export function useDeleteFilter() {
   const emitEvent = useEmitEvent();
-  const setFilters = useSetRecoilState(fieldsByIDState);
+  const setFilters = useSetRecoilState<FiltersByIDState>(filtersByIDState);
 
   const deleteFilter = useCallback(
     (filter: Filter) => {
@@ -502,7 +522,7 @@ export function useDeleteFilter() {
 
 export function useCreateView() {
   const emitEvent = useEmitEvent();
-  const setViews = useSetRecoilState(viewsByIDState);
+  const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
   const createView = useCallback(
     (collectionID: string) => {

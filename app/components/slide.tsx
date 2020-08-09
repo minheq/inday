@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, StyleSheet } from 'react-native';
+import { Animated } from 'react-native';
 
 interface SlideProps {
   width: number;
@@ -41,15 +41,5 @@ export function Slide(props: SlideProps) {
     });
   }, [width, opacity, open, intrinsicWidth, onSlide, onCollapsed]);
 
-  return (
-    <Animated.View style={[styles.base, { width, opacity }]}>
-      {children}
-    </Animated.View>
-  );
+  return <Animated.View style={[{ width, opacity }]}>{children}</Animated.View>;
 }
-
-const styles = StyleSheet.create({
-  base: {
-    overflow: 'hidden',
-  },
-});
