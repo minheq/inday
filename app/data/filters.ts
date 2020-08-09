@@ -7,7 +7,7 @@ import {
 } from '../../lib/data_structures/arrays';
 import { atom, selector } from 'recoil';
 import { RecoilKey, FieldType } from './constants';
-import { FieldID } from './fields';
+import { FieldID, Field } from './fields';
 import { ViewID } from './views';
 import {
   DateFieldValue,
@@ -31,11 +31,11 @@ export type FilterID = string;
 
 export interface BaseFilter {
   id: FilterID;
-  fieldID: FieldID;
   viewID: ViewID;
 }
 
 export interface CheckboxFieldFilterConfig {
+  fieldID: FieldID;
   rule: BooleanFilterRule;
   value: BooleanFilterRuleValue;
 }
@@ -44,6 +44,7 @@ export interface CheckboxFieldFilter
     CheckboxFieldFilterConfig {}
 
 export interface CurrencyFieldFilterConfig {
+  fieldID: FieldID;
   rule: NumberFilterRule;
   value: NumberFilterRuleValue;
 }
@@ -52,18 +53,21 @@ export interface CurrencyFieldFilter
     CurrencyFieldFilterConfig {}
 
 export interface DateFieldFilterConfig {
+  fieldID: FieldID;
   rule: DateFilterRule;
   value: DateFilterRuleValue;
 }
 export interface DateFieldFilter extends BaseFilter, DateFieldFilterConfig {}
 
 export interface EmailFieldFilterConfig {
+  fieldID: FieldID;
   rule: TextFilterRule;
   value: TextFilterRuleValue;
 }
 export interface EmailFieldFilter extends BaseFilter, EmailFieldFilterConfig {}
 
 export interface MultiCollaboratorFieldFilterConfig {
+  fieldID: FieldID;
   rule: MultiSelectFilterRule;
   value: MultiSelectFilterRuleValue;
 }
@@ -72,6 +76,7 @@ export interface MultiCollaboratorFieldFilter
     MultiCollaboratorFieldFilterConfig {}
 
 export interface MultiDocumentLinkFieldFilterConfig {
+  fieldID: FieldID;
   rule: MultiSelectFilterRule;
   value: MultiSelectFilterRuleValue;
 }
@@ -80,6 +85,7 @@ export interface MultiDocumentLinkFieldFilter
     MultiDocumentLinkFieldFilterConfig {}
 
 export interface MultiLineTextFieldFilterConfig {
+  fieldID: FieldID;
   rule: TextFilterRule;
   value: TextFilterRuleValue;
 }
@@ -88,6 +94,7 @@ export interface MultiLineTextFieldFilter
     MultiLineTextFieldFilterConfig {}
 
 export interface MultiSelectFieldFilterConfig {
+  fieldID: FieldID;
   rule: MultiSelectFilterRule;
   value: MultiSelectFilterRuleValue;
 }
@@ -96,6 +103,7 @@ export interface MultiSelectFieldFilter
     MultiSelectFieldFilterConfig {}
 
 export interface NumberFieldFilterConfig {
+  fieldID: FieldID;
   rule: NumberFilterRule;
   value: NumberFilterRuleValue;
 }
@@ -104,6 +112,7 @@ export interface NumberFieldFilter
     NumberFieldFilterConfig {}
 
 export interface PhoneNumberFieldFilterConfig {
+  fieldID: FieldID;
   rule: TextFilterRule;
   value: TextFilterRuleValue;
 }
@@ -112,6 +121,7 @@ export interface PhoneNumberFieldFilter
     PhoneNumberFieldFilterConfig {}
 
 export interface SingleCollaboratorFieldFilterConfig {
+  fieldID: FieldID;
   rule: SingleSelectFilterRule;
   value: SingleSelectFilterRuleValue;
 }
@@ -120,6 +130,7 @@ export interface SingleCollaboratorFieldFilter
     SingleCollaboratorFieldFilterConfig {}
 
 export interface SingleDocumentLinkFieldFilterConfig {
+  fieldID: FieldID;
   rule: SingleSelectFilterRule;
   value: SingleSelectFilterRuleValue;
 }
@@ -128,6 +139,7 @@ export interface SingleDocumentLinkFieldFilter
     SingleDocumentLinkFieldFilterConfig {}
 
 export interface SingleLineTextFieldFilterConfig {
+  fieldID: FieldID;
   rule: TextFilterRule;
   value: TextFilterRuleValue;
 }
@@ -136,6 +148,7 @@ export interface SingleLineTextFieldFilter
     SingleLineTextFieldFilterConfig {}
 
 export interface SingleSelectFieldFilterConfig {
+  fieldID: FieldID;
   rule: SingleSelectFilterRule;
   value: SingleSelectFilterRuleValue;
 }
@@ -144,6 +157,7 @@ export interface SingleSelectFieldFilter
     SingleSelectFieldFilterConfig {}
 
 export interface URLFieldFilterConfig {
+  fieldID: FieldID;
   rule: TextFilterRule;
   value: TextFilterRuleValue;
 }
@@ -284,31 +298,31 @@ export const filtersQuery = selector({
   },
 });
 
-export function getDefaultFilterConfig(fieldType: FieldType): FilterConfig {
-  switch (fieldType) {
+export function getDefaultFilterConfig(field: Field): FilterConfig {
+  switch (field.type) {
     case FieldType.Checkbox:
-      return { rule: 'is', value: false };
+      return { fieldID: field.id, rule: 'is', value: false };
     case FieldType.Date:
-      return { rule: 'is', value: null };
+      return { fieldID: field.id, rule: 'is', value: null };
     case FieldType.SingleLineText:
     case FieldType.MultiLineText:
     case FieldType.URL:
     case FieldType.PhoneNumber:
     case FieldType.Email:
-      return { rule: 'contains', value: '' };
+      return { fieldID: field.id, rule: 'contains', value: '' };
     case FieldType.Number:
     case FieldType.Currency:
-      return { rule: 'equal', value: null };
+      return { fieldID: field.id, rule: 'equal', value: null };
     case FieldType.MultiCollaborator:
     case FieldType.MultiDocumentLink:
     case FieldType.MultiSelect:
-      return { rule: 'hasAnyOf', value: [] };
+      return { fieldID: field.id, rule: 'hasAnyOf', value: [] };
     case FieldType.SingleSelect:
     case FieldType.SingleDocumentLink:
     case FieldType.SingleCollaborator:
-      return { rule: 'is', value: null };
+      return { fieldID: field.id, rule: 'is', value: null };
     default:
-      throw new Error(`Expected default filter config for ${fieldType}`);
+      throw new Error(`Expected default filter config for ${field}`);
   }
 }
 

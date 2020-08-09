@@ -419,11 +419,10 @@ export function useCreateFilter() {
   const setFilters = useSetRecoilState(filtersByIDState);
 
   const createFilter = useCallback(
-    (viewID: string, fieldID: string, filterConfig: FilterConfig) => {
+    (viewID: string, filterConfig: FilterConfig) => {
       let newFilter: Filter = {
         id: generateID(),
         viewID,
-        fieldID,
         ...filterConfig,
       };
 
@@ -451,12 +450,11 @@ export function useUpdateFilterConfig() {
   const getFilter = useGetFilterCallback();
 
   const updateFilterConfig = useCallback(
-    (filterID: string, fieldID: string, filterConfig: FilterConfig) => {
+    (filterID: string, filterConfig: FilterConfig) => {
       const prevFilter = getFilter(filterID);
 
       const nextFilter: Filter = {
         ...prevFilter,
-        fieldID,
         ...filterConfig,
       };
       setFilters((previousFilters) => ({

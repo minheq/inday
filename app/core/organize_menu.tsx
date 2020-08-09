@@ -44,7 +44,7 @@ import { FieldID } from '../data/fields';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
 import { CollectionID } from '../data/collections';
-import { atom, useRecoilState, useSetRecoilState } from 'recoil';
+import { atom, useRecoilState } from 'recoil';
 import { tokens } from '../components/theme';
 
 const OrganizeMenuContext = createContext({
@@ -92,19 +92,7 @@ const filterEditIDState = atom<FilterID>({
 
 function FilterMenu() {
   const context = useContext(OrganizeMenuContext);
-  const createFilter = useCreateFilter();
-  const fields = useGetCollectionFields(context.collectionID);
-  const setFilterEditID = useSetRecoilState(filterEditIDState);
   const filters = useGetViewFilters(context.viewID);
-  const firstField = first(fields);
-
-  const handlePressAddFilter = useCallback(() => {
-    const filterConfig = getDefaultFilterConfig(firstField.type);
-
-    const filter = createFilter(context.viewID, firstField.id, filterConfig);
-
-    setFilterEditID(filter.id);
-  }, [createFilter, setFilterEditID, context, firstField]);
 
   return (
     <Container>
@@ -114,11 +102,7 @@ function FilterMenu() {
           <Spacer size={24} />
         </Fragment>
       ))}
-      <Button
-        alignTitle="left"
-        onPress={handlePressAddFilter}
-        title="+ Add filter"
-      />
+      <FilterNew />
     </Container>
   );
 }
@@ -130,10 +114,7 @@ interface FilterListItemProps {
 function FilterListItem(props: FilterListItemProps) {
   const { filter } = props;
   const [filterEditID, setFilterEditID] = useRecoilState(filterEditIDState);
-  const context = useContext(OrganizeMenuContext);
   const field = useGetField(filter.fieldID);
-  const fields = useGetCollectionFields(context.collectionID);
-  const getField = useGetFieldCallback();
   const deleteFilter = useDeleteFilter();
   const updateFilterConfig = useUpdateFilterConfig();
   const [filterConfig, setFilterConfig] = useState<FilterConfig>(filter);
@@ -142,16 +123,6 @@ function FilterListItem(props: FilterListItemProps) {
   const handleChangeFilterConfig = useCallback((config: FilterConfig) => {
     setFilterConfig(config);
   }, []);
-
-  const handleChangeField = useCallback(
-    (fieldID: FieldID) => {
-      const newField = getField(fieldID);
-      const defaultFilterConfig = getDefaultFilterConfig(newField.type);
-
-      updateFilterConfig(filter.id, fieldID, defaultFilterConfig);
-    },
-    [filter, getField, updateFilterConfig],
-  );
 
   const handlePressEdit = useCallback(() => {
     setFilterEditID(filter.id);
@@ -167,15 +138,13 @@ function FilterListItem(props: FilterListItemProps) {
   }, [deleteFilter, setFilterEditID, filter]);
 
   const handlePressDone = useCallback(() => {
-    updateFilterConfig(filter.id, filter.fieldID, filterConfig);
+    updateFilterConfig(filter.id, filterConfig);
     setFilterEditID('');
   }, [updateFilterConfig, setFilterEditID, filter, filterConfig]);
 
   useEffect(() => {
     setFilterConfig(filter);
   }, [filterEditID, filter]);
-
-  const FilterConfigEdit = filterConfigEditComponentByFieldType[field.type];
 
   if (edit === false) {
     return (
@@ -194,23 +163,11 @@ function FilterListItem(props: FilterListItemProps) {
 
   return (
     <Container padding={16} borderRadius={tokens.radius} shadow>
-      <Picker
-        value={field.id}
-        onChange={handleChangeField}
-        options={fields.map((f) => ({
-          label: f.name,
-          value: f.id,
-        }))}
-      />
-      <Spacer size={4} />
-      <FilterConfigEdit
-        onChange={handleChangeFilterConfig}
-        filterConfig={filterConfig}
-      />
+      <FilterEdit filterConfig={filter} onChange={handleChangeFilterConfig} />
       <Spacer size={16} />
       <Row justifyContent="space-between">
         <Pressable onPress={handleRemove}>
-          <Text>Remove</Text>
+          <Text color="error">Remove</Text>
         </Pressable>
         <Row>
           <Pressable onPress={handlePressCancel}>
@@ -222,6 +179,100 @@ function FilterListItem(props: FilterListItemProps) {
           </Pressable>
         </Row>
       </Row>
+    </Container>
+  );
+}
+
+function FilterNew() {
+  const [open, setOpen] = useState(false);
+  const context = useContext(OrganizeMenuContext);
+  const fields = useGetCollectionFields(context.collectionID);
+  const createFilter = useCreateFilter();
+  const firstField = first(fields);
+  const defaultFilterConfig = getDefaultFilterConfig(firstField);
+  const [filterConfig, setFilterConfig] = useState(defaultFilterConfig);
+
+  const handleClose = useCallback(() => {
+    setOpen(false);
+    setFilterConfig(defaultFilterConfig);
+  }, [defaultFilterConfig]);
+
+  const handlePressAddFilter = useCallback(() => {
+    setOpen(true);
+  }, []);
+
+  const handlePressSave = useCallback(() => {
+    handleClose();
+
+    createFilter(context.viewID, filterConfig);
+  }, [handleClose, createFilter, context, filterConfig]);
+
+  if (open) {
+    return (
+      <Container padding={16} borderRadius={tokens.radius} shadow>
+        <FilterEdit filterConfig={filterConfig} onChange={setFilterConfig} />
+        <Spacer size={16} />
+        <Row justifyContent="flex-end">
+          <Pressable onPress={handleClose}>
+            <Text>Cancel</Text>
+          </Pressable>
+          <Spacer size={16} />
+          <Pressable onPress={handlePressSave}>
+            <Text color="primary">Save</Text>
+          </Pressable>
+        </Row>
+      </Container>
+    );
+  }
+
+  return (
+    <Button
+      alignTitle="left"
+      onPress={handlePressAddFilter}
+      title="+ Add filter"
+    />
+  );
+}
+
+interface FilterEditProps {
+  filterConfig: FilterConfig;
+  onChange: (filterConfig: FilterConfig) => void;
+}
+
+function FilterEdit(props: FilterEditProps) {
+  const { filterConfig, onChange } = props;
+  const context = useContext(OrganizeMenuContext);
+  const field = useGetField(filterConfig.fieldID);
+  const fields = useGetCollectionFields(context.collectionID);
+  const getField = useGetFieldCallback();
+
+  const handleChangeField = useCallback(
+    (fieldID: FieldID) => {
+      const newField = getField(fieldID);
+      const defaultFilterConfig = getDefaultFilterConfig(newField);
+
+      onChange({
+        ...defaultFilterConfig,
+        fieldID,
+      });
+    },
+    [getField, onChange],
+  );
+
+  const FilterConfigEdit = filterConfigEditComponentByFieldType[field.type];
+
+  return (
+    <Container padding={16} borderRadius={tokens.radius} shadow>
+      <Picker
+        value={field.id}
+        onChange={handleChangeField}
+        options={fields.map((f) => ({
+          label: f.name,
+          value: f.id,
+        }))}
+      />
+      <Spacer size={4} />
+      <FilterConfigEdit onChange={onChange} filterConfig={filterConfig} />
     </Container>
   );
 }
@@ -256,16 +307,17 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
 
   assertTextFilterConfig(filterConfig);
 
-  const { rule, value } = filterConfig;
+  const { rule, value, fieldID } = filterConfig;
 
   const handleChangeRule = useCallback(
     (newRule: TextFilterRule) => {
       onChange({
         rule: newRule,
         value: '',
+        fieldID,
       });
     },
-    [onChange],
+    [onChange, fieldID],
   );
 
   const handleChangeValue = useCallback(
@@ -273,9 +325,10 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
       onChange({
         rule,
         value: newValue,
+        fieldID,
       });
     },
-    [onChange, rule],
+    [onChange, rule, fieldID],
   );
 
   const options: Option<TextFilterRule>[] = [
@@ -300,16 +353,17 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
   const { filterConfig, onChange } = props;
   assertNumberFilterConfig(filterConfig);
 
-  const { rule, value } = filterConfig;
+  const { rule, value, fieldID } = filterConfig;
 
   const handleChangeRule = useCallback(
     (newRule: NumberFilterRule) => {
       onChange({
         rule: newRule,
         value: null,
+        fieldID,
       });
     },
-    [onChange],
+    [onChange, fieldID],
   );
 
   const handleChangeValue = useCallback(
@@ -317,9 +371,10 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
       onChange({
         rule,
         value: Number(newValue),
+        fieldID,
       });
     },
-    [onChange, rule],
+    [onChange, rule, fieldID],
   );
 
   const options: Option<NumberFilterRule>[] = [
