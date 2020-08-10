@@ -21,16 +21,16 @@ export function Popover(props: PopoverProps) {
     anchor,
     children,
   } = props;
-  const show = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
   const theme = useTheme();
 
   useEffect(() => {
-    Animated.spring(show, {
+    Animated.spring(opacity, {
       toValue: visible ? 1 : 0,
       bounciness: 0,
       useNativeDriver: true,
     }).start();
-  }, [visible, show]);
+  }, [visible, opacity]);
 
   const handlePressBackground = useCallback(() => {
     onRequestClose();
@@ -61,7 +61,7 @@ export function Popover(props: PopoverProps) {
             {
               top: anchor.y,
               left: anchor.x,
-              opacity: show,
+              opacity,
             },
           ]}
         >

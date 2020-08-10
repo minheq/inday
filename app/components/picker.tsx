@@ -3,10 +3,10 @@ import React, { useCallback, useState, useRef, Fragment } from 'react';
 import {
   StyleSheet,
   View,
-  LayoutChangeEvent,
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { tokens, useTheme } from './theme';
 import { Container } from './container';
@@ -20,6 +20,7 @@ import { Option } from './option';
 import { Checkbox } from './checkbox';
 import { Popover, initialPopoverAnchor } from './popover';
 import { measure, initialMeasurements } from '../lib/measurements';
+import { wait } from '../../lib/async/async';
 
 interface PickerProps<TValue = any> {
   value?: TValue;
@@ -40,36 +41,65 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
     onChange = () => {},
     searchable = false,
   } = props;
-  const ref = useRef<View>(null);
+  const buttonRef = useRef<View>(null);
+  const popoverRef = useRef<View>(null);
+  const opacity = React.useRef(new Animated.Value(0)).current;
   const borderColor = React.useRef(new Animated.Value(0)).current;
   const [focused, setFocused] = React.useState(false);
-  const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState('');
+  const [ready, setReady] = useState(false);
   const [anchor, setAnchor] = useState(initialPopoverAnchor);
   const [button, setButton] = useState(initialMeasurements);
   const theme = useTheme();
 
+  const handleClosePicker = useCallback(() => {
+    setVisible(false);
+    setReady(false);
+    setSearch('');
+  }, []);
+
+  const handleOpenPicker = useCallback(async () => {
+    const buttonMeasurements = await measure(buttonRef);
+    setButton(buttonMeasurements);
+    setVisible(true);
+
+    await wait();
+
+    const screenSize = Dimensions.get('window');
+    const popoverMeasurements = await measure(popoverRef);
+
+    const offsetTop = 4;
+
+    const bottomY =
+      buttonMeasurements.pageY + buttonMeasurements.height + offsetTop;
+
+    if (bottomY + popoverMeasurements.height > screenSize.height) {
+      setAnchor({
+        x: buttonMeasurements.pageX,
+        y: buttonMeasurements.pageY - offsetTop - popoverMeasurements.height,
+      });
+    } else {
+      setAnchor({
+        x: buttonMeasurements.pageX,
+        y: bottomY,
+      });
+    }
+
+    setReady(true);
+  }, [buttonRef, popoverRef]);
+
   const handleSelectOption = useCallback(
     (option: Option<TValue>) => {
-      setOpen(false);
-      setSearch('');
+      handleClosePicker();
       onChange(option.value);
     },
-    [onChange],
+    [onChange, handleClosePicker],
   );
 
   const handleChangeSearch = useCallback((text: string) => {
     setSearch(text);
-  }, []);
-
-  const handlePress = useCallback(() => {
-    setOpen(!open);
-  }, [open]);
-
-  const handleClosePopover = useCallback(() => {
-    setSearch('');
-    setOpen(false);
   }, []);
 
   const handleHoverIn = useCallback((index: number) => {
@@ -86,11 +116,11 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
 
   const handleSubmitEditing = useCallback(() => {
     if (activeIndex !== null) {
-      setOpen(false);
-      const o = options[activeIndex];
-      onChange(o.value);
+      handleClosePicker();
+      const option = options[activeIndex];
+      onChange(option.value);
     }
-  }, [activeIndex, options, onChange]);
+  }, [activeIndex, options, handleClosePicker, onChange]);
 
   const handleKeyPress = useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -109,36 +139,27 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
           setActiveIndex(activeIndex - 1);
         }
       } else if (key === 'Escape') {
-        handleClosePopover();
+        handleClosePicker();
       }
     },
-    [activeIndex, options, handleClosePopover],
+    [activeIndex, options, handleClosePicker],
   );
 
-  const handleLayout = useCallback((_event: LayoutChangeEvent) => {
-    const offsetTop = 44;
-
-    measure(ref).then((m) => {
-      setAnchor({ x: m.pageX, y: m.pageY + offsetTop });
-      setButton(m);
-    });
-  }, []);
+  React.useEffect(() => {
+    Animated.spring(borderColor, {
+      toValue: focused || visible ? 1 : 0,
+      useNativeDriver: true,
+      bounciness: 0,
+    }).start();
+  }, [borderColor, focused, visible]);
 
   React.useEffect(() => {
-    if (focused || open) {
-      Animated.spring(borderColor, {
-        toValue: 1,
-        useNativeDriver: true,
-        bounciness: 0,
-      }).start();
-    } else {
-      Animated.spring(borderColor, {
-        toValue: 0,
-        useNativeDriver: true,
-        bounciness: 0,
-      }).start();
-    }
-  }, [borderColor, focused, open]);
+    Animated.spring(opacity, {
+      toValue: ready ? 1 : 0,
+      useNativeDriver: true,
+      bounciness: 0,
+    }).start();
+  }, [ready, opacity]);
 
   const selected = options.find((o) => o.value === value);
   const filteredOptions =
@@ -150,9 +171,9 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
 
   return (
     <Container>
-      <View ref={ref} onLayout={handleLayout}>
+      <View ref={buttonRef}>
         <Pressable
-          onPress={handlePress}
+          onPress={handleOpenPicker}
           onFocus={handleFocus}
           onBlur={handleBlur}
           style={[
@@ -179,68 +200,72 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
       </View>
       <Popover
         anchor={anchor}
-        visible={open}
-        onRequestClose={handleClosePopover}
+        visible={visible}
+        onRequestClose={handleClosePicker}
       >
-        <Container
-          width={button.width}
-          color="content"
-          padding={8}
-          borderWidth={1}
-          borderRadius={tokens.radius}
-        >
-          {searchable === true && (
-            <Fragment>
-              <TextInput
-                clearable
-                placeholder="Search option"
-                autoFocus
-                value={search}
-                onChange={handleChangeSearch}
-                onKeyPress={handleKeyPress}
-                onSubmitEditing={handleSubmitEditing}
-              />
-              <Spacer size={8} />
-            </Fragment>
-          )}
-          {filteredOptions.map((o, i) => {
-            const active = i === activeIndex;
+        <View ref={popoverRef}>
+          <Animated.View style={{ opacity }}>
+            <Container
+              width={button.width}
+              color="content"
+              padding={8}
+              borderWidth={1}
+              borderRadius={tokens.radius}
+            >
+              {searchable === true && (
+                <Fragment>
+                  <TextInput
+                    clearable
+                    placeholder="Search option"
+                    autoFocus
+                    value={search}
+                    onChange={handleChangeSearch}
+                    onKeyPress={handleKeyPress}
+                    onSubmitEditing={handleSubmitEditing}
+                  />
+                  <Spacer size={8} />
+                </Fragment>
+              )}
+              {filteredOptions.map((o, i) => {
+                const active = i === activeIndex;
 
-            return renderOption ? (
-              renderOption(o, active)
-            ) : (
-              <Pressable
-                onHoverIn={() => handleHoverIn(i)}
-                onPress={() => handleSelectOption(o)}
-                style={[
-                  styles.option,
-                  {
-                    backgroundColor: active
-                      ? theme.button.backgroundActive
-                      : theme.button.backgroundDefault,
-                  },
-                ]}
-              >
-                <Container
-                  height={32}
-                  paddingHorizontal={8}
-                  borderRadius={tokens.radius}
-                >
-                  <Row
-                    expanded
-                    alignItems="center"
-                    justifyContent="space-between"
+                return renderOption ? (
+                  renderOption(o, active)
+                ) : (
+                  <Pressable
+                    onHoverIn={() => handleHoverIn(i)}
+                    onPress={() => handleSelectOption(o)}
+                    style={[
+                      styles.option,
+                      {
+                        backgroundColor: active
+                          ? theme.button.backgroundActive
+                          : theme.button.backgroundDefault,
+                      },
+                    ]}
                   >
-                    <Text>{o.label}</Text>
-                    {selected && selected.value === o.value && (
-                      <Checkbox value={true} />
-                    )}
-                  </Row>
-                </Container>
-              </Pressable>
-            );
-          })}
-        </Container>
+                    <Container
+                      height={32}
+                      paddingHorizontal={8}
+                      borderRadius={tokens.radius}
+                    >
+                      <Row
+                        expanded
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Text>{o.label}</Text>
+                        {selected && selected.value === o.value && (
+                          <Checkbox value={true} />
+                        )}
+                      </Row>
+                    </Container>
+                  </Pressable>
+                );
+              })}
+            </Container>
+          </Animated.View>
+        </View>
       </Popover>
     </Container>
   );
