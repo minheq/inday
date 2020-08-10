@@ -22,10 +22,11 @@ import {
   viewsByIDState,
   View,
   viewQuery,
-  viewFiltersQuery,
+  viewFilterGroupsQuery,
   viewDocumentsQuery,
   ViewsByIDState,
   viewFiltersGroupMaxQuery,
+  viewFiltersQuery,
 } from './views';
 import { Field, fieldsByIDState, fieldQuery, FieldConfig } from './fields';
 import { documentsByIDState, documentQuery, Document } from './documents';
@@ -420,6 +421,12 @@ export function useGetFilterCallback() {
   return getFilter;
 }
 
+export function useGetViewFiltersGroups(viewID: string) {
+  const filterGroups = useRecoilValue(viewFilterGroupsQuery(viewID));
+
+  return filterGroups;
+}
+
 export function useGetViewFilters(viewID: string) {
   const filters = useRecoilValue(viewFiltersQuery(viewID));
 
@@ -475,6 +482,37 @@ export function useUpdateFilterConfig() {
       const nextFilter: Filter = {
         ...prevFilter,
         ...filterConfig,
+        group,
+      };
+      setFilters((previousFilters) => ({
+        ...previousFilters,
+        [nextFilter.id]: nextFilter,
+      }));
+
+      emitEvent({
+        name: 'FilterConfigUpdated',
+        filter: nextFilter,
+      });
+
+      return nextFilter;
+    },
+    [emitEvent, setFilters, getFilter],
+  );
+
+  return updateFilterConfig;
+}
+
+export function useUpdateFilterGroup() {
+  const emitEvent = useEmitEvent();
+  const setFilters = useSetRecoilState(filtersByIDState);
+  const getFilter = useGetFilterCallback();
+
+  const updateFilterConfig = useCallback(
+    (filterID: string, group: number) => {
+      const prevFilter = getFilter(filterID);
+
+      const nextFilter: Filter = {
+        ...prevFilter,
         group,
       };
       setFilters((previousFilters) => ({

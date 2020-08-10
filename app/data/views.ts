@@ -49,6 +49,7 @@ import {
   textFiltersByRule,
   filtersQuery,
 } from './filters';
+import { last, isEmpty } from '../../lib/data_structures/arrays';
 
 export type ViewID = string;
 
@@ -123,18 +124,48 @@ export const viewFiltersQuery = selectorFamily<Filter[], string>({
   key: RecoilKey.ViewFilters,
   get: (viewID: string) => ({ get }) => {
     const view = get(viewQuery(viewID));
-    const filters = get(filtersQuery);
+    let filters = get(filtersQuery);
 
     return filters.filter((f) => f.viewID === view.id);
+  },
+});
+
+export type FilterGroup = Filter[];
+
+export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], string>({
+  key: RecoilKey.ViewFilters,
+  get: (viewID: string) => ({ get }) => {
+    const filters = get(viewFiltersQuery(viewID));
+
+    const filterGroups: Filter[][] = [];
+
+    let currentGroup = 1;
+
+    for (const filter of filters) {
+      if (filter.group === currentGroup) {
+        filterGroups[currentGroup - 1].push(filter);
+      } else {
+        filterGroups.push([filter]);
+        currentGroup++;
+      }
+    }
+
+    return filterGroups;
   },
 });
 
 export const viewFiltersGroupMaxQuery = selectorFamily<number, string>({
   key: RecoilKey.ViewFilters,
   get: (viewID: string) => ({ get }) => {
-    const filters = get(viewFiltersQuery(viewID));
+    const filterGroups = get(viewFilterGroupsQuery(viewID));
 
-    return Math.max(Math.max(...filters.map((f) => f.group)), 0);
+    if (isEmpty(filterGroups)) {
+      return 0;
+    }
+
+    const lastFilterGroup = last(filterGroups);
+
+    return lastFilterGroup[0].group;
   },
 });
 
@@ -143,17 +174,16 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
   get: (viewID: string) => ({ get }) => {
     const view = get(viewQuery(viewID));
     const documents = get(collectionDocumentsQuery(view.collectionID));
-    const filters = get(viewFiltersQuery(viewID));
+    const filterGroups = get(viewFilterGroupsQuery(viewID));
 
     function getField(fieldID: string) {
       return get(fieldQuery(fieldID));
     }
 
     let finalDocuments = documents;
-    const filterPairs: [FieldID, Filter][] = filters.map((f) => [f.fieldID, f]);
 
     finalDocuments = filterDocumentsByView(
-      filterPairs,
+      filterGroups,
       finalDocuments,
       getField,
     );
@@ -166,20 +196,22 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
 });
 
 export function filterDocumentsByView(
-  filters: [FieldID, Filter][],
+  filterGroups: FilterGroup[],
   documents: Document[],
   getField: (fieldID: string) => Field,
 ) {
   let filteredDocuments = documents;
 
-  for (const [fieldID, filter] of filters) {
-    const field = getField(fieldID);
-    const applyFilter = filtersByFieldType[field.type];
+  filteredDocuments = filteredDocuments.filter((doc) => {
+    return filterGroups.some((filterGroup) => {
+      return filterGroup.every((filter) => {
+        const field = getField(filter.fieldID);
+        const applyFilter = filtersByFieldType[field.type];
 
-    filteredDocuments = filteredDocuments.filter((doc) => {
-      return applyFilter(doc.fields[fieldID], filter);
+        return applyFilter(doc.fields[filter.fieldID], filter);
+      });
     });
-  }
+  });
 
   return filteredDocuments;
 }

@@ -38,6 +38,7 @@ import {
   useGetField,
   useGetFieldCallback,
   useGetFiltersGroupMax,
+  useUpdateFilterGroup,
 } from '../data/store';
 import { first } from '../../lib/data_structures/arrays';
 import { FieldType } from '../data/constants';
@@ -102,9 +103,12 @@ function FilterMenu() {
     <Container flex={1}>
       <ScrollView>
         <Container paddingHorizontal={16}>
-          {filters.map((filter) => (
+          {filters.map((filter, index) => (
             <Fragment key={filter.id}>
-              <FilterListItem filter={filter} />
+              <FilterListItem
+                prevFilter={filters[index - 1] || null}
+                filter={filter}
+              />
               <Spacer size={24} />
             </Fragment>
           ))}
@@ -117,14 +121,16 @@ function FilterMenu() {
 
 interface FilterListItemProps {
   filter: Filter;
+  prevFilter: Filter | null;
 }
 
 function FilterListItem(props: FilterListItemProps) {
-  const { filter } = props;
+  const { prevFilter, filter } = props;
   const [filterEditID, setFilterEditID] = useRecoilState(filterEditIDState);
   const field = useGetField(filter.fieldID);
   const deleteFilter = useDeleteFilter();
   const updateFilterConfig = useUpdateFilterConfig();
+  const updateFilterGroup = useUpdateFilterGroup();
   const [filterConfig, setFilterConfig] = useState<FilterConfig>(filter);
   const edit = filterEditID === filter.id;
 
@@ -140,10 +146,33 @@ function FilterListItem(props: FilterListItemProps) {
     setFilterEditID('');
   }, [setFilterEditID]);
 
-  const handleRemove = useCallback(() => {
+  const handlePressRemove = useCallback(() => {
     deleteFilter(filter);
     setFilterEditID('');
   }, [deleteFilter, setFilterEditID, filter]);
+
+  const handleChangeFilterGroup = useCallback(
+    (value: 'and' | 'or') => {
+      if (prevFilter === null) {
+        return;
+      }
+
+      if (value === 'and') {
+        if (prevFilter.group === filter.group) {
+          return;
+        }
+
+        updateFilterGroup(filter.id, prevFilter.group);
+      } else if (value === 'or') {
+        if (prevFilter.group !== filter.group) {
+          return;
+        }
+
+        updateFilterGroup(filter.id, filter.group + 1);
+      }
+    },
+    [prevFilter, filter, updateFilterGroup],
+  );
 
   const handleSubmit = useCallback(() => {
     updateFilterConfig(filter.id, filter.group, filterConfig);
@@ -179,7 +208,7 @@ function FilterListItem(props: FilterListItemProps) {
         />
         <Spacer size={16} />
         <Row justifyContent="space-between">
-          <Pressable onPress={handleRemove}>
+          <Pressable onPress={handlePressRemove}>
             <Text color="error">Remove</Text>
           </Pressable>
           <Row>
@@ -198,14 +227,15 @@ function FilterListItem(props: FilterListItemProps) {
 
   return (
     <Container>
-      {filter.group !== 1 && (
+      {prevFilter !== null && (
         <Fragment>
           <Spacer size={16} />
           <Picker
-            value={1}
+            value={prevFilter.group === filter.group ? 'and' : 'or'}
+            onChange={handleChangeFilterGroup}
             options={[
-              { label: 'And', value: 1 },
-              { label: 'Or', value: 0 },
+              { label: 'And', value: 'and' },
+              { label: 'Or', value: 'or' },
             ]}
           />
           <Spacer size={16} />
