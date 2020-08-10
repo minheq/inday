@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useRef, Fragment } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  Fragment,
+  useEffect,
+} from 'react';
 
 import {
   StyleSheet,
@@ -7,6 +13,7 @@ import {
   NativeSyntheticEvent,
   Animated,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { tokens, useTheme } from './theme';
 import { Container } from './container';
@@ -18,9 +25,8 @@ import { TextInput } from './text_input';
 import { Spacer } from './spacer';
 import { Option } from './option';
 import { Checkbox } from './checkbox';
-import { Popover, initialPopoverAnchor } from './popover';
+import { Popover, initialPopoverAnchor, PopoverAnchor } from './popover';
 import { measure, initialMeasurements } from '../lib/measurements';
-import { wait } from '../../lib/async/async';
 
 interface PickerProps<TValue = any> {
   value?: TValue;
@@ -43,43 +49,64 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
   } = props;
   const buttonRef = useRef<View>(null);
   const popoverRef = useRef<View>(null);
-  const opacity = React.useRef(new Animated.Value(0)).current;
   const borderColor = React.useRef(new Animated.Value(0)).current;
   const [focused, setFocused] = React.useState(false);
   const [visible, setVisible] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState('');
-  const [ready, setReady] = useState(false);
   const [anchor, setAnchor] = useState(initialPopoverAnchor);
   const [button, setButton] = useState(initialMeasurements);
+  const [popover, setPopover] = useState(initialMeasurements);
+  const [height, setHeight] = useState(0);
   const theme = useTheme();
 
   const handleClosePicker = useCallback(() => {
     setVisible(false);
-    setReady(false);
     setSearch('');
   }, []);
 
   const handleOpenPicker = useCallback(async () => {
     const buttonMeasurements = await measure(buttonRef);
-    setButton(buttonMeasurements);
-    setVisible(true);
 
-    await wait();
+    setButton(buttonMeasurements);
 
     const screenSize = Dimensions.get('window');
-    const popoverMeasurements = await measure(popoverRef);
-
-    const offsetTop = 4;
+    const pickerOffset = 4;
+    const screenOffset = 16;
 
     const bottomY =
-      buttonMeasurements.pageY + buttonMeasurements.height + offsetTop;
+      buttonMeasurements.pageY + buttonMeasurements.height + pickerOffset;
+    const topY = buttonMeasurements.pageY - pickerOffset - popover.height;
 
-    if (bottomY + popoverMeasurements.height > screenSize.height) {
-      setAnchor({
-        x: buttonMeasurements.pageX,
-        y: buttonMeasurements.pageY - offsetTop - popoverMeasurements.height,
-      });
+    const overflowsBottom = bottomY + popover.height > screenSize.height;
+
+    if (overflowsBottom) {
+      const heightIfBottomY = screenSize.height - bottomY;
+      const heightIfTopY = buttonMeasurements.pageY;
+
+      if (heightIfTopY < heightIfBottomY) {
+        setAnchor({
+          x: buttonMeasurements.pageX,
+          y: bottomY,
+        });
+
+        if (screenSize.height - bottomY < popover.height) {
+          setHeight(screenSize.height - bottomY - screenOffset);
+        }
+      } else {
+        if (topY < 0) {
+          setHeight(buttonMeasurements.pageY - screenOffset);
+          setAnchor({
+            x: buttonMeasurements.pageX,
+            y: screenOffset,
+          });
+        } else {
+          setAnchor({
+            x: buttonMeasurements.pageX,
+            y: topY,
+          });
+        }
+      }
     } else {
       setAnchor({
         x: buttonMeasurements.pageX,
@@ -87,8 +114,8 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
       });
     }
 
-    setReady(true);
-  }, [buttonRef, popoverRef]);
+    setVisible(true);
+  }, [popover, buttonRef]);
 
   const handleSelectOption = useCallback(
     (option: Option<TValue>) => {
@@ -153,14 +180,6 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
     }).start();
   }, [borderColor, focused, visible]);
 
-  React.useEffect(() => {
-    Animated.spring(opacity, {
-      toValue: ready ? 1 : 0,
-      useNativeDriver: true,
-      bounciness: 0,
-    }).start();
-  }, [ready, opacity]);
-
   const selected = options.find((o) => o.value === value);
   const filteredOptions =
     search !== ''
@@ -169,8 +188,74 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
         )
       : options;
 
+  useEffect(() => {
+    measure(popoverRef).then((m) => {
+      setPopover(m);
+      setHeight(m.height);
+    });
+    // Include everything that may affect the height
+  }, [filteredOptions, searchable, popoverRef]);
+
+  const content = (
+    <Container
+      width={button.width}
+      color="content"
+      padding={8}
+      borderWidth={1}
+      borderRadius={tokens.radius}
+    >
+      {searchable === true && (
+        <Fragment>
+          <TextInput
+            clearable
+            placeholder="Search option"
+            autoFocus
+            value={search}
+            onChange={handleChangeSearch}
+            onKeyPress={handleKeyPress}
+            onSubmitEditing={handleSubmitEditing}
+          />
+          <Spacer size={8} />
+        </Fragment>
+      )}
+      {filteredOptions.map((o, i) => {
+        const active = i === activeIndex;
+
+        return renderOption ? (
+          renderOption(o, active)
+        ) : (
+          <Pressable
+            onHoverIn={() => handleHoverIn(i)}
+            onPress={() => handleSelectOption(o)}
+            style={[
+              styles.option,
+              {
+                backgroundColor: active
+                  ? theme.button.backgroundActive
+                  : theme.button.backgroundDefault,
+              },
+            ]}
+          >
+            <Container
+              height={32}
+              paddingHorizontal={8}
+              borderRadius={tokens.radius}
+            >
+              <Row expanded alignItems="center" justifyContent="space-between">
+                <Text>{o.label}</Text>
+                {selected && selected.value === o.value && (
+                  <Checkbox value={true} />
+                )}
+              </Row>
+            </Container>
+          </Pressable>
+        );
+      })}
+    </Container>
+  );
+
   return (
-    <Container>
+    <Fragment>
       <View ref={buttonRef}>
         <Pressable
           onPress={handleOpenPicker}
@@ -203,71 +288,15 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
         visible={visible}
         onRequestClose={handleClosePicker}
       >
-        <View ref={popoverRef}>
-          <Animated.View style={{ opacity }}>
-            <Container
-              width={button.width}
-              color="content"
-              padding={8}
-              borderWidth={1}
-              borderRadius={tokens.radius}
-            >
-              {searchable === true && (
-                <Fragment>
-                  <TextInput
-                    clearable
-                    placeholder="Search option"
-                    autoFocus
-                    value={search}
-                    onChange={handleChangeSearch}
-                    onKeyPress={handleKeyPress}
-                    onSubmitEditing={handleSubmitEditing}
-                  />
-                  <Spacer size={8} />
-                </Fragment>
-              )}
-              {filteredOptions.map((o, i) => {
-                const active = i === activeIndex;
-
-                return renderOption ? (
-                  renderOption(o, active)
-                ) : (
-                  <Pressable
-                    onHoverIn={() => handleHoverIn(i)}
-                    onPress={() => handleSelectOption(o)}
-                    style={[
-                      styles.option,
-                      {
-                        backgroundColor: active
-                          ? theme.button.backgroundActive
-                          : theme.button.backgroundDefault,
-                      },
-                    ]}
-                  >
-                    <Container
-                      height={32}
-                      paddingHorizontal={8}
-                      borderRadius={tokens.radius}
-                    >
-                      <Row
-                        expanded
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Text>{o.label}</Text>
-                        {selected && selected.value === o.value && (
-                          <Checkbox value={true} />
-                        )}
-                      </Row>
-                    </Container>
-                  </Pressable>
-                );
-              })}
-            </Container>
-          </Animated.View>
-        </View>
+        <Container height={height}>
+          <ScrollView>{content}</ScrollView>
+        </Container>
       </Popover>
-    </Container>
+      {/* We use this hidden component to calculate height */}
+      <View style={styles.hidden} ref={popoverRef}>
+        {content}
+      </View>
+    </Fragment>
   );
 }
 
@@ -283,5 +312,10 @@ const styles = StyleSheet.create({
   },
   option: {
     borderRadius: tokens.radius,
+  },
+  hidden: {
+    position: 'absolute',
+    opacity: 0,
+    zIndex: -1,
   },
 });
