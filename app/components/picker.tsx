@@ -22,13 +22,12 @@ import { Row } from './row';
 import { Text } from './text';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
-import { Spacer } from './spacer';
 import { Option } from './option';
 import { Checkbox } from './checkbox';
-import { Popover, initialPopoverAnchor, PopoverAnchor } from './popover';
+import { Popover, initialPopoverAnchor } from './popover';
 import { measure, initialMeasurements } from '../lib/measurements';
 
-interface PickerProps<TValue = any> {
+export interface PickerProps<TValue = any> {
   value?: TValue;
   options: Option<TValue>[];
   onChange?: (value: TValue) => void;
@@ -197,27 +196,7 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
   }, [filteredOptions, searchable, popoverRef]);
 
   const content = (
-    <Container
-      width={button.width}
-      color="content"
-      padding={8}
-      borderWidth={1}
-      borderRadius={tokens.radius}
-    >
-      {searchable === true && (
-        <Fragment>
-          <TextInput
-            clearable
-            placeholder="Search option"
-            autoFocus
-            value={search}
-            onChange={handleChangeSearch}
-            onKeyPress={handleKeyPress}
-            onSubmitEditing={handleSubmitEditing}
-          />
-          <Spacer size={8} />
-        </Fragment>
-      )}
+    <Container padding={8}>
       {filteredOptions.map((o, i) => {
         const active = i === activeIndex;
 
@@ -288,7 +267,26 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
         visible={visible}
         onRequestClose={handleClosePicker}
       >
-        <Container height={height}>
+        <Container
+          width={button.width}
+          height={height}
+          color="content"
+          borderWidth={1}
+          borderRadius={tokens.radius}
+        >
+          {searchable === true && (
+            <Container padding={8}>
+              <TextInput
+                clearable
+                placeholder="Search option"
+                autoFocus
+                value={search}
+                onChange={handleChangeSearch}
+                onKeyPress={handleKeyPress}
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </Container>
+          )}
           <ScrollView>{content}</ScrollView>
         </Container>
       </Popover>

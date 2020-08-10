@@ -48,6 +48,7 @@ import { CollectionID } from '../data/collections';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { tokens } from '../components/theme';
 import { ScrollView } from 'react-native';
+import { FieldPicker } from './field_picker';
 
 const OrganizeMenuContext = createContext({
   spaceID: '1',
@@ -312,13 +313,10 @@ function FilterEdit(props: FilterEditProps) {
 
   return (
     <Fragment>
-      <Picker
+      <FieldPicker
         value={field.id}
         onChange={handleChangeField}
-        options={fields.map((f) => ({
-          label: f.name,
-          value: f.id,
-        }))}
+        fields={fields}
       />
       <Spacer size={4} />
       <FilterConfigEdit
