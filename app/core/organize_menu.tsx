@@ -153,25 +153,9 @@ function FilterListItem(props: FilterListItemProps) {
 
   const handleChangeFilterGroup = useCallback(
     (value: 'and' | 'or') => {
-      if (prevFilter === null) {
-        return;
-      }
-
-      if (value === 'and') {
-        if (prevFilter.group === filter.group) {
-          return;
-        }
-
-        updateFilterGroup(filter.id, prevFilter.group);
-      } else if (value === 'or') {
-        if (prevFilter.group !== filter.group) {
-          return;
-        }
-
-        updateFilterGroup(filter.id, filter.group + 1);
-      }
+      updateFilterGroup(filter.id, value);
     },
-    [prevFilter, filter, updateFilterGroup],
+    [filter, updateFilterGroup],
   );
 
   const handleSubmit = useCallback(() => {

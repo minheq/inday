@@ -5,6 +5,8 @@ import {
   singleSelectFiltersByRule,
   multiSelectFiltersByRule,
   booleanFiltersByRule,
+  Filter,
+  updateFilterGroup,
 } from './filters';
 import { parseDay } from '../../lib/datetime/day';
 
@@ -478,6 +480,105 @@ describe('booleanFiltersByRule', () => {
 
     test('not ok', () => {
       expect(filter(true, false)).toBeFalsy();
+    });
+  });
+});
+
+describe('updateFilterGroup', () => {
+  describe('3 or filters', () => {
+    const filter1: Filter = {
+      id: '1',
+      viewID: '1',
+      group: 1,
+      fieldID: '1',
+      rule: 'contains',
+      value: 's',
+    };
+
+    const filter2: Filter = {
+      id: '2',
+      viewID: '1',
+      group: 2,
+      fieldID: '1',
+      rule: 'contains',
+      value: 's',
+    };
+
+    const filter3: Filter = {
+      id: '3',
+      viewID: '1',
+      group: 3,
+      fieldID: '1',
+      rule: 'contains',
+      value: 's',
+    };
+
+    const filters: Filter[] = [filter1, filter2, filter3];
+
+    test('f1 and f2 or f3', () => {
+      const updatedFilters = updateFilterGroup(filter2, 'and', filters);
+
+      const updatedFilter2 = updatedFilters[filter2.id];
+      const updatedFilter3 = updatedFilters[filter3.id];
+
+      expect(updatedFilter2.group).toBe(1);
+      expect(updatedFilter3.group).toBe(2);
+    });
+
+    test('f1 or f2 and f3', () => {
+      const updatedFilters = updateFilterGroup(filter3, 'and', filters);
+
+      const updatedFilter3 = updatedFilters[filter3.id];
+
+      expect(updatedFilter3.group).toBe(2);
+    });
+  });
+
+  describe('3 and filters', () => {
+    const filter1: Filter = {
+      id: '1',
+      viewID: '1',
+      group: 1,
+      fieldID: '1',
+      rule: 'contains',
+      value: 's',
+    };
+
+    const filter2: Filter = {
+      id: '2',
+      viewID: '1',
+      group: 1,
+      fieldID: '1',
+      rule: 'contains',
+      value: 's',
+    };
+
+    const filter3: Filter = {
+      id: '3',
+      viewID: '1',
+      group: 1,
+      fieldID: '1',
+      rule: 'contains',
+      value: 's',
+    };
+
+    const filters: Filter[] = [filter1, filter2, filter3];
+
+    test('f1 and f2 or f3', () => {
+      const updatedFilters = updateFilterGroup(filter3, 'or', filters);
+
+      const updatedFilter3 = updatedFilters[filter3.id];
+
+      expect(updatedFilter3.group).toBe(2);
+    });
+
+    test('f1 or f2 and f3', () => {
+      const updatedFilters = updateFilterGroup(filter2, 'or', filters);
+      const updatedFilter2 = updatedFilters[filter2.id];
+      const updatedFilter3 = updatedFilters[filter3.id];
+
+      expect(updatedFilter2.group).toBe(2);
+      expect(updatedFilter3.group).toBe(2);
     });
   });
 });

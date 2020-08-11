@@ -32,6 +32,8 @@ export type FilterID = string;
 export interface BaseFilter {
   id: FilterID;
   viewID: ViewID;
+  // Group filters to make "AND" and "OR" filters
+  // "AND" belong to the same group, "OR" will have different group
   group: number;
 }
 
@@ -325,6 +327,43 @@ export function getDefaultFilterConfig(field: Field): FilterConfig {
     default:
       throw new Error(`Expected default filter config for ${field}`);
   }
+}
+
+export function updateFilterGroup(
+  filter: Filter,
+  value: 'and' | 'or',
+  filters: Filter[],
+): { [filterID: string]: Filter } {
+  const updatedFilters: { [filterID: string]: Filter } = {};
+  const filterIndex = filters.findIndex((f) => f.id === filter.id);
+
+  // Guaranteed to have previous filter given UI
+  const prevFilter: Filter = filters[filterIndex - 1];
+
+  let op: 'add' | 'sub' | null = null;
+
+  if (value === 'and' && prevFilter.group !== filter.group) {
+    op = 'sub';
+  } else if (value === 'or' && prevFilter.group === filter.group) {
+    op = 'add';
+  } else {
+    op = null;
+  }
+
+  if (op === null) {
+    return updatedFilters;
+  }
+
+  const nextFilters = filters.slice(filterIndex);
+
+  for (const nextFilter of nextFilters) {
+    updatedFilters[nextFilter.id] = {
+      ...nextFilter,
+      group: nextFilter.group + (op === 'sub' ? -1 : 1),
+    };
+  }
+
+  return updatedFilters;
 }
 
 export function assertCheckboxFieldFilter(

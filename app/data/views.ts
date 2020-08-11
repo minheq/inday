@@ -126,7 +126,9 @@ export const viewFiltersQuery = selectorFamily<Filter[], string>({
     const view = get(viewQuery(viewID));
     let filters = get(filtersQuery);
 
-    return filters.filter((f) => f.viewID === view.id);
+    return filters
+      .filter((f) => f.viewID === view.id)
+      .sort((a, b) => a.group - b.group);
   },
 });
 
