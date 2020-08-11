@@ -53,6 +53,7 @@ export type DocumentsByIDState = { [documentID: string]: Document | undefined };
 export const documentsByIDState = atom<DocumentsByIDState>({
   key: RecoilKey.DocumentsByID,
   default: documentsByIDFixtures,
+  persistence_UNSTABLE: { type: true },
 });
 
 export const documentsQuery = selector({

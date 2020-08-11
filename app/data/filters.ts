@@ -290,6 +290,7 @@ export type FiltersByIDState = { [filterID: string]: Filter | undefined };
 export const filtersByIDState = atom<FiltersByIDState>({
   key: RecoilKey.FiltersByID,
   default: {},
+  persistence_UNSTABLE: { type: true },
 });
 
 export const filtersQuery = selector({
@@ -346,8 +347,6 @@ export function updateFilterGroup(
     op = 'sub';
   } else if (value === 'or' && prevFilter.group === filter.group) {
     op = 'add';
-  } else {
-    op = null;
   }
 
   if (op === null) {

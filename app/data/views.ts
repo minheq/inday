@@ -95,6 +95,7 @@ export type ViewsByIDState = { [viewID: string]: View | undefined };
 export const viewsByIDState = atom<ViewsByIDState>({
   key: RecoilKey.ViewsByID,
   default: viewsByIDFixtures,
+  persistence_UNSTABLE: { type: true },
 });
 
 export const viewsQuery = selector({
@@ -144,7 +145,7 @@ export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], string>({
     let currentGroup = 1;
 
     for (const filter of filters) {
-      if (filter.group === currentGroup) {
+      if (filter.group === currentGroup && filterGroups[currentGroup - 1]) {
         filterGroups[currentGroup - 1].push(filter);
       } else {
         filterGroups.push([filter]);

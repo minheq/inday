@@ -146,6 +146,14 @@ export interface FilterConfigUpdatedEvent
   extends BaseEvent,
     FilterConfigUpdatedEventConfig {}
 
+export interface FilterGroupUpdatedEventConfig {
+  name: 'FilterGroupUpdated';
+  filters: Filter[];
+}
+export interface FilterGroupUpdatedEvent
+  extends BaseEvent,
+    FilterGroupUpdatedEventConfig {}
+
 export interface FilterDeletedEventConfig {
   name: 'FilterDeleted';
   filter: Filter;
@@ -173,6 +181,7 @@ export type EventConfig =
   | DocumentDeletedEventConfig
   | FilterCreatedEventConfig
   | FilterConfigUpdatedEventConfig
+  | FilterGroupUpdatedEventConfig
   | FilterDeletedEventConfig;
 
 export type Event =
@@ -194,6 +203,7 @@ export type Event =
   | DocumentDeletedEvent
   | FilterCreatedEvent
   | FilterConfigUpdatedEvent
+  | FilterGroupUpdatedEvent
   | FilterDeletedEvent;
 
 type SubscriptionCallback = (event: Event) => void;
@@ -228,4 +238,5 @@ export type EventsState = Event[];
 export const eventsState = atom<EventsState>({
   key: RecoilKey.Events,
   default: [],
+  persistence_UNSTABLE: { type: true },
 });

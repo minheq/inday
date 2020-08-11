@@ -39,7 +39,6 @@ import {
   updateFilterGroup,
 } from './filters';
 import { useLogger } from '../../lib/logger/logger';
-import { first, isEmpty, isNotEmpty } from '../../lib/data_structures/arrays';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
@@ -535,7 +534,7 @@ export function useUpdateFilterGroup() {
 
       emitEvent({
         name: 'FilterGroupUpdated',
-        filter: updatedFilter,
+        filters: Object.values(updatedFilters),
       });
 
       return updatedFilters[filterID];

@@ -17,6 +17,7 @@ export type SpacesByIDState = { [spaceID: string]: Space | undefined };
 export const spacesByIDState = atom<SpacesByIDState>({
   key: RecoilKey.SpacesByID,
   default: spacesByIDFixtures,
+  persistence_UNSTABLE: { type: true },
 });
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({

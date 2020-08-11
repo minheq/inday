@@ -168,6 +168,7 @@ export type FieldsByIDState = { [fieldID: string]: Field | undefined };
 export const fieldsByIDState = atom<FieldsByIDState>({
   key: RecoilKey.FieldsByID,
   default: fieldsByIDFixtures,
+  persistence_UNSTABLE: { type: true },
 });
 
 export const fieldsQuery = selector({

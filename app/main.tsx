@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { RecoilRoot } from 'recoil';
+import { RecoilRoot, useTransactionObservation_UNSTABLE } from 'recoil';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -11,11 +11,24 @@ import { linking, ScreenName, RootStackParamsMap } from './linking';
 
 const RootStack = createStackNavigator<RootStackParamsMap>();
 
+function PersistenceObserver() {
+  useTransactionObservation_UNSTABLE(
+    ({ atomValues, atomInfo, modifiedAtoms }) => {
+      for (const modifiedAtom of modifiedAtoms) {
+        window[`atom__${modifiedAtom}`] = atomValues.get(modifiedAtom);
+      }
+    },
+  );
+
+  return null;
+}
+
 export function App() {
   return (
     <RecoilRoot>
       <ErrorBoundary>
         <Suspense fallback={<Text>Loading...</Text>}>
+          <PersistenceObserver />
           <ThemeProvider>
             <NavigationContainer
               linking={linking}

@@ -23,6 +23,7 @@ export const collectionsByIDState = atom<CollectionsByIDState>({
     [collection1.id]: collection1,
     [collection2.id]: collection2,
   },
+  persistence_UNSTABLE: { type: true },
 });
 
 export const collectionsQuery = selector({
