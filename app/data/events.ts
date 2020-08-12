@@ -238,5 +238,6 @@ export type EventsState = Event[];
 export const eventsState = atom<EventsState>({
   key: RecoilKey.Events,
   default: [],
+  // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });

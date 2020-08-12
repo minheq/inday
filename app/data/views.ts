@@ -77,6 +77,7 @@ export type ViewsByIDState = { [viewID: string]: View | undefined };
 export const viewsByIDState = atom<ViewsByIDState>({
   key: RecoilKey.ViewsByID,
   default: viewsByIDFixtures,
+  // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });
 

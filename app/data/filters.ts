@@ -283,6 +283,7 @@ export type FiltersByIDState = { [filterID: string]: Filter | undefined };
 export const filtersByIDState = atom<FiltersByIDState>({
   key: RecoilKey.FiltersByID,
   default: {},
+  // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });
 

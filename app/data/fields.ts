@@ -5,7 +5,7 @@ import { fieldsByIDFixtures } from './fixtures';
 
 export type FieldID = string;
 
-interface BaseField {
+export interface BaseField {
   id: FieldID;
   name: string;
   description: string;
@@ -16,7 +16,7 @@ interface BaseField {
 
 export interface SingleLineTextFieldConfig {
   type: FieldType.SingleLineText;
-  default: string | null;
+  default: string;
 }
 export interface SingleLineTextField
   extends BaseField,
@@ -33,19 +33,18 @@ export interface MultiLineTextField
 interface SelectOption {
   value: string;
   color: string;
+  order: number;
 }
 
 export interface SingleOptionFieldConfig {
   type: FieldType.SingleOption;
   options: SelectOption[];
-  order: string[];
 }
 export interface SingleOptionField extends BaseField, SingleOptionFieldConfig {}
 
 export interface MultiOptionFieldConfig {
   type: FieldType.MultiOption;
   options: SelectOption[];
-  order: string[];
 }
 export interface MultiOptionField extends BaseField, MultiOptionFieldConfig {}
 
@@ -168,6 +167,7 @@ export type FieldsByIDState = { [fieldID: string]: Field | undefined };
 export const fieldsByIDState = atom<FieldsByIDState>({
   key: RecoilKey.FieldsByID,
   default: fieldsByIDFixtures,
+  // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });
 

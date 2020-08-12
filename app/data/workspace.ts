@@ -16,5 +16,6 @@ export const workspaceState = atom<WorkspaceState>({
     name: 'My Workspace',
     ownerID: '1',
   },
+  // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });
