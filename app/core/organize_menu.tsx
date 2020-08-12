@@ -358,13 +358,13 @@ const filterConfigEditComponentByFieldType: {
   [FieldType.MultiCollaborator]: TextFilterRuleInput,
   [FieldType.MultiDocumentLink]: TextFilterRuleInput,
   [FieldType.MultiLineText]: TextFilterRuleInput,
-  [FieldType.MultiSelect]: TextFilterRuleInput,
+  [FieldType.MultiOption]: TextFilterRuleInput,
   [FieldType.Number]: NumberFilterRuleInput,
   [FieldType.PhoneNumber]: TextFilterRuleInput,
   [FieldType.SingleCollaborator]: TextFilterRuleInput,
   [FieldType.SingleDocumentLink]: TextFilterRuleInput,
   [FieldType.SingleLineText]: TextFilterRuleInput,
-  [FieldType.SingleSelect]: TextFilterRuleInput,
+  [FieldType.SingleOption]: TextFilterRuleInput,
   [FieldType.URL]: TextFilterRuleInput,
 };
 

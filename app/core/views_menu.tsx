@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { useGetView, useGetCollectionViews } from '../data/store';
-import { Container, Text, Spacer, Button, Row, Icon } from '../components';
+import { Container, Text, Spacer, Button } from '../components';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
 import { createStackNavigator } from '@react-navigation/stack';

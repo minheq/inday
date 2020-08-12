@@ -34,7 +34,7 @@ import { Slide } from '../components/slide';
 import { FieldType } from '../data/constants';
 import { Field } from '../data/fields';
 import {
-  DocumentFieldValue,
+  FieldValue,
   assertCheckboxFieldValue,
   assertCurrencyFieldValue,
   assertDateFieldValue,
@@ -42,13 +42,13 @@ import {
   assertMultiCollaboratorFieldValue,
   assertMultiDocumentLinkFieldValue,
   assertMultiLineTextFieldValue,
-  assertMultiSelectFieldValue,
+  assertMultiOptionFieldValue,
   assertNumberFieldValue,
   assertPhoneNumberFieldValue,
   assertSingleCollaboratorFieldValue,
   assertSingleDocumentLinkFieldValue,
   assertSingleLineTextFieldValue,
-  assertSingleSelectFieldValue,
+  assertSingleOptionFieldValue,
   assertURLFieldValue,
 } from '../data/documents';
 import {
@@ -59,13 +59,13 @@ import {
   assertMultiCollaboratorField,
   assertMultiDocumentLinkField,
   assertMultiLineTextField,
-  assertMultiSelectField,
+  assertMultiOptionField,
   assertNumberField,
   assertPhoneNumberField,
   assertSingleCollaboratorField,
   assertSingleDocumentLinkField,
   assertSingleLineTextField,
-  assertSingleSelectField,
+  assertSingleOptionField,
   assertURLField,
 } from '../data/fields';
 import { format } from 'date-fns';
@@ -433,7 +433,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
 
 const documentFieldValueComponentByFieldType: {
   [fieldType in FieldType]: (
-    value: DocumentFieldValue,
+    value: FieldValue,
     field: Field,
   ) => React.ReactNode;
 } = {
@@ -484,9 +484,9 @@ const documentFieldValueComponentByFieldType: {
 
     return <Text>{value}</Text>;
   },
-  [FieldType.MultiSelect]: (value, field) => {
-    assertMultiSelectFieldValue(value);
-    assertMultiSelectField(field);
+  [FieldType.MultiOption]: (value, field) => {
+    assertMultiOptionFieldValue(value);
+    assertMultiOptionField(field);
 
     return <Text>{value[0]}</Text>;
   },
@@ -521,9 +521,9 @@ const documentFieldValueComponentByFieldType: {
 
     return <Text>{value}</Text>;
   },
-  [FieldType.SingleSelect]: (value, field) => {
-    assertSingleSelectFieldValue(value);
-    assertSingleSelectField(field);
+  [FieldType.SingleOption]: (value, field) => {
+    assertSingleOptionFieldValue(value);
+    assertSingleOptionField(field);
 
     return <Text>{value}</Text>;
   },

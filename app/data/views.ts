@@ -6,48 +6,30 @@ import { FieldType } from './constants';
 import { FieldID, fieldQuery, Field } from './fields';
 import {
   Document,
-  DocumentFieldValue,
-  assertCheckboxFieldValue,
-  assertCurrencyFieldValue,
-  assertDateFieldValue,
-  assertEmailFieldValue,
-  assertMultiCollaboratorFieldValue,
-  assertMultiDocumentLinkFieldValue,
-  assertMultiLineTextFieldValue,
-  assertMultiSelectFieldValue,
+  FieldValue,
+  assertTextFieldValue,
   assertNumberFieldValue,
-  assertPhoneNumberFieldValue,
-  assertSingleCollaboratorFieldValue,
-  assertSingleDocumentLinkFieldValue,
-  assertSingleLineTextFieldValue,
+  assertDateFieldValue,
   assertSingleSelectFieldValue,
-  assertURLFieldValue,
+  assertMultiSelectFieldValue,
+  assertBooleanFieldValue,
 } from './documents';
 import { collectionDocumentsQuery } from './collections';
 import {
   Filter,
-  assertCheckboxFieldFilter,
-  assertCurrencyFieldFilter,
-  assertDateFieldFilter,
-  assertEmailFieldFilter,
-  assertMultiCollaboratorFieldFilter,
-  assertMultiDocumentLinkFieldFilter,
-  assertMultiLineTextFieldFilter,
-  assertMultiSelectFieldFilter,
-  assertNumberFieldFilter,
-  assertPhoneNumberFieldFilter,
-  assertSingleCollaboratorFieldFilter,
-  assertSingleDocumentLinkFieldFilter,
-  assertSingleLineTextFieldFilter,
-  assertSingleSelectFieldFilter,
-  assertURLFieldFilter,
-  booleanFiltersByRule,
-  dateFiltersByRule,
-  multiSelectFiltersByRule,
-  numberFiltersByRule,
-  singleSelectFiltersByRule,
-  textFiltersByRule,
   filtersQuery,
+  applyTextFilter,
+  assertTextFilter,
+  applyNumberFilter,
+  assertNumberFilter,
+  assertDateFilter,
+  applyDateFilter,
+  assertSingleSelectFilter,
+  applySingleSelectFilter,
+  assertMultiSelectFilter,
+  applyMultiSelectFilter,
+  assertBooleanFilter,
+  applyBooleanFilter,
 } from './filters';
 import { last, isEmpty } from '../../lib/data_structures/arrays';
 
@@ -209,6 +191,7 @@ export function filterDocumentsByView(
     return filterGroups.some((filterGroup) => {
       return filterGroup.every((filter) => {
         const field = getField(filter.fieldID);
+
         const applyFilter = filtersByFieldType[field.type];
 
         return applyFilter(doc.fields[filter.fieldID], filter);
@@ -220,131 +203,63 @@ export function filterDocumentsByView(
 }
 
 const filtersByFieldType: {
-  [fieldType in FieldType]: (
-    value: DocumentFieldValue,
-    filter: Filter,
-  ) => boolean;
+  [fieldType in FieldType]: (value: FieldValue, filter: Filter) => boolean;
 } = {
-  [FieldType.Checkbox]: (value, filter) => {
-    assertCheckboxFieldValue(value);
-    assertCheckboxFieldFilter(filter);
-
-    const applyFilter = booleanFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.Currency]: (value, filter) => {
-    assertCurrencyFieldValue(value);
-    assertCurrencyFieldFilter(filter);
-
-    const applyFilter = numberFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.Date]: (value, filter) => {
-    assertDateFieldValue(value);
-    assertDateFieldFilter(filter);
-
-    const applyFilter = dateFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.Email]: (value, filter) => {
-    assertEmailFieldValue(value);
-    assertEmailFieldFilter(filter);
-
-    const applyFilter = textFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiCollaborator]: (value, filter) => {
-    assertMultiCollaboratorFieldValue(value);
-    assertMultiCollaboratorFieldFilter(filter);
-
-    const applyFilter = multiSelectFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiDocumentLink]: (value, filter) => {
-    assertMultiDocumentLinkFieldValue(value);
-    assertMultiDocumentLinkFieldFilter(filter);
-
-    const applyFilter = multiSelectFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiLineText]: (value, filter) => {
-    assertMultiLineTextFieldValue(value);
-    assertMultiLineTextFieldFilter(filter);
-
-    const applyFilter = textFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.MultiSelect]: (value, filter) => {
-    assertMultiSelectFieldValue(value);
-    assertMultiSelectFieldFilter(filter);
-
-    const applyFilter = multiSelectFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.Number]: (value, filter) => {
-    assertNumberFieldValue(value);
-    assertNumberFieldFilter(filter);
-
-    const applyFilter = numberFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.PhoneNumber]: (value, filter) => {
-    assertPhoneNumberFieldValue(value);
-    assertPhoneNumberFieldFilter(filter);
-
-    const applyFilter = textFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.SingleCollaborator]: (value, filter) => {
-    assertSingleCollaboratorFieldValue(value);
-    assertSingleCollaboratorFieldFilter(filter);
-
-    const applyFilter = singleSelectFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-
-  [FieldType.SingleDocumentLink]: (value, filter) => {
-    assertSingleDocumentLinkFieldValue(value);
-    assertSingleDocumentLinkFieldFilter(filter);
-
-    const applyFilter = singleSelectFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.SingleLineText]: (value, filter) => {
-    assertSingleLineTextFieldValue(value);
-    assertSingleLineTextFieldFilter(filter);
-
-    const applyFilter = textFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-
-  [FieldType.SingleSelect]: (value, filter) => {
-    assertSingleSelectFieldValue(value);
-    assertSingleSelectFieldFilter(filter);
-
-    const applyFilter = singleSelectFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
-  [FieldType.URL]: (value, filter) => {
-    assertURLFieldValue(value);
-    assertURLFieldFilter(filter);
-
-    const applyFilter = textFiltersByRule[filter.rule];
-
-    return applyFilter(value, filter.value);
-  },
+  [FieldType.Checkbox]: booleanFilter,
+  [FieldType.Currency]: numberFilter,
+  [FieldType.Date]: dateFilter,
+  [FieldType.Email]: textFilter,
+  [FieldType.MultiCollaborator]: multiSelectFilter,
+  [FieldType.MultiDocumentLink]: multiSelectFilter,
+  [FieldType.MultiLineText]: textFilter,
+  [FieldType.MultiOption]: multiSelectFilter,
+  [FieldType.Number]: numberFilter,
+  [FieldType.PhoneNumber]: textFilter,
+  [FieldType.SingleCollaborator]: singleSelectFilter,
+  [FieldType.SingleDocumentLink]: singleSelectFilter,
+  [FieldType.SingleLineText]: textFilter,
+  [FieldType.SingleOption]: singleSelectFilter,
+  [FieldType.URL]: textFilter,
 };
+
+function textFilter(value: FieldValue, filter: Filter) {
+  assertTextFieldValue(value);
+  assertTextFilter(filter);
+
+  return applyTextFilter(value, filter);
+}
+
+function numberFilter(value: FieldValue, filter: Filter) {
+  assertNumberFieldValue(value);
+  assertNumberFilter(filter);
+
+  return applyNumberFilter(value, filter);
+}
+
+function dateFilter(value: FieldValue, filter: Filter) {
+  assertDateFieldValue(value);
+  assertDateFilter(filter);
+
+  return applyDateFilter(value, filter);
+}
+
+function singleSelectFilter(value: FieldValue, filter: Filter) {
+  assertSingleSelectFieldValue(value);
+  assertSingleSelectFilter(filter);
+
+  return applySingleSelectFilter(value, filter);
+}
+
+function multiSelectFilter(value: FieldValue, filter: Filter) {
+  assertMultiSelectFieldValue(value);
+  assertMultiSelectFilter(filter);
+
+  return applyMultiSelectFilter(value, filter);
+}
+
+function booleanFilter(value: FieldValue, filter: Filter) {
+  assertBooleanFieldValue(value);
+  assertBooleanFilter(filter);
+
+  return applyBooleanFilter(value, filter);
+}

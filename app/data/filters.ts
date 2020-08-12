@@ -10,21 +10,14 @@ import { RecoilKey, FieldType } from './constants';
 import { FieldID, Field } from './fields';
 import { ViewID } from './views';
 import {
-  DateFieldValue,
-  CurrencyFieldValue,
+  DateValue,
+  CurrencyValue,
   NumberFieldValue,
-  SingleLineTextFieldValue,
-  MultiLineTextFieldValue,
-  URLFieldValue,
-  PhoneNumberFieldValue,
-  EmailFieldValue,
-  SingleCollaboratorFieldValue,
+  CheckboxValue,
+  TextFieldValue,
   SingleSelectFieldValue,
-  SingleDocumentLinkFieldValue,
-  MultiCollaboratorFieldValue,
-  MultiDocumentLinkFieldValue,
   MultiSelectFieldValue,
-  CheckboxFieldValue,
+  BooleanFieldValue,
 } from './documents';
 
 export type FilterID = string;
@@ -96,14 +89,14 @@ export interface MultiLineTextFieldFilter
   extends BaseFilter,
     MultiLineTextFieldFilterConfig {}
 
-export interface MultiSelectFieldFilterConfig {
+export interface MultiOptionFieldFilterConfig {
   fieldID: FieldID;
   rule: MultiSelectFilterRule;
   value: MultiSelectFilterRuleValue;
 }
-export interface MultiSelectFieldFilter
+export interface MultiOptionFieldFilter
   extends BaseFilter,
-    MultiSelectFieldFilterConfig {}
+    MultiOptionFieldFilterConfig {}
 
 export interface NumberFieldFilterConfig {
   fieldID: FieldID;
@@ -150,14 +143,14 @@ export interface SingleLineTextFieldFilter
   extends BaseFilter,
     SingleLineTextFieldFilterConfig {}
 
-export interface SingleSelectFieldFilterConfig {
+export interface SingleOptionFieldFilterConfig {
   fieldID: FieldID;
   rule: SingleSelectFilterRule;
   value: SingleSelectFilterRuleValue;
 }
-export interface SingleSelectFieldFilter
+export interface SingleOptionFieldFilter
   extends BaseFilter,
-    SingleSelectFieldFilterConfig {}
+    SingleOptionFieldFilterConfig {}
 
 export interface URLFieldFilterConfig {
   fieldID: FieldID;
@@ -253,12 +246,12 @@ export type DateFilter = DateFieldFilter;
 export type MultiSelectFilter =
   | MultiCollaboratorFieldFilter
   | MultiDocumentLinkFieldFilter
-  | MultiSelectFieldFilter;
+  | MultiOptionFieldFilter;
 export type NumberFilter = CurrencyFieldFilter | NumberFieldFilter;
 export type SingleSelectFilter =
   | SingleCollaboratorFieldFilter
   | SingleDocumentLinkFieldFilter
-  | SingleSelectFieldFilter;
+  | SingleOptionFieldFilter;
 export type TextFilter =
   | EmailFieldFilter
   | MultiLineTextFieldFilter
@@ -271,14 +264,14 @@ export type DateFilterConfig = DateFieldFilterConfig;
 export type MultiSelectFilterConfig =
   | MultiCollaboratorFieldFilterConfig
   | MultiDocumentLinkFieldFilterConfig
-  | MultiSelectFieldFilterConfig;
+  | MultiOptionFieldFilterConfig;
 export type NumberFilterConfig =
   | CurrencyFieldFilterConfig
   | NumberFieldFilterConfig;
 export type SingleSelectFilterConfig =
   | SingleCollaboratorFieldFilterConfig
   | SingleDocumentLinkFieldFilterConfig
-  | SingleSelectFieldFilterConfig;
+  | SingleOptionFieldFilterConfig;
 export type TextFilterConfig =
   | EmailFieldFilterConfig
   | MultiLineTextFieldFilterConfig
@@ -319,9 +312,9 @@ export function getDefaultFilterConfig(field: Field): FilterConfig {
       return { fieldID: field.id, rule: 'equal', value: null };
     case FieldType.MultiCollaborator:
     case FieldType.MultiDocumentLink:
-    case FieldType.MultiSelect:
+    case FieldType.MultiOption:
       return { fieldID: field.id, rule: 'hasAnyOf', value: [] };
-    case FieldType.SingleSelect:
+    case FieldType.SingleOption:
     case FieldType.SingleDocumentLink:
     case FieldType.SingleCollaborator:
       return { fieldID: field.id, rule: 'is', value: null };
@@ -363,185 +356,6 @@ export function updateFilterGroup(
   }
 
   return updatedFilters;
-}
-
-export function assertCheckboxFieldFilter(
-  filter: Filter,
-): asserts filter is CheckboxFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected CheckboxFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertBooleanFilterRule(filter.rule);
-}
-
-export function assertCurrencyFieldFilter(
-  filter: Filter,
-): asserts filter is CurrencyFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected CurrencyFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertNumberFilterRule(filter.rule);
-}
-
-export function assertDateFieldFilter(
-  filter: Filter,
-): asserts filter is DateFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected DateFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertDateFilterRule(filter.rule);
-}
-
-export function assertEmailFieldFilter(
-  filter: Filter,
-): asserts filter is EmailFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected EmailFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertTextFilterRule(filter.rule);
-}
-
-export function assertMultiCollaboratorFieldFilter(
-  filter: Filter,
-): asserts filter is MultiCollaboratorFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected MultiCollaboratorFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertMultiSelectFilterRule(filter.rule);
-}
-
-export function assertMultiDocumentLinkFieldFilter(
-  filter: Filter,
-): asserts filter is MultiDocumentLinkFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected MultiDocumentLinkFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertMultiSelectFilterRule(filter.rule);
-}
-
-export function assertMultiLineTextFieldFilter(
-  filter: Filter,
-): asserts filter is MultiLineTextFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected MultiLineTextFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertTextFilterRule(filter.rule);
-}
-
-export function assertMultiSelectFieldFilter(
-  filter: Filter,
-): asserts filter is MultiSelectFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected MultiSelectFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertMultiSelectFilterRule(filter.rule);
-}
-
-export function assertNumberFieldFilter(
-  filter: Filter,
-): asserts filter is NumberFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected NumberFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertNumberFilterRule(filter.rule);
-}
-
-export function assertPhoneNumberFieldFilter(
-  filter: Filter,
-): asserts filter is PhoneNumberFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected PhoneNumberFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertTextFilterRule(filter.rule);
-}
-
-export function assertSingleCollaboratorFieldFilter(
-  filter: Filter,
-): asserts filter is SingleCollaboratorFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected SingleCollaboratorFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertSingleSelectFilterRule(filter.rule);
-}
-export function assertSingleDocumentLinkFieldFilter(
-  filter: Filter,
-): asserts filter is SingleDocumentLinkFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected SingleDocumentLinkFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertSingleSelectFilterRule(filter.rule);
-}
-
-export function assertSingleLineTextFieldFilter(
-  filter: Filter,
-): asserts filter is SingleLineTextFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected SingleLineTextFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertTextFilterRule(filter.rule);
-}
-
-export function assertSingleSelectFieldFilter(
-  filter: Filter,
-): asserts filter is SingleSelectFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected SingleSelectFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertSingleSelectFilterRule(filter.rule);
-}
-
-export function assertURLFieldFilter(
-  filter: Filter,
-): asserts filter is URLFieldFilter {
-  if (typeof filter.value !== 'string') {
-    throw new Error(
-      `Expected URLFieldFilter to be string. Received ${filter.value}`,
-    );
-  }
-
-  assertTextFilterRule(filter.rule);
 }
 
 export function assertNumberFilterRule(
@@ -604,14 +418,16 @@ export function assertBooleanFilterRule(
   throw Error(`Expected one of valid BooleanFilterRule. Received ${rule}`);
 }
 
+export function applyTextFilter(
+  value: TextFieldValue,
+  filter: TextFilter,
+): boolean {
+  return textFiltersByRule[filter.rule](value, filter.value);
+}
+
 export const textFiltersByRule: {
   [rule in TextFilterRule]: (
-    value:
-      | SingleLineTextFieldValue
-      | MultiLineTextFieldValue
-      | URLFieldValue
-      | PhoneNumberFieldValue
-      | EmailFieldValue,
+    value: TextFieldValue,
     filterValue: TextFilterRuleValue,
   ) => boolean;
 } = {
@@ -635,9 +451,16 @@ export const textFiltersByRule: {
   },
 };
 
+export function applyNumberFilter(
+  value: NumberFieldValue,
+  filter: NumberFieldFilter,
+): boolean {
+  return numberFiltersByRule[filter.rule](value, filter.value);
+}
+
 export const numberFiltersByRule: {
   [rule in NumberFilterRule]: (
-    value: CurrencyFieldValue | NumberFieldValue,
+    value: CurrencyValue | NumberFieldValue,
     filterValue: NumberFilterRuleValue,
   ) => boolean;
 } = {
@@ -699,9 +522,16 @@ export const numberFiltersByRule: {
   },
 };
 
+export function applyDateFilter(
+  value: DateValue,
+  filter: DateFieldFilter,
+): boolean {
+  return dateFiltersByRule[filter.rule](value, filter.value);
+}
+
 export const dateFiltersByRule: {
   [rule in DateFilterRule]: (
-    value: DateFieldValue,
+    value: DateValue,
     filterValue: DateFilterRuleValue,
   ) => boolean;
 } = {
@@ -808,12 +638,16 @@ export const dateFiltersByRule: {
   },
 };
 
+export function applySingleSelectFilter(
+  value: SingleSelectFieldValue,
+  filter: SingleSelectFilter,
+): boolean {
+  return singleSelectFiltersByRule[filter.rule](value, filter.value);
+}
+
 export const singleSelectFiltersByRule: {
   [rule in SingleSelectFilterRule]: (
-    value:
-      | SingleCollaboratorFieldValue
-      | SingleSelectFieldValue
-      | SingleDocumentLinkFieldValue,
+    value: SingleSelectFieldValue,
     filterValue: SingleSelectFilterRuleValue,
   ) => boolean;
 } = {
@@ -885,12 +719,16 @@ export const singleSelectFiltersByRule: {
   },
 };
 
+export function applyMultiSelectFilter(
+  value: MultiSelectFieldValue,
+  filter: MultiSelectFilter,
+): boolean {
+  return multiSelectFiltersByRule[filter.rule](value, filter.value);
+}
+
 export const multiSelectFiltersByRule: {
   [rule in MultiSelectFilterRule]: (
-    value:
-      | MultiCollaboratorFieldValue
-      | MultiDocumentLinkFieldValue
-      | MultiSelectFieldValue,
+    value: MultiSelectFieldValue,
     filterValue: MultiSelectFilterRuleValue,
   ) => boolean;
 } = {
@@ -923,9 +761,16 @@ export const multiSelectFiltersByRule: {
   },
 };
 
+export function applyBooleanFilter(
+  value: BooleanFieldValue,
+  filter: BooleanFilter,
+): boolean {
+  return booleanFiltersByRule[filter.rule](value, filter.value);
+}
+
 export const booleanFiltersByRule: {
   [rule in BooleanFilterRule]: (
-    value: CheckboxFieldValue,
+    value: CheckboxValue,
     filterValue: BooleanFilterRuleValue,
   ) => boolean;
 } = {

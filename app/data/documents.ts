@@ -4,38 +4,46 @@ import { RecoilKey } from './constants';
 import { documentsByIDFixtures } from './fixtures';
 import { CollaboratorID } from './collaborators';
 
-export type CheckboxFieldValue = boolean;
-export type CurrencyFieldValue = number | null;
-export type DateFieldValue = Date | null;
-export type EmailFieldValue = string;
-export type MultiCollaboratorFieldValue = CollaboratorID[];
-export type MultiDocumentLinkFieldValue = DocumentID[];
-export type MultiLineTextFieldValue = string;
-export type MultiSelectFieldValue = string[];
-export type NumberFieldValue = number | null;
-export type PhoneNumberFieldValue = string;
-export type SingleCollaboratorFieldValue = CollaboratorID | null;
-export type SingleDocumentLinkFieldValue = DocumentID | null;
-export type SingleLineTextFieldValue = string;
-export type SingleSelectFieldValue = string | null;
-export type URLFieldValue = string;
+export type CheckboxValue = boolean;
+export type CurrencyValue = number | null;
+export type DateValue = Date | null;
+export type EmailValue = string;
+export type MultiCollaboratorValue = CollaboratorID[];
+export type MultiDocumentLinkValue = DocumentID[];
+export type MultiLineTextValue = string;
+export type MultiOptionValue = string[];
+export type NumberValue = number | null;
+export type PhoneNumberValue = string;
+export type SingleCollaboratorValue = CollaboratorID | null;
+export type SingleDocumentLinkValue = DocumentID | null;
+export type SingleLineTextValue = string;
+export type SingleOptionValue = string | null;
+export type URLValue = string;
 
-export type DocumentFieldValue =
-  | CheckboxFieldValue
-  | CurrencyFieldValue
+export type BooleanFieldValue = CheckboxValue;
+export type DateFieldValue = DateValue;
+export type MultiSelectFieldValue =
+  | MultiCollaboratorValue
+  | MultiDocumentLinkValue
+  | MultiOptionValue;
+export type NumberFieldValue = CurrencyValue | NumberValue;
+export type SingleSelectFieldValue =
+  | SingleCollaboratorValue
+  | SingleDocumentLinkValue
+  | SingleOptionValue;
+export type TextFieldValue =
+  | EmailValue
+  | MultiLineTextValue
+  | PhoneNumberValue
+  | SingleLineTextValue
+  | URLValue;
+export type FieldValue =
+  | BooleanFieldValue
   | DateFieldValue
-  | EmailFieldValue
-  | MultiCollaboratorFieldValue
-  | MultiDocumentLinkFieldValue
-  | MultiLineTextFieldValue
   | MultiSelectFieldValue
   | NumberFieldValue
-  | PhoneNumberFieldValue
-  | SingleCollaboratorFieldValue
-  | SingleDocumentLinkFieldValue
-  | SingleLineTextFieldValue
   | SingleSelectFieldValue
-  | URLFieldValue;
+  | TextFieldValue;
 
 export type DocumentID = string;
 
@@ -44,7 +52,7 @@ export interface Document {
   createdAt: Date;
   updatedAt: Date;
   fields: {
-    [fieldID: string]: DocumentFieldValue;
+    [fieldID: string]: FieldValue;
   };
   collectionID: string;
 }
@@ -80,56 +88,50 @@ export const documentQuery = selectorFamily<Document, string>({
 });
 
 export function assertCheckboxFieldValue(
-  value: DocumentFieldValue,
-): asserts value is CheckboxFieldValue {
+  value: FieldValue,
+): asserts value is CheckboxValue {
   if (typeof value !== 'boolean') {
-    throw new Error(
-      `Expected CurrencyFieldValue to be boolean. Received ${value}`,
-    );
+    throw new Error(`Expected CurrencyValue to be boolean. Received ${value}`);
   }
 }
 
 export function assertCurrencyFieldValue(
-  value: DocumentFieldValue,
-): asserts value is CurrencyFieldValue {
+  value: FieldValue,
+): asserts value is CurrencyValue {
   if (value === null) {
     return;
   }
 
   if (typeof value !== 'number') {
-    throw new Error(
-      `Expected CurrencyFieldValue to be number. Received ${value}`,
-    );
+    throw new Error(`Expected CurrencyValue to be number. Received ${value}`);
   }
 }
 
-export function assertDateFieldValue(
-  value: DocumentFieldValue,
-): asserts value is DateFieldValue {
+export function assertDateValue(value: FieldValue): asserts value is DateValue {
   if (value === null) {
     return;
   }
 
   if (!(value instanceof Date)) {
-    throw new Error(`Expected DateFieldValue to be Date. Received ${value}`);
+    throw new Error(`Expected DateValue to be Date. Received ${value}`);
   }
 }
 
 export function assertEmailFieldValue(
-  value: DocumentFieldValue,
-): asserts value is EmailFieldValue {
+  value: FieldValue,
+): asserts value is EmailValue {
   if (value === null) {
     return;
   }
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected EmailFieldValue to be string. Received ${value}`);
+    throw new Error(`Expected EmailValue to be string. Received ${value}`);
   }
 }
 
 export function assertMultiCollaboratorFieldValue(
-  value: DocumentFieldValue,
-): asserts value is MultiCollaboratorFieldValue {
+  value: FieldValue,
+): asserts value is MultiCollaboratorValue {
   if (value === null) {
     return;
   }
@@ -142,8 +144,8 @@ export function assertMultiCollaboratorFieldValue(
 }
 
 export function assertMultiDocumentLinkFieldValue(
-  value: DocumentFieldValue,
-): asserts value is MultiDocumentLinkFieldValue {
+  value: FieldValue,
+): asserts value is MultiDocumentLinkValue {
   if (value === null) {
     return;
   }
@@ -156,8 +158,8 @@ export function assertMultiDocumentLinkFieldValue(
 }
 
 export function assertMultiLineTextFieldValue(
-  value: DocumentFieldValue,
-): asserts value is MultiLineTextFieldValue {
+  value: FieldValue,
+): asserts value is MultiLineTextValue {
   if (value === null) {
     return;
   }
@@ -169,23 +171,23 @@ export function assertMultiLineTextFieldValue(
   }
 }
 
-export function assertMultiSelectFieldValue(
-  value: DocumentFieldValue,
-): asserts value is MultiSelectFieldValue {
+export function assertMultiOptionFieldValue(
+  value: FieldValue,
+): asserts value is MultiOptionValue {
   if (value === null) {
     return;
   }
 
   if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiSelectFieldValue to be string[]. Received ${value}`,
+      `Expected MultiOptionFieldValue to be string[]. Received ${value}`,
     );
   }
 }
 
-export function assertNumberFieldValue(
-  value: DocumentFieldValue,
-): asserts value is NumberFieldValue {
+export function assertNumberValue(
+  value: FieldValue,
+): asserts value is NumberValue {
   if (value === null) {
     return;
   }
@@ -198,8 +200,8 @@ export function assertNumberFieldValue(
 }
 
 export function assertPhoneNumberFieldValue(
-  value: DocumentFieldValue,
-): asserts value is PhoneNumberFieldValue {
+  value: FieldValue,
+): asserts value is PhoneNumberValue {
   if (value === null) {
     return;
   }
@@ -212,8 +214,8 @@ export function assertPhoneNumberFieldValue(
 }
 
 export function assertSingleCollaboratorFieldValue(
-  value: DocumentFieldValue,
-): asserts value is SingleCollaboratorFieldValue {
+  value: FieldValue,
+): asserts value is SingleCollaboratorValue {
   if (value === null) {
     return;
   }
@@ -225,8 +227,8 @@ export function assertSingleCollaboratorFieldValue(
   }
 }
 export function assertSingleDocumentLinkFieldValue(
-  value: DocumentFieldValue,
-): asserts value is SingleDocumentLinkFieldValue {
+  value: FieldValue,
+): asserts value is SingleDocumentLinkValue {
   if (value === null) {
     return;
   }
@@ -238,8 +240,8 @@ export function assertSingleDocumentLinkFieldValue(
   }
 }
 export function assertSingleLineTextFieldValue(
-  value: DocumentFieldValue,
-): asserts value is SingleLineTextFieldValue {
+  value: FieldValue,
+): asserts value is SingleLineTextValue {
   if (value === null) {
     return;
   }
@@ -251,28 +253,76 @@ export function assertSingleLineTextFieldValue(
   }
 }
 
-export function assertSingleSelectFieldValue(
-  value: DocumentFieldValue,
-): asserts value is SingleSelectFieldValue {
+export function assertSingleOptionFieldValue(
+  value: FieldValue,
+): asserts value is SingleOptionValue {
   if (value === null) {
     return;
   }
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleSelectFieldValue to be string. Received ${value}`,
+      `Expected SingleOptionFieldValue to be string. Received ${value}`,
     );
   }
 }
 
 export function assertURLFieldValue(
-  value: DocumentFieldValue,
-): asserts value is URLFieldValue {
+  value: FieldValue,
+): asserts value is URLValue {
   if (value === null) {
     return;
   }
 
   if (typeof value !== 'string') {
     throw new Error(`Expected URLFieldValue to be string. Received ${value}`);
+  }
+}
+
+export function assertBooleanFieldValue(
+  value: FieldValue,
+): asserts value is BooleanFieldValue {
+  if (typeof value !== 'boolean') {
+    throw new Error(`Expected BooleanFieldValue. Received ${value}`);
+  }
+}
+
+export function assertDateFieldValue(
+  value: FieldValue,
+): asserts value is DateFieldValue {
+  if (value !== null || !((value as any) instanceof Date)) {
+    throw new Error(`Expected DateFieldValue. Received ${value}`);
+  }
+}
+
+export function assertMultiSelectFieldValue(
+  value: FieldValue,
+): asserts value is MultiSelectFieldValue {
+  if (Array.isArray(value) === false) {
+    throw new Error(`Expected MultiSelectFieldValue. Received ${value}`);
+  }
+}
+
+export function assertNumberFieldValue(
+  value: FieldValue,
+): asserts value is NumberFieldValue {
+  if (value !== null || typeof value !== 'number') {
+    throw new Error(`Expected NumberFieldValue. Received ${value}`);
+  }
+}
+
+export function assertSingleSelectFieldValue(
+  value: FieldValue,
+): asserts value is SingleSelectFieldValue {
+  if (value !== null || typeof value !== 'string') {
+    throw new Error(`Expected SingleSelectFieldValue. Received ${value}`);
+  }
+}
+
+export function assertTextFieldValue(
+  value: FieldValue,
+): asserts value is TextFieldValue {
+  if (typeof value !== 'string') {
+    throw new Error(`Expected TextFieldValue. Received ${value}`);
   }
 }

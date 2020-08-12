@@ -35,19 +35,19 @@ interface SelectOption {
   color: string;
 }
 
-export interface SingleSelectFieldConfig {
-  type: FieldType.SingleSelect;
+export interface SingleOptionFieldConfig {
+  type: FieldType.SingleOption;
   options: SelectOption[];
   order: string[];
 }
-export interface SingleSelectField extends BaseField, SingleSelectFieldConfig {}
+export interface SingleOptionField extends BaseField, SingleOptionFieldConfig {}
 
-export interface MultiSelectFieldConfig {
-  type: FieldType.MultiSelect;
+export interface MultiOptionFieldConfig {
+  type: FieldType.MultiOption;
   options: SelectOption[];
   order: string[];
 }
-export interface MultiSelectField extends BaseField, MultiSelectFieldConfig {}
+export interface MultiOptionField extends BaseField, MultiOptionFieldConfig {}
 
 export interface SingleCollaboratorFieldConfig {
   type: FieldType.SingleCollaborator;
@@ -138,13 +138,13 @@ export type FieldConfig =
   | MultiCollaboratorFieldConfig
   | MultiDocumentLinkFieldConfig
   | MultiLineTextFieldConfig
-  | MultiSelectFieldConfig
+  | MultiOptionFieldConfig
   | NumberFieldConfig
   | PhoneNumberFieldConfig
   | SingleCollaboratorFieldConfig
   | SingleDocumentLinkFieldConfig
   | SingleLineTextFieldConfig
-  | SingleSelectFieldConfig
+  | SingleOptionFieldConfig
   | URLFieldConfig;
 
 export type Field =
@@ -155,13 +155,13 @@ export type Field =
   | MultiCollaboratorField
   | MultiDocumentLinkField
   | MultiLineTextField
-  | MultiSelectField
+  | MultiOptionField
   | NumberField
   | PhoneNumberField
   | SingleCollaboratorField
   | SingleDocumentLinkField
   | SingleLineTextField
-  | SingleSelectField
+  | SingleOptionField
   | URLField;
 
 export type FieldsByIDState = { [fieldID: string]: Field | undefined };
@@ -214,22 +214,22 @@ export function assertMultiLineTextField(
   }
 }
 
-export function assertSingleSelectField(
+export function assertSingleOptionField(
   field: Field,
-): asserts field is SingleSelectField {
-  if (field.type !== FieldType.SingleSelect) {
+): asserts field is SingleOptionField {
+  if (field.type !== FieldType.SingleOption) {
     throw new Error(
-      `Expected field to be SingleSelectField. Received ${field.type}`,
+      `Expected field to be SingleOptionField. Received ${field.type}`,
     );
   }
 }
 
-export function assertMultiSelectField(
+export function assertMultiOptionField(
   field: Field,
-): asserts field is MultiSelectField {
-  if (field.type !== FieldType.MultiSelect) {
+): asserts field is MultiOptionField {
+  if (field.type !== FieldType.MultiOption) {
     throw new Error(
-      `Expected field to be MultiSelectField. Received ${field.type}`,
+      `Expected field to be MultiOptionField. Received ${field.type}`,
     );
   }
 }

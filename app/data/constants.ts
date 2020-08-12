@@ -36,8 +36,8 @@ export enum StorageKeyPrefix {}
 export enum FieldType {
   SingleLineText = 'SingleLineText',
   MultiLineText = 'MultiLineText',
-  SingleSelect = 'SingleSelect',
-  MultiSelect = 'MultiSelect',
+  SingleOption = 'SingleOption',
+  MultiOption = 'MultiOption',
   SingleCollaborator = 'SingleCollaborator',
   MultiCollaborator = 'MultiCollaborator',
   SingleDocumentLink = 'SingleDocumentLink',

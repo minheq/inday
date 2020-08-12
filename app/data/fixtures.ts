@@ -5,8 +5,8 @@ import {
   NumberField,
   SingleLineTextField,
   MultiLineTextField,
-  SingleSelectField,
-  MultiSelectField,
+  SingleOptionField,
+  MultiOptionField,
   SingleCollaboratorField,
   MultiCollaboratorField,
   SingleDocumentLinkField,
@@ -108,7 +108,7 @@ export const col1Field2: MultiLineTextField = {
   createdAt: new Date(),
 };
 
-export const col1Field3: SingleSelectField = {
+export const col1Field3: SingleOptionField = {
   id: '13',
   name: 'Status',
   description: '',
@@ -118,13 +118,13 @@ export const col1Field3: SingleSelectField = {
     { value: 'Evaluation', color: 'black' },
   ],
   order: ['Qualification', 'Proposal', 'Evaluation'],
-  type: FieldType.SingleSelect,
+  type: FieldType.SingleOption,
   collectionID: collection1.id,
   updatedAt: new Date(),
   createdAt: new Date(),
 };
 
-export const col1Field4: MultiSelectField = {
+export const col1Field4: MultiOptionField = {
   id: '14',
   name: 'Tags',
   description: '',
@@ -134,7 +134,7 @@ export const col1Field4: MultiSelectField = {
     { value: 'Evaluation', color: 'black' },
   ],
   order: ['Qualification', 'Proposal', 'Evaluation'],
-  type: FieldType.MultiSelect,
+  type: FieldType.MultiOption,
   collectionID: collection1.id,
   updatedAt: new Date(),
   createdAt: new Date(),
@@ -266,9 +266,6 @@ export const col1View1: ListView = {
   name: 'All opportunities',
   type: 'list',
   collectionID: collection1.id,
-  filters: [],
-  sorts: [],
-  groups: [],
   fieldsOrder: [
     col1Field1.id,
     col1Field2.id,
@@ -312,9 +309,6 @@ export const col1View2: ListView = {
   name: 'Grouped by owner',
   type: 'list',
   collectionID: collection1.id,
-  filters: [],
-  sorts: [],
-  groups: [],
   fieldsOrder: [
     col1Field1.id,
     col1Field2.id,
