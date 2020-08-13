@@ -433,10 +433,10 @@ export const textFiltersByRule: {
   ) => boolean;
 } = {
   contains: (value, filterValue) => {
-    return value.includes(filterValue);
+    return value.toLowerCase().includes(filterValue.toLowerCase());
   },
   doesNotContain: (value, filterValue) => {
-    return !value.includes(filterValue);
+    return !value.toLowerCase().includes(filterValue.toLowerCase());
   },
   is: (value, filterValue) => {
     return value === filterValue;

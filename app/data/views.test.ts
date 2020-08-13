@@ -34,7 +34,7 @@ describe('filtering text', () => {
     const textFilterConfig: TextFilterConfig = {
       fieldID: textField.id,
       rule: 'contains',
-      value: doc.fields[textField.id] as string,
+      value: (doc.fields[textField.id] as string).toUpperCase(),
     };
     const textFilter = makeFilter({}, textFilterConfig);
     const filterGroups: FilterGroup[] = [[textFilter]];
