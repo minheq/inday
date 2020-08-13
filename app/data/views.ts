@@ -1,7 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
-import { viewsByIDFixtures } from './fixtures';
+import { viewsByIDFixtures } from './fake_data';
 import { FieldType } from './constants';
 import { FieldID, fieldQuery, Field } from './fields';
 import {

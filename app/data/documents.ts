@@ -1,7 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
-import { documentsByIDFixtures } from './fixtures';
+import { documentsByIDFixtures } from './fake_data';
 import { CollaboratorID } from './collaborators';
 
 export type CheckboxValue = boolean;
@@ -291,7 +291,7 @@ export function assertBooleanFieldValue(
 export function assertDateFieldValue(
   value: FieldValue,
 ): asserts value is DateFieldValue {
-  if (value !== null || !((value as any) instanceof Date)) {
+  if (value !== null && !((value as any) instanceof Date)) {
     throw new Error(`Expected DateFieldValue. Received ${value}`);
   }
 }
@@ -307,7 +307,7 @@ export function assertMultiSelectFieldValue(
 export function assertNumberFieldValue(
   value: FieldValue,
 ): asserts value is NumberFieldValue {
-  if (value !== null || typeof value !== 'number') {
+  if (value !== null && typeof value !== 'number') {
     throw new Error(`Expected NumberFieldValue. Received ${value}`);
   }
 }
@@ -315,7 +315,7 @@ export function assertNumberFieldValue(
 export function assertSingleSelectFieldValue(
   value: FieldValue,
 ): asserts value is SingleSelectFieldValue {
-  if (value !== null || typeof value !== 'string') {
+  if (value !== null && typeof value !== 'string') {
     throw new Error(`Expected SingleSelectFieldValue. Received ${value}`);
   }
 }

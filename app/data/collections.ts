@@ -3,7 +3,7 @@ import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import { fieldsQuery, Field } from './fields';
 import { Document, documentsQuery } from './documents';
-import { collection1, collection2 } from './fixtures';
+import { collectionsByIDFixtures } from './fake_data';
 import { View, viewsQuery } from './views';
 
 export type CollectionID = string;
@@ -19,10 +19,7 @@ export interface Collection {
 export type CollectionsByIDState = { [id: string]: Collection | undefined };
 export const collectionsByIDState = atom<CollectionsByIDState>({
   key: RecoilKey.CollectionsByID,
-  default: {
-    [collection1.id]: collection1,
-    [collection2.id]: collection2,
-  },
+  default: collectionsByIDFixtures,
   // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });

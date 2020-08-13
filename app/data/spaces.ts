@@ -1,7 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import { collectionsQuery, Collection } from './collections';
-import { spacesByIDFixtures } from './fixtures';
+import { spacesByIDFixtures } from './fake_data';
 
 export type SpaceID = string;
 

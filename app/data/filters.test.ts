@@ -14,8 +14,12 @@ describe('textFiltersByRule', () => {
   describe('contains', () => {
     const filter = textFiltersByRule.contains;
 
-    test('ok', () => {
+    test('ok same case', () => {
       expect(filter('abc', 'a')).toBeTruthy();
+    });
+
+    test('ok difference case', () => {
+      expect(filter('abc', 'A')).toBeTruthy();
     });
 
     test('not ok', () => {

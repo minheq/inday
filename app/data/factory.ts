@@ -17,6 +17,7 @@ import { Collection } from './collections';
 import { Document, FieldValue } from './documents';
 import { groupByID } from '../../lib/data_structures/objects';
 import { Filter, FilterConfig } from './filters';
+import { range, isEmpty } from '../../lib/data_structures/arrays';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -249,6 +250,19 @@ export function makeView(
   };
 }
 
+export function makeManyDocuments(
+  count: number,
+  collection: CollectionWithFields,
+  documentsByFieldID?: {
+    [fieldID: string]: Document[];
+  },
+  collaborators?: Collaborator[],
+) {
+  return range(0, count).map(() => {
+    return makeDocument({}, collection, documentsByFieldID, collaborators);
+  });
+}
+
 export function makeDocument(
   document: Partial<Document>,
   collection: CollectionWithFields,
@@ -269,7 +283,7 @@ export function makeDocument(
   return {
     id: document.id ?? generateID(),
     fields,
-    collectionID: document.collectionID ?? generateID(),
+    collectionID: document.collectionID ?? collection.id ?? generateID(),
     updatedAt: document.updatedAt ?? new Date(),
     createdAt: document.createdAt ?? new Date(),
   };
@@ -303,16 +317,24 @@ const fakeFieldValuesByFieldType: {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    return faker.helpers.randomize(collaborators.map((c) => c.id));
+    if (isEmpty(collaborators)) {
+      return [];
+    }
+
+    return [faker.helpers.randomize(collaborators.map((c) => c.id))];
   },
   [FieldType.MultiDocumentLink]: (field, documentsByFieldID) => {
     if (documentsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    return faker.helpers.randomize(
-      documentsByFieldID[field.id].map((d) => d.id),
-    );
+    if (isEmpty(documentsByFieldID[field.id])) {
+      return [];
+    }
+
+    return [
+      faker.helpers.randomize(documentsByFieldID[field.id].map((d) => d.id)),
+    ];
   },
   [FieldType.MultiLineText]: () => {
     return faker.random.words();
@@ -320,7 +342,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.MultiOption]: (field) => {
     assertMultiOptionField(field);
 
-    return faker.helpers.randomize(field.options).value;
+    return [faker.helpers.randomize(field.options).value];
   },
   [FieldType.Number]: () => {
     return faker.random.number();
@@ -339,11 +361,19 @@ const fakeFieldValuesByFieldType: {
       throw new Error('Expected collaborators list to be passed in');
     }
 
+    if (isEmpty(collaborators)) {
+      return null;
+    }
+
     return faker.helpers.randomize(collaborators.map((c) => c.id));
   },
   [FieldType.SingleDocumentLink]: (field, documentsByFieldID) => {
     if (documentsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
+    }
+
+    if (isEmpty(documentsByFieldID[field.id])) {
+      return null;
     }
 
     return faker.helpers.randomize(

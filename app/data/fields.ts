@@ -1,7 +1,7 @@
 import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey, FieldType } from './constants';
-import { fieldsByIDFixtures } from './fixtures';
+import { fieldsByIDFixtures } from './fake_data';
 
 export type FieldID = string;
 

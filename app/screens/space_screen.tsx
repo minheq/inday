@@ -164,7 +164,9 @@ function CollectionsMenu() {
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   if (activeCollection === undefined) {
-    throw new Error('Invalid collection');
+    throw new Error(
+      `Active collection not found. Expected to find collectionID=${view.collectionID} in viewID=${view.id}`,
+    );
   }
 
   return (
@@ -298,6 +300,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
   const collection = useGetCollection(view.collectionID);
   const fieldsByID = useGetCollectionFieldsByID(collection.id);
   const documents = useGetViewDocuments(view.id);
+
   const { fieldsOrder, fieldsConfig } = view;
 
   const headerScrollView = React.useRef<ScrollView>(null);
