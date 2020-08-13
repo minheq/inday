@@ -2,35 +2,10 @@ import { atom, selectorFamily, selector } from 'recoil';
 
 import { RecoilKey } from './constants';
 import { viewsByIDFixtures } from './fake_data';
-import { FieldType } from './constants';
 import { FieldID, fieldQuery, Field } from './fields';
-import {
-  Document,
-  FieldValue,
-  assertTextFieldValue,
-  assertNumberFieldValue,
-  assertDateFieldValue,
-  assertSingleSelectFieldValue,
-  assertMultiSelectFieldValue,
-  assertBooleanFieldValue,
-} from './documents';
+import { Document } from './documents';
 import { collectionDocumentsQuery } from './collections';
-import {
-  Filter,
-  filtersQuery,
-  applyTextFilter,
-  assertTextFilter,
-  applyNumberFilter,
-  assertNumberFilter,
-  assertDateFilter,
-  applyDateFilter,
-  assertSingleSelectFilter,
-  applySingleSelectFilter,
-  assertMultiSelectFilter,
-  applyMultiSelectFilter,
-  assertBooleanFilter,
-  applyBooleanFilter,
-} from './filters';
+import { Filter, filtersQuery, filtersByFieldType } from './filters';
 import { last, isEmpty } from '../../lib/data_structures/arrays';
 
 export type ViewID = string;
@@ -207,64 +182,14 @@ export function filterDocumentsByView(
   return filteredDocuments;
 }
 
-const filtersByFieldType: {
-  [fieldType in FieldType]: (value: FieldValue, filter: Filter) => boolean;
-} = {
-  [FieldType.Checkbox]: booleanFilter,
-  [FieldType.Currency]: numberFilter,
-  [FieldType.Date]: dateFilter,
-  [FieldType.Email]: textFilter,
-  [FieldType.MultiCollaborator]: multiSelectFilter,
-  [FieldType.MultiDocumentLink]: multiSelectFilter,
-  [FieldType.MultiLineText]: textFilter,
-  [FieldType.MultiOption]: multiSelectFilter,
-  [FieldType.Number]: numberFilter,
-  [FieldType.PhoneNumber]: textFilter,
-  [FieldType.SingleCollaborator]: singleSelectFilter,
-  [FieldType.SingleDocumentLink]: singleSelectFilter,
-  [FieldType.SingleLineText]: textFilter,
-  [FieldType.SingleOption]: singleSelectFilter,
-  [FieldType.URL]: textFilter,
-};
-
-function textFilter(value: FieldValue, filter: Filter) {
-  assertTextFieldValue(value);
-  assertTextFilter(filter);
-
-  return applyTextFilter(value, filter);
+export function assertListView(view: View): asserts view is ListView {
+  if (view.type !== 'list') {
+    throw new Error(`Expected view to be list. Received ${view.type}`);
+  }
 }
 
-function numberFilter(value: FieldValue, filter: Filter) {
-  assertNumberFieldValue(value);
-  assertNumberFilter(filter);
-
-  return applyNumberFilter(value, filter);
-}
-
-function dateFilter(value: FieldValue, filter: Filter) {
-  assertDateFieldValue(value);
-  assertDateFilter(filter);
-
-  return applyDateFilter(value, filter);
-}
-
-function singleSelectFilter(value: FieldValue, filter: Filter) {
-  assertSingleSelectFieldValue(value);
-  assertSingleSelectFilter(filter);
-
-  return applySingleSelectFilter(value, filter);
-}
-
-function multiSelectFilter(value: FieldValue, filter: Filter) {
-  assertMultiSelectFieldValue(value);
-  assertMultiSelectFilter(filter);
-
-  return applyMultiSelectFilter(value, filter);
-}
-
-function booleanFilter(value: FieldValue, filter: Filter) {
-  assertBooleanFieldValue(value);
-  assertBooleanFilter(filter);
-
-  return applyBooleanFilter(value, filter);
+export function assertBoardView(view: View): asserts view is ListView {
+  if (view.type !== 'board') {
+    throw new Error(`Expected view to be board. Received ${view.type}`);
+  }
 }

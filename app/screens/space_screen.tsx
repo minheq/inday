@@ -13,6 +13,8 @@ import {
   Column,
   BackButton,
   Button,
+  Spacer,
+  Icon,
 } from '../components';
 import {
   useRoute,
@@ -20,7 +22,6 @@ import {
   NavigationHelpers,
 } from '@react-navigation/native';
 import { RootStackParamsMap } from '../linking';
-import { View, ListView } from '../data/views';
 import {
   useGetSpace,
   useGetView,
@@ -72,6 +73,7 @@ import { format } from 'date-fns';
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer/autosizer';
+import { View, ListView, ViewType, assertListView } from '../data/views';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -216,6 +218,8 @@ function MainContent() {
     throw new Error('Invalid collection');
   }
 
+  const ViewDisplay = displaysByViewType[view.type];
+
   return (
     <Container flex={1}>
       <ViewBar
@@ -277,15 +281,18 @@ interface ViewDisplayProps {
   view: View;
 }
 
-function ViewDisplay(props: ViewDisplayProps) {
-  const { view } = props;
+const displaysByViewType: {
+  [viewType in ViewType]: (props: ViewDisplayProps) => JSX.Element;
+} = {
+  list: (props: ViewDisplayProps) => {
+    const { view } = props;
 
-  if (view.type === 'list') {
+    assertListView(view);
+
     return <ListViewDisplay view={view} />;
-  }
-
-  return null;
-}
+  },
+  board: () => <></>,
+};
 
 interface ListViewDisplayProps {
   view: ListView;
@@ -364,7 +371,11 @@ function ListViewDisplay(props: ListViewDisplayProps) {
                   borderRightWidth={1}
                   padding={8}
                 >
-                  <Text>{field.name}</Text>
+                  <Row alignItems="center">
+                    <Icon name="menu" />
+                    <Spacer size={8} />
+                    <Text>{field.name}</Text>
+                  </Row>
                 </Container>
               );
             })}

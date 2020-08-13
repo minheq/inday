@@ -1,5 +1,14 @@
 import { isSameDay, isWithinInterval, isBefore, isAfter } from 'date-fns';
 import {
+  FieldValue,
+  assertTextFieldValue,
+  assertNumberFieldValue,
+  assertDateFieldValue,
+  assertSingleSelectFieldValue,
+  assertMultiSelectFieldValue,
+  assertBooleanFieldValue,
+} from './documents';
+import {
   hasAnyOf,
   hasAllOf,
   hasNoneOf,
@@ -846,4 +855,66 @@ export function assertTextFilterConfig(
   filterConfig: FilterConfig,
 ): asserts filterConfig is TextFilterConfig {
   assertTextFilterRule(filterConfig.rule);
+}
+
+export const filtersByFieldType: {
+  [fieldType in FieldType]: (value: FieldValue, filter: Filter) => boolean;
+} = {
+  [FieldType.Checkbox]: booleanFilter,
+  [FieldType.Currency]: numberFilter,
+  [FieldType.Date]: dateFilter,
+  [FieldType.Email]: textFilter,
+  [FieldType.MultiCollaborator]: multiSelectFilter,
+  [FieldType.MultiDocumentLink]: multiSelectFilter,
+  [FieldType.MultiLineText]: textFilter,
+  [FieldType.MultiOption]: multiSelectFilter,
+  [FieldType.Number]: numberFilter,
+  [FieldType.PhoneNumber]: textFilter,
+  [FieldType.SingleCollaborator]: singleSelectFilter,
+  [FieldType.SingleDocumentLink]: singleSelectFilter,
+  [FieldType.SingleLineText]: textFilter,
+  [FieldType.SingleOption]: singleSelectFilter,
+  [FieldType.URL]: textFilter,
+};
+
+function textFilter(value: FieldValue, filter: Filter) {
+  assertTextFieldValue(value);
+  assertTextFilter(filter);
+
+  return applyTextFilter(value, filter);
+}
+
+function numberFilter(value: FieldValue, filter: Filter) {
+  assertNumberFieldValue(value);
+  assertNumberFilter(filter);
+
+  return applyNumberFilter(value, filter);
+}
+
+function dateFilter(value: FieldValue, filter: Filter) {
+  assertDateFieldValue(value);
+  assertDateFilter(filter);
+
+  return applyDateFilter(value, filter);
+}
+
+function singleSelectFilter(value: FieldValue, filter: Filter) {
+  assertSingleSelectFieldValue(value);
+  assertSingleSelectFilter(filter);
+
+  return applySingleSelectFilter(value, filter);
+}
+
+function multiSelectFilter(value: FieldValue, filter: Filter) {
+  assertMultiSelectFieldValue(value);
+  assertMultiSelectFilter(filter);
+
+  return applyMultiSelectFilter(value, filter);
+}
+
+function booleanFilter(value: FieldValue, filter: Filter) {
+  assertBooleanFieldValue(value);
+  assertBooleanFilter(filter);
+
+  return applyBooleanFilter(value, filter);
 }
