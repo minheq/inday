@@ -16,6 +16,7 @@ import { View } from './views';
 import { Collection } from './collections';
 import { Document, FieldValue } from './documents';
 import { groupByID } from '../../lib/data_structures/objects';
+import { Filter, FilterConfig } from './filters';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -201,16 +202,26 @@ interface CollectionWithFields extends Collection {
   fields: Field[];
 }
 
-export function makeCollectionWithFields(
-  collection: Partial<Collection>,
-  fields: Field[],
-): CollectionWithFields {
+export function makeCollection(collection: Partial<Collection>): Collection {
   return {
     id: collection.id ?? generateID(),
     name: collection.name ?? faker.commerce.department(),
     spaceID: collection.spaceID ?? generateID(),
     updatedAt: collection.updatedAt ?? new Date(),
     createdAt: collection.createdAt ?? new Date(),
+  };
+}
+
+interface CollectionWithFields extends Collection {
+  fields: Field[];
+}
+
+export function addFieldsToCollection(
+  collection: Collection,
+  fields: Field[],
+): CollectionWithFields {
+  return {
+    ...collection,
     fields,
   };
 }
@@ -239,7 +250,7 @@ export function makeView(
 }
 
 export function makeDocument(
-  view: Partial<Document>,
+  document: Partial<Document>,
   collection: CollectionWithFields,
   documentsByFieldID?: {
     [fieldID: string]: Document[];
@@ -256,11 +267,11 @@ export function makeDocument(
     );
   }
   return {
-    id: view.id ?? generateID(),
+    id: document.id ?? generateID(),
     fields,
-    collectionID: view.collectionID ?? generateID(),
-    updatedAt: view.updatedAt ?? new Date(),
-    createdAt: view.createdAt ?? new Date(),
+    collectionID: document.collectionID ?? generateID(),
+    updatedAt: document.updatedAt ?? new Date(),
+    createdAt: document.createdAt ?? new Date(),
   };
 }
 
@@ -351,3 +362,15 @@ const fakeFieldValuesByFieldType: {
     return faker.internet.url();
   },
 };
+
+export function makeFilter(
+  filter: Partial<Filter>,
+  config: FilterConfig,
+): Filter {
+  return {
+    id: filter.id ?? generateID(),
+    viewID: filter.viewID ?? generateID(),
+    group: filter.group || 1,
+    ...config,
+  };
+}

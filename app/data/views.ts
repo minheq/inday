@@ -189,6 +189,10 @@ export function filterDocumentsByView(
   let filteredDocuments = documents;
 
   filteredDocuments = filteredDocuments.filter((doc) => {
+    if (isEmpty(filterGroups)) {
+      return true;
+    }
+
     return filterGroups.some((filterGroup) => {
       return filterGroup.every((filter) => {
         const field = getField(filter.fieldID);
