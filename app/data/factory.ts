@@ -2,9 +2,20 @@ import { Space } from './spaces';
 import faker from 'faker';
 import { generateID } from '../../lib/id/id';
 import { Collaborator } from './collaborators';
-import { BaseField, Field, MultiDocumentLinkField } from './fields';
+import {
+  BaseField,
+  Field,
+  MultiDocumentLinkField,
+  assertSingleCollaboratorField,
+  assertMultiOptionField,
+  assertSingleOptionField,
+  assertMultiCollaboratorField,
+} from './fields';
 import { FieldType } from './constants';
 import { View } from './views';
+import { Collection } from './collections';
+import { Document, FieldValue } from './documents';
+import { groupByID } from '../../lib/data_structures/objects';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -117,9 +128,9 @@ const makeFieldByType: {
     return {
       type: FieldType.MultiOption,
       options: [
-        { value: 'Qualification', color: 'black', order: 1 },
-        { value: 'Proposal', color: 'black', order: 2 },
-        { value: 'Evaluation', color: 'black', order: 3 },
+        { value: faker.random.word(), color: 'green', order: 1 },
+        { value: faker.random.word(), color: 'blue', order: 2 },
+        { value: faker.random.word(), color: 'red', order: 3 },
       ],
       ...base,
     };
@@ -170,9 +181,9 @@ const makeFieldByType: {
     return {
       type: FieldType.SingleOption,
       options: [
-        { value: 'Qualification', color: 'black', order: 1 },
-        { value: 'Proposal', color: 'black', order: 2 },
-        { value: 'Evaluation', color: 'black', order: 3 },
+        { value: faker.random.word(), color: 'green', order: 1 },
+        { value: faker.random.word(), color: 'blue', order: 2 },
+        { value: faker.random.word(), color: 'red', order: 3 },
       ],
       ...base,
     };
@@ -186,4 +197,157 @@ const makeFieldByType: {
   },
 };
 
-export function makeView(view: Partial<View>): View {}
+interface CollectionWithFields extends Collection {
+  fields: Field[];
+}
+
+export function makeCollectionWithFields(
+  collection: Partial<Collection>,
+  fields: Field[],
+): CollectionWithFields {
+  return {
+    id: collection.id ?? generateID(),
+    name: collection.name ?? faker.commerce.department(),
+    spaceID: collection.spaceID ?? generateID(),
+    updatedAt: collection.updatedAt ?? new Date(),
+    createdAt: collection.createdAt ?? new Date(),
+    fields,
+  };
+}
+
+export function makeView(
+  view: Partial<View>,
+  collection: CollectionWithFields,
+): View {
+  // @ts-ignore: I don't know how to solve this type error
+  return {
+    fieldsOrder: collection.fields.map((f) => f.id),
+    fieldsConfig: groupByID(
+      collection.fields.map((f) => ({
+        id: f.id,
+        visible: true,
+        width: 180,
+      })),
+    ),
+    id: view.id ?? generateID(),
+    type: view.type ?? 'list',
+    name: view.name ?? faker.commerce.department(),
+    collectionID: view.collectionID ?? generateID(),
+    updatedAt: view.updatedAt ?? new Date(),
+    createdAt: view.createdAt ?? new Date(),
+  };
+}
+
+export function makeDocument(
+  view: Partial<Document>,
+  collection: CollectionWithFields,
+  documentsByFieldID?: {
+    [fieldID: string]: Document[];
+  },
+  collaborators?: Collaborator[],
+): Document {
+  const fields: { [fieldID: string]: FieldValue } = {};
+
+  for (const field of collection.fields) {
+    fields[field.id] = fakeFieldValuesByFieldType[field.type](
+      field,
+      documentsByFieldID,
+      collaborators,
+    );
+  }
+  return {
+    id: view.id ?? generateID(),
+    fields,
+    collectionID: view.collectionID ?? generateID(),
+    updatedAt: view.updatedAt ?? new Date(),
+    createdAt: view.createdAt ?? new Date(),
+  };
+}
+
+const fakeFieldValuesByFieldType: {
+  [fieldType in FieldType]: (
+    field: Field,
+    documentsByFieldID?: {
+      [fieldID: string]: Document[];
+    },
+    collaborators?: Collaborator[],
+  ) => FieldValue;
+} = {
+  [FieldType.Checkbox]: () => {
+    return faker.random.boolean();
+  },
+  [FieldType.Currency]: () => {
+    return faker.random.number();
+  },
+  [FieldType.Date]: () => {
+    return faker.date.future();
+  },
+  [FieldType.Email]: () => {
+    return faker.internet.email();
+  },
+  [FieldType.MultiCollaborator]: (field, documentsByFieldID, collaborators) => {
+    assertMultiCollaboratorField(field);
+
+    if (collaborators === undefined) {
+      throw new Error('Expected collaborators list to be passed in');
+    }
+
+    return faker.helpers.randomize(collaborators.map((c) => c.id));
+  },
+  [FieldType.MultiDocumentLink]: (field, documentsByFieldID) => {
+    if (documentsByFieldID === undefined) {
+      throw new Error('Expected collaborators list to be passed in');
+    }
+
+    return faker.helpers.randomize(
+      documentsByFieldID[field.id].map((d) => d.id),
+    );
+  },
+  [FieldType.MultiLineText]: () => {
+    return faker.random.words();
+  },
+  [FieldType.MultiOption]: (field) => {
+    assertMultiOptionField(field);
+
+    return faker.helpers.randomize(field.options).value;
+  },
+  [FieldType.Number]: () => {
+    return faker.random.number();
+  },
+  [FieldType.PhoneNumber]: () => {
+    return faker.phone.phoneNumber();
+  },
+  [FieldType.SingleCollaborator]: (
+    field,
+    documentsByFieldID,
+    collaborators,
+  ) => {
+    assertSingleCollaboratorField(field);
+
+    if (collaborators === undefined) {
+      throw new Error('Expected collaborators list to be passed in');
+    }
+
+    return faker.helpers.randomize(collaborators.map((c) => c.id));
+  },
+  [FieldType.SingleDocumentLink]: (field, documentsByFieldID) => {
+    if (documentsByFieldID === undefined) {
+      throw new Error('Expected collaborators list to be passed in');
+    }
+
+    return faker.helpers.randomize(
+      documentsByFieldID[field.id].map((d) => d.id),
+    );
+  },
+  [FieldType.SingleLineText]: () => {
+    return faker.random.words();
+  },
+  [FieldType.SingleOption]: (field) => {
+    assertSingleOptionField(field);
+
+    return faker.helpers.randomize(field.options).value;
+  },
+  [FieldType.URL]: () => {
+    return faker.internet.url();
+  },
+};
