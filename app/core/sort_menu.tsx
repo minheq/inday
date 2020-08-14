@@ -31,7 +31,7 @@ import {
 import { first, isEmpty } from '../../lib/data_structures/arrays';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
-import { SortID, Sort, SortConfig, SortOrder } from '../data/sort';
+import { SortID, Sort, SortConfig, SortOrder } from '../data/sorts';
 
 const sortEditIDState = atom<SortID>({
   key: 'SortMenuSortEditID',

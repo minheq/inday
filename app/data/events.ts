@@ -5,7 +5,7 @@ import { View } from './views';
 import { Field } from './fields';
 import { Document } from './documents';
 import { Filter } from './filters';
-import { Sort } from './sort';
+import { Sort } from './sorts';
 
 export interface BaseEvent {
   createdAt: Date;

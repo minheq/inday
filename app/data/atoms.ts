@@ -15,7 +15,7 @@ import { Filter } from './filters';
 import { Space } from './spaces';
 import { View } from './views';
 import { Workspace } from './workspace';
-import { Sort } from './sort';
+import { Sort } from './sorts';
 import { Event } from './events';
 
 export type WorkspaceState = Workspace | null;

@@ -16,7 +16,7 @@ import { Filter, FilterGroup, FilterID, filterDocuments } from './filters';
 import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
 import { isEmpty, last } from '../../lib/data_structures/arrays';
-import { Sort, SortID, sortDocuments } from './sort';
+import { Sort, SortID, sortDocuments } from './sorts';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: RecoilKey.Space,

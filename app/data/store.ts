@@ -45,7 +45,7 @@ import {
   sortQuery,
   viewSortsSequenceMaxQuery,
 } from './queries';
-import { SortConfig, Sort, SortID } from './sort';
+import { SortConfig, Sort, SortID } from './sorts';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
