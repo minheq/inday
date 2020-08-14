@@ -1,6 +1,22 @@
-import { FieldType } from './constants';
-
 export type FieldID = string;
+
+export enum FieldType {
+  SingleLineText = 'SingleLineText',
+  MultiLineText = 'MultiLineText',
+  SingleOption = 'SingleOption',
+  MultiOption = 'MultiOption',
+  SingleCollaborator = 'SingleCollaborator',
+  MultiCollaborator = 'MultiCollaborator',
+  SingleDocumentLink = 'SingleDocumentLink',
+  MultiDocumentLink = 'MultiDocumentLink',
+  Date = 'Date',
+  PhoneNumber = 'PhoneNumber',
+  Email = 'Email',
+  URL = 'URL',
+  Number = 'Number',
+  Currency = 'Currency',
+  Checkbox = 'Checkbox',
+}
 
 export interface BaseField {
   id: FieldID;

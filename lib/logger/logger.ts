@@ -48,7 +48,7 @@ class Logger {
 }
 
 const logger = new Logger({
-  level: 'info',
+  level: 'debug',
 });
 
 export function useLogger() {

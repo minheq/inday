@@ -3,6 +3,7 @@ import faker from 'faker';
 import { generateID } from '../../lib/id/id';
 import { Collaborator } from './collaborators';
 import {
+  FieldType,
   BaseField,
   Field,
   MultiDocumentLinkField,
@@ -11,7 +12,6 @@ import {
   assertSingleOptionField,
   assertMultiCollaboratorField,
 } from './fields';
-import { FieldType } from './constants';
 import { View } from './views';
 import { Collection } from './collections';
 import { Document, FieldValue } from './documents';

@@ -14,8 +14,7 @@ import {
   hasNoneOf,
   isEmpty,
 } from '../../lib/data_structures/arrays';
-import { FieldType } from './constants';
-import { FieldID, Field } from './fields';
+import { FieldID, Field, FieldType } from './fields';
 import { ViewID } from './views';
 import {
   DateValue,

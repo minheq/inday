@@ -6,7 +6,7 @@ import {
   makeDocument,
   makeFilter,
 } from './factory';
-import { FieldType } from './constants';
+import { FieldType } from './fields';
 import { TextFilterConfig, FilterGroup } from './filters';
 
 describe('no filter', () => {

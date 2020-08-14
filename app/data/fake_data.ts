@@ -1,9 +1,8 @@
 import { Document } from './documents';
 import { Collection } from './collections';
 import { Space } from './spaces';
-import { Field } from './fields';
+import { Field, FieldType } from './fields';
 import { View } from './views';
-import { FieldType } from './constants';
 import { Collaborator } from './collaborators';
 import {
   makeSpace,

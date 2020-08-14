@@ -12,7 +12,12 @@ export enum RecoilKey {
 
   // Selectors
   Collection = 'Collection',
+  CollectionFieldsByID = 'CollectionFieldsByID',
   Collections = 'Collections',
+  CollectionFields = 'CollectionFields',
+  CollectionViews = 'CollectionViews',
+  ViewFilterGroups = 'ViewFilterGroups',
+  ViewFiltersGroupMax = 'ViewFiltersGroupMax',
   View = 'View',
   ViewDocuments = 'ViewDocuments',
   ViewFilters = 'ViewFilters',
@@ -37,21 +42,3 @@ export enum StorageKey {
 }
 
 export enum StorageKeyPrefix {}
-
-export enum FieldType {
-  SingleLineText = 'SingleLineText',
-  MultiLineText = 'MultiLineText',
-  SingleOption = 'SingleOption',
-  MultiOption = 'MultiOption',
-  SingleCollaborator = 'SingleCollaborator',
-  MultiCollaborator = 'MultiCollaborator',
-  SingleDocumentLink = 'SingleDocumentLink',
-  MultiDocumentLink = 'MultiDocumentLink',
-  Date = 'Date',
-  PhoneNumber = 'PhoneNumber',
-  Email = 'Email',
-  URL = 'URL',
-  Number = 'Number',
-  Currency = 'Currency',
-  Checkbox = 'Checkbox',
-}

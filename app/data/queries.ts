@@ -133,7 +133,7 @@ export const collectionFieldsByIDQuery = selectorFamily<
   { [fieldID: string]: Field },
   string
 >({
-  key: RecoilKey.Collection,
+  key: RecoilKey.CollectionFieldsByID,
   get: (collectionID: string) => ({ get }) => {
     const fields = get(fieldsQuery);
 
@@ -150,7 +150,7 @@ export const collectionFieldsByIDQuery = selectorFamily<
 });
 
 export const collectionFieldsQuery = selectorFamily<Field[], string>({
-  key: RecoilKey.Collection,
+  key: RecoilKey.CollectionFields,
   get: (collectionID: string) => ({ get }) => {
     const fields = get(fieldsQuery);
 
@@ -183,7 +183,7 @@ export const filterQuery = selectorFamily<Filter, FilterID>({
 });
 
 export const sortsQuery = selector({
-  key: RecoilKey.Filters,
+  key: RecoilKey.Sorts,
   get: ({ get }) => {
     const sortsByID = get(sortsByIDState);
 
@@ -233,7 +233,7 @@ export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
   key: RecoilKey.ViewFilters,
   get: (viewID: ViewID) => ({ get }) => {
     const view = get(viewQuery(viewID));
-    let filters = get(filtersQuery);
+    const filters = get(filtersQuery);
 
     return filters
       .filter((f) => f.viewID === view.id)
@@ -254,7 +254,7 @@ export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
 });
 
 export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], ViewID>({
-  key: RecoilKey.ViewFilters,
+  key: RecoilKey.ViewFilterGroups,
   get: (viewID: ViewID) => ({ get }) => {
     const filters = get(viewFiltersQuery(viewID));
 
@@ -276,7 +276,7 @@ export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], ViewID>({
 });
 
 export const viewFiltersGroupMaxQuery = selectorFamily<number, ViewID>({
-  key: RecoilKey.ViewFilters,
+  key: RecoilKey.ViewFiltersGroupMax,
   get: (viewID: ViewID) => ({ get }) => {
     const filterGroups = get(viewFilterGroupsQuery(viewID));
 
@@ -304,7 +304,7 @@ export const viewSortsSequenceMaxQuery = selectorFamily<number, ViewID>({
 });
 
 export const collectionViewsQuery = selectorFamily<View[], string>({
-  key: RecoilKey.Collection,
+  key: RecoilKey.CollectionViews,
   get: (collectionID: string) => ({ get }) => {
     const views = get(viewsQuery);
 

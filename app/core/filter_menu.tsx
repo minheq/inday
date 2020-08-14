@@ -43,8 +43,7 @@ import {
   useUpdateFilterGroup,
 } from '../data/store';
 import { first, isEmpty } from '../../lib/data_structures/arrays';
-import { FieldType } from '../data/constants';
-import { FieldID } from '../data/fields';
+import { FieldID, FieldType } from '../data/fields';
 import { FieldPicker } from './field_picker';
 
 const filterEditIDState = atom<FilterID>({
