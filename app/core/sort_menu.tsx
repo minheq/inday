@@ -31,7 +31,7 @@ import {
 import { first, isEmpty } from '../../lib/data_structures/arrays';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
-import { SortID, Sort, SortConfig } from '../data/sort';
+import { SortID, Sort, SortConfig, SortOrder } from '../data/sort';
 
 const sortEditIDState = atom<SortID>({
   key: 'SortMenuSortEditID',
@@ -245,6 +245,16 @@ function SortEdit(props: SortEditProps) {
     [onChange],
   );
 
+  const handleChangeOrder = useCallback(
+    (order: SortOrder) => {
+      onChange({
+        order,
+        fieldID: field.id,
+      });
+    },
+    [onChange, field],
+  );
+
   return (
     <Fragment>
       <FieldPicker
@@ -253,7 +263,9 @@ function SortEdit(props: SortEditProps) {
         fields={fields}
       />
       <Spacer size={4} />
-      <SegmentedControl
+      <SegmentedControl<SortOrder>
+        value={sortConfig.order}
+        onChange={handleChangeOrder}
         options={[
           { label: 'Ascending', value: 'ascending' },
           { label: 'Descending', value: 'descending' },

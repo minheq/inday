@@ -7,8 +7,68 @@ import {
   booleanFiltersByRule,
   Filter,
   updateFilterGroup,
+  filterDocuments,
 } from './filters';
 import { parseDay } from '../../lib/datetime/day';
+
+import {
+  makeCollection,
+  makeField,
+  addFieldsToCollection,
+  makeDocument,
+  makeFilter,
+} from './factory';
+import { FieldType } from './fields';
+import { TextFilterConfig, FilterGroup } from './filters';
+
+describe('no filter', () => {
+  const collection = makeCollection({});
+  const textField = makeField({ type: FieldType.SingleLineText });
+  const collectionWithFields = addFieldsToCollection(collection, [textField]);
+  const doc = makeDocument({}, collectionWithFields);
+  const getField = () => textField;
+
+  test('all docs', () => {
+    const result = filterDocuments([], [doc], getField);
+
+    expect(result).toHaveLength(1);
+  });
+});
+
+describe('filtering text', () => {
+  const collection = makeCollection({});
+  const textField = makeField({ type: FieldType.SingleLineText });
+  const collectionWithFields = addFieldsToCollection(collection, [textField]);
+  const getField = () => textField;
+
+  test('text contains true', () => {
+    const doc = makeDocument({}, collectionWithFields);
+    const textFilterConfig: TextFilterConfig = {
+      fieldID: textField.id,
+      rule: 'contains',
+      value: (doc.fields[textField.id] as string).toUpperCase(),
+    };
+    const textFilter = makeFilter({}, textFilterConfig);
+    const filterGroups: FilterGroup[] = [[textFilter]];
+    const result = filterDocuments(filterGroups, [doc], getField);
+
+    expect(result).toHaveLength(1);
+  });
+
+  test('text contains false', () => {
+    const doc = makeDocument({}, collectionWithFields);
+    const textFilterConfig: TextFilterConfig = {
+      fieldID: textField.id,
+      rule: 'contains',
+      value: 'nothing999',
+    };
+    const textFilter = makeFilter({}, textFilterConfig);
+    const filterGroups: FilterGroup[] = [[textFilter]];
+    const result = filterDocuments(filterGroups, [doc], getField);
+
+    expect(result).toHaveLength(0);
+  });
+});
 
 describe('textFiltersByRule', () => {
   describe('contains', () => {

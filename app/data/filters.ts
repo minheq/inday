@@ -7,6 +7,7 @@ import {
   assertSingleSelectFieldValue,
   assertMultiSelectFieldValue,
   assertBooleanFieldValue,
+  Document,
 } from './documents';
 import {
   hasAnyOf,
@@ -900,4 +901,30 @@ function booleanFilter(value: FieldValue, filter: Filter) {
   assertBooleanFilter(filter);
 
   return applyBooleanFilter(value, filter);
+}
+
+export function filterDocuments(
+  filterGroups: FilterGroup[],
+  documents: Document[],
+  getField: (fieldID: string) => Field,
+) {
+  let filteredDocuments = documents;
+
+  filteredDocuments = filteredDocuments.filter((doc) => {
+    if (isEmpty(filterGroups)) {
+      return true;
+    }
+
+    return filterGroups.some((filterGroup) => {
+      return filterGroup.every((filter) => {
+        const field = getField(filter.fieldID);
+
+        const applyFilter = filtersByFieldType[field.type];
+
+        return applyFilter(doc.fields[filter.fieldID], filter);
+      });
+    });
+  });
+
+  return filteredDocuments;
 }

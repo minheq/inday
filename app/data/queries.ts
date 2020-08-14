@@ -12,11 +12,11 @@ import {
 import { Document } from './documents';
 import { Collection, CollectionID } from './collections';
 import { Field } from './fields';
-import { Filter, FilterGroup, FilterID } from './filters';
+import { Filter, FilterGroup, FilterID, filterDocuments } from './filters';
 import { Space, SpaceID } from './spaces';
-import { View, filterDocumentsByView, ViewID } from './views';
+import { View, ViewID } from './views';
 import { isEmpty, last } from '../../lib/data_structures/arrays';
-import { Sort, SortID } from './sort';
+import { Sort, SortID, sortDocuments } from './sort';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: RecoilKey.Space,
@@ -318,6 +318,7 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
     const view = get(viewQuery(viewID));
     const documents = get(collectionDocumentsQuery(view.collectionID));
     const filterGroups = get(viewFilterGroupsQuery(viewID));
+    const sorts = get(viewSortsQuery(viewID));
 
     function getField(fieldID: string) {
       return get(fieldQuery(fieldID));
@@ -325,14 +326,8 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
 
     let finalDocuments = documents;
 
-    finalDocuments = filterDocumentsByView(
-      filterGroups,
-      finalDocuments,
-      getField,
-    );
-    // TODO: Apply sorting
-    // TODO: Apply view. List, Board, Calendar
-    // TODO: Apply grouping
+    finalDocuments = filterDocuments(filterGroups, finalDocuments, getField);
+    finalDocuments = sortDocuments(sorts, finalDocuments, getField);
 
     return finalDocuments;
   },
