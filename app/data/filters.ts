@@ -14,8 +14,7 @@ import {
   hasNoneOf,
   isEmpty,
 } from '../../lib/data_structures/arrays';
-import { atom, selector } from 'recoil';
-import { RecoilKey, FieldType } from './constants';
+import { FieldType } from './constants';
 import { FieldID, Field } from './fields';
 import { ViewID } from './views';
 import {
@@ -250,6 +249,8 @@ export type Filter =
   | SingleSelectFilter
   | TextFilter;
 
+export type FilterGroup = Filter[];
+
 export type BooleanFilter = CheckboxFieldFilter;
 export type DateFilter = DateFieldFilter;
 export type MultiSelectFilter =
@@ -287,23 +288,6 @@ export type TextFilterConfig =
   | PhoneNumberFieldFilterConfig
   | SingleLineTextFieldFilterConfig
   | URLFieldFilterConfig;
-
-export type FiltersByIDState = { [filterID: string]: Filter | undefined };
-export const filtersByIDState = atom<FiltersByIDState>({
-  key: RecoilKey.FiltersByID,
-  default: {},
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
-});
-
-export const filtersQuery = selector({
-  key: RecoilKey.Filters,
-  get: ({ get }) => {
-    const viewsByID = get(filtersByIDState);
-
-    return Object.values(viewsByID) as Filter[];
-  },
-});
 
 export function getDefaultFilterConfig(field: Field): FilterConfig {
   switch (field.type) {

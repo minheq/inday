@@ -2,43 +2,42 @@ import { useCallback } from 'react';
 import { useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
 
 import { useEventEmitter, eventsState, EventConfig, Event } from './events';
-import {
-  Collection,
-  collectionQuery,
-  collectionsByIDState,
-  collectionFieldsQuery,
-  collectionDocumentsQuery,
-  collectionViewsQuery,
-  collectionFieldsByIDQuery,
-} from './collections';
-import { workspaceState } from './workspace';
-import {
-  spacesByIDState,
-  Space,
-  spaceQuery,
-  spaceCollectionsQuery,
-} from './spaces';
-import {
-  viewsByIDState,
-  View,
-  viewQuery,
-  viewFilterGroupsQuery,
-  viewDocumentsQuery,
-  ViewsByIDState,
-  viewFiltersGroupMaxQuery,
-  viewFiltersQuery,
-} from './views';
-import { Field, fieldsByIDState, fieldQuery, FieldConfig } from './fields';
-import { documentsByIDState, documentQuery, Document } from './documents';
+import { Collection } from './collections';
+
+import { Space } from './spaces';
+import { View } from './views';
+import { Field, FieldConfig } from './fields';
+import { Document } from './documents';
 import { generateID } from '../../lib/id/id';
+import { Filter, FilterConfig, updateFilterGroup } from './filters';
+import { useLogger } from '../../lib/logger/logger';
 import {
-  Filter,
-  FilterConfig,
+  workspaceState,
+  spacesByIDState,
+  collectionsByIDState,
+  viewsByIDState,
   filtersByIDState,
   FiltersByIDState,
-  updateFilterGroup,
-} from './filters';
-import { useLogger } from '../../lib/logger/logger';
+  ViewsByIDState,
+  fieldsByIDState,
+  documentsByIDState,
+} from './atoms';
+import {
+  spaceQuery,
+  spaceCollectionsQuery,
+  collectionQuery,
+  collectionFieldsQuery,
+  collectionDocumentsQuery,
+  collectionFieldsByIDQuery,
+  collectionViewsQuery,
+  viewQuery,
+  viewDocumentsQuery,
+  viewFilterGroupsQuery,
+  viewFiltersQuery,
+  viewFiltersGroupMaxQuery,
+  fieldQuery,
+  documentQuery,
+} from './queries';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);

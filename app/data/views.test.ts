@@ -1,4 +1,4 @@
-import { filterDocumentsByView, FilterGroup } from './views';
+import { filterDocumentsByView } from './views';
 import {
   makeCollection,
   makeField,
@@ -7,7 +7,7 @@ import {
   makeFilter,
 } from './factory';
 import { FieldType } from './constants';
-import { TextFilterConfig } from './filters';
+import { TextFilterConfig, FilterGroup } from './filters';
 
 describe('no filter', () => {
   const collection = makeCollection({});

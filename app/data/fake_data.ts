@@ -129,7 +129,7 @@ const col1View2 = makeView(
 );
 
 const col1Docs = makeManyDocuments(
-  100,
+  10,
   collection1WithFields,
   {
     [col1Field6.id]: [],

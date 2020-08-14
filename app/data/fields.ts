@@ -1,7 +1,4 @@
-import { atom, selectorFamily, selector } from 'recoil';
-
-import { RecoilKey, FieldType } from './constants';
-import { fieldsByIDFixtures } from './fake_data';
+import { FieldType } from './constants';
 
 export type FieldID = string;
 
@@ -162,37 +159,6 @@ export type Field =
   | SingleLineTextField
   | SingleOptionField
   | URLField;
-
-export type FieldsByIDState = { [fieldID: string]: Field | undefined };
-export const fieldsByIDState = atom<FieldsByIDState>({
-  key: RecoilKey.FieldsByID,
-  default: fieldsByIDFixtures,
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
-});
-
-export const fieldsQuery = selector({
-  key: RecoilKey.Fields,
-  get: ({ get }) => {
-    const fieldsByID = get(fieldsByIDState);
-
-    return Object.values(fieldsByID) as Field[];
-  },
-});
-
-export const fieldQuery = selectorFamily<Field, string>({
-  key: RecoilKey.Field,
-  get: (fieldID: string) => ({ get }) => {
-    const fieldsByID = get(fieldsByIDState);
-    const field = fieldsByID[fieldID];
-
-    if (field === undefined) {
-      throw new Error('Field not found');
-    }
-
-    return field;
-  },
-});
 
 export function assertSingleLineTextField(
   field: Field,

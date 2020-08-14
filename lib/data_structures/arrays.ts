@@ -18,10 +18,18 @@ export function range(arg0: any, arg1?: any, arg2?: any): number[] {
   return arr;
 }
 
+/**
+ * Get first item in the array.
+ * IMPORTANT: Make sure to check that the array is not empty first.
+ */
 export function first<T = any>(arr: T[]): T {
   return arr[0];
 }
 
+/**
+ * Get last item in the array.
+ * IMPORTANT: Make sure to check that the array is not empty first.
+ */
 export function last<T = any>(arr: T[]): T {
   return arr[arr.length - 1];
 }

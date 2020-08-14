@@ -22,6 +22,7 @@ export * from './list_picker';
 export * from './picker';
 export * from './fade';
 export * from './time_picker';
+export * from './theme';
 export * from './pressable';
 export * from './spacer';
 export * from './button';

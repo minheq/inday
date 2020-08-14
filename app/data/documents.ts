@@ -1,7 +1,3 @@
-import { atom, selectorFamily, selector } from 'recoil';
-
-import { RecoilKey } from './constants';
-import { documentsByIDFixtures } from './fake_data';
 import { CollaboratorID } from './collaborators';
 
 export type CheckboxValue = boolean;
@@ -56,37 +52,6 @@ export interface Document {
   };
   collectionID: string;
 }
-
-export type DocumentsByIDState = { [documentID: string]: Document | undefined };
-export const documentsByIDState = atom<DocumentsByIDState>({
-  key: RecoilKey.DocumentsByID,
-  default: documentsByIDFixtures,
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
-});
-
-export const documentsQuery = selector({
-  key: RecoilKey.Documents,
-  get: ({ get }) => {
-    const documentsByID = get(documentsByIDState);
-
-    return Object.values(documentsByID) as Document[];
-  },
-});
-
-export const documentQuery = selectorFamily<Document, string>({
-  key: RecoilKey.Document,
-  get: (documentID: string) => ({ get }) => {
-    const documentsByID = get(documentsByIDState);
-    const document = documentsByID[documentID];
-
-    if (document === undefined) {
-      throw new Error('Document not found');
-    }
-
-    return document;
-  },
-});
 
 export function assertCheckboxFieldValue(
   value: FieldValue,
