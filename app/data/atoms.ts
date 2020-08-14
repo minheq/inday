@@ -15,6 +15,8 @@ import { Filter } from './filters';
 import { Space } from './spaces';
 import { View } from './views';
 import { Workspace } from './workspace';
+import { Sort } from './sort';
+import { Event } from './events';
 
 export type WorkspaceState = Workspace | null;
 export const workspaceState = atom<WorkspaceState>({
@@ -60,6 +62,14 @@ export const filtersByIDState = atom<FiltersByIDState>({
   persistence_UNSTABLE: { type: true },
 });
 
+export type SortsByIDState = { [filterID: string]: Sort | undefined };
+export const sortsByIDState = atom<SortsByIDState>({
+  key: RecoilKey.SortsByID,
+  default: {},
+  // @ts-ignore: will be stable
+  persistence_UNSTABLE: { type: true },
+});
+
 export type SpacesByIDState = { [spaceID: string]: Space | undefined };
 export const spacesByIDState = atom<SpacesByIDState>({
   key: RecoilKey.SpacesByID,
@@ -72,6 +82,14 @@ export type ViewsByIDState = { [viewID: string]: View | undefined };
 export const viewsByIDState = atom<ViewsByIDState>({
   key: RecoilKey.ViewsByID,
   default: viewsByIDFixtures,
+  // @ts-ignore: will be stable
+  persistence_UNSTABLE: { type: true },
+});
+
+export type EventsState = Event[];
+export const eventsState = atom<EventsState>({
+  key: RecoilKey.Events,
+  default: [],
   // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });

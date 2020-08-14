@@ -5,11 +5,6 @@ import { isEmpty } from '../../lib/data_structures/arrays';
 
 export type ViewID = string;
 
-export enum Sort {
-  Ascending,
-  Descending,
-}
-
 interface BaseView {
   id: ViewID;
   name: string;

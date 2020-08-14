@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
 
-import { useEventEmitter, eventsState, EventConfig, Event } from './events';
+import { useEventEmitter, EventConfig, Event } from './events';
 import { Collection } from './collections';
 
 import { Space } from './spaces';
@@ -9,7 +9,7 @@ import { View } from './views';
 import { Field, FieldConfig } from './fields';
 import { Document } from './documents';
 import { generateID } from '../../lib/id/id';
-import { Filter, FilterConfig, updateFilterGroup } from './filters';
+import { Filter, FilterConfig, updateFilterGroup, FilterID } from './filters';
 import { useLogger } from '../../lib/logger/logger';
 import {
   workspaceState,
@@ -21,6 +21,9 @@ import {
   ViewsByIDState,
   fieldsByIDState,
   documentsByIDState,
+  sortsByIDState,
+  eventsState,
+  SortsByIDState,
 } from './atoms';
 import {
   spaceQuery,
@@ -37,7 +40,12 @@ import {
   viewFiltersGroupMaxQuery,
   fieldQuery,
   documentQuery,
+  viewSortsQuery,
+  filterQuery,
+  sortQuery,
+  viewSortsSequenceMaxQuery,
 } from './queries';
+import { SortConfig, Sort, SortID } from './sort';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
@@ -65,7 +73,7 @@ export function useEmitEvent() {
 
       setEvents((prevEvents) => [...prevEvents, event]);
 
-      logger.info('Emit event', event);
+      logger.debug('Emit event', event);
 
       eventEmitter.emit(event);
     },
@@ -403,22 +411,25 @@ export function useGetFiltersByID() {
 }
 
 export function useGetFilterCallback() {
-  const filtersByID = useGetFiltersByID();
-
-  const getFilter = useCallback(
-    (filterID: string) => {
-      const filter = filtersByID[filterID];
-
-      if (filter === undefined) {
-        throw new Error('Filter not found');
-      }
+  return useRecoilCallback(
+    ({ snapshot }) => async (filterID: FilterID) => {
+      const filter = await snapshot.getPromise(filterQuery(filterID));
 
       return filter;
     },
-    [filtersByID],
+    [],
   );
+}
 
-  return getFilter;
+export function useGetSortCallback() {
+  return useRecoilCallback(
+    ({ snapshot }) => async (sortID: SortID) => {
+      const sort = await snapshot.getPromise(sortQuery(sortID));
+
+      return sort;
+    },
+    [],
+  );
 }
 
 export function useGetViewFiltersGroups(viewID: string) {
@@ -433,6 +444,12 @@ export function useGetViewFilters(viewID: string) {
   return filters;
 }
 
+export function useGetViewSorts(viewID: string) {
+  const sorts = useRecoilValue(viewSortsQuery(viewID));
+
+  return sorts;
+}
+
 export function useGetViewFiltersCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (viewID: string) => {
@@ -444,10 +461,27 @@ export function useGetViewFiltersCallback() {
   );
 }
 
+export function useGetViewSortsCallback() {
+  return useRecoilCallback(
+    ({ snapshot }) => async (viewID: string) => {
+      const sorts = await snapshot.getPromise(viewSortsQuery(viewID));
+
+      return sorts;
+    },
+    [],
+  );
+}
+
 export function useGetFiltersGroupMax(viewID: string) {
   const groupMax = useRecoilValue(viewFiltersGroupMaxQuery(viewID));
 
   return groupMax;
+}
+
+export function useGetSortsSequenceMax(viewID: string) {
+  const sequenceMax = useRecoilValue(viewSortsSequenceMaxQuery(viewID));
+
+  return sequenceMax;
 }
 
 export function useCreateFilter() {
@@ -487,8 +521,8 @@ export function useUpdateFilterConfig() {
   const getFilter = useGetFilterCallback();
 
   const updateFilterConfig = useCallback(
-    (filterID: string, group: number, filterConfig: FilterConfig) => {
-      const prevFilter = getFilter(filterID);
+    async (filterID: string, group: number, filterConfig: FilterConfig) => {
+      const prevFilter = await getFilter(filterID);
 
       const updatedFilter: Filter = {
         ...prevFilter,
@@ -521,7 +555,7 @@ export function useUpdateFilterGroup() {
 
   const callback = useCallback(
     async (filterID: string, value: 'and' | 'or') => {
-      const prevFilter = getFilter(filterID);
+      const prevFilter = await getFilter(filterID);
       const filters = await getViewFilters(prevFilter.viewID);
 
       const updatedFilters = updateFilterGroup(prevFilter, value, filters);
@@ -567,6 +601,94 @@ export function useDeleteFilter() {
   );
 
   return deleteFilter;
+}
+
+export function useCreateSort() {
+  const emitEvent = useEmitEvent();
+  const setSorts = useSetRecoilState(sortsByIDState);
+
+  const createSort = useCallback(
+    (viewID: string, sequence: number, sortConfig: SortConfig) => {
+      let newSort: Sort = {
+        id: generateID(),
+        viewID,
+        sequence,
+        ...sortConfig,
+      };
+
+      setSorts((previousSorts) => ({
+        ...previousSorts,
+        [newSort.id]: newSort,
+      }));
+
+      emitEvent({
+        name: 'SortCreated',
+        sort: newSort,
+      });
+
+      return newSort;
+    },
+    [emitEvent, setSorts],
+  );
+
+  return createSort;
+}
+
+export function useUpdateSortConfig() {
+  const emitEvent = useEmitEvent();
+  const setSorts = useSetRecoilState(sortsByIDState);
+  const getSort = useGetSortCallback();
+
+  const callback = useCallback(
+    async (sortID: string, sortConfig: SortConfig) => {
+      const prevSort = await getSort(sortID);
+
+      const updatedSort: Sort = {
+        ...prevSort,
+        ...sortConfig,
+      };
+
+      setSorts((previousSorts) => ({
+        ...previousSorts,
+        [updatedSort.id]: updatedSort,
+      }));
+
+      emitEvent({
+        name: 'SortConfigUpdated',
+        sort: updatedSort,
+      });
+
+      return updatedSort;
+    },
+    [emitEvent, setSorts, getSort],
+  );
+
+  return callback;
+}
+
+export function useDeleteSort() {
+  const emitEvent = useEmitEvent();
+  const setSorts = useSetRecoilState<SortsByIDState>(sortsByIDState);
+
+  const deleteSort = useCallback(
+    (sort: Sort) => {
+      setSorts((previousSorts) => {
+        const updatedSorts = { ...previousSorts };
+
+        delete updatedSorts[sort.id];
+
+        return updatedSorts;
+      });
+
+      emitEvent({
+        name: 'SortDeleted',
+        sort,
+      });
+    },
+    [emitEvent, setSorts],
+  );
+
+  return deleteSort;
 }
 
 export function useCreateView() {

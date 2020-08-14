@@ -1,6 +1,3 @@
-import { atom } from 'recoil';
-
-import { RecoilKey } from './constants';
 import { Workspace } from './workspace';
 import { Space } from './spaces';
 import { Collection } from './collections';
@@ -8,6 +5,7 @@ import { View } from './views';
 import { Field } from './fields';
 import { Document } from './documents';
 import { Filter } from './filters';
+import { Sort } from './sort';
 
 export interface BaseEvent {
   createdAt: Date;
@@ -162,6 +160,26 @@ export interface FilterDeletedEvent
   extends BaseEvent,
     FilterDeletedEventConfig {}
 
+export interface SortCreatedEventConfig {
+  name: 'SortCreated';
+  sort: Sort;
+}
+export interface SortCreatedEvent extends BaseEvent, SortCreatedEventConfig {}
+
+export interface SortConfigUpdatedEventConfig {
+  name: 'SortConfigUpdated';
+  sort: Sort;
+}
+export interface SortConfigUpdatedEvent
+  extends BaseEvent,
+    SortConfigUpdatedEventConfig {}
+
+export interface SortDeletedEventConfig {
+  name: 'SortDeleted';
+  sort: Sort;
+}
+export interface SortDeletedEvent extends BaseEvent, SortDeletedEventConfig {}
+
 export type EventConfig =
   | WorkspaceCreatedEventConfig
   | SpaceCreatedEventConfig
@@ -182,7 +200,10 @@ export type EventConfig =
   | FilterCreatedEventConfig
   | FilterConfigUpdatedEventConfig
   | FilterGroupUpdatedEventConfig
-  | FilterDeletedEventConfig;
+  | FilterDeletedEventConfig
+  | SortCreatedEventConfig
+  | SortConfigUpdatedEventConfig
+  | SortDeletedEventConfig;
 
 export type Event =
   | WorkspaceCreatedEvent
@@ -204,7 +225,10 @@ export type Event =
   | FilterCreatedEvent
   | FilterConfigUpdatedEvent
   | FilterGroupUpdatedEvent
-  | FilterDeletedEvent;
+  | FilterDeletedEvent
+  | SortCreatedEvent
+  | SortConfigUpdatedEvent
+  | SortDeletedEvent;
 
 type SubscriptionCallback = (event: Event) => void;
 
@@ -233,11 +257,3 @@ export const eventEmitter = new EventEmitter();
 export function useEventEmitter() {
   return eventEmitter;
 }
-
-export type EventsState = Event[];
-export const eventsState = atom<EventsState>({
-  key: RecoilKey.Events,
-  default: [],
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
-});

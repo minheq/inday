@@ -7,14 +7,16 @@ import {
   filtersByIDState,
   spacesByIDState,
   viewsByIDState,
+  sortsByIDState,
 } from './atoms';
 import { Document } from './documents';
 import { Collection, CollectionID } from './collections';
 import { Field } from './fields';
-import { Filter, FilterGroup } from './filters';
+import { Filter, FilterGroup, FilterID } from './filters';
 import { Space, SpaceID } from './spaces';
-import { View, filterDocumentsByView } from './views';
+import { View, filterDocumentsByView, ViewID } from './views';
 import { isEmpty, last } from '../../lib/data_structures/arrays';
+import { Sort, SortID } from './sort';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: RecoilKey.Space,
@@ -159,9 +161,48 @@ export const collectionFieldsQuery = selectorFamily<Field[], string>({
 export const filtersQuery = selector({
   key: RecoilKey.Filters,
   get: ({ get }) => {
-    const viewsByID = get(filtersByIDState);
+    const filtersByID = get(filtersByIDState);
 
-    return Object.values(viewsByID) as Filter[];
+    return Object.values(filtersByID) as Filter[];
+  },
+});
+
+export const filterQuery = selectorFamily<Filter, FilterID>({
+  key: RecoilKey.Filter,
+  get: (filterID: FilterID) => ({ get }) => {
+    const filtersByID = get(filtersByIDState);
+
+    const filter = filtersByID[filterID];
+
+    if (filter === undefined) {
+      throw new Error('Filter not found');
+    }
+
+    return filter;
+  },
+});
+
+export const sortsQuery = selector({
+  key: RecoilKey.Filters,
+  get: ({ get }) => {
+    const sortsByID = get(sortsByIDState);
+
+    return Object.values(sortsByID) as Sort[];
+  },
+});
+
+export const sortQuery = selectorFamily<Sort, SortID>({
+  key: RecoilKey.Sort,
+  get: (sortID: SortID) => ({ get }) => {
+    const sortsByID = get(sortsByIDState);
+
+    const sort = sortsByID[sortID];
+
+    if (sort === undefined) {
+      throw new Error('Sort not found');
+    }
+
+    return sort;
   },
 });
 
@@ -174,9 +215,9 @@ export const viewsQuery = selector({
   },
 });
 
-export const viewQuery = selectorFamily<View, string>({
+export const viewQuery = selectorFamily<View, ViewID>({
   key: RecoilKey.View,
-  get: (viewID: string) => ({ get }) => {
+  get: (viewID: ViewID) => ({ get }) => {
     const viewsByID = get(viewsByIDState);
     const view = viewsByID[viewID];
 
@@ -188,9 +229,9 @@ export const viewQuery = selectorFamily<View, string>({
   },
 });
 
-export const viewFiltersQuery = selectorFamily<Filter[], string>({
+export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
   key: RecoilKey.ViewFilters,
-  get: (viewID: string) => ({ get }) => {
+  get: (viewID: ViewID) => ({ get }) => {
     const view = get(viewQuery(viewID));
     let filters = get(filtersQuery);
 
@@ -200,9 +241,21 @@ export const viewFiltersQuery = selectorFamily<Filter[], string>({
   },
 });
 
-export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], string>({
+export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
+  key: RecoilKey.ViewSorts,
+  get: (viewID: ViewID) => ({ get }) => {
+    const view = get(viewQuery(viewID));
+    let sorts = get(sortsQuery);
+
+    return sorts
+      .filter((f) => f.viewID === view.id)
+      .sort((a, b) => a.sequence - b.sequence);
+  },
+});
+
+export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], ViewID>({
   key: RecoilKey.ViewFilters,
-  get: (viewID: string) => ({ get }) => {
+  get: (viewID: ViewID) => ({ get }) => {
     const filters = get(viewFiltersQuery(viewID));
 
     const filterGroups: Filter[][] = [];
@@ -222,9 +275,9 @@ export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], string>({
   },
 });
 
-export const viewFiltersGroupMaxQuery = selectorFamily<number, string>({
+export const viewFiltersGroupMaxQuery = selectorFamily<number, ViewID>({
   key: RecoilKey.ViewFilters,
-  get: (viewID: string) => ({ get }) => {
+  get: (viewID: ViewID) => ({ get }) => {
     const filterGroups = get(viewFilterGroupsQuery(viewID));
 
     if (isEmpty(filterGroups)) {
@@ -234,6 +287,19 @@ export const viewFiltersGroupMaxQuery = selectorFamily<number, string>({
     const lastFilterGroup = last(filterGroups);
 
     return lastFilterGroup[0].group;
+  },
+});
+
+export const viewSortsSequenceMaxQuery = selectorFamily<number, ViewID>({
+  key: RecoilKey.ViewFilters,
+  get: (viewID: ViewID) => ({ get }) => {
+    const sorts = get(viewSortsQuery(viewID));
+
+    if (isEmpty(sorts)) {
+      return 0;
+    }
+
+    return Math.max(...sorts.map((s) => s.sequence));
   },
 });
 
