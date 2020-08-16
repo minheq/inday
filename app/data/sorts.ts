@@ -59,9 +59,20 @@ export function sortDocuments(
   documents: Document[],
   getters: SortGetters,
 ) {
+  if (isEmpty(sorts)) {
+    return documents;
+  }
   const nodes = makeNodes(sorts, documents, getters);
 
   return toDocuments(nodes);
+}
+
+function isLeafNodes(nodes: Node[]): nodes is LeafNode[] {
+  if (isEmpty(nodes)) {
+    throw new Error('Nodes are empty');
+  }
+
+  return first(nodes).type === 'leaf';
 }
 
 function toDocuments(nodes: Node[]): Document[] {
@@ -69,10 +80,8 @@ function toDocuments(nodes: Node[]): Document[] {
     return [];
   }
 
-  const isLeafNodes = first(nodes).type === 'leaf';
-
-  if (isLeafNodes) {
-    return flattenLeafNodes(nodes as LeafNode[]);
+  if (isLeafNodes(nodes)) {
+    return flattenLeafNodes(nodes);
   }
 
   let docs: Document[] = [];
@@ -115,7 +124,7 @@ function makeNodes(
   documents: Document[],
   getters: SortGetters,
 ): Node[] {
-  if (isEmpty(sorts) || isEmpty(documents)) {
+  if (isEmpty(documents)) {
     return [];
   }
 
@@ -202,12 +211,13 @@ export function applyTextSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -215,7 +225,7 @@ export function applyTextSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -228,12 +238,13 @@ export function applyNumberSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -241,7 +252,7 @@ export function applyNumberSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -254,12 +265,13 @@ export function applyDateSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -267,7 +279,7 @@ export function applyDateSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -280,6 +292,7 @@ export function applySingleOptionSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
@@ -289,7 +302,7 @@ export function applySingleOptionSort(
   const optionsByValue = keyedBy(field.options, 'value');
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id] as SingleOptionValue;
       const valB = b.fields[field.id] as SingleOptionValue;
 
@@ -313,7 +326,7 @@ export function applySingleOptionSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as SingleOptionValue;
     const valB = b.fields[field.id] as SingleOptionValue;
 
@@ -342,6 +355,7 @@ export function applyMultiOptionSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
@@ -351,7 +365,7 @@ export function applyMultiOptionSort(
   const optionsByValue = keyedBy(field.options, 'value');
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id] as MultiOptionValue;
       const valB = b.fields[field.id] as MultiOptionValue;
 
@@ -375,7 +389,7 @@ export function applyMultiOptionSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as MultiOptionValue;
     const valB = b.fields[field.id] as MultiOptionValue;
 
@@ -404,6 +418,7 @@ export function applySingleCollaboratorSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField, getCollaborator } = getters;
 
   const field = getField(sort.fieldID);
@@ -411,7 +426,7 @@ export function applySingleCollaboratorSort(
   assertSingleCollaboratorField(field);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id] as SingleCollaboratorValue;
       const valB = b.fields[field.id] as SingleCollaboratorValue;
 
@@ -435,7 +450,7 @@ export function applySingleCollaboratorSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as SingleCollaboratorValue;
     const valB = b.fields[field.id] as SingleCollaboratorValue;
 
@@ -464,6 +479,7 @@ export function applyMultiCollaboratorSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField, getCollaborator } = getters;
 
   const field = getField(sort.fieldID);
@@ -471,7 +487,7 @@ export function applyMultiCollaboratorSort(
   assertMultiCollaboratorField(field);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id] as MultiCollaboratorValue;
       const valB = b.fields[field.id] as MultiCollaboratorValue;
 
@@ -495,7 +511,7 @@ export function applyMultiCollaboratorSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as MultiCollaboratorValue;
     const valB = b.fields[field.id] as MultiCollaboratorValue;
 
@@ -524,6 +540,7 @@ export function applySingleDocumentLinkSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField, getDocument, getCollection } = getters;
 
   const field = getField(sort.fieldID);
@@ -533,7 +550,7 @@ export function applySingleDocumentLinkSort(
   assertSingleDocumentLinkField(field);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id] as SingleDocumentLinkValue;
       const valB = b.fields[field.id] as SingleDocumentLinkValue;
 
@@ -559,7 +576,7 @@ export function applySingleDocumentLinkSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as SingleDocumentLinkValue;
     const valB = b.fields[field.id] as SingleDocumentLinkValue;
 
@@ -590,6 +607,7 @@ export function applyMultiDocumentLinkSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField, getDocument, getCollection } = getters;
 
   const field = getField(sort.fieldID);
@@ -599,7 +617,7 @@ export function applyMultiDocumentLinkSort(
   assertMultiDocumentLinkField(field);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id] as MultiDocumentLinkValue;
       const valB = b.fields[field.id] as MultiDocumentLinkValue;
 
@@ -625,7 +643,7 @@ export function applyMultiDocumentLinkSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as MultiDocumentLinkValue;
     const valB = b.fields[field.id] as MultiDocumentLinkValue;
 
@@ -656,12 +674,13 @@ export function applyBooleanSort(
   documents: Document[],
   getters: SortGetters,
 ) {
+  const docsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return documents.sort((a, b) => {
+    return docsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -669,7 +688,7 @@ export function applyBooleanSort(
     });
   }
 
-  return documents.sort((a, b) => {
+  return docsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -756,9 +775,9 @@ function descendingTextFieldValueSort(a: FieldValue, b: FieldValue) {
   assertTextFieldValue(a);
   assertTextFieldValue(b);
 
-  if (a < b) {
+  if (a > b) {
     return -1;
-  } else if (b > a) {
+  } else if (b < a) {
     return 1;
   }
   return 0;
@@ -768,17 +787,17 @@ function descendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
   assertNumberFieldValue(a);
   assertNumberFieldValue(b);
 
-  if (a === null) {
+  if (b === null) {
     return -1;
   }
 
-  if (b === null) {
+  if (a === null) {
     return 1;
   }
 
-  if (a < b) {
+  if (a > b) {
     return -1;
-  } else if (b > a) {
+  } else if (b < a) {
     return 1;
   }
   return 0;

@@ -7,125 +7,118 @@ import {
   makeCollaborator,
 } from './factory';
 import { FieldType } from './fields';
-import { sortDocuments, Sort, SortGetters } from './sorts';
+import { sortDocuments, SortGetters } from './sorts';
+import { FieldValue, Document } from './documents';
+
+function prepare(fieldType: FieldType, values: FieldValue[]) {
+  const collection = makeCollection({});
+  const field = makeField({ type: fieldType });
+  const collectionWithFields = addFieldsToCollection(collection, [field]);
+
+  const docs = values.map((value) => {
+    return makeDocument(
+      { fields: { [field.id]: value } },
+      collectionWithFields,
+    );
+  });
+
+  const collaborator = makeCollaborator({});
+
+  const getters: SortGetters = {
+    getField: () => field,
+    getDocument: (documentID) => {
+      const document = docs.find((d) => d.id === documentID);
+
+      if (document === undefined) {
+        throw new Error('Document not found');
+      }
+
+      return document;
+    },
+    getCollection: () => collection,
+    getCollaborator: () => collaborator,
+  };
+
+  const getValue = (doc: Document) => {
+    return doc.fields[field.id];
+  };
+
+  return { docs, getters, field, getValue };
+}
 
 describe('no sort', () => {
-  const collection = makeCollection({});
-  const textField = makeField({ type: FieldType.SingleLineText });
-  const collectionWithFields = addFieldsToCollection(collection, [textField]);
-  const doc1 = makeDocument(
-    { fields: { [textField.id]: 'Bword' } },
-    collectionWithFields,
-  );
-  const doc2 = makeDocument(
-    { fields: { [textField.id]: 'Aword' } },
-    collectionWithFields,
-  );
-  const collaborator = makeCollaborator({});
-  const docs = [doc1, doc2];
-
   test('all docs', () => {
-    const getters: SortGetters = {
-      getField: () => textField,
-      getDocument: (documentID) => {
-        const document = docs.find((d) => d.id === documentID);
+    const values = ['BWord', 'Aword'];
+    const { getters, docs, getValue } = prepare(
+      FieldType.SingleLineText,
+      values,
+    );
 
-        if (document === undefined) {
-          throw new Error('Document not found');
-        }
-
-        return document;
-      },
-      getCollection: () => collection,
-      getCollaborator: () => collaborator,
-    };
     const result = sortDocuments([], docs, getters);
-    expect(result[0].id).toBe(doc1.id);
-    expect(result[1].id).toBe(doc2.id);
+
+    expect(getValue(result[0])).toBe(values[0]);
+    expect(getValue(result[1])).toBe(values[1]);
   });
 });
 
 describe('text sort', () => {
-  const collection = makeCollection({});
-  const textField = makeField({ type: FieldType.SingleLineText });
-  const collectionWithFields = addFieldsToCollection(collection, [textField]);
-  const doc1 = makeDocument(
-    { fields: { [textField.id]: 'Bword' } },
-    collectionWithFields,
-  );
-  const doc2 = makeDocument(
-    { fields: { [textField.id]: 'Aword' } },
-    collectionWithFields,
-  );
-  const sort: Sort = makeSort(
-    {},
-    { fieldID: textField.id, order: 'ascending' },
-  );
-  const collaborator = makeCollaborator({});
-  const docs = [doc1, doc2];
-  const sorts = [sort];
+  test('ascending', () => {
+    const values = ['BWord', 'Aword'];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.SingleLineText,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
 
-  test.only('all docs', () => {
-    const getters: SortGetters = {
-      getField: () => textField,
-      getDocument: (documentID) => {
-        const document = docs.find((d) => d.id === documentID);
+    const result = sortDocuments([sort], docs, getters);
 
-        if (document === undefined) {
-          throw new Error('Document not found');
-        }
+    expect(getValue(result[0])).toBe(values[1]);
+    expect(getValue(result[1])).toBe(values[0]);
+  });
 
-        return document;
-      },
-      getCollection: () => collection,
-      getCollaborator: () => collaborator,
-    };
-    const result = sortDocuments(sorts, docs, getters);
-    expect(result[0].id).toBe(doc2.id);
-    expect(result[1].id).toBe(doc1.id);
+  test('descending', () => {
+    const values = ['AWord', 'Bword'];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.SingleLineText,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+    const result = sortDocuments([sort], docs, getters);
+
+    expect(getValue(result[0])).toBe(values[1]);
+    expect(getValue(result[1])).toBe(values[0]);
   });
 });
 
-// function prepare(fieldType: FieldType) {
-//   const collection = makeCollection({});
-//   const checkboxField = makeField({ type: FieldType.Checkbox });
-//   const collectionWithFields = addFieldsToCollection(collection, [checkboxField]);
-// }
+describe('number sort', () => {
+  test('ascending', () => {
+    const values = [2, 1, null];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.Number,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
 
-// describe('applyBooleanSort', () => {
-//   const collection = makeCollection({});
-//   const checkboxField = makeField({ type: FieldType.Checkbox });
-//   const collectionWithFields = addFieldsToCollection(collection, [checkboxField]);
-//   const doc1 = makeDocument(
-//     { fields: { [checkboxField.id]: true } },
-//     collectionWithFields,
-//   );
-//   const doc2 = makeDocument(
-//     { fields: { [checkboxField.id]: false } },
-//     collectionWithFields,
-//   );
-//   const doc3 = makeDocument(
-//     { fields: { [checkboxField.id]: true } },
-//     collectionWithFields,
-//   );
-//   const getField = () => checkboxField;
-//   const getDocument = () => checkboxField;
-//   const getCollection = () => checkboxField;
-//   const getCollaborator = () => checkboxField;
+    const result = sortDocuments([sort], docs, getters);
 
-//   const documents = [doc1, doc2, doc3];
-//   const getters: SortGetters = {
-//     getField,
-//     getDocument,
-//     getCollection,
-//     getCollaborator,
-//   }
+    expect(getValue(result[0])).toBe(values[2]);
+    expect(getValue(result[1])).toBe(values[1]);
+    expect(getValue(result[2])).toBe(values[0]);
+  });
 
-//   test('ascending sort', () => {
-//     const sort: Sort = makeSort(
-//       {},
-//       { fieldID: checkboxField.id, order: 'ascending' },
-//     );
-//     const docs = applboo
-//   })
-// });
+  test('descending', () => {
+    const values = [1, 2, null];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.Number,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+    const result = sortDocuments([sort], docs, getters);
+
+    expect(getValue(result[0])).toBe(values[1]);
+    expect(getValue(result[1])).toBe(values[0]);
+    expect(getValue(result[2])).toBe(values[2]);
+  });
+});

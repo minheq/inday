@@ -277,12 +277,13 @@ export function makeDocument(
 
   for (const field of collection.fields) {
     fields[field.id] =
-      document.fields?.[field.id] ??
-      fakeFieldValuesByFieldType[field.type](
-        field,
-        documentsByFieldID,
-        collaborators,
-      );
+      document.fields?.[field.id] !== undefined
+        ? document.fields?.[field.id]
+        : fakeFieldValuesByFieldType[field.type](
+            field,
+            documentsByFieldID,
+            collaborators,
+          );
   }
   return {
     id: document.id ?? generateID(),
