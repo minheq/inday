@@ -1,3 +1,5 @@
+import { assertString } from './strings';
+
 export function range(min: number, max: number, step?: number): number[];
 export function range(max: number): number[];
 export function range(arg0: any, arg1?: any, arg2?: any): number[] {
@@ -66,4 +68,41 @@ export function hasAllOf<T>(a: T[], b: T[]): boolean {
 
 export function hasNoneOf<T>(a: T[], b: T[]): boolean {
   return isEmpty(intersect(a, b));
+}
+
+type KeyedBy<T extends object> = { [key: string]: T };
+
+export function keyedBy<T extends object>(
+  items: T[],
+  prop: keyof T,
+): KeyedBy<T> {
+  const grouped: KeyedBy<T> = {};
+
+  for (const item of items) {
+    const key = item[prop];
+
+    assertString(key);
+
+    grouped[key] = item;
+  }
+
+  return grouped;
+}
+
+export function groupBy<T extends object>(items: T[], prop: keyof T) {
+  const grouped: { [key: string]: T[] } = {};
+
+  for (const item of items) {
+    const key = item[prop];
+
+    assertString(key);
+
+    if (grouped[key]) {
+      grouped[key].push(item);
+    } else {
+      grouped[key] = [item];
+    }
+  }
+
+  return grouped;
 }

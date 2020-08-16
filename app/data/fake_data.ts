@@ -13,7 +13,7 @@ import {
   addFieldsToCollection,
   makeManyDocuments,
 } from './factory';
-import { groupByID } from '../../lib/data_structures/objects';
+import { keyedBy } from '../../lib/data_structures/arrays';
 
 const space1 = makeSpace({
   id: '1',
@@ -175,10 +175,10 @@ export const viewsByIDFixtures: { [viewID: string]: View } = {
 };
 
 export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
-  ...groupByID(col1Fields),
-  ...groupByID(col2Fields),
+  ...keyedBy(col1Fields, 'id'),
+  ...keyedBy(col2Fields, 'id'),
 };
 
 export const documentsByIDFixtures: {
   [documentID: string]: Document;
-} = groupByID(col1Docs);
+} = keyedBy(col1Docs, 'id');

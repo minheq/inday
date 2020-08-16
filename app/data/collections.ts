@@ -1,3 +1,6 @@
+import { FieldID } from './fields';
+import { SpaceID } from './spaces';
+
 export type CollectionID = string;
 
 export interface Collection {
@@ -5,5 +8,6 @@ export interface Collection {
   name: string;
   createdAt: Date;
   updatedAt: Date;
-  spaceID: string;
+  spaceID: SpaceID;
+  mainFieldID: FieldID;
 }

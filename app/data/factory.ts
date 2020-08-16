@@ -15,9 +15,9 @@ import {
 import { View } from './views';
 import { Collection } from './collections';
 import { Document, FieldValue } from './documents';
-import { groupByID } from '../../lib/data_structures/objects';
 import { Filter, FilterConfig } from './filters';
-import { range, isEmpty } from '../../lib/data_structures/arrays';
+import { keyedBy, range, isEmpty } from '../../lib/data_structures/arrays';
+import { Sort, SortConfig } from './sorts';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -210,6 +210,7 @@ export function makeCollection(collection: Partial<Collection>): Collection {
     spaceID: collection.spaceID ?? generateID(),
     updatedAt: collection.updatedAt ?? new Date(),
     createdAt: collection.createdAt ?? new Date(),
+    mainFieldID: collection.mainFieldID ?? generateID(),
   };
 }
 
@@ -234,12 +235,13 @@ export function makeView(
   // @ts-ignore: I don't know how to solve this type error
   return {
     fieldsOrder: collection.fields.map((f) => f.id),
-    fieldsConfig: groupByID(
+    fieldsConfig: keyedBy(
       collection.fields.map((f) => ({
         id: f.id,
         visible: true,
         width: 180,
       })),
+      'id',
     ),
     id: view.id ?? generateID(),
     type: view.type ?? 'list',
@@ -403,6 +405,15 @@ export function makeFilter(
     id: filter.id ?? generateID(),
     viewID: filter.viewID ?? generateID(),
     group: filter.group || 1,
+    ...config,
+  };
+}
+
+export function makeSort(sort: Partial<Sort>, config: SortConfig): Sort {
+  return {
+    id: sort.id ?? generateID(),
+    viewID: sort.viewID ?? generateID(),
+    sequence: sort.sequence || 1,
     ...config,
   };
 }
