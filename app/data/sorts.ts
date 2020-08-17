@@ -455,19 +455,19 @@ export function applySingleCollaboratorSort(
     const valB = b.fields[field.id] as SingleCollaboratorValue;
 
     if (valA === null) {
-      return -1;
+      return 1;
     }
 
     if (valB === null) {
-      return 1;
+      return -1;
     }
 
     const collaboratorA = getCollaborator(valA);
     const collaboratorB = getCollaborator(valB);
 
-    if (collaboratorA.name < collaboratorB.name) {
+    if (collaboratorA.name > collaboratorB.name) {
       return -1;
-    } else if (collaboratorA.name > collaboratorB.name) {
+    } else if (collaboratorA.name < collaboratorB.name) {
       return 1;
     }
     return 0;
@@ -516,19 +516,19 @@ export function applyMultiCollaboratorSort(
     const valB = b.fields[field.id] as MultiCollaboratorValue;
 
     if (isEmpty(valA)) {
-      return -1;
+      return 1;
     }
 
     if (isEmpty(valB)) {
-      return 1;
+      return -1;
     }
 
     const collaboratorA = getCollaborator(valA[0]);
     const collaboratorB = getCollaborator(valB[0]);
 
-    if (collaboratorA.name < collaboratorB.name) {
+    if (collaboratorA.name > collaboratorB.name) {
       return -1;
-    } else if (collaboratorA.name > collaboratorB.name) {
+    } else if (collaboratorA.name < collaboratorB.name) {
       return 1;
     }
     return 0;
@@ -700,9 +700,9 @@ function ascendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
   assertBooleanFieldValue(a);
   assertBooleanFieldValue(b);
 
-  if (a === true && b === false) {
+  if (a === false && b === true) {
     return -1;
-  } else if (a === false && b === true) {
+  } else if (a === true && b === false) {
     return 1;
   }
   return 0;
@@ -808,16 +808,16 @@ function descendingDateFieldValueSort(a: FieldValue, b: FieldValue) {
   assertDateFieldValue(b);
 
   if (a === null) {
-    return -1;
-  }
-
-  if (b === null) {
     return 1;
   }
 
-  if (isBefore(a, b)) {
+  if (b === null) {
     return -1;
-  } else if (isAfter(a, b)) {
+  }
+
+  if (isAfter(a, b)) {
+    return -1;
+  } else if (isBefore(a, b)) {
     return 1;
   }
   return 0;
