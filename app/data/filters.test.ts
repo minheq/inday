@@ -8,6 +8,7 @@ import {
   Filter,
   updateFilterGroup,
   filterDocuments,
+  FilterGetters,
 } from './filters';
 import { parseDay } from '../../lib/datetime/day';
 
@@ -18,55 +19,55 @@ import {
   makeDocument,
   makeFilter,
 } from './factory';
-import { FieldType } from './fields';
-import { TextFilterConfig, FilterGroup } from './filters';
+import { FieldType, FieldID } from './fields';
+import { FieldValue } from './documents';
 
 describe('no filter', () => {
-  const collection = makeCollection({});
-  const textField = makeField({ type: FieldType.SingleLineText });
-  const collectionWithFields = addFieldsToCollection(collection, [textField]);
-  const doc = makeDocument({}, collectionWithFields);
-  const getField = () => textField;
-
   test('all docs', () => {
-    const result = filterDocuments([], [doc], getField);
+    const values = ['AWord', 'BWord'];
+    const { docs, getters } = prepare(FieldType.SingleLineText, values);
+    const result = filterDocuments([], docs, getters);
 
-    expect(result).toHaveLength(1);
+    expect(result).toHaveLength(values.length);
   });
 });
 
 describe('filtering text', () => {
-  const collection = makeCollection({});
-  const textField = makeField({ type: FieldType.SingleLineText });
-  const collectionWithFields = addFieldsToCollection(collection, [textField]);
-  const getField = () => textField;
+  const values = ['AWord', 'BWord'];
+  const { docs, getters, field } = prepare(FieldType.SingleLineText, values);
 
-  test('text contains true', () => {
-    const doc = makeDocument({}, collectionWithFields);
-    const textFilterConfig: TextFilterConfig = {
-      fieldID: textField.id,
-      rule: 'contains',
-      value: (doc.fields[textField.id] as string).toUpperCase(),
-    };
-    const textFilter = makeFilter({}, textFilterConfig);
-    const filterGroups: FilterGroup[] = [[textFilter]];
-    const result = filterDocuments(filterGroups, [doc], getField);
+  test('contains same case', () => {
+    const filter = makeFilter(
+      {},
+      { rule: 'contains', value: 'Word', fieldID: field.id },
+    );
+    const result = filterDocuments([[filter]], docs, getters);
+
+    expect(result).toHaveLength(values.length);
+  });
+
+  test('one word different case', () => {
+    const filter = makeFilter(
+      {},
+      { rule: 'contains', value: 'aword', fieldID: field.id },
+    );
+    const result = filterDocuments([[filter]], docs, getters);
 
     expect(result).toHaveLength(1);
   });
 
-  test('text contains false', () => {
-    const doc = makeDocument({}, collectionWithFields);
-    const textFilterConfig: TextFilterConfig = {
-      fieldID: textField.id,
-      rule: 'contains',
-      value: 'nothing999',
-    };
-    const textFilter = makeFilter({}, textFilterConfig);
-    const filterGroups: FilterGroup[] = [[textFilter]];
-    const result = filterDocuments(filterGroups, [doc], getField);
+  test('2 for one', () => {
+    const filter1 = makeFilter(
+      {},
+      { rule: 'contains', value: 'word', fieldID: field.id },
+    );
+    const filter2 = makeFilter(
+      {},
+      { rule: 'contains', value: 'a', fieldID: field.id },
+    );
+    const result = filterDocuments([[filter1, filter2]], docs, getters);
 
-    expect(result).toHaveLength(0);
+    expect(result).toHaveLength(1);
   });
 });
 
@@ -549,7 +550,7 @@ describe('booleanFiltersByRule', () => {
 });
 
 describe('updateFilterGroup', () => {
-  describe('3 or filters', () => {
+  describe('3 "OR" filters', () => {
     const filter1: Filter = {
       id: '1',
       viewID: '1',
@@ -579,7 +580,7 @@ describe('updateFilterGroup', () => {
 
     const filters: Filter[] = [filter1, filter2, filter3];
 
-    test('f1 and f2 or f3', () => {
+    test('f1 AND f2 OR f3', () => {
       const updatedFilters = updateFilterGroup(filter2, 'and', filters);
 
       const updatedFilter2 = updatedFilters[filter2.id];
@@ -589,7 +590,7 @@ describe('updateFilterGroup', () => {
       expect(updatedFilter3.group).toBe(2);
     });
 
-    test('f1 or f2 and f3', () => {
+    test('f1 OR f2 AND f3', () => {
       const updatedFilters = updateFilterGroup(filter3, 'and', filters);
 
       const updatedFilter3 = updatedFilters[filter3.id];
@@ -598,7 +599,7 @@ describe('updateFilterGroup', () => {
     });
   });
 
-  describe('3 and filters', () => {
+  describe('3 "AND" filters', () => {
     const filter1: Filter = {
       id: '1',
       viewID: '1',
@@ -646,3 +647,24 @@ describe('updateFilterGroup', () => {
     });
   });
 });
+
+function prepare(fieldType: FieldType, values: FieldValue[]) {
+  const collection = makeCollection({});
+  const field = makeField({ type: fieldType });
+  const collectionWithFields = addFieldsToCollection(collection, [field]);
+
+  const docs = values.map((value) => {
+    return makeDocument(
+      { fields: { [field.id]: value } },
+      collectionWithFields,
+    );
+  });
+
+  const getField = (_fieldID: FieldID) => field;
+
+  const getters: FilterGetters = {
+    getField,
+  };
+
+  return { docs, field, getters };
+}

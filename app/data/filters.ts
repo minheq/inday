@@ -352,6 +352,38 @@ export function updateFilterGroup(
   return updatedFilters;
 }
 
+export interface FilterGetters {
+  getField: (fieldID: string) => Field;
+}
+
+export function filterDocuments(
+  filterGroups: FilterGroup[],
+  documents: Document[],
+  getters: FilterGetters,
+) {
+  const { getField } = getters;
+
+  let filteredDocuments = documents;
+
+  filteredDocuments = filteredDocuments.filter((doc) => {
+    if (isEmpty(filterGroups)) {
+      return true;
+    }
+
+    return filterGroups.some((filterGroup) => {
+      return filterGroup.every((filter) => {
+        const field = getField(filter.fieldID);
+
+        const applyFilter = filtersByFieldType[field.type];
+
+        return applyFilter(doc.fields[filter.fieldID], filter);
+      });
+    });
+  });
+
+  return filteredDocuments;
+}
+
 export function assertNumberFilterRule(
   rule: FilterRule,
 ): asserts rule is NumberFilterRule {
@@ -901,30 +933,4 @@ function booleanFilter(value: FieldValue, filter: Filter) {
   assertBooleanFilter(filter);
 
   return applyBooleanFilter(value, filter);
-}
-
-export function filterDocuments(
-  filterGroups: FilterGroup[],
-  documents: Document[],
-  getField: (fieldID: string) => Field,
-) {
-  let filteredDocuments = documents;
-
-  filteredDocuments = filteredDocuments.filter((doc) => {
-    if (isEmpty(filterGroups)) {
-      return true;
-    }
-
-    return filterGroups.some((filterGroup) => {
-      return filterGroup.every((filter) => {
-        const field = getField(filter.fieldID);
-
-        const applyFilter = filtersByFieldType[field.type];
-
-        return applyFilter(doc.fields[filter.fieldID], filter);
-      });
-    });
-  });
-
-  return filteredDocuments;
 }

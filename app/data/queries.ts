@@ -8,15 +8,23 @@ import {
   spacesByIDState,
   viewsByIDState,
   sortsByIDState,
+  collaboratorsByIDState,
 } from './atoms';
-import { Document } from './documents';
+import { Document, DocumentID } from './documents';
 import { Collection, CollectionID } from './collections';
-import { Field } from './fields';
-import { Filter, FilterGroup, FilterID, filterDocuments } from './filters';
+import { Field, FieldID } from './fields';
+import {
+  Filter,
+  FilterGroup,
+  FilterID,
+  filterDocuments,
+  FilterGetters,
+} from './filters';
 import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
 import { isEmpty, last } from '../../lib/data_structures/arrays';
-import { Sort, SortID, sortDocuments } from './sorts';
+import { Sort, SortID, sortDocuments, SortGetters } from './sorts';
+import { CollaboratorID, Collaborator } from './collaborators';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: RecoilKey.Space,
@@ -91,14 +99,14 @@ export const collectionsQuery = selector({
   },
 });
 
-export const collectionQuery = selectorFamily<Collection | null, string>({
+export const collectionQuery = selectorFamily<Collection, string>({
   key: RecoilKey.Collection,
   get: (collectionID: CollectionID) => ({ get }) => {
     const collectionsByID = get(collectionsByIDState);
     const collection = collectionsByID[collectionID];
 
     if (collection === undefined) {
-      return null;
+      throw new Error('Collection not found');
     }
 
     return collection;
@@ -312,6 +320,20 @@ export const collectionViewsQuery = selectorFamily<View[], string>({
   },
 });
 
+export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
+  key: RecoilKey.Collaborator,
+  get: (collaboratorID: CollaboratorID) => ({ get }) => {
+    const collaboratorsByID = get(collaboratorsByIDState);
+    const collaborator = collaboratorsByID[collaboratorID];
+
+    if (collaborator === undefined) {
+      throw new Error('Collaborator not found');
+    }
+
+    return collaborator;
+  },
+});
+
 export const viewDocumentsQuery = selectorFamily<Document[], string>({
   key: RecoilKey.ViewDocuments,
   get: (viewID: string) => ({ get }) => {
@@ -320,14 +342,41 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
     const filterGroups = get(viewFilterGroupsQuery(viewID));
     const sorts = get(viewSortsQuery(viewID));
 
-    function getField(fieldID: string) {
+    const getField = (fieldID: FieldID) => {
       return get(fieldQuery(fieldID));
-    }
+    };
+
+    const getDocument = (documentID: DocumentID) => {
+      return get(documentQuery(documentID));
+    };
+
+    const getCollaborator = (collaboratorID: CollaboratorID) => {
+      return get(collaboratorQuery(collaboratorID));
+    };
+
+    const getCollection = (collectionID: CollectionID) => {
+      return get(collectionQuery(collectionID));
+    };
+
+    const filterGetters: FilterGetters = {
+      getField,
+    };
+
+    const sortGetters: SortGetters = {
+      getField,
+      getDocument,
+      getCollaborator,
+      getCollection,
+    };
 
     let finalDocuments = documents;
 
-    finalDocuments = filterDocuments(filterGroups, finalDocuments, getField);
-    finalDocuments = sortDocuments(sorts, finalDocuments, getField);
+    finalDocuments = filterDocuments(
+      filterGroups,
+      finalDocuments,
+      filterGetters,
+    );
+    finalDocuments = sortDocuments(sorts, finalDocuments, sortGetters);
 
     return finalDocuments;
   },

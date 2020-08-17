@@ -17,6 +17,7 @@ import { View } from './views';
 import { Workspace } from './workspace';
 import { Sort } from './sorts';
 import { Event } from './events';
+import { Collaborator } from './collaborators';
 
 export type WorkspaceState = Workspace | null;
 export const workspaceState = atom<WorkspaceState>({
@@ -82,6 +83,16 @@ export type ViewsByIDState = { [viewID: string]: View | undefined };
 export const viewsByIDState = atom<ViewsByIDState>({
   key: RecoilKey.ViewsByID,
   default: viewsByIDFixtures,
+  // @ts-ignore: will be stable
+  persistence_UNSTABLE: { type: true },
+});
+
+export type CollaboratorsByIDState = {
+  [collaboratorID: string]: Collaborator | undefined;
+};
+export const collaboratorsByIDState = atom<CollaboratorsByIDState>({
+  key: RecoilKey.CollaboratorsByID,
+  default: {},
   // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });
