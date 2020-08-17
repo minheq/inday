@@ -6,7 +6,11 @@ import {
   makeSort,
   makeCollaborator,
 } from './factory';
-import { FieldType } from './fields';
+import {
+  FieldType,
+  assertMultiOptionField,
+  assertSingleOptionField,
+} from './fields';
 import { sortDocuments, SortGetters } from './sorts';
 import { FieldValue, Document, DocumentID } from './documents';
 import { CollaboratorID } from './collaborators';
@@ -141,6 +145,66 @@ describe('date', () => {
     expect(getValue(result[0])).toBe(values[2]);
     expect(getValue(result[1])).toBe(values[1]);
     expect(getValue(result[2])).toBe(values[0]);
+  });
+});
+
+describe('multi options', () => {
+  const { getters, field } = prepare(FieldType.MultiOption, []);
+  assertMultiOptionField(field);
+  const opt1 = field.options[0];
+  const opt2 = field.options[1];
+
+  const doc1 = makeDocument({ fields: { [field.id]: [opt1.value] } });
+  const doc2 = makeDocument({ fields: { [field.id]: [opt2.value] } });
+  const doc3 = makeDocument({ fields: { [field.id]: [] } });
+  const docs = [doc1, doc2, doc3];
+
+  test('ascending', () => {
+    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+    const result = sortDocuments([sort], docs, getters);
+
+    expect(result[0].id).toBe(doc3.id);
+    expect(result[1].id).toBe(doc2.id);
+    expect(result[2].id).toBe(doc1.id);
+  });
+
+  test('descending', () => {
+    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+    const result = sortDocuments([sort], docs, getters);
+
+    expect(result[0].id).toBe(doc1.id);
+    expect(result[1].id).toBe(doc2.id);
+    expect(result[2].id).toBe(doc3.id);
+  });
+});
+
+describe('single options', () => {
+  const { getters, field } = prepare(FieldType.SingleOption, []);
+  assertSingleOptionField(field);
+  const opt1 = field.options[0];
+  const opt2 = field.options[1];
+
+  const doc1 = makeDocument({ fields: { [field.id]: opt1.value } });
+  const doc2 = makeDocument({ fields: { [field.id]: opt2.value } });
+  const doc3 = makeDocument({ fields: { [field.id]: null } });
+  const docs = [doc1, doc2, doc3];
+
+  test('ascending', () => {
+    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+    const result = sortDocuments([sort], docs, getters);
+
+    expect(result[0].id).toBe(doc3.id);
+    expect(result[1].id).toBe(doc2.id);
+    expect(result[2].id).toBe(doc1.id);
+  });
+
+  test('descending', () => {
+    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+    const result = sortDocuments([sort], docs, getters);
+
+    expect(result[0].id).toBe(doc1.id);
+    expect(result[1].id).toBe(doc2.id);
+    expect(result[2].id).toBe(doc3.id);
   });
 });
 

@@ -328,6 +328,10 @@ export function applySingleOptionSort(
       const valA = a.fields[field.id] as SingleOptionValue;
       const valB = b.fields[field.id] as SingleOptionValue;
 
+      if (valA === null && valB === null) {
+        return 0;
+      }
+
       if (valA === null) {
         return -1;
       }
@@ -337,11 +341,11 @@ export function applySingleOptionSort(
       }
 
       const optionA = optionsByValue[valA];
-      const optionB = optionsByValue[valA];
+      const optionB = optionsByValue[valB];
 
-      if (optionA.order < optionB.order) {
+      if (optionA.order > optionB.order) {
         return -1;
-      } else if (optionA.order > optionB.order) {
+      } else if (optionA.order < optionB.order) {
         return 1;
       }
       return 0;
@@ -352,16 +356,20 @@ export function applySingleOptionSort(
     const valA = a.fields[field.id] as SingleOptionValue;
     const valB = b.fields[field.id] as SingleOptionValue;
 
-    if (valA === null) {
-      return -1;
+    if (valA === null && valB === null) {
+      return 0;
     }
 
-    if (valB === null) {
+    if (valA === null) {
       return 1;
     }
 
+    if (valB === null) {
+      return -1;
+    }
+
     const optionA = optionsByValue[valA];
-    const optionB = optionsByValue[valA];
+    const optionB = optionsByValue[valB];
 
     if (optionA.order < optionB.order) {
       return -1;
@@ -391,6 +399,10 @@ export function applyMultiOptionSort(
       const valA = a.fields[field.id] as MultiOptionValue;
       const valB = b.fields[field.id] as MultiOptionValue;
 
+      if (isEmpty(valA) && isEmpty(valB)) {
+        return 0;
+      }
+
       if (isEmpty(valA)) {
         return -1;
       }
@@ -400,11 +412,11 @@ export function applyMultiOptionSort(
       }
 
       const optionA = optionsByValue[valA[0]];
-      const optionB = optionsByValue[valA[0]];
+      const optionB = optionsByValue[valB[0]];
 
-      if (optionA.order < optionB.order) {
+      if (optionA.order > optionB.order) {
         return -1;
-      } else if (optionA.order > optionB.order) {
+      } else if (optionA.order < optionB.order) {
         return 1;
       }
       return 0;
@@ -415,16 +427,20 @@ export function applyMultiOptionSort(
     const valA = a.fields[field.id] as MultiOptionValue;
     const valB = b.fields[field.id] as MultiOptionValue;
 
-    if (isEmpty(valA)) {
-      return -1;
+    if (isEmpty(valA) && isEmpty(valB)) {
+      return 0;
     }
 
-    if (isEmpty(valB)) {
+    if (isEmpty(valA)) {
       return 1;
     }
 
+    if (isEmpty(valB)) {
+      return -1;
+    }
+
     const optionA = optionsByValue[valA[0]];
-    const optionB = optionsByValue[valA[0]];
+    const optionB = optionsByValue[valB[0]];
 
     if (optionA.order < optionB.order) {
       return -1;
@@ -452,6 +468,10 @@ export function applySingleCollaboratorSort(
       const valA = a.fields[field.id] as SingleCollaboratorValue;
       const valB = b.fields[field.id] as SingleCollaboratorValue;
 
+      if (valA === null && valB === null) {
+        return 0;
+      }
+
       if (valA === null) {
         return -1;
       }
@@ -475,6 +495,10 @@ export function applySingleCollaboratorSort(
   return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as SingleCollaboratorValue;
     const valB = b.fields[field.id] as SingleCollaboratorValue;
+
+    if (valA === null && valB === null) {
+      return 0;
+    }
 
     if (valA === null) {
       return 1;
@@ -513,6 +537,10 @@ export function applyMultiCollaboratorSort(
       const valA = a.fields[field.id] as MultiCollaboratorValue;
       const valB = b.fields[field.id] as MultiCollaboratorValue;
 
+      if (isEmpty(valA) && isEmpty(valB)) {
+        return 0;
+      }
+
       if (isEmpty(valA)) {
         return -1;
       }
@@ -536,6 +564,10 @@ export function applyMultiCollaboratorSort(
   return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as MultiCollaboratorValue;
     const valB = b.fields[field.id] as MultiCollaboratorValue;
+
+    if (isEmpty(valA) && isEmpty(valB)) {
+      return 0;
+    }
 
     if (isEmpty(valA)) {
       return 1;
@@ -577,6 +609,10 @@ export function applySingleDocumentLinkSort(
       const valA = a.fields[field.id] as SingleDocumentLinkValue;
       const valB = b.fields[field.id] as SingleDocumentLinkValue;
 
+      if (valA === null && valB === null) {
+        return 0;
+      }
+
       if (valA === null) {
         return -1;
       }
@@ -602,6 +638,10 @@ export function applySingleDocumentLinkSort(
   return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as SingleDocumentLinkValue;
     const valB = b.fields[field.id] as SingleDocumentLinkValue;
+
+    if (valA === null && valB === null) {
+      return 0;
+    }
 
     if (valA === null) {
       return 1;
@@ -644,6 +684,10 @@ export function applyMultiDocumentLinkSort(
       const valA = a.fields[field.id] as MultiDocumentLinkValue;
       const valB = b.fields[field.id] as MultiDocumentLinkValue;
 
+      if (isEmpty(valA) && isEmpty(valB)) {
+        return 0;
+      }
+
       if (isEmpty(valA)) {
         return -1;
       }
@@ -669,6 +713,10 @@ export function applyMultiDocumentLinkSort(
   return docsClone.sort((a, b) => {
     const valA = a.fields[field.id] as MultiDocumentLinkValue;
     const valB = b.fields[field.id] as MultiDocumentLinkValue;
+
+    if (isEmpty(valA) && isEmpty(valB)) {
+      return 0;
+    }
 
     if (isEmpty(valA)) {
       return 1;
@@ -747,6 +795,10 @@ function ascendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
   assertNumberFieldValue(a);
   assertNumberFieldValue(b);
 
+  if (a === null && b === null) {
+    return 0;
+  }
+
   if (a === null) {
     return -1;
   }
@@ -767,6 +819,10 @@ function ascendingDateFieldValueSort(a: FieldValue, b: FieldValue) {
   assertDateFieldValue(a);
   assertDateFieldValue(b);
 
+  if (a === null && b === null) {
+    return 0;
+  }
+
   if (a === null) {
     return -1;
   }
@@ -786,11 +842,13 @@ function ascendingDateFieldValueSort(a: FieldValue, b: FieldValue) {
 function descendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
   assertBooleanFieldValue(a);
   assertBooleanFieldValue(b);
+
   if (a === true && b === false) {
     return -1;
   } else if (a === false && b === true) {
     return 1;
   }
+
   return 0;
 }
 
@@ -809,6 +867,10 @@ function descendingTextFieldValueSort(a: FieldValue, b: FieldValue) {
 function descendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
   assertNumberFieldValue(a);
   assertNumberFieldValue(b);
+
+  if (a === null && b === null) {
+    return 0;
+  }
 
   if (b === null) {
     return -1;
@@ -829,6 +891,10 @@ function descendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
 function descendingDateFieldValueSort(a: FieldValue, b: FieldValue) {
   assertDateFieldValue(a);
   assertDateFieldValue(b);
+
+  if (a === null && b === null) {
+    return 0;
+  }
 
   if (a === null) {
     return 1;

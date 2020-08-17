@@ -267,28 +267,34 @@ export function makeManyDocuments(
 
 export function makeDocument(
   document: Partial<Document>,
-  collection: CollectionWithFields,
+  collection?: CollectionWithFields,
   documentsByFieldID?: {
     [fieldID: string]: Document[];
   },
   collaborators?: Collaborator[],
 ): Document {
-  const fields: { [fieldID: string]: FieldValue } = {};
+  const fields: { [fieldID: string]: FieldValue } = {
+    ...document.fields,
+  };
 
-  for (const field of collection.fields) {
-    fields[field.id] =
-      document.fields?.[field.id] !== undefined
-        ? document.fields?.[field.id]
-        : fakeFieldValuesByFieldType[field.type](
-            field,
-            documentsByFieldID,
-            collaborators,
-          );
+  if (collection) {
+    for (const field of collection.fields) {
+      if (document.fields?.[field.id] !== undefined) {
+        continue;
+      }
+
+      fields[field.id] = fakeFieldValuesByFieldType[field.type](
+        field,
+        documentsByFieldID,
+        collaborators,
+      );
+    }
   }
+
   return {
     id: document.id ?? generateID(),
     fields,
-    collectionID: document.collectionID ?? collection.id ?? generateID(),
+    collectionID: document.collectionID ?? collection?.id ?? generateID(),
     updatedAt: document.updatedAt ?? new Date(),
     createdAt: document.createdAt ?? new Date(),
   };
