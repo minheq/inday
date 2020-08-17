@@ -544,10 +544,11 @@ export function applySingleDocumentLinkSort(
   const { getField, getDocument, getCollection } = getters;
 
   const field = getField(sort.fieldID);
-  const collection = getCollection(field.collectionID);
-  const mainField = getField(collection.mainFieldID);
-
   assertSingleDocumentLinkField(field);
+
+  const collection = getCollection(field.documentsFromCollectionID);
+
+  const mainField = getField(collection.mainFieldID);
 
   if (sort.order === 'ascending') {
     return docsClone.sort((a, b) => {
@@ -581,11 +582,11 @@ export function applySingleDocumentLinkSort(
     const valB = b.fields[field.id] as SingleDocumentLinkValue;
 
     if (valA === null) {
-      return -1;
+      return 1;
     }
 
     if (valB === null) {
-      return 1;
+      return -1;
     }
 
     const docA = getDocument(valA);
@@ -611,10 +612,10 @@ export function applyMultiDocumentLinkSort(
   const { getField, getDocument, getCollection } = getters;
 
   const field = getField(sort.fieldID);
-  const collection = getCollection(field.collectionID);
-  const mainField = getField(collection.mainFieldID);
-
   assertMultiDocumentLinkField(field);
+
+  const collection = getCollection(field.documentsFromCollectionID);
+  const mainField = getField(collection.mainFieldID);
 
   if (sort.order === 'ascending') {
     return docsClone.sort((a, b) => {
@@ -648,11 +649,11 @@ export function applyMultiDocumentLinkSort(
     const valB = b.fields[field.id] as MultiDocumentLinkValue;
 
     if (isEmpty(valA)) {
-      return -1;
+      return 1;
     }
 
     if (isEmpty(valB)) {
-      return 1;
+      return -1;
     }
 
     const docA = getDocument(valA[0]);

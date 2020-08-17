@@ -8,7 +8,7 @@ import {
 } from './factory';
 import { FieldType } from './fields';
 import { sortDocuments, SortGetters } from './sorts';
-import { FieldValue, Document } from './documents';
+import { FieldValue, Document, DocumentID } from './documents';
 import { CollaboratorID } from './collaborators';
 
 function prepare(fieldType: FieldType, values: FieldValue[]) {
@@ -246,6 +246,144 @@ describe('collaborator', () => {
     const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
 
     const result = sortDocuments([sort], docs, { ...getters, getCollaborator });
+
+    expect(getValue(result[0])).toBe(values[2]);
+    expect(getValue(result[1])).toBe(values[1]);
+    expect(getValue(result[2])).toBe(values[0]);
+  });
+});
+
+describe('documents', () => {
+  const otherCollection = makeCollection({
+    name: 'other collection',
+  });
+  const otherField = makeField({
+    type: FieldType.SingleLineText,
+    collectionID: otherCollection.id,
+  });
+  otherCollection.mainFieldID = otherField.id;
+  const collectionWithFields = addFieldsToCollection(otherCollection, [
+    otherField,
+  ]);
+  const doc1 = makeDocument(
+    { fields: { [otherField.id]: 'BName' } },
+    collectionWithFields,
+  );
+  const doc2 = makeDocument(
+    { fields: { [otherField.id]: 'AName' } },
+    collectionWithFields,
+  );
+
+  const getDocument = (docID: DocumentID) => {
+    if (docID === doc1.id) {
+      return doc1;
+    }
+
+    return doc2;
+  };
+
+  const getCollection = () => {
+    return otherCollection;
+  };
+
+  test('multi ascending', () => {
+    const values = [[doc1.id], [doc2.id], []];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.MultiDocumentLink,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+    const result = sortDocuments([sort], docs, {
+      ...getters,
+      getDocument,
+      getCollection,
+      getField: (fieldID) => {
+        if (fieldID === field.id) {
+          return field;
+        }
+
+        return otherField;
+      },
+    });
+
+    expect(getValue(result[0])).toBe(values[2]);
+    expect(getValue(result[1])).toBe(values[1]);
+    expect(getValue(result[2])).toBe(values[0]);
+  });
+
+  test('multi descending', () => {
+    const values = [[], [doc2.id], [doc1.id]];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.MultiDocumentLink,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+    const result = sortDocuments([sort], docs, {
+      ...getters,
+      getDocument,
+      getCollection,
+      getField: (fieldID) => {
+        if (fieldID === field.id) {
+          return field;
+        }
+
+        return otherField;
+      },
+    });
+
+    expect(getValue(result[0])).toBe(values[2]);
+    expect(getValue(result[1])).toBe(values[1]);
+    expect(getValue(result[2])).toBe(values[0]);
+  });
+
+  test('single ascending', () => {
+    const values = [doc1.id, doc2.id, null];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.SingleDocumentLink,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+    const result = sortDocuments([sort], docs, {
+      ...getters,
+      getDocument,
+      getCollection,
+      getField: (fieldID) => {
+        if (fieldID === field.id) {
+          return field;
+        }
+
+        return otherField;
+      },
+    });
+
+    expect(getValue(result[0])).toBe(values[2]);
+    expect(getValue(result[1])).toBe(values[1]);
+    expect(getValue(result[2])).toBe(values[0]);
+  });
+
+  test('single descending', () => {
+    const values = [null, doc2.id, doc1.id];
+    const { getters, docs, field, getValue } = prepare(
+      FieldType.SingleDocumentLink,
+      values,
+    );
+    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+    const result = sortDocuments([sort], docs, {
+      ...getters,
+      getDocument,
+      getCollection,
+      getField: (fieldID) => {
+        if (fieldID === field.id) {
+          return field;
+        }
+
+        return otherField;
+      },
+    });
 
     expect(getValue(result[0])).toBe(values[2]);
     expect(getValue(result[1])).toBe(values[1]);
