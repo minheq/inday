@@ -128,11 +128,33 @@ function makeNodes(
     return [];
   }
 
-  if (sorts.length === 1) {
-    return makeLeafNodes(sorts[0], documents, getters);
+  if (isEmpty(sorts)) {
+    throw new Error('Empty sorts. Nodes should be sorted to make a tree');
   }
 
-  const nodes: Node[] = [];
+  const sort = first(sorts);
+  const nextSorts = sorts.slice(1);
+
+  if (sorts.length === 1) {
+    return makeLeafNodes(sort, documents, getters);
+  }
+
+  const leafNodes = makeLeafNodes(sort, documents, getters);
+
+  if (sorts.length === 1) {
+    return leafNodes;
+  }
+
+  const nodes: AncestorNode[] = [];
+
+  for (const leafNode of leafNodes) {
+    nodes.push({
+      type: 'node',
+      field: leafNode.field,
+      value: leafNode.value,
+      children: makeNodes(nextSorts, leafNode.children, getters),
+    });
+  }
 
   return nodes;
 }

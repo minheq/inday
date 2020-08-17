@@ -11,42 +11,6 @@ import { sortDocuments, SortGetters } from './sorts';
 import { FieldValue, Document, DocumentID } from './documents';
 import { CollaboratorID } from './collaborators';
 
-function prepare(fieldType: FieldType, values: FieldValue[]) {
-  const collection = makeCollection({});
-  const field = makeField({ type: fieldType });
-  const collectionWithFields = addFieldsToCollection(collection, [field]);
-
-  const docs = values.map((value) => {
-    return makeDocument(
-      { fields: { [field.id]: value } },
-      collectionWithFields,
-    );
-  });
-
-  const collaborator = makeCollaborator({});
-
-  const getters: SortGetters = {
-    getField: () => field,
-    getDocument: (documentID) => {
-      const document = docs.find((d) => d.id === documentID);
-
-      if (document === undefined) {
-        throw new Error('Document not found');
-      }
-
-      return document;
-    },
-    getCollection: () => collection,
-    getCollaborator: () => collaborator,
-  };
-
-  const getValue = (doc: Document) => {
-    return doc.fields[field.id];
-  };
-
-  return { docs, getters, field, getValue };
-}
-
 describe('no sort', () => {
   test('all docs', () => {
     const values = ['BWord', 'Aword'];
@@ -390,3 +354,117 @@ describe('documents', () => {
     expect(getValue(result[2])).toBe(values[0]);
   });
 });
+
+describe('multiple sorts', () => {
+  const collection = makeCollection({});
+  const numberField = makeField({
+    type: FieldType.Number,
+    collectionID: collection.id,
+  });
+  const textField = makeField({
+    type: FieldType.SingleLineText,
+    collectionID: collection.id,
+  });
+  const collectionWithFields = addFieldsToCollection(collection, [
+    numberField,
+    textField,
+  ]);
+
+  const doc1 = makeDocument(
+    { fields: { [numberField.id]: 2, [textField.id]: 'AWord' } },
+    collectionWithFields,
+  );
+  const doc2 = makeDocument(
+    { fields: { [numberField.id]: 2, [textField.id]: 'BWord' } },
+    collectionWithFields,
+  );
+  const doc3 = makeDocument(
+    { fields: { [numberField.id]: 1, [textField.id]: 'BWord' } },
+    collectionWithFields,
+  );
+  const doc4 = makeDocument(
+    { fields: { [numberField.id]: 1, [textField.id]: 'AWord' } },
+    collectionWithFields,
+  );
+  const fields = [numberField, textField];
+  const docs = [doc1, doc2, doc3, doc4];
+
+  const collaborator = makeCollaborator({});
+
+  const getters: SortGetters = {
+    getField: (fieldID) => {
+      const field = fields.find((d) => d.id === fieldID);
+
+      if (field === undefined) {
+        throw new Error('Document not found');
+      }
+
+      return field;
+    },
+    getDocument: (documentID) => {
+      const document = docs.find((d) => d.id === documentID);
+
+      if (document === undefined) {
+        throw new Error('Document not found');
+      }
+
+      return document;
+    },
+    getCollection: () => collection,
+    getCollaborator: () => collaborator,
+  };
+
+  test('ascending number then descending text sort', () => {
+    const numberSort = makeSort(
+      {},
+      { fieldID: numberField.id, order: 'ascending' },
+    );
+    const textSort = makeSort(
+      {},
+      { fieldID: textField.id, order: 'descending' },
+    );
+
+    const result = sortDocuments([numberSort, textSort], docs, getters);
+
+    expect(result[0].id).toBe(doc3.id);
+    expect(result[1].id).toBe(doc4.id);
+    expect(result[2].id).toBe(doc2.id);
+    expect(result[3].id).toBe(doc1.id);
+  });
+});
+
+function prepare(fieldType: FieldType, values: FieldValue[]) {
+  const collection = makeCollection({});
+  const field = makeField({ type: fieldType });
+  const collectionWithFields = addFieldsToCollection(collection, [field]);
+
+  const docs = values.map((value) => {
+    return makeDocument(
+      { fields: { [field.id]: value } },
+      collectionWithFields,
+    );
+  });
+
+  const collaborator = makeCollaborator({});
+
+  const getters: SortGetters = {
+    getField: () => field,
+    getDocument: (documentID) => {
+      const document = docs.find((d) => d.id === documentID);
+
+      if (document === undefined) {
+        throw new Error('Document not found');
+      }
+
+      return document;
+    },
+    getCollection: () => collection,
+    getCollaborator: () => collaborator,
+  };
+
+  const getValue = (doc: Document) => {
+    return doc.fields[field.id];
+  };
+
+  return { docs, getters, field, getValue };
+}
