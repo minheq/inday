@@ -9,6 +9,7 @@ import {
   assertMultiCollaboratorField,
   assertMultiDocumentLinkField,
   assertSingleDocumentLinkField,
+  areFieldValuesEqual,
 } from './fields';
 import {
   Document,
@@ -129,7 +130,9 @@ function makeNodes(
   }
 
   if (isEmpty(sorts)) {
-    throw new Error('Empty sorts. Nodes should be sorted to make a tree');
+    throw new Error(
+      'Empty sorts. There should be at least one sort to make a tree',
+    );
   }
 
   const sort = first(sorts);
@@ -185,8 +188,13 @@ function makeLeafNodes(
   for (let i = 1; i < sortedDocuments.length; i++) {
     const document = sortedDocuments[i];
 
-    // TODO: check field equality
-    if (document.fields[field.id] === currentNode.value) {
+    if (
+      areFieldValuesEqual(
+        field.type,
+        document.fields[field.id],
+        currentNode.value,
+      )
+    ) {
       if (currentNode.type === 'leaf') {
         currentNode.children.push(document);
       }

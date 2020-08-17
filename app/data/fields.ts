@@ -1,3 +1,15 @@
+import {
+  FieldValue,
+  assertTextFieldValue,
+  assertNumberFieldValue,
+  assertSingleSelectFieldValue,
+  assertMultiSelectFieldValue,
+  assertBooleanFieldValue,
+  assertDateFieldValue,
+} from './documents';
+import { isSameDay } from 'date-fns';
+import { hasAllOf } from '../../lib/data_structures/arrays';
+
 export type FieldID = string;
 
 export enum FieldType {
@@ -308,4 +320,80 @@ export function assertCheckboxField(
       `Expected field to be CheckboxField. Received ${field.type}`,
     );
   }
+}
+
+export function areFieldValuesEqual(
+  fieldType: FieldType,
+  a: FieldValue,
+  b: FieldValue,
+): boolean {
+  const checkEquality = equalityCheckerByFieldType[fieldType];
+
+  return checkEquality(a, b);
+}
+
+const equalityCheckerByFieldType: {
+  [fieldType in FieldType]: (a: FieldValue, b: FieldValue) => boolean;
+} = {
+  [FieldType.Checkbox]: areBooleanFieldValuesEqual,
+  [FieldType.Currency]: areNumberFieldValuesEqual,
+  [FieldType.Date]: areDateFieldValuesEqual,
+  [FieldType.Email]: areTextFieldValuesEqual,
+  [FieldType.MultiCollaborator]: areMultiSelectFieldValuesEqual,
+  [FieldType.MultiDocumentLink]: areMultiSelectFieldValuesEqual,
+  [FieldType.MultiLineText]: areTextFieldValuesEqual,
+  [FieldType.MultiOption]: areMultiSelectFieldValuesEqual,
+  [FieldType.Number]: areNumberFieldValuesEqual,
+  [FieldType.PhoneNumber]: areTextFieldValuesEqual,
+  [FieldType.SingleCollaborator]: areSingleSelectFieldValuesEqual,
+  [FieldType.SingleDocumentLink]: areSingleSelectFieldValuesEqual,
+  [FieldType.SingleLineText]: areTextFieldValuesEqual,
+  [FieldType.SingleOption]: areSingleSelectFieldValuesEqual,
+  [FieldType.URL]: areTextFieldValuesEqual,
+};
+
+function areTextFieldValuesEqual(a: FieldValue, b: FieldValue) {
+  assertTextFieldValue(a);
+  assertTextFieldValue(b);
+
+  return a === b;
+}
+
+function areNumberFieldValuesEqual(a: FieldValue, b: FieldValue) {
+  assertNumberFieldValue(a);
+  assertNumberFieldValue(b);
+
+  return a === b;
+}
+
+function areSingleSelectFieldValuesEqual(a: FieldValue, b: FieldValue) {
+  assertSingleSelectFieldValue(a);
+  assertSingleSelectFieldValue(b);
+
+  return a === b;
+}
+
+function areMultiSelectFieldValuesEqual(a: FieldValue, b: FieldValue) {
+  assertMultiSelectFieldValue(a);
+  assertMultiSelectFieldValue(b);
+
+  return hasAllOf(a, b);
+}
+
+function areBooleanFieldValuesEqual(a: FieldValue, b: FieldValue) {
+  assertBooleanFieldValue(a);
+  assertBooleanFieldValue(b);
+
+  return a === b;
+}
+
+function areDateFieldValuesEqual(a: FieldValue, b: FieldValue) {
+  assertDateFieldValue(a);
+  assertDateFieldValue(b);
+
+  if (a !== null && b !== null) {
+    return isSameDay(a, b);
+  }
+
+  return a === b;
 }
