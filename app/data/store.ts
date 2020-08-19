@@ -52,6 +52,7 @@ import {
   filterQuery,
   sortQuery,
   viewSortsSequenceMaxQuery,
+  viewGroupsSequenceMaxQuery,
   viewGroupsQuery,
   groupQuery,
 } from './queries';
@@ -517,6 +518,12 @@ export function useGetSortsSequenceMax(viewID: string) {
   return sequenceMax;
 }
 
+export function useGetGroupsSequenceMax(viewID: string) {
+  const sequenceMax = useRecoilValue(viewGroupsSequenceMaxQuery(viewID));
+
+  return sequenceMax;
+}
+
 export function useCreateFilter() {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
@@ -621,10 +628,18 @@ export function useDeleteFilter() {
       const filters = await getViewFilter(filter.viewID);
       const updatedFilters = deleteFilter(filter, filters);
 
-      setFilters((previousFilters) => ({
-        ...previousFilters,
-        ...updatedFilters,
-      }));
+      setFilters((previousFilters) => {
+        const clonedPreviousFilters: FiltersByIDState = {
+          ...previousFilters,
+        };
+
+        delete clonedPreviousFilters[filter.id];
+
+        return {
+          ...clonedPreviousFilters,
+          ...updatedFilters,
+        };
+      });
 
       emitEvent({
         name: 'FilterDeleted',
@@ -710,10 +725,18 @@ export function useDeleteSort() {
       const sorts = await getViewSorts(sort.viewID);
       const updatedSorts = deleteSort(sort, sorts);
 
-      setSorts((previousSorts) => ({
-        ...previousSorts,
-        ...updatedSorts,
-      }));
+      setSorts((previousSorts) => {
+        const clonedPreviousSorts: SortsByIDState = {
+          ...previousSorts,
+        };
+
+        delete clonedPreviousSorts[sort.id];
+
+        return {
+          ...clonedPreviousSorts,
+          ...updatedSorts,
+        };
+      });
 
       emitEvent({
         name: 'SortDeleted',
@@ -799,10 +822,18 @@ export function useDeleteGroup() {
       const groups = await getViewGroups(group.viewID);
       const updatedGroups = deleteGroup(group, groups);
 
-      setGroups((previousGroups) => ({
-        ...previousGroups,
-        ...updatedGroups,
-      }));
+      setGroups((previousGroups) => {
+        const clonedPreviousGroups: GroupsByIDState = {
+          ...previousGroups,
+        };
+
+        delete clonedPreviousGroups[group.id];
+
+        return {
+          ...clonedPreviousGroups,
+          ...updatedGroups,
+        };
+      });
 
       emitEvent({
         name: 'GroupDeleted',

@@ -36,6 +36,7 @@ export type SortID = string;
 export type SortOrder = 'ascending' | 'descending';
 
 export interface BaseSort {
+  id: SortID;
   viewID: ViewID;
   sequence: number;
 }
@@ -45,9 +46,7 @@ export interface SortConfig {
   order: SortOrder;
 }
 
-export interface Sort extends BaseSort, SortConfig {
-  id: SortID;
-}
+export interface Sort extends BaseSort, SortConfig {}
 
 export interface SortGetters {
   getField: (fieldID: FieldID) => Field;

@@ -1,11 +1,22 @@
-import { BaseSort, SortConfig } from './sorts';
+import { ViewID } from './views';
+import { FieldID } from './fields';
 
 export type GroupID = string;
-export type GroupConfig = SortConfig;
 
-export interface Group extends BaseSort, GroupConfig {
+export type GroupOrder = 'ascending' | 'descending';
+
+export interface BaseGroup {
   id: GroupID;
+  viewID: ViewID;
+  sequence: number;
 }
+
+export interface GroupConfig {
+  fieldID: FieldID;
+  order: GroupOrder;
+}
+
+export interface Group extends BaseGroup, GroupConfig {}
 
 export function deleteGroup(
   group: Group,

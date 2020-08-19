@@ -217,7 +217,7 @@ export const sortQuery = selectorFamily<Sort, SortID>({
 });
 
 export const groupsQuery = selector({
-  key: RecoilKey.Sorts,
+  key: RecoilKey.Groups,
   get: ({ get }) => {
     const groupsByID = get(groupsByIDState);
 
@@ -346,6 +346,19 @@ export const viewSortsSequenceMaxQuery = selectorFamily<number, ViewID>({
     }
 
     return Math.max(...sorts.map((s) => s.sequence));
+  },
+});
+
+export const viewGroupsSequenceMaxQuery = selectorFamily<number, ViewID>({
+  key: RecoilKey.ViewFilters,
+  get: (viewID: ViewID) => ({ get }) => {
+    const group = get(viewGroupsQuery(viewID));
+
+    if (isEmpty(group)) {
+      return 0;
+    }
+
+    return Math.max(...group.map((s) => s.sequence));
   },
 });
 

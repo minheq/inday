@@ -368,8 +368,6 @@ export function deleteFilter(
     };
   }
 
-  delete updatedFilters[filter.id];
-
   return updatedFilters;
 }
 
