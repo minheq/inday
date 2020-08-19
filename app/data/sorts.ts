@@ -162,6 +162,27 @@ function makeNodes(
   return nodes;
 }
 
+export function deleteSort(
+  sort: Sort,
+  sorts: Sort[],
+): { [sortID: string]: Sort } {
+  const updatedSorts: { [sortID: string]: Sort } = {};
+  const sortIndex = sorts.findIndex((f) => f.id === sort.id);
+
+  const nextSorts = sorts.slice(sortIndex + 1);
+
+  for (const nextSort of nextSorts) {
+    updatedSorts[nextSort.id] = {
+      ...nextSort,
+      sequence: nextSort.sequence - 1,
+    };
+  }
+
+  delete updatedSorts[sort.id];
+
+  return updatedSorts;
+}
+
 function makeLeafNodes(
   sort: Sort,
   documents: Document[],

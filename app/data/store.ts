@@ -9,7 +9,13 @@ import { View } from './views';
 import { Field, FieldConfig } from './fields';
 import { Document } from './documents';
 import { generateID } from '../../lib/id/id';
-import { Filter, FilterConfig, updateFilterGroup, FilterID } from './filters';
+import {
+  Filter,
+  FilterConfig,
+  updateFilterGroup,
+  FilterID,
+  deleteFilter,
+} from './filters';
 import { useLogger } from '../../lib/logger/logger';
 import {
   workspaceState,
@@ -45,7 +51,7 @@ import {
   sortQuery,
   viewSortsSequenceMaxQuery,
 } from './queries';
-import { SortConfig, Sort, SortID } from './sorts';
+import { SortConfig, Sort, SortID, deleteSort } from './sorts';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
@@ -283,6 +289,8 @@ export function useCreateCollection() {
       let newCollection: Collection = {
         id: generateID(),
         name: '',
+        // TODO: create field
+        mainFieldID: '',
         createdAt: new Date(),
         updatedAt: new Date(),
         spaceID,
@@ -581,26 +589,27 @@ export function useUpdateFilterGroup() {
 export function useDeleteFilter() {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState<FiltersByIDState>(filtersByIDState);
+  const getViewFilter = useGetViewFiltersCallback();
 
-  const deleteFilter = useCallback(
-    (filter: Filter) => {
-      setFilters((previousFilters) => {
-        const updatedFilters = { ...previousFilters };
+  const callback = useCallback(
+    async (filter: Filter) => {
+      const filters = await getViewFilter(filter.viewID);
+      const updatedFilters = deleteFilter(filter, filters);
 
-        delete updatedFilters[filter.id];
-
-        return updatedFilters;
-      });
+      setFilters((previousFilters) => ({
+        ...previousFilters,
+        ...updatedFilters,
+      }));
 
       emitEvent({
         name: 'FilterDeleted',
-        filter,
+        filters: Object.values(updatedFilters),
       });
     },
-    [emitEvent, setFilters],
+    [emitEvent, setFilters, getViewFilter],
   );
 
-  return deleteFilter;
+  return callback;
 }
 
 export function useCreateSort() {
@@ -669,26 +678,27 @@ export function useUpdateSortConfig() {
 export function useDeleteSort() {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState<SortsByIDState>(sortsByIDState);
+  const getViewSorts = useGetViewSortsCallback();
 
-  const deleteSort = useCallback(
-    (sort: Sort) => {
-      setSorts((previousSorts) => {
-        const updatedSorts = { ...previousSorts };
+  const callback = useCallback(
+    async (sort: Sort) => {
+      const sorts = await getViewSorts(sort.viewID);
+      const updatedSorts = deleteSort(sort, sorts);
 
-        delete updatedSorts[sort.id];
-
-        return updatedSorts;
-      });
+      setSorts((previousSorts) => ({
+        ...previousSorts,
+        ...updatedSorts,
+      }));
 
       emitEvent({
         name: 'SortDeleted',
-        sort,
+        sorts: Object.values(updatedSorts),
       });
     },
-    [emitEvent, setSorts],
+    [emitEvent, setSorts, getViewSorts],
   );
 
-  return deleteSort;
+  return callback;
 }
 
 export function useCreateView() {

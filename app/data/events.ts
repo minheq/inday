@@ -154,7 +154,7 @@ export interface FilterGroupUpdatedEvent
 
 export interface FilterDeletedEventConfig {
   name: 'FilterDeleted';
-  filter: Filter;
+  filters: Filter[];
 }
 export interface FilterDeletedEvent
   extends BaseEvent,
@@ -176,7 +176,7 @@ export interface SortConfigUpdatedEvent
 
 export interface SortDeletedEventConfig {
   name: 'SortDeleted';
-  sort: Sort;
+  sorts: Sort[];
 }
 export interface SortDeletedEvent extends BaseEvent, SortDeletedEventConfig {}
 

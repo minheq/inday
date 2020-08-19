@@ -352,6 +352,27 @@ export function updateFilterGroup(
   return updatedFilters;
 }
 
+export function deleteFilter(
+  filter: Filter,
+  filters: Filter[],
+): { [filterID: string]: Filter } {
+  const updatedFilters: { [filterID: string]: Filter } = {};
+  const filterIndex = filters.findIndex((f) => f.id === filter.id);
+
+  const nextFilters = filters.slice(filterIndex + 1);
+
+  for (const nextFilter of nextFilters) {
+    updatedFilters[nextFilter.id] = {
+      ...nextFilter,
+      group: nextFilter.group - 1,
+    };
+  }
+
+  delete updatedFilters[filter.id];
+
+  return updatedFilters;
+}
+
 export interface FilterGetters {
   getField: (fieldID: string) => Field;
 }
