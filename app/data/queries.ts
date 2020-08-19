@@ -9,6 +9,7 @@ import {
   viewsByIDState,
   sortsByIDState,
   collaboratorsByIDState,
+  groupsByIDState,
 } from './atoms';
 import { Document, DocumentID } from './documents';
 import { Collection, CollectionID } from './collections';
@@ -25,6 +26,7 @@ import { View, ViewID } from './views';
 import { isEmpty, last } from '../../lib/data_structures/arrays';
 import { Sort, SortID, sortDocuments, SortGetters } from './sorts';
 import { CollaboratorID, Collaborator } from './collaborators';
+import { Group, GroupID } from './groups';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: RecoilKey.Space,
@@ -214,6 +216,30 @@ export const sortQuery = selectorFamily<Sort, SortID>({
   },
 });
 
+export const groupsQuery = selector({
+  key: RecoilKey.Sorts,
+  get: ({ get }) => {
+    const groupsByID = get(groupsByIDState);
+
+    return Object.values(groupsByID) as Sort[];
+  },
+});
+
+export const groupQuery = selectorFamily<Sort, SortID>({
+  key: RecoilKey.Sort,
+  get: (groupID: SortID) => ({ get }) => {
+    const groupsByID = get(groupsByIDState);
+
+    const group = groupsByID[groupID];
+
+    if (group === undefined) {
+      throw new Error('Sort not found');
+    }
+
+    return group;
+  },
+});
+
 export const viewsQuery = selector({
   key: RecoilKey.Views,
   get: ({ get }) => {
@@ -253,9 +279,21 @@ export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
   key: RecoilKey.ViewSorts,
   get: (viewID: ViewID) => ({ get }) => {
     const view = get(viewQuery(viewID));
-    let sorts = get(sortsQuery);
+    const sorts = get(sortsQuery);
 
     return sorts
+      .filter((f) => f.viewID === view.id)
+      .sort((a, b) => a.sequence - b.sequence);
+  },
+});
+
+export const viewGroupsQuery = selectorFamily<Group[], GroupID>({
+  key: RecoilKey.ViewGroups,
+  get: (groupID: GroupID) => ({ get }) => {
+    const view = get(viewQuery(groupID));
+    const groups = get(groupsQuery);
+
+    return groups
       .filter((f) => f.viewID === view.id)
       .sort((a, b) => a.sequence - b.sequence);
   },

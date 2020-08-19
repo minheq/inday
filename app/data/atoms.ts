@@ -18,6 +18,7 @@ import { Workspace } from './workspace';
 import { Sort } from './sorts';
 import { Event } from './events';
 import { Collaborator } from './collaborators';
+import { Group } from './groups';
 
 export type WorkspaceState = Workspace | null;
 export const workspaceState = atom<WorkspaceState>({
@@ -63,9 +64,17 @@ export const filtersByIDState = atom<FiltersByIDState>({
   persistence_UNSTABLE: { type: true },
 });
 
-export type SortsByIDState = { [filterID: string]: Sort | undefined };
+export type SortsByIDState = { [sortID: string]: Sort | undefined };
 export const sortsByIDState = atom<SortsByIDState>({
   key: RecoilKey.SortsByID,
+  default: {},
+  // @ts-ignore: will be stable
+  persistence_UNSTABLE: { type: true },
+});
+
+export type GroupsByIDState = { [groupID: string]: Group | undefined };
+export const groupsByIDState = atom<GroupsByIDState>({
+  key: RecoilKey.GroupsByID,
   default: {},
   // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },

@@ -5,7 +5,7 @@ import { useEventEmitter, EventConfig, Event } from './events';
 import { Collection } from './collections';
 
 import { Space } from './spaces';
-import { View } from './views';
+import { View, ViewID } from './views';
 import { Field, FieldConfig } from './fields';
 import { Document } from './documents';
 import { generateID } from '../../lib/id/id';
@@ -30,6 +30,8 @@ import {
   sortsByIDState,
   eventsState,
   SortsByIDState,
+  groupsByIDState,
+  GroupsByIDState,
 } from './atoms';
 import {
   spaceQuery,
@@ -50,8 +52,11 @@ import {
   filterQuery,
   sortQuery,
   viewSortsSequenceMaxQuery,
+  viewGroupsQuery,
+  groupQuery,
 } from './queries';
 import { SortConfig, Sort, SortID, deleteSort } from './sorts';
+import { GroupConfig, Group, GroupID, deleteGroup } from './groups';
 
 export function useGetWorkspace() {
   const workspace = useRecoilValue(workspaceState);
@@ -378,22 +383,25 @@ export function useUpdateCollectionName() {
 }
 
 export function useGetViewCallback() {
-  const views = useRecoilValue(viewsByIDState);
-
-  const getView = useCallback(
-    (viewID: string) => {
-      const view = views[viewID];
-
-      if (view === undefined) {
-        throw new Error('View not found');
-      }
+  return useRecoilCallback(
+    ({ snapshot }) => async (viewID: ViewID) => {
+      const view = await snapshot.getPromise(viewQuery(viewID));
 
       return view;
     },
-    [views],
+    [],
   );
+}
 
-  return getView;
+export function useGetGroupCallback() {
+  return useRecoilCallback(
+    ({ snapshot }) => async (groupID: GroupID) => {
+      const group = await snapshot.getPromise(groupQuery(groupID));
+
+      return group;
+    },
+    [],
+  );
 }
 
 export function useGetView(viewID: string) {
@@ -458,6 +466,12 @@ export function useGetViewSorts(viewID: string) {
   return sorts;
 }
 
+export function useGetViewGroups(viewID: string) {
+  const groups = useRecoilValue(viewGroupsQuery(viewID));
+
+  return groups;
+}
+
 export function useGetViewFiltersCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (viewID: string) => {
@@ -475,6 +489,17 @@ export function useGetViewSortsCallback() {
       const sorts = await snapshot.getPromise(viewSortsQuery(viewID));
 
       return sorts;
+    },
+    [],
+  );
+}
+
+export function useGetViewGroupsCallback() {
+  return useRecoilCallback(
+    ({ snapshot }) => async (viewID: string) => {
+      const groups = await snapshot.getPromise(viewGroupsQuery(viewID));
+
+      return groups;
     },
     [],
   );
@@ -616,7 +641,7 @@ export function useCreateSort() {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState(sortsByIDState);
 
-  const createSort = useCallback(
+  const callback = useCallback(
     (viewID: string, sequence: number, sortConfig: SortConfig) => {
       let newSort: Sort = {
         id: generateID(),
@@ -640,7 +665,7 @@ export function useCreateSort() {
     [emitEvent, setSorts],
   );
 
-  return createSort;
+  return callback;
 }
 
 export function useUpdateSortConfig() {
@@ -696,6 +721,95 @@ export function useDeleteSort() {
       });
     },
     [emitEvent, setSorts, getViewSorts],
+  );
+
+  return callback;
+}
+
+export function useCreateGroup() {
+  const emitEvent = useEmitEvent();
+  const setGroups = useSetRecoilState(groupsByIDState);
+
+  const callback = useCallback(
+    (viewID: string, sequence: number, groupConfig: GroupConfig) => {
+      let newGroup: Group = {
+        id: generateID(),
+        viewID,
+        sequence,
+        ...groupConfig,
+      };
+
+      setGroups((previousGroups) => ({
+        ...previousGroups,
+        [newGroup.id]: newGroup,
+      }));
+
+      emitEvent({
+        name: 'GroupCreated',
+        group: newGroup,
+      });
+
+      return newGroup;
+    },
+    [emitEvent, setGroups],
+  );
+
+  return callback;
+}
+
+export function useUpdateGroupConfig() {
+  const emitEvent = useEmitEvent();
+  const setGroups = useSetRecoilState(groupsByIDState);
+  const getGroup = useGetGroupCallback();
+
+  const callback = useCallback(
+    async (groupID: string, groupConfig: GroupConfig) => {
+      const prevGroup = await getGroup(groupID);
+
+      const updatedGroup: Group = {
+        ...prevGroup,
+        ...groupConfig,
+      };
+
+      setGroups((previousGroups) => ({
+        ...previousGroups,
+        [updatedGroup.id]: updatedGroup,
+      }));
+
+      emitEvent({
+        name: 'GroupConfigUpdated',
+        group: updatedGroup,
+      });
+
+      return updatedGroup;
+    },
+    [emitEvent, setGroups, getGroup],
+  );
+
+  return callback;
+}
+
+export function useDeleteGroup() {
+  const emitEvent = useEmitEvent();
+  const setGroups = useSetRecoilState<GroupsByIDState>(groupsByIDState);
+  const getViewGroups = useGetViewGroupsCallback();
+
+  const callback = useCallback(
+    async (group: Group) => {
+      const groups = await getViewGroups(group.viewID);
+      const updatedGroups = deleteGroup(group, groups);
+
+      setGroups((previousGroups) => ({
+        ...previousGroups,
+        ...updatedGroups,
+      }));
+
+      emitEvent({
+        name: 'GroupDeleted',
+        groups: Object.values(updatedGroups),
+      });
+    },
+    [emitEvent, setGroups, getViewGroups],
   );
 
   return callback;
@@ -771,10 +885,10 @@ export function useUpdateViewName() {
   const getView = useGetViewCallback();
   const setViews = useSetRecoilState(viewsByIDState);
 
-  const updateViewName = useCallback(
-    (input: UpdateViewNameInput) => {
+  const callback = useCallback(
+    async (input: UpdateViewNameInput) => {
       const { viewID, name } = input;
-      const prevView = getView(viewID);
+      const prevView = await getView(viewID);
 
       const updatedView: View = {
         ...prevView,
@@ -794,7 +908,7 @@ export function useUpdateViewName() {
     [getView, setViews, emitEvent],
   );
 
-  return updateViewName;
+  return callback;
 }
 
 export function useGetFieldCallback() {

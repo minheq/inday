@@ -6,6 +6,7 @@ import { Field } from './fields';
 import { Document } from './documents';
 import { Filter } from './filters';
 import { Sort } from './sorts';
+import { Group } from './groups';
 
 export interface BaseEvent {
   createdAt: Date;
@@ -180,6 +181,26 @@ export interface SortDeletedEventConfig {
 }
 export interface SortDeletedEvent extends BaseEvent, SortDeletedEventConfig {}
 
+export interface GroupCreatedEventConfig {
+  name: 'GroupCreated';
+  group: Group;
+}
+export interface GroupCreatedEvent extends BaseEvent, GroupCreatedEventConfig {}
+
+export interface GroupConfigUpdatedEventConfig {
+  name: 'GroupConfigUpdated';
+  group: Group;
+}
+export interface GroupConfigUpdatedEvent
+  extends BaseEvent,
+    GroupConfigUpdatedEventConfig {}
+
+export interface GroupDeletedEventConfig {
+  name: 'GroupDeleted';
+  groups: Group[];
+}
+export interface GroupDeletedEvent extends BaseEvent, GroupDeletedEventConfig {}
+
 export type EventConfig =
   | WorkspaceCreatedEventConfig
   | SpaceCreatedEventConfig
@@ -203,7 +224,10 @@ export type EventConfig =
   | FilterDeletedEventConfig
   | SortCreatedEventConfig
   | SortConfigUpdatedEventConfig
-  | SortDeletedEventConfig;
+  | SortDeletedEventConfig
+  | GroupCreatedEventConfig
+  | GroupConfigUpdatedEventConfig
+  | GroupDeletedEventConfig;
 
 export type Event =
   | WorkspaceCreatedEvent
@@ -228,7 +252,10 @@ export type Event =
   | FilterDeletedEvent
   | SortCreatedEvent
   | SortConfigUpdatedEvent
-  | SortDeletedEvent;
+  | SortDeletedEvent
+  | GroupCreatedEvent
+  | GroupConfigUpdatedEvent
+  | GroupDeletedEvent;
 
 type SubscriptionCallback = (event: Event) => void;
 
