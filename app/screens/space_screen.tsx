@@ -26,9 +26,8 @@ import {
   useGetSpace,
   useGetView,
   useGetSpaceCollections,
-  useGetCollection,
-  useGetCollectionFieldsByID,
   useGetViewDocuments,
+  useGetListViewFieldsWithConfig,
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
@@ -303,11 +302,10 @@ const FIELD_HEIGHT = 40;
 
 function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
-  const collection = useGetCollection(view.collectionID);
-  const fieldsByID = useGetCollectionFieldsByID(collection.id);
+  const fields = useGetListViewFieldsWithConfig(view.id);
   const documents = useGetViewDocuments(view.id);
 
-  const { fieldsOrder, fieldsConfig } = view;
+  const { fieldsConfig } = view;
 
   const headerScrollView = React.useRef<ScrollView>(null);
   const gridHorizontalScrollView = React.useRef<ScrollView>(null);
@@ -336,10 +334,6 @@ function ListViewDisplay(props: ListViewDisplayProps) {
     [gridHorizontalScrollView],
   );
 
-  const fieldList = fieldsOrder
-    .filter((fieldID) => fieldsConfig[fieldID].visible)
-    .map((fieldID) => fieldsByID[fieldID]);
-
   return (
     <Container flex={1}>
       <Container height={FIELD_HEIGHT}>
@@ -357,15 +351,13 @@ function ListViewDisplay(props: ListViewDisplayProps) {
             onScroll={handleHeaderHorizontalScroll}
             scrollEventThrottle={16}
           >
-            {fieldList.map((field) => {
-              const fieldConfig = fieldsConfig[field.id];
-
+            {fields.map((field) => {
               return (
                 <Container
                   color="tint"
                   key={field.id}
                   height={FIELD_HEIGHT}
-                  width={fieldConfig.width}
+                  width={field.config.width}
                   borderBottomWidth={1}
                   borderRightWidth={1}
                   padding={8}
@@ -414,7 +406,7 @@ function ListViewDisplay(props: ListViewDisplayProps) {
                   height={DOCUMENT_HEIGHT}
                 >
                   <Row key={doc.id}>
-                    {fieldList.map((field) => {
+                    {fields.map((field) => {
                       const fieldConfig = fieldsConfig[field.id];
                       const cell = documentFieldValueComponentByFieldType[
                         field.type

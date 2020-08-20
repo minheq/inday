@@ -1,4 +1,4 @@
-import { FieldID } from './fields';
+import { FieldID, Field } from './fields';
 
 export type ViewID = string;
 
@@ -13,15 +13,19 @@ interface BaseView {
 export interface ListViewFieldConfig {
   visible: boolean;
   width: number;
+  order: number;
 }
 
 interface ListViewConfig {
   type: 'list';
-  fieldsOrder: FieldID[];
   fieldsConfig: {
     [fieldID: string]: ListViewFieldConfig;
   };
 }
+
+export type FieldWithListViewConfig = Field & {
+  config: ListViewFieldConfig;
+};
 
 export interface ListView extends BaseView, ListViewConfig {}
 

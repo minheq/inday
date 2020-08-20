@@ -234,12 +234,12 @@ export function makeView(
 ): View {
   // @ts-ignore: I don't know how to solve this type error
   return {
-    fieldsOrder: collection.fields.map((f) => f.id),
     fieldsConfig: keyedBy(
-      collection.fields.map((f) => ({
+      collection.fields.map((f, i) => ({
         id: f.id,
         visible: true,
         width: 180,
+        order: i,
       })),
       'id',
     ),

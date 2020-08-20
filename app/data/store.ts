@@ -5,7 +5,7 @@ import { useEventEmitter, EventConfig, Event } from './events';
 import { Collection } from './collections';
 
 import { Space } from './spaces';
-import { View, ViewID } from './views';
+import { View, ViewID, assertListView, FieldWithListViewConfig } from './views';
 import { Field, FieldConfig } from './fields';
 import { Document } from './documents';
 import { generateID } from '../../lib/id/id';
@@ -846,6 +846,39 @@ export function useDeleteGroup() {
   return callback;
 }
 
+export function useGetListViewFieldsWithConfig(
+  viewID: string,
+): FieldWithListViewConfig[] {
+  const view = useGetView(viewID);
+
+  assertListView(view);
+
+  const fields = useGetCollectionFields(view.collectionID);
+
+  return fields
+    .slice(0)
+    .sort((a, b) => {
+      const fieldConfigA = view.fieldsConfig[a.id];
+      const fieldConfigB = view.fieldsConfig[b.id];
+
+      if (fieldConfigA.order < fieldConfigB.order) {
+        return -1;
+      } else if (fieldConfigA.order > fieldConfigB.order) {
+        return 1;
+      }
+
+      return 0;
+    })
+    .map((f) => {
+      const config = view.fieldsConfig[f.id];
+
+      return {
+        ...f,
+        config,
+      };
+    });
+}
+
 export function useCreateView() {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
@@ -857,7 +890,6 @@ export function useCreateView() {
         name: '',
         type: 'list',
         fieldsConfig: {},
-        fieldsOrder: [],
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,

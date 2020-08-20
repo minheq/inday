@@ -7,6 +7,7 @@ import { CollectionID } from '../data/collections';
 import { FilterMenu } from './filter_menu';
 import { SortMenu } from './sort_menu';
 import { GroupMenu } from './group_menu';
+import { FieldMenu } from './field_menu';
 
 interface OrganizeMenuProps {
   spaceID: SpaceID;
@@ -34,6 +35,7 @@ export function OrganizeMenu(props: OrganizeMenuProps) {
         />
       </Container>
       <Spacer size={16} />
+      {tab === 1 && <FieldMenu viewID={viewID} collectionID={collectionID} />}
       {tab === 2 && <FilterMenu viewID={viewID} collectionID={collectionID} />}
       {tab === 3 && <SortMenu viewID={viewID} collectionID={collectionID} />}
       {tab === 4 && <GroupMenu viewID={viewID} collectionID={collectionID} />}
