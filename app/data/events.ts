@@ -1,7 +1,7 @@
 import { Workspace } from './workspace';
 import { Space } from './spaces';
 import { Collection } from './collections';
-import { View } from './views';
+import { View, ListView } from './views';
 import { Field } from './fields';
 import { Document } from './documents';
 import { Filter } from './filters';
@@ -35,7 +35,8 @@ export interface SpaceDeletedEvent extends BaseEvent, SpaceDeletedEventConfig {}
 
 export interface SpaceNameUpdatedEventConfig {
   name: 'SpaceNameUpdated';
-  space: Space;
+  prevSpace: Space;
+  nextSpace: Space;
 }
 export interface SpaceNameUpdatedEvent
   extends BaseEvent,
@@ -51,7 +52,8 @@ export interface CollectionCreatedEvent
 
 export interface CollectionNameUpdatedEventConfig {
   name: 'CollectionNameUpdated';
-  collection: Collection;
+  prevCollection: Collection;
+  nextCollection: Collection;
 }
 export interface CollectionNameUpdatedEvent
   extends BaseEvent,
@@ -73,7 +75,8 @@ export interface ViewCreatedEvent extends BaseEvent, ViewCreatedEventConfig {}
 
 export interface ViewNameUpdatedEventConfig {
   name: 'ViewNameUpdated';
-  view: View;
+  prevView: View;
+  nextView: View;
 }
 export interface ViewNameUpdatedEvent
   extends BaseEvent,
@@ -93,7 +96,8 @@ export interface FieldCreatedEvent extends BaseEvent, FieldCreatedEventConfig {}
 
 export interface FieldNameUpdatedEventConfig {
   name: 'FieldNameUpdated';
-  field: Field;
+  prevField: Field;
+  nextField: Field;
 }
 export interface FieldNameUpdatedEvent
   extends BaseEvent,
@@ -115,7 +119,8 @@ export interface DocumentCreatedEvent
 
 export interface DocumentNameUpdatedEventConfig {
   name: 'DocumentNameUpdated';
-  document: Document;
+  prevDocument: Document;
+  nextDocument: Document;
 }
 export interface DocumentNameUpdatedEvent
   extends BaseEvent,
@@ -139,7 +144,8 @@ export interface FilterCreatedEvent
 
 export interface FilterConfigUpdatedEventConfig {
   name: 'FilterConfigUpdated';
-  filter: Filter;
+  prevFilter: Filter;
+  nextFilter: Filter;
 }
 export interface FilterConfigUpdatedEvent
   extends BaseEvent,
@@ -147,7 +153,8 @@ export interface FilterConfigUpdatedEvent
 
 export interface FilterGroupUpdatedEventConfig {
   name: 'FilterGroupUpdated';
-  filters: Filter[];
+  prevFilters: Filter[];
+  nextFilters: Filter[];
 }
 export interface FilterGroupUpdatedEvent
   extends BaseEvent,
@@ -155,7 +162,8 @@ export interface FilterGroupUpdatedEvent
 
 export interface FilterDeletedEventConfig {
   name: 'FilterDeleted';
-  filters: Filter[];
+  prevFilters: Filter[];
+  nextFilters: Filter[];
 }
 export interface FilterDeletedEvent
   extends BaseEvent,
@@ -169,7 +177,8 @@ export interface SortCreatedEvent extends BaseEvent, SortCreatedEventConfig {}
 
 export interface SortConfigUpdatedEventConfig {
   name: 'SortConfigUpdated';
-  sort: Sort;
+  prevSort: Sort;
+  nextSort: Sort;
 }
 export interface SortConfigUpdatedEvent
   extends BaseEvent,
@@ -177,7 +186,8 @@ export interface SortConfigUpdatedEvent
 
 export interface SortDeletedEventConfig {
   name: 'SortDeleted';
-  sorts: Sort[];
+  prevSorts: Sort[];
+  nextSorts: Sort[];
 }
 export interface SortDeletedEvent extends BaseEvent, SortDeletedEventConfig {}
 
@@ -189,7 +199,8 @@ export interface GroupCreatedEvent extends BaseEvent, GroupCreatedEventConfig {}
 
 export interface GroupConfigUpdatedEventConfig {
   name: 'GroupConfigUpdated';
-  group: Group;
+  prevGroup: Group;
+  nextGroup: Group;
 }
 export interface GroupConfigUpdatedEvent
   extends BaseEvent,
@@ -197,9 +208,19 @@ export interface GroupConfigUpdatedEvent
 
 export interface GroupDeletedEventConfig {
   name: 'GroupDeleted';
-  groups: Group[];
+  prevGroups: Group[];
+  nextGroups: Group[];
 }
 export interface GroupDeletedEvent extends BaseEvent, GroupDeletedEventConfig {}
+
+export interface ListViewFieldConfigUpdatedEventConfig {
+  name: 'ListViewFieldConfigUpdated';
+  prevView: ListView;
+  nextView: ListView;
+}
+export interface ListViewFieldConfigUpdatedEvent
+  extends BaseEvent,
+    ListViewFieldConfigUpdatedEventConfig {}
 
 export type EventConfig =
   | WorkspaceCreatedEventConfig
@@ -227,7 +248,8 @@ export type EventConfig =
   | SortDeletedEventConfig
   | GroupCreatedEventConfig
   | GroupConfigUpdatedEventConfig
-  | GroupDeletedEventConfig;
+  | GroupDeletedEventConfig
+  | ListViewFieldConfigUpdatedEventConfig;
 
 export type Event =
   | WorkspaceCreatedEvent
@@ -255,7 +277,8 @@ export type Event =
   | SortDeletedEvent
   | GroupCreatedEvent
   | GroupConfigUpdatedEvent
-  | GroupDeletedEvent;
+  | GroupDeletedEvent
+  | ListViewFieldConfigUpdatedEvent;
 
 type SubscriptionCallback = (event: Event) => void;
 

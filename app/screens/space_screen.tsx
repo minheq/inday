@@ -27,7 +27,7 @@ import {
   useGetView,
   useGetSpaceCollections,
   useGetViewDocuments,
-  useGetListViewFieldsWithConfig,
+  useGetFieldsWithListViewConfig,
 } from '../data/store';
 import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
@@ -302,7 +302,7 @@ const FIELD_HEIGHT = 40;
 
 function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
-  const fields = useGetListViewFieldsWithConfig(view.id);
+  const fields = useGetFieldsWithListViewConfig(view.id);
   const documents = useGetViewDocuments(view.id);
 
   const { fieldsConfig } = view;

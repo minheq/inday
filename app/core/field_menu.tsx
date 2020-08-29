@@ -1,8 +1,11 @@
-import React, { Fragment, createContext } from 'react';
+import React, { Fragment, createContext, useCallback, useContext } from 'react';
 import { ScrollView } from 'react-native';
 
 import { Container, Spacer, Text, Row, tokens, Switch } from '../components';
-import { useGetListViewFieldsWithConfig } from '../data/store';
+import {
+  useGetFieldsWithListViewConfig,
+  useUpdateListViewFieldConfig,
+} from '../data/store';
 import { FieldWithListViewConfig } from '../data/views';
 
 const FieldMenuContext = createContext({
@@ -18,7 +21,7 @@ interface FieldMenuProps {
 export function FieldMenu(props: FieldMenuProps) {
   const { viewID, collectionID } = props;
 
-  const fields = useGetListViewFieldsWithConfig(viewID);
+  const fields = useGetFieldsWithListViewConfig(viewID);
 
   return (
     <FieldMenuContext.Provider value={{ viewID, collectionID }}>
@@ -44,12 +47,24 @@ interface FieldListItemProps {
 
 function FieldListItem(props: FieldListItemProps) {
   const { field } = props;
+  const context = useContext(FieldMenuContext);
+  const updateListViewFieldConfig = useUpdateListViewFieldConfig();
+
+  const handleChange = useCallback(
+    (value: boolean) => {
+      updateListViewFieldConfig(context.viewID, field.id, {
+        ...field.config,
+        visible: value,
+      });
+    },
+    [updateListViewFieldConfig, context, field],
+  );
 
   return (
     <Container padding={16} borderRadius={tokens.radius} shadow>
-      <Row>
+      <Row justifyContent="space-between">
         <Text>{field.name}</Text>
-        <Switch value={field.config.visible} />
+        <Switch value={field.config.visible} onChange={handleChange} />
       </Row>
     </Container>
   );

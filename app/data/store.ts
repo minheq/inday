@@ -5,8 +5,14 @@ import { useEventEmitter, EventConfig, Event } from './events';
 import { Collection } from './collections';
 
 import { Space } from './spaces';
-import { View, ViewID, assertListView, FieldWithListViewConfig } from './views';
-import { Field, FieldConfig } from './fields';
+import {
+  View,
+  ViewID,
+  assertListView,
+  FieldWithListViewConfig,
+  ListViewFieldConfig,
+} from './views';
+import { Field, FieldConfig, FieldID } from './fields';
 import { Document } from './documents';
 import { generateID } from '../../lib/id/id';
 import {
@@ -207,19 +213,20 @@ export function useUpdateSpaceName() {
       const { spaceID, name } = input;
       const prevSpace = getSpace(spaceID);
 
-      const updatedSpace: Space = {
+      const nextSpace: Space = {
         ...prevSpace,
         name,
       };
 
       setSpaces((previousSpaces) => ({
         ...previousSpaces,
-        [updatedSpace.id]: updatedSpace,
+        [nextSpace.id]: nextSpace,
       }));
 
       emitEvent({
         name: 'SpaceNameUpdated',
-        space: updatedSpace,
+        prevSpace,
+        nextSpace,
       });
     },
     [emitEvent, setSpaces, getSpace],
@@ -362,19 +369,20 @@ export function useUpdateCollectionName() {
       const { collectionID, name } = input;
       const prevCollection = getCollection(collectionID);
 
-      const updatedCollection: Collection = {
+      const nextCollection: Collection = {
         ...prevCollection,
         name,
       };
 
       setCollections((previousCollections) => ({
         ...previousCollections,
-        [updatedCollection.id]: updatedCollection,
+        [nextCollection.id]: nextCollection,
       }));
 
       emitEvent({
         name: 'CollectionNameUpdated',
-        collection: updatedCollection,
+        prevCollection,
+        nextCollection,
       });
     },
     [getCollection, setCollections, emitEvent],
@@ -537,8 +545,8 @@ export function useCreateFilter() {
         ...filterConfig,
       };
 
-      setFilters((previousFilters) => ({
-        ...previousFilters,
+      setFilters((prevFilters) => ({
+        ...prevFilters,
         [newFilter.id]: newFilter,
       }));
 
@@ -564,22 +572,23 @@ export function useUpdateFilterConfig() {
     async (filterID: string, group: number, filterConfig: FilterConfig) => {
       const prevFilter = await getFilter(filterID);
 
-      const updatedFilter: Filter = {
+      const nextFilter: Filter = {
         ...prevFilter,
         ...filterConfig,
         group,
       };
-      setFilters((previousFilters) => ({
-        ...previousFilters,
-        [updatedFilter.id]: updatedFilter,
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        [nextFilter.id]: nextFilter,
       }));
 
       emitEvent({
         name: 'FilterConfigUpdated',
-        filter: updatedFilter,
+        prevFilter,
+        nextFilter,
       });
 
-      return updatedFilter;
+      return nextFilter;
     },
     [emitEvent, setFilters, getFilter],
   );
@@ -596,21 +605,22 @@ export function useUpdateFilterGroup() {
   const callback = useCallback(
     async (filterID: string, value: 'and' | 'or') => {
       const prevFilter = await getFilter(filterID);
-      const filters = await getViewFilters(prevFilter.viewID);
+      const prevFilters = await getViewFilters(prevFilter.viewID);
 
-      const updatedFilters = updateFilterGroup(prevFilter, value, filters);
+      const nextFilters = updateFilterGroup(prevFilter, value, prevFilters);
 
       setFilters((previousFilters) => ({
         ...previousFilters,
-        ...updatedFilters,
+        ...nextFilters,
       }));
 
       emitEvent({
         name: 'FilterGroupUpdated',
-        filters: Object.values(updatedFilters),
+        prevFilters,
+        nextFilters: Object.values(nextFilters),
       });
 
-      return updatedFilters[filterID];
+      return nextFilters[filterID];
     },
     [emitEvent, setFilters, getFilter, getViewFilters],
   );
@@ -625,25 +635,26 @@ export function useDeleteFilter() {
 
   const callback = useCallback(
     async (filter: Filter) => {
-      const filters = await getViewFilter(filter.viewID);
-      const updatedFilters = deleteFilter(filter, filters);
+      const prevFilters = await getViewFilter(filter.viewID);
+      const nextFilters = deleteFilter(filter, prevFilters);
 
-      setFilters((previousFilters) => {
+      setFilters((prevFilters) => {
         const clonedPreviousFilters: FiltersByIDState = {
-          ...previousFilters,
+          ...prevFilters,
         };
 
         delete clonedPreviousFilters[filter.id];
 
         return {
           ...clonedPreviousFilters,
-          ...updatedFilters,
+          ...nextFilters,
         };
       });
 
       emitEvent({
         name: 'FilterDeleted',
-        filters: Object.values(updatedFilters),
+        prevFilters,
+        nextFilters: Object.values(nextFilters),
       });
     },
     [emitEvent, setFilters, getViewFilter],
@@ -692,22 +703,23 @@ export function useUpdateSortConfig() {
     async (sortID: string, sortConfig: SortConfig) => {
       const prevSort = await getSort(sortID);
 
-      const updatedSort: Sort = {
+      const nextSort: Sort = {
         ...prevSort,
         ...sortConfig,
       };
 
       setSorts((previousSorts) => ({
         ...previousSorts,
-        [updatedSort.id]: updatedSort,
+        [nextSort.id]: nextSort,
       }));
 
       emitEvent({
         name: 'SortConfigUpdated',
-        sort: updatedSort,
+        prevSort,
+        nextSort,
       });
 
-      return updatedSort;
+      return nextSort;
     },
     [emitEvent, setSorts, getSort],
   );
@@ -722,8 +734,8 @@ export function useDeleteSort() {
 
   const callback = useCallback(
     async (sort: Sort) => {
-      const sorts = await getViewSorts(sort.viewID);
-      const updatedSorts = deleteSort(sort, sorts);
+      const prevSorts = await getViewSorts(sort.viewID);
+      const nextSorts = deleteSort(sort, prevSorts);
 
       setSorts((previousSorts) => {
         const clonedPreviousSorts: SortsByIDState = {
@@ -734,13 +746,14 @@ export function useDeleteSort() {
 
         return {
           ...clonedPreviousSorts,
-          ...updatedSorts,
+          ...nextSorts,
         };
       });
 
       emitEvent({
         name: 'SortDeleted',
-        sorts: Object.values(updatedSorts),
+        prevSorts,
+        nextSorts: Object.values(nextSorts),
       });
     },
     [emitEvent, setSorts, getViewSorts],
@@ -789,22 +802,23 @@ export function useUpdateGroupConfig() {
     async (groupID: string, groupConfig: GroupConfig) => {
       const prevGroup = await getGroup(groupID);
 
-      const updatedGroup: Group = {
+      const nextGroup: Group = {
         ...prevGroup,
         ...groupConfig,
       };
 
       setGroups((previousGroups) => ({
         ...previousGroups,
-        [updatedGroup.id]: updatedGroup,
+        [nextGroup.id]: nextGroup,
       }));
 
       emitEvent({
         name: 'GroupConfigUpdated',
-        group: updatedGroup,
+        prevGroup,
+        nextGroup,
       });
 
-      return updatedGroup;
+      return nextGroup;
     },
     [emitEvent, setGroups, getGroup],
   );
@@ -819,8 +833,8 @@ export function useDeleteGroup() {
 
   const callback = useCallback(
     async (group: Group) => {
-      const groups = await getViewGroups(group.viewID);
-      const updatedGroups = deleteGroup(group, groups);
+      const prevGroups = await getViewGroups(group.viewID);
+      const nextGroups = deleteGroup(group, prevGroups);
 
       setGroups((previousGroups) => {
         const clonedPreviousGroups: GroupsByIDState = {
@@ -831,13 +845,14 @@ export function useDeleteGroup() {
 
         return {
           ...clonedPreviousGroups,
-          ...updatedGroups,
+          ...nextGroups,
         };
       });
 
       emitEvent({
         name: 'GroupDeleted',
-        groups: Object.values(updatedGroups),
+        prevGroups,
+        nextGroups: Object.values(nextGroups),
       });
     },
     [emitEvent, setGroups, getViewGroups],
@@ -846,7 +861,7 @@ export function useDeleteGroup() {
   return callback;
 }
 
-export function useGetListViewFieldsWithConfig(
+export function useGetFieldsWithListViewConfig(
   viewID: string,
 ): FieldWithListViewConfig[] {
   const view = useGetView(viewID);
@@ -879,11 +894,47 @@ export function useGetListViewFieldsWithConfig(
     });
 }
 
+export function useUpdateListViewFieldConfig() {
+  const emitEvent = useEmitEvent();
+  const getView = useGetViewCallback();
+  const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
+
+  const callback = useCallback(
+    async (viewID: ViewID, fieldID: FieldID, config: ListViewFieldConfig) => {
+      const prevView = await getView(viewID);
+
+      assertListView(prevView);
+
+      const nextView: View = {
+        ...prevView,
+        fieldsConfig: {
+          ...prevView.fieldsConfig,
+          [fieldID]: config,
+        },
+      };
+
+      setViews((previousViews) => ({
+        ...previousViews,
+        [nextView.id]: nextView,
+      }));
+
+      emitEvent({
+        name: 'ListViewFieldConfigUpdated',
+        prevView,
+        nextView,
+      });
+    },
+    [emitEvent, setViews, getView],
+  );
+
+  return callback;
+}
+
 export function useCreateView() {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
-  const createView = useCallback(
+  const callback = useCallback(
     (collectionID: string) => {
       let newView: View = {
         id: generateID(),
@@ -910,7 +961,7 @@ export function useCreateView() {
     [emitEvent, setViews],
   );
 
-  return createView;
+  return callback;
 }
 
 export function useDeleteView() {
@@ -953,19 +1004,20 @@ export function useUpdateViewName() {
       const { viewID, name } = input;
       const prevView = await getView(viewID);
 
-      const updatedView: View = {
+      const nextView: View = {
         ...prevView,
         name,
       };
 
       setViews((previousViews) => ({
         ...previousViews,
-        [updatedView.id]: updatedView,
+        [nextView.id]: nextView,
       }));
 
       emitEvent({
         name: 'ViewNameUpdated',
-        view: updatedView,
+        prevView,
+        nextView,
       });
     },
     [getView, setViews, emitEvent],
@@ -1082,19 +1134,20 @@ export function useUpdateFieldName() {
       const { fieldID, name } = input;
       const prevField = getField(fieldID);
 
-      const updatedField: Field = {
+      const nextField: Field = {
         ...prevField,
         name,
       };
 
       setFields((previousFields) => ({
         ...previousFields,
-        [updatedField.id]: updatedField,
+        [nextField.id]: nextField,
       }));
 
       emitEvent({
         name: 'FieldNameUpdated',
-        field: updatedField,
+        prevField,
+        nextField,
       });
     },
     [getField, setFields, emitEvent],
@@ -1203,18 +1256,19 @@ export function useUpdateDocumentName() {
       const { documentID } = input;
       const prevDocument = getDocument(documentID);
 
-      const updatedDocument: Document = {
+      const nextDocument: Document = {
         ...prevDocument,
       };
 
       setDocuments((previousDocuments) => ({
         ...previousDocuments,
-        [updatedDocument.id]: updatedDocument,
+        [nextDocument.id]: nextDocument,
       }));
 
       emitEvent({
         name: 'DocumentNameUpdated',
-        document: updatedDocument,
+        prevDocument,
+        nextDocument,
       });
     },
     [getDocument, setDocuments, emitEvent],
