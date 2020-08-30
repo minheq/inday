@@ -54,6 +54,11 @@ interface ContainerProps {
   paddingVertical?: number;
   paddingHorizontal?: number;
   padding?: number;
+  position?: 'absolute' | 'relative';
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
   shadow?: boolean;
   center?: boolean;
   overflow?: 'visible' | 'hidden' | 'scroll';
@@ -89,6 +94,11 @@ export function Container(props: ContainerProps) {
     paddingVertical,
     paddingHorizontal,
     padding,
+    position,
+    top,
+    right,
+    bottom,
+    left,
     overflow,
     height,
     shape,
@@ -124,6 +134,11 @@ export function Container(props: ContainerProps) {
             paddingVertical,
             paddingHorizontal,
             padding,
+            position,
+            top,
+            right,
+            bottom,
+            left,
             borderTopWidth,
             borderRightWidth,
             borderLeftWidth,

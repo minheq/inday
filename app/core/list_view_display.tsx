@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ScrollView, Animated } from 'react-native';
 import { Container, Text, Row, Column, Spacer, Icon } from '../components';
 import {
@@ -44,28 +44,28 @@ import {
 } from '../data/fields';
 import { format } from 'date-fns';
 import { AutoSizer } from '../lib/autosizer/autosizer';
-import { ListView, ListViewFieldConfig } from '../data/views';
+import { ListView, FieldWithListViewConfig } from '../data/views';
 
 interface ListViewDisplayProps {
   view: ListView;
 }
 
 const LEFT_COLUMN_WIDTH = 40;
-const DOCUMENT_HEIGHT = 32;
+const ROW_HEIGHT = 32;
 const FIELD_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
   const fields = useGetFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
-  const scrollPosition = useRef(new Animated.Value(0)).current;
+  const scrollX = useRef(new Animated.Value(0)).current;
 
-  const { fieldsConfig } = view;
+  const { frozenFieldsCount } = view;
 
   const headerScrollView = React.useRef<ScrollView>(null);
 
   useEffect(() => {
-    const listenerID = scrollPosition.addListener((position) => {
+    const listenerID = scrollX.addListener((position) => {
       headerScrollView.current!.scrollTo({
         x: position.value,
         animated: false,
@@ -73,9 +73,13 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     });
 
     () => {
-      scrollPosition.removeListener(listenerID);
+      scrollX.removeListener(listenerID);
     };
-  }, [scrollPosition]);
+  }, [scrollX]);
+
+  const frozenFieldsWidth = fields
+    .slice(0, frozenFieldsCount)
+    .reduce((prevValue, field) => prevValue + field.config.width, 0);
 
   return (
     <Container flex={1}>
@@ -88,100 +92,214 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             borderBottomWidth={1}
             borderRightWidth={1}
           />
+          <Container width={frozenFieldsWidth}>
+            <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
+              {fields.slice(0, frozenFieldsCount).map((field) => {
+                return <HeaderCell field={field} />;
+              })}
+            </ScrollView>
+          </Container>
           <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
-            {fields.map((field) => {
-              return (
-                <Container
-                  color="tint"
-                  key={field.id}
-                  height={FIELD_HEIGHT}
-                  width={field.config.width}
-                  borderBottomWidth={1}
-                  borderRightWidth={1}
-                  padding={8}
-                >
-                  <Row alignItems="center">
-                    <Icon name="menu" />
-                    <Spacer size={8} />
-                    <Text>{field.name}</Text>
-                  </Row>
-                </Container>
-              );
+            {fields.slice(frozenFieldsCount).map((field) => {
+              return <HeaderCell field={field} />;
             })}
           </ScrollView>
         </Row>
       </Container>
       <AutoSizer>
         {({ height }) => (
-          <Container height={height}>
-            <ScrollView>
-              <Row flex={1}>
-                <Container width={LEFT_COLUMN_WIDTH}>
-                  <Column>
-                    {records.map((record, i) => (
-                      <Container
-                        key={record.id}
-                        borderBottomWidth={1}
-                        borderRightWidth={1}
-                        height={DOCUMENT_HEIGHT}
-                        center
-                      >
-                        <Text>{i + 1}</Text>
-                      </Container>
-                    ))}
-                  </Column>
-                </Container>
-
-                <Animated.ScrollView
-                  horizontal
-                  onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { x: scrollPosition } } }],
-                    { useNativeDriver: false },
-                  )}
-                  scrollEventThrottle={16}
-                >
-                  <Column>
-                    {records.map((record) => (
-                      <Container
-                        key={record.id}
-                        color="content"
-                        borderBottomWidth={1}
-                        height={DOCUMENT_HEIGHT}
-                      >
-                        <Row key={record.id}>
-                          {fields.map((field) => {
-                            const fieldConfig = fieldsConfig[field.id];
-
-                            return (
-                              <Cell
-                                record={record}
-                                field={field}
-                                fieldConfig={fieldConfig}
-                              />
-                            );
-                          })}
-                        </Row>
-                      </Container>
-                    ))}
-                  </Column>
-                </Animated.ScrollView>
-              </Row>
-            </ScrollView>
-          </Container>
+          <Rows
+            height={height}
+            records={records}
+            fields={fields}
+            scrollX={scrollX}
+            frozenFieldsCount={frozenFieldsCount}
+            frozenFieldsWidth={frozenFieldsWidth}
+          />
         )}
       </AutoSizer>
     </Container>
   );
 }
 
-interface CellProps {
-  field: Field;
-  fieldConfig: ListViewFieldConfig;
+interface RowsProps {
+  height: number;
+  records: Record[];
+  fields: FieldWithListViewConfig[];
+  frozenFieldsCount: number;
+  frozenFieldsWidth: number;
+  scrollX: Animated.Value;
+}
+
+function Rows(props: RowsProps) {
+  const {
+    height,
+    records,
+    fields,
+    frozenFieldsCount,
+    frozenFieldsWidth,
+    scrollX,
+  } = props;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [scrollTop, setScrollTop] = useState(0);
+  const innerHeight = records.length * ROW_HEIGHT;
+
+  useEffect(() => {
+    const listenerID = scrollY.addListener((position) => {
+      setScrollTop(position.value);
+    });
+
+    () => {
+      scrollY.removeListener(listenerID);
+    };
+  }, [scrollY]);
+
+  const startIndex = Math.floor(scrollTop / ROW_HEIGHT);
+  const endIndex = Math.min(
+    records.length - 1, // don't render past the end of the list
+    Math.floor((scrollTop + height) / ROW_HEIGHT),
+  );
+
+  const rows = [];
+
+  for (let index = startIndex; index <= endIndex; index++) {
+    const record = records[index];
+
+    rows.push({ index, record });
+  }
+
+  return (
+    <Container height={height}>
+      <ScrollView
+        onScroll={Animated.event(
+          [
+            {
+              nativeEvent: {
+                contentOffset: {
+                  y: scrollY,
+                },
+              },
+            },
+          ],
+          { useNativeDriver: false },
+        )}
+        scrollEventThrottle={16}
+      >
+        <Row flex={1}>
+          <Container width={LEFT_COLUMN_WIDTH}>
+            <Column>
+              {rows.map((row) => {
+                const { record, index } = row;
+
+                return (
+                  <Container
+                    position="absolute"
+                    top={index * ROW_HEIGHT}
+                    width="100%"
+                  >
+                    <LeftColumnCell
+                      key={record.id}
+                      index={index}
+                      record={record}
+                    />
+                  </Container>
+                );
+              })}
+            </Column>
+          </Container>
+          <Container width={frozenFieldsWidth}>
+            <ScrollView
+              horizontal
+              contentContainerStyle={{ height: innerHeight }}
+            >
+              <Column>
+                {rows.map((row) => {
+                  const { record, index } = row;
+
+                  return (
+                    <Container
+                      position="absolute"
+                      top={index * ROW_HEIGHT}
+                      key={record.id}
+                      color="content"
+                      borderBottomWidth={1}
+                      height={ROW_HEIGHT}
+                    >
+                      <Row key={record.id}>
+                        {fields.slice(0, frozenFieldsCount).map((field) => {
+                          return (
+                            <BodyCell
+                              key={`${field.id}${record.id}`}
+                              record={record}
+                              field={field}
+                            />
+                          );
+                        })}
+                      </Row>
+                    </Container>
+                  );
+                })}
+              </Column>
+            </ScrollView>
+          </Container>
+          <ScrollView
+            contentContainerStyle={{ height: innerHeight }}
+            horizontal
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: {
+                      x: scrollX,
+                    },
+                  },
+                },
+              ],
+              { useNativeDriver: false },
+            )}
+            scrollEventThrottle={16}
+          >
+            <Column>
+              {rows.map((row) => {
+                const { record, index } = row;
+                return (
+                  <Container
+                    position="absolute"
+                    top={index * ROW_HEIGHT}
+                    key={record.id}
+                    color="content"
+                    borderBottomWidth={1}
+                    height={ROW_HEIGHT}
+                  >
+                    <Row key={record.id}>
+                      {fields.slice(frozenFieldsCount).map((field) => {
+                        return (
+                          <BodyCell
+                            key={`${field.id}${record.id}`}
+                            record={record}
+                            field={field}
+                          />
+                        );
+                      })}
+                    </Row>
+                  </Container>
+                );
+              })}
+            </Column>
+          </ScrollView>
+        </Row>
+      </ScrollView>
+    </Container>
+  );
+}
+
+interface BodyCellProps {
+  field: FieldWithListViewConfig;
   record: Record;
 }
 
-function Cell(props: CellProps) {
-  const { record, field, fieldConfig } = props;
+function BodyCell(props: BodyCellProps) {
+  const { record, field } = props;
 
   const cell = recordFieldValueComponentByFieldType[field.type](
     record.fields[field.id],
@@ -190,14 +308,60 @@ function Cell(props: CellProps) {
 
   return (
     <Container
-      key={`${field.id}${record.id}`}
-      width={fieldConfig.width}
+      width={field.config.width}
       height="100%"
       borderRightWidth={1}
       padding={4}
       paddingHorizontal={8}
     >
       {cell}
+    </Container>
+  );
+}
+
+interface HeaderCellProps {
+  field: FieldWithListViewConfig;
+}
+
+function HeaderCell(props: HeaderCellProps) {
+  const { field } = props;
+
+  return (
+    <Container
+      color="tint"
+      key={field.id}
+      height={FIELD_HEIGHT}
+      width={field.config.width}
+      borderBottomWidth={1}
+      borderRightWidth={1}
+      padding={8}
+    >
+      <Row alignItems="center">
+        <Icon name="menu" />
+        <Spacer size={8} />
+        <Text>{field.name}</Text>
+      </Row>
+    </Container>
+  );
+}
+
+interface LeftColumnCellProps {
+  record: Record;
+  index: number;
+}
+
+function LeftColumnCell(props: LeftColumnCellProps) {
+  const { record, index } = props;
+
+  return (
+    <Container
+      key={record.id}
+      borderBottomWidth={1}
+      borderRightWidth={1}
+      height={ROW_HEIGHT}
+      center
+    >
+      <Text>{index}</Text>
     </Container>
   );
 }
