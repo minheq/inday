@@ -2,7 +2,7 @@ import { FieldID, Field } from './fields';
 
 export type ViewID = string;
 
-interface BaseView {
+export interface BaseView {
   id: ViewID;
   name: string;
   createdAt: Date;
@@ -18,6 +18,7 @@ export interface ListViewFieldConfig {
 
 interface ListViewConfig {
   type: 'list';
+  frozenFieldsCount: number;
   fieldsConfig: {
     [fieldID: string]: ListViewFieldConfig;
   };

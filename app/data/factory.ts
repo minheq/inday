@@ -12,7 +12,7 @@ import {
   assertSingleOptionField,
   assertMultiCollaboratorField,
 } from './fields';
-import { View } from './views';
+import { BaseView, View } from './views';
 import { Collection } from './collections';
 import { Document, FieldValue } from './documents';
 import { Filter, FilterConfig } from './filters';
@@ -232,8 +232,26 @@ export function makeView(
   view: Partial<View>,
   collection: CollectionWithFields,
 ): View {
-  // @ts-ignore: I don't know how to solve this type error
+  const baseView: BaseView = {
+    id: view.id ?? generateID(),
+    name: view.name ?? faker.commerce.department(),
+    collectionID: view.collectionID ?? generateID(),
+    updatedAt: view.updatedAt ?? new Date(),
+    createdAt: view.createdAt ?? new Date(),
+  };
+
+  if (view.type === 'board') {
+    return {
+      ...baseView,
+      type: 'board',
+      stackedByFieldID: collection.fields[0].id,
+    };
+  }
+
   return {
+    ...baseView,
+    type: 'list',
+    frozenFieldsCount: 1,
     fieldsConfig: keyedBy(
       collection.fields.map((f, i) => ({
         id: f.id,
@@ -243,12 +261,6 @@ export function makeView(
       })),
       'id',
     ),
-    id: view.id ?? generateID(),
-    type: view.type ?? 'list',
-    name: view.name ?? faker.commerce.department(),
-    collectionID: view.collectionID ?? generateID(),
-    updatedAt: view.updatedAt ?? new Date(),
-    createdAt: view.createdAt ?? new Date(),
   };
 }
 

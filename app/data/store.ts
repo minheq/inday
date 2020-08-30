@@ -940,6 +940,7 @@ export function useCreateView() {
         id: generateID(),
         name: '',
         type: 'list',
+        frozenFieldsCount: 1,
         fieldsConfig: {},
         createdAt: new Date(),
         updatedAt: new Date(),
