@@ -5,13 +5,13 @@ export type CurrencyValue = number | null;
 export type DateValue = Date | null;
 export type EmailValue = string;
 export type MultiCollaboratorValue = CollaboratorID[];
-export type MultiDocumentLinkValue = DocumentID[];
+export type MultiRecordLinkValue = RecordID[];
 export type MultiLineTextValue = string;
 export type MultiOptionValue = string[];
 export type NumberValue = number | null;
 export type PhoneNumberValue = string;
 export type SingleCollaboratorValue = CollaboratorID | null;
-export type SingleDocumentLinkValue = DocumentID | null;
+export type SingleRecordLinkValue = RecordID | null;
 export type SingleLineTextValue = string;
 export type SingleOptionValue = string | null;
 export type URLValue = string;
@@ -20,12 +20,12 @@ export type BooleanFieldValue = CheckboxValue;
 export type DateFieldValue = DateValue;
 export type MultiSelectFieldValue =
   | MultiCollaboratorValue
-  | MultiDocumentLinkValue
+  | MultiRecordLinkValue
   | MultiOptionValue;
 export type NumberFieldValue = CurrencyValue | NumberValue;
 export type SingleSelectFieldValue =
   | SingleCollaboratorValue
-  | SingleDocumentLinkValue
+  | SingleRecordLinkValue
   | SingleOptionValue;
 export type TextFieldValue =
   | EmailValue
@@ -41,10 +41,10 @@ export type FieldValue =
   | SingleSelectFieldValue
   | TextFieldValue;
 
-export type DocumentID = string;
+export type RecordID = string;
 
-export interface Document {
-  id: DocumentID;
+export interface Record {
+  id: RecordID;
   createdAt: Date;
   updatedAt: Date;
   fields: {
@@ -109,16 +109,16 @@ export function assertMultiCollaboratorFieldValue(
   }
 }
 
-export function assertMultiDocumentLinkFieldValue(
+export function assertMultiRecordLinkFieldValue(
   value: FieldValue,
-): asserts value is MultiDocumentLinkValue {
+): asserts value is MultiRecordLinkValue {
   if (value === null) {
     return;
   }
 
   if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiDocumentLinkFieldValue to be string[]. Received ${value}`,
+      `Expected MultiRecordLinkFieldValue to be string[]. Received ${value}`,
     );
   }
 }
@@ -192,16 +192,16 @@ export function assertSingleCollaboratorFieldValue(
     );
   }
 }
-export function assertSingleDocumentLinkFieldValue(
+export function assertSingleRecordLinkFieldValue(
   value: FieldValue,
-): asserts value is SingleDocumentLinkValue {
+): asserts value is SingleRecordLinkValue {
   if (value === null) {
     return;
   }
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleDocumentLinkFieldValue to be string. Received ${value}`,
+      `Expected SingleRecordLinkFieldValue to be string. Received ${value}`,
     );
   }
 }

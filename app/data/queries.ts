@@ -1,7 +1,7 @@
 import { selectorFamily, selector } from 'recoil';
 import { RecoilKey } from './constants';
 import {
-  documentsByIDState,
+  recordsByIDState,
   collectionsByIDState,
   fieldsByIDState,
   filtersByIDState,
@@ -11,20 +11,20 @@ import {
   collaboratorsByIDState,
   groupsByIDState,
 } from './atoms';
-import { Document, DocumentID } from './documents';
+import { Record, RecordID } from './records';
 import { Collection, CollectionID } from './collections';
 import { Field, FieldID } from './fields';
 import {
   Filter,
   FilterGroup,
   FilterID,
-  filterDocuments,
+  filterRecords,
   FilterGetters,
 } from './filters';
 import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
 import { isEmpty, last } from '../../lib/data_structures/arrays';
-import { Sort, SortID, sortDocuments, SortGetters } from './sorts';
+import { Sort, SortID, sortRecords, SortGetters } from './sorts';
 import { CollaboratorID, Collaborator } from './collaborators';
 import { Group, GroupID } from './groups';
 
@@ -60,35 +60,35 @@ export const spacesQuery = selector({
   },
 });
 
-export const documentsQuery = selector({
-  key: RecoilKey.Documents,
+export const recordsQuery = selector({
+  key: RecoilKey.Records,
   get: ({ get }) => {
-    const documentsByID = get(documentsByIDState);
+    const recordsByID = get(recordsByIDState);
 
-    return Object.values(documentsByID) as Document[];
+    return Object.values(recordsByID) as Record[];
   },
 });
 
-export const documentQuery = selectorFamily<Document, string>({
-  key: RecoilKey.Document,
-  get: (documentID: string) => ({ get }) => {
-    const documentsByID = get(documentsByIDState);
-    const document = documentsByID[documentID];
+export const recordQuery = selectorFamily<Record, string>({
+  key: RecoilKey.Record,
+  get: (recordID: string) => ({ get }) => {
+    const recordsByID = get(recordsByIDState);
+    const record = recordsByID[recordID];
 
-    if (document === undefined) {
-      throw new Error('Document not found');
+    if (record === undefined) {
+      throw new Error('Record not found');
     }
 
-    return document;
+    return record;
   },
 });
 
-export const collectionDocumentsQuery = selectorFamily<Document[], string>({
+export const collectionRecordsQuery = selectorFamily<Record[], string>({
   key: RecoilKey.Collection,
   get: (collectionID: string) => ({ get }) => {
-    const documents = get(documentsQuery);
+    const records = get(recordsQuery);
 
-    return documents.filter((doc) => doc.collectionID === collectionID);
+    return records.filter((record) => record.collectionID === collectionID);
   },
 });
 
@@ -385,11 +385,11 @@ export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
   },
 });
 
-export const viewDocumentsQuery = selectorFamily<Document[], string>({
-  key: RecoilKey.ViewDocuments,
+export const viewRecordsQuery = selectorFamily<Record[], string>({
+  key: RecoilKey.ViewRecords,
   get: (viewID: string) => ({ get }) => {
     const view = get(viewQuery(viewID));
-    const documents = get(collectionDocumentsQuery(view.collectionID));
+    const records = get(collectionRecordsQuery(view.collectionID));
     const filterGroups = get(viewFilterGroupsQuery(viewID));
     const sorts = get(viewSortsQuery(viewID));
 
@@ -397,8 +397,8 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
       return get(fieldQuery(fieldID));
     };
 
-    const getDocument = (documentID: DocumentID) => {
-      return get(documentQuery(documentID));
+    const getRecord = (recordID: RecordID) => {
+      return get(recordQuery(recordID));
     };
 
     const getCollaborator = (collaboratorID: CollaboratorID) => {
@@ -415,20 +415,16 @@ export const viewDocumentsQuery = selectorFamily<Document[], string>({
 
     const sortGetters: SortGetters = {
       getField,
-      getDocument,
+      getRecord,
       getCollaborator,
       getCollection,
     };
 
-    let finalDocuments = documents;
+    let finalRecords = records;
 
-    finalDocuments = filterDocuments(
-      filterGroups,
-      finalDocuments,
-      filterGetters,
-    );
-    finalDocuments = sortDocuments(sorts, finalDocuments, sortGetters);
+    finalRecords = filterRecords(filterGroups, finalRecords, filterGetters);
+    finalRecords = sortRecords(sorts, finalRecords, sortGetters);
 
-    return finalDocuments;
+    return finalRecords;
   },
 });

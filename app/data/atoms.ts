@@ -2,13 +2,13 @@ import { atom } from 'recoil';
 
 import { RecoilKey } from './constants';
 import {
-  documentsByIDFixtures,
+  recordsByIDFixtures,
   collectionsByIDFixtures,
   fieldsByIDFixtures,
   spacesByIDFixtures,
   viewsByIDFixtures,
 } from './fake_data';
-import { Document } from './documents';
+import { Record } from './records';
 import { Collection } from './collections';
 import { Field } from './fields';
 import { Filter } from './filters';
@@ -32,10 +32,10 @@ export const workspaceState = atom<WorkspaceState>({
   persistence_UNSTABLE: { type: true },
 });
 
-export type DocumentsByIDState = { [documentID: string]: Document | undefined };
-export const documentsByIDState = atom<DocumentsByIDState>({
-  key: RecoilKey.DocumentsByID,
-  default: documentsByIDFixtures,
+export type RecordsByIDState = { [recordID: string]: Record | undefined };
+export const recordsByIDState = atom<RecordsByIDState>({
+  key: RecoilKey.RecordsByID,
+  default: recordsByIDFixtures,
   // @ts-ignore: will be stable
   persistence_UNSTABLE: { type: true },
 });

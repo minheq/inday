@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { ScrollView, Animated } from 'react-native';
 import { Container, Text, Row, Column, Spacer, Icon } from '../components';
 import {
-  useGetViewDocuments,
+  useGetViewRecords,
   useGetFieldsWithListViewConfig,
 } from '../data/store';
 import { Field, FieldType } from '../data/fields';
@@ -13,31 +13,31 @@ import {
   assertDateFieldValue,
   assertEmailFieldValue,
   assertMultiCollaboratorFieldValue,
-  assertMultiDocumentLinkFieldValue,
+  assertMultiRecordLinkFieldValue,
   assertMultiLineTextFieldValue,
   assertMultiOptionFieldValue,
   assertNumberFieldValue,
   assertPhoneNumberFieldValue,
   assertSingleCollaboratorFieldValue,
-  assertSingleDocumentLinkFieldValue,
+  assertSingleRecordLinkFieldValue,
   assertSingleLineTextFieldValue,
   assertSingleOptionFieldValue,
   assertURLFieldValue,
-  Document,
-} from '../data/documents';
+  Record,
+} from '../data/records';
 import {
   assertCheckboxField,
   assertCurrencyField,
   assertDateField,
   assertEmailField,
   assertMultiCollaboratorField,
-  assertMultiDocumentLinkField,
+  assertMultiRecordLinkField,
   assertMultiLineTextField,
   assertMultiOptionField,
   assertNumberField,
   assertPhoneNumberField,
   assertSingleCollaboratorField,
-  assertSingleDocumentLinkField,
+  assertSingleRecordLinkField,
   assertSingleLineTextField,
   assertSingleOptionField,
   assertURLField,
@@ -57,7 +57,7 @@ const FIELD_HEIGHT = 40;
 export function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
   const fields = useGetFieldsWithListViewConfig(view.id);
-  const documents = useGetViewDocuments(view.id);
+  const records = useGetViewRecords(view.id);
   const scrollPosition = useRef(new Animated.Value(0)).current;
 
   const { fieldsConfig } = view;
@@ -118,9 +118,9 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
               <Row flex={1}>
                 <Container width={LEFT_COLUMN_WIDTH}>
                   <Column>
-                    {documents.map((doc, i) => (
+                    {records.map((record, i) => (
                       <Container
-                        key={doc.id}
+                        key={record.id}
                         borderBottomWidth={1}
                         borderRightWidth={1}
                         height={DOCUMENT_HEIGHT}
@@ -141,20 +141,20 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
                   scrollEventThrottle={16}
                 >
                   <Column>
-                    {documents.map((doc) => (
+                    {records.map((record) => (
                       <Container
-                        key={doc.id}
+                        key={record.id}
                         color="content"
                         borderBottomWidth={1}
                         height={DOCUMENT_HEIGHT}
                       >
-                        <Row key={doc.id}>
+                        <Row key={record.id}>
                           {fields.map((field) => {
                             const fieldConfig = fieldsConfig[field.id];
 
                             return (
                               <Cell
-                                document={doc}
+                                record={record}
                                 field={field}
                                 fieldConfig={fieldConfig}
                               />
@@ -177,20 +177,20 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
 interface CellProps {
   field: Field;
   fieldConfig: ListViewFieldConfig;
-  document: Document;
+  record: Record;
 }
 
 function Cell(props: CellProps) {
-  const { document, field, fieldConfig } = props;
+  const { record, field, fieldConfig } = props;
 
-  const cell = documentFieldValueComponentByFieldType[field.type](
-    document.fields[field.id],
+  const cell = recordFieldValueComponentByFieldType[field.type](
+    record.fields[field.id],
     field,
   );
 
   return (
     <Container
-      key={`${field.id}${document.id}`}
+      key={`${field.id}${record.id}`}
       width={fieldConfig.width}
       height="100%"
       borderRightWidth={1}
@@ -202,7 +202,7 @@ function Cell(props: CellProps) {
   );
 }
 
-const documentFieldValueComponentByFieldType: {
+const recordFieldValueComponentByFieldType: {
   [fieldType in FieldType]: (
     value: FieldValue,
     field: Field,
@@ -243,9 +243,9 @@ const documentFieldValueComponentByFieldType: {
     return <Text>{value[0]}</Text>;
   },
 
-  [FieldType.MultiDocumentLink]: (value, field) => {
-    assertMultiDocumentLinkFieldValue(value);
-    assertMultiDocumentLinkField(field);
+  [FieldType.MultiRecordLink]: (value, field) => {
+    assertMultiRecordLinkFieldValue(value);
+    assertMultiRecordLinkField(field);
 
     return <Text>{value[0]}</Text>;
   },
@@ -280,9 +280,9 @@ const documentFieldValueComponentByFieldType: {
 
     return <Text>{value}</Text>;
   },
-  [FieldType.SingleDocumentLink]: (value, field) => {
-    assertSingleDocumentLinkFieldValue(value);
-    assertSingleDocumentLinkField(field);
+  [FieldType.SingleRecordLink]: (value, field) => {
+    assertSingleRecordLinkFieldValue(value);
+    assertSingleRecordLinkField(field);
 
     return <Text>{value}</Text>;
   },

@@ -7,7 +7,7 @@ import {
   booleanFiltersByRule,
   Filter,
   updateFilterGroup,
-  filterDocuments,
+  filterRecords,
   FilterGetters,
 } from './filters';
 import { parseDay } from '../../lib/datetime/day';
@@ -16,17 +16,17 @@ import {
   makeCollection,
   makeField,
   addFieldsToCollection,
-  makeDocument,
+  makeRecord,
   makeFilter,
 } from './factory';
 import { FieldType, FieldID } from './fields';
-import { FieldValue } from './documents';
+import { FieldValue } from './records';
 
 describe('no filter', () => {
-  test('all docs', () => {
+  test('all records', () => {
     const values = ['AWord', 'BWord'];
-    const { docs, getters } = prepare(FieldType.SingleLineText, values);
-    const result = filterDocuments([], docs, getters);
+    const { records, getters } = prepare(FieldType.SingleLineText, values);
+    const result = filterRecords([], records, getters);
 
     expect(result).toHaveLength(values.length);
   });
@@ -34,14 +34,14 @@ describe('no filter', () => {
 
 describe('filtering text', () => {
   const values = ['AWord', 'BWord'];
-  const { docs, getters, field } = prepare(FieldType.SingleLineText, values);
+  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
 
   test('contains same case', () => {
     const filter = makeFilter(
       {},
       { rule: 'contains', value: 'Word', fieldID: field.id },
     );
-    const result = filterDocuments([[filter]], docs, getters);
+    const result = filterRecords([[filter]], records, getters);
 
     expect(result).toHaveLength(values.length);
   });
@@ -51,7 +51,7 @@ describe('filtering text', () => {
       {},
       { rule: 'contains', value: 'aword', fieldID: field.id },
     );
-    const result = filterDocuments([[filter]], docs, getters);
+    const result = filterRecords([[filter]], records, getters);
 
     expect(result).toHaveLength(1);
   });
@@ -65,7 +65,7 @@ describe('filtering text', () => {
       {},
       { rule: 'contains', value: 'a', fieldID: field.id },
     );
-    const result = filterDocuments([[filter1, filter2]], docs, getters);
+    const result = filterRecords([[filter1, filter2]], records, getters);
 
     expect(result).toHaveLength(1);
   });
@@ -653,11 +653,8 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
   const field = makeField({ type: fieldType });
   const collectionWithFields = addFieldsToCollection(collection, [field]);
 
-  const docs = values.map((value) => {
-    return makeDocument(
-      { fields: { [field.id]: value } },
-      collectionWithFields,
-    );
+  const records = values.map((value) => {
+    return makeRecord({ fields: { [field.id]: value } }, collectionWithFields);
   });
 
   const getField = (_fieldID: FieldID) => field;
@@ -666,5 +663,5 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
     getField,
   };
 
-  return { docs, field, getters };
+  return { records, field, getters };
 }

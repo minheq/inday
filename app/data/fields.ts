@@ -6,7 +6,7 @@ import {
   assertMultiSelectFieldValue,
   assertBooleanFieldValue,
   assertDateFieldValue,
-} from './documents';
+} from './records';
 import { isSameDay } from 'date-fns';
 import { hasAllOf } from '../../lib/data_structures/arrays';
 
@@ -19,8 +19,8 @@ export enum FieldType {
   MultiOption = 'MultiOption',
   SingleCollaborator = 'SingleCollaborator',
   MultiCollaborator = 'MultiCollaborator',
-  SingleDocumentLink = 'SingleDocumentLink',
-  MultiDocumentLink = 'MultiDocumentLink',
+  SingleRecordLink = 'SingleRecordLink',
+  MultiRecordLink = 'MultiRecordLink',
   Date = 'Date',
   PhoneNumber = 'PhoneNumber',
   Email = 'Email',
@@ -87,21 +87,21 @@ export interface MultiCollaboratorField
   extends BaseField,
     MultiCollaboratorFieldConfig {}
 
-export interface SingleDocumentLinkFieldConfig {
-  type: FieldType.SingleDocumentLink;
-  documentsFromCollectionID: string;
+export interface SingleRecordLinkFieldConfig {
+  type: FieldType.SingleRecordLink;
+  recordsFromCollectionID: string;
 }
-export interface SingleDocumentLinkField
+export interface SingleRecordLinkField
   extends BaseField,
-    SingleDocumentLinkFieldConfig {}
+    SingleRecordLinkFieldConfig {}
 
-export interface MultiDocumentLinkFieldConfig {
-  type: FieldType.MultiDocumentLink;
-  documentsFromCollectionID: string;
+export interface MultiRecordLinkFieldConfig {
+  type: FieldType.MultiRecordLink;
+  recordsFromCollectionID: string;
 }
-export interface MultiDocumentLinkField
+export interface MultiRecordLinkField
   extends BaseField,
-    MultiDocumentLinkFieldConfig {}
+    MultiRecordLinkFieldConfig {}
 
 export interface DateFieldConfig {
   type: FieldType.Date;
@@ -160,13 +160,13 @@ export type FieldConfig =
   | DateFieldConfig
   | EmailFieldConfig
   | MultiCollaboratorFieldConfig
-  | MultiDocumentLinkFieldConfig
+  | MultiRecordLinkFieldConfig
   | MultiLineTextFieldConfig
   | MultiOptionFieldConfig
   | NumberFieldConfig
   | PhoneNumberFieldConfig
   | SingleCollaboratorFieldConfig
-  | SingleDocumentLinkFieldConfig
+  | SingleRecordLinkFieldConfig
   | SingleLineTextFieldConfig
   | SingleOptionFieldConfig
   | URLFieldConfig;
@@ -177,13 +177,13 @@ export type Field =
   | DateField
   | EmailField
   | MultiCollaboratorField
-  | MultiDocumentLinkField
+  | MultiRecordLinkField
   | MultiLineTextField
   | MultiOptionField
   | NumberField
   | PhoneNumberField
   | SingleCollaboratorField
-  | SingleDocumentLinkField
+  | SingleRecordLinkField
   | SingleLineTextField
   | SingleOptionField
   | URLField;
@@ -248,22 +248,22 @@ export function assertMultiCollaboratorField(
   }
 }
 
-export function assertSingleDocumentLinkField(
+export function assertSingleRecordLinkField(
   field: Field,
-): asserts field is SingleDocumentLinkField {
-  if (field.type !== FieldType.SingleDocumentLink) {
+): asserts field is SingleRecordLinkField {
+  if (field.type !== FieldType.SingleRecordLink) {
     throw new Error(
-      `Expected field to be SingleDocumentLinkField. Received ${field.type}`,
+      `Expected field to be SingleRecordLinkField. Received ${field.type}`,
     );
   }
 }
 
-export function assertMultiDocumentLinkField(
+export function assertMultiRecordLinkField(
   field: Field,
-): asserts field is MultiDocumentLinkField {
-  if (field.type !== FieldType.MultiDocumentLink) {
+): asserts field is MultiRecordLinkField {
+  if (field.type !== FieldType.MultiRecordLink) {
     throw new Error(
-      `Expected field to be MultiDocumentLinkField. Received ${field.type}`,
+      `Expected field to be MultiRecordLinkField. Received ${field.type}`,
     );
   }
 }
@@ -340,13 +340,13 @@ const equalityCheckerByFieldType: {
   [FieldType.Date]: areDateFieldValuesEqual,
   [FieldType.Email]: areTextFieldValuesEqual,
   [FieldType.MultiCollaborator]: areMultiSelectFieldValuesEqual,
-  [FieldType.MultiDocumentLink]: areMultiSelectFieldValuesEqual,
+  [FieldType.MultiRecordLink]: areMultiSelectFieldValuesEqual,
   [FieldType.MultiLineText]: areTextFieldValuesEqual,
   [FieldType.MultiOption]: areMultiSelectFieldValuesEqual,
   [FieldType.Number]: areNumberFieldValuesEqual,
   [FieldType.PhoneNumber]: areTextFieldValuesEqual,
   [FieldType.SingleCollaborator]: areSingleSelectFieldValuesEqual,
-  [FieldType.SingleDocumentLink]: areSingleSelectFieldValuesEqual,
+  [FieldType.SingleRecordLink]: areSingleSelectFieldValuesEqual,
   [FieldType.SingleLineText]: areTextFieldValuesEqual,
   [FieldType.SingleOption]: areSingleSelectFieldValuesEqual,
   [FieldType.URL]: areTextFieldValuesEqual,

@@ -7,8 +7,8 @@ import {
   assertSingleSelectFieldValue,
   assertMultiSelectFieldValue,
   assertBooleanFieldValue,
-  Document,
-} from './documents';
+  Record,
+} from './records';
 import {
   hasAnyOf,
   hasAllOf,
@@ -26,7 +26,7 @@ import {
   SingleSelectFieldValue,
   MultiSelectFieldValue,
   BooleanFieldValue,
-} from './documents';
+} from './records';
 
 export type FilterID = string;
 
@@ -79,14 +79,14 @@ export interface MultiCollaboratorFieldFilter
   extends BaseFilter,
     MultiCollaboratorFieldFilterConfig {}
 
-export interface MultiDocumentLinkFieldFilterConfig {
+export interface MultiRecordLinkFieldFilterConfig {
   fieldID: FieldID;
   rule: MultiSelectFilterRule;
   value: MultiSelectFilterRuleValue;
 }
-export interface MultiDocumentLinkFieldFilter
+export interface MultiRecordLinkFieldFilter
   extends BaseFilter,
-    MultiDocumentLinkFieldFilterConfig {}
+    MultiRecordLinkFieldFilterConfig {}
 
 export interface MultiLineTextFieldFilterConfig {
   fieldID: FieldID;
@@ -133,14 +133,14 @@ export interface SingleCollaboratorFieldFilter
   extends BaseFilter,
     SingleCollaboratorFieldFilterConfig {}
 
-export interface SingleDocumentLinkFieldFilterConfig {
+export interface SingleRecordLinkFieldFilterConfig {
   fieldID: FieldID;
   rule: SingleSelectFilterRule;
   value: SingleSelectFilterRuleValue;
 }
-export interface SingleDocumentLinkFieldFilter
+export interface SingleRecordLinkFieldFilter
   extends BaseFilter,
-    SingleDocumentLinkFieldFilterConfig {}
+    SingleRecordLinkFieldFilterConfig {}
 
 export interface SingleLineTextFieldFilterConfig {
   fieldID: FieldID;
@@ -255,12 +255,12 @@ export type BooleanFilter = CheckboxFieldFilter;
 export type DateFilter = DateFieldFilter;
 export type MultiSelectFilter =
   | MultiCollaboratorFieldFilter
-  | MultiDocumentLinkFieldFilter
+  | MultiRecordLinkFieldFilter
   | MultiOptionFieldFilter;
 export type NumberFilter = CurrencyFieldFilter | NumberFieldFilter;
 export type SingleSelectFilter =
   | SingleCollaboratorFieldFilter
-  | SingleDocumentLinkFieldFilter
+  | SingleRecordLinkFieldFilter
   | SingleOptionFieldFilter;
 export type TextFilter =
   | EmailFieldFilter
@@ -273,14 +273,14 @@ export type BooleanFilterConfig = CheckboxFieldFilterConfig;
 export type DateFilterConfig = DateFieldFilterConfig;
 export type MultiSelectFilterConfig =
   | MultiCollaboratorFieldFilterConfig
-  | MultiDocumentLinkFieldFilterConfig
+  | MultiRecordLinkFieldFilterConfig
   | MultiOptionFieldFilterConfig;
 export type NumberFilterConfig =
   | CurrencyFieldFilterConfig
   | NumberFieldFilterConfig;
 export type SingleSelectFilterConfig =
   | SingleCollaboratorFieldFilterConfig
-  | SingleDocumentLinkFieldFilterConfig
+  | SingleRecordLinkFieldFilterConfig
   | SingleOptionFieldFilterConfig;
 export type TextFilterConfig =
   | EmailFieldFilterConfig
@@ -305,11 +305,11 @@ export function getDefaultFilterConfig(field: Field): FilterConfig {
     case FieldType.Currency:
       return { fieldID: field.id, rule: 'equal', value: null };
     case FieldType.MultiCollaborator:
-    case FieldType.MultiDocumentLink:
+    case FieldType.MultiRecordLink:
     case FieldType.MultiOption:
       return { fieldID: field.id, rule: 'hasAnyOf', value: [] };
     case FieldType.SingleOption:
-    case FieldType.SingleDocumentLink:
+    case FieldType.SingleRecordLink:
     case FieldType.SingleCollaborator:
       return { fieldID: field.id, rule: 'is', value: null };
     default:
@@ -375,16 +375,16 @@ export interface FilterGetters {
   getField: (fieldID: string) => Field;
 }
 
-export function filterDocuments(
+export function filterRecords(
   filterGroups: FilterGroup[],
-  documents: Document[],
+  records: Record[],
   getters: FilterGetters,
 ) {
   const { getField } = getters;
 
-  let filteredDocuments = documents;
+  let filteredRecords = records;
 
-  filteredDocuments = filteredDocuments.filter((doc) => {
+  filteredRecords = filteredRecords.filter((record) => {
     if (isEmpty(filterGroups)) {
       return true;
     }
@@ -395,12 +395,12 @@ export function filterDocuments(
 
         const applyFilter = filtersByFieldType[field.type];
 
-        return applyFilter(doc.fields[filter.fieldID], filter);
+        return applyFilter(record.fields[filter.fieldID], filter);
       });
     });
   });
 
-  return filteredDocuments;
+  return filteredRecords;
 }
 
 export function assertNumberFilterRule(
@@ -900,13 +900,13 @@ export const filtersByFieldType: {
   [FieldType.Date]: dateFilter,
   [FieldType.Email]: textFilter,
   [FieldType.MultiCollaborator]: multiSelectFilter,
-  [FieldType.MultiDocumentLink]: multiSelectFilter,
+  [FieldType.MultiRecordLink]: multiSelectFilter,
   [FieldType.MultiLineText]: textFilter,
   [FieldType.MultiOption]: multiSelectFilter,
   [FieldType.Number]: numberFilter,
   [FieldType.PhoneNumber]: textFilter,
   [FieldType.SingleCollaborator]: singleSelectFilter,
-  [FieldType.SingleDocumentLink]: singleSelectFilter,
+  [FieldType.SingleRecordLink]: singleSelectFilter,
   [FieldType.SingleLineText]: textFilter,
   [FieldType.SingleOption]: singleSelectFilter,
   [FieldType.URL]: textFilter,

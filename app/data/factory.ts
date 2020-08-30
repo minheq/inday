@@ -6,7 +6,7 @@ import {
   FieldType,
   BaseField,
   Field,
-  MultiDocumentLinkField,
+  MultiRecordLinkField,
   assertSingleCollaboratorField,
   assertMultiOptionField,
   assertSingleOptionField,
@@ -14,7 +14,7 @@ import {
 } from './fields';
 import { BaseView, View } from './views';
 import { Collection } from './collections';
-import { Document, FieldValue } from './documents';
+import { Record, FieldValue } from './records';
 import { Filter, FilterConfig } from './filters';
 import { keyedBy, range, isEmpty } from '../../lib/data_structures/arrays';
 import { Sort, SortConfig } from './sorts';
@@ -106,13 +106,13 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.MultiDocumentLink]: (field) => {
+  [FieldType.MultiRecordLink]: (field) => {
     const base = makeBaseField(field);
 
     return {
-      type: FieldType.MultiDocumentLink,
-      documentsFromCollectionID:
-        (field as Partial<MultiDocumentLinkField>).documentsFromCollectionID ??
+      type: FieldType.MultiRecordLink,
+      recordsFromCollectionID:
+        (field as Partial<MultiRecordLinkField>).recordsFromCollectionID ??
         generateID(),
       ...base,
     };
@@ -160,12 +160,12 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.SingleDocumentLink]: (field) => {
+  [FieldType.SingleRecordLink]: (field) => {
     const base = makeBaseField(field);
     return {
-      type: FieldType.SingleDocumentLink,
-      documentsFromCollectionID:
-        (field as Partial<MultiDocumentLinkField>).documentsFromCollectionID ??
+      type: FieldType.SingleRecordLink,
+      recordsFromCollectionID:
+        (field as Partial<MultiRecordLinkField>).recordsFromCollectionID ??
         generateID(),
       ...base,
     };
@@ -264,59 +264,59 @@ export function makeView(
   };
 }
 
-export function makeManyDocuments(
+export function makeManyRecords(
   count: number,
   collection: CollectionWithFields,
-  documentsByFieldID?: {
-    [fieldID: string]: Document[];
+  recordsByFieldID?: {
+    [fieldID: string]: Record[];
   },
   collaborators?: Collaborator[],
 ) {
   return range(0, count).map(() => {
-    return makeDocument({}, collection, documentsByFieldID, collaborators);
+    return makeRecord({}, collection, recordsByFieldID, collaborators);
   });
 }
 
-export function makeDocument(
-  document: Partial<Document>,
+export function makeRecord(
+  record: Partial<Record>,
   collection?: CollectionWithFields,
-  documentsByFieldID?: {
-    [fieldID: string]: Document[];
+  recordsByFieldID?: {
+    [fieldID: string]: Record[];
   },
   collaborators?: Collaborator[],
-): Document {
+): Record {
   const fields: { [fieldID: string]: FieldValue } = {
-    ...document.fields,
+    ...record.fields,
   };
 
   if (collection) {
     for (const field of collection.fields) {
-      if (document.fields?.[field.id] !== undefined) {
+      if (record.fields?.[field.id] !== undefined) {
         continue;
       }
 
       fields[field.id] = fakeFieldValuesByFieldType[field.type](
         field,
-        documentsByFieldID,
+        recordsByFieldID,
         collaborators,
       );
     }
   }
 
   return {
-    id: document.id ?? generateID(),
+    id: record.id ?? generateID(),
     fields,
-    collectionID: document.collectionID ?? collection?.id ?? generateID(),
-    updatedAt: document.updatedAt ?? new Date(),
-    createdAt: document.createdAt ?? new Date(),
+    collectionID: record.collectionID ?? collection?.id ?? generateID(),
+    updatedAt: record.updatedAt ?? new Date(),
+    createdAt: record.createdAt ?? new Date(),
   };
 }
 
 const fakeFieldValuesByFieldType: {
   [fieldType in FieldType]: (
     field: Field,
-    documentsByFieldID?: {
-      [fieldID: string]: Document[];
+    recordsByFieldID?: {
+      [fieldID: string]: Record[];
     },
     collaborators?: Collaborator[],
   ) => FieldValue;
@@ -333,7 +333,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.Email]: () => {
     return faker.internet.email();
   },
-  [FieldType.MultiCollaborator]: (field, documentsByFieldID, collaborators) => {
+  [FieldType.MultiCollaborator]: (field, recordsByFieldID, collaborators) => {
     assertMultiCollaboratorField(field);
 
     if (collaborators === undefined) {
@@ -346,17 +346,17 @@ const fakeFieldValuesByFieldType: {
 
     return [faker.helpers.randomize(collaborators.map((c) => c.id))];
   },
-  [FieldType.MultiDocumentLink]: (field, documentsByFieldID) => {
-    if (documentsByFieldID === undefined) {
+  [FieldType.MultiRecordLink]: (field, recordsByFieldID) => {
+    if (recordsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (isEmpty(documentsByFieldID[field.id])) {
+    if (isEmpty(recordsByFieldID[field.id])) {
       return [];
     }
 
     return [
-      faker.helpers.randomize(documentsByFieldID[field.id].map((d) => d.id)),
+      faker.helpers.randomize(recordsByFieldID[field.id].map((d) => d.id)),
     ];
   },
   [FieldType.MultiLineText]: () => {
@@ -373,11 +373,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.PhoneNumber]: () => {
     return faker.phone.phoneNumber();
   },
-  [FieldType.SingleCollaborator]: (
-    field,
-    documentsByFieldID,
-    collaborators,
-  ) => {
+  [FieldType.SingleCollaborator]: (field, recordsByFieldID, collaborators) => {
     assertSingleCollaboratorField(field);
 
     if (collaborators === undefined) {
@@ -390,18 +386,16 @@ const fakeFieldValuesByFieldType: {
 
     return faker.helpers.randomize(collaborators.map((c) => c.id));
   },
-  [FieldType.SingleDocumentLink]: (field, documentsByFieldID) => {
-    if (documentsByFieldID === undefined) {
+  [FieldType.SingleRecordLink]: (field, recordsByFieldID) => {
+    if (recordsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (isEmpty(documentsByFieldID[field.id])) {
+    if (isEmpty(recordsByFieldID[field.id])) {
       return null;
     }
 
-    return faker.helpers.randomize(
-      documentsByFieldID[field.id].map((d) => d.id),
-    );
+    return faker.helpers.randomize(recordsByFieldID[field.id].map((d) => d.id));
   },
   [FieldType.SingleLineText]: () => {
     return faker.random.words();

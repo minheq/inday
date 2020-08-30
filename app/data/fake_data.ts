@@ -1,4 +1,4 @@
-import { Document } from './documents';
+import { Record } from './records';
 import { Collection } from './collections';
 import { Space } from './spaces';
 import { Field, FieldType } from './fields';
@@ -11,7 +11,7 @@ import {
   makeField,
   makeView,
   addFieldsToCollection,
-  makeManyDocuments,
+  makeManyRecords,
 } from './factory';
 import { keyedBy } from '../../lib/data_structures/arrays';
 
@@ -50,7 +50,7 @@ const col1Field5 = makeField({
 });
 
 const col1Field6 = makeField({
-  type: FieldType.MultiDocumentLink,
+  type: FieldType.MultiRecordLink,
   collectionID: collection1.id,
 });
 
@@ -80,7 +80,7 @@ const col1Field11 = makeField({
 });
 
 const col1Field12 = makeField({
-  type: FieldType.SingleDocumentLink,
+  type: FieldType.SingleRecordLink,
   collectionID: collection1.id,
 });
 
@@ -127,7 +127,7 @@ const col1View2 = makeView(
   collection1WithFields,
 );
 
-const col1Docs = makeManyDocuments(
+const col1Records = makeManyRecords(
   20,
   collection1WithFields,
   {
@@ -179,6 +179,6 @@ export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
   ...keyedBy(col2Fields, 'id'),
 };
 
-export const documentsByIDFixtures: {
-  [documentID: string]: Document;
-} = keyedBy(col1Docs, 'id');
+export const recordsByIDFixtures: {
+  [recordID: string]: Record;
+} = keyedBy(col1Records, 'id');

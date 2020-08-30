@@ -5,7 +5,7 @@ import { NotFoundError } from './errors';
 import { first } from '../lib/data_structures/arrays';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
-import { Document } from '../app/data/documents';
+import { Record } from '../app/data/records';
 import { View, ViewType } from '../app/data/views';
 import { Field, FieldType } from '../app/data/fields';
 import { Template } from '../app/data/templates';
@@ -306,139 +306,133 @@ export async function deleteCollection(
 }
 //#endregion Collection
 
-//#region Document
-interface DocumentRow {
-  document_id: string;
+//#region Record
+interface RecordRow {
+  record_id: string;
   name: string;
   collection_id: string;
   created_at: Date;
   updated_at: Date;
 }
 
-interface DocumentFieldValueRow {
-  document_id: string;
+interface RecordFieldValueRow {
+  record_id: string;
   value: string;
   field_id: string;
   created_at: Date;
   updated_at: Date;
 }
 
-interface DocumentFieldValueRow {
-  document_id: string;
+interface RecordFieldValueRow {
+  record_id: string;
   value: string;
   field_id: string;
   created_at: Date;
   updated_at: Date;
 }
 
-function toDocument(data: DocumentRow): Document {
+function toRecord(data: RecordRow): Record {
   return {
-    id: data.document_id,
+    id: data.record_id,
     collectionID: data.collection_id,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
 }
 
-export async function getDocumentByID(
-  db: DB,
-  documentID: string,
-): Promise<Document> {
-  const result = await db.query<DocumentRow>(
-    'SELECT * FROM documents WHERE document_id=$1',
-    [documentID],
+export async function getRecordByID(db: DB, recordID: string): Promise<Record> {
+  const result = await db.query<RecordRow>(
+    'SELECT * FROM records WHERE record_id=$1',
+    [recordID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('collection', documentID);
+    throw new NotFoundError('collection', recordID);
   }
 
   const row = first(result.rows);
 
-  return toDocument(row);
+  return toRecord(row);
 }
 
-export async function createDocument(
+export async function createRecord(
   db: DB,
-  documentID: string,
+  recordID: string,
   collectionID: string,
-): Promise<Document> {
-  const result = await db.query<DocumentRow>(
-    'INSERT INTO documents (document_id, collection_id) VALUES($1, $2) RETURNING *',
-    [documentID, collectionID],
+): Promise<Record> {
+  const result = await db.query<RecordRow>(
+    'INSERT INTO records (record_id, collection_id) VALUES($1, $2) RETURNING *',
+    [recordID, collectionID],
   );
 
   const row = first(result.rows);
 
-  return toDocument(row);
+  return toRecord(row);
 }
 
-export async function updateDocumentFieldValue(
+export async function updateRecordFieldValue(
   db: DB,
-  documentID: string,
+  recordID: string,
   fieldID: string,
   value: string,
-): Promise<Document> {
-  const result = await db.query<DocumentRow>(
-    'INSERT INTO document_field_values (value, document_id, field_id) VALUES($1, $2, $3) RETURNING *',
-    [value, documentID, fieldID],
+): Promise<Record> {
+  const result = await db.query<RecordRow>(
+    'INSERT INTO record_field_values (value, record_id, field_id) VALUES($1, $2, $3) RETURNING *',
+    [value, recordID, fieldID],
   );
 
   const row = first(result.rows);
 
-  return toDocument(row);
+  return toRecord(row);
 }
 
-export async function fullUpdateDocument(
+export async function fullUpdateRecord(
   db: DB,
-  documentID: string,
-): Promise<Document> {
-  const result = await db.query<DocumentRow>(
-    'UPDATE documents SET WHERE document_id=$1 RETURNING *',
-    [documentID],
+  recordID: string,
+): Promise<Record> {
+  const result = await db.query<RecordRow>(
+    'UPDATE records SET WHERE record_id=$1 RETURNING *',
+    [recordID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('document', documentID);
+    throw new NotFoundError('record', recordID);
   }
 
   const row = first(result.rows);
 
-  return toDocument(row);
+  return toRecord(row);
 }
 
-export async function partialUpdateDocument(
+export async function partialUpdateRecord(
   db: DB,
-  documentID: string,
-): Promise<Document> {
-  const result = await db.query<DocumentRow>(
-    'SELECT * FROM documents WHERE document_id=$1',
-    [documentID],
+  recordID: string,
+): Promise<Record> {
+  const result = await db.query<RecordRow>(
+    'SELECT * FROM records WHERE record_id=$1',
+    [recordID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('document', documentID);
+    throw new NotFoundError('record', recordID);
   }
 
   const row = first(result.rows);
 
-  return toDocument(row);
+  return toRecord(row);
 }
 
-export async function deleteDocument(
-  db: DB,
-  documentID: string,
-): Promise<void> {
-  const result = await db.query<DocumentRow>(
-    'DELETE FROM documents where document_id=$1',
-    [documentID],
+export async function deleteRecord(db: DB, recordID: string): Promise<void> {
+  const result = await db.query<RecordRow>(
+    'DELETE FROM records where record_id=$1',
+    [recordID],
   );
 
   if (result.rowCount === 0) {
-    throw new NotFoundError('document', documentID);
+    throw new NotFoundError('record', recordID);
   }
 }
-//#endregion Document
+//#endregion Record
 
 //#region View
 interface ViewRow {
@@ -582,7 +576,7 @@ export async function duplicateField(
   db: DB,
   fieldID: string,
   fromFieldID: string,
-  duplicateDocumentFieldValues: boolean,
+  duplicateRecordFieldValues: boolean,
 ): Promise<Field> {
   const result = await db.query<FieldRow>(
     'INSERT INTO fields (field_id, name, type, description, collection_id) SELECT $1, name, type, description, collection_id FROM fields WHERE field_id=$2 RETURNING *',
@@ -596,9 +590,9 @@ export async function duplicateField(
   const row = first(result.rows);
   const field = toField(row);
 
-  if (duplicateDocumentFieldValues === true) {
+  if (duplicateRecordFieldValues === true) {
     await db.query<FieldRow>(
-      'INSERT INTO document_field_values (value, field_id, document_id) SELECT value, $1, document_id FROM document_field_values WHERE field_id=$2 RETURNING *',
+      'INSERT INTO record_field_values (value, field_id, record_id) SELECT value, $1, record_id FROM record_field_values WHERE field_id=$2 RETURNING *',
       [field.id, fromFieldID],
     );
   }

@@ -13,7 +13,7 @@ import {
   ListViewFieldConfig,
 } from './views';
 import { Field, FieldConfig, FieldID } from './fields';
-import { Document } from './documents';
+import { Record } from './records';
 import { generateID } from '../../lib/id/id';
 import {
   Filter,
@@ -32,7 +32,7 @@ import {
   FiltersByIDState,
   ViewsByIDState,
   fieldsByIDState,
-  documentsByIDState,
+  recordsByIDState,
   sortsByIDState,
   eventsState,
   SortsByIDState,
@@ -44,16 +44,16 @@ import {
   spaceCollectionsQuery,
   collectionQuery,
   collectionFieldsQuery,
-  collectionDocumentsQuery,
+  collectionRecordsQuery,
   collectionFieldsByIDQuery,
   collectionViewsQuery,
   viewQuery,
-  viewDocumentsQuery,
+  viewRecordsQuery,
   viewFilterGroupsQuery,
   viewFiltersQuery,
   viewFiltersGroupMaxQuery,
   fieldQuery,
-  documentQuery,
+  recordQuery,
   viewSortsQuery,
   filterQuery,
   sortQuery,
@@ -274,10 +274,10 @@ export function useGetCollectionFields(collectionID: string) {
   return fields;
 }
 
-export function useGetCollectionDocuments(collectionID: string) {
-  const documents = useRecoilValue(collectionDocumentsQuery(collectionID));
+export function useGetCollectionRecords(collectionID: string) {
+  const records = useRecoilValue(collectionRecordsQuery(collectionID));
 
-  return documents;
+  return records;
 }
 
 export function useGetCollectionFieldsByID(collectionID: string) {
@@ -423,10 +423,10 @@ export function useGetView(viewID: string) {
   return view;
 }
 
-export function useGetViewDocuments(viewID: string) {
-  const documents = useRecoilValue(viewDocumentsQuery(viewID));
+export function useGetViewRecords(viewID: string) {
+  const records = useRecoilValue(viewRecordsQuery(viewID));
 
-  return documents;
+  return records;
 }
 
 export function useGetFiltersByID() {
@@ -1157,42 +1157,42 @@ export function useUpdateFieldName() {
   return updateFieldName;
 }
 
-export function useGetDocumentCallback() {
-  const documents = useRecoilValue(documentsByIDState);
+export function useGetRecordCallback() {
+  const records = useRecoilValue(recordsByIDState);
 
-  const getDocument = useCallback(
-    (documentID: string) => {
-      const document = documents[documentID];
+  const getRecord = useCallback(
+    (recordID: string) => {
+      const record = records[recordID];
 
-      if (document === undefined) {
-        throw new Error('Document not found');
+      if (record === undefined) {
+        throw new Error('Record not found');
       }
 
-      return document;
+      return record;
     },
-    [documents],
+    [records],
   );
 
-  return getDocument;
+  return getRecord;
 }
 
-export function useGetDocument(documentID: string) {
-  const document = useRecoilValue(documentQuery(documentID));
+export function useGetRecord(recordID: string) {
+  const record = useRecoilValue(recordQuery(recordID));
 
-  if (document === null) {
-    throw new Error('Document not found');
+  if (record === null) {
+    throw new Error('Record not found');
   }
 
-  return document;
+  return record;
 }
 
-export function useCreateDocument() {
+export function useCreateRecord() {
   const emitEvent = useEmitEvent();
-  const setDocuments = useSetRecoilState(documentsByIDState);
+  const setRecords = useSetRecoilState(recordsByIDState);
 
-  const createDocument = useCallback(
+  const createRecord = useCallback(
     (collectionID: string) => {
-      let newDocument: Document = {
+      let newRecord: Record = {
         id: generateID(),
         fields: {},
         createdAt: new Date(),
@@ -1200,80 +1200,80 @@ export function useCreateDocument() {
         collectionID,
       };
 
-      setDocuments((previousDocuments) => ({
-        ...previousDocuments,
-        [newDocument.id]: newDocument,
+      setRecords((previousRecords) => ({
+        ...previousRecords,
+        [newRecord.id]: newRecord,
       }));
 
       emitEvent({
-        name: 'DocumentCreated',
-        document: newDocument,
+        name: 'RecordCreated',
+        record: newRecord,
       });
 
-      return newDocument;
+      return newRecord;
     },
-    [emitEvent, setDocuments],
+    [emitEvent, setRecords],
   );
 
-  return createDocument;
+  return createRecord;
 }
 
-export function useDeleteDocument() {
+export function useDeleteRecord() {
   const emitEvent = useEmitEvent();
-  const setDocuments = useSetRecoilState(documentsByIDState);
+  const setRecords = useSetRecoilState(recordsByIDState);
 
-  const deleteDocument = useCallback(
-    (document: Document) => {
-      setDocuments((previousDocuments) => {
-        const updatedDocuments = { ...previousDocuments };
+  const deleteRecord = useCallback(
+    (record: Record) => {
+      setRecords((previousRecords) => {
+        const updatedRecords = { ...previousRecords };
 
-        delete updatedDocuments[document.id];
+        delete updatedRecords[record.id];
 
-        return updatedDocuments;
+        return updatedRecords;
       });
 
       emitEvent({
-        name: 'DocumentDeleted',
-        document,
+        name: 'RecordDeleted',
+        record,
       });
     },
-    [emitEvent, setDocuments],
+    [emitEvent, setRecords],
   );
 
-  return deleteDocument;
+  return deleteRecord;
 }
 
-export interface UpdateDocumentNameInput {
-  documentID: string;
+export interface UpdateRecordNameInput {
+  recordID: string;
 }
 
-export function useUpdateDocumentName() {
+export function useUpdateRecordName() {
   const emitEvent = useEmitEvent();
-  const getDocument = useGetDocumentCallback();
-  const setDocuments = useSetRecoilState(documentsByIDState);
+  const getRecord = useGetRecordCallback();
+  const setRecords = useSetRecoilState(recordsByIDState);
 
-  const updateDocumentName = useCallback(
-    (input: UpdateDocumentNameInput) => {
-      const { documentID } = input;
-      const prevDocument = getDocument(documentID);
+  const updateRecordName = useCallback(
+    (input: UpdateRecordNameInput) => {
+      const { recordID } = input;
+      const prevRecord = getRecord(recordID);
 
-      const nextDocument: Document = {
-        ...prevDocument,
+      const nextRecord: Record = {
+        ...prevRecord,
       };
 
-      setDocuments((previousDocuments) => ({
-        ...previousDocuments,
-        [nextDocument.id]: nextDocument,
+      setRecords((previousRecords) => ({
+        ...previousRecords,
+        [nextRecord.id]: nextRecord,
       }));
 
       emitEvent({
-        name: 'DocumentNameUpdated',
-        prevDocument,
-        nextDocument,
+        name: 'RecordNameUpdated',
+        prevRecord,
+        nextRecord,
       });
     },
-    [getDocument, setDocuments, emitEvent],
+    [getRecord, setRecords, emitEvent],
   );
 
-  return updateDocumentName;
+  return updateRecordName;
 }

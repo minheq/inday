@@ -7,25 +7,25 @@ import {
   assertMultiOptionField,
   assertSingleCollaboratorField,
   assertMultiCollaboratorField,
-  assertMultiDocumentLinkField,
-  assertSingleDocumentLinkField,
+  assertMultiRecordLinkField,
+  assertSingleRecordLinkField,
   areFieldValuesEqual,
 } from './fields';
 import {
-  Document,
+  Record,
   FieldValue,
-  DocumentID,
+  RecordID,
   SingleOptionValue,
   MultiOptionValue,
   SingleCollaboratorValue,
   MultiCollaboratorValue,
-  SingleDocumentLinkValue,
-  MultiDocumentLinkValue,
+  SingleRecordLinkValue,
+  MultiRecordLinkValue,
   assertTextFieldValue,
   assertBooleanFieldValue,
   assertNumberFieldValue,
   assertDateFieldValue,
-} from './documents';
+} from './records';
 import { isEmpty, first, keyedBy } from '../../lib/data_structures/arrays';
 import { CollaboratorID, Collaborator } from './collaborators';
 import { isBefore, isAfter } from 'date-fns';
@@ -50,22 +50,22 @@ export interface Sort extends BaseSort, SortConfig {}
 
 export interface SortGetters {
   getField: (fieldID: FieldID) => Field;
-  getDocument: (documentID: DocumentID) => Document;
+  getRecord: (recordID: RecordID) => Record;
   getCollection: (collectionID: CollectionID) => Collection;
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator;
 }
 
-export function sortDocuments(
+export function sortRecords(
   sorts: Sort[],
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
   if (isEmpty(sorts)) {
-    return documents;
+    return records;
   }
-  const nodes = makeNodes(sorts, documents, getters);
+  const nodes = makeNodes(sorts, records, getters);
 
-  return toDocuments(nodes);
+  return toRecords(nodes);
 }
 
 function isLeafNodes(nodes: Node[]): nodes is LeafNode[] {
@@ -76,7 +76,7 @@ function isLeafNodes(nodes: Node[]): nodes is LeafNode[] {
   return first(nodes).type === 'leaf';
 }
 
-function toDocuments(nodes: Node[]): Document[] {
+function toRecords(nodes: Node[]): Record[] {
   if (isEmpty(nodes)) {
     return [];
   }
@@ -85,23 +85,23 @@ function toDocuments(nodes: Node[]): Document[] {
     return flattenLeafNodes(nodes);
   }
 
-  let docs: Document[] = [];
+  let records: Record[] = [];
 
   for (const node of nodes) {
-    docs = docs.concat(toDocuments(node.children as Node[]));
+    records = records.concat(toRecords(node.children as Node[]));
   }
 
-  return docs;
+  return records;
 }
 
-function flattenLeafNodes(leafNodes: LeafNode[]): Document[] {
-  let docs: Document[] = [];
+function flattenLeafNodes(leafNodes: LeafNode[]): Record[] {
+  let records: Record[] = [];
 
   for (const node of leafNodes) {
-    docs = docs.concat(node.children);
+    records = records.concat(node.children);
   }
 
-  return docs;
+  return records;
 }
 
 interface AncestorNode {
@@ -115,17 +115,17 @@ interface LeafNode {
   type: 'leaf';
   field: Field;
   value: FieldValue;
-  children: Document[];
+  children: Record[];
 }
 
 type Node = AncestorNode | LeafNode;
 
 function makeNodes(
   sorts: Sort[],
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ): Node[] {
-  if (isEmpty(documents)) {
+  if (isEmpty(records)) {
     return [];
   }
 
@@ -139,10 +139,10 @@ function makeNodes(
   const nextSorts = sorts.slice(1);
 
   if (sorts.length === 1) {
-    return makeLeafNodes(sort, documents, getters);
+    return makeLeafNodes(sort, records, getters);
   }
 
-  const leafNodes = makeLeafNodes(sort, documents, getters);
+  const leafNodes = makeLeafNodes(sort, records, getters);
 
   if (sorts.length === 1) {
     return leafNodes;
@@ -185,7 +185,7 @@ export function deleteSort(
 
 function makeLeafNodes(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ): LeafNode[] {
   const { getField } = getters;
@@ -193,38 +193,38 @@ function makeLeafNodes(
   const field = getField(sort.fieldID);
 
   const applySort = applySortByFieldType[field.type];
-  const sortedDocuments = applySort(sort, documents, getters);
+  const sortedRecords = applySort(sort, records, getters);
 
-  const firstDocument = first(sortedDocuments);
+  const firstRecord = first(sortedRecords);
 
   let currentNode: LeafNode = {
     type: 'leaf',
     field,
-    value: firstDocument.fields[field.id],
-    children: [firstDocument],
+    value: firstRecord.fields[field.id],
+    children: [firstRecord],
   };
 
   const nodes: LeafNode[] = [currentNode];
 
-  for (let i = 1; i < sortedDocuments.length; i++) {
-    const document = sortedDocuments[i];
+  for (let i = 1; i < sortedRecords.length; i++) {
+    const record = sortedRecords[i];
 
     if (
       areFieldValuesEqual(
         field.type,
-        document.fields[field.id],
+        record.fields[field.id],
         currentNode.value,
       )
     ) {
       if (currentNode.type === 'leaf') {
-        currentNode.children.push(document);
+        currentNode.children.push(record);
       }
     } else {
       currentNode = {
         type: 'leaf',
         field,
-        value: document.fields[field.id],
-        children: [document],
+        value: record.fields[field.id],
+        children: [record],
       };
       nodes.push(currentNode);
     }
@@ -236,22 +236,22 @@ function makeLeafNodes(
 const applySortByFieldType: {
   [fieldType in FieldType]: (
     sort: Sort,
-    documents: Document[],
+    records: Record[],
     getters: SortGetters,
-  ) => Document[];
+  ) => Record[];
 } = {
   [FieldType.Checkbox]: applyBooleanSort,
   [FieldType.Currency]: applyNumberSort,
   [FieldType.Date]: applyDateSort,
   [FieldType.Email]: applyTextSort,
   [FieldType.MultiCollaborator]: applyMultiCollaboratorSort,
-  [FieldType.MultiDocumentLink]: applyMultiDocumentLinkSort,
+  [FieldType.MultiRecordLink]: applyMultiRecordLinkSort,
   [FieldType.MultiLineText]: applyTextSort,
   [FieldType.MultiOption]: applyMultiOptionSort,
   [FieldType.Number]: applyNumberSort,
   [FieldType.PhoneNumber]: applyTextSort,
   [FieldType.SingleCollaborator]: applySingleCollaboratorSort,
-  [FieldType.SingleDocumentLink]: applySingleDocumentLinkSort,
+  [FieldType.SingleRecordLink]: applySingleRecordLinkSort,
   [FieldType.SingleLineText]: applyTextSort,
   [FieldType.SingleOption]: applySingleOptionSort,
   [FieldType.URL]: applyTextSort,
@@ -259,16 +259,16 @@ const applySortByFieldType: {
 
 export function applyTextSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -276,7 +276,7 @@ export function applyTextSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -286,16 +286,16 @@ export function applyTextSort(
 
 export function applyNumberSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -303,7 +303,7 @@ export function applyNumberSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -313,16 +313,16 @@ export function applyNumberSort(
 
 export function applyDateSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -330,7 +330,7 @@ export function applyDateSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -340,10 +340,10 @@ export function applyDateSort(
 
 export function applySingleOptionSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
@@ -353,7 +353,7 @@ export function applySingleOptionSort(
   const optionsByValue = keyedBy(field.options, 'value');
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id] as SingleOptionValue;
       const valB = b.fields[field.id] as SingleOptionValue;
 
@@ -381,7 +381,7 @@ export function applySingleOptionSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id] as SingleOptionValue;
     const valB = b.fields[field.id] as SingleOptionValue;
 
@@ -411,10 +411,10 @@ export function applySingleOptionSort(
 
 export function applyMultiOptionSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
@@ -424,7 +424,7 @@ export function applyMultiOptionSort(
   const optionsByValue = keyedBy(field.options, 'value');
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id] as MultiOptionValue;
       const valB = b.fields[field.id] as MultiOptionValue;
 
@@ -452,7 +452,7 @@ export function applyMultiOptionSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id] as MultiOptionValue;
     const valB = b.fields[field.id] as MultiOptionValue;
 
@@ -482,10 +482,10 @@ export function applyMultiOptionSort(
 
 export function applySingleCollaboratorSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField, getCollaborator } = getters;
 
   const field = getField(sort.fieldID);
@@ -493,7 +493,7 @@ export function applySingleCollaboratorSort(
   assertSingleCollaboratorField(field);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id] as SingleCollaboratorValue;
       const valB = b.fields[field.id] as SingleCollaboratorValue;
 
@@ -521,7 +521,7 @@ export function applySingleCollaboratorSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id] as SingleCollaboratorValue;
     const valB = b.fields[field.id] as SingleCollaboratorValue;
 
@@ -551,10 +551,10 @@ export function applySingleCollaboratorSort(
 
 export function applyMultiCollaboratorSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField, getCollaborator } = getters;
 
   const field = getField(sort.fieldID);
@@ -562,7 +562,7 @@ export function applyMultiCollaboratorSort(
   assertMultiCollaboratorField(field);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id] as MultiCollaboratorValue;
       const valB = b.fields[field.id] as MultiCollaboratorValue;
 
@@ -590,7 +590,7 @@ export function applyMultiCollaboratorSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id] as MultiCollaboratorValue;
     const valB = b.fields[field.id] as MultiCollaboratorValue;
 
@@ -618,25 +618,25 @@ export function applyMultiCollaboratorSort(
   });
 }
 
-export function applySingleDocumentLinkSort(
+export function applySingleRecordLinkSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
-  const { getField, getDocument, getCollection } = getters;
+  const recordsClone = records.slice(0);
+  const { getField, getRecord, getCollection } = getters;
 
   const field = getField(sort.fieldID);
-  assertSingleDocumentLinkField(field);
+  assertSingleRecordLinkField(field);
 
-  const collection = getCollection(field.documentsFromCollectionID);
+  const collection = getCollection(field.recordsFromCollectionID);
 
   const mainField = getField(collection.mainFieldID);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as SingleDocumentLinkValue;
-      const valB = b.fields[field.id] as SingleDocumentLinkValue;
+    return recordsClone.sort((a, b) => {
+      const valA = a.fields[field.id] as SingleRecordLinkValue;
+      const valB = b.fields[field.id] as SingleRecordLinkValue;
 
       if (valA === null && valB === null) {
         return 0;
@@ -650,23 +650,23 @@ export function applySingleDocumentLinkSort(
         return 1;
       }
 
-      const docA = getDocument(valA);
-      const docB = getDocument(valB);
+      const recordA = getRecord(valA);
+      const recordB = getRecord(valB);
 
-      const docAMainField = docA.fields[mainField.id];
-      const docBMainField = docB.fields[mainField.id];
+      const recordAMainField = recordA.fields[mainField.id];
+      const recordBMainField = recordB.fields[mainField.id];
 
       return ascendingFieldValueSort(
         mainField.type,
-        docAMainField,
-        docBMainField,
+        recordAMainField,
+        recordBMainField,
       );
     });
   }
 
-  return docsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as SingleDocumentLinkValue;
-    const valB = b.fields[field.id] as SingleDocumentLinkValue;
+  return recordsClone.sort((a, b) => {
+    const valA = a.fields[field.id] as SingleRecordLinkValue;
+    const valB = b.fields[field.id] as SingleRecordLinkValue;
 
     if (valA === null && valB === null) {
       return 0;
@@ -680,38 +680,38 @@ export function applySingleDocumentLinkSort(
       return -1;
     }
 
-    const docA = getDocument(valA);
-    const docB = getDocument(valB);
+    const recordA = getRecord(valA);
+    const recordB = getRecord(valB);
 
-    const docAMainField = docA.fields[mainField.id];
-    const docBMainField = docB.fields[mainField.id];
+    const recordAMainField = recordA.fields[mainField.id];
+    const recordBMainField = recordB.fields[mainField.id];
 
     return descendingFieldValueSort(
       mainField.type,
-      docAMainField,
-      docBMainField,
+      recordAMainField,
+      recordBMainField,
     );
   });
 }
 
-export function applyMultiDocumentLinkSort(
+export function applyMultiRecordLinkSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
-  const { getField, getDocument, getCollection } = getters;
+  const recordsClone = records.slice(0);
+  const { getField, getRecord, getCollection } = getters;
 
   const field = getField(sort.fieldID);
-  assertMultiDocumentLinkField(field);
+  assertMultiRecordLinkField(field);
 
-  const collection = getCollection(field.documentsFromCollectionID);
+  const collection = getCollection(field.recordsFromCollectionID);
   const mainField = getField(collection.mainFieldID);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as MultiDocumentLinkValue;
-      const valB = b.fields[field.id] as MultiDocumentLinkValue;
+    return recordsClone.sort((a, b) => {
+      const valA = a.fields[field.id] as MultiRecordLinkValue;
+      const valB = b.fields[field.id] as MultiRecordLinkValue;
 
       if (isEmpty(valA) && isEmpty(valB)) {
         return 0;
@@ -725,23 +725,23 @@ export function applyMultiDocumentLinkSort(
         return 1;
       }
 
-      const docA = getDocument(valA[0]);
-      const docB = getDocument(valB[0]);
+      const recordA = getRecord(valA[0]);
+      const recordB = getRecord(valB[0]);
 
-      const docAMainField = docA.fields[mainField.id];
-      const docBMainField = docB.fields[mainField.id];
+      const recordAMainField = recordA.fields[mainField.id];
+      const recordBMainField = recordB.fields[mainField.id];
 
       return ascendingFieldValueSort(
         mainField.type,
-        docAMainField,
-        docBMainField,
+        recordAMainField,
+        recordBMainField,
       );
     });
   }
 
-  return docsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as MultiDocumentLinkValue;
-    const valB = b.fields[field.id] as MultiDocumentLinkValue;
+  return recordsClone.sort((a, b) => {
+    const valA = a.fields[field.id] as MultiRecordLinkValue;
+    const valB = b.fields[field.id] as MultiRecordLinkValue;
 
     if (isEmpty(valA) && isEmpty(valB)) {
       return 0;
@@ -755,32 +755,32 @@ export function applyMultiDocumentLinkSort(
       return -1;
     }
 
-    const docA = getDocument(valA[0]);
-    const docB = getDocument(valB[0]);
+    const recordA = getRecord(valA[0]);
+    const recordB = getRecord(valB[0]);
 
-    const docAMainField = docA.fields[mainField.id];
-    const docBMainField = docB.fields[mainField.id];
+    const recordAMainField = recordA.fields[mainField.id];
+    const recordBMainField = recordB.fields[mainField.id];
 
     return descendingFieldValueSort(
       mainField.type,
-      docAMainField,
-      docBMainField,
+      recordAMainField,
+      recordBMainField,
     );
   });
 }
 
 export function applyBooleanSort(
   sort: Sort,
-  documents: Document[],
+  records: Record[],
   getters: SortGetters,
 ) {
-  const docsClone = documents.slice(0);
+  const recordsClone = records.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
   if (sort.order === 'ascending') {
-    return docsClone.sort((a, b) => {
+    return recordsClone.sort((a, b) => {
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
@@ -788,7 +788,7 @@ export function applyBooleanSort(
     });
   }
 
-  return docsClone.sort((a, b) => {
+  return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 

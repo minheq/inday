@@ -16,11 +16,11 @@ import {
   updateCollectionName,
   getCollectionByID,
   deleteCollection,
-  createDocument,
-  fullUpdateDocument,
-  partialUpdateDocument,
-  getDocumentByID,
-  deleteDocument,
+  createRecord,
+  fullUpdateRecord,
+  partialUpdateRecord,
+  getRecordByID,
+  deleteRecord,
   createView,
   deleteView,
   updateViewName,
@@ -390,94 +390,94 @@ export const handleDeleteCollection: AH = async (ctx, req, res) => {
 
 //#endregion Collection
 
-//#region Document
-interface DocumentIDParams {
-  documentID: string;
+//#region Record
+interface RecordIDParams {
+  recordID: string;
 }
 
-const documentIDParamsSchema = yup
-  .object<DocumentIDParams>({
-    documentID: yup.string().required(),
+const recordIDParamsSchema = yup
+  .object<RecordIDParams>({
+    recordID: yup.string().required(),
   })
   .required();
 
-export interface CreateDocumentInput {
+export interface CreateRecordInput {
   collectionID: string;
 }
 
-const createDocumentInputSchema = yup
-  .object<CreateDocumentInput>({
+const createRecordInputSchema = yup
+  .object<CreateRecordInput>({
     collectionID: yup.string().required(),
   })
   .required();
 
-export const handleCreateDocument: AH = async (ctx, req, res) => {
-  validateInput(createDocumentInputSchema, req.body);
-  validateParams(documentIDParamsSchema, req.params);
-  validateID(req.params.documentID);
+export const handleCreateRecord: AH = async (ctx, req, res) => {
+  validateInput(createRecordInputSchema, req.body);
+  validateParams(recordIDParamsSchema, req.params);
+  validateID(req.params.recordID);
 
-  const { documentID } = req.params;
+  const { recordID } = req.params;
   const { collectionID } = req.body;
 
-  const document = await createDocument(ctx.db, documentID, collectionID);
+  const record = await createRecord(ctx.db, recordID, collectionID);
 
-  res.send(document);
+  res.send(record);
 };
 
-export interface FullUpdateDocumentInput {}
+export interface FullUpdateRecordInput {}
 
-const fullUpdateDocumentInputSchema = yup
-  .object<FullUpdateDocumentInput>({})
+const fullUpdateRecordInputSchema = yup
+  .object<FullUpdateRecordInput>({})
   .required();
 
-export const handleFullUpdateDocument: AH = async (ctx, req, res) => {
-  validateInput(fullUpdateDocumentInputSchema, req.body);
-  validateParams(documentIDParamsSchema, req.params);
+export const handleFullUpdateRecord: AH = async (ctx, req, res) => {
+  validateInput(fullUpdateRecordInputSchema, req.body);
+  validateParams(recordIDParamsSchema, req.params);
 
-  const { documentID } = req.params;
+  const { recordID } = req.params;
 
-  const document = await fullUpdateDocument(ctx.db, documentID);
+  const record = await fullUpdateRecord(ctx.db, recordID);
 
-  res.send(document);
+  res.send(record);
 };
 
-export interface PartialUpdateDocumentInput {}
+export interface PartialUpdateRecordInput {}
 
-const partialUpdateDocumentInputSchema = yup
-  .object<PartialUpdateDocumentInput>({})
+const partialUpdateRecordInputSchema = yup
+  .object<PartialUpdateRecordInput>({})
   .required();
 
-export const handlePartialUpdateDocument: AH = async (ctx, req, res) => {
-  validateInput(partialUpdateDocumentInputSchema, req.body);
-  validateParams(documentIDParamsSchema, req.params);
+export const handlePartialUpdateRecord: AH = async (ctx, req, res) => {
+  validateInput(partialUpdateRecordInputSchema, req.body);
+  validateParams(recordIDParamsSchema, req.params);
 
-  const { documentID } = req.params;
+  const { recordID } = req.params;
 
-  const document = await partialUpdateDocument(ctx.db, documentID);
+  const record = await partialUpdateRecord(ctx.db, recordID);
 
-  res.send(document);
+  res.send(record);
 };
 
-export const handleGetDocument: AH = async (ctx, req, res) => {
-  validateParams(documentIDParamsSchema, req.params);
+export const handleGetRecord: AH = async (ctx, req, res) => {
+  validateParams(recordIDParamsSchema, req.params);
 
-  const { documentID } = req.params;
-  const document = await getDocumentByID(ctx.db, documentID);
+  const { recordID } = req.params;
+  const record = await getRecordByID(ctx.db, recordID);
 
-  res.send(document);
+  res.send(record);
 };
 
-export const handleDeleteDocument: AH = async (ctx, req, res) => {
-  validateParams(documentIDParamsSchema, req.params);
+export const handleDeleteRecord: AH = async (ctx, req, res) => {
+  validateParams(recordIDParamsSchema, req.params);
 
-  const { documentID } = req.params;
+  const { recordID } = req.params;
 
-  await deleteDocument(ctx.db, documentID);
+  await deleteRecord(ctx.db, recordID);
 
-  res.send({ id: documentID, deleted: true });
+  res.send({ id: recordID, deleted: true });
 };
 
-//#endregion Document
+//#endregion Record
 
 //#region View
 interface ViewIDParams {
@@ -568,8 +568,8 @@ const fieldTypes: FieldType[] = [
   'multiSelect',
   'singleCollaborator',
   'multiCollaborator',
-  'singleDocumentLink',
-  'multiDocumentLink',
+  'singleRecordLink',
+  'multiRecordLink',
   'date',
   'phoneNumber',
   'email',
@@ -620,13 +620,13 @@ export const handleCreateField: AH = async (ctx, req, res) => {
 
 export interface DuplicateFieldInput {
   fromFieldID: string;
-  duplicateDocumentFieldValues: boolean;
+  duplicateRecordFieldValues: boolean;
 }
 
 const duplicateFieldInputSchema = yup
   .object<DuplicateFieldInput>({
     fromFieldID: yup.string().defined(),
-    duplicateDocumentFieldValues: yup.boolean().defined(),
+    duplicateRecordFieldValues: yup.boolean().defined(),
   })
   .required();
 
@@ -635,13 +635,13 @@ export const handleDuplicateField: AH = async (ctx, req, res) => {
   validateParams(fieldIDParamsSchema, req.params);
 
   const { fieldID } = req.params;
-  const { fromFieldID, duplicateDocumentFieldValues } = req.body;
+  const { fromFieldID, duplicateRecordFieldValues } = req.body;
 
   const field = await duplicateField(
     ctx.db,
     fieldID,
     fromFieldID,
-    duplicateDocumentFieldValues,
+    duplicateRecordFieldValues,
   );
 
   res.send(field);

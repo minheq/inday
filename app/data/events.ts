@@ -3,7 +3,7 @@ import { Space } from './spaces';
 import { Collection } from './collections';
 import { View, ListView } from './views';
 import { Field } from './fields';
-import { Document } from './documents';
+import { Record } from './records';
 import { Filter } from './filters';
 import { Sort } from './sorts';
 import { Group } from './groups';
@@ -109,30 +109,30 @@ export interface FieldDeletedEventConfig {
 }
 export interface FieldDeletedEvent extends BaseEvent, FieldDeletedEventConfig {}
 
-export interface DocumentCreatedEventConfig {
-  name: 'DocumentCreated';
-  document: Document;
+export interface RecordCreatedEventConfig {
+  name: 'RecordCreated';
+  record: Record;
 }
-export interface DocumentCreatedEvent
+export interface RecordCreatedEvent
   extends BaseEvent,
-    DocumentCreatedEventConfig {}
+    RecordCreatedEventConfig {}
 
-export interface DocumentNameUpdatedEventConfig {
-  name: 'DocumentNameUpdated';
-  prevDocument: Document;
-  nextDocument: Document;
+export interface RecordNameUpdatedEventConfig {
+  name: 'RecordNameUpdated';
+  prevRecord: Record;
+  nextRecord: Record;
 }
-export interface DocumentNameUpdatedEvent
+export interface RecordNameUpdatedEvent
   extends BaseEvent,
-    DocumentNameUpdatedEventConfig {}
+    RecordNameUpdatedEventConfig {}
 
-export interface DocumentDeletedEventConfig {
-  name: 'DocumentDeleted';
-  document: Document;
+export interface RecordDeletedEventConfig {
+  name: 'RecordDeleted';
+  record: Record;
 }
-export interface DocumentDeletedEvent
+export interface RecordDeletedEvent
   extends BaseEvent,
-    DocumentDeletedEventConfig {}
+    RecordDeletedEventConfig {}
 
 export interface FilterCreatedEventConfig {
   name: 'FilterCreated';
@@ -236,9 +236,9 @@ export type EventConfig =
   | FieldCreatedEventConfig
   | FieldNameUpdatedEventConfig
   | FieldDeletedEventConfig
-  | DocumentCreatedEventConfig
-  | DocumentNameUpdatedEventConfig
-  | DocumentDeletedEventConfig
+  | RecordCreatedEventConfig
+  | RecordNameUpdatedEventConfig
+  | RecordDeletedEventConfig
   | FilterCreatedEventConfig
   | FilterConfigUpdatedEventConfig
   | FilterGroupUpdatedEventConfig
@@ -265,9 +265,9 @@ export type Event =
   | FieldCreatedEvent
   | FieldNameUpdatedEvent
   | FieldDeletedEvent
-  | DocumentCreatedEvent
-  | DocumentNameUpdatedEvent
-  | DocumentDeletedEvent
+  | RecordCreatedEvent
+  | RecordNameUpdatedEvent
+  | RecordDeletedEvent
   | FilterCreatedEvent
   | FilterConfigUpdatedEvent
   | FilterGroupUpdatedEvent

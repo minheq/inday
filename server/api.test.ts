@@ -454,7 +454,7 @@ describe('Fields', () => {
 
       const input: DuplicateFieldInput = {
         fromFieldID: field.id,
-        duplicateDocumentFieldValues: false,
+        duplicateRecordFieldValues: false,
       };
 
       const res = await api.inject({

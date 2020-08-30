@@ -9,7 +9,7 @@ export enum RecoilKey {
   ViewsByID = 'ViewsByID',
   FiltersByID = 'FiltersByID',
   FieldsByID = 'FieldsByID',
-  DocumentsByID = 'DocumentsByID',
+  RecordsByID = 'RecordsByID',
   Events = 'Events',
 
   // Selectors
@@ -22,7 +22,7 @@ export enum RecoilKey {
   ViewFilterGroups = 'ViewFilterGroups',
   ViewFiltersGroupMax = 'ViewFiltersGroupMax',
   View = 'View',
-  ViewDocuments = 'ViewDocuments',
+  ViewRecords = 'ViewRecords',
   ViewFilters = 'ViewFilters',
   ViewSorts = 'ViewSorts',
   ViewGroups = 'ViewGroups',
@@ -35,8 +35,8 @@ export enum RecoilKey {
   Fields = 'Fields',
   Filter = 'Filter',
   Filters = 'Filters',
-  Document = 'Document',
-  Documents = 'Documents',
+  Record = 'Record',
+  Records = 'Records',
   Space = 'Space',
   Spaces = 'Spaces',
 }
