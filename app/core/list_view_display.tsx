@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ScrollView, Animated } from 'react-native';
 import { Container, Text, Row, Column, Spacer, Icon } from '../components';
 import {
@@ -72,7 +72,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
       });
     });
 
-    () => {
+    return () => {
       scrollX.removeListener(listenerID);
     };
   }, [scrollX]);
@@ -149,7 +149,7 @@ function Rows(props: RowsProps) {
       setScrollTop(position.value);
     });
 
-    () => {
+    return () => {
       scrollY.removeListener(listenerID);
     };
   }, [scrollY]);
