@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, memo } from 'react';
 import { ScrollView, Animated } from 'react-native';
 import { Container, Text, Row, Column, Spacer, Icon } from '../components';
 import {
@@ -95,13 +95,13 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
           <Container width={frozenFieldsWidth}>
             <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
               {fields.slice(0, frozenFieldsCount).map((field) => {
-                return <HeaderCell field={field} />;
+                return <HeaderCell key={field.id} field={field} />;
               })}
             </ScrollView>
           </Container>
           <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
             {fields.slice(frozenFieldsCount).map((field) => {
-              return <HeaderCell field={field} />;
+              return <HeaderCell key={field.id} field={field} />;
             })}
           </ScrollView>
         </Row>
@@ -183,6 +183,7 @@ function Rows(props: RowsProps) {
           ],
           { useNativeDriver: false },
         )}
+        contentContainerStyle={{ height: innerHeight }}
         scrollEventThrottle={16}
       >
         <Row flex={1}>
@@ -193,25 +194,19 @@ function Rows(props: RowsProps) {
 
                 return (
                   <Container
+                    key={record.id}
                     position="absolute"
                     top={index * ROW_HEIGHT}
                     width="100%"
                   >
-                    <LeftColumnCell
-                      key={record.id}
-                      index={index}
-                      record={record}
-                    />
+                    <LeftColumnCell index={index} record={record} />
                   </Container>
                 );
               })}
             </Column>
           </Container>
           <Container width={frozenFieldsWidth}>
-            <ScrollView
-              horizontal
-              contentContainerStyle={{ height: innerHeight }}
-            >
+            <ScrollView horizontal>
               <Column>
                 {rows.map((row) => {
                   const { record, index } = row;
@@ -243,7 +238,6 @@ function Rows(props: RowsProps) {
             </ScrollView>
           </Container>
           <ScrollView
-            contentContainerStyle={{ height: innerHeight }}
             horizontal
             onScroll={Animated.event(
               [
@@ -298,7 +292,7 @@ interface BodyCellProps {
   record: Record;
 }
 
-function BodyCell(props: BodyCellProps) {
+const BodyCell = memo(function BodyCell(props: BodyCellProps) {
   const { record, field } = props;
 
   const cell = recordFieldValueComponentByFieldType[field.type](
@@ -317,13 +311,13 @@ function BodyCell(props: BodyCellProps) {
       {cell}
     </Container>
   );
-}
+});
 
 interface HeaderCellProps {
   field: FieldWithListViewConfig;
 }
 
-function HeaderCell(props: HeaderCellProps) {
+const HeaderCell = memo(function HeaderCell(props: HeaderCellProps) {
   const { field } = props;
 
   return (
@@ -343,14 +337,16 @@ function HeaderCell(props: HeaderCellProps) {
       </Row>
     </Container>
   );
-}
+});
 
 interface LeftColumnCellProps {
   record: Record;
   index: number;
 }
 
-function LeftColumnCell(props: LeftColumnCellProps) {
+const LeftColumnCell = memo(function LeftColumnCell(
+  props: LeftColumnCellProps,
+) {
   const { record, index } = props;
 
   return (
@@ -364,7 +360,7 @@ function LeftColumnCell(props: LeftColumnCellProps) {
       <Text>{index}</Text>
     </Container>
   );
-}
+});
 
 const recordFieldValueComponentByFieldType: {
   [fieldType in FieldType]: (
