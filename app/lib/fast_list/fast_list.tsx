@@ -16,6 +16,7 @@ type RowHeight = number | ((section: number, row?: number) => number);
 type SectionFooterHeight = number | ((section: number) => number);
 
 export const FastListItemTypes = {
+  // Spacers create empty space to create illusion that the visible items are scrolled by that amount.
   Spacer: 0 as const,
   Header: 1 as const,
   Footer: 2 as const,
@@ -38,7 +39,7 @@ export type FastListItem = {
 /**
  * FastListItemRecycler is used to recycle FastListItem objects between recomputations
  * of the list. By doing this we ensure that components maintain their keys and avoid
- * reallocations.
+ * mounting/unmounting of components -- which is expensive.
  */
 class FastListItemRecycler {
   static _LAST_KEY: number = 0;
@@ -299,6 +300,7 @@ class FastListComputer {
           prevSection.section,
           0,
         );
+
         items = [spacer, prevSection];
       }
 
@@ -486,8 +488,8 @@ const FastListSectionRenderer = ({
         React.isValidElement(child) && child.props.style
           ? child.props.style
           : undefined,
+        styles.section,
         {
-          zIndex: styles.section,
           height: layoutHeight,
           transform: [{ translateY }],
         },
@@ -567,6 +569,7 @@ function computeBlock(
   const blockNumber = Math.ceil(scrollTop / batchSize);
   const blockStart = batchSize * blockNumber;
   const blockEnd = blockStart + batchSize;
+
   return { batchSize, blockStart, blockEnd };
 }
 
@@ -630,7 +633,6 @@ export class FastList extends React.PureComponent<
   FastListState
 > {
   static defaultProps = {
-    isFastList: true,
     renderHeader: () => null,
     renderFooter: () => null,
     renderSection: () => null,
