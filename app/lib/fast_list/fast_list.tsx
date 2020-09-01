@@ -457,14 +457,13 @@ class FastListComputer {
   }
 }
 
-function computeBlock(
-  containerHeight: number,
-  scrollTop: number,
-): {
+interface Block {
   batchSize: number;
   blockStart: number;
   blockEnd: number;
-} {
+}
+
+function computeBlock(containerHeight: number, scrollTop: number): Block {
   if (containerHeight === 0) {
     return {
       batchSize: 0,
@@ -480,8 +479,27 @@ function computeBlock(
   return { batchSize, blockStart, blockEnd };
 }
 
+interface GetFastListStateParams {
+  footerHeight: FooterHeight;
+  headerHeight: HeaderHeight;
+  insetBottom: number;
+  insetTop: number;
+  rowHeight: RowHeight;
+  scrollTopValue?: Animated.Value;
+  sectionFooterHeight: SectionFooterHeight;
+  sectionHeight: SectionHeight;
+  sections: number[];
+}
+
+interface BlockWithItems extends Block {
+  items?: FastListItem[];
+}
+
 function getFastListState(
-  {
+  params: GetFastListStateParams,
+  blockWithItems: BlockWithItems,
+): FastListState {
+  const {
     headerHeight,
     footerHeight,
     sectionHeight,
@@ -490,19 +508,14 @@ function getFastListState(
     sections,
     insetTop,
     insetBottom,
-  }: UseFastListProps,
-  {
+  } = params;
+  const {
     batchSize,
     blockStart,
     blockEnd,
     items: prevItems = [],
-  }: {
-    batchSize: number;
-    blockStart: number;
-    blockEnd: number;
-    items?: FastListItem[];
-  },
-): FastListState {
+  } = blockWithItems;
+
   if (batchSize === 0) {
     return {
       batchSize,
@@ -536,42 +549,32 @@ function getFastListState(
   };
 }
 
-interface UseFastListProps {
+interface UseFastListProps extends GetFastListStateParams {
   contentInset: {
     top?: number;
     left?: number;
     right?: number;
     bottom?: number;
   };
-  footerHeight: FooterHeight;
-  headerHeight: HeaderHeight;
-  insetBottom: number;
-  insetTop: number;
-  rowHeight: RowHeight;
-  scrollTopValue?: Animated.Value;
-  sectionFooterHeight: SectionFooterHeight;
-  sectionHeight: SectionHeight;
-  sections: number[];
 
   onScrollEnd?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   onLayout?: (event: LayoutChangeEvent) => void;
   renderAccessory?: () => React.ReactNode;
 }
 
-type FastListState = {
-  batchSize: number;
-  blockStart: number;
-  blockEnd: number;
+interface FastListState extends Block {
   height: number;
   items: FastListItem[];
-};
+}
 
 function useFastList(props: UseFastListProps) {
   const { contentInset, renderAccessory, onScrollEnd, scrollTopValue } = props;
   const forceUpdate = useForceUpdate();
-  const containerHeightRef = useRef(0);
-  const scrollTopRef = useRef(0);
-  const scrollTopValueRef = useRef(scrollTopValue || new Animated.Value(0));
+  const containerHeightRef = useRef<number>(0);
+  const scrollTopRef = useRef<number>(0);
+  const scrollTopValueRef = useRef<Animated.Value>(
+    scrollTopValue || new Animated.Value(0),
+  );
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [state, setState] = useState<FastListState>(
     getFastListState(
@@ -579,7 +582,7 @@ function useFastList(props: UseFastListProps) {
       computeBlock(containerHeightRef.current, scrollTopRef.current),
     ),
   );
-  const prevProps = usePrevious(props);
+  const prevScrollTopValue = usePrevious(props.scrollTopValue);
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -669,10 +672,10 @@ function useFastList(props: UseFastListProps) {
   );
 
   useEffect(() => {
-    if (prevProps.scrollTopValue !== props.scrollTopValue) {
+    if (prevScrollTopValue !== scrollTopValue) {
       throw new Error('scrollTopValue cannot changed after mounting');
     }
-  }, [prevProps, props]);
+  }, [prevScrollTopValue, scrollTopValue]);
 
   return {
     containerHeightRef,
