@@ -1,4 +1,11 @@
-import React from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import {
   Animated,
   View,
@@ -8,6 +15,8 @@ import {
   LayoutChangeEvent,
   StyleSheet,
 } from 'react-native';
+import { useForceUpdate } from '../../hooks/use_force_update';
+import { usePrevious } from '../../hooks/use_previous';
 
 type HeaderHeight = number | (() => number);
 type FooterHeight = number | (() => number);
@@ -448,108 +457,6 @@ class FastListComputer {
   }
 }
 
-const FastListSectionRenderer = ({
-  layoutY,
-  layoutHeight,
-  nextSectionLayoutY,
-  scrollTopValue,
-  children,
-}: {
-  layoutY: number;
-  layoutHeight: number;
-  nextSectionLayoutY?: number;
-  scrollTopValue: Animated.Value;
-  children: React.ReactNode;
-}): React.ReactElement => {
-  const inputRange: number[] = [-1, 0];
-  const outputRange: number[] = [0, 0];
-
-  inputRange.push(layoutY);
-  outputRange.push(0);
-  const collisionPoint = (nextSectionLayoutY || 0) - layoutHeight;
-  if (collisionPoint >= layoutY) {
-    inputRange.push(collisionPoint, collisionPoint + 1);
-    outputRange.push(collisionPoint - layoutY, collisionPoint - layoutY);
-  } else {
-    inputRange.push(layoutY + 1);
-    outputRange.push(1);
-  }
-
-  const translateY = scrollTopValue.interpolate({
-    inputRange,
-    outputRange,
-  });
-
-  const child = React.Children.only(children);
-
-  return (
-    <Animated.View
-      style={[
-        React.isValidElement(child) && child.props.style
-          ? child.props.style
-          : undefined,
-        styles.section,
-        {
-          height: layoutHeight,
-          transform: [{ translateY }],
-        },
-      ]}
-    >
-      {React.isValidElement(child) &&
-        React.cloneElement(child, {
-          style: { flex: 1 },
-        })}
-    </Animated.View>
-  );
-};
-
-const FastListItemRenderer = ({
-  layoutHeight: height,
-  children,
-}: {
-  layoutHeight: number;
-  children?: React.ReactNode;
-}): React.ReactElement => <View style={{ height }}>{children}</View>;
-
-export type FastListProps = {
-  renderActionSheetScrollViewWrapper?: (
-    wrapper: React.ReactNode,
-  ) => React.ReactNode;
-  actionSheetScrollRef?: { current?: React.ReactNode };
-  onScrollEnd?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
-  onLayout?: (event: LayoutChangeEvent) => void;
-  renderHeader: () => React.ReactElement | null;
-  renderFooter: () => React.ReactElement | null;
-  renderSection: (section: number) => React.ReactElement | null;
-  renderRow: (section: number, row: number) => React.ReactElement | null;
-  renderSectionFooter: (section: number) => React.ReactElement | null;
-  renderAccessory?: (list: FastList) => React.ReactNode;
-  renderEmpty?: () => React.ReactElement;
-  headerHeight: HeaderHeight;
-  footerHeight: FooterHeight;
-  sectionHeight: SectionHeight;
-  sectionFooterHeight: SectionFooterHeight;
-  rowHeight: RowHeight;
-  sections: number[];
-  insetTop: number;
-  insetBottom: number;
-  scrollTopValue?: Animated.Value;
-  contentInset: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number;
-  };
-};
-
-type FastListState = {
-  batchSize: number;
-  blockStart: number;
-  blockEnd: number;
-  height: number;
-  items: FastListItem[];
-};
-
 function computeBlock(
   containerHeight: number,
   scrollTop: number,
@@ -583,7 +490,7 @@ function getFastListState(
     sections,
     insetTop,
     insetBottom,
-  }: FastListProps,
+  }: UseFastListProps,
   {
     batchSize,
     blockStart,
@@ -616,6 +523,7 @@ function getFastListState(
     insetTop,
     insetBottom,
   });
+
   return {
     batchSize,
     blockStart,
@@ -628,162 +536,277 @@ function getFastListState(
   };
 }
 
-export class FastList extends React.PureComponent<
-  FastListProps,
-  FastListState
-> {
-  static defaultProps = {
-    renderHeader: () => null,
-    renderFooter: () => null,
-    renderSection: () => null,
-    renderSectionFooter: () => null,
-    headerHeight: 0,
-    footerHeight: 0,
-    sectionHeight: 0,
-    sectionFooterHeight: 0,
-    insetTop: 0,
-    insetBottom: 0,
-    contentInset: { top: 0, right: 0, left: 0, bottom: 0 },
+interface UseFastListProps {
+  contentInset: {
+    top?: number;
+    left?: number;
+    right?: number;
+    bottom?: number;
   };
+  footerHeight: FooterHeight;
+  headerHeight: HeaderHeight;
+  insetBottom: number;
+  insetTop: number;
+  rowHeight: RowHeight;
+  scrollTopValue?: Animated.Value;
+  sectionFooterHeight: SectionFooterHeight;
+  sectionHeight: SectionHeight;
+  sections: number[];
 
-  containerHeight: number = 0;
-  scrollTop: number = 0;
-  scrollTopValue: Animated.Value =
-    this.props.scrollTopValue || new Animated.Value(0);
-  scrollView: { current: ScrollView | null } = React.createRef();
+  onScrollEnd?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  onLayout?: (event: LayoutChangeEvent) => void;
+  renderAccessory?: () => React.ReactNode;
+}
 
-  state = getFastListState(
-    this.props,
-    computeBlock(this.containerHeight, this.scrollTop),
+type FastListState = {
+  batchSize: number;
+  blockStart: number;
+  blockEnd: number;
+  height: number;
+  items: FastListItem[];
+};
+
+function useFastList(props: UseFastListProps) {
+  const { contentInset, renderAccessory, onScrollEnd, scrollTopValue } = props;
+  const forceUpdate = useForceUpdate();
+  const containerHeightRef = useRef(0);
+  const scrollTopRef = useRef(0);
+  const scrollTopValueRef = useRef(scrollTopValue || new Animated.Value(0));
+  const scrollViewRef = useRef<ScrollView | null>(null);
+  const [state, setState] = useState<FastListState>(
+    getFastListState(
+      props,
+      computeBlock(containerHeightRef.current, scrollTopRef.current),
+    ),
+  );
+  const prevProps = usePrevious(props);
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { nativeEvent } = event;
+
+      containerHeightRef.current =
+        nativeEvent.layoutMeasurement.height -
+        (contentInset.top || 0) -
+        (contentInset.bottom || 0);
+
+      scrollTopRef.current = Math.min(
+        Math.max(0, nativeEvent.contentOffset.y),
+        nativeEvent.contentSize.height - containerHeightRef.current,
+      );
+
+      const nextBlock = computeBlock(
+        containerHeightRef.current,
+        scrollTopRef.current,
+      );
+
+      if (
+        nextBlock.batchSize !== state.batchSize ||
+        nextBlock.blockStart !== state.blockStart ||
+        nextBlock.blockEnd !== state.blockEnd
+      ) {
+        const nextState = getFastListState(props, {
+          ...state,
+          batchSize: nextBlock.batchSize,
+          blockStart: nextBlock.blockStart,
+          blockEnd: nextBlock.blockEnd,
+        });
+
+        setState(nextState);
+      }
+    },
+    [state, props, contentInset],
   );
 
-  static getDerivedStateFromProps(props: FastListProps, state: FastListState) {
-    return getFastListState(props, state);
-  }
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { nativeEvent } = event;
 
-  getItems(): FastListItem[] {
-    return this.state.items;
-  }
+      containerHeightRef.current =
+        nativeEvent.layout.height -
+        (contentInset.top || 0) -
+        (contentInset.bottom || 0);
 
-  isVisible = (layoutY: number): boolean => {
-    return (
-      layoutY >= this.scrollTop &&
-      layoutY <= this.scrollTop + this.containerHeight
-    );
-  };
+      const nextBlock = computeBlock(
+        containerHeightRef.current,
+        scrollTopRef.current,
+      );
 
-  scrollToLocation = (
-    section: number,
-    row: number,
-    animated: boolean = true,
-  ) => {
-    const scrollView = this.scrollView.current;
-    if (scrollView !== null) {
-      const {
-        headerHeight,
-        footerHeight,
-        sectionHeight,
-        rowHeight,
-        sectionFooterHeight,
-        sections,
-        insetTop,
-        insetBottom,
-      } = this.props;
-      const computer = new FastListComputer({
-        headerHeight,
-        footerHeight,
-        sectionHeight,
-        sectionFooterHeight,
-        rowHeight,
-        sections,
-        insetTop,
-        insetBottom,
-      });
-      const {
-        scrollTop: layoutY,
-        sectionHeight: layoutHeight,
-      } = computer.computeScrollPosition(section, row);
-      scrollView.scrollTo({
-        x: 0,
-        y: Math.max(0, layoutY - layoutHeight),
-        animated,
-      });
-    }
-  };
+      if (
+        nextBlock.batchSize !== state.batchSize ||
+        nextBlock.blockStart !== state.blockStart ||
+        nextBlock.blockEnd !== state.blockEnd
+      ) {
+        const nextState = getFastListState(props, {
+          ...state,
+          batchSize: nextBlock.batchSize,
+          blockStart: nextBlock.blockStart,
+          blockEnd: nextBlock.blockEnd,
+        });
 
-  handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { nativeEvent } = event;
-    const { contentInset } = this.props;
+        setState(nextState);
+      }
+    },
+    [state, props, contentInset],
+  );
 
-    this.containerHeight =
-      nativeEvent.layoutMeasurement.height -
-      (contentInset.top || 0) -
-      (contentInset.bottom || 0);
-    this.scrollTop = Math.min(
-      Math.max(0, nativeEvent.contentOffset.y),
-      nativeEvent.contentSize.height - this.containerHeight,
-    );
-
-    const nextState = computeBlock(this.containerHeight, this.scrollTop);
-
-    if (
-      nextState.batchSize !== this.state.batchSize ||
-      nextState.blockStart !== this.state.blockStart ||
-      nextState.blockEnd !== this.state.blockEnd
-    ) {
-      this.setState(nextState);
-    }
-  };
-
-  handleLayout = (event: LayoutChangeEvent) => {
-    const { nativeEvent } = event;
-    const { contentInset } = this.props;
-
-    this.containerHeight =
-      nativeEvent.layout.height -
-      (contentInset.top || 0) -
-      (contentInset.bottom || 0);
-
-    const nextState = computeBlock(this.containerHeight, this.scrollTop);
-    if (
-      nextState.batchSize !== this.state.batchSize ||
-      nextState.blockStart !== this.state.blockStart ||
-      nextState.blockEnd !== this.state.blockEnd
-    ) {
-      this.setState(nextState);
-    }
-
-    const { onLayout } = this.props;
-    if (onLayout !== undefined) {
-      onLayout(event);
-    }
-  };
   /**
    * FastList only re-renders when items change which which does not happen with
    * every scroll event. Since an accessory might depend on scroll position this
    * ensures the accessory at least re-renders when scrolling ends
    */
-  handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { renderAccessory, onScrollEnd } = this.props;
-    if (renderAccessory !== null) {
-      this.forceUpdate();
+  const handleScrollEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (renderAccessory !== null) {
+        forceUpdate();
+      }
+
+      if (onScrollEnd) {
+        onScrollEnd(event);
+      }
+    },
+    [renderAccessory, forceUpdate, onScrollEnd],
+  );
+
+  useEffect(() => {
+    if (prevProps.scrollTopValue !== props.scrollTopValue) {
+      throw new Error('scrollTopValue cannot changed after mounting');
     }
-    onScrollEnd && onScrollEnd(event);
+  }, [prevProps, props]);
+
+  return {
+    containerHeightRef,
+    handleLayout,
+    handleScroll,
+    handleScrollEnd,
+    scrollTopValueRef,
+    scrollViewRef,
+    scrollTopRef,
+    state,
   };
+}
 
-  renderItems() {
+interface FastListInstance {
+  getItems(): FastListItem[];
+  isEmpty(): boolean;
+  isVisible: (layoutY: number) => boolean;
+  scrollToLocation: (section: number, row: number, animated: boolean) => void;
+}
+
+export interface FastListProps extends UseFastListProps {
+  renderActionSheetScrollViewWrapper?: (
+    wrapper: React.ReactNode,
+  ) => React.ReactNode;
+  actionSheetScrollRef?: { current?: React.ReactNode };
+  onLayout?: (event: LayoutChangeEvent) => void;
+  renderHeader: () => React.ReactElement | null;
+  renderFooter: () => React.ReactElement | null;
+  renderSection: (section: number) => React.ReactElement | null;
+  renderRow: (section: number, row: number) => React.ReactElement | null;
+  renderSectionFooter: (section: number) => React.ReactElement | null;
+  renderEmpty?: () => React.ReactElement;
+}
+
+export const FastList = forwardRef<FastListInstance, FastListProps>(
+  (props, ref) => {
     const {
-      renderHeader,
-      renderFooter,
-      renderSection,
-      renderRow,
-      renderSectionFooter,
+      contentInset = { top: 0, right: 0, left: 0, bottom: 0 },
+      footerHeight = 0,
+      headerHeight = 0,
+      insetBottom = 0,
+      insetTop = 0,
+      rowHeight,
+      scrollTopValue,
+      sectionFooterHeight = 0,
+      sectionHeight = 0,
+      sections,
+
+      actionSheetScrollRef,
+      renderAccessory,
+      renderActionSheetScrollViewWrapper,
       renderEmpty,
-    } = this.props;
+      renderFooter = () => null,
+      renderHeader = () => null,
+      renderRow,
+      renderSection = () => null,
+      renderSectionFooter = () => null,
+    } = props;
 
-    const { items } = this.state;
+    const {
+      containerHeightRef,
+      handleLayout,
+      handleScroll,
+      handleScrollEnd,
+      scrollTopValueRef,
+      scrollTopRef,
+      scrollViewRef,
+      state,
+    } = useFastList({
+      contentInset,
+      footerHeight,
+      headerHeight,
+      insetBottom,
+      insetTop,
+      rowHeight,
+      scrollTopValue,
+      sectionFooterHeight,
+      sectionHeight,
+      sections,
+    });
 
-    if (renderEmpty !== undefined && this.isEmpty()) {
+    const { items } = state;
+    const length = sections.reduce(
+      (prevLength, rowLength) => prevLength + rowLength,
+      0,
+    );
+    const empty = length === 0;
+
+    useImperativeHandle(ref, () => ({
+      getItems: () => {
+        return state.items;
+      },
+
+      isVisible: (layoutY: number): boolean => {
+        return (
+          layoutY >= scrollTopRef.current &&
+          layoutY <= scrollTopRef.current + containerHeightRef.current
+        );
+      },
+
+      scrollToLocation: (
+        section: number,
+        row: number,
+        animated: boolean = true,
+      ) => {
+        const scrollView = scrollViewRef.current;
+
+        if (scrollView !== null) {
+          const computer = new FastListComputer({
+            headerHeight,
+            footerHeight,
+            sectionHeight,
+            sectionFooterHeight,
+            rowHeight,
+            sections,
+            insetTop,
+            insetBottom,
+          });
+          const {
+            scrollTop: layoutY,
+            sectionHeight: layoutHeight,
+          } = computer.computeScrollPosition(section, row);
+          scrollView.scrollTo({
+            x: 0,
+            y: Math.max(0, layoutY - layoutHeight),
+            animated,
+          });
+        }
+      },
+
+      isEmpty: () => empty,
+    }));
+
+    if (renderEmpty !== undefined && empty) {
       return renderEmpty();
     }
 
@@ -834,7 +857,7 @@ export class FastList extends React.PureComponent<
                 layoutY={layoutY}
                 layoutHeight={layoutHeight}
                 nextSectionLayoutY={sectionLayoutYs[0]}
-                scrollTopValue={this.scrollTopValue}
+                scrollTopValue={scrollTopValueRef.current}
               >
                 {child}
               </FastListSectionRenderer>,
@@ -867,31 +890,6 @@ export class FastList extends React.PureComponent<
       }
     });
 
-    return children;
-  }
-
-  componentDidUpdate(prevProps: FastListProps) {
-    if (prevProps.scrollTopValue !== this.props.scrollTopValue) {
-      throw new Error('scrollTopValue cannot changed after mounting');
-    }
-  }
-
-  isEmpty = () => {
-    const { sections } = this.props;
-    const length = sections.reduce((prevLength, rowLength) => {
-      return prevLength + rowLength;
-    }, 0);
-    return length === 0;
-  };
-
-  render() {
-    const {
-      renderActionSheetScrollViewWrapper,
-      actionSheetScrollRef,
-      renderAccessory,
-      contentInset,
-    } = this.props;
-
     // in order to support continuous scrolling of a scrollview/list/whatever in an action sheet, we need
     // to wrap the scrollview in a NativeViewGestureHandler. This wrapper does that thing that need do
     const wrapper = renderActionSheetScrollViewWrapper || ((val) => val);
@@ -900,7 +898,7 @@ export class FastList extends React.PureComponent<
         contentInset={contentInset}
         // @ts-ignore no types
         ref={(ref) => {
-          this.scrollView.current = ref;
+          scrollViewRef.current = ref;
           if (actionSheetScrollRef) {
             actionSheetScrollRef.current = ref;
           }
@@ -908,23 +906,93 @@ export class FastList extends React.PureComponent<
         removeClippedSubviews={false}
         scrollEventThrottle={16}
         onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: this.scrollTopValue } } }],
-          { listener: this.handleScroll, useNativeDriver: true },
+          [
+            {
+              nativeEvent: { contentOffset: { y: scrollTopValueRef.current } },
+            },
+          ],
+          { listener: handleScroll, useNativeDriver: true },
         )}
-        onLayout={this.handleLayout}
-        onMomentumScrollEnd={this.handleScrollEnd}
-        onScrollEndDrag={this.handleScrollEnd}
+        onLayout={handleLayout}
+        onMomentumScrollEnd={handleScrollEnd}
+        onScrollEndDrag={handleScrollEnd}
       >
-        {this.renderItems()}
+        {children}
       </Animated.ScrollView>,
     );
+
     return (
       <React.Fragment>
         {scrollView}
-        {renderAccessory !== undefined ? renderAccessory(this) : null}
+        {renderAccessory !== undefined ? renderAccessory() : null}
       </React.Fragment>
     );
+  },
+);
+
+function FastListItemRenderer({
+  layoutHeight: height,
+  children,
+}: {
+  layoutHeight: number;
+  children?: React.ReactNode;
+}): React.ReactElement {
+  return <View style={{ height }}>{children}</View>;
+}
+
+function FastListSectionRenderer({
+  layoutY,
+  layoutHeight,
+  nextSectionLayoutY,
+  scrollTopValue,
+  children,
+}: {
+  layoutY: number;
+  layoutHeight: number;
+  nextSectionLayoutY?: number;
+  scrollTopValue: Animated.Value;
+  children: React.ReactNode;
+}): React.ReactElement {
+  const inputRange: number[] = [-1, 0];
+  const outputRange: number[] = [0, 0];
+
+  inputRange.push(layoutY);
+  outputRange.push(0);
+  const collisionPoint = (nextSectionLayoutY || 0) - layoutHeight;
+  if (collisionPoint >= layoutY) {
+    inputRange.push(collisionPoint, collisionPoint + 1);
+    outputRange.push(collisionPoint - layoutY, collisionPoint - layoutY);
+  } else {
+    inputRange.push(layoutY + 1);
+    outputRange.push(1);
   }
+
+  const translateY = scrollTopValue.interpolate({
+    inputRange,
+    outputRange,
+  });
+
+  const child = React.Children.only(children);
+
+  return (
+    <Animated.View
+      style={[
+        React.isValidElement(child) && child.props.style
+          ? child.props.style
+          : undefined,
+        styles.section,
+        {
+          height: layoutHeight,
+          transform: [{ translateY }],
+        },
+      ]}
+    >
+      {React.isValidElement(child) &&
+        React.cloneElement(child, {
+          style: { flex: 1 },
+        })}
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({
