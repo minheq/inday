@@ -6,18 +6,23 @@ import {
   StyleSheet,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  ScrollView,
 } from 'react-native';
+import { useForceUpdate } from '../../hooks/use_force_update';
+import { usePrevious } from '../../hooks/use_previous';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import {
-  FastListItem,
   HeaderHeight,
   FooterHeight,
   SectionHeight,
   RowHeight,
   SectionFooterHeight,
-  useFastList,
   FastListComputer,
-  FastListItemTypes,
-} from './fast';
+  computeBlock,
+  Block,
+} from './fast_list_computer';
+import { FastListItem, FastListItemTypes } from './fast_list_item';
 
 interface FastListInstance {
   getItems(): FastListItem[];
@@ -370,3 +375,222 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 });
+
+interface GetFastListStateParams {
+  footerHeight: FooterHeight;
+  headerHeight: HeaderHeight;
+  insetBottom: number;
+  insetTop: number;
+  rowHeight: RowHeight;
+  scrollTopValue?: Animated.Value;
+  sectionFooterHeight: SectionFooterHeight;
+  sectionHeight: SectionHeight;
+  sections: number[];
+}
+
+interface BlockWithItems extends Block {
+  items?: FastListItem[];
+}
+
+function getFastListState(
+  params: GetFastListStateParams,
+  blockWithItems: BlockWithItems,
+): FastListState {
+  const {
+    headerHeight,
+    footerHeight,
+    sectionHeight,
+    rowHeight,
+    sectionFooterHeight,
+    sections,
+    insetTop,
+    insetBottom,
+  } = params;
+  const {
+    batchSize,
+    blockStart,
+    blockEnd,
+    items: prevItems = [],
+  } = blockWithItems;
+
+  if (batchSize === 0) {
+    return {
+      batchSize,
+      blockStart,
+      blockEnd,
+      height: insetTop + insetBottom,
+      items: [],
+    };
+  }
+
+  const computer = new FastListComputer({
+    headerHeight,
+    footerHeight,
+    sectionHeight,
+    rowHeight,
+    sectionFooterHeight,
+    sections,
+    insetTop,
+    insetBottom,
+  });
+
+  return {
+    batchSize,
+    blockStart,
+    blockEnd,
+    ...computer.compute(
+      blockStart - batchSize,
+      blockEnd + batchSize,
+      prevItems,
+    ),
+  };
+}
+
+interface UseFastListProps {
+  contentInset: {
+    top?: number;
+    left?: number;
+    right?: number;
+    bottom?: number;
+  };
+  onScrollEnd?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  onLayout?: (event: LayoutChangeEvent) => void;
+  renderAccessory?: () => React.ReactNode;
+
+  footerHeight: FooterHeight;
+  headerHeight: HeaderHeight;
+  insetBottom: number;
+  insetTop: number;
+  rowHeight: RowHeight;
+  scrollTopValue?: Animated.Value;
+  sectionFooterHeight: SectionFooterHeight;
+  sectionHeight: SectionHeight;
+  sections: number[];
+}
+
+interface FastListState extends Block {
+  height: number;
+  items: FastListItem[];
+}
+
+export function useFastList(props: UseFastListProps) {
+  const { contentInset, renderAccessory, onScrollEnd, scrollTopValue } = props;
+  const forceUpdate = useForceUpdate();
+  const containerHeightRef = useRef<number>(0);
+  const scrollTopRef = useRef<number>(0);
+  const scrollTopValueRef = useRef<Animated.Value>(
+    scrollTopValue || new Animated.Value(0),
+  );
+  const scrollViewRef = useRef<ScrollView | null>(null);
+  const [state, setState] = useState<FastListState>(
+    getFastListState(
+      props,
+      computeBlock(containerHeightRef.current, scrollTopRef.current),
+    ),
+  );
+  const prevScrollTopValue = usePrevious(props.scrollTopValue);
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { nativeEvent } = event;
+
+      containerHeightRef.current =
+        nativeEvent.layoutMeasurement.height -
+        (contentInset.top || 0) -
+        (contentInset.bottom || 0);
+
+      scrollTopRef.current = Math.min(
+        Math.max(0, nativeEvent.contentOffset.y),
+        nativeEvent.contentSize.height - containerHeightRef.current,
+      );
+
+      const nextBlock = computeBlock(
+        containerHeightRef.current,
+        scrollTopRef.current,
+      );
+
+      if (
+        nextBlock.batchSize !== state.batchSize ||
+        nextBlock.blockStart !== state.blockStart ||
+        nextBlock.blockEnd !== state.blockEnd
+      ) {
+        const nextState = getFastListState(props, {
+          ...state,
+          batchSize: nextBlock.batchSize,
+          blockStart: nextBlock.blockStart,
+          blockEnd: nextBlock.blockEnd,
+        });
+
+        setState(nextState);
+      }
+    },
+    [state, props, contentInset],
+  );
+
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { nativeEvent } = event;
+
+      containerHeightRef.current =
+        nativeEvent.layout.height -
+        (contentInset.top || 0) -
+        (contentInset.bottom || 0);
+
+      const nextBlock = computeBlock(
+        containerHeightRef.current,
+        scrollTopRef.current,
+      );
+
+      if (
+        nextBlock.batchSize !== state.batchSize ||
+        nextBlock.blockStart !== state.blockStart ||
+        nextBlock.blockEnd !== state.blockEnd
+      ) {
+        const nextState = getFastListState(props, {
+          ...state,
+          batchSize: nextBlock.batchSize,
+          blockStart: nextBlock.blockStart,
+          blockEnd: nextBlock.blockEnd,
+        });
+
+        setState(nextState);
+      }
+    },
+    [state, props, contentInset],
+  );
+
+  /**
+   * FastList only re-renders when items change which which does not happen with
+   * every scroll event. Since an accessory might depend on scroll position this
+   * ensures the accessory at least re-renders when scrolling ends
+   */
+  const handleScrollEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (renderAccessory !== null) {
+        forceUpdate();
+      }
+
+      if (onScrollEnd) {
+        onScrollEnd(event);
+      }
+    },
+    [renderAccessory, forceUpdate, onScrollEnd],
+  );
+
+  useEffect(() => {
+    if (prevScrollTopValue !== scrollTopValue) {
+      throw new Error('scrollTopValue cannot changed after mounting');
+    }
+  }, [prevScrollTopValue, scrollTopValue]);
+
+  return {
+    containerHeightRef,
+    handleLayout,
+    handleScroll,
+    handleScrollEnd,
+    scrollTopValueRef,
+    scrollViewRef,
+    scrollTopRef,
+    state,
+  };
+}
