@@ -90,14 +90,17 @@ export const FastList = forwardRef<FastListInstance, FastListProps>(
     } = props;
 
     const {
-      containerHeightRef,
       handleLayout,
       handleScroll,
       handleScrollEnd,
       scrollTopValueRef,
-      scrollTopRef,
       scrollViewRef,
       state,
+
+      getItems,
+      isVisible,
+      scrollToLocation,
+      isEmpty,
     } = useFastList({
       contentInset,
       footerHeight,
@@ -112,76 +115,19 @@ export const FastList = forwardRef<FastListInstance, FastListProps>(
     });
 
     const { items } = state;
-    const length = sections.reduce(
-      (prevLength, rowLength) => prevLength + rowLength,
-      0,
-    );
-    const empty = length === 0;
 
     useImperativeHandle(
       ref,
       () => ({
-        getItems: () => {
-          return state.items;
-        },
-
-        isVisible: (layoutY: number): boolean => {
-          return (
-            layoutY >= scrollTopRef.current &&
-            layoutY <= scrollTopRef.current + containerHeightRef.current
-          );
-        },
-
-        scrollToLocation: (
-          section: number,
-          row: number,
-          animated: boolean = true,
-        ) => {
-          const scrollView = scrollViewRef.current;
-
-          if (scrollView !== null) {
-            const computer = new FastListComputer({
-              footerHeight,
-              headerHeight,
-              insetBottom,
-              insetTop,
-              rowHeight,
-              sectionFooterHeight,
-              sectionHeight,
-              sections,
-            });
-            const {
-              scrollTop: layoutY,
-              sectionHeight: layoutHeight,
-            } = computer.computeScrollPosition(section, row);
-            scrollView.scrollTo({
-              x: 0,
-              y: Math.max(0, layoutY - layoutHeight),
-              animated,
-            });
-          }
-        },
-
-        isEmpty: () => empty,
+        getItems,
+        isVisible,
+        scrollToLocation,
+        isEmpty,
       }),
-      [
-        footerHeight,
-        headerHeight,
-        insetBottom,
-        insetTop,
-        rowHeight,
-        sectionFooterHeight,
-        sectionHeight,
-        sections,
-        empty,
-        state.items,
-        containerHeightRef,
-        scrollTopRef,
-        scrollViewRef,
-      ],
+      [getItems, isVisible, scrollToLocation, isEmpty],
     );
 
-    if (renderEmpty !== undefined && empty) {
+    if (renderEmpty !== undefined && isEmpty()) {
       return renderEmpty();
     }
 
@@ -474,7 +420,20 @@ interface FastListState extends Block {
 }
 
 export function useFastList(props: UseFastListProps) {
-  const { contentInset, renderAccessory, onScrollEnd, scrollTopValue } = props;
+  const {
+    contentInset,
+    renderAccessory,
+    onScrollEnd,
+    scrollTopValue,
+    sectionFooterHeight,
+    sectionHeight,
+    sections,
+    headerHeight,
+    rowHeight,
+    footerHeight,
+    insetTop,
+    insetBottom,
+  } = props;
   const forceUpdate = useForceUpdate();
   const containerHeightRef = useRef<number>(0);
   const scrollTopRef = useRef<number>(0);
@@ -583,14 +542,77 @@ export function useFastList(props: UseFastListProps) {
     }
   }, [prevScrollTopValue, scrollTopValue]);
 
+  const length = sections.reduce(
+    (prevLength, rowLength) => prevLength + rowLength,
+    0,
+  );
+  const empty = length === 0;
+
+  const getItems = useCallback(() => {
+    return state.items;
+  }, [state.items]);
+
+  const isVisible = useCallback(
+    (layoutY: number): boolean => {
+      return (
+        layoutY >= scrollTopRef.current &&
+        layoutY <= scrollTopRef.current + containerHeightRef.current
+      );
+    },
+    [scrollTopRef],
+  );
+
+  const scrollToLocation = useCallback(
+    (section: number, row: number, animated: boolean = true) => {
+      const scrollView = scrollViewRef.current;
+
+      if (scrollView !== null) {
+        const computer = new FastListComputer({
+          footerHeight,
+          headerHeight,
+          insetBottom,
+          insetTop,
+          rowHeight,
+          sectionFooterHeight,
+          sectionHeight,
+          sections,
+        });
+        const {
+          scrollTop: layoutY,
+          sectionHeight: layoutHeight,
+        } = computer.computeScrollPosition(section, row);
+        scrollView.scrollTo({
+          x: 0,
+          y: Math.max(0, layoutY - layoutHeight),
+          animated,
+        });
+      }
+    },
+    [
+      footerHeight,
+      headerHeight,
+      insetBottom,
+      insetTop,
+      rowHeight,
+      sectionFooterHeight,
+      sectionHeight,
+      sections,
+    ],
+  );
+
+  const isEmpty = useCallback(() => empty, [empty]);
+
   return {
-    containerHeightRef,
     handleLayout,
     handleScroll,
     handleScrollEnd,
     scrollTopValueRef,
     scrollViewRef,
-    scrollTopRef,
     state,
+
+    getItems,
+    isVisible,
+    scrollToLocation,
+    isEmpty,
   };
 }

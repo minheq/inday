@@ -7,7 +7,7 @@ export type SectionHeight = number | ((section: number) => number);
 export type RowHeight = number | ((section: number, row?: number) => number);
 export type SectionFooterHeight = number | ((section: number) => number);
 
-type FastListComputerProps = {
+interface FastListComputerProps {
   headerHeight: HeaderHeight;
   footerHeight: FooterHeight;
   sectionHeight: SectionHeight;
@@ -16,7 +16,7 @@ type FastListComputerProps = {
   sections: number[];
   insetTop: number;
   insetBottom: number;
-};
+}
 
 export class FastListComputer {
   headerHeight: HeaderHeight;
@@ -27,7 +27,6 @@ export class FastListComputer {
   sections: number[];
   insetTop: number;
   insetBottom: number;
-  // When true, all rows are equal height
   uniform: boolean;
 
   constructor({
