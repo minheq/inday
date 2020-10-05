@@ -5,7 +5,7 @@ import {
   StyleProp,
   GestureResponderEvent,
 } from 'react-native';
-import { Pressable, PressableChildrenProps } from './pressable';
+import { Pressable, StateCallback } from './pressable';
 import { useTheme, tokens } from './theme';
 import { Container } from './container';
 import { Row } from './row';
@@ -29,7 +29,7 @@ interface ButtonProps {
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
     | ((
-        props: PressableChildrenProps,
+        props: StateCallback,
       ) => Animated.WithAnimatedValue<StyleProp<ViewStyle>>);
 }
 

@@ -14,7 +14,7 @@ import {
   hasAllOf,
   hasNoneOf,
   isEmpty,
-} from '../../lib/data_structures/arrays';
+} from '../../lib/data_structures';
 import { FieldID, Field, FieldType } from './fields';
 import { ViewID } from './views';
 import {

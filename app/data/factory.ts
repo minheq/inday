@@ -16,7 +16,7 @@ import { BaseView, View } from './views';
 import { Collection } from './collections';
 import { Record, FieldValue } from './records';
 import { Filter, FilterConfig } from './filters';
-import { keyedBy, range, isEmpty } from '../../lib/data_structures/arrays';
+import { keyedBy, range, isEmpty } from '../../lib/data_structures';
 import { Sort, SortConfig } from './sorts';
 
 export function makeSpace(space: Partial<Space>): Space {

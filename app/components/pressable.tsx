@@ -6,23 +6,23 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { usePressability, PressabilityConfig } from '../hooks/use_pressability';
+import { PressabilityConfig } from '../lib/pressability/pressability';
+import { usePressability } from '../lib/pressability/use_pressability';
+
 import { useTheme } from './theme';
 
-export interface PressableChildrenProps {
+export interface StateCallback {
   pressed: boolean;
   hovered: boolean;
   focused: boolean;
 }
 
 interface PressableProps extends PressabilityConfig {
-  children?:
-    | React.ReactNode
-    | ((props: PressableChildrenProps) => React.ReactNode);
+  children?: React.ReactNode | ((props: StateCallback) => React.ReactNode);
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
     | ((
-        props: PressableChildrenProps,
+        props: StateCallback,
       ) => Animated.WithAnimatedValue<StyleProp<ViewStyle>>);
 }
 
@@ -107,9 +107,9 @@ export function Pressable(props: PressableProps) {
     onResponderTerminate,
     onResponderTerminationRequest,
     onStartShouldSetResponder,
-  } = usePressability(config);
+  } = usePressability(config) || {};
 
-  const childrenProps: PressableChildrenProps = {
+  const childrenProps: StateCallback = {
     pressed: pressed,
     focused: focused,
     hovered: !pressed && hovered,

@@ -1,3 +1,4 @@
+import { isEmpty } from './primitive';
 import { assertString } from './strings';
 
 export function range(min: number, max: number, step?: number): number[];
@@ -38,10 +39,6 @@ export function last<T = any>(arr: T[]): T {
 
 export function secondLast<T = any>(arr: T[]): T {
   return arr[arr.length - 2];
-}
-
-export function isEmpty<T = any>(arr: T[]): boolean {
-  return arr.length === 0;
 }
 
 export function isNotEmpty<T = any>(arr: T[]): boolean {

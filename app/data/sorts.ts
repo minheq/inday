@@ -26,7 +26,7 @@ import {
   assertNumberFieldValue,
   assertDateFieldValue,
 } from './records';
-import { isEmpty, first, keyedBy } from '../../lib/data_structures/arrays';
+import { first, isEmpty, keyedBy } from '../../lib/data_structures';
 import { CollaboratorID, Collaborator } from './collaborators';
 import { isBefore, isAfter } from 'date-fns';
 import { CollectionID, Collection } from './collections';

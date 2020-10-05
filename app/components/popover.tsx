@@ -2,7 +2,8 @@ import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { useTheme, tokens } from './theme';
 import { Modal } from './modal';
-import { PressabilityConfig, usePressability } from '../hooks/use_pressability';
+import { usePressability } from '../lib/pressability/use_pressability';
+import { PressabilityConfig } from '../lib/pressability/pressability';
 
 export const initialPopoverAnchor: PopoverAnchor = { y: 0, x: 0 };
 export type PopoverAnchor = { y: number; x: number };

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { GestureResponderEvent, Platform, UIManager } from 'react-native';
-import { isHoverEnabled } from '../lib/env/execution_environment';
+import { isHoverEnabled } from '../env/execution_environment';
 
 export type Rect = {
   bottom?: number;
@@ -71,6 +71,11 @@ export type PressabilityConfig = {
    * Duration to wait after letting up before calling `onPressOut`.
    */
   delayPressOut?: number;
+
+  /**
+   * Minimum duration to wait between calling `onPressIn` and `onPressOut`.
+   */
+  minPressDuration?: number;
 
   /**
    * Called after the element loses focus.
@@ -247,14 +252,14 @@ const isTerminalSignal = (signal: TouchSignal) =>
   signal === TouchSignal.ResponderTerminated ||
   signal === TouchSignal.ResponderRelease;
 
-const DEFAULT_LONG_PRESS_DELAY_MS = 370; // 500 - 130
-const DEFAULT_PRESS_DELAY_MS = 130;
+const DEFAULT_LONG_PRESS_DELAY_MS = 500;
 const DEFAULT_PRESS_RECT_OFFSETS = {
   bottom: 30,
   left: 20,
   right: 20,
   top: 20,
 };
+const DEFAULT_MIN_PRESS_DURATION = 130;
 
 type TimeoutID = number;
 
@@ -267,7 +272,7 @@ export class Pressability {
   _longPressDelayTimeout: TimeoutID | null = null;
   _pressDelayTimeout: TimeoutID | null = null;
   _pressOutDelayTimeout: TimeoutID | null = null;
-  _responderID?: number | React.ElementRef<any> = null;
+  _responderID: number | null = null;
   _responderRegion: {
     bottom: number;
     left: number;
@@ -278,6 +283,7 @@ export class Pressability {
     pageX: number;
     pageY: number;
   } | null = null;
+  _touchActivateTime: number | null = null;
   _touchState: TouchState = TouchState.NotResponder;
 
   constructor(config: PressabilityConfig) {
@@ -297,6 +303,10 @@ export class Pressability {
     this._cancelLongPressDelayTimeout();
     this._cancelPressDelayTimeout();
     this._cancelPressOutDelayTimeout();
+
+    // Ensure that, if any async event handlers are fired after unmount
+    // due to a race, we don't call any configured callbacks.
+    this._config = Object.freeze({});
   }
 
   /**
@@ -333,12 +343,6 @@ export class Pressability {
       },
 
       onResponderGrant: (event: GestureResponderEvent): void => {
-        // @ts-ignore available on web
-        const eventType = event.nativeEvent.type as
-          | 'mousedown'
-          | 'touchstart'
-          | undefined;
-
         event.persist();
 
         this._cancelPressOutDelayTimeout();
@@ -347,11 +351,7 @@ export class Pressability {
         this._touchState = TouchState.NotResponder;
         this._receiveSignal(TouchSignal.ResponderGrant, event);
 
-        const delayPressIn = normalizeDelay(
-          this._config.delayPressIn,
-          0,
-          eventType === 'mousedown' ? 0 : DEFAULT_PRESS_DELAY_MS,
-        );
+        const delayPressIn = normalizeDelay(this._config.delayPressIn);
 
         if (delayPressIn > 0) {
           this._pressDelayTimeout = setTimeout(() => {
@@ -364,7 +364,7 @@ export class Pressability {
         const delayLongPress = normalizeDelay(
           this._config.delayLongPress,
           10,
-          DEFAULT_LONG_PRESS_DELAY_MS,
+          DEFAULT_LONG_PRESS_DELAY_MS - delayPressIn,
         );
         this._longPressDelayTimeout = setTimeout(() => {
           this._handleLongPress(event);
@@ -389,7 +389,7 @@ export class Pressability {
           return;
         }
 
-        if (this._touchActivatePosition != null) {
+        if (this._touchActivatePosition !== null) {
           const deltaX = this._touchActivatePosition.pageX - touch.pageX;
           const deltaY = this._touchActivatePosition.pageY - touch.pageY;
           if (Math.hypot(deltaX, deltaY) > 10) {
@@ -441,6 +441,7 @@ export class Pressability {
                     this._config.delayHoverIn,
                   );
                   if (delayHoverIn > 0) {
+                    event.persist();
                     this._hoverInDelayTimeout = setTimeout(() => {
                       onHoverIn(event);
                     }, delayHoverIn);
@@ -461,6 +462,7 @@ export class Pressability {
                     this._config.delayHoverOut,
                   );
                   if (delayHoverOut > 0) {
+                    event.persist();
                     this._hoverInDelayTimeout = setTimeout(() => {
                       onHoverOut(event);
                     }, delayHoverOut);
@@ -553,18 +555,21 @@ export class Pressability {
     }
 
     if (isPressInSignal(prevState) && signal === TouchSignal.ResponderRelease) {
+      // If we never activated (due to delays), activate and deactivate now.
+      if (!isNextActive && !isPrevActive) {
+        this._activate(event);
+        this._deactivate(event);
+      }
       const { onLongPress, onPress } = this._config;
       if (onPress != null) {
         const isPressCanceledByLongPress =
           onLongPress != null &&
           prevState === TouchState.ResponderActiveLongPressIn;
         if (!isPressCanceledByLongPress) {
-          // If we never activated (due to delays), activate and deactivate now.
-          if (!isNextActive && !isPrevActive) {
-            this._activate(event);
-            this._deactivate(event);
-          }
-
+          // TODO: Not integrated
+          // if (Platform.OS === 'android' && android_disableSound !== true) {
+          //   SoundManager.playTouchSound();
+          // }
           onPress(event);
         }
       }
@@ -580,6 +585,7 @@ export class Pressability {
       pageX: touch.pageX,
       pageY: touch.pageY,
     };
+    this._touchActivateTime = Date.now();
     if (onPressIn != null) {
       onPressIn(event);
     }
@@ -588,8 +594,18 @@ export class Pressability {
   _deactivate(event: GestureResponderEvent): void {
     const { onPressOut } = this._config;
     if (onPressOut != null) {
-      const delayPressOut = normalizeDelay(this._config.delayPressOut);
+      const minPressDuration = normalizeDelay(
+        this._config.minPressDuration,
+        0,
+        DEFAULT_MIN_PRESS_DURATION,
+      );
+      const pressDuration = Date.now() - (this._touchActivateTime ?? 0);
+      const delayPressOut = Math.max(
+        minPressDuration - pressDuration,
+        normalizeDelay(this._config.delayPressOut),
+      );
       if (delayPressOut > 0) {
+        event.persist();
         this._pressOutDelayTimeout = setTimeout(() => {
           onPressOut(event);
         }, delayPressOut);
@@ -597,6 +613,7 @@ export class Pressability {
         onPressOut(event);
       }
     }
+    this._touchActivateTime = null;
   }
 
   _measureResponderRegion(): void {
@@ -732,27 +749,3 @@ const getTouchFromGestureResponderEvent = (event: GestureResponderEvent) => {
   }
   return event.nativeEvent;
 };
-
-export function usePressability(config: PressabilityConfig): EventHandlers {
-  const pressabilityRef = React.useRef<Pressability | null>(null);
-  if (pressabilityRef.current == null) {
-    pressabilityRef.current = new Pressability(config);
-  }
-  const pressability = pressabilityRef.current;
-
-  // On the initial mount, this is a no-op. On updates, `pressability` will be
-  // re-configured to use the new configuration.
-  React.useEffect(() => {
-    pressability.configure(config);
-  }, [config, pressability]);
-
-  // On unmount, reset pending state and timers inside `pressability`. This is
-  // a separate effect because we do not want to reset when `config` changes.
-  React.useEffect(() => {
-    return () => {
-      pressability.reset();
-    };
-  }, [pressability]);
-
-  return pressability.getEventHandlers();
-}

@@ -28,7 +28,7 @@ import {
   useCreateGroup,
   useGetGroupsSequenceMax,
 } from '../data/store';
-import { first, isEmpty } from '../../lib/data_structures/arrays';
+import { first, isEmpty } from '../../lib/data_structures';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { GroupID, Group, GroupConfig, GroupOrder } from '../data/groups';

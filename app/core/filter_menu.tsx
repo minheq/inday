@@ -42,9 +42,10 @@ import {
   useGetFiltersGroupMax,
   useUpdateFilterGroup,
 } from '../data/store';
-import { first, isEmpty } from '../../lib/data_structures/arrays';
+import { first } from '../../lib/data_structures/arrays';
 import { FieldID, FieldType } from '../data/fields';
 import { FieldPicker } from './field_picker';
+import { isEmpty } from '../../lib/data_structures/primitive';
 
 const filterEditIDState = atom<FilterID>({
   key: 'FilterMenuFilterEditID',

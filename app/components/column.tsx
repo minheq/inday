@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { ContainerProvider } from './container';
 
 interface ColumnProps {
+  flex?: number;
   children?: React.ReactNode;
   justifyContent?: 'flex-start' | 'flex-end' | 'space-between' | 'center';
   alignItems?: 'flex-start' | 'flex-end' | 'center';
@@ -13,7 +14,7 @@ interface ColumnProps {
  * Displays its children in a vertical array.
  */
 export function Column(props: ColumnProps) {
-  const { children, justifyContent, alignItems, expanded } = props;
+  const { children, flex, justifyContent, alignItems, expanded } = props;
 
   return (
     <ContainerProvider direction="column">
@@ -24,6 +25,7 @@ export function Column(props: ColumnProps) {
           {
             justifyContent,
             alignItems,
+            flex,
           },
         ]}
       >
