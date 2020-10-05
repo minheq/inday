@@ -10,11 +10,11 @@ export const FastListItemTypes = {
 
 export type FastListItemType = number;
 
-export type FastListItem = {
+export interface FastListItem {
   type: FastListItemType;
   key: number;
   layoutY: number;
   layoutHeight: number;
   section: number;
   row: number;
-};
+}

@@ -95,7 +95,7 @@ export const FastList = forwardRef<FastListInstance, FastListProps>(
       handleScrollEnd,
       scrollTopValueRef,
       scrollViewRef,
-      state,
+      items,
 
       getItems,
       isVisible,
@@ -113,8 +113,6 @@ export const FastList = forwardRef<FastListInstance, FastListProps>(
       sectionHeight,
       sections,
     });
-
-    const { items } = state;
 
     useImperativeHandle(
       ref,
@@ -577,10 +575,12 @@ export function useFastList(props: UseFastListProps) {
           sectionHeight,
           sections,
         });
+
         const {
           scrollTop: layoutY,
           sectionHeight: layoutHeight,
         } = computer.computeScrollPosition(section, row);
+
         scrollView.scrollTo({
           x: 0,
           y: Math.max(0, layoutY - layoutHeight),
@@ -602,13 +602,15 @@ export function useFastList(props: UseFastListProps) {
 
   const isEmpty = useCallback(() => empty, [empty]);
 
+  const { items } = state;
+
   return {
     handleLayout,
     handleScroll,
     handleScrollEnd,
     scrollTopValueRef,
     scrollViewRef,
-    state,
+    items,
 
     getItems,
     isVisible,
