@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Grid } from './grid';
+import { Grid, RenderCellProps } from './grid';
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text } from 'react-native';
 
@@ -11,11 +11,13 @@ export default {
 
 const ROW_HEIGHT = 40;
 
-function renderCell(row: number, col: number) {
+function renderCell(props: RenderCellProps) {
+  const { row, column } = props;
+
   return (
     <View style={styles.cell}>
       <Text>
-        {row} {col}
+        {row} {column}
       </Text>
     </View>
   );

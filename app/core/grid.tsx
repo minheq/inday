@@ -1,9 +1,14 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, memo } from 'react';
 import { Animated, ScrollView, StyleSheet, View } from 'react-native';
+
+export interface RenderCellProps {
+  row: number;
+  column: number;
+}
 
 export interface GridProps {
   scrollViewHeight: number;
-  renderCell: (row: number, column: number) => React.ReactElement | null;
+  renderCell: (props: RenderCellProps) => React.ReactNode;
   rowHeight: number;
   rowsCount: number;
   /** Length of the array determines number of columns. Array values correspond to their width. */
@@ -36,43 +41,44 @@ export function Grid(props: GridProps) {
 
   const frozenColumnsWidth = columns
     .slice(0, frozenColumns)
-    .reduce((val, col) => val + col, 0);
+    .reduce((val, column) => val + column, 0);
 
   const scrollableColumnsWidth = columns
     .slice(frozenColumns)
-    .reduce((val, col) => val + col, 0);
-
-  const startIndex = Math.max(Math.floor(scrollTop / rowHeight) - 10, 0);
-  const endIndex = Math.min(
-    rowsCount - 1, // don't render past the end of the list
-    Math.floor((scrollTop + scrollViewHeight) / rowHeight) + 10,
-  );
+    .reduce((val, column) => val + column, 0);
 
   const frozenColumnsRows: React.ReactNode[] = [];
   const scrollableColumnsRows: React.ReactNode[] = [];
 
-  let rowKey = 0;
-  for (let row = startIndex; row <= endIndex; row++) {
+  const items = useRecycle({
+    rowsCount,
+    scrollTop,
+    scrollViewHeight,
+    rowHeight,
+    overscan: 10,
+  });
+
+  items.forEach(({ row, rowKey, top }) => {
     const frozenColumnsCells: React.ReactNode[] = [];
     const scrollableColumnsCells: React.ReactNode[] = [];
 
-    for (let col = 0; col < columns.length; col++) {
-      const width = columns[col];
+    for (let column = 0; column < columns.length; column++) {
+      const width = columns[column];
 
-      if (col < frozenColumns) {
-        const child = renderCell(row, col);
+      if (column < frozenColumns) {
+        const child = renderCell({ row, column });
         if (child !== null) {
           frozenColumnsCells.push(
-            <Cell key={col} width={width}>
+            <Cell key={column} width={width}>
               {child}
             </Cell>,
           );
         }
       } else {
-        const child = renderCell(row, col);
+        const child = renderCell({ row, column });
         if (child !== null) {
           scrollableColumnsCells.push(
-            <Cell key={col} width={width}>
+            <Cell key={column} width={width}>
               {child}
             </Cell>,
           );
@@ -81,18 +87,18 @@ export function Grid(props: GridProps) {
     }
 
     frozenColumnsRows.push(
-      <Row key={rowKey} top={row * rowHeight} height={rowHeight}>
+      <Row key={rowKey} top={top} height={rowHeight}>
         {frozenColumnsCells}
       </Row>,
     );
     scrollableColumnsRows.push(
-      <Row key={rowKey} top={row * rowHeight} height={rowHeight}>
+      <Row key={rowKey} top={top} height={rowHeight}>
         {scrollableColumnsCells}
       </Row>,
     );
+  });
 
-    rowKey++;
-  }
+  // console.log('render grid');
 
   return (
     <View style={{ height: scrollViewHeight }}>
@@ -136,27 +142,74 @@ export function Grid(props: GridProps) {
   );
 }
 
+interface Item {
+  row: number;
+  rowKey: number;
+  top: number;
+}
+
+interface RecycleParams {
+  rowHeight: number;
+  rowsCount: number;
+  scrollTop: number;
+  scrollViewHeight: number;
+  overscan: number;
+}
+
+function useRecycle(params: RecycleParams): Item[] {
+  const {
+    rowsCount,
+    scrollTop,
+    scrollViewHeight,
+    rowHeight,
+    overscan,
+  } = params;
+
+  const startIndex = Math.max(Math.floor(scrollTop / rowHeight) - overscan, 0);
+  const endIndex = Math.min(
+    rowsCount - 1, // don't render past the end of the list
+    Math.floor((scrollTop + scrollViewHeight) / rowHeight) + overscan,
+  );
+
+  const items: Item[] = [];
+
+  let rowKey = 0;
+
+  for (let row = startIndex; row <= endIndex; row++) {
+    items.push({
+      row,
+      rowKey,
+      top: row * rowHeight,
+    });
+
+    rowKey++;
+  }
+
+  return items;
+}
+
 interface RowProps {
   height: number;
   top: number;
   children: React.ReactNode;
 }
 
-function Row(props: RowProps) {
+const Row = memo(function Row(props: RowProps) {
   const { height, top, children } = props;
 
   return <View style={[{ height, top }, styles.row]}>{children}</View>;
-}
+});
 
 interface CellProps {
   width: number;
   children: React.ReactNode;
 }
 
-function Cell(props: CellProps) {
+const Cell = memo(function Cell(props: CellProps) {
   const { width, children } = props;
+
   return <View style={[{ width }]}>{children}</View>;
-}
+});
 
 const styles = StyleSheet.create({
   section: {
