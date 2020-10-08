@@ -42,7 +42,7 @@ export function Grid(props: GridProps) {
     .slice(frozenColumns)
     .reduce((val, col) => val + col, 0);
 
-  const startIndex = Math.floor(scrollTop / rowHeight);
+  const startIndex = Math.max(Math.floor(scrollTop / rowHeight), 0);
   const endIndex = Math.min(
     rowsCount - 1, // don't render past the end of the list
     Math.floor((scrollTop + scrollViewHeight) / rowHeight),
