@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { Grid } from './grid';
-import { Container, Text } from '../components';
 import { AutoSizer } from '../lib/autosizer';
+import { StyleSheet, View, Text } from 'react-native';
 
 export default {
   title: 'Grid',
@@ -11,13 +11,13 @@ export default {
 
 const ROW_HEIGHT = 40;
 
-function renderCell(row: number, column: number) {
+function renderCell(row: number, col: number) {
   return (
-    <Container width="100%" height={ROW_HEIGHT}>
+    <View style={styles.cell}>
       <Text>
-        {row} {column}
+        {row} {col}
       </Text>
-    </Container>
+    </View>
   );
 }
 
@@ -57,3 +57,9 @@ export const Default = () => (
     </AutoSizer>
   </div>
 );
+
+const styles = StyleSheet.create({
+  cell: {
+    width: '100%',
+  },
+});

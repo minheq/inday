@@ -42,15 +42,16 @@ export function Grid(props: GridProps) {
     .slice(frozenColumns)
     .reduce((val, col) => val + col, 0);
 
-  const startIndex = Math.max(Math.floor(scrollTop / rowHeight), 0);
+  const startIndex = Math.max(Math.floor(scrollTop / rowHeight) - 10, 0);
   const endIndex = Math.min(
     rowsCount - 1, // don't render past the end of the list
-    Math.floor((scrollTop + scrollViewHeight) / rowHeight),
+    Math.floor((scrollTop + scrollViewHeight) / rowHeight) + 10,
   );
 
   const frozenColumnsRows: React.ReactNode[] = [];
   const scrollableColumnsRows: React.ReactNode[] = [];
 
+  let rowKey = 0;
   for (let row = startIndex; row <= endIndex; row++) {
     const frozenColumnsCells: React.ReactNode[] = [];
     const scrollableColumnsCells: React.ReactNode[] = [];
@@ -62,7 +63,7 @@ export function Grid(props: GridProps) {
         const child = renderCell(row, col);
         if (child !== null) {
           frozenColumnsCells.push(
-            <Cell key={`${row}-${col}`} width={width}>
+            <Cell key={col} width={width}>
               {child}
             </Cell>,
           );
@@ -71,7 +72,7 @@ export function Grid(props: GridProps) {
         const child = renderCell(row, col);
         if (child !== null) {
           scrollableColumnsCells.push(
-            <Cell key={`${row}-${col}`} width={width}>
+            <Cell key={col} width={width}>
               {child}
             </Cell>,
           );
@@ -80,15 +81,17 @@ export function Grid(props: GridProps) {
     }
 
     frozenColumnsRows.push(
-      <Row key={`${row}`} top={row * rowHeight} height={rowHeight}>
+      <Row key={rowKey} top={row * rowHeight} height={rowHeight}>
         {frozenColumnsCells}
       </Row>,
     );
     scrollableColumnsRows.push(
-      <Row key={`${row}`} top={row * rowHeight} height={rowHeight}>
+      <Row key={rowKey} top={row * rowHeight} height={rowHeight}>
         {scrollableColumnsCells}
       </Row>,
     );
+
+    rowKey++;
   }
 
   return (
