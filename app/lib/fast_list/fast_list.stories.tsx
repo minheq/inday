@@ -1,7 +1,7 @@
 import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { FastList } from './fast_list';
-import { Container, Text } from '../../components';
 
 export default {
   title: 'FastList',
@@ -12,49 +12,49 @@ const ROW_HEIGHT = 40;
 
 function renderRow(section: number, row: number) {
   return (
-    <Container width="100%" height={ROW_HEIGHT}>
+    <View>
       <Text>
         {section} {row}
       </Text>
-    </Container>
+    </View>
   );
 }
 
 function renderSection(section: number) {
   return (
-    <Container color="primary" width="100%" height={ROW_HEIGHT}>
+    <View>
       <Text>{section}</Text>
-    </Container>
+    </View>
   );
 }
 
 function renderHeader() {
   return (
-    <Container color="primary" width="100%" height={ROW_HEIGHT}>
+    <View>
       <Text>Header</Text>
-    </Container>
+    </View>
   );
 }
 
 function renderFooter() {
   return (
-    <Container color="primary" width="100%" height={ROW_HEIGHT}>
+    <View>
       <Text>Footer</Text>
-    </Container>
+    </View>
   );
 }
 
 function renderSectionFooter() {
   return (
-    <Container color="primary" width="100%" height={ROW_HEIGHT}>
+    <View>
       <Text>Section Footer</Text>
-    </Container>
+    </View>
   );
 }
 
 export const Default = () => (
   <div style={{ height: '100vh' }}>
-    <Container expanded>
+    <View style={{ height: '100%', width: '100%' }}>
       <FastList
         sections={[100, 100, 100, 100, 100]}
         renderRow={renderRow}
@@ -68,6 +68,12 @@ export const Default = () => (
         sectionFooterHeight={ROW_HEIGHT}
         sectionHeight={ROW_HEIGHT}
       />
-    </Container>
+    </View>
   </div>
 );
+
+const styles = StyleSheet.create({
+  row: {
+    width: '100%',
+  },
+});
