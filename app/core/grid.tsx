@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, memo } from 'react';
 import { Animated, ScrollView, StyleSheet, View } from 'react-native';
-import { isEmpty } from '../../lib/data_structures';
+import { isEmpty, RecycleQueue } from '../../lib/data_structures';
 
 export interface RenderCellProps {
   row: number;
@@ -157,7 +157,10 @@ export function getItems(params: GetItemsParams): Item[] {
   );
 
   const size = endRow - startRow + 15;
-  const queue = new RecycleQueue(size, rowHeight, prevItems);
+  const queue = new RecycleQueue(
+    size,
+    prevItems.map((i) => i.row),
+  );
 
   if (isEmpty(prevItems)) {
     for (let row = startRow; row < endRow; row++) {
@@ -172,87 +175,13 @@ export function getItems(params: GetItemsParams): Item[] {
     }
   }
 
-  return queue.items;
-}
-
-export class RecycleQueue {
-  items: Item[] = [];
-  size: number;
-  lastIndex: number = 0;
-  rowHeight: number;
-
-  constructor(size: number, rowHeight: number, items: Item[] = []) {
-    this.size = size;
-    this.rowHeight = rowHeight;
-    this.items = items;
-
-    if (isEmpty(items) === false) {
-      let lastIndex = 0;
-
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item.row > items[lastIndex].row) {
-          lastIndex = i;
-        }
-      }
-
-      this.lastIndex = lastIndex;
-    }
-  }
-
-  enqueue() {
-    if (isEmpty(this.items)) {
-      this.items[0] = {
-        key: 0,
-        row: 1,
-        top: 0,
-      };
-      this.lastIndex = 0;
-      return;
-    }
-
-    const lastItem = this.items[this.lastIndex];
-    const nextIndex = this.lastIndex + 1;
-    const row = lastItem.row + 1;
-
-    if (nextIndex > this.size - 1) {
-      this.items[0] = {
-        key: 0,
-        row,
-        top: (row - 1) * this.rowHeight,
-      };
-      this.lastIndex = 0;
-    } else {
-      this.items[nextIndex] = {
-        key: nextIndex,
-        row,
-        top: (row - 1) * this.rowHeight,
-      };
-      this.lastIndex = nextIndex;
-    }
-  }
-
-  dequeue() {
-    if (isEmpty(this.items)) {
-      throw new Error('Cannot dequeue from RecycleQueue because it is empty.');
-    }
-
-    const lastItem = this.items[this.lastIndex];
-
-    this.items[this.lastIndex] = {
-      key: lastItem.key,
-      row: lastItem.row - this.size,
-      top: (lastItem.row - this.size - 1) * this.rowHeight,
+  return queue.items.map((row, key) => {
+    return {
+      key,
+      row,
+      top: row * rowHeight,
     };
-
-    const prevIndex = this.lastIndex - 1;
-
-    if (prevIndex < 0) {
-      this.lastIndex = this.size - 1;
-    } else {
-      this.lastIndex = prevIndex;
-    }
-  }
+  });
 }
 
 interface RowProps {
