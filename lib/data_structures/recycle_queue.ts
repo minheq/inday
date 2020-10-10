@@ -10,17 +10,17 @@ export class RecycleQueue {
     this.items = items;
 
     if (isEmpty(items) === false) {
-      let maxNum = -1;
+      let index = 0;
 
       for (let i = 0; i < items.length; i++) {
         const num = items[i];
 
-        if (num > items[maxNum]) {
-          maxNum = num;
+        if (num > items[index]) {
+          index = i;
         }
       }
 
-      this.index = maxNum;
+      this.index = index;
     } else {
       this.index = -1;
     }
@@ -39,7 +39,6 @@ export class RecycleQueue {
       this.items[0] = 1;
       this.index = 0;
     } else {
-      // Add 1 to previous index
       const num = this.items[this.index] + 1;
       this.index = (this.index + 1) % this.size;
       this.items[this.index] = num;

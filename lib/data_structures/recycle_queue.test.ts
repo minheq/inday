@@ -1,6 +1,6 @@
 import { RecycleQueue } from './recycle_queue';
 
-describe('RecycleQueue', () => {
+describe('RecycleQueue empty', () => {
   const queue = new RecycleQueue(5);
 
   test('enqueue 1 item', () => {
@@ -73,5 +73,16 @@ describe('RecycleQueue', () => {
     queue.dequeue();
 
     expect(queue.getItems()).toEqual([]);
+  });
+});
+
+describe('RecycleQueue loaded items', () => {
+  const queue = new RecycleQueue(5, [1, 2, 3, 4, 5]);
+
+  test('enqueue 2', () => {
+    queue.enqueue();
+    queue.enqueue();
+
+    expect(queue.getItems()).toEqual([6, 7, 3, 4, 5]);
   });
 });
