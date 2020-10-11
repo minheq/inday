@@ -64,6 +64,7 @@ export function Grid(props: GridProps) {
     scrollViewHeight,
     prevItems: prevItemsRef.current,
     rowHeight,
+    rowsCount,
   });
 
   prevItemsRef.current = items;
@@ -143,31 +144,125 @@ interface GetItemsParams {
   scrollViewHeight: number;
   rowHeight: number;
   scrollTop: number;
+  rowsCount: number;
   prevItems: Item[];
 }
 
+/**
+ * Applies algorithm to recycle items by reusing keys and apply only changes to the
+ * scroll position of the nodes that are meant to be immediately visible.
+ *
+ * For example, given a list where there are 30 items, but only 5 are visible in the view.
+ *
+ * The algorithm will yield visible items (1-5) but will also "prefetch" items that is 2x the visible nodes
+ * which is 5-15.
+ *
+ * Illustrated:
+ * [
+ *  // visible nodes
+ *  1,
+ *  ...
+ *  5,
+ *
+ *  // not visible nodes, but "overscan" -- exists in the DOM
+ *  6,
+ *  ...
+ *  15,
+ *
+ *  // not in the DOM
+ *  16
+ *  ...
+ *  30
+ * ]
+ *
+ * When user scrolls down where the first visible item is 10, the algorithm will yield following shape:
+ *
+ * [
+ *  // not in the DOM
+ *  1,
+ *  ...
+ *  4,
+ *
+ *  // "overscan" -- exists in the DOM
+ *  5,
+ *  ...
+ *  9,
+ *
+ *  // visible nodes
+ *  10,
+ *  ...
+ *  14,
+ *
+ *  // "overscan" -- exists in the DOM
+ *  15,
+ *  ...
+ *  19,
+ *
+ *  // not in the DOM
+ *  20
+ *  ...
+ *  30
+ * ]
+ *
+ * When user scrolls to the bottom of the list
+ *
+ * [
+ *  // not in the DOM
+ *  1,
+ *  ...
+ *  15,
+ *
+ *  // "overscan" -- exists in the DOM
+ *  16,
+ *  ...
+ *  25,
+ *
+ *  // visible nodes
+ *  26
+ *  ...
+ *  30
+ * ]
+ *
+ * See tests for the implementation of the scenario
+ */
 export function getItems(params: GetItemsParams): Item[] {
-  const { prevItems, scrollViewHeight, scrollTop, rowHeight } = params;
+  const {
+    prevItems,
+    scrollViewHeight,
+    scrollTop,
+    rowHeight,
+    rowsCount,
+  } = params;
+
+  // console.log(scrollTop);
+
   // size is the number of visible rows
   const size = Math.floor(scrollViewHeight / rowHeight);
-  // sizeWithOverscan is the number of visible rows plus extraneous rows (here equal to the size)
-  const sizeWithOverscan = size * 3;
+  // prefetch the same number of items that are above and below the currently visible items
+  const overscanSize = size * 2;
+  // totalSize is the number of visible rows plus overscan rows (here equal to the size)
+  const totalSize = size + overscanSize;
 
   const queue = new RecycleQueue(
-    sizeWithOverscan,
+    totalSize,
     prevItems.map((i) => i.row),
   );
 
   if (isEmpty(prevItems)) {
-    for (let i = 0; i < sizeWithOverscan; i++) {
+    for (let i = 0; i < totalSize; i++) {
       queue.enqueue();
     }
   } else {
-    const startRow = Math.floor(scrollTop / rowHeight) - size / 3;
-    const prevStartRow = Math.min(...prevItems.map((i) => i.row));
+    // first row that is visible
+    const visibleStartRow = Math.floor(scrollTop / rowHeight);
+    // first row in the overscan above visible rows
+    const overscanStartRow = visibleStartRow - size;
+    // last row that stops overscan
+    const lastStartRow = rowsCount - overscanSize;
 
-    if (startRow > 0) {
-      const diff = startRow - prevStartRow + 1;
+    if (overscanStartRow >= 0 && visibleStartRow <= lastStartRow) {
+      const prevStartRow = Math.min(...prevItems.map((i) => i.row));
+      const diff = overscanStartRow - prevStartRow + 1;
 
       if (diff > 0) {
         for (let i = 0; i < diff; i++) {
@@ -188,7 +283,6 @@ export function getItems(params: GetItemsParams): Item[] {
       top: (row - 1) * rowHeight,
     };
   });
-
   // console.log(items);
 
   return items;
@@ -214,7 +308,6 @@ const Row = memo(function Row(props: RowProps) {
     columns,
     renderCell,
   } = props;
-  // console.log('render row');
 
   return (
     <View style={[{ height, top }, styles.row]}>

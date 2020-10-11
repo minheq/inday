@@ -3,7 +3,7 @@ import { getItems, Item } from './grid';
 describe('getItems', () => {
   const scrollViewHeight = 100;
   const rowHeight = 20;
-  const rowsCount = 100;
+  const rowsCount = 30;
   let scrollTop = 0;
   let prevItems: Item[] = [];
   let items: Item[] = [];

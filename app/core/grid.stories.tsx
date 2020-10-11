@@ -24,14 +24,20 @@ function renderCell(props: RenderCellProps) {
 }
 
 export const Default = () => (
-  <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+  <div
+    style={{
+      height: 'calc(100vh - 32px)',
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+  >
     <AutoSizer>
       {({ height }) => (
         <Grid
           scrollViewHeight={height}
           // TODO
           // contentOffset={{ x: 400, y: 1000 }}
-          rowsCount={5000}
+          rowsCount={100}
           renderCell={renderCell}
           rowHeight={ROW_HEIGHT}
           columns={[
