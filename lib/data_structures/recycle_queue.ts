@@ -26,6 +26,14 @@ export class RecycleQueue {
     }
   }
 
+  front() {
+    return this.items[this.index];
+  }
+
+  rear() {
+    return this.items[(this.index + 1) % this.size];
+  }
+
   isEmpty() {
     return isEmpty(this.items);
   }

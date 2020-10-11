@@ -1,6 +1,6 @@
 import { getItems, Item } from './grid';
 
-describe('getItems', () => {
+describe('getItems ', () => {
   const scrollViewHeight = 100;
   const rowHeight = 20;
   const rowsCount = 30;
@@ -21,13 +21,29 @@ describe('getItems', () => {
       prevItems,
     });
 
-    expect(getRows(items)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(getRows(items)).toEqual([
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+    ]);
   });
 
-  test('scroll 50', () => {
+  test('scroll to start row 10', () => {
     // First scroll
     prevItems = items;
-    scrollTop = 50;
+    scrollTop = 180;
 
     items = getItems({
       scrollViewHeight,
@@ -37,13 +53,29 @@ describe('getItems', () => {
       prevItems,
     });
 
-    expect(getRows(items)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(getRows(items)).toEqual([
+      16,
+      17,
+      18,
+      19,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+    ]);
   });
 
-  test('scroll 100', () => {
+  test('scroll to bottom', () => {
     // First scroll
     prevItems = items;
-    scrollTop = 100;
+    scrollTop = 500;
 
     items = getItems({
       scrollViewHeight,
@@ -53,6 +85,54 @@ describe('getItems', () => {
       prevItems,
     });
 
-    expect(getRows(items)).toEqual([11, 12, 13, 4, 5, 6, 7, 8, 9, 10]);
+    expect(getRows(items)).toEqual([
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+    ]);
+  });
+
+  test('scroll to top', () => {
+    // First scroll
+    prevItems = items;
+    scrollTop = 0;
+
+    items = getItems({
+      scrollViewHeight,
+      rowHeight,
+      rowsCount,
+      scrollTop,
+      prevItems,
+    });
+
+    expect(getRows(items)).toEqual([
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+    ]);
   });
 });

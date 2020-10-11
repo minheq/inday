@@ -37,6 +37,7 @@ export function Grid(props: GridProps) {
   } = props;
   const scrollY = useRef(new Animated.Value(0)).current;
   const [scrollTop, setScrollTop] = useState(contentOffset.y);
+  const prevItemsRef = useRef<Item[]>([]);
   const contentHeight = rowsCount * rowHeight;
 
   useEffect(() => {
@@ -56,8 +57,6 @@ export function Grid(props: GridProps) {
   const scrollableColumnsWidth = columns
     .slice(frozenColumns)
     .reduce((val, column) => val + column, 0);
-
-  const prevItemsRef = useRef<Item[]>([]);
 
   const items = getItems({
     scrollTop,
@@ -224,6 +223,7 @@ interface GetItemsParams {
  * ]
  *
  * See tests for the implementation of the scenario
+ * TODO: Handle resizing
  */
 export function getItems(params: GetItemsParams): Item[] {
   const {
@@ -233,8 +233,6 @@ export function getItems(params: GetItemsParams): Item[] {
     rowHeight,
     rowsCount,
   } = params;
-
-  // console.log(scrollTop);
 
   // size is the number of visible rows
   const size = Math.floor(scrollViewHeight / rowHeight);
@@ -254,24 +252,27 @@ export function getItems(params: GetItemsParams): Item[] {
     }
   } else {
     // first row that is visible
-    const visibleStartRow = Math.floor(scrollTop / rowHeight);
+    const visibleStartRow = Math.floor(scrollTop / rowHeight) + 1; // row index + 1 = row number
     // first row in the overscan above visible rows
     const overscanStartRow = visibleStartRow - size;
-    // last row that stops overscan
-    const lastStartRow = rowsCount - overscanSize;
 
-    if (overscanStartRow >= 0 && visibleStartRow <= lastStartRow) {
-      const prevStartRow = Math.min(...prevItems.map((i) => i.row));
-      const diff = overscanStartRow - prevStartRow + 1;
+    const prevStartRow = Math.min(...prevItems.map((i) => i.row));
 
-      if (diff > 0) {
-        for (let i = 0; i < diff; i++) {
-          queue.enqueue();
+    const diff = overscanStartRow - prevStartRow;
+
+    if (diff > 0) {
+      for (let i = 0; i < diff; i++) {
+        if (queue.front() >= rowsCount) {
+          break;
         }
-      } else if (diff < 0) {
-        for (let i = 0; i < Math.abs(diff); i++) {
-          queue.dequeue();
+        queue.enqueue();
+      }
+    } else if (diff < 0) {
+      for (let i = 0; i < Math.abs(diff); i++) {
+        if (queue.rear() === 1) {
+          break;
         }
+        queue.dequeue();
       }
     }
   }

@@ -9,8 +9,6 @@ export default {
   component: Grid,
 };
 
-const ROW_HEIGHT = 40;
-
 function renderCell(props: RenderCellProps) {
   const { row, column } = props;
 
@@ -37,9 +35,9 @@ export const Default = () => (
           scrollViewHeight={height}
           // TODO
           // contentOffset={{ x: 400, y: 1000 }}
-          rowsCount={100}
+          rowsCount={5000}
           renderCell={renderCell}
-          rowHeight={ROW_HEIGHT}
+          rowHeight={40}
           columns={[
             100,
             150,
