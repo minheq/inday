@@ -1,5 +1,11 @@
 import React, { useRef, useEffect, useState, memo } from 'react';
-import { Animated, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Animated,
+  PointPropType,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { isEmpty, RecycleQueue } from '../../lib/data_structures';
 
 export interface RenderCellProps {
@@ -15,9 +21,9 @@ export interface GridProps {
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
   frozenColumns: number;
+  /** Used to manually set the starting scroll offset. The default value is {x: 0, y: 0} */
+  contentOffset?: PointPropType;
 }
-
-const overscan = 0;
 
 export function Grid(props: GridProps) {
   const {
@@ -27,9 +33,10 @@ export function Grid(props: GridProps) {
     rowHeight,
     scrollViewHeight,
     renderCell,
+    contentOffset = { x: 0, y: 0 },
   } = props;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const [scrollTop, setScrollTop] = useState(0);
+  const [scrollTop, setScrollTop] = useState(contentOffset.y);
   const contentHeight = rowsCount * rowHeight;
 
   useEffect(() => {
@@ -57,16 +64,14 @@ export function Grid(props: GridProps) {
     scrollViewHeight,
     prevItems: prevItemsRef.current,
     rowHeight,
-    rowsCount,
   });
 
   prevItemsRef.current = items;
 
-  console.log('render grid');
-
   return (
     <View style={{ height: scrollViewHeight }}>
       <ScrollView
+        contentOffset={contentOffset}
         onScroll={Animated.event(
           [
             {
@@ -100,7 +105,7 @@ export function Grid(props: GridProps) {
             ))}
           </View>
           <View style={styles.scrollableCellsWrapper}>
-            <Animated.ScrollView horizontal>
+            <Animated.ScrollView contentOffset={contentOffset} horizontal>
               <View
                 style={[
                   styles.scrollableCellsContentWrapper,
@@ -137,51 +142,56 @@ export interface Item {
 interface GetItemsParams {
   scrollViewHeight: number;
   rowHeight: number;
-  rowsCount: number;
   scrollTop: number;
   prevItems: Item[];
 }
 
 export function getItems(params: GetItemsParams): Item[] {
-  const {
-    prevItems,
-    scrollViewHeight,
-    scrollTop,
-    rowHeight,
-    rowsCount,
-  } = params;
-  const startRow = Math.max(Math.floor(scrollTop / rowHeight) - overscan, 0);
-  const endRow = Math.min(
-    rowsCount - 1, // don't render past the end of the list
-    Math.floor((scrollTop + scrollViewHeight) / rowHeight) + overscan,
-  );
+  const { prevItems, scrollViewHeight, scrollTop, rowHeight } = params;
+  // size is the number of visible rows
+  const size = Math.floor(scrollViewHeight / rowHeight);
+  // sizeWithOverscan is the number of visible rows plus extraneous rows (here equal to the size)
+  const sizeWithOverscan = size * 3;
 
-  const size = endRow - startRow + 15;
   const queue = new RecycleQueue(
-    size,
+    sizeWithOverscan,
     prevItems.map((i) => i.row),
   );
 
   if (isEmpty(prevItems)) {
-    for (let row = startRow; row < endRow; row++) {
+    for (let i = 0; i < sizeWithOverscan; i++) {
       queue.enqueue();
     }
   } else {
-    const prevEndRow = Math.max(...prevItems.map((i) => i.row));
-    const diff = endRow - prevEndRow;
+    const startRow = Math.floor(scrollTop / rowHeight) - size / 3;
+    const prevStartRow = Math.min(...prevItems.map((i) => i.row));
 
-    for (let i = 0; i < diff; i++) {
-      queue.enqueue();
+    if (startRow > 0) {
+      const diff = startRow - prevStartRow + 1;
+
+      if (diff > 0) {
+        for (let i = 0; i < diff; i++) {
+          queue.enqueue();
+        }
+      } else if (diff < 0) {
+        for (let i = 0; i < Math.abs(diff); i++) {
+          queue.dequeue();
+        }
+      }
     }
   }
 
-  return queue.items.map((row, key) => {
+  const items = queue.items.map((row, key) => {
     return {
       key,
       row,
-      top: row * rowHeight,
+      top: (row - 1) * rowHeight,
     };
   });
+
+  // console.log(items);
+
+  return items;
 }
 
 interface RowProps {
@@ -204,7 +214,7 @@ const Row = memo(function Row(props: RowProps) {
     columns,
     renderCell,
   } = props;
-  console.log('render row');
+  // console.log('render row');
 
   return (
     <View style={[{ height, top }, styles.row]}>
@@ -214,7 +224,11 @@ const Row = memo(function Row(props: RowProps) {
       ).map((columnWidth, i) => {
         const column = frozen ? i : i + frozenColumns;
 
-        return <Cell width={columnWidth}>{renderCell({ row, column })}</Cell>;
+        return (
+          <Cell key={column} width={columnWidth}>
+            {renderCell({ row, column })}
+          </Cell>
+        );
       })}
     </View>
   );

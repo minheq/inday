@@ -29,29 +29,31 @@ export const Default = () => (
       {({ height }) => (
         <Grid
           scrollViewHeight={height}
-          rowsCount={500}
+          // TODO
+          // contentOffset={{ x: 400, y: 1000 }}
+          rowsCount={5000}
           renderCell={renderCell}
           rowHeight={ROW_HEIGHT}
           columns={[
             100,
             150,
             100,
-            200,
-            100,
-            100,
-            100,
-            140,
-            100,
-            300,
-            100,
-            200,
-            150,
-            140,
-            100,
-            300,
-            100,
-            200,
-            150,
+            // 200,
+            // 100,
+            // 100,
+            // 100,
+            // 140,
+            // 100,
+            // 300,
+            // 100,
+            // 200,
+            // 150,
+            // 140,
+            // 100,
+            // 300,
+            // 100,
+            // 200,
+            // 150,
           ]}
           frozenColumns={1}
         />
