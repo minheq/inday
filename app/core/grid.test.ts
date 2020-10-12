@@ -1,4 +1,4 @@
-import { getItems, Item } from './grid';
+import { getColumnsData, getItems, Item } from './grid';
 
 describe('getItems ', () => {
   const scrollViewHeight = 100;
@@ -134,5 +134,62 @@ describe('getItems ', () => {
       14,
       15,
     ]);
+  });
+});
+
+describe('getColumnsData ', () => {
+  const columns = [100, 200, 100, 200, 100, 200];
+  const scrollViewContentWidth = 400;
+
+  test('left 0', () => {
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 0,
+      scrollViewContentWidth,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 0,
+      endIndex: 2,
+    });
+  });
+
+  test('left 100', () => {
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 100,
+      scrollViewContentWidth,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 1,
+      endIndex: 3,
+    });
+  });
+
+  test('left 350', () => {
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 350,
+      scrollViewContentWidth,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 2,
+      endIndex: 5,
+    });
+  });
+
+  test('scroll rightmost', () => {
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 500,
+      scrollViewContentWidth,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 3,
+      endIndex: 5,
+    });
   });
 });

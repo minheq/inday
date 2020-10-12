@@ -30,8 +30,9 @@ export const Default = () => (
     }}
   >
     <AutoSizer>
-      {({ height }) => (
+      {({ height, width }) => (
         <Grid
+          scrollViewWidth={width}
           scrollViewHeight={height}
           // TODO
           // contentOffset={{ x: 400, y: 1000 }}
@@ -42,24 +43,24 @@ export const Default = () => (
             100,
             150,
             100,
-            // 200,
-            // 100,
-            // 100,
-            // 100,
-            // 140,
-            // 100,
-            // 300,
-            // 100,
-            // 200,
-            // 150,
-            // 140,
-            // 100,
-            // 300,
-            // 100,
-            // 200,
-            // 150,
+            200,
+            100,
+            100,
+            100,
+            140,
+            100,
+            300,
+            100,
+            200,
+            150,
+            140,
+            100,
+            300,
+            100,
+            200,
+            150,
           ]}
-          frozenColumns={1}
+          frozenColumnsCount={1}
         />
       )}
     </AutoSizer>
