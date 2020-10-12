@@ -86,3 +86,25 @@ describe('RecycleQueue loaded items', () => {
     expect(queue.getItems()).toEqual([6, 7, 3, 4, 5]);
   });
 });
+
+describe('RecycleQueue resize', () => {
+  test('expand sequential', () => {
+    const queue = new RecycleQueue(10, [1, 2, 3, 4, 5]);
+    expect(queue.getItems()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  test('expand from middle', () => {
+    const queue = new RecycleQueue(10, [6, 7, 3, 4, 5]);
+    expect(queue.getItems()).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  });
+
+  test('shrink sequential', () => {
+    const queue = new RecycleQueue(5, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(queue.getItems()).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  test('shrink from middle', () => {
+    const queue = new RecycleQueue(5, [11, 12, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(queue.getItems()).toEqual([3, 4, 5, 6, 7]);
+  });
+});

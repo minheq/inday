@@ -223,7 +223,6 @@ interface GetItemsParams {
  * ]
  *
  * See tests for the implementation of the scenario
- * TODO: Handle resizing
  */
 export function getItems(params: GetItemsParams): Item[] {
   const {

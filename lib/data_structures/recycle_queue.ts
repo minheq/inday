@@ -10,17 +10,34 @@ export class RecycleQueue {
     this.items = items;
 
     if (isEmpty(items) === false) {
-      let index = 0;
+      if (size === items.length) {
+        let index = 0;
 
-      for (let i = 0; i < items.length; i++) {
-        const num = items[i];
+        for (let i = 0; i < items.length; i++) {
+          const maxNum = items[i];
 
-        if (num > items[index]) {
-          index = i;
+          if (maxNum > items[index]) {
+            index = i;
+          }
         }
-      }
 
-      this.index = index;
+        this.index = index;
+      } else {
+        let minNum = items[0];
+
+        for (let i = 0; i < items.length; i++) {
+          if (minNum > items[i]) {
+            minNum = items[i];
+          }
+        }
+
+        this.items = [];
+        for (let i = 0; i < size; i++) {
+          this.items.push(i + minNum);
+        }
+
+        this.index = size - 1;
+      }
     } else {
       this.index = -1;
     }
