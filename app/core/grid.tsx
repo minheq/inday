@@ -284,7 +284,6 @@ export function getItems(params: GetItemsParams): Item[] {
       top: (row - 1) * rowHeight,
     };
   });
-  // console.log(items);
 
   return items;
 }
