@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { isEmpty, RecycleQueue, sum } from '../../lib/data_structures';
+import { usePrevious } from '../hooks/use_previous';
 
 export interface RenderCellProps {
   row: number;
@@ -53,7 +54,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     scrollViewHeight,
     scrollViewWidth,
     renderCell,
-    contentOffset = { x: 0, y: 0 },
+    contentOffset,
     overscanColumnCount = 2,
     onContentOffsetLoaded,
   } = props;
@@ -64,6 +65,9 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const [scrollY, setScrollY] = useState(0);
   const [scrollX, setScrollX] = useState(0);
   const prevRowsDataRef = useRef<RowData[]>([]);
+  const prevScrollY = usePrevious(scrollY);
+  const [scrolling, setScrolling] = useState(false);
+  const scrollingTimeoutRef = useRef<number | null>(null);
   const contentHeight = rowCount * rowHeight;
 
   const handleScrollTo = useCallback(
@@ -102,6 +106,20 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
       scrollXObservable.removeListener(scrollXListenerID);
     };
   }, [scrollYObservable, scrollXObservable]);
+
+  useEffect(() => {
+    if (scrollingTimeoutRef.current !== null) {
+      clearTimeout(scrollingTimeoutRef.current);
+    }
+
+    if (scrollY !== prevScrollY && scrolling === false) {
+      setScrolling(true);
+    } else if (scrolling === true) {
+      scrollingTimeoutRef.current = setTimeout(() => {
+        setScrolling(false);
+      }, 100);
+    }
+  }, [scrollY, prevScrollY, scrolling]);
 
   useEffect(() => {
     if (Platform.OS === 'web' && contentOffset) {
@@ -172,6 +190,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
                 frozenColumnCount={frozenColumnCount}
                 columns={columns}
                 renderCell={renderCell}
+                scrolling={scrolling}
                 key={key}
                 y={y}
                 row={row}
@@ -204,6 +223,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
               {rowsData.map(({ key, y, row }) => (
                 <RowContainer
                   frozen={false}
+                  scrolling={scrolling}
                   frozenColumnCount={frozenColumnCount}
                   columns={columns}
                   renderCell={renderCell}
@@ -445,6 +465,7 @@ interface RowPropsContainer {
   renderCell: (props: RenderCellProps) => React.ReactNode;
   columns: number[];
   frozen: boolean;
+  scrolling: boolean;
   frozenColumnCount: number;
   startColumnIndex: number;
   endColumnIndex: number;
@@ -457,17 +478,34 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
     height,
     y,
     row,
+    scrolling,
     columns: allColumns,
     startColumnIndex,
     endColumnIndex,
     renderCell,
   } = props;
 
-  let initialX = 0;
   const columns = frozen
     ? allColumns.slice(0, frozenColumnCount)
     : allColumns.slice(frozenColumnCount);
 
+  if (scrolling === false) {
+    return (
+      <View style={[{ height, top: y }, styles.row]}>
+        {columns.map((width, index) => {
+          const column = (frozen ? index : frozenColumnCount + index) + 1;
+
+          return (
+            <View key={column} style={[{ width }]}>
+              {renderCell({ row, column })}
+            </View>
+          );
+        })}
+      </View>
+    );
+  }
+
+  let initialX = 0;
   for (let i = 0; i < startColumnIndex; i++) {
     initialX += columns[i];
   }

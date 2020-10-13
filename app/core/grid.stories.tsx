@@ -34,7 +34,7 @@ export const Default = () => (
         <Grid
           scrollViewWidth={width}
           scrollViewHeight={height}
-          contentOffset={{ x: 400, y: 1000 }}
+          // contentOffset={{ x: 400, y: 1000 }}
           rowCount={5000}
           renderCell={renderCell}
           rowHeight={40}
