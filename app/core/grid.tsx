@@ -53,7 +53,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     scrollViewHeight,
     scrollViewWidth,
     renderCell,
-    contentOffset = { x: 0, y: 0 },
+    contentOffset,
     overscanColumnCount = 2,
     onContentOffsetLoaded,
   } = props;
