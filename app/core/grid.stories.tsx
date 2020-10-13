@@ -35,7 +35,7 @@ export const Default = () => (
           scrollViewWidth={width}
           scrollViewHeight={height}
           // TODO
-          // contentOffset={{ x: 400, y: 1000 }}
+          contentOffset={{ x: 400, y: 1000 }}
           rowsCount={5000}
           renderCell={renderCell}
           rowHeight={40}

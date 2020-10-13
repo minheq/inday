@@ -1,11 +1,13 @@
-import React, { useRef, useEffect, useState, memo } from 'react';
-import {
-  Animated,
-  PointPropType,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  memo,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+} from 'react';
+import { Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { isEmpty, RecycleQueue } from '../../lib/data_structures';
 
 export interface RenderCellProps {
@@ -23,15 +25,23 @@ export interface GridProps {
   columns: number[];
   frozenColumnsCount: number;
   /** Used to manually set the starting scroll offset. The default value is {x: 0, y: 0} */
-  contentOffset?: PointPropType;
+  contentOffset?: ContentOffset;
 }
 
-/**
- * TODO:
- * - scrollToLocation
- * - contentOffset
- */
-export function Grid(props: GridProps) {
+interface ContentOffset {
+  x: number;
+  y: number;
+}
+
+interface ScrollToParams extends Partial<ContentOffset> {
+  animated?: boolean;
+}
+
+interface GridRef {
+  scrollTo: (params: ScrollToParams) => void;
+}
+
+export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const {
     columns,
     frozenColumnsCount,
@@ -40,16 +50,51 @@ export function Grid(props: GridProps) {
     scrollViewHeight,
     scrollViewWidth,
     renderCell,
-    contentOffset = { x: 0, y: 0 },
+    contentOffset,
   } = props;
+  const verticalScrollViewRef = useRef<ScrollView>(null);
+  const horizontalScrollViewRef = useRef<ScrollView>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollX = useRef(new Animated.Value(0)).current;
-  const [scrollTop, setScrollTop] = useState(contentOffset.y);
-  const [scrollLeft, setScrollLeft] = useState(contentOffset.y);
+  const [contentOffsetLoaded, setContentOffsetLoaded] = useState(
+    contentOffset === undefined,
+  );
+  const [scrollTop, setScrollTop] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   const prevItemsRef = useRef<Item[]>([]);
+
   const contentHeight = rowsCount * rowHeight;
   const contentWidth = columns.reduce((v, c) => v + c, 0);
 
+  const handleScrollTo = useCallback(
+    (params: ScrollToParams) => {
+      const { x, y, animated } = params;
+
+      if (verticalScrollViewRef.current) {
+        verticalScrollViewRef.current.scrollTo({ y, animated });
+      }
+      if (horizontalScrollViewRef.current) {
+        horizontalScrollViewRef.current.scrollTo({ x, animated });
+      }
+
+      if (contentOffsetLoaded === false) {
+        setContentOffsetLoaded(true);
+      }
+    },
+    [contentOffsetLoaded, verticalScrollViewRef, horizontalScrollViewRef],
+  );
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        scrollTo: handleScrollTo,
+      };
+    },
+    [handleScrollTo],
+  );
+
+  // Set up scroll listeners
   useEffect(() => {
     const yScrollListenerID = scrollY.addListener((position) => {
       setScrollTop(position.value);
@@ -63,6 +108,16 @@ export function Grid(props: GridProps) {
       scrollX.removeListener(xScrollListenerID);
     };
   }, [scrollY, scrollX]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && contentOffset) {
+      handleScrollTo({
+        y: contentOffset.y,
+        x: contentOffset.x,
+        animated: false,
+      });
+    }
+  }, [handleScrollTo, contentOffset]);
 
   const frozenColumns = columns.slice(0, frozenColumnsCount);
   const scrollableColumns = columns.slice(frozenColumnsCount);
@@ -101,8 +156,14 @@ export function Grid(props: GridProps) {
   prevItemsRef.current = items;
 
   return (
-    <View style={{ height: scrollViewHeight }}>
+    <View
+      style={[
+        { height: scrollViewHeight },
+        contentOffsetLoaded ? styles.visible : styles.invisible,
+      ]}
+    >
       <ScrollView
+        ref={verticalScrollViewRef}
         contentOffset={contentOffset}
         onScroll={Animated.event(
           [
@@ -139,7 +200,8 @@ export function Grid(props: GridProps) {
             ))}
           </View>
           <View style={styles.scrollableCellsWrapper}>
-            <Animated.ScrollView
+            <ScrollView
+              ref={horizontalScrollViewRef}
               contentOffset={contentOffset}
               horizontal
               onScroll={Animated.event(
@@ -155,6 +217,7 @@ export function Grid(props: GridProps) {
                 { useNativeDriver: false },
               )}
               contentContainerStyle={{ height: contentWidth }}
+              scrollEventThrottle={16}
             >
               <View
                 style={[
@@ -177,13 +240,13 @@ export function Grid(props: GridProps) {
                   />
                 ))}
               </View>
-            </Animated.ScrollView>
+            </ScrollView>
           </View>
         </View>
       </ScrollView>
     </View>
   );
-}
+});
 
 export interface Item {
   row: number;
@@ -469,6 +532,12 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
 const styles = StyleSheet.create({
   section: {
     zIndex: 10,
+  },
+  invisible: {
+    opacity: 0,
+  },
+  visible: {
+    opacity: 1,
   },
   wrapper: {
     flex: 1,
