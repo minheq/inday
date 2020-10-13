@@ -511,21 +511,20 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
   }
 
   const columnsData: ColumnData[] = [];
-  let columnKey = 0;
   let currentX = 0;
 
   for (let i = startColumnIndex; i <= endColumnIndex; i++) {
     const columnWidth = columns[i];
+    const column = frozen ? i + 1 : i + 1 + frozenColumnCount;
 
     columnsData.push({
-      key: columnKey,
-      column: frozen ? i + 1 : i + 1 + frozenColumnCount,
+      key: column,
+      column,
       width: columnWidth,
       x: initialX + currentX,
     });
 
     currentX += columnWidth;
-    columnKey++;
   }
 
   return (
