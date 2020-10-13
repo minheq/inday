@@ -202,6 +202,74 @@ describe('getColumnsData', () => {
     });
   });
 
+  test('left 0, overscan 2', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 0,
+      scrollViewWidth,
+      overscan: 2,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 0,
+      endIndex: 4,
+    });
+  });
+
+  test('left 100, overscan 2', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 100,
+      scrollViewWidth,
+      overscan: 2,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 0,
+      endIndex: 5,
+    });
+  });
+
+  test('left 350, overscan 2', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 350,
+      scrollViewWidth,
+      overscan: 2,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 0,
+      endIndex: 5,
+    });
+  });
+
+  test('scroll rightmost, overscan 2', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 500,
+      scrollViewWidth,
+      overscan: 2,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 1,
+      endIndex: 5,
+    });
+  });
+
   test('scrollview larger', () => {
     const columns = [100, 200];
     const scrollViewWidth = 400;

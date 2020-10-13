@@ -28,7 +28,6 @@ export interface GridProps {
 
 /**
  * TODO:
- * - fix virtualized rows
  * - scrollToLocation
  * - contentOffset
  */
@@ -90,12 +89,13 @@ export function Grid(props: GridProps) {
     scrollLeft,
     scrollViewWidth: frozenColumnsWidth,
     columns: frozenColumns,
+    overscan: 2,
   });
   const scrollableColumnsData = getColumnsData({
     scrollLeft,
     scrollViewWidth: scrollViewWidth - frozenColumnsWidth,
     columns: scrollableColumns,
-    // overscan: 2,
+    overscan: 2,
   });
 
   prevItemsRef.current = items;
@@ -387,12 +387,15 @@ export function getColumnsData(params: GetColumnsDataParams) {
       currentEndWidth >= scrollLeft + scrollViewWidth ||
       columnWidth === undefined
     ) {
-      endIndex = i - 1 + overscan;
+      endIndex = i - 1;
       break;
     }
 
     currentEndWidth += columnWidth;
   }
+
+  startIndex = Math.max(startIndex - overscan, 0);
+  endIndex = Math.min(endIndex + overscan, columns.length - 1);
 
   return { startIndex, endIndex };
 }
