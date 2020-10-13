@@ -137,15 +137,15 @@ describe('getItems ', () => {
   });
 });
 
-describe('getColumnsData ', () => {
-  const columns = [100, 200, 100, 200, 100, 200];
-  const scrollViewContentWidth = 400;
-
+describe('getColumnsData', () => {
   test('left 0', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
     const columnsData = getColumnsData({
       columns,
       scrollLeft: 0,
-      scrollViewContentWidth,
+      scrollViewWidth,
     });
 
     expect(columnsData).toEqual({
@@ -155,10 +155,13 @@ describe('getColumnsData ', () => {
   });
 
   test('left 100', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
     const columnsData = getColumnsData({
       columns,
       scrollLeft: 100,
-      scrollViewContentWidth,
+      scrollViewWidth,
     });
 
     expect(columnsData).toEqual({
@@ -168,10 +171,13 @@ describe('getColumnsData ', () => {
   });
 
   test('left 350', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
     const columnsData = getColumnsData({
       columns,
       scrollLeft: 350,
-      scrollViewContentWidth,
+      scrollViewWidth,
     });
 
     expect(columnsData).toEqual({
@@ -181,15 +187,50 @@ describe('getColumnsData ', () => {
   });
 
   test('scroll rightmost', () => {
+    const columns = [100, 200, 100, 200, 100, 200];
+    const scrollViewWidth = 400;
+
     const columnsData = getColumnsData({
       columns,
       scrollLeft: 500,
-      scrollViewContentWidth,
+      scrollViewWidth,
     });
 
     expect(columnsData).toEqual({
       startIndex: 3,
       endIndex: 5,
+    });
+  });
+
+  test('scrollview larger', () => {
+    const columns = [100, 200];
+    const scrollViewWidth = 400;
+
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 0,
+      scrollViewWidth,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 0,
+      endIndex: 1,
+    });
+  });
+
+  test('scrollview equal', () => {
+    const columns = [100, 200, 100];
+    const scrollViewWidth = 400;
+
+    const columnsData = getColumnsData({
+      columns,
+      scrollLeft: 0,
+      scrollViewWidth,
+    });
+
+    expect(columnsData).toEqual({
+      startIndex: 0,
+      endIndex: 2,
     });
   });
 });

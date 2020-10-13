@@ -49,6 +49,7 @@ export function Grid(props: GridProps) {
   const [scrollLeft, setScrollLeft] = useState(contentOffset.y);
   const prevItemsRef = useRef<Item[]>([]);
   const contentHeight = rowsCount * rowHeight;
+  const contentWidth = columns.reduce((v, c) => v + c, 0);
 
   useEffect(() => {
     const yScrollListenerID = scrollY.addListener((position) => {
@@ -87,16 +88,15 @@ export function Grid(props: GridProps) {
 
   const frozenColumnsData = getColumnsData({
     scrollLeft,
-    scrollViewContentWidth: frozenColumnsWidth,
+    scrollViewWidth: frozenColumnsWidth,
     columns: frozenColumns,
   });
   const scrollableColumnsData = getColumnsData({
     scrollLeft,
-    scrollViewContentWidth: scrollViewWidth - frozenColumnsWidth,
+    scrollViewWidth: scrollViewWidth - frozenColumnsWidth,
     columns: scrollableColumns,
+    // overscan: 2,
   });
-  console.log(frozenColumnsData, 'frozenColumnsData');
-  console.log(scrollableColumnsData, 'scrollableColumnsData');
 
   prevItemsRef.current = items;
 
@@ -154,6 +154,7 @@ export function Grid(props: GridProps) {
                 ],
                 { useNativeDriver: false },
               )}
+              contentContainerStyle={{ height: contentWidth }}
             >
               <View
                 style={[
@@ -348,11 +349,12 @@ interface ColumnData {
 interface GetColumnsDataParams {
   columns: number[];
   scrollLeft: number;
-  scrollViewContentWidth: number;
+  scrollViewWidth: number;
+  overscan?: number;
 }
 
 export function getColumnsData(params: GetColumnsDataParams) {
-  const { scrollLeft, columns, scrollViewContentWidth } = params;
+  const { scrollLeft, columns, scrollViewWidth, overscan = 0 } = params;
 
   let startIndex = 0;
   let currentStartWidth = 0;
@@ -365,9 +367,10 @@ export function getColumnsData(params: GetColumnsDataParams) {
       break;
     } else if (currentStartWidth > scrollLeft) {
       startIndex = i - 1;
-      const prevColumnWidth = columns[i - 1];
 
+      const prevColumnWidth = columns[i - 1];
       currentStartWidth -= prevColumnWidth;
+
       break;
     }
 
@@ -377,11 +380,14 @@ export function getColumnsData(params: GetColumnsDataParams) {
   let endIndex = 0;
   let currentEndWidth = currentStartWidth;
 
-  for (let i = startIndex; i <= columns.length; i++) {
+  for (let i = startIndex; i < columns.length + 1; i++) {
     const columnWidth = columns[i];
 
-    if (currentEndWidth >= scrollLeft + scrollViewContentWidth) {
-      endIndex = i - 1;
+    if (
+      currentEndWidth >= scrollLeft + scrollViewWidth ||
+      columnWidth === undefined
+    ) {
+      endIndex = i - 1 + overscan;
       break;
     }
 
@@ -421,8 +427,6 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
     ? allColumns.slice(0, frozenColumnsCount)
     : allColumns.slice(frozenColumnsCount);
 
-  console.log(columns, 'columns');
-
   for (let i = 0; i < startColumnIndex; i++) {
     initialLeft += columns[i];
   }
@@ -431,13 +435,11 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
   let columnKey = 0;
   let addLeft = 0;
 
-  for (let i = startColumnIndex; i < endColumnIndex; i++) {
+  for (let i = startColumnIndex; i <= endColumnIndex; i++) {
     const columnWidth = columns[i];
     columnsData.push({
       key: columnKey,
-      column: frozen
-        ? startColumnIndex + i + 1
-        : startColumnIndex + i + 1 + frozenColumnsCount,
+      column: frozen ? i + 1 : i + 1 + frozenColumnsCount,
       width: columnWidth,
       left: initialLeft + addLeft,
     });
@@ -445,8 +447,6 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
     addLeft += columnWidth;
     columnKey++;
   }
-
-  console.log(columnsData, 'columnsData');
 
   return (
     <View style={[{ height, top }, styles.row]}>
