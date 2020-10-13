@@ -9,8 +9,6 @@ export default {
   component: Grid,
 };
 
-const ROW_HEIGHT = 40;
-
 function renderCell(props: RenderCellProps) {
   const { row, column } = props;
 
@@ -24,14 +22,22 @@ function renderCell(props: RenderCellProps) {
 }
 
 export const Default = () => (
-  <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+  <div
+    style={{
+      height: 'calc(100vh - 32px)',
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+  >
     <AutoSizer>
-      {({ height }) => (
+      {({ height, width }) => (
         <Grid
+          scrollViewWidth={width}
           scrollViewHeight={height}
-          rowsCount={500}
+          contentOffset={{ x: 400, y: 1000 }}
+          rowCount={5000}
           renderCell={renderCell}
-          rowHeight={ROW_HEIGHT}
+          rowHeight={40}
           columns={[
             100,
             150,
@@ -53,7 +59,7 @@ export const Default = () => (
             200,
             150,
           ]}
-          frozenColumns={1}
+          frozenColumnCount={2}
         />
       )}
     </AutoSizer>
