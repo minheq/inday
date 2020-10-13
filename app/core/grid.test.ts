@@ -1,27 +1,27 @@
-import { getColumnsData, getItems, Item } from './grid';
+import { getColumnsData, getRowsData, RowData } from './grid';
 
-describe('getItems ', () => {
+describe('getRowsData ', () => {
   const scrollViewHeight = 100;
   const rowHeight = 20;
-  const rowsCount = 30;
-  let scrollTop = 0;
-  let prevItems: Item[] = [];
-  let items: Item[] = [];
+  const rowCount = 30;
+  let scrollY = 0;
+  let prevRowsData: RowData[] = [];
+  let rowsData: RowData[] = [];
 
-  function getRows(data: Item[]) {
+  function getRowsDataKeys(data: RowData[]) {
     return data.map((item) => item.row);
   }
 
   test('initial', () => {
-    items = getItems({
+    rowsData = getRowsData({
       scrollViewHeight,
       rowHeight,
-      rowsCount,
-      scrollTop,
-      prevItems,
+      rowCount,
+      scrollY,
+      prevRowsData,
     });
 
-    expect(getRows(items)).toEqual([
+    expect(getRowsDataKeys(rowsData)).toEqual([
       1,
       2,
       3,
@@ -42,18 +42,18 @@ describe('getItems ', () => {
 
   test('scroll to start row 10', () => {
     // First scroll
-    prevItems = items;
-    scrollTop = 180;
+    prevRowsData = rowsData;
+    scrollY = 180;
 
-    items = getItems({
+    rowsData = getRowsData({
       scrollViewHeight,
       rowHeight,
-      rowsCount,
-      scrollTop,
-      prevItems,
+      rowCount,
+      scrollY,
+      prevRowsData,
     });
 
-    expect(getRows(items)).toEqual([
+    expect(getRowsDataKeys(rowsData)).toEqual([
       16,
       17,
       18,
@@ -74,18 +74,18 @@ describe('getItems ', () => {
 
   test('scroll to bottom', () => {
     // First scroll
-    prevItems = items;
-    scrollTop = 500;
+    prevRowsData = rowsData;
+    scrollY = 500;
 
-    items = getItems({
+    rowsData = getRowsData({
       scrollViewHeight,
       rowHeight,
-      rowsCount,
-      scrollTop,
-      prevItems,
+      rowCount,
+      scrollY,
+      prevRowsData,
     });
 
-    expect(getRows(items)).toEqual([
+    expect(getRowsDataKeys(rowsData)).toEqual([
       16,
       17,
       18,
@@ -106,18 +106,18 @@ describe('getItems ', () => {
 
   test('scroll to top', () => {
     // First scroll
-    prevItems = items;
-    scrollTop = 0;
+    prevRowsData = rowsData;
+    scrollY = 0;
 
-    items = getItems({
+    rowsData = getRowsData({
       scrollViewHeight,
       rowHeight,
-      rowsCount,
-      scrollTop,
-      prevItems,
+      rowCount,
+      scrollY,
+      prevRowsData,
     });
 
-    expect(getRows(items)).toEqual([
+    expect(getRowsDataKeys(rowsData)).toEqual([
       1,
       2,
       3,
@@ -144,7 +144,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 0,
+      scrollX: 0,
       scrollViewWidth,
     });
 
@@ -160,7 +160,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 100,
+      scrollX: 100,
       scrollViewWidth,
     });
 
@@ -176,7 +176,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 350,
+      scrollX: 350,
       scrollViewWidth,
     });
 
@@ -192,7 +192,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 500,
+      scrollX: 500,
       scrollViewWidth,
     });
 
@@ -208,7 +208,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 0,
+      scrollX: 0,
       scrollViewWidth,
       overscan: 2,
     });
@@ -225,7 +225,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 100,
+      scrollX: 100,
       scrollViewWidth,
       overscan: 2,
     });
@@ -242,7 +242,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 350,
+      scrollX: 350,
       scrollViewWidth,
       overscan: 2,
     });
@@ -259,7 +259,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 500,
+      scrollX: 500,
       scrollViewWidth,
       overscan: 2,
     });
@@ -276,7 +276,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 0,
+      scrollX: 0,
       scrollViewWidth,
     });
 
@@ -292,7 +292,7 @@ describe('getColumnsData', () => {
 
     const columnsData = getColumnsData({
       columns,
-      scrollLeft: 0,
+      scrollX: 0,
       scrollViewWidth,
     });
 

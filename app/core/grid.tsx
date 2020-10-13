@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { isEmpty, RecycleQueue } from '../../lib/data_structures';
+import { isEmpty, RecycleQueue, sum } from '../../lib/data_structures';
 
 export interface RenderCellProps {
   row: number;
@@ -20,12 +20,13 @@ export interface GridProps {
   scrollViewWidth: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   rowHeight: number;
-  rowsCount: number;
+  rowCount: number;
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
-  frozenColumnsCount: number;
+  frozenColumnCount: number;
   /** Used to manually set the starting scroll offset. The default value is {x: 0, y: 0} */
   contentOffset?: ContentOffset;
+  overscanColumnCount?: number;
 }
 
 interface ContentOffset {
@@ -44,27 +45,24 @@ interface GridRef {
 export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const {
     columns,
-    frozenColumnsCount,
-    rowsCount,
+    frozenColumnCount,
+    rowCount,
     rowHeight,
     scrollViewHeight,
     scrollViewWidth,
     renderCell,
     contentOffset,
+    overscanColumnCount = 2,
   } = props;
   const verticalScrollViewRef = useRef<ScrollView>(null);
   const horizontalScrollViewRef = useRef<ScrollView>(null);
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const [contentOffsetLoaded, setContentOffsetLoaded] = useState(
-    contentOffset === undefined,
-  );
-  const [scrollTop, setScrollTop] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const prevItemsRef = useRef<Item[]>([]);
-
-  const contentHeight = rowsCount * rowHeight;
-  const contentWidth = columns.reduce((v, c) => v + c, 0);
+  const scrollYObservable = useRef(new Animated.Value(0)).current;
+  const scrollXObservable = useRef(new Animated.Value(0)).current;
+  const [scrollY, setScrollY] = useState(0);
+  const [scrollX, setScrollX] = useState(0);
+  const [ready, setReady] = useState(contentOffset === undefined);
+  const prevRowsDataRef = useRef<RowData[]>([]);
+  const contentHeight = rowCount * rowHeight;
 
   const handleScrollTo = useCallback(
     (params: ScrollToParams) => {
@@ -77,11 +75,11 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
         horizontalScrollViewRef.current.scrollTo({ x, animated });
       }
 
-      if (contentOffsetLoaded === false) {
-        setContentOffsetLoaded(true);
+      if (ready === false) {
+        setReady(true);
       }
     },
-    [contentOffsetLoaded, verticalScrollViewRef, horizontalScrollViewRef],
+    [ready, verticalScrollViewRef, horizontalScrollViewRef],
   );
 
   useImperativeHandle(
@@ -96,18 +94,18 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
 
   // Set up scroll listeners
   useEffect(() => {
-    const yScrollListenerID = scrollY.addListener((position) => {
-      setScrollTop(position.value);
+    const scrollYListenerID = scrollYObservable.addListener((state) => {
+      setScrollY(state.value);
     });
-    const xScrollListenerID = scrollX.addListener((position) => {
-      setScrollLeft(position.value);
+    const scrollXListenerID = scrollXObservable.addListener((state) => {
+      setScrollX(state.value);
     });
 
     return () => {
-      scrollY.removeListener(yScrollListenerID);
-      scrollX.removeListener(xScrollListenerID);
+      scrollYObservable.removeListener(scrollYListenerID);
+      scrollXObservable.removeListener(scrollXListenerID);
     };
-  }, [scrollY, scrollX]);
+  }, [scrollYObservable, scrollXObservable]);
 
   useEffect(() => {
     if (Platform.OS === 'web' && contentOffset) {
@@ -119,47 +117,39 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     }
   }, [handleScrollTo, contentOffset]);
 
-  const frozenColumns = columns.slice(0, frozenColumnsCount);
-  const scrollableColumns = columns.slice(frozenColumnsCount);
+  const frozenAreaColumns = columns.slice(0, frozenColumnCount);
+  const scrollAreaColumns = columns.slice(frozenColumnCount);
+  const frozenAreaWidth = sum(frozenAreaColumns);
+  const scrollAreaWidth = sum(scrollAreaColumns);
 
-  const frozenColumnsWidth = frozenColumns.reduce(
-    (val, column) => val + column,
-    0,
-  );
-
-  const scrollableColumnsWidth = scrollableColumns.reduce(
-    (val, column) => val + column,
-    0,
-  );
-
-  const items = getItems({
-    scrollTop,
+  const rowsData = getRowsData({
+    scrollY,
     scrollViewHeight,
-    prevItems: prevItemsRef.current,
+    prevRowsData: prevRowsDataRef.current,
     rowHeight,
-    rowsCount,
+    rowCount,
   });
 
-  const frozenColumnsData = getColumnsData({
-    scrollLeft,
-    scrollViewWidth: frozenColumnsWidth,
-    columns: frozenColumns,
-    overscan: 2,
+  const frozenAreaColumnsData = getColumnsData({
+    scrollX,
+    scrollViewWidth: frozenAreaWidth,
+    columns: frozenAreaColumns,
+    overscan: overscanColumnCount,
   });
-  const scrollableColumnsData = getColumnsData({
-    scrollLeft,
-    scrollViewWidth: scrollViewWidth - frozenColumnsWidth,
-    columns: scrollableColumns,
-    overscan: 2,
+  const scrollAreaColumnsData = getColumnsData({
+    scrollX,
+    scrollViewWidth: scrollViewWidth - frozenAreaWidth,
+    columns: scrollAreaColumns,
+    overscan: overscanColumnCount,
   });
 
-  prevItemsRef.current = items;
+  prevRowsDataRef.current = rowsData;
 
   return (
     <View
       style={[
         { height: scrollViewHeight },
-        contentOffsetLoaded ? styles.visible : styles.invisible,
+        ready ? styles.visible : styles.invisible,
       ]}
     >
       <ScrollView
@@ -170,7 +160,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
             {
               nativeEvent: {
                 contentOffset: {
-                  y: scrollY,
+                  y: scrollYObservable,
                 },
               },
             },
@@ -181,25 +171,23 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
         scrollEventThrottle={16}
       >
         <View style={styles.wrapper}>
-          <View
-            style={[styles.frozenCellsWrapper, { width: frozenColumnsWidth }]}
-          >
-            {items.map(({ key, top, row }) => (
+          <View style={[{ width: frozenAreaWidth }]}>
+            {rowsData.map(({ key, y, row }) => (
               <RowContainer
                 frozen={true}
-                frozenColumnsCount={frozenColumnsCount}
+                frozenColumnCount={frozenColumnCount}
                 columns={columns}
                 renderCell={renderCell}
                 key={key}
-                top={top}
+                y={y}
                 row={row}
                 height={rowHeight}
-                startColumnIndex={frozenColumnsData.startIndex}
-                endColumnIndex={frozenColumnsData.endIndex}
+                startColumnIndex={frozenAreaColumnsData.startIndex}
+                endColumnIndex={frozenAreaColumnsData.endIndex}
               />
             ))}
           </View>
-          <View style={styles.scrollableCellsWrapper}>
+          <View style={styles.scrollAreaWrapper}>
             <ScrollView
               ref={horizontalScrollViewRef}
               contentOffset={contentOffset}
@@ -209,37 +197,30 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
                   {
                     nativeEvent: {
                       contentOffset: {
-                        x: scrollX,
+                        x: scrollXObservable,
                       },
                     },
                   },
                 ],
                 { useNativeDriver: false },
               )}
-              contentContainerStyle={{ height: contentWidth }}
+              contentContainerStyle={{ height: scrollAreaWidth }}
               scrollEventThrottle={16}
             >
-              <View
-                style={[
-                  styles.scrollableCellsContentWrapper,
-                  { width: scrollableColumnsWidth },
-                ]}
-              >
-                {items.map(({ key, top, row }) => (
-                  <RowContainer
-                    frozen={false}
-                    frozenColumnsCount={frozenColumnsCount}
-                    columns={columns}
-                    renderCell={renderCell}
-                    key={key}
-                    top={top}
-                    row={row}
-                    height={rowHeight}
-                    startColumnIndex={scrollableColumnsData.startIndex}
-                    endColumnIndex={scrollableColumnsData.endIndex}
-                  />
-                ))}
-              </View>
+              {rowsData.map(({ key, y, row }) => (
+                <RowContainer
+                  frozen={false}
+                  frozenColumnCount={frozenColumnCount}
+                  columns={columns}
+                  renderCell={renderCell}
+                  key={key}
+                  y={y}
+                  row={row}
+                  height={rowHeight}
+                  startColumnIndex={scrollAreaColumnsData.startIndex}
+                  endColumnIndex={scrollAreaColumnsData.endIndex}
+                />
+              ))}
             </ScrollView>
           </View>
         </View>
@@ -248,18 +229,18 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   );
 });
 
-export interface Item {
+export interface RowData {
   row: number;
   key: number;
-  top: number;
+  y: number;
 }
 
-interface GetItemsParams {
+interface GetRowsDataParams {
   scrollViewHeight: number;
   rowHeight: number;
-  scrollTop: number;
-  rowsCount: number;
-  prevItems: Item[];
+  scrollY: number;
+  rowCount: number;
+  prevRowsData: RowData[];
 }
 
 /**
@@ -339,44 +320,44 @@ interface GetItemsParams {
  *
  * See tests for the implementation of the scenario
  */
-export function getItems(params: GetItemsParams): Item[] {
+export function getRowsData(params: GetRowsDataParams): RowData[] {
   const {
-    prevItems,
+    prevRowsData,
     scrollViewHeight,
-    scrollTop,
+    scrollY,
     rowHeight,
-    rowsCount,
+    rowCount,
   } = params;
 
   // size is the number of visible rows
   const size = Math.floor(scrollViewHeight / rowHeight);
-  // prefetch the same number of items that are above and below the currently visible items
+  // overscan the same number of items that are above and below the currently visible items
   const overscanSize = size * 2;
   // totalSize is the number of visible rows plus overscan rows (here equal to the size)
   const totalSize = size + overscanSize;
 
   const queue = new RecycleQueue(
     totalSize,
-    prevItems.map((i) => i.row),
+    prevRowsData.map((i) => i.row),
   );
 
-  if (isEmpty(prevItems)) {
+  if (isEmpty(prevRowsData)) {
     for (let i = 0; i < totalSize; i++) {
       queue.enqueue();
     }
   } else {
     // first row that is visible
-    const visibleStartRow = Math.floor(scrollTop / rowHeight) + 1; // row index + 1 = row number
+    const visibleStartRow = Math.floor(scrollY / rowHeight) + 1; // row index + 1 = row number
     // first row in the overscan above visible rows
     const overscanStartRow = visibleStartRow - size;
 
-    const prevStartRow = Math.min(...prevItems.map((i) => i.row));
+    const prevStartRow = Math.min(...prevRowsData.map((i) => i.row));
 
     const diff = overscanStartRow - prevStartRow;
 
     if (diff > 0) {
       for (let i = 0; i < diff; i++) {
-        if (queue.front() >= rowsCount) {
+        if (queue.front() >= rowCount) {
           break;
         }
         queue.enqueue();
@@ -395,7 +376,7 @@ export function getItems(params: GetItemsParams): Item[] {
     return {
       key,
       row,
-      top: (row - 1) * rowHeight,
+      y: (row - 1) * rowHeight,
     };
   });
 
@@ -403,7 +384,7 @@ export function getItems(params: GetItemsParams): Item[] {
 }
 
 interface ColumnData {
-  left: number;
+  x: number;
   key: number;
   column: number;
   width: number;
@@ -411,13 +392,13 @@ interface ColumnData {
 
 interface GetColumnsDataParams {
   columns: number[];
-  scrollLeft: number;
+  scrollX: number;
   scrollViewWidth: number;
   overscan?: number;
 }
 
 export function getColumnsData(params: GetColumnsDataParams) {
-  const { scrollLeft, columns, scrollViewWidth, overscan = 0 } = params;
+  const { scrollX, columns, scrollViewWidth, overscan = 0 } = params;
 
   let startIndex = 0;
   let currentStartWidth = 0;
@@ -425,10 +406,10 @@ export function getColumnsData(params: GetColumnsDataParams) {
   for (let i = 0; i < columns.length; i++) {
     const columnWidth = columns[i];
 
-    if (currentStartWidth === scrollLeft) {
+    if (currentStartWidth === scrollX) {
       startIndex = i;
       break;
-    } else if (currentStartWidth > scrollLeft) {
+    } else if (currentStartWidth > scrollX) {
       startIndex = i - 1;
 
       const prevColumnWidth = columns[i - 1];
@@ -447,7 +428,7 @@ export function getColumnsData(params: GetColumnsDataParams) {
     const columnWidth = columns[i];
 
     if (
-      currentEndWidth >= scrollLeft + scrollViewWidth ||
+      currentEndWidth >= scrollX + scrollViewWidth ||
       columnWidth === undefined
     ) {
       endIndex = i - 1;
@@ -465,12 +446,12 @@ export function getColumnsData(params: GetColumnsDataParams) {
 
 interface RowPropsContainer {
   height: number;
-  top: number;
+  y: number;
   row: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   columns: number[];
   frozen: boolean;
-  frozenColumnsCount: number;
+  frozenColumnCount: number;
   startColumnIndex: number;
   endColumnIndex: number;
 }
@@ -478,9 +459,9 @@ interface RowPropsContainer {
 const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
   const {
     frozen,
-    frozenColumnsCount,
+    frozenColumnCount,
     height,
-    top,
+    y,
     row,
     columns: allColumns,
     startColumnIndex,
@@ -488,39 +469,40 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
     renderCell,
   } = props;
 
-  let initialLeft = 0;
+  let initialX = 0;
   const columns = frozen
-    ? allColumns.slice(0, frozenColumnsCount)
-    : allColumns.slice(frozenColumnsCount);
+    ? allColumns.slice(0, frozenColumnCount)
+    : allColumns.slice(frozenColumnCount);
 
   for (let i = 0; i < startColumnIndex; i++) {
-    initialLeft += columns[i];
+    initialX += columns[i];
   }
 
   const columnsData: ColumnData[] = [];
   let columnKey = 0;
-  let addLeft = 0;
+  let currentX = 0;
 
   for (let i = startColumnIndex; i <= endColumnIndex; i++) {
     const columnWidth = columns[i];
+
     columnsData.push({
       key: columnKey,
-      column: frozen ? i + 1 : i + 1 + frozenColumnsCount,
+      column: frozen ? i + 1 : i + 1 + frozenColumnCount,
       width: columnWidth,
-      left: initialLeft + addLeft,
+      x: initialX + currentX,
     });
 
-    addLeft += columnWidth;
+    currentX += columnWidth;
     columnKey++;
   }
 
   return (
-    <View style={[{ height, top }, styles.row]}>
+    <View style={[{ height, top: y }, styles.row]}>
       {columnsData.map((columnData) => {
-        const { key, width, column, left } = columnData;
+        const { key, width, column, x } = columnData;
 
         return (
-          <View key={key} style={[{ left, width }, styles.cell]}>
+          <View key={key} style={[{ left: x, width }, styles.cell]}>
             {renderCell({ row, column })}
           </View>
         );
@@ -530,9 +512,6 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
 });
 
 const styles = StyleSheet.create({
-  section: {
-    zIndex: 10,
-  },
   invisible: {
     opacity: 0,
   },
@@ -542,13 +521,10 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: 'pink',
   },
-  frozenCellsWrapper: {},
-  scrollableCellsWrapper: {
+  scrollAreaWrapper: {
     flex: 1,
   },
-  scrollableCellsContentWrapper: {},
   row: {
     flexDirection: 'row',
     position: 'absolute',
