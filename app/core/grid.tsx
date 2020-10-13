@@ -55,7 +55,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     renderCell,
     contentOffset = { x: 0, y: 0 },
     overscanColumnCount = 2,
-    onContentOffsetLoaded = () => {},
+    onContentOffsetLoaded,
   } = props;
   const verticalScrollViewRef = useRef<ScrollView>(null);
   const horizontalScrollViewRef = useRef<ScrollView>(null);
@@ -104,17 +104,16 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   }, [scrollYObservable, scrollXObservable]);
 
   useEffect(() => {
-    if (
-      Platform.OS === 'web' &&
-      (contentOffset.x !== 0 || contentOffset.y !== 0)
-    ) {
+    if (Platform.OS === 'web' && contentOffset) {
       handleScrollTo({
         y: contentOffset.y,
         x: contentOffset.x,
         animated: false,
       });
 
-      onContentOffsetLoaded();
+      if (onContentOffsetLoaded) {
+        onContentOffsetLoaded();
+      }
     }
   }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
 
