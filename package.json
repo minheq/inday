@@ -9,7 +9,6 @@
     "web": "webpack-dev-server",
     "server": "ts-node-dev --respawn --transpile-only --no-notify server/main.ts",
     "build": "webpack --mode=production",
-    "build:editor": "node ./scripts/build_editor_html.js",
     "build:storybook": "build-storybook",
     "test": "jest",
     "analyze": "webpack --profile --json > stats.json",
