@@ -24,9 +24,11 @@ export interface GridProps {
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
   frozenColumnCount: number;
+  overscanColumnCount?: number;
   /** Used to manually set the starting scroll offset. The default value is {x: 0, y: 0} */
   contentOffset?: ContentOffset;
-  overscanColumnCount?: number;
+  /** (Web) Starting scroll offset has loaded */
+  onContentOffsetLoaded?: () => void;
 }
 
 interface ContentOffset {
@@ -51,8 +53,9 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     scrollViewHeight,
     scrollViewWidth,
     renderCell,
-    contentOffset,
+    contentOffset = { x: 0, y: 0 },
     overscanColumnCount = 2,
+    onContentOffsetLoaded = () => {},
   } = props;
   const verticalScrollViewRef = useRef<ScrollView>(null);
   const horizontalScrollViewRef = useRef<ScrollView>(null);
@@ -60,26 +63,19 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const scrollXObservable = useRef(new Animated.Value(0)).current;
   const [scrollY, setScrollY] = useState(0);
   const [scrollX, setScrollX] = useState(0);
-  const [ready, setReady] = useState(contentOffset === undefined);
   const prevRowsDataRef = useRef<RowData[]>([]);
   const contentHeight = rowCount * rowHeight;
 
   const handleScrollTo = useCallback(
     (params: ScrollToParams) => {
-      const { x, y, animated } = params;
-
       if (verticalScrollViewRef.current) {
-        verticalScrollViewRef.current.scrollTo({ y, animated });
+        verticalScrollViewRef.current.scrollTo(params);
       }
       if (horizontalScrollViewRef.current) {
-        horizontalScrollViewRef.current.scrollTo({ x, animated });
-      }
-
-      if (ready === false) {
-        setReady(true);
+        horizontalScrollViewRef.current.scrollTo(params);
       }
     },
-    [ready, verticalScrollViewRef, horizontalScrollViewRef],
+    [verticalScrollViewRef, horizontalScrollViewRef],
   );
 
   useImperativeHandle(
@@ -108,14 +104,19 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   }, [scrollYObservable, scrollXObservable]);
 
   useEffect(() => {
-    if (Platform.OS === 'web' && contentOffset) {
+    if (
+      Platform.OS === 'web' &&
+      (contentOffset.x !== 0 || contentOffset.y !== 0)
+    ) {
       handleScrollTo({
         y: contentOffset.y,
         x: contentOffset.x,
         animated: false,
       });
+
+      onContentOffsetLoaded();
     }
-  }, [handleScrollTo, contentOffset]);
+  }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
 
   const frozenAreaColumns = columns.slice(0, frozenColumnCount);
   const scrollAreaColumns = columns.slice(frozenColumnCount);
@@ -129,7 +130,6 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     rowHeight,
     rowCount,
   });
-
   const frozenAreaColumnsData = getColumnsData({
     scrollX,
     scrollViewWidth: frozenAreaWidth,
@@ -146,12 +146,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   prevRowsDataRef.current = rowsData;
 
   return (
-    <View
-      style={[
-        { height: scrollViewHeight },
-        ready ? styles.visible : styles.invisible,
-      ]}
-    >
+    <View style={[{ height: scrollViewHeight }]}>
       <ScrollView
         ref={verticalScrollViewRef}
         contentOffset={contentOffset}
@@ -512,12 +507,6 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
 });
 
 const styles = StyleSheet.create({
-  invisible: {
-    opacity: 0,
-  },
-  visible: {
-    opacity: 1,
-  },
   wrapper: {
     flex: 1,
     flexDirection: 'row',

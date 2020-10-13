@@ -34,7 +34,7 @@ export const Default = () => (
         <Grid
           scrollViewWidth={width}
           scrollViewHeight={height}
-          // contentOffset={{ x: 400, y: 1000 }}
+          contentOffset={{ x: 400, y: 1000 }}
           rowCount={5000}
           renderCell={renderCell}
           rowHeight={40}
@@ -59,7 +59,7 @@ export const Default = () => (
             200,
             150,
           ]}
-          frozenColumnCount={1}
+          frozenColumnCount={2}
         />
       )}
     </AutoSizer>
