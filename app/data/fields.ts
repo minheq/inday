@@ -663,22 +663,22 @@ const equalityCheckerByFieldType: {
 } = {
   [FieldType.Checkbox]: areBooleanFieldKindValueEqual,
   [FieldType.Currency]: areNumberFieldKindValueEqual,
-  [FieldType.Date]: areDateFieldValuesEqual,
-  [FieldType.Email]: areTextFieldValueKindEqual,
+  [FieldType.Date]: areDateFieldKindValueEqual,
+  [FieldType.Email]: areTextFieldKindValueEqual,
   [FieldType.MultiCollaborator]: areMultiSelectFieldKindValueEqual,
   [FieldType.MultiRecordLink]: areMultiSelectFieldKindValueEqual,
-  [FieldType.MultiLineText]: areTextFieldValueKindEqual,
+  [FieldType.MultiLineText]: areTextFieldKindValueEqual,
   [FieldType.MultiOption]: areMultiSelectFieldKindValueEqual,
   [FieldType.Number]: areNumberFieldKindValueEqual,
-  [FieldType.PhoneNumber]: areTextFieldValueKindEqual,
+  [FieldType.PhoneNumber]: areTextFieldKindValueEqual,
   [FieldType.SingleCollaborator]: areSingleSelectFieldKindValueEqual,
   [FieldType.SingleRecordLink]: areSingleSelectFieldKindValueEqual,
-  [FieldType.SingleLineText]: areTextFieldValueKindEqual,
+  [FieldType.SingleLineText]: areTextFieldKindValueEqual,
   [FieldType.SingleOption]: areSingleSelectFieldKindValueEqual,
-  [FieldType.URL]: areTextFieldValueKindEqual,
+  [FieldType.URL]: areTextFieldKindValueEqual,
 };
 
-function areTextFieldValueKindEqual(a: FieldValue, b: FieldValue) {
+function areTextFieldKindValueEqual(a: FieldValue, b: FieldValue) {
   assertTextFieldKindValue(a);
   assertTextFieldKindValue(b);
 
@@ -713,7 +713,7 @@ function areBooleanFieldKindValueEqual(a: FieldValue, b: FieldValue) {
   return a === b;
 }
 
-function areDateFieldValuesEqual(a: FieldValue, b: FieldValue) {
+function areDateFieldKindValueEqual(a: FieldValue, b: FieldValue) {
   assertDateFieldValue(a);
   assertDateFieldValue(b);
 

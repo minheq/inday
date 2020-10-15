@@ -4,22 +4,22 @@ import {
   Field,
   FieldType,
   FieldValue,
-  SingleOptionFieldValue,
-  MultiOptionFieldValue,
-  SingleCollaboratorFieldValue,
   MultiCollaboratorFieldValue,
-  SingleRecordLinkFieldValue,
+  MultiOptionFieldValue,
   MultiRecordLinkFieldValue,
-  assertTextFieldKindValue,
+  SingleCollaboratorFieldValue,
+  SingleOptionFieldValue,
+  SingleRecordLinkFieldValue,
   assertBooleanFieldKindValue,
-  assertNumberFieldKindValue,
   assertDateFieldKindValue,
-  assertSingleOptionField,
-  assertMultiOptionField,
-  assertSingleCollaboratorField,
   assertMultiCollaboratorField,
+  assertMultiOptionField,
   assertMultiRecordLinkField,
+  assertNumberFieldKindValue,
+  assertSingleCollaboratorField,
+  assertSingleOptionField,
   assertSingleRecordLinkField,
+  assertTextFieldKindValue,
   areFieldValuesEqual,
 } from './fields';
 import { Record, RecordID } from './records';
@@ -781,7 +781,7 @@ export function applyBooleanFieldKindSort(
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
-      return ascendingBooleanFieldValueSort(valA, valB);
+      return ascendingBooleanFieldKindValueSort(valA, valB);
     });
   }
 
@@ -789,11 +789,11 @@ export function applyBooleanFieldKindSort(
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    return descendingBooleanFieldValueSort(valA, valB);
+    return descendingBooleanFieldKindValueSort(valA, valB);
   });
 }
 
-function ascendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
+function ascendingBooleanFieldKindValueSort(a: FieldValue, b: FieldValue) {
   assertBooleanFieldKindValue(a);
   assertBooleanFieldKindValue(b);
 
@@ -865,7 +865,7 @@ function ascendingDateFieldKindValueSort(a: FieldValue, b: FieldValue) {
   return 0;
 }
 
-function descendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
+function descendingBooleanFieldKindValueSort(a: FieldValue, b: FieldValue) {
   assertBooleanFieldKindValue(a);
   assertBooleanFieldKindValue(b);
 
@@ -945,7 +945,7 @@ function ascendingFieldValueSort(
 ) {
   switch (fieldType) {
     case FieldType.Checkbox:
-      return ascendingBooleanFieldValueSort(a, b);
+      return ascendingBooleanFieldKindValueSort(a, b);
     case FieldType.Date:
       return ascendingDateFieldKindValueSort(a, b);
     case FieldType.SingleLineText:
@@ -969,7 +969,7 @@ function descendingFieldValueSort(
 ) {
   switch (fieldType) {
     case FieldType.Checkbox:
-      return descendingBooleanFieldValueSort(a, b);
+      return descendingBooleanFieldKindValueSort(a, b);
     case FieldType.Date:
       return descendingDateFieldKindValueSort(a, b);
     case FieldType.SingleLineText:
