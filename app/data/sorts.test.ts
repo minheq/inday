@@ -1,7 +1,7 @@
 import {
+  addFieldsToCollection,
   makeCollection,
   makeField,
-  addFieldsToCollection,
   makeRecord,
   makeSort,
   makeCollaborator,

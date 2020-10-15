@@ -107,7 +107,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   const renderCell = useCallback(
     ({ row, column }: RenderCellProps) => {
       const field = fields[column - 1];
-      const record = records[row];
+      const record = records[row - 1];
       const value = record.fields[field.id];
 
       const renderer = rendererByFieldType[field.type];
