@@ -3,6 +3,17 @@ import {
   FieldID,
   Field,
   FieldType,
+  FieldValue,
+  SingleOptionFieldValue,
+  MultiOptionFieldValue,
+  SingleCollaboratorFieldValue,
+  MultiCollaboratorFieldValue,
+  SingleRecordLinkFieldValue,
+  MultiRecordLinkFieldValue,
+  assertTextFieldKindValue,
+  assertBooleanFieldKindValue,
+  assertNumberFieldKindValue,
+  assertDateFieldKindValue,
   assertSingleOptionField,
   assertMultiOptionField,
   assertSingleCollaboratorField,
@@ -11,21 +22,7 @@ import {
   assertSingleRecordLinkField,
   areFieldValuesEqual,
 } from './fields';
-import {
-  Record,
-  FieldValue,
-  RecordID,
-  SingleOptionValue,
-  MultiOptionValue,
-  SingleCollaboratorValue,
-  MultiCollaboratorValue,
-  SingleRecordLinkValue,
-  MultiRecordLinkValue,
-  assertTextFieldValue,
-  assertBooleanFieldValue,
-  assertNumberFieldValue,
-  assertDateFieldValue,
-} from './records';
+import { Record, RecordID } from './records';
 import { first, isEmpty, keyedBy } from '../../lib/data_structures';
 import { CollaboratorID, Collaborator } from './collaborators';
 import { isBefore, isAfter } from 'date-fns';
@@ -240,24 +237,24 @@ const applySortByFieldType: {
     getters: SortGetters,
   ) => Record[];
 } = {
-  [FieldType.Checkbox]: applyBooleanSort,
-  [FieldType.Currency]: applyNumberSort,
-  [FieldType.Date]: applyDateSort,
-  [FieldType.Email]: applyTextSort,
-  [FieldType.MultiCollaborator]: applyMultiCollaboratorSort,
-  [FieldType.MultiRecordLink]: applyMultiRecordLinkSort,
-  [FieldType.MultiLineText]: applyTextSort,
-  [FieldType.MultiOption]: applyMultiOptionSort,
-  [FieldType.Number]: applyNumberSort,
-  [FieldType.PhoneNumber]: applyTextSort,
-  [FieldType.SingleCollaborator]: applySingleCollaboratorSort,
-  [FieldType.SingleRecordLink]: applySingleRecordLinkSort,
-  [FieldType.SingleLineText]: applyTextSort,
-  [FieldType.SingleOption]: applySingleOptionSort,
-  [FieldType.URL]: applyTextSort,
+  [FieldType.Checkbox]: applyBooleanFieldKindSort,
+  [FieldType.Currency]: applyNumberFieldKindSort,
+  [FieldType.Date]: applyDateFieldKindSort,
+  [FieldType.Email]: applyTextFieldKindSort,
+  [FieldType.MultiCollaborator]: applyMultiCollaboratorFieldSort,
+  [FieldType.MultiRecordLink]: applyMultiRecordLinkFieldSort,
+  [FieldType.MultiLineText]: applyTextFieldKindSort,
+  [FieldType.MultiOption]: applyMultiOptionFieldSort,
+  [FieldType.Number]: applyNumberFieldKindSort,
+  [FieldType.PhoneNumber]: applyTextFieldKindSort,
+  [FieldType.SingleCollaborator]: applySingleCollaboratorFieldSort,
+  [FieldType.SingleRecordLink]: applySingleRecordLinkFieldSort,
+  [FieldType.SingleLineText]: applyTextFieldKindSort,
+  [FieldType.SingleOption]: applySingleOptionFieldSort,
+  [FieldType.URL]: applyTextFieldKindSort,
 };
 
-export function applyTextSort(
+export function applyTextFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -272,7 +269,7 @@ export function applyTextSort(
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
-      return ascendingTextFieldValueSort(valA, valB);
+      return ascendingTextFieldKindValueSort(valA, valB);
     });
   }
 
@@ -280,11 +277,11 @@ export function applyTextSort(
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    return descendingTextFieldValueSort(valA, valB);
+    return descendingTextFieldKindValueSort(valA, valB);
   });
 }
 
-export function applyNumberSort(
+export function applyNumberFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -299,7 +296,7 @@ export function applyNumberSort(
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
-      return ascendingNumberFieldValueSort(valA, valB);
+      return ascendingNumberFieldKindValueSort(valA, valB);
     });
   }
 
@@ -307,11 +304,11 @@ export function applyNumberSort(
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    return descendingNumberFieldValueSort(valA, valB);
+    return descendingNumberFieldKindValueSort(valA, valB);
   });
 }
 
-export function applyDateSort(
+export function applyDateFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -326,7 +323,7 @@ export function applyDateSort(
       const valA = a.fields[field.id];
       const valB = b.fields[field.id];
 
-      return ascendingDateFieldValueSort(valA, valB);
+      return ascendingDateFieldKindValueSort(valA, valB);
     });
   }
 
@@ -334,11 +331,11 @@ export function applyDateSort(
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    return descendingDateFieldValueSort(valA, valB);
+    return descendingDateFieldKindValueSort(valA, valB);
   });
 }
 
-export function applySingleOptionSort(
+export function applySingleOptionFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -354,8 +351,8 @@ export function applySingleOptionSort(
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as SingleOptionValue;
-      const valB = b.fields[field.id] as SingleOptionValue;
+      const valA = a.fields[field.id] as SingleOptionFieldValue;
+      const valB = b.fields[field.id] as SingleOptionFieldValue;
 
       if (valA === null && valB === null) {
         return 0;
@@ -382,8 +379,8 @@ export function applySingleOptionSort(
   }
 
   return recordsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as SingleOptionValue;
-    const valB = b.fields[field.id] as SingleOptionValue;
+    const valA = a.fields[field.id] as SingleOptionFieldValue;
+    const valB = b.fields[field.id] as SingleOptionFieldValue;
 
     if (valA === null && valB === null) {
       return 0;
@@ -409,7 +406,7 @@ export function applySingleOptionSort(
   });
 }
 
-export function applyMultiOptionSort(
+export function applyMultiOptionFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -425,8 +422,8 @@ export function applyMultiOptionSort(
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as MultiOptionValue;
-      const valB = b.fields[field.id] as MultiOptionValue;
+      const valA = a.fields[field.id] as MultiOptionFieldValue;
+      const valB = b.fields[field.id] as MultiOptionFieldValue;
 
       if (isEmpty(valA) && isEmpty(valB)) {
         return 0;
@@ -453,8 +450,8 @@ export function applyMultiOptionSort(
   }
 
   return recordsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as MultiOptionValue;
-    const valB = b.fields[field.id] as MultiOptionValue;
+    const valA = a.fields[field.id] as MultiOptionFieldValue;
+    const valB = b.fields[field.id] as MultiOptionFieldValue;
 
     if (isEmpty(valA) && isEmpty(valB)) {
       return 0;
@@ -480,7 +477,7 @@ export function applyMultiOptionSort(
   });
 }
 
-export function applySingleCollaboratorSort(
+export function applySingleCollaboratorFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -494,8 +491,8 @@ export function applySingleCollaboratorSort(
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as SingleCollaboratorValue;
-      const valB = b.fields[field.id] as SingleCollaboratorValue;
+      const valA = a.fields[field.id] as SingleCollaboratorFieldValue;
+      const valB = b.fields[field.id] as SingleCollaboratorFieldValue;
 
       if (valA === null && valB === null) {
         return 0;
@@ -522,8 +519,8 @@ export function applySingleCollaboratorSort(
   }
 
   return recordsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as SingleCollaboratorValue;
-    const valB = b.fields[field.id] as SingleCollaboratorValue;
+    const valA = a.fields[field.id] as SingleCollaboratorFieldValue;
+    const valB = b.fields[field.id] as SingleCollaboratorFieldValue;
 
     if (valA === null && valB === null) {
       return 0;
@@ -549,7 +546,7 @@ export function applySingleCollaboratorSort(
   });
 }
 
-export function applyMultiCollaboratorSort(
+export function applyMultiCollaboratorFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -563,8 +560,8 @@ export function applyMultiCollaboratorSort(
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as MultiCollaboratorValue;
-      const valB = b.fields[field.id] as MultiCollaboratorValue;
+      const valA = a.fields[field.id] as MultiCollaboratorFieldValue;
+      const valB = b.fields[field.id] as MultiCollaboratorFieldValue;
 
       if (isEmpty(valA) && isEmpty(valB)) {
         return 0;
@@ -591,8 +588,8 @@ export function applyMultiCollaboratorSort(
   }
 
   return recordsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as MultiCollaboratorValue;
-    const valB = b.fields[field.id] as MultiCollaboratorValue;
+    const valA = a.fields[field.id] as MultiCollaboratorFieldValue;
+    const valB = b.fields[field.id] as MultiCollaboratorFieldValue;
 
     if (isEmpty(valA) && isEmpty(valB)) {
       return 0;
@@ -618,7 +615,7 @@ export function applyMultiCollaboratorSort(
   });
 }
 
-export function applySingleRecordLinkSort(
+export function applySingleRecordLinkFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -635,8 +632,8 @@ export function applySingleRecordLinkSort(
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as SingleRecordLinkValue;
-      const valB = b.fields[field.id] as SingleRecordLinkValue;
+      const valA = a.fields[field.id] as SingleRecordLinkFieldValue;
+      const valB = b.fields[field.id] as SingleRecordLinkFieldValue;
 
       if (valA === null && valB === null) {
         return 0;
@@ -665,8 +662,8 @@ export function applySingleRecordLinkSort(
   }
 
   return recordsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as SingleRecordLinkValue;
-    const valB = b.fields[field.id] as SingleRecordLinkValue;
+    const valA = a.fields[field.id] as SingleRecordLinkFieldValue;
+    const valB = b.fields[field.id] as SingleRecordLinkFieldValue;
 
     if (valA === null && valB === null) {
       return 0;
@@ -694,7 +691,7 @@ export function applySingleRecordLinkSort(
   });
 }
 
-export function applyMultiRecordLinkSort(
+export function applyMultiRecordLinkFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -710,8 +707,8 @@ export function applyMultiRecordLinkSort(
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
-      const valA = a.fields[field.id] as MultiRecordLinkValue;
-      const valB = b.fields[field.id] as MultiRecordLinkValue;
+      const valA = a.fields[field.id] as MultiRecordLinkFieldValue;
+      const valB = b.fields[field.id] as MultiRecordLinkFieldValue;
 
       if (isEmpty(valA) && isEmpty(valB)) {
         return 0;
@@ -740,8 +737,8 @@ export function applyMultiRecordLinkSort(
   }
 
   return recordsClone.sort((a, b) => {
-    const valA = a.fields[field.id] as MultiRecordLinkValue;
-    const valB = b.fields[field.id] as MultiRecordLinkValue;
+    const valA = a.fields[field.id] as MultiRecordLinkFieldValue;
+    const valB = b.fields[field.id] as MultiRecordLinkFieldValue;
 
     if (isEmpty(valA) && isEmpty(valB)) {
       return 0;
@@ -769,7 +766,7 @@ export function applyMultiRecordLinkSort(
   });
 }
 
-export function applyBooleanSort(
+export function applyBooleanFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
@@ -797,8 +794,8 @@ export function applyBooleanSort(
 }
 
 function ascendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertBooleanFieldValue(a);
-  assertBooleanFieldValue(b);
+  assertBooleanFieldKindValue(a);
+  assertBooleanFieldKindValue(b);
 
   if (a === false && b === true) {
     return -1;
@@ -808,9 +805,9 @@ function ascendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
   return 0;
 }
 
-function ascendingTextFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertTextFieldValue(a);
-  assertTextFieldValue(b);
+function ascendingTextFieldKindValueSort(a: FieldValue, b: FieldValue) {
+  assertTextFieldKindValue(a);
+  assertTextFieldKindValue(b);
 
   if (a < b) {
     return -1;
@@ -820,9 +817,9 @@ function ascendingTextFieldValueSort(a: FieldValue, b: FieldValue) {
   return 0;
 }
 
-function ascendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertNumberFieldValue(a);
-  assertNumberFieldValue(b);
+function ascendingNumberFieldKindValueSort(a: FieldValue, b: FieldValue) {
+  assertNumberFieldKindValue(a);
+  assertNumberFieldKindValue(b);
 
   if (a === null && b === null) {
     return 0;
@@ -844,9 +841,9 @@ function ascendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
   return 0;
 }
 
-function ascendingDateFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertDateFieldValue(a);
-  assertDateFieldValue(b);
+function ascendingDateFieldKindValueSort(a: FieldValue, b: FieldValue) {
+  assertDateFieldKindValue(a);
+  assertDateFieldKindValue(b);
 
   if (a === null && b === null) {
     return 0;
@@ -869,8 +866,8 @@ function ascendingDateFieldValueSort(a: FieldValue, b: FieldValue) {
 }
 
 function descendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertBooleanFieldValue(a);
-  assertBooleanFieldValue(b);
+  assertBooleanFieldKindValue(a);
+  assertBooleanFieldKindValue(b);
 
   if (a === true && b === false) {
     return -1;
@@ -881,9 +878,9 @@ function descendingBooleanFieldValueSort(a: FieldValue, b: FieldValue) {
   return 0;
 }
 
-function descendingTextFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertTextFieldValue(a);
-  assertTextFieldValue(b);
+function descendingTextFieldKindValueSort(a: FieldValue, b: FieldValue) {
+  assertTextFieldKindValue(a);
+  assertTextFieldKindValue(b);
 
   if (a > b) {
     return -1;
@@ -893,9 +890,9 @@ function descendingTextFieldValueSort(a: FieldValue, b: FieldValue) {
   return 0;
 }
 
-function descendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertNumberFieldValue(a);
-  assertNumberFieldValue(b);
+function descendingNumberFieldKindValueSort(a: FieldValue, b: FieldValue) {
+  assertNumberFieldKindValue(a);
+  assertNumberFieldKindValue(b);
 
   if (a === null && b === null) {
     return 0;
@@ -917,9 +914,9 @@ function descendingNumberFieldValueSort(a: FieldValue, b: FieldValue) {
   return 0;
 }
 
-function descendingDateFieldValueSort(a: FieldValue, b: FieldValue) {
-  assertDateFieldValue(a);
-  assertDateFieldValue(b);
+function descendingDateFieldKindValueSort(a: FieldValue, b: FieldValue) {
+  assertDateFieldKindValue(a);
+  assertDateFieldKindValue(b);
 
   if (a === null && b === null) {
     return 0;
@@ -950,16 +947,16 @@ function ascendingFieldValueSort(
     case FieldType.Checkbox:
       return ascendingBooleanFieldValueSort(a, b);
     case FieldType.Date:
-      return ascendingDateFieldValueSort(a, b);
+      return ascendingDateFieldKindValueSort(a, b);
     case FieldType.SingleLineText:
     case FieldType.MultiLineText:
     case FieldType.URL:
     case FieldType.PhoneNumber:
     case FieldType.Email:
-      return ascendingTextFieldValueSort(a, b);
+      return ascendingTextFieldKindValueSort(a, b);
     case FieldType.Number:
     case FieldType.Currency:
-      return ascendingNumberFieldValueSort(a, b);
+      return ascendingNumberFieldKindValueSort(a, b);
     default:
       throw new Error(`Sort not supported for main field type=${fieldType}`);
   }
@@ -974,16 +971,16 @@ function descendingFieldValueSort(
     case FieldType.Checkbox:
       return descendingBooleanFieldValueSort(a, b);
     case FieldType.Date:
-      return descendingDateFieldValueSort(a, b);
+      return descendingDateFieldKindValueSort(a, b);
     case FieldType.SingleLineText:
     case FieldType.MultiLineText:
     case FieldType.URL:
     case FieldType.PhoneNumber:
     case FieldType.Email:
-      return descendingTextFieldValueSort(a, b);
+      return descendingTextFieldKindValueSort(a, b);
     case FieldType.Number:
     case FieldType.Currency:
-      return descendingNumberFieldValueSort(a, b);
+      return descendingNumberFieldKindValueSort(a, b);
     default:
       throw new Error(`Sort not supported for main field type=${fieldType}`);
   }

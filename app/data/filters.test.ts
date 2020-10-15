@@ -1,10 +1,10 @@
 import {
-  textFiltersByRule,
-  numberFiltersByRule,
-  dateFiltersByRule,
-  singleSelectFiltersByRule,
-  multiSelectFiltersByRule,
-  booleanFiltersByRule,
+  textFieldKindFiltersByRule,
+  numberFieldKindFiltersByRule,
+  dateFieldKindFiltersByRule,
+  singleSelectFieldKindFiltersByRule,
+  multiSelectFieldKindFiltersByRule,
+  booleanFieldKindFiltersByRule,
   Filter,
   updateFilterGroup,
   filterRecords,
@@ -19,8 +19,7 @@ import {
   makeRecord,
   makeFilter,
 } from './factory';
-import { FieldType, FieldID } from './fields';
-import { FieldValue } from './records';
+import { FieldType, FieldValue, FieldID } from './fields';
 
 describe('no filter', () => {
   test('all records', () => {
@@ -71,9 +70,9 @@ describe('filtering text', () => {
   });
 });
 
-describe('textFiltersByRule', () => {
+describe('textFieldKindFiltersByRule', () => {
   describe('contains', () => {
-    const filter = textFiltersByRule.contains;
+    const filter = textFieldKindFiltersByRule.contains;
 
     test('ok same case', () => {
       expect(filter('abc', 'a')).toBeTruthy();
@@ -89,7 +88,7 @@ describe('textFiltersByRule', () => {
   });
 
   describe('doesNotContain', () => {
-    const filter = textFiltersByRule.doesNotContain;
+    const filter = textFieldKindFiltersByRule.doesNotContain;
 
     test('ok', () => {
       expect(filter('abc', 'd')).toBeTruthy();
@@ -101,7 +100,7 @@ describe('textFiltersByRule', () => {
   });
 
   describe('is', () => {
-    const filter = textFiltersByRule.is;
+    const filter = textFieldKindFiltersByRule.is;
 
     test('ok', () => {
       expect(filter('abc', 'abc')).toBeTruthy();
@@ -113,7 +112,7 @@ describe('textFiltersByRule', () => {
   });
 
   describe('isNot', () => {
-    const filter = textFiltersByRule.isNot;
+    const filter = textFieldKindFiltersByRule.isNot;
 
     test('ok', () => {
       expect(filter('abc', 'b')).toBeTruthy();
@@ -125,7 +124,7 @@ describe('textFiltersByRule', () => {
   });
 
   describe('isEmpty', () => {
-    const filter = textFiltersByRule.isEmpty;
+    const filter = textFieldKindFiltersByRule.isEmpty;
 
     test('ok', () => {
       expect(filter('', '')).toBeTruthy();
@@ -137,7 +136,7 @@ describe('textFiltersByRule', () => {
   });
 
   describe('isNotEmpty', () => {
-    const filter = textFiltersByRule.isNotEmpty;
+    const filter = textFieldKindFiltersByRule.isNotEmpty;
 
     test('ok', () => {
       expect(filter('abc', '')).toBeTruthy();
@@ -149,9 +148,9 @@ describe('textFiltersByRule', () => {
   });
 });
 
-describe('numberFiltersByRule', () => {
+describe('numberFieldKindFiltersByRule', () => {
   describe('equal', () => {
-    const filter = numberFiltersByRule.equal;
+    const filter = numberFieldKindFiltersByRule.equal;
 
     test('ok', () => {
       expect(filter(1, 1)).toBeTruthy();
@@ -163,7 +162,7 @@ describe('numberFiltersByRule', () => {
   });
 
   describe('notEqual', () => {
-    const filter = numberFiltersByRule.notEqual;
+    const filter = numberFieldKindFiltersByRule.notEqual;
 
     test('ok', () => {
       expect(filter(1, 2)).toBeTruthy();
@@ -175,7 +174,7 @@ describe('numberFiltersByRule', () => {
   });
 
   describe('lessThan', () => {
-    const filter = numberFiltersByRule.lessThan;
+    const filter = numberFieldKindFiltersByRule.lessThan;
 
     test('ok', () => {
       expect(filter(1, 2)).toBeTruthy();
@@ -187,7 +186,7 @@ describe('numberFiltersByRule', () => {
   });
 
   describe('greaterThan', () => {
-    const filter = numberFiltersByRule.greaterThan;
+    const filter = numberFieldKindFiltersByRule.greaterThan;
 
     test('ok', () => {
       expect(filter(2, 1)).toBeTruthy();
@@ -199,7 +198,7 @@ describe('numberFiltersByRule', () => {
   });
 
   describe('lessThanOrEqual', () => {
-    const filter = numberFiltersByRule.lessThanOrEqual;
+    const filter = numberFieldKindFiltersByRule.lessThanOrEqual;
 
     test('ok', () => {
       expect(filter(1, 2)).toBeTruthy();
@@ -212,7 +211,7 @@ describe('numberFiltersByRule', () => {
   });
 
   describe('greaterThanOrEqual', () => {
-    const filter = numberFiltersByRule.greaterThanOrEqual;
+    const filter = numberFieldKindFiltersByRule.greaterThanOrEqual;
 
     test('ok', () => {
       expect(filter(2, 1)).toBeTruthy();
@@ -225,7 +224,7 @@ describe('numberFiltersByRule', () => {
   });
 
   describe('isEmpty', () => {
-    const filter = numberFiltersByRule.isEmpty;
+    const filter = numberFieldKindFiltersByRule.isEmpty;
 
     test('ok', () => {
       expect(filter(null, 0)).toBeTruthy();
@@ -237,7 +236,7 @@ describe('numberFiltersByRule', () => {
   });
 
   describe('isNotEmpty', () => {
-    const filter = numberFiltersByRule.isNotEmpty;
+    const filter = numberFieldKindFiltersByRule.isNotEmpty;
 
     test('ok', () => {
       expect(filter(1, 0)).toBeTruthy();
@@ -249,9 +248,9 @@ describe('numberFiltersByRule', () => {
   });
 });
 
-describe('dateFiltersByRule', () => {
+describe('dateFieldKindFiltersByRule', () => {
   describe('is', () => {
-    const filter = dateFiltersByRule.is;
+    const filter = dateFieldKindFiltersByRule.is;
 
     test('ok', () => {
       expect(
@@ -267,7 +266,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isWithin', () => {
-    const filter = dateFiltersByRule.isWithin;
+    const filter = dateFieldKindFiltersByRule.isWithin;
 
     test('ok', () => {
       expect(
@@ -289,7 +288,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isBefore', () => {
-    const filter = dateFiltersByRule.isBefore;
+    const filter = dateFieldKindFiltersByRule.isBefore;
 
     test('ok', () => {
       expect(
@@ -305,7 +304,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isAfter', () => {
-    const filter = dateFiltersByRule.isAfter;
+    const filter = dateFieldKindFiltersByRule.isAfter;
 
     test('ok', () => {
       expect(
@@ -321,7 +320,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isOnOrBefore', () => {
-    const filter = dateFiltersByRule.isOnOrBefore;
+    const filter = dateFieldKindFiltersByRule.isOnOrBefore;
 
     test('ok', () => {
       expect(
@@ -340,7 +339,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isOnOrAfter', () => {
-    const filter = dateFiltersByRule.isOnOrAfter;
+    const filter = dateFieldKindFiltersByRule.isOnOrAfter;
 
     test('ok', () => {
       expect(
@@ -359,7 +358,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isNot', () => {
-    const filter = dateFiltersByRule.isNot;
+    const filter = dateFieldKindFiltersByRule.isNot;
 
     test('ok', () => {
       expect(
@@ -375,7 +374,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isEmpty', () => {
-    const filter = dateFiltersByRule.isEmpty;
+    const filter = dateFieldKindFiltersByRule.isEmpty;
 
     test('ok', () => {
       expect(filter(null, new Date())).toBeTruthy();
@@ -387,7 +386,7 @@ describe('dateFiltersByRule', () => {
   });
 
   describe('isNotEmpty', () => {
-    const filter = dateFiltersByRule.isNotEmpty;
+    const filter = dateFieldKindFiltersByRule.isNotEmpty;
 
     test('ok', () => {
       expect(filter(parseDay('2020-08-04'), new Date())).toBeTruthy();
@@ -399,9 +398,9 @@ describe('dateFiltersByRule', () => {
   });
 });
 
-describe('singleSelectFiltersByRule', () => {
+describe('singleSelectFieldKindFiltersByRule', () => {
   describe('is', () => {
-    const filter = singleSelectFiltersByRule.is;
+    const filter = singleSelectFieldKindFiltersByRule.is;
 
     test('ok', () => {
       expect(filter('a', 'a')).toBeTruthy();
@@ -413,7 +412,7 @@ describe('singleSelectFiltersByRule', () => {
   });
 
   describe('isNot', () => {
-    const filter = singleSelectFiltersByRule.isNot;
+    const filter = singleSelectFieldKindFiltersByRule.isNot;
 
     test('ok', () => {
       expect(filter('ab', 'a')).toBeTruthy();
@@ -425,7 +424,7 @@ describe('singleSelectFiltersByRule', () => {
   });
 
   describe('isAnyOf', () => {
-    const filter = singleSelectFiltersByRule.isAnyOf;
+    const filter = singleSelectFieldKindFiltersByRule.isAnyOf;
 
     test('ok', () => {
       expect(filter('a', ['a', 'b'])).toBeTruthy();
@@ -437,7 +436,7 @@ describe('singleSelectFiltersByRule', () => {
   });
 
   describe('isNoneOf', () => {
-    const filter = singleSelectFiltersByRule.isNoneOf;
+    const filter = singleSelectFieldKindFiltersByRule.isNoneOf;
 
     test('ok', () => {
       expect(filter('a', ['b', 'c'])).toBeTruthy();
@@ -449,7 +448,7 @@ describe('singleSelectFiltersByRule', () => {
   });
 
   describe('isEmpty', () => {
-    const filter = singleSelectFiltersByRule.isEmpty;
+    const filter = singleSelectFieldKindFiltersByRule.isEmpty;
 
     test('ok', () => {
       expect(filter(null, '')).toBeTruthy();
@@ -461,7 +460,7 @@ describe('singleSelectFiltersByRule', () => {
   });
 
   describe('isNotEmpty', () => {
-    const filter = singleSelectFiltersByRule.isNotEmpty;
+    const filter = singleSelectFieldKindFiltersByRule.isNotEmpty;
 
     test('ok', () => {
       expect(filter('abc', '')).toBeTruthy();
@@ -473,9 +472,9 @@ describe('singleSelectFiltersByRule', () => {
   });
 });
 
-describe('multiSelectFiltersByRule', () => {
+describe('multiSelectFieldKindFiltersByRule', () => {
   describe('hasAnyOf', () => {
-    const filter = multiSelectFiltersByRule.hasAnyOf;
+    const filter = multiSelectFieldKindFiltersByRule.hasAnyOf;
 
     test('ok', () => {
       expect(filter(['a'], ['a', 'b'])).toBeTruthy();
@@ -487,7 +486,7 @@ describe('multiSelectFiltersByRule', () => {
   });
 
   describe('hasAllOf', () => {
-    const filter = multiSelectFiltersByRule.hasAllOf;
+    const filter = multiSelectFieldKindFiltersByRule.hasAllOf;
 
     test('ok', () => {
       expect(filter(['b', 'a'], ['a', 'b'])).toBeTruthy();
@@ -499,7 +498,7 @@ describe('multiSelectFiltersByRule', () => {
   });
 
   describe('hasNoneOf', () => {
-    const filter = multiSelectFiltersByRule.hasNoneOf;
+    const filter = multiSelectFieldKindFiltersByRule.hasNoneOf;
 
     test('ok', () => {
       expect(filter(['a'], ['b', 'c'])).toBeTruthy();
@@ -511,7 +510,7 @@ describe('multiSelectFiltersByRule', () => {
   });
 
   describe('isEmpty', () => {
-    const filter = multiSelectFiltersByRule.isEmpty;
+    const filter = multiSelectFieldKindFiltersByRule.isEmpty;
 
     test('ok', () => {
       expect(filter([], [])).toBeTruthy();
@@ -523,7 +522,7 @@ describe('multiSelectFiltersByRule', () => {
   });
 
   describe('isNotEmpty', () => {
-    const filter = multiSelectFiltersByRule.isNotEmpty;
+    const filter = multiSelectFieldKindFiltersByRule.isNotEmpty;
 
     test('ok', () => {
       expect(filter(['a'], [])).toBeTruthy();
@@ -535,9 +534,9 @@ describe('multiSelectFiltersByRule', () => {
   });
 });
 
-describe('booleanFiltersByRule', () => {
+describe('booleanFieldKindFiltersByRule', () => {
   describe('is', () => {
-    const filter = booleanFiltersByRule.is;
+    const filter = booleanFieldKindFiltersByRule.is;
 
     test('ok', () => {
       expect(filter(true, true)).toBeTruthy();

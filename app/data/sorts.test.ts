@@ -8,11 +8,12 @@ import {
 } from './factory';
 import {
   FieldType,
+  FieldValue,
   assertMultiOptionField,
   assertSingleOptionField,
 } from './fields';
 import { sortRecords, SortGetters } from './sorts';
-import { FieldValue, Record, RecordID } from './records';
+import { Record, RecordID } from './records';
 import { CollaboratorID } from './collaborators';
 
 describe('no sort', () => {

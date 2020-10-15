@@ -1,5 +1,4 @@
 import { isEmpty } from './primitive';
-import { assertString } from './strings';
 
 export function range(min: number, max: number, step?: number): number[];
 export function range(max: number): number[];
@@ -67,9 +66,9 @@ export function hasNoneOf<T>(a: T[], b: T[]): boolean {
   return isEmpty(intersect(a, b));
 }
 
-type KeyedBy<T extends object> = { [key: string]: T };
+type KeyedBy<T extends { [key: string]: any }> = { [key: string]: T };
 
-export function keyedBy<T extends object>(
+export function keyedBy<T extends { [key: string]: any }>(
   items: T[],
   prop: keyof T,
 ): KeyedBy<T> {
@@ -78,21 +77,20 @@ export function keyedBy<T extends object>(
   for (const item of items) {
     const key = item[prop];
 
-    assertString(key);
-
     grouped[key] = item;
   }
 
   return grouped;
 }
 
-export function groupBy<T extends object>(items: T[], prop: keyof T) {
+export function groupBy<T extends { [key: string]: any }>(
+  items: T[],
+  prop: keyof T,
+) {
   const grouped: { [key: string]: T[] } = {};
 
   for (const item of items) {
     const key = item[prop];
-
-    assertString(key);
 
     if (grouped[key]) {
       grouped[key].push(item);

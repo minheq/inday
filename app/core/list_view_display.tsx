@@ -1,31 +1,28 @@
-import React, { useRef, useEffect, useState, memo } from 'react';
-import { ScrollView, Animated } from 'react-native';
-import { Container, Text, Row, Column, Spacer, Icon } from '../components';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Animated, ScrollView, View, StyleSheet } from 'react-native';
+import { Container, Text, Row } from '../components';
 import {
   useGetViewRecords,
-  useGetFieldsWithListViewConfig,
+  useGetSortedFieldsWithListViewConfig,
 } from '../data/store';
-import { Field, FieldType } from '../data/fields';
 import {
-  FieldValue,
-  assertCheckboxFieldValue,
-  assertCurrencyFieldValue,
-  assertDateFieldValue,
-  assertEmailFieldValue,
-  assertMultiCollaboratorFieldValue,
-  assertMultiRecordLinkFieldValue,
-  assertMultiLineTextFieldValue,
-  assertMultiOptionFieldValue,
-  assertNumberFieldValue,
-  assertPhoneNumberFieldValue,
-  assertSingleCollaboratorFieldValue,
-  assertSingleRecordLinkFieldValue,
-  assertSingleLineTextFieldValue,
-  assertSingleOptionFieldValue,
-  assertURLFieldValue,
-  Record,
-} from '../data/records';
-import {
+  FieldType,
+  CheckboxField,
+  CurrencyField,
+  DateField,
+  EmailField,
+  MultiCollaboratorField,
+  MultiRecordLinkField,
+  MultiLineTextField,
+  MultiOptionField,
+  NumberField,
+  PhoneNumberField,
+  SingleCollaboratorField,
+  SingleRecordLinkField,
+  SingleLineTextField,
+  SingleOptionField,
+  URLField,
+  Field,
   assertCheckboxField,
   assertCurrencyField,
   assertDateField,
@@ -41,27 +38,57 @@ import {
   assertSingleLineTextField,
   assertSingleOptionField,
   assertURLField,
+  CheckboxFieldValue,
+  CurrencyFieldValue,
+  DateFieldValue,
+  EmailFieldValue,
+  MultiCollaboratorFieldValue,
+  MultiRecordLinkFieldValue,
+  MultiLineTextFieldValue,
+  MultiOptionFieldValue,
+  NumberFieldValue,
+  PhoneNumberFieldValue,
+  SingleCollaboratorFieldValue,
+  SingleRecordLinkFieldValue,
+  SingleLineTextFieldValue,
+  SingleOptionFieldValue,
+  URLFieldValue,
+  FieldValue,
+  assertDateFieldValue,
+  assertCheckboxFieldValue,
+  assertCurrencyFieldValue,
+  assertEmailFieldValue,
+  assertMultiCollaboratorFieldValue,
+  assertMultiRecordLinkFieldValue,
+  assertMultiLineTextFieldValue,
+  assertMultiOptionFieldValue,
+  assertNumberFieldValue,
+  assertPhoneNumberFieldValue,
+  assertSingleCollaboratorFieldValue,
+  assertSingleRecordLinkFieldValue,
+  assertSingleLineTextFieldValue,
+  assertSingleOptionFieldValue,
+  assertURLFieldValue,
 } from '../data/fields';
-import { format } from 'date-fns';
 import { AutoSizer } from '../lib/autosizer/autosizer';
-import { ListView, FieldWithListViewConfig } from '../data/views';
+import { ListView } from '../data/views';
+import { Grid, RenderCellProps } from './grid';
+import { format } from 'date-fns';
 
 interface ListViewDisplayProps {
   view: ListView;
 }
 
-const LEFT_COLUMN_WIDTH = 40;
-const ROW_HEIGHT = 32;
-const FIELD_HEIGHT = 40;
+const FIELDS_ROW_HEIGHT = 40;
+const RECORD_ROW_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
-  const fields = useGetFieldsWithListViewConfig(view.id);
+  const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  const { frozenFieldsCount } = view;
-
+  const { frozenFieldCount } = view;
   const headerScrollView = React.useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -77,44 +104,51 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     };
   }, [scrollX]);
 
-  const frozenFieldsWidth = fields
-    .slice(0, frozenFieldsCount)
-    .reduce((prevValue, field) => prevValue + field.config.width, 0);
+  const renderCell = useCallback(
+    ({ row, column }: RenderCellProps) => {
+      const field = fields[column - 1];
+      const record = records[row];
+      const value = record.fields[field.id];
+
+      const renderer = rendererByFieldType[field.type];
+
+      return <View style={styles.cell}>{renderer({ field, value })}</View>;
+    },
+    [fields, records],
+  );
+
+  const columns = fields.map((field) => field.config.width);
+  const rowCount = records.length;
 
   return (
     <Container flex={1}>
-      <Container height={FIELD_HEIGHT}>
+      <Container height={FIELDS_ROW_HEIGHT}>
         <Row>
-          <Container
-            color="tint"
-            width={LEFT_COLUMN_WIDTH}
-            height={FIELD_HEIGHT}
-            borderBottomWidth={1}
-            borderRightWidth={1}
-          />
-          <Container width={frozenFieldsWidth}>
+          {/* <Container width={frozenFieldsWidth}>
             <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
-              {fields.slice(0, frozenFieldsCount).map((field) => {
+              {fields.slice(0, frozenFieldCount).map((field) => {
                 return <HeaderCell key={field.id} field={field} />;
               })}
             </ScrollView>
           </Container>
           <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
-            {fields.slice(frozenFieldsCount).map((field) => {
+            {fields.slice(frozenFieldCount).map((field) => {
               return <HeaderCell key={field.id} field={field} />;
             })}
-          </ScrollView>
+          </ScrollView> */}
         </Row>
       </Container>
       <AutoSizer>
-        {({ height }) => (
-          <Rows
-            height={height}
-            records={records}
-            fields={fields}
-            scrollX={scrollX}
-            frozenFieldsCount={frozenFieldsCount}
-            frozenFieldsWidth={frozenFieldsWidth}
+        {({ height, width }) => (
+          <Grid
+            scrollViewWidth={width}
+            scrollViewHeight={height}
+            contentOffset={{ x: 0, y: 0 }}
+            rowCount={rowCount}
+            renderCell={renderCell}
+            rowHeight={RECORD_ROW_HEIGHT}
+            columns={columns}
+            frozenColumnCount={frozenFieldCount}
           />
         )}
       </AutoSizer>
@@ -122,346 +156,265 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   );
 }
 
-interface RowsProps {
-  height: number;
-  records: Record[];
-  fields: FieldWithListViewConfig[];
-  frozenFieldsCount: number;
-  frozenFieldsWidth: number;
-  scrollX: Animated.Value;
-}
-
-function Rows(props: RowsProps) {
-  const {
-    height,
-    records,
-    fields,
-    frozenFieldsCount,
-    frozenFieldsWidth,
-    scrollX,
-  } = props;
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const [scrollTop, setScrollTop] = useState(0);
-  const innerHeight = records.length * ROW_HEIGHT;
-
-  useEffect(() => {
-    const listenerID = scrollY.addListener((position) => {
-      setScrollTop(position.value);
-    });
-
-    return () => {
-      scrollY.removeListener(listenerID);
-    };
-  }, [scrollY]);
-
-  const startIndex = Math.floor(scrollTop / ROW_HEIGHT);
-  const endIndex = Math.min(
-    records.length - 1, // don't render past the end of the list
-    Math.floor((scrollTop + height) / ROW_HEIGHT),
-  );
-
-  const rows = [];
-
-  for (let index = startIndex; index <= endIndex; index++) {
-    const record = records[index];
-
-    rows.push({ index, record });
-  }
-
-  return (
-    <Container height={height}>
-      <ScrollView
-        onScroll={Animated.event(
-          [
-            {
-              nativeEvent: {
-                contentOffset: {
-                  y: scrollY,
-                },
-              },
-            },
-          ],
-          { useNativeDriver: false },
-        )}
-        contentContainerStyle={{ height: innerHeight }}
-        scrollEventThrottle={16}
-      >
-        <Row flex={1}>
-          <Container width={LEFT_COLUMN_WIDTH}>
-            <Column>
-              {rows.map((row) => {
-                const { record, index } = row;
-
-                return (
-                  <Container
-                    key={record.id}
-                    position="absolute"
-                    top={index * ROW_HEIGHT}
-                    width="100%"
-                  >
-                    <LeftColumnCell index={index} record={record} />
-                  </Container>
-                );
-              })}
-            </Column>
-          </Container>
-          <Container width={frozenFieldsWidth}>
-            <ScrollView horizontal>
-              <Column>
-                {rows.map((row) => {
-                  const { record, index } = row;
-
-                  return (
-                    <Container
-                      position="absolute"
-                      top={index * ROW_HEIGHT}
-                      key={record.id}
-                      color="content"
-                      borderBottomWidth={1}
-                      height={ROW_HEIGHT}
-                    >
-                      <Row key={record.id}>
-                        {fields.slice(0, frozenFieldsCount).map((field) => {
-                          return (
-                            <BodyCell
-                              key={`${field.id}${record.id}`}
-                              record={record}
-                              field={field}
-                            />
-                          );
-                        })}
-                      </Row>
-                    </Container>
-                  );
-                })}
-              </Column>
-            </ScrollView>
-          </Container>
-          <ScrollView
-            horizontal
-            onScroll={Animated.event(
-              [
-                {
-                  nativeEvent: {
-                    contentOffset: {
-                      x: scrollX,
-                    },
-                  },
-                },
-              ],
-              { useNativeDriver: false },
-            )}
-            scrollEventThrottle={16}
-          >
-            <Column>
-              {rows.map((row) => {
-                const { record, index } = row;
-                return (
-                  <Container
-                    position="absolute"
-                    top={index * ROW_HEIGHT}
-                    key={record.id}
-                    color="content"
-                    borderBottomWidth={1}
-                    height={ROW_HEIGHT}
-                  >
-                    <Row key={record.id}>
-                      {fields.slice(frozenFieldsCount).map((field) => {
-                        return (
-                          <BodyCell
-                            key={`${field.id}${record.id}`}
-                            record={record}
-                            field={field}
-                          />
-                        );
-                      })}
-                    </Row>
-                  </Container>
-                );
-              })}
-            </Column>
-          </ScrollView>
-        </Row>
-      </ScrollView>
-    </Container>
-  );
-}
-
-interface BodyCellProps {
-  field: FieldWithListViewConfig;
-  record: Record;
-}
-
-const BodyCell = memo(function BodyCell(props: BodyCellProps) {
-  const { record, field } = props;
-
-  const cell = recordFieldValueComponentByFieldType[field.type](
-    record.fields[field.id],
-    field,
-  );
-
-  return (
-    <Container
-      width={field.config.width}
-      height="100%"
-      borderRightWidth={1}
-      padding={4}
-      paddingHorizontal={8}
-    >
-      {cell}
-    </Container>
-  );
-});
-
-interface HeaderCellProps {
-  field: FieldWithListViewConfig;
-}
-
-const HeaderCell = memo(function HeaderCell(props: HeaderCellProps) {
-  const { field } = props;
-
-  return (
-    <Container
-      color="tint"
-      key={field.id}
-      height={FIELD_HEIGHT}
-      width={field.config.width}
-      borderBottomWidth={1}
-      borderRightWidth={1}
-      padding={8}
-    >
-      <Row alignItems="center">
-        <Icon name="menu" />
-        <Spacer size={8} />
-        <Text>{field.name}</Text>
-      </Row>
-    </Container>
-  );
-});
-
-interface LeftColumnCellProps {
-  record: Record;
-  index: number;
-}
-
-const LeftColumnCell = memo(function LeftColumnCell(
-  props: LeftColumnCellProps,
-) {
-  const { record, index } = props;
-
-  return (
-    <Container
-      key={record.id}
-      borderBottomWidth={1}
-      borderRightWidth={1}
-      height={ROW_HEIGHT}
-      center
-    >
-      <Text>{index}</Text>
-    </Container>
-  );
-});
-
-const recordFieldValueComponentByFieldType: {
-  [fieldType in FieldType]: (
-    value: FieldValue,
-    field: Field,
-  ) => React.ReactNode;
+const rendererByFieldType: {
+  [fieldType in FieldType]: (props: {
+    field: Field;
+    value: FieldValue;
+  }) => React.ReactNode;
 } = {
-  [FieldType.Checkbox]: (value, field) => {
+  [FieldType.Checkbox]: ({ field, value }) => {
     assertCheckboxFieldValue(value);
     assertCheckboxField(field);
 
-    return <Text>{value ? 'checked' : 'unchecked'}</Text>;
+    return <CheckboxCell field={field} value={value} />;
   },
-  [FieldType.Currency]: (value, field) => {
+  [FieldType.Currency]: ({ field, value }) => {
     assertCurrencyFieldValue(value);
     assertCurrencyField(field);
 
-    return <Text>{value}</Text>;
+    return <CurrencyCell field={field} value={value} />;
   },
-  [FieldType.Date]: (value, field) => {
+  [FieldType.Date]: ({ field, value }) => {
     assertDateFieldValue(value);
     assertDateField(field);
 
-    if (value === null) {
-      return null;
-    }
-
-    return <Text>{format(value, field.format)}</Text>;
+    return <DateCell field={field} value={value} />;
   },
-  [FieldType.Email]: (value, field) => {
+  [FieldType.Email]: ({ field, value }) => {
     assertEmailFieldValue(value);
     assertEmailField(field);
 
-    return <Text>{value}</Text>;
+    return <EmailCell field={field} value={value} />;
   },
-  [FieldType.MultiCollaborator]: (value, field) => {
+  [FieldType.MultiCollaborator]: ({ field, value }) => {
     assertMultiCollaboratorFieldValue(value);
     assertMultiCollaboratorField(field);
 
-    return <Text>{value[0]}</Text>;
+    return <MultiCollaboratorCell field={field} value={value} />;
   },
-
-  [FieldType.MultiRecordLink]: (value, field) => {
+  [FieldType.MultiRecordLink]: ({ field, value }) => {
     assertMultiRecordLinkFieldValue(value);
     assertMultiRecordLinkField(field);
 
-    return <Text>{value[0]}</Text>;
+    return <MultiRecordLinkCell field={field} value={value} />;
   },
-  [FieldType.MultiLineText]: (value, field) => {
+  [FieldType.MultiLineText]: ({ field, value }) => {
     assertMultiLineTextFieldValue(value);
     assertMultiLineTextField(field);
 
-    return <Text>{value}</Text>;
+    return <MultiLineTextCell field={field} value={value} />;
   },
-  [FieldType.MultiOption]: (value, field) => {
+  [FieldType.MultiOption]: ({ field, value }) => {
     assertMultiOptionFieldValue(value);
     assertMultiOptionField(field);
 
-    return <Text>{value[0]}</Text>;
+    return <MultiOptionCell field={field} value={value} />;
   },
-
-  [FieldType.Number]: (value, field) => {
+  [FieldType.Number]: ({ field, value }) => {
     assertNumberFieldValue(value);
     assertNumberField(field);
 
-    return <Text>{value}</Text>;
+    return <NumberCell field={field} value={value} />;
   },
-  [FieldType.PhoneNumber]: (value, field) => {
+  [FieldType.PhoneNumber]: ({ field, value }) => {
     assertPhoneNumberFieldValue(value);
     assertPhoneNumberField(field);
 
-    return <Text>{value}</Text>;
+    return <PhoneNumberCell field={field} value={value} />;
   },
-  [FieldType.SingleCollaborator]: (value, field) => {
+  [FieldType.SingleCollaborator]: ({ field, value }) => {
     assertSingleCollaboratorFieldValue(value);
     assertSingleCollaboratorField(field);
 
-    return <Text>{value}</Text>;
+    return <SingleCollaboratorCell field={field} value={value} />;
   },
-  [FieldType.SingleRecordLink]: (value, field) => {
+  [FieldType.SingleRecordLink]: ({ field, value }) => {
     assertSingleRecordLinkFieldValue(value);
     assertSingleRecordLinkField(field);
 
-    return <Text>{value}</Text>;
+    return <SingleRecordLinkCell field={field} value={value} />;
   },
-  [FieldType.SingleLineText]: (value, field) => {
+  [FieldType.SingleLineText]: ({ field, value }) => {
     assertSingleLineTextFieldValue(value);
     assertSingleLineTextField(field);
 
-    return <Text>{value}</Text>;
+    return <SingleLineTextCell field={field} value={value} />;
   },
-  [FieldType.SingleOption]: (value, field) => {
+  [FieldType.SingleOption]: ({ field, value }) => {
     assertSingleOptionFieldValue(value);
     assertSingleOptionField(field);
 
-    return <Text>{value}</Text>;
+    return <SingleOptionCell field={field} value={value} />;
   },
-  [FieldType.URL]: (value, field) => {
+  [FieldType.URL]: ({ field, value }) => {
     assertURLFieldValue(value);
     assertURLField(field);
 
-    return <Text>{value}</Text>;
+    return <URLCell field={field} value={value} />;
   },
 };
+
+interface CheckboxCellProps {
+  value: CheckboxFieldValue;
+  field: CheckboxField;
+}
+
+function CheckboxCell(props: CheckboxCellProps) {
+  const { value } = props;
+
+  return <Text>{value ? 'checked' : 'unchecked'}</Text>;
+}
+
+interface CurrencyCellProps {
+  value: CurrencyFieldValue;
+  field: CurrencyField;
+}
+
+function CurrencyCell(props: CurrencyCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+
+interface DateCellProps {
+  value: DateFieldValue;
+  field: DateField;
+}
+
+function DateCell(props: DateCellProps) {
+  const { value } = props;
+
+  if (value === null) {
+    return <Text>No date</Text>;
+  }
+
+  return <Text>{format(value, 'dd-MM-yyyy')}</Text>;
+}
+interface EmailCellProps {
+  value: EmailFieldValue;
+  field: EmailField;
+}
+
+function EmailCell(props: EmailCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+interface MultiCollaboratorCellProps {
+  value: MultiCollaboratorFieldValue;
+  field: MultiCollaboratorField;
+}
+
+function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
+  const { value } = props;
+
+  return <Text>{value[0]}</Text>;
+}
+interface MultiRecordLinkCellProps {
+  value: MultiRecordLinkFieldValue;
+  field: MultiRecordLinkField;
+}
+
+function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
+  const { value } = props;
+
+  return <Text>{value[0]}</Text>;
+}
+interface MultiLineTextCellProps {
+  value: MultiLineTextFieldValue;
+  field: MultiLineTextField;
+}
+
+function MultiLineTextCell(props: MultiLineTextCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+interface MultiOptionCellProps {
+  value: MultiOptionFieldValue;
+  field: MultiOptionField;
+}
+
+function MultiOptionCell(props: MultiOptionCellProps) {
+  const { value } = props;
+
+  return <Text>{value[0]}</Text>;
+}
+interface NumberCellProps {
+  value: NumberFieldValue;
+  field: NumberField;
+}
+
+function NumberCell(props: NumberCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+interface PhoneNumberCellProps {
+  value: PhoneNumberFieldValue;
+  field: PhoneNumberField;
+}
+
+function PhoneNumberCell(props: PhoneNumberCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+interface SingleCollaboratorCellProps {
+  value: SingleCollaboratorFieldValue;
+  field: SingleCollaboratorField;
+}
+
+function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+interface SingleRecordLinkCellProps {
+  value: SingleRecordLinkFieldValue;
+  field: SingleRecordLinkField;
+}
+
+function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+interface SingleLineTextCellProps {
+  value: SingleLineTextFieldValue;
+  field: SingleLineTextField;
+}
+
+function SingleLineTextCell(props: SingleLineTextCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+
+interface SingleOptionCellProps {
+  value: SingleOptionFieldValue;
+  field: SingleOptionField;
+}
+
+function SingleOptionCell(props: SingleOptionCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+
+interface URLCellProps {
+  value: URLFieldValue;
+  field: URLField;
+}
+
+function URLCell(props: URLCellProps) {
+  const { value } = props;
+
+  return <Text>{value}</Text>;
+}
+
+const styles = StyleSheet.create({
+  cell: {
+    width: '100%',
+  },
+});

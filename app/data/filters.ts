@@ -1,32 +1,30 @@
 import { isSameDay, isWithinInterval, isBefore, isAfter } from 'date-fns';
-import {
-  FieldValue,
-  assertTextFieldValue,
-  assertNumberFieldValue,
-  assertDateFieldValue,
-  assertSingleSelectFieldValue,
-  assertMultiSelectFieldValue,
-  assertBooleanFieldValue,
-  Record,
-} from './records';
+import { Record } from './records';
 import {
   hasAnyOf,
   hasAllOf,
   hasNoneOf,
   isEmpty,
 } from '../../lib/data_structures';
-import { FieldID, Field, FieldType } from './fields';
-import { ViewID } from './views';
 import {
-  DateValue,
-  CurrencyValue,
-  NumberFieldValue,
-  CheckboxValue,
-  TextFieldValue,
-  SingleSelectFieldValue,
-  MultiSelectFieldValue,
-  BooleanFieldValue,
-} from './records';
+  assertBooleanFieldKindValue,
+  assertDateFieldValue,
+  assertMultiSelectFieldKindValue,
+  assertNumberFieldValue,
+  assertSingleSelectFieldKindValue,
+  assertTextFieldKindValue,
+  BooleanFieldKindValue,
+  DateFieldKindValue,
+  Field,
+  FieldID,
+  FieldType,
+  FieldValue,
+  MultiSelectFieldKindValue,
+  NumberFieldKindValue,
+  SingleSelectFieldKindValue,
+  TextFieldKindValue,
+} from './fields';
+import { ViewID } from './views';
 
 export type FilterID = string;
 
@@ -40,8 +38,8 @@ export interface BaseFilter {
 
 export interface CheckboxFieldFilterConfig {
   fieldID: FieldID;
-  rule: BooleanFilterRule;
-  value: BooleanFilterRuleValue;
+  rule: BooleanFieldKindFilterRule;
+  value: BooleanFieldKindFilterRuleValue;
 }
 export interface CheckboxFieldFilter
   extends BaseFilter,
@@ -49,8 +47,8 @@ export interface CheckboxFieldFilter
 
 export interface CurrencyFieldFilterConfig {
   fieldID: FieldID;
-  rule: NumberFilterRule;
-  value: NumberFilterRuleValue;
+  rule: NumberFieldKindFilterRule;
+  value: NumberFieldKindFilterRuleValue;
 }
 export interface CurrencyFieldFilter
   extends BaseFilter,
@@ -58,22 +56,22 @@ export interface CurrencyFieldFilter
 
 export interface DateFieldFilterConfig {
   fieldID: FieldID;
-  rule: DateFilterRule;
-  value: DateFilterRuleValue;
+  rule: DateFieldKindFilterRule;
+  value: DateFieldKindFilterRuleValue;
 }
 export interface DateFieldFilter extends BaseFilter, DateFieldFilterConfig {}
 
 export interface EmailFieldFilterConfig {
   fieldID: FieldID;
-  rule: TextFilterRule;
-  value: TextFilterRuleValue;
+  rule: TextFieldKindFilterRule;
+  value: TextFieldKindFilterRuleValue;
 }
 export interface EmailFieldFilter extends BaseFilter, EmailFieldFilterConfig {}
 
 export interface MultiCollaboratorFieldFilterConfig {
   fieldID: FieldID;
-  rule: MultiSelectFilterRule;
-  value: MultiSelectFilterRuleValue;
+  rule: MultiSelectFieldKindFilterRule;
+  value: MultiSelectFieldKindFilterRuleValue;
 }
 export interface MultiCollaboratorFieldFilter
   extends BaseFilter,
@@ -81,8 +79,8 @@ export interface MultiCollaboratorFieldFilter
 
 export interface MultiRecordLinkFieldFilterConfig {
   fieldID: FieldID;
-  rule: MultiSelectFilterRule;
-  value: MultiSelectFilterRuleValue;
+  rule: MultiSelectFieldKindFilterRule;
+  value: MultiSelectFieldKindFilterRuleValue;
 }
 export interface MultiRecordLinkFieldFilter
   extends BaseFilter,
@@ -90,8 +88,8 @@ export interface MultiRecordLinkFieldFilter
 
 export interface MultiLineTextFieldFilterConfig {
   fieldID: FieldID;
-  rule: TextFilterRule;
-  value: TextFilterRuleValue;
+  rule: TextFieldKindFilterRule;
+  value: TextFieldKindFilterRuleValue;
 }
 export interface MultiLineTextFieldFilter
   extends BaseFilter,
@@ -99,8 +97,8 @@ export interface MultiLineTextFieldFilter
 
 export interface MultiOptionFieldFilterConfig {
   fieldID: FieldID;
-  rule: MultiSelectFilterRule;
-  value: MultiSelectFilterRuleValue;
+  rule: MultiSelectFieldKindFilterRule;
+  value: MultiSelectFieldKindFilterRuleValue;
 }
 export interface MultiOptionFieldFilter
   extends BaseFilter,
@@ -108,8 +106,8 @@ export interface MultiOptionFieldFilter
 
 export interface NumberFieldFilterConfig {
   fieldID: FieldID;
-  rule: NumberFilterRule;
-  value: NumberFilterRuleValue;
+  rule: NumberFieldKindFilterRule;
+  value: NumberFieldKindFilterRuleValue;
 }
 export interface NumberFieldFilter
   extends BaseFilter,
@@ -117,8 +115,8 @@ export interface NumberFieldFilter
 
 export interface PhoneNumberFieldFilterConfig {
   fieldID: FieldID;
-  rule: TextFilterRule;
-  value: TextFilterRuleValue;
+  rule: TextFieldKindFilterRule;
+  value: TextFieldKindFilterRuleValue;
 }
 export interface PhoneNumberFieldFilter
   extends BaseFilter,
@@ -126,8 +124,8 @@ export interface PhoneNumberFieldFilter
 
 export interface SingleCollaboratorFieldFilterConfig {
   fieldID: FieldID;
-  rule: SingleSelectFilterRule;
-  value: SingleSelectFilterRuleValue;
+  rule: SingleSelectFieldKindFilterRule;
+  value: SingleSelectFieldKindFilterRuleValue;
 }
 export interface SingleCollaboratorFieldFilter
   extends BaseFilter,
@@ -135,8 +133,8 @@ export interface SingleCollaboratorFieldFilter
 
 export interface SingleRecordLinkFieldFilterConfig {
   fieldID: FieldID;
-  rule: SingleSelectFilterRule;
-  value: SingleSelectFilterRuleValue;
+  rule: SingleSelectFieldKindFilterRule;
+  value: SingleSelectFieldKindFilterRuleValue;
 }
 export interface SingleRecordLinkFieldFilter
   extends BaseFilter,
@@ -144,8 +142,8 @@ export interface SingleRecordLinkFieldFilter
 
 export interface SingleLineTextFieldFilterConfig {
   fieldID: FieldID;
-  rule: TextFilterRule;
-  value: TextFilterRuleValue;
+  rule: TextFieldKindFilterRule;
+  value: TextFieldKindFilterRuleValue;
 }
 export interface SingleLineTextFieldFilter
   extends BaseFilter,
@@ -153,8 +151,8 @@ export interface SingleLineTextFieldFilter
 
 export interface SingleOptionFieldFilterConfig {
   fieldID: FieldID;
-  rule: SingleSelectFilterRule;
-  value: SingleSelectFilterRuleValue;
+  rule: SingleSelectFieldKindFilterRule;
+  value: SingleSelectFieldKindFilterRuleValue;
 }
 export interface SingleOptionFieldFilter
   extends BaseFilter,
@@ -162,38 +160,38 @@ export interface SingleOptionFieldFilter
 
 export interface URLFieldFilterConfig {
   fieldID: FieldID;
-  rule: TextFilterRule;
-  value: TextFilterRuleValue;
+  rule: TextFieldKindFilterRule;
+  value: TextFieldKindFilterRuleValue;
 }
 export interface URLFieldFilter extends BaseFilter, URLFieldFilterConfig {}
 
-export type TextFilterRule =
+export type TextFieldKindFilterRule =
   | 'contains'
   | 'doesNotContain'
   | 'is'
   | 'isNot'
   | 'isEmpty'
   | 'isNotEmpty';
-export type TextFilterRuleValue = string;
+export type TextFieldKindFilterRuleValue = string;
 
-export type SingleSelectFilterRule =
+export type SingleSelectFieldKindFilterRule =
   | 'is'
   | 'isNot'
   | 'isAnyOf'
   | 'isNoneOf'
   | 'isEmpty'
   | 'isNotEmpty';
-export type SingleSelectFilterRuleValue = string | string[] | null;
+export type SingleSelectFieldKindFilterRuleValue = string | string[] | null;
 
-export type MultiSelectFilterRule =
+export type MultiSelectFieldKindFilterRule =
   | 'hasAnyOf'
   | 'hasAllOf'
   | 'hasNoneOf'
   | 'isEmpty'
   | 'isNotEmpty';
-export type MultiSelectFilterRuleValue = string[];
+export type MultiSelectFieldKindFilterRuleValue = string[];
 
-export type DateFilterRule =
+export type DateFieldKindFilterRule =
   | 'is'
   | 'isWithin'
   | 'isBefore'
@@ -203,9 +201,9 @@ export type DateFilterRule =
   | 'isNot'
   | 'isEmpty'
   | 'isNotEmpty';
-export type DateFilterRuleValue = Date | Interval | null;
+export type DateFieldKindFilterRuleValue = Date | Interval | null;
 
-export type NumberFilterRule =
+export type NumberFieldKindFilterRule =
   | 'equal'
   | 'notEqual'
   | 'lessThan'
@@ -214,75 +212,75 @@ export type NumberFilterRule =
   | 'greaterThanOrEqual'
   | 'isEmpty'
   | 'isNotEmpty';
-export type NumberFilterRuleValue = number | null;
+export type NumberFieldKindFilterRuleValue = number | null;
 
-export type BooleanFilterRule = 'is';
-export type BooleanFilterRuleValue = boolean;
+export type BooleanFieldKindFilterRule = 'is';
+export type BooleanFieldKindFilterRuleValue = boolean;
 
 export type FilterRule =
-  | DateFilterRule
-  | MultiSelectFilterRule
-  | NumberFilterRule
-  | SingleSelectFilterRule
-  | TextFilterRule;
+  | DateFieldKindFilterRule
+  | MultiSelectFieldKindFilterRule
+  | NumberFieldKindFilterRule
+  | SingleSelectFieldKindFilterRule
+  | TextFieldKindFilterRule;
 
 export type FilterRuleValue =
-  | DateFilterRuleValue
-  | MultiSelectFilterRuleValue
-  | NumberFilterRuleValue
-  | SingleSelectFilterRuleValue
-  | TextFilterRuleValue;
+  | DateFieldKindFilterRuleValue
+  | MultiSelectFieldKindFilterRuleValue
+  | NumberFieldKindFilterRuleValue
+  | SingleSelectFieldKindFilterRuleValue
+  | TextFieldKindFilterRuleValue;
 
 export type FilterConfig =
-  | BooleanFilterConfig
-  | DateFilterConfig
-  | MultiSelectFilterConfig
-  | NumberFilterConfig
-  | SingleSelectFilterConfig
-  | TextFilterConfig;
+  | BooleanFieldKindFilterConfig
+  | DateFieldKindFilterConfig
+  | MultiSelectFieldKindFilterConfig
+  | NumberFieldKindFilterConfig
+  | SingleSelectFieldKindFilterConfig
+  | TextFieldKindFilterConfig;
 
 export type Filter =
-  | BooleanFilter
-  | DateFilter
-  | MultiSelectFilter
-  | NumberFilter
-  | SingleSelectFilter
-  | TextFilter;
+  | BooleanFieldKindFilter
+  | DateFieldKindFilter
+  | MultiSelectFieldKindFilter
+  | NumberFieldKindFilter
+  | SingleSelectFieldKindFilter
+  | TextFieldKindFilter;
 
 export type FilterGroup = Filter[];
 
-export type BooleanFilter = CheckboxFieldFilter;
-export type DateFilter = DateFieldFilter;
-export type MultiSelectFilter =
+export type BooleanFieldKindFilter = CheckboxFieldFilter;
+export type DateFieldKindFilter = DateFieldFilter;
+export type MultiSelectFieldKindFilter =
   | MultiCollaboratorFieldFilter
   | MultiRecordLinkFieldFilter
   | MultiOptionFieldFilter;
-export type NumberFilter = CurrencyFieldFilter | NumberFieldFilter;
-export type SingleSelectFilter =
+export type NumberFieldKindFilter = CurrencyFieldFilter | NumberFieldFilter;
+export type SingleSelectFieldKindFilter =
   | SingleCollaboratorFieldFilter
   | SingleRecordLinkFieldFilter
   | SingleOptionFieldFilter;
-export type TextFilter =
+export type TextFieldKindFilter =
   | EmailFieldFilter
   | MultiLineTextFieldFilter
   | PhoneNumberFieldFilter
   | SingleLineTextFieldFilter
   | URLFieldFilter;
 
-export type BooleanFilterConfig = CheckboxFieldFilterConfig;
-export type DateFilterConfig = DateFieldFilterConfig;
-export type MultiSelectFilterConfig =
+export type BooleanFieldKindFilterConfig = CheckboxFieldFilterConfig;
+export type DateFieldKindFilterConfig = DateFieldFilterConfig;
+export type MultiSelectFieldKindFilterConfig =
   | MultiCollaboratorFieldFilterConfig
   | MultiRecordLinkFieldFilterConfig
   | MultiOptionFieldFilterConfig;
-export type NumberFilterConfig =
+export type NumberFieldKindFilterConfig =
   | CurrencyFieldFilterConfig
   | NumberFieldFilterConfig;
-export type SingleSelectFilterConfig =
+export type SingleSelectFieldKindFilterConfig =
   | SingleCollaboratorFieldFilterConfig
   | SingleRecordLinkFieldFilterConfig
   | SingleOptionFieldFilterConfig;
-export type TextFilterConfig =
+export type TextFieldKindFilterConfig =
   | EmailFieldFilterConfig
   | MultiLineTextFieldFilterConfig
   | PhoneNumberFieldFilterConfig
@@ -403,77 +401,89 @@ export function filterRecords(
   return filteredRecords;
 }
 
-export function assertNumberFilterRule(
+export function assertNumberFieldKindFilterRule(
   rule: FilterRule,
-): asserts rule is NumberFilterRule {
-  if (rule in numberFiltersByRule) {
+): asserts rule is NumberFieldKindFilterRule {
+  if (rule in numberFieldKindFiltersByRule) {
     return;
   }
 
-  throw Error(`Expected one of valid NumberFilterRule. Received ${rule}`);
+  throw Error(
+    `Expected one of valid NumberFieldKindFilterRule. Received ${rule}`,
+  );
 }
 
-export function assertTextFilterRule(
+export function assertTextFieldKindFilterRule(
   rule: FilterRule,
-): asserts rule is TextFilterRule {
-  if (rule in textFiltersByRule) {
+): asserts rule is TextFieldKindFilterRule {
+  if (rule in textFieldKindFiltersByRule) {
     return;
   }
 
-  throw Error(`Expected one of valid TextFilterRule. Received ${rule}`);
+  throw Error(
+    `Expected one of valid TextFieldKindFilterRule. Received ${rule}`,
+  );
 }
 
-export function assertDateFilterRule(
+export function assertDateFieldKindFilterRule(
   rule: FilterRule,
-): asserts rule is DateFilterRule {
-  if (rule in dateFiltersByRule) {
+): asserts rule is DateFieldKindFilterRule {
+  if (rule in dateFieldKindFiltersByRule) {
     return;
   }
 
-  throw Error(`Expected one of valid DateFilterRule. Received ${rule}`);
+  throw Error(
+    `Expected one of valid DateFieldKindFilterRule. Received ${rule}`,
+  );
 }
 
-export function assertMultiSelectFilterRule(
+export function assertMultiSelectFieldKindFilterRule(
   rule: FilterRule,
-): asserts rule is MultiSelectFilterRule {
-  if (rule in multiSelectFiltersByRule) {
+): asserts rule is MultiSelectFieldKindFilterRule {
+  if (rule in multiSelectFieldKindFiltersByRule) {
     return;
   }
 
-  throw Error(`Expected one of valid MultiSelectFilterRule. Received ${rule}`);
+  throw Error(
+    `Expected one of valid MultiSelectFieldKindFilterRule. Received ${rule}`,
+  );
 }
 
-export function assertSingleSelectFilterRule(
+export function assertSingleSelectFieldKindFilterRule(
   rule: FilterRule,
-): asserts rule is SingleSelectFilterRule {
-  if (rule in singleSelectFiltersByRule) {
+): asserts rule is SingleSelectFieldKindFilterRule {
+  if (rule in singleSelectFieldKindFiltersByRule) {
     return;
   }
 
-  throw Error(`Expected one of valid SingleSelectFilterRule. Received ${rule}`);
+  throw Error(
+    `Expected one of valid SingleSelectFieldKindFilterRule. Received ${rule}`,
+  );
 }
 
 export function assertBooleanFilterRule(
   rule: FilterRule,
-): asserts rule is BooleanFilterRule {
-  if (rule in booleanFiltersByRule) {
+): asserts rule is BooleanFieldKindFilterRule {
+  if (rule in booleanFieldKindFiltersByRule) {
     return;
   }
 
-  throw Error(`Expected one of valid BooleanFilterRule. Received ${rule}`);
+  throw Error(
+    `Expected one of valid BooleanFieldKindFilterRule. Received ${rule}`,
+  );
 }
 
-export function applyTextFilter(
-  value: TextFieldValue,
-  filter: TextFilter,
+export function applyTextFieldKindFilter(
+  value: TextFieldKindValue,
+  filter: TextFieldKindFilter,
 ): boolean {
-  return textFiltersByRule[filter.rule](value, filter.value);
+  return textFieldKindFiltersByRule[filter.rule](value, filter.value);
 }
 
-export const textFiltersByRule: {
-  [rule in TextFilterRule]: (
-    value: TextFieldValue,
-    filterValue: TextFilterRuleValue,
+export const textFieldKindFiltersByRule: {
+  [rule in TextFieldKindFilterRule]: (
+    value: TextFieldKindValue,
+    filterValue: TextFieldKindFilterRuleValue,
   ) => boolean;
 } = {
   contains: (value, filterValue) => {
@@ -496,17 +506,17 @@ export const textFiltersByRule: {
   },
 };
 
-export function applyNumberFilter(
-  value: NumberFieldValue,
+export function applyNumberFieldKindFilter(
+  value: NumberFieldKindValue,
   filter: NumberFieldFilter,
 ): boolean {
-  return numberFiltersByRule[filter.rule](value, filter.value);
+  return numberFieldKindFiltersByRule[filter.rule](value, filter.value);
 }
 
-export const numberFiltersByRule: {
-  [rule in NumberFilterRule]: (
-    value: CurrencyValue | NumberFieldValue,
-    filterValue: NumberFilterRuleValue,
+export const numberFieldKindFiltersByRule: {
+  [rule in NumberFieldKindFilterRule]: (
+    value: NumberFieldKindValue,
+    filterValue: NumberFieldKindFilterRuleValue,
   ) => boolean;
 } = {
   equal: (value, filterValue) => {
@@ -567,17 +577,17 @@ export const numberFiltersByRule: {
   },
 };
 
-export function applyDateFilter(
-  value: DateValue,
+export function applyDateFieldKindFilter(
+  value: DateFieldKindValue,
   filter: DateFieldFilter,
 ): boolean {
-  return dateFiltersByRule[filter.rule](value, filter.value);
+  return dateFieldKindFiltersByRule[filter.rule](value, filter.value);
 }
 
-export const dateFiltersByRule: {
-  [rule in DateFilterRule]: (
-    value: DateValue,
-    filterValue: DateFilterRuleValue,
+export const dateFieldKindFiltersByRule: {
+  [rule in DateFieldKindFilterRule]: (
+    value: DateFieldKindValue,
+    filterValue: DateFieldKindFilterRuleValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {
@@ -683,17 +693,17 @@ export const dateFiltersByRule: {
   },
 };
 
-export function applySingleSelectFilter(
-  value: SingleSelectFieldValue,
-  filter: SingleSelectFilter,
+export function applySingleSelectFieldKindFilter(
+  value: SingleSelectFieldKindValue,
+  filter: SingleSelectFieldKindFilter,
 ): boolean {
-  return singleSelectFiltersByRule[filter.rule](value, filter.value);
+  return singleSelectFieldKindFiltersByRule[filter.rule](value, filter.value);
 }
 
-export const singleSelectFiltersByRule: {
-  [rule in SingleSelectFilterRule]: (
-    value: SingleSelectFieldValue,
-    filterValue: SingleSelectFilterRuleValue,
+export const singleSelectFieldKindFiltersByRule: {
+  [rule in SingleSelectFieldKindFilterRule]: (
+    value: SingleSelectFieldKindValue,
+    filterValue: SingleSelectFieldKindFilterRuleValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {
@@ -764,17 +774,17 @@ export const singleSelectFiltersByRule: {
   },
 };
 
-export function applyMultiSelectFilter(
-  value: MultiSelectFieldValue,
-  filter: MultiSelectFilter,
+export function applyMultiSelectFieldKindFilter(
+  value: MultiSelectFieldKindValue,
+  filter: MultiSelectFieldKindFilter,
 ): boolean {
-  return multiSelectFiltersByRule[filter.rule](value, filter.value);
+  return multiSelectFieldKindFiltersByRule[filter.rule](value, filter.value);
 }
 
-export const multiSelectFiltersByRule: {
-  [rule in MultiSelectFilterRule]: (
-    value: MultiSelectFieldValue,
-    filterValue: MultiSelectFilterRuleValue,
+export const multiSelectFieldKindFiltersByRule: {
+  [rule in MultiSelectFieldKindFilterRule]: (
+    value: MultiSelectFieldKindValue,
+    filterValue: MultiSelectFieldKindFilterRuleValue,
   ) => boolean;
 } = {
   hasAnyOf: (value, filterValue) => {
@@ -806,17 +816,17 @@ export const multiSelectFiltersByRule: {
   },
 };
 
-export function applyBooleanFilter(
-  value: BooleanFieldValue,
-  filter: BooleanFilter,
+export function applyBooleanFieldKindFilter(
+  value: BooleanFieldKindValue,
+  filter: BooleanFieldKindFilter,
 ): boolean {
-  return booleanFiltersByRule[filter.rule](value, filter.value);
+  return booleanFieldKindFiltersByRule[filter.rule](value, filter.value);
 }
 
-export const booleanFiltersByRule: {
-  [rule in BooleanFilterRule]: (
-    value: CheckboxValue,
-    filterValue: BooleanFilterRuleValue,
+export const booleanFieldKindFiltersByRule: {
+  [rule in BooleanFieldKindFilterRule]: (
+    value: BooleanFieldKindValue,
+    filterValue: BooleanFieldKindFilterRuleValue,
   ) => boolean;
 } = {
   is: (value, filterValue) => {
@@ -826,130 +836,134 @@ export const booleanFiltersByRule: {
 
 export function assertBooleanFilter(
   filter: Filter,
-): asserts filter is BooleanFilter {
+): asserts filter is BooleanFieldKindFilter {
   assertBooleanFilterRule(filter.rule);
 }
 
-export function assertDateFilter(filter: Filter): asserts filter is DateFilter {
-  assertDateFilterRule(filter.rule);
+export function assertDateFilter(
+  filter: Filter,
+): asserts filter is DateFieldKindFilter {
+  assertDateFieldKindFilterRule(filter.rule);
 }
 
 export function assertMultiSelectFilter(
   filter: Filter,
-): asserts filter is MultiSelectFilter {
-  assertMultiSelectFilterRule(filter.rule);
+): asserts filter is MultiSelectFieldKindFilter {
+  assertMultiSelectFieldKindFilterRule(filter.rule);
 }
 
 export function assertNumberFilter(
   filter: Filter,
-): asserts filter is NumberFilter {
-  assertNumberFilterRule(filter.rule);
+): asserts filter is NumberFieldKindFilter {
+  assertNumberFieldKindFilterRule(filter.rule);
 }
 
 export function assertSingleSelectFilter(
   filter: Filter,
-): asserts filter is SingleSelectFilter {
-  assertSingleSelectFilterRule(filter.rule);
+): asserts filter is SingleSelectFieldKindFilter {
+  assertSingleSelectFieldKindFilterRule(filter.rule);
 }
 
-export function assertTextFilter(filter: Filter): asserts filter is TextFilter {
-  assertTextFilterRule(filter.rule);
+export function assertTextFilter(
+  filter: Filter,
+): asserts filter is TextFieldKindFilter {
+  assertTextFieldKindFilterRule(filter.rule);
 }
 
-export function assertBooleanFilterConfig(
+export function assertBooleanFieldKindFilterConfig(
   filterConfig: FilterConfig,
-): asserts filterConfig is BooleanFilterConfig {
+): asserts filterConfig is BooleanFieldKindFilterConfig {
   assertBooleanFilterRule(filterConfig.rule);
 }
 
-export function assertDateFilterConfig(
+export function assertDateFieldKindFilterConfig(
   filterConfig: FilterConfig,
-): asserts filterConfig is DateFilterConfig {
-  assertDateFilterRule(filterConfig.rule);
+): asserts filterConfig is DateFieldKindFilterConfig {
+  assertDateFieldKindFilterRule(filterConfig.rule);
 }
 
 export function assertMultiSelectFilterConfig(
   filterConfig: FilterConfig,
-): asserts filterConfig is MultiSelectFilterConfig {
-  assertMultiSelectFilterRule(filterConfig.rule);
+): asserts filterConfig is MultiSelectFieldKindFilterConfig {
+  assertMultiSelectFieldKindFilterRule(filterConfig.rule);
 }
 
 export function assertNumberFilterConfig(
   filterConfig: FilterConfig,
-): asserts filterConfig is NumberFilterConfig {
-  assertNumberFilterRule(filterConfig.rule);
+): asserts filterConfig is NumberFieldKindFilterConfig {
+  assertNumberFieldKindFilterRule(filterConfig.rule);
 }
 
 export function assertSingleSelectFilterConfig(
   filterConfig: FilterConfig,
-): asserts filterConfig is SingleSelectFilterConfig {
-  assertSingleSelectFilterRule(filterConfig.rule);
+): asserts filterConfig is SingleSelectFieldKindFilterConfig {
+  assertSingleSelectFieldKindFilterRule(filterConfig.rule);
 }
 
 export function assertTextFilterConfig(
   filterConfig: FilterConfig,
-): asserts filterConfig is TextFilterConfig {
-  assertTextFilterRule(filterConfig.rule);
+): asserts filterConfig is TextFieldKindFilterConfig {
+  assertTextFieldKindFilterRule(filterConfig.rule);
 }
 
 export const filtersByFieldType: {
   [fieldType in FieldType]: (value: FieldValue, filter: Filter) => boolean;
 } = {
-  [FieldType.Checkbox]: booleanFilter,
-  [FieldType.Currency]: numberFilter,
-  [FieldType.Date]: dateFilter,
-  [FieldType.Email]: textFilter,
-  [FieldType.MultiCollaborator]: multiSelectFilter,
-  [FieldType.MultiRecordLink]: multiSelectFilter,
-  [FieldType.MultiLineText]: textFilter,
-  [FieldType.MultiOption]: multiSelectFilter,
-  [FieldType.Number]: numberFilter,
-  [FieldType.PhoneNumber]: textFilter,
-  [FieldType.SingleCollaborator]: singleSelectFilter,
-  [FieldType.SingleRecordLink]: singleSelectFilter,
-  [FieldType.SingleLineText]: textFilter,
-  [FieldType.SingleOption]: singleSelectFilter,
-  [FieldType.URL]: textFilter,
+  [FieldType.Checkbox]: booleanFieldKindFilter,
+  [FieldType.Currency]: numberFieldKindFilter,
+  [FieldType.Date]: dateFieldKindFilter,
+  [FieldType.Email]: textFieldKindFilter,
+  [FieldType.MultiCollaborator]: multiSelectFieldKindFilter,
+  [FieldType.MultiRecordLink]: multiSelectFieldKindFilter,
+  [FieldType.MultiLineText]: textFieldKindFilter,
+  [FieldType.MultiOption]: multiSelectFieldKindFilter,
+  [FieldType.Number]: numberFieldKindFilter,
+  [FieldType.PhoneNumber]: textFieldKindFilter,
+  [FieldType.SingleCollaborator]: singleSelectFieldKindFilter,
+  [FieldType.SingleRecordLink]: singleSelectFieldKindFilter,
+  [FieldType.SingleLineText]: textFieldKindFilter,
+  [FieldType.SingleOption]: singleSelectFieldKindFilter,
+  [FieldType.URL]: textFieldKindFilter,
 };
 
-function textFilter(value: FieldValue, filter: Filter) {
-  assertTextFieldValue(value);
+function textFieldKindFilter(value: FieldValue, filter: Filter) {
+  assertTextFieldKindValue(value);
   assertTextFilter(filter);
 
-  return applyTextFilter(value, filter);
+  return applyTextFieldKindFilter(value, filter);
 }
 
-function numberFilter(value: FieldValue, filter: Filter) {
+function numberFieldKindFilter(value: FieldValue, filter: Filter) {
   assertNumberFieldValue(value);
   assertNumberFilter(filter);
 
-  return applyNumberFilter(value, filter);
+  return applyNumberFieldKindFilter(value, filter);
 }
 
-function dateFilter(value: FieldValue, filter: Filter) {
+function dateFieldKindFilter(value: FieldValue, filter: Filter) {
   assertDateFieldValue(value);
   assertDateFilter(filter);
 
-  return applyDateFilter(value, filter);
+  return applyDateFieldKindFilter(value, filter);
 }
 
-function singleSelectFilter(value: FieldValue, filter: Filter) {
-  assertSingleSelectFieldValue(value);
+function singleSelectFieldKindFilter(value: FieldValue, filter: Filter) {
+  assertSingleSelectFieldKindValue(value);
   assertSingleSelectFilter(filter);
 
-  return applySingleSelectFilter(value, filter);
+  return applySingleSelectFieldKindFilter(value, filter);
 }
 
-function multiSelectFilter(value: FieldValue, filter: Filter) {
-  assertMultiSelectFieldValue(value);
+function multiSelectFieldKindFilter(value: FieldValue, filter: Filter) {
+  assertMultiSelectFieldKindValue(value);
   assertMultiSelectFilter(filter);
 
-  return applyMultiSelectFilter(value, filter);
+  return applyMultiSelectFieldKindFilter(value, filter);
 }
 
-function booleanFilter(value: FieldValue, filter: Filter) {
-  assertBooleanFieldValue(value);
+function booleanFieldKindFilter(value: FieldValue, filter: Filter) {
+  assertBooleanFieldKindValue(value);
   assertBooleanFilter(filter);
 
-  return applyBooleanFilter(value, filter);
+  return applyBooleanFieldKindFilter(value, filter);
 }

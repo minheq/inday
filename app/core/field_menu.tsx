@@ -3,7 +3,7 @@ import { ScrollView } from 'react-native';
 
 import { Container, Spacer, Text, Row, tokens, Switch } from '../components';
 import {
-  useGetFieldsWithListViewConfig,
+  useGetSortedFieldsWithListViewConfig,
   useUpdateListViewFieldConfig,
 } from '../data/store';
 import { FieldWithListViewConfig } from '../data/views';
@@ -21,7 +21,7 @@ interface FieldMenuProps {
 export function FieldMenu(props: FieldMenuProps) {
   const { viewID, collectionID } = props;
 
-  const fields = useGetFieldsWithListViewConfig(viewID);
+  const fields = useGetSortedFieldsWithListViewConfig(viewID);
 
   return (
     <FieldMenuContext.Provider value={{ viewID, collectionID }}>

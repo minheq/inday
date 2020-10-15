@@ -861,7 +861,7 @@ export function useDeleteGroup() {
   return callback;
 }
 
-export function useGetFieldsWithListViewConfig(
+export function useGetSortedFieldsWithListViewConfig(
   viewID: string,
 ): FieldWithListViewConfig[] {
   const view = useGetView(viewID);
@@ -940,7 +940,7 @@ export function useCreateView() {
         id: generateID(),
         name: '',
         type: 'list',
-        frozenFieldsCount: 1,
+        frozenFieldCount: 1,
         fieldsConfig: {},
         createdAt: new Date(),
         updatedAt: new Date(),

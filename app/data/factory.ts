@@ -251,7 +251,7 @@ export function makeView(
   return {
     ...baseView,
     type: 'list',
-    frozenFieldsCount: 1,
+    frozenFieldCount: 1,
     fieldsConfig: keyedBy(
       collection.fields.map((f, i) => ({
         id: f.id,
