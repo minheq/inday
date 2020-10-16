@@ -15,15 +15,21 @@ export interface RenderCellProps {
   column: number;
 }
 
+export interface RenderHeaderCellProps {
+  column: number;
+}
+
 export interface GridProps {
   scrollViewHeight: number;
   scrollViewWidth: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
+  renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   rowHeight: number;
+  headerHeight?: number;
   rowCount: number;
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
-  frozenColumnCount: number;
+  fixedColumnCount: number;
   overscanColumnCount?: number;
   /** Used to manually set the starting scroll offset. The default value is {x: 0, y: 0} */
   contentOffset?: ContentOffset;
@@ -47,18 +53,21 @@ interface GridRef {
 export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const {
     columns,
-    frozenColumnCount,
+    fixedColumnCount,
     rowCount,
     rowHeight,
+    headerHeight,
     scrollViewHeight,
     scrollViewWidth,
     renderCell,
+    renderHeaderCell,
     contentOffset,
     overscanColumnCount = 2,
     onContentOffsetLoaded,
   } = props;
   const verticalScrollViewRef = useRef<ScrollView>(null);
   const horizontalScrollViewRef = useRef<ScrollView>(null);
+  const headerScrollViewRef = useRef<ScrollView>(null);
   const scrollYObservable = useRef(new Animated.Value(0)).current;
   const scrollXObservable = useRef(new Animated.Value(0)).current;
   const [scrollY, setScrollY] = useState(0);
@@ -95,13 +104,20 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     });
     const scrollXListenerID = scrollXObservable.addListener((state) => {
       setScrollX(state.value);
+
+      if (headerScrollViewRef.current !== null) {
+        headerScrollViewRef.current.scrollTo({
+          x: state.value,
+          animated: false,
+        });
+      }
     });
 
     return () => {
       scrollYObservable.removeListener(scrollYListenerID);
       scrollXObservable.removeListener(scrollXListenerID);
     };
-  }, [scrollYObservable, scrollXObservable]);
+  }, [scrollYObservable, scrollXObservable, headerScrollViewRef]);
 
   useEffect(() => {
     if (Platform.OS === 'web' && contentOffset) {
@@ -117,9 +133,9 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     }
   }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
 
-  const frozenAreaColumns = columns.slice(0, frozenColumnCount);
-  const scrollAreaColumns = columns.slice(frozenColumnCount);
-  const frozenAreaWidth = sum(frozenAreaColumns);
+  const fixedAreaColumns = columns.slice(0, fixedColumnCount);
+  const scrollAreaColumns = columns.slice(fixedColumnCount);
+  const fixedAreaWidth = sum(fixedAreaColumns);
   const scrollAreaWidth = sum(scrollAreaColumns);
 
   const rowsData = getRowsData({
@@ -129,15 +145,15 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     rowHeight,
     rowCount,
   });
-  const frozenAreaColumnsData = getColumnsData({
+  const fixedAreaColumnsData = getColumnsData({
     scrollX,
-    scrollViewWidth: frozenAreaWidth,
-    columns: frozenAreaColumns,
+    scrollViewWidth: fixedAreaWidth,
+    columns: fixedAreaColumns,
     overscan: overscanColumnCount,
   });
   const scrollAreaColumnsData = getColumnsData({
     scrollX,
-    scrollViewWidth: scrollViewWidth - frozenAreaWidth,
+    scrollViewWidth: scrollViewWidth - fixedAreaWidth,
     columns: scrollAreaColumns,
     overscan: overscanColumnCount,
   });
@@ -146,6 +162,28 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
 
   return (
     <View style={[{ height: scrollViewHeight }]}>
+      {headerHeight && renderHeaderCell && (
+        <View style={[{ height: headerHeight }, styles.header]}>
+          <HeaderContainer
+            fixed={true}
+            fixedColumnCount={fixedColumnCount}
+            columns={columns}
+            renderHeaderCell={renderHeaderCell}
+          />
+          <ScrollView
+            horizontal
+            ref={headerScrollViewRef}
+            scrollEnabled={false}
+          >
+            <HeaderContainer
+              fixed={false}
+              fixedColumnCount={fixedColumnCount}
+              columns={columns}
+              renderHeaderCell={renderHeaderCell}
+            />
+          </ScrollView>
+        </View>
+      )}
       <ScrollView
         ref={verticalScrollViewRef}
         contentOffset={contentOffset}
@@ -165,19 +203,19 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
         scrollEventThrottle={16}
       >
         <View style={styles.wrapper}>
-          <View style={[{ width: frozenAreaWidth }]}>
+          <View style={[{ width: fixedAreaWidth }]}>
             {rowsData.map(({ key, y, row }) => (
               <RowContainer
-                frozen={true}
-                frozenColumnCount={frozenColumnCount}
+                fixed={true}
+                fixedColumnCount={fixedColumnCount}
                 columns={columns}
                 renderCell={renderCell}
                 key={key}
                 y={y}
                 row={row}
                 height={rowHeight}
-                startColumnIndex={frozenAreaColumnsData.startIndex}
-                endColumnIndex={frozenAreaColumnsData.endIndex}
+                startColumnIndex={fixedAreaColumnsData.startIndex}
+                endColumnIndex={fixedAreaColumnsData.endIndex}
               />
             ))}
           </View>
@@ -203,8 +241,8 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
             >
               {rowsData.map(({ key, y, row }) => (
                 <RowContainer
-                  frozen={false}
-                  frozenColumnCount={frozenColumnCount}
+                  fixed={false}
+                  fixedColumnCount={fixedColumnCount}
                   columns={columns}
                   renderCell={renderCell}
                   key={key}
@@ -438,22 +476,22 @@ export function getColumnsData(params: GetColumnsDataParams) {
   return { startIndex, endIndex };
 }
 
-interface RowPropsContainer {
+interface RowContainerProps {
   height: number;
   y: number;
   row: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   columns: number[];
-  frozen: boolean;
-  frozenColumnCount: number;
+  fixed: boolean;
+  fixedColumnCount: number;
   startColumnIndex: number;
   endColumnIndex: number;
 }
 
-const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
+const RowContainer = memo(function RowContainer(props: RowContainerProps) {
   const {
-    frozen,
-    frozenColumnCount,
+    fixed,
+    fixedColumnCount,
     height,
     y,
     row,
@@ -463,11 +501,11 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
     renderCell,
   } = props;
 
-  let initialX = 0;
-  const columns = frozen
-    ? allColumns.slice(0, frozenColumnCount)
-    : allColumns.slice(frozenColumnCount);
+  const columns = fixed
+    ? allColumns.slice(0, fixedColumnCount)
+    : allColumns.slice(fixedColumnCount);
 
+  let initialX = 0;
   for (let i = 0; i < startColumnIndex; i++) {
     initialX += columns[i];
   }
@@ -477,7 +515,7 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
 
   for (let i = startColumnIndex; i <= endColumnIndex; i++) {
     const columnWidth = columns[i];
-    const column = frozen ? i + 1 : i + 1 + frozenColumnCount;
+    const column = fixed ? i + 1 : i + 1 + fixedColumnCount;
 
     columnsData.push({
       key: column,
@@ -504,6 +542,42 @@ const RowContainer = memo(function RowContainer(props: RowPropsContainer) {
   );
 });
 
+interface HeaderContainerProps {
+  renderHeaderCell: (props: RenderHeaderCellProps) => React.ReactNode;
+  columns: number[];
+  fixed: boolean;
+  fixedColumnCount: number;
+}
+
+const HeaderContainer = memo(function HeaderContainer(
+  props: HeaderContainerProps,
+) {
+  const {
+    fixed,
+    fixedColumnCount,
+    columns: allColumns,
+    renderHeaderCell,
+  } = props;
+
+  const columns = fixed
+    ? allColumns.slice(0, fixedColumnCount)
+    : allColumns.slice(fixedColumnCount);
+
+  return (
+    <View style={[styles.header]}>
+      {columns.map((width, index) => {
+        const column = fixed ? index + 1 : index + 1 + fixedColumnCount;
+
+        return (
+          <View key={column} style={[{ width }]}>
+            {renderHeaderCell({ column })}
+          </View>
+        );
+      })}
+    </View>
+  );
+});
+
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
@@ -515,6 +589,9 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     position: 'absolute',
+  },
+  header: {
+    flexDirection: 'row',
   },
   cell: {
     position: 'absolute',

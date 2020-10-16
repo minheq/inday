@@ -18,7 +18,7 @@ export interface ListViewFieldConfig {
 
 interface ListViewConfig {
   type: 'list';
-  frozenFieldCount: number;
+  fixedFieldCount: number;
   fieldsConfig: {
     [fieldID: string]: ListViewFieldConfig;
   };

@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { Animated, ScrollView, View, StyleSheet } from 'react-native';
-import { Container, Text, Row } from '../components';
+import React, { useCallback } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Container, Text } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -79,30 +79,14 @@ interface ListViewDisplayProps {
   view: ListView;
 }
 
-const FIELDS_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
-  const scrollX = useRef(new Animated.Value(0)).current;
 
-  const { frozenFieldCount } = view;
-  const headerScrollView = React.useRef<ScrollView>(null);
-
-  useEffect(() => {
-    const listenerID = scrollX.addListener((position) => {
-      headerScrollView.current!.scrollTo({
-        x: position.value,
-        animated: false,
-      });
-    });
-
-    return () => {
-      scrollX.removeListener(listenerID);
-    };
-  }, [scrollX]);
+  const { fixedFieldCount } = view;
 
   const renderCell = useCallback(
     ({ row, column }: RenderCellProps) => {
@@ -122,22 +106,6 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
 
   return (
     <Container flex={1}>
-      <Container height={FIELDS_ROW_HEIGHT}>
-        <Row>
-          {/* <Container width={frozenFieldsWidth}>
-            <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
-              {fields.slice(0, frozenFieldCount).map((field) => {
-                return <HeaderCell key={field.id} field={field} />;
-              })}
-            </ScrollView>
-          </Container>
-          <ScrollView horizontal ref={headerScrollView} scrollEnabled={false}>
-            {fields.slice(frozenFieldCount).map((field) => {
-              return <HeaderCell key={field.id} field={field} />;
-            })}
-          </ScrollView> */}
-        </Row>
-      </Container>
       <AutoSizer>
         {({ height, width }) => (
           <Grid
@@ -148,7 +116,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             renderCell={renderCell}
             rowHeight={RECORD_ROW_HEIGHT}
             columns={columns}
-            frozenColumnCount={frozenFieldCount}
+            fixedColumnCount={fixedFieldCount}
           />
         )}
       </AutoSizer>

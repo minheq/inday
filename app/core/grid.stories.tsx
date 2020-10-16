@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Grid, RenderCellProps } from './grid';
+import { Grid, RenderCellProps, RenderHeaderCellProps } from './grid';
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text } from 'react-native';
 
@@ -21,6 +21,16 @@ function renderCell(props: RenderCellProps) {
   );
 }
 
+function renderHeaderCell(props: RenderHeaderCellProps) {
+  const { column } = props;
+
+  return (
+    <View style={styles.cell}>
+      <Text>{column}</Text>
+    </View>
+  );
+}
+
 export const Default = () => (
   <div
     style={{
@@ -34,9 +44,11 @@ export const Default = () => (
         <Grid
           scrollViewWidth={width}
           scrollViewHeight={height}
-          contentOffset={{ x: 400, y: 1000 }}
+          // contentOffset={{ x: 400, y: 1000 }}
           rowCount={5000}
           renderCell={renderCell}
+          headerHeight={40}
+          renderHeaderCell={renderHeaderCell}
           rowHeight={40}
           columns={[
             100,
@@ -59,7 +71,7 @@ export const Default = () => (
             200,
             150,
           ]}
-          frozenColumnCount={2}
+          fixedColumnCount={2}
         />
       )}
     </AutoSizer>
