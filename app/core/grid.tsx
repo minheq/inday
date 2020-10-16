@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { isEmpty, RecycleQueue, sum } from '../../lib/data_structures';
+import { usePrevious } from '../hooks/use_previous';
 
 export interface RenderCellProps {
   row: number;
@@ -30,7 +31,6 @@ export interface GridProps {
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
   fixedColumnCount: number;
-  overscanColumnCount?: number;
   /** Used to manually set the starting scroll offset. The default value is {x: 0, y: 0} */
   contentOffset?: ContentOffset;
   /** (Web) Starting scroll offset has loaded */
@@ -62,7 +62,6 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     renderCell,
     renderHeaderCell,
     contentOffset,
-    overscanColumnCount = 2,
     onContentOffsetLoaded,
   } = props;
   const verticalScrollViewRef = useRef<ScrollView>(null);
@@ -73,7 +72,9 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const [scrollY, setScrollY] = useState(0);
   const [scrollX, setScrollX] = useState(0);
   const prevRowsDataRef = useRef<RowData[]>([]);
-  const contentHeight = rowCount * rowHeight;
+  const prevScrollY = usePrevious(scrollY);
+  const [scrollingY, setScrollingY] = useState(false);
+  const scrollingTimeoutRef = useRef<number | null>(null);
 
   const handleScrollTo = useCallback(
     (params: ScrollToParams) => {
@@ -133,10 +134,25 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     }
   }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
 
+  useEffect(() => {
+    if (scrollingTimeoutRef.current !== null) {
+      clearTimeout(scrollingTimeoutRef.current);
+    }
+
+    if (scrollY !== prevScrollY && scrollingY === false) {
+      setScrollingY(true);
+    } else if (scrollingY === true) {
+      scrollingTimeoutRef.current = setTimeout(() => {
+        setScrollingY(false);
+      }, 100);
+    }
+  }, [scrollY, prevScrollY, scrollingY]);
+
   const fixedAreaColumns = columns.slice(0, fixedColumnCount);
   const scrollAreaColumns = columns.slice(fixedColumnCount);
   const fixedAreaWidth = sum(fixedAreaColumns);
   const scrollAreaWidth = sum(scrollAreaColumns);
+  const contentHeight = rowCount * rowHeight;
 
   const rowsData = getRowsData({
     scrollY,
@@ -149,13 +165,11 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     scrollX,
     scrollViewWidth: fixedAreaWidth,
     columns: fixedAreaColumns,
-    overscan: overscanColumnCount,
   });
   const scrollAreaColumnsData = getColumnsData({
     scrollX,
     scrollViewWidth: scrollViewWidth - fixedAreaWidth,
     columns: scrollAreaColumns,
-    overscan: overscanColumnCount,
   });
 
   prevRowsDataRef.current = rowsData;
@@ -249,8 +263,14 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
                   y={y}
                   row={row}
                   height={rowHeight}
-                  startColumnIndex={scrollAreaColumnsData.startIndex}
-                  endColumnIndex={scrollAreaColumnsData.endIndex}
+                  startColumnIndex={
+                    scrollingY ? scrollAreaColumnsData.startIndex : 0
+                  }
+                  endColumnIndex={
+                    scrollingY
+                      ? scrollAreaColumnsData.endIndex
+                      : columns.length - fixedColumnCount - 1
+                  }
                 />
               ))}
             </ScrollView>
