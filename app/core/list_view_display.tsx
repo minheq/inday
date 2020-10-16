@@ -72,13 +72,14 @@ import {
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView } from '../data/views';
-import { Grid, RenderCellProps } from './grid';
+import { Grid, RenderCellProps, RenderHeaderCellProps } from './grid';
 import { format } from 'date-fns';
 
 interface ListViewDisplayProps {
   view: ListView;
 }
 
+const FIELD_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
@@ -101,6 +102,19 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     [fields, records],
   );
 
+  const renderHeaderCell = useCallback(
+    ({ column }: RenderHeaderCellProps) => {
+      const field = fields[column - 1];
+
+      return (
+        <View style={styles.cell}>
+          <Text>{field.name}</Text>
+        </View>
+      );
+    },
+    [fields],
+  );
+
   const columns = fields.map((field) => field.config.width);
   const rowCount = records.length;
 
@@ -114,7 +128,9 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             contentOffset={{ x: 0, y: 0 }}
             rowCount={rowCount}
             renderCell={renderCell}
+            renderHeaderCell={renderHeaderCell}
             rowHeight={RECORD_ROW_HEIGHT}
+            headerHeight={FIELD_ROW_HEIGHT}
             columns={columns}
             fixedColumnCount={fixedFieldCount}
           />

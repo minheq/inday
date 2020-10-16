@@ -4,6 +4,7 @@ import { generateID } from '../../lib/id/id';
 import { Collaborator } from './collaborators';
 import {
   FieldType,
+  FieldValue,
   BaseField,
   Field,
   MultiRecordLinkField,
@@ -14,7 +15,7 @@ import {
 } from './fields';
 import { BaseView, View } from './views';
 import { Collection } from './collections';
-import { Record, FieldValue } from './records';
+import { Record } from './records';
 import { Filter, FilterConfig } from './filters';
 import { keyedBy, range, isEmpty } from '../../lib/data_structures';
 import { Sort, SortConfig } from './sorts';
@@ -251,7 +252,7 @@ export function makeView(
   return {
     ...baseView,
     type: 'list',
-    frozenFieldCount: 1,
+    fixedFieldCount: 1,
     fieldsConfig: keyedBy(
       collection.fields.map((f, i) => ({
         id: f.id,
