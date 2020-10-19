@@ -52,6 +52,81 @@ export function intersect<T>(a: T[], b: T[]): T[] {
   return Array.from(intersection);
 }
 
+type Iteratee<T> = ((item: T) => string) | string;
+
+/** TODO: Optimize */
+export function intersectBy<T extends { [key: string]: any }>(
+  a: T[],
+  b: T[],
+  iteratee: Iteratee<T>,
+): T[] {
+  function getKey(item: T): string {
+    if (typeof iteratee === 'string') {
+      return item[iteratee];
+    }
+
+    return iteratee(item);
+  }
+
+  const result: T[] = [];
+
+  for (let i = 0; i < a.length; i++) {
+    const itemA = a[i];
+    const keyA = getKey(itemA);
+
+    for (let j = 0; j < b.length; j++) {
+      const itemB = b[j];
+      const keyB = getKey(itemB);
+
+      if (keyA === keyB) {
+        result.push(itemA);
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+/** TODO: Optimize */
+export function differenceBy<T extends { [key: string]: any }>(
+  a: T[],
+  b: T[],
+  iteratee: Iteratee<T>,
+): T[] {
+  function getKey(item: T): string {
+    if (typeof iteratee === 'string') {
+      return item[iteratee];
+    }
+
+    return iteratee(item);
+  }
+
+  const result: T[] = [];
+
+  for (let i = 0; i < a.length; i++) {
+    const itemA = a[i];
+    const keyA = getKey(itemA);
+    let contains = false;
+
+    for (let j = 0; j < b.length; j++) {
+      const itemB = b[j];
+      const keyB = getKey(itemB);
+
+      if (keyA === keyB) {
+        contains = true;
+        break;
+      }
+    }
+
+    if (contains === false) {
+      result.push(itemA);
+    }
+  }
+
+  return result;
+}
+
 export function hasAnyOf<T>(a: T[], b: T[]): boolean {
   return isNotEmpty(intersect(a, b));
 }

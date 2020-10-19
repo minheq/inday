@@ -13,8 +13,8 @@ import {
   isEmpty,
   RecycleQueue,
   sum,
-  first,
-  last,
+  intersectBy,
+  differenceBy,
 } from '../../lib/data_structures';
 
 export interface RenderCellProps {
@@ -502,87 +502,31 @@ export function recycleItems(params: RecycleItemsParams): ColumnData[] {
     return currentColumns.map((col, index) => ({ ...col, key: index }));
   }
 
-  if (first(currentColumns).x > first(prevColumns).x) {
-    const prevStartIndex = prevColumns.findIndex(
-      (c) => c.x === first(currentColumns).x,
-    );
-    const recycledKeys = prevColumns.slice(0, prevStartIndex).map((c) => c.key);
-    const reusedColumns = prevColumns.slice(prevStartIndex);
+  const reusedColumns = intersectBy(
+    prevColumns,
+    currentColumns,
+    'column',
+  ) as ColumnData[];
+  const recycledColumns = differenceBy(
+    prevColumns,
+    currentColumns,
+    'column',
+  ) as ColumnData[];
+  const newColumns = differenceBy(
+    currentColumns,
+    prevColumns,
+    'column',
+  ) as Column[];
 
-    const nextEndIndex = currentColumns.findIndex(
-      (c) => c.x === last(prevColumns).x,
-    );
-
-    const newColumns = currentColumns.slice(nextEndIndex + 1);
-
-    // If there are insufficient number of keys, add them
-    if (newColumns.length > recycledKeys.length) {
-      const diff = newColumns.length - recycledKeys.length;
-      let maxKey = Math.max(...prevColumns.map((c) => c.key));
-
-      for (let i = 0; i < diff; i++) {
-        recycledKeys.push(maxKey + 1);
-        maxKey++;
-      }
-    }
-
-    const newColumnsWithKeys = newColumns.map((c, i) => ({
-      ...c,
-      key: recycledKeys[i],
-    }));
-
-    const nextColumns = reusedColumns.concat(newColumnsWithKeys);
-
-    return nextColumns;
-  } else if (first(currentColumns).x < first(prevColumns).x) {
-    const prevEndIndex = prevColumns.findIndex(
-      (c) => c.x === last(currentColumns).x,
-    );
-
-    const recycledKeys = prevColumns.slice(prevEndIndex + 1).map((c) => c.key);
-    const reusedColumns = prevColumns.slice(0, prevEndIndex + 1);
-    const prevStartIndex = currentColumns.findIndex(
-      (c) => c.x === first(prevColumns).x,
-    );
-    const newColumns = currentColumns.slice(0, prevStartIndex);
-
-    // If there are insufficient number of keys, add them
-    if (newColumns.length > recycledKeys.length) {
-      const diff = newColumns.length - recycledKeys.length;
-      let maxKey = Math.max(...prevColumns.map((c) => c.key));
-
-      for (let i = 0; i < diff; i++) {
-        recycledKeys.push(maxKey + 1);
-        maxKey++;
-      }
-    }
-
-    const newColumnsWithKeys = newColumns.map((c, i) => ({
-      ...c,
-      key: recycledKeys[i],
-    }));
-
-    const nextColumns = newColumnsWithKeys.concat(reusedColumns);
-
-    return nextColumns;
+  const recycledKeys = recycledColumns.map((c) => c.key);
+  if (recycledKeys.length < newColumns.length) {
+    let maxKey = Math.max(...prevColumns.map((c) => c.key)) + 1;
+    recycledKeys.push(maxKey++);
   }
 
-  const nextEndIndex = currentColumns.findIndex(
-    (c) => c.x === last(prevColumns).x,
-  );
-
-  const newColumns = currentColumns.slice(nextEndIndex + 1);
-
-  let maxKey = Math.max(...prevColumns.map((c) => c.key)) + 1;
-
-  const newColumnsWithKeys = newColumns.map((c) => ({
-    ...c,
-    key: maxKey++,
-  }));
-
-  const nextColumns = prevColumns.concat(newColumnsWithKeys);
-
-  return nextColumns;
+  return reusedColumns
+    .concat(newColumns.map((c, i) => ({ ...c, key: recycledKeys[i] })))
+    .sort((a, b) => a.column - b.column);
 }
 
 interface GetIndexParams {
