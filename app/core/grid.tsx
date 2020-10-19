@@ -444,6 +444,7 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
             key={key}
             width={width}
             row={row}
+            height={height}
             column={column}
             x={offset}
             renderCell={renderCell}
@@ -457,16 +458,17 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
 interface CellContainerProps {
   x: number;
   width: number;
+  height: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   column: number;
   row: number;
 }
 
 const CellContainer = memo(function CellContainer(props: CellContainerProps) {
-  const { x, row, column, width, renderCell } = props;
+  const { x, row, column, width, height, renderCell } = props;
 
   return (
-    <View style={[{ left: x, width }, styles.cell]}>
+    <View style={[{ left: x, width, height }, styles.cell]}>
       {renderCell({ row, column })}
     </View>
   );

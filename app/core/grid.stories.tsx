@@ -81,5 +81,6 @@ export const Default = () => (
 const styles = StyleSheet.create({
   cell: {
     width: '100%',
+    height: '100%',
   },
 });
