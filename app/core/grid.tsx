@@ -362,21 +362,21 @@ export function recycleItems(params: RecycleItemsParams): RecycleItem[] {
     return currentItems.map((col, index) => ({ ...col, key: index }));
   }
 
-  const reusedColumns = intersectBy(prevItems, currentItems, 'num');
-  const recycledColumns = differenceBy(prevItems, currentItems, 'num');
-  const newColumns = differenceBy(currentItems, prevItems, 'num');
+  const reusedItems = intersectBy(prevItems, currentItems, 'num');
+  const recycledItems = differenceBy(prevItems, currentItems, 'num');
+  const newItems = differenceBy(currentItems, prevItems, 'num');
 
-  const recycledKeys = recycledColumns.map((c) => c.key);
-  if (recycledKeys.length < newColumns.length) {
+  const recycledKeys = recycledItems.map((c) => c.key);
+  if (recycledKeys.length < newItems.length) {
     let maxKey = maxBy(prevItems, 'key') + 1;
     recycledKeys.push(maxKey++);
   }
 
-  const nextColumns = reusedColumns
-    .concat(newColumns.map((c, i) => ({ ...c, key: recycledKeys[i] })))
+  const nextItems = reusedItems
+    .concat(newItems.map((c, i) => ({ ...c, key: recycledKeys[i] })))
     .sort((a, b) => a.num - b.num);
 
-  return nextColumns;
+  return nextItems;
 }
 
 interface Item {
@@ -440,11 +440,34 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
         const { key, size: width, num: column, offset } = columnData;
 
         return (
-          <View key={key} style={[{ left: offset, width }, styles.cell]}>
-            {renderCell({ row, column })}
-          </View>
+          <CellContainer
+            key={key}
+            width={width}
+            row={row}
+            column={column}
+            x={offset}
+            renderCell={renderCell}
+          />
         );
       })}
+    </View>
+  );
+});
+
+interface CellContainerProps {
+  x: number;
+  width: number;
+  renderCell: (props: RenderCellProps) => React.ReactNode;
+  column: number;
+  row: number;
+}
+
+const CellContainer = memo(function CellContainer(props: CellContainerProps) {
+  const { x, row, column, width, renderCell } = props;
+
+  return (
+    <View style={[{ left: x, width }, styles.cell]}>
+      {renderCell({ row, column })}
     </View>
   );
 });
