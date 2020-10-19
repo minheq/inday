@@ -1,4 +1,11 @@
-import { getColumnsData, getRowsData, RowData } from './grid';
+import {
+  getRowsData,
+  RowData,
+  getIndex,
+  getColumns,
+  ColumnData,
+  recycleItems,
+} from './grid';
 
 describe('getRowsData ', () => {
   const scrollViewHeight = 100;
@@ -137,18 +144,18 @@ describe('getRowsData ', () => {
   });
 });
 
-describe('getColumnsData', () => {
+describe('getIndex', () => {
   test('left 0', () => {
     const columns = [100, 200, 100, 200, 100, 200];
     const scrollViewWidth = 400;
 
-    const columnsData = getColumnsData({
-      columns,
+    const result = getIndex({
+      columns: getColumns(columns),
       scrollX: 0,
       scrollViewWidth,
     });
 
-    expect(columnsData).toEqual({
+    expect(result).toEqual({
       startIndex: 0,
       endIndex: 2,
     });
@@ -158,13 +165,13 @@ describe('getColumnsData', () => {
     const columns = [100, 200, 100, 200, 100, 200];
     const scrollViewWidth = 400;
 
-    const columnsData = getColumnsData({
-      columns,
+    const result = getIndex({
+      columns: getColumns(columns),
       scrollX: 100,
       scrollViewWidth,
     });
 
-    expect(columnsData).toEqual({
+    expect(result).toEqual({
       startIndex: 1,
       endIndex: 3,
     });
@@ -174,13 +181,13 @@ describe('getColumnsData', () => {
     const columns = [100, 200, 100, 200, 100, 200];
     const scrollViewWidth = 400;
 
-    const columnsData = getColumnsData({
-      columns,
+    const result = getIndex({
+      columns: getColumns(columns),
       scrollX: 350,
       scrollViewWidth,
     });
 
-    expect(columnsData).toEqual({
+    expect(result).toEqual({
       startIndex: 2,
       endIndex: 5,
     });
@@ -190,82 +197,14 @@ describe('getColumnsData', () => {
     const columns = [100, 200, 100, 200, 100, 200];
     const scrollViewWidth = 400;
 
-    const columnsData = getColumnsData({
-      columns,
+    const result = getIndex({
+      columns: getColumns(columns),
       scrollX: 500,
       scrollViewWidth,
     });
 
-    expect(columnsData).toEqual({
+    expect(result).toEqual({
       startIndex: 3,
-      endIndex: 5,
-    });
-  });
-
-  test('left 0, overscan 2', () => {
-    const columns = [100, 200, 100, 200, 100, 200];
-    const scrollViewWidth = 400;
-
-    const columnsData = getColumnsData({
-      columns,
-      scrollX: 0,
-      scrollViewWidth,
-      overscan: 2,
-    });
-
-    expect(columnsData).toEqual({
-      startIndex: 0,
-      endIndex: 4,
-    });
-  });
-
-  test('left 100, overscan 2', () => {
-    const columns = [100, 200, 100, 200, 100, 200];
-    const scrollViewWidth = 400;
-
-    const columnsData = getColumnsData({
-      columns,
-      scrollX: 100,
-      scrollViewWidth,
-      overscan: 2,
-    });
-
-    expect(columnsData).toEqual({
-      startIndex: 0,
-      endIndex: 5,
-    });
-  });
-
-  test('left 350, overscan 2', () => {
-    const columns = [100, 200, 100, 200, 100, 200];
-    const scrollViewWidth = 400;
-
-    const columnsData = getColumnsData({
-      columns,
-      scrollX: 350,
-      scrollViewWidth,
-      overscan: 2,
-    });
-
-    expect(columnsData).toEqual({
-      startIndex: 0,
-      endIndex: 5,
-    });
-  });
-
-  test('scroll rightmost, overscan 2', () => {
-    const columns = [100, 200, 100, 200, 100, 200];
-    const scrollViewWidth = 400;
-
-    const columnsData = getColumnsData({
-      columns,
-      scrollX: 500,
-      scrollViewWidth,
-      overscan: 2,
-    });
-
-    expect(columnsData).toEqual({
-      startIndex: 1,
       endIndex: 5,
     });
   });
@@ -274,13 +213,13 @@ describe('getColumnsData', () => {
     const columns = [100, 200];
     const scrollViewWidth = 400;
 
-    const columnsData = getColumnsData({
-      columns,
+    const result = getIndex({
+      columns: getColumns(columns),
       scrollX: 0,
       scrollViewWidth,
     });
 
-    expect(columnsData).toEqual({
+    expect(result).toEqual({
       startIndex: 0,
       endIndex: 1,
     });
@@ -290,15 +229,182 @@ describe('getColumnsData', () => {
     const columns = [100, 200, 100];
     const scrollViewWidth = 400;
 
-    const columnsData = getColumnsData({
+    const result = getIndex({
+      columns: getColumns(columns),
+      scrollX: 0,
+      scrollViewWidth,
+    });
+
+    expect(result).toEqual({
+      startIndex: 0,
+      endIndex: 2,
+    });
+  });
+});
+
+describe.only('recycleItems', () => {
+  let prevColumns: ColumnData[] = [];
+  const scrollViewWidth = 400;
+  const columns = getColumns([100, 200, 100, 200, 100, 200]);
+
+  test('initial', () => {
+    const { startIndex, endIndex } = getIndex({
       columns,
       scrollX: 0,
       scrollViewWidth,
     });
 
-    expect(columnsData).toEqual({
-      startIndex: 0,
-      endIndex: 2,
+    const result = recycleItems({
+      columns,
+      prevColumns,
+      startIndex,
+      endIndex,
     });
+
+    expect(result).toEqual([
+      { width: 100, x: 0, column: 1, key: 0 },
+      { width: 200, x: 100, column: 2, key: 1 },
+      { width: 100, x: 300, column: 3, key: 2 },
+    ]);
+
+    prevColumns = result;
+  });
+
+  test('scroll 100', () => {
+    const { startIndex, endIndex } = getIndex({
+      columns,
+      scrollX: 100,
+      scrollViewWidth,
+    });
+
+    const result = recycleItems({
+      columns,
+      prevColumns,
+      startIndex,
+      endIndex,
+    });
+
+    expect(result).toEqual([
+      { width: 200, x: 100, column: 2, key: 1 },
+      { width: 100, x: 300, column: 3, key: 2 },
+      { width: 200, x: 400, column: 4, key: 0 },
+    ]);
+
+    prevColumns = result;
+  });
+
+  test('scroll 350', () => {
+    const { startIndex, endIndex } = getIndex({
+      columns,
+      scrollX: 350,
+      scrollViewWidth,
+    });
+
+    const result = recycleItems({
+      columns,
+      prevColumns,
+      startIndex,
+      endIndex,
+    });
+
+    expect(result).toEqual([
+      { width: 100, x: 300, column: 3, key: 2 },
+      { width: 200, x: 400, column: 4, key: 0 },
+      { width: 100, x: 600, column: 5, key: 1 },
+      { width: 200, x: 700, column: 6, key: 3 },
+    ]);
+
+    prevColumns = result;
+  });
+
+  test('scroll rightmost', () => {
+    const { startIndex, endIndex } = getIndex({
+      columns,
+      scrollX: 500,
+      scrollViewWidth,
+    });
+
+    const result = recycleItems({
+      columns,
+      prevColumns,
+      startIndex,
+      endIndex,
+    });
+
+    expect(result).toEqual([
+      { width: 200, x: 400, column: 4, key: 0 },
+      { width: 100, x: 600, column: 5, key: 1 },
+      { width: 200, x: 700, column: 6, key: 3 },
+    ]);
+
+    prevColumns = result;
+  });
+
+  test('scroll back to 350', () => {
+    const { startIndex, endIndex } = getIndex({
+      columns,
+      scrollX: 350,
+      scrollViewWidth,
+    });
+
+    const result = recycleItems({
+      columns,
+      prevColumns,
+      startIndex,
+      endIndex,
+    });
+
+    expect(result).toEqual([
+      { width: 100, x: 300, column: 3, key: 4 },
+      { width: 200, x: 400, column: 4, key: 0 },
+      { width: 100, x: 600, column: 5, key: 1 },
+      { width: 200, x: 700, column: 6, key: 3 },
+    ]);
+
+    prevColumns = result;
+  });
+
+  test('scroll back to 100', () => {
+    const { startIndex, endIndex } = getIndex({
+      columns,
+      scrollX: 100,
+      scrollViewWidth,
+    });
+
+    const result = recycleItems({
+      columns,
+      prevColumns,
+      startIndex,
+      endIndex,
+    });
+
+    expect(result).toEqual([
+      { width: 200, x: 100, column: 2, key: 1 },
+      { width: 100, x: 300, column: 3, key: 4 },
+      { width: 200, x: 400, column: 4, key: 0 },
+    ]);
+
+    prevColumns = result;
+  });
+
+  test('scroll back to 0', () => {
+    const { startIndex, endIndex } = getIndex({
+      columns,
+      scrollX: 0,
+      scrollViewWidth,
+    });
+
+    const result = recycleItems({
+      columns,
+      prevColumns,
+      startIndex,
+      endIndex,
+    });
+
+    expect(result).toEqual([
+      { width: 100, x: 0, column: 1, key: 0 },
+      { width: 200, x: 100, column: 2, key: 1 },
+      { width: 100, x: 300, column: 3, key: 4 },
+    ]);
   });
 });
