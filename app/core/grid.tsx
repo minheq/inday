@@ -11,7 +11,6 @@ import React, {
 import { Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import {
   isEmpty,
-  RecycleQueue,
   sum,
   intersectBy,
   differenceBy,
@@ -85,8 +84,8 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const scrollXObservable = useRef(new Animated.Value(0)).current;
   const [scrollY, setScrollY] = useState(0);
   const [scrollX, setScrollX] = useState(0);
-  const prevRowsDataRef = useRef<RowData[]>([]);
-  const prevBodyRightPaneColumnsDataRef = useRef<ColumnData[]>([]);
+  const prevRowsDataRef = useRef<RecycleItem[]>([]);
+  const prevBodyRightPaneColumnsDataRef = useRef<RecycleItem[]>([]);
 
   const handleScrollTo = useCallback(
     (params: ScrollToParams) => {
@@ -150,7 +149,7 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     () => columns.slice(0, fixedColumnCount),
     [columns, fixedColumnCount],
   );
-  const leftPaneColumns = useMemo(() => getColumns(leftPaneColumnWidths), [
+  const leftPaneColumns = useMemo(() => getItems(leftPaneColumnWidths), [
     leftPaneColumnWidths,
   ]);
   const rightPaneColumnWidths = useMemo(() => columns.slice(fixedColumnCount), [
@@ -158,27 +157,47 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     fixedColumnCount,
   ]);
   const rightPaneColumns = useMemo(
-    () => getColumns(rightPaneColumnWidths, fixedColumnCount),
+    () => getItems(rightPaneColumnWidths, fixedColumnCount),
     [rightPaneColumnWidths, fixedColumnCount],
   );
+  const rows = useMemo(() => {
+    const items: Item[] = [];
+    for (let i = 0; i < rowCount; i++) {
+      items.push({ num: i + 1, size: rowHeight, offset: i * rowHeight });
+    }
+    return items;
+  }, [rowCount, rowHeight]);
   const leftPaneContentWidth = sum(leftPaneColumnWidths);
   const rightPaneContentWidth = sum(rightPaneColumnWidths);
   const rightPaneScrollViewWidth = scrollViewWidth - leftPaneContentWidth;
   const contentHeight = rowCount * rowHeight;
 
-  const rowsData = getRowsData({
-    scrollY,
-    scrollViewHeight,
-    prevRowsData: prevRowsDataRef.current,
-    rowHeight,
-    rowCount,
-  });
+  const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
+    () =>
+      getIndex({
+        items: rows,
+        scrollOffset: scrollY,
+        scrollViewSize: scrollViewHeight,
+      }),
+    [rows, scrollY, scrollViewHeight],
+  );
+
+  const recycledRows = useMemo(
+    () =>
+      recycleItems({
+        items: rows,
+        prevItems: prevRowsDataRef.current,
+        startIndex: rowStartIndex,
+        endIndex: rowEndIndex,
+      }),
+    [rows, rowStartIndex, rowEndIndex],
+  );
 
   const bodyLeftPaneColumns = useMemo(
     () =>
       recycleItems({
-        columns: leftPaneColumns,
-        prevColumns: [],
+        items: leftPaneColumns,
+        prevItems: [],
         startIndex: 0,
         endIndex: fixedColumnCount - 1,
       }),
@@ -191,9 +210,9 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   } = useMemo(
     () =>
       getIndex({
-        columns: rightPaneColumns,
-        scrollX,
-        scrollViewWidth: rightPaneScrollViewWidth,
+        items: rightPaneColumns,
+        scrollOffset: scrollX,
+        scrollViewSize: rightPaneScrollViewWidth,
       }),
     [scrollX, rightPaneScrollViewWidth, rightPaneColumns],
   );
@@ -201,15 +220,15 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   const bodyRightPaneColumns = useMemo(
     () =>
       recycleItems({
-        columns: rightPaneColumns,
-        prevColumns: prevBodyRightPaneColumnsDataRef.current,
+        items: rightPaneColumns,
+        prevItems: prevBodyRightPaneColumnsDataRef.current,
         startIndex: rightPaneStartIndex,
         endIndex: rightPaneEndIndex,
       }),
     [rightPaneColumns, rightPaneStartIndex, rightPaneEndIndex],
   );
 
-  prevRowsDataRef.current = rowsData;
+  prevRowsDataRef.current = recycledRows;
   prevBodyRightPaneColumnsDataRef.current = bodyRightPaneColumns;
 
   return (
@@ -252,14 +271,14 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
       >
         <View style={styles.wrapper}>
           <View style={[{ width: leftPaneContentWidth }]}>
-            {rowsData.map(({ key, y, row }) => (
+            {recycledRows.map(({ key, size, offset, num }) => (
               <RowContainer
                 columns={bodyLeftPaneColumns}
                 renderCell={renderCell}
                 key={key}
-                y={y}
-                row={row}
-                height={rowHeight}
+                y={offset}
+                row={num}
+                height={size}
               />
             ))}
           </View>
@@ -283,14 +302,14 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
               contentContainerStyle={{ width: rightPaneContentWidth }}
               scrollEventThrottle={16}
             >
-              {rowsData.map(({ key, y, row }) => (
+              {recycledRows.map(({ key, size, offset, num }) => (
                 <RowContainer
                   columns={bodyRightPaneColumns}
                   renderCell={renderCell}
                   key={key}
-                  y={y}
-                  row={row}
-                  height={rowHeight}
+                  y={offset}
+                  row={num}
+                  height={size}
                 />
               ))}
             </ScrollView>
@@ -301,267 +320,109 @@ export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
   );
 });
 
-export interface RowData {
-  row: number;
-  key: number;
-  y: number;
-}
+export function getItems(itemSizes: number[], offsetNum: number = 0) {
+  const items: Item[] = [];
 
-interface GetRowsDataParams {
-  scrollViewHeight: number;
-  rowHeight: number;
-  scrollY: number;
-  rowCount: number;
-  prevRowsData: RowData[];
-}
-
-/**
- * Applies algorithm to recycle items by reusing keys and apply only changes to the
- * scroll position of the nodes that are meant to be immediately visible.
- *
- * For example, given a list where there are 30 items, but only 5 are visible in the view.
- *
- * The algorithm will yield visible items (1-5) but will also "prefetch" items that is 2x the visible nodes
- * which is 5-15.
- *
- * Illustrated:
- * [
- *  // visible nodes
- *  1,
- *  ...
- *  5,
- *
- *  // not visible nodes, but "overscan" -- exists in the DOM
- *  6,
- *  ...
- *  15,
- *
- *  // not in the DOM
- *  16
- *  ...
- *  30
- * ]
- *
- * When user scrolls down where the first visible item is 10, the algorithm will yield following shape:
- *
- * [
- *  // not in the DOM
- *  1,
- *  ...
- *  4,
- *
- *  // "overscan" -- exists in the DOM
- *  5,
- *  ...
- *  9,
- *
- *  // visible nodes
- *  10,
- *  ...
- *  14,
- *
- *  // "overscan" -- exists in the DOM
- *  15,
- *  ...
- *  19,
- *
- *  // not in the DOM
- *  20
- *  ...
- *  30
- * ]
- *
- * When user scrolls to the bottom of the list
- *
- * [
- *  // not in the DOM
- *  1,
- *  ...
- *  15,
- *
- *  // "overscan" -- exists in the DOM
- *  16,
- *  ...
- *  25,
- *
- *  // visible nodes
- *  26
- *  ...
- *  30
- * ]
- *
- * See tests for the implementation of the scenario
- */
-export function getRowsData(params: GetRowsDataParams): RowData[] {
-  const {
-    prevRowsData,
-    scrollViewHeight,
-    scrollY,
-    rowHeight,
-    rowCount,
-  } = params;
-
-  // size is the number of visible rows
-  const size = Math.floor(scrollViewHeight / rowHeight);
-  // overscan the same number of items that are above and below the currently visible items
-  const overscanSize = size * 2;
-  // totalSize is the number of visible rows plus overscan rows (here equal to the size)
-  const totalSize = size + overscanSize;
-
-  const queue = new RecycleQueue(
-    totalSize,
-    prevRowsData.map((i) => i.row),
-  );
-
-  if (isEmpty(prevRowsData)) {
-    for (let i = 0; i < totalSize; i++) {
-      queue.enqueue();
-    }
-  } else {
-    // first row that is visible
-    const visibleStartRow = Math.floor(scrollY / rowHeight) + 1; // row index + 1 = row number
-    // first row in the overscan above visible rows
-    const overscanStartRow = visibleStartRow - size;
-
-    const prevStartRow = Math.min(...prevRowsData.map((i) => i.row));
-
-    const diff = overscanStartRow - prevStartRow;
-
-    if (diff > 0) {
-      for (let i = 0; i < diff; i++) {
-        if (queue.front() >= rowCount) {
-          break;
-        }
-        queue.enqueue();
-      }
-    } else if (diff < 0) {
-      for (let i = 0; i < Math.abs(diff); i++) {
-        if (queue.rear() === 1) {
-          break;
-        }
-        queue.dequeue();
-      }
-    }
-  }
-
-  const items = queue.items.map((row, key) => {
-    return {
-      key,
-      row,
-      y: (row - 1) * rowHeight,
-    };
-  });
-
-  return items;
-}
-
-interface Column {
-  column: number;
-  width: number;
-  x: number;
-}
-
-export function getColumns(columnWidths: number[], offsetColumn: number = 0) {
-  const columns: Column[] = [];
-
-  for (let i = 0; i < columnWidths.length; i++) {
-    const columnWidth = columnWidths[i];
-    const prevColumn = columns[i - 1];
+  for (let i = 0; i < itemSizes.length; i++) {
+    const size = itemSizes[i];
+    const prevColumn = items[i - 1];
 
     if (prevColumn === undefined) {
-      columns.push({ width: columnWidth, x: 0, column: 1 + offsetColumn });
+      items.push({ size, offset: 0, num: 1 + offsetNum });
     } else {
-      columns.push({
-        width: columnWidth,
-        x: prevColumn.x + prevColumn.width,
-        column: i + 1 + offsetColumn,
+      items.push({
+        size,
+        offset: prevColumn.offset + prevColumn.size,
+        num: i + 1 + offsetNum,
       });
     }
   }
 
-  return columns;
+  return items;
 }
 
-export interface ColumnData extends Column {
+export interface RecycleItem extends Item {
   key: number;
 }
 
 interface RecycleItemsParams {
-  columns: Column[];
-  prevColumns: ColumnData[];
+  items: Item[];
+  prevItems: RecycleItem[];
   startIndex: number;
   endIndex: number;
 }
 
-export function recycleItems(params: RecycleItemsParams): ColumnData[] {
-  const { columns, startIndex, endIndex, prevColumns } = params;
+export function recycleItems(params: RecycleItemsParams): RecycleItem[] {
+  const { items, startIndex, endIndex, prevItems } = params;
 
-  let currentColumns = columns.slice(startIndex, endIndex + 1);
+  let currentItems = items.slice(startIndex, endIndex + 1);
 
-  if (isEmpty(prevColumns)) {
-    return currentColumns.map((col, index) => ({ ...col, key: index }));
+  if (isEmpty(prevItems)) {
+    return currentItems.map((col, index) => ({ ...col, key: index }));
   }
 
   const reusedColumns = intersectBy(
-    prevColumns,
-    currentColumns,
-    'column',
-  ) as ColumnData[];
+    prevItems,
+    currentItems,
+    'num',
+  ) as RecycleItem[];
   const recycledColumns = differenceBy(
-    prevColumns,
-    currentColumns,
-    'column',
-  ) as ColumnData[];
-  const newColumns = differenceBy(
-    currentColumns,
-    prevColumns,
-    'column',
-  ) as Column[];
+    prevItems,
+    currentItems,
+    'num',
+  ) as RecycleItem[];
+  const newColumns = differenceBy(currentItems, prevItems, 'num') as Item[];
 
   const recycledKeys = recycledColumns.map((c) => c.key);
   if (recycledKeys.length < newColumns.length) {
-    let maxKey = Math.max(...prevColumns.map((c) => c.key)) + 1;
+    let maxKey = Math.max(...prevItems.map((c) => c.key)) + 1;
     recycledKeys.push(maxKey++);
   }
 
   return reusedColumns
     .concat(newColumns.map((c, i) => ({ ...c, key: recycledKeys[i] })))
-    .sort((a, b) => a.column - b.column);
+    .sort((a, b) => a.num - b.num);
+}
+
+interface Item {
+  size: number;
+  offset: number;
+  num: number;
 }
 
 interface GetIndexParams {
-  columns: Column[];
-  scrollX: number;
-  scrollViewWidth: number;
+  items: Item[];
+  scrollOffset: number;
+  scrollViewSize: number;
 }
 
 export function getIndex(params: GetIndexParams) {
-  const { columns, scrollX, scrollViewWidth } = params;
+  const { items, scrollOffset, scrollViewSize } = params;
 
   let startIndex = 0;
   let endIndex = 0;
 
-  for (let i = 0; i < columns.length; i++) {
-    const column = columns[i];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
 
-    if (column.x > scrollX) {
+    if (item.offset > scrollOffset) {
       startIndex = i - 1;
       break;
     }
   }
 
-  for (let i = startIndex; i < columns.length; i++) {
-    const column = columns[i];
+  for (let i = startIndex; i < items.length; i++) {
+    const item = items[i];
 
-    if (column.x + column.width >= scrollX + scrollViewWidth) {
+    if (item.offset + item.size >= scrollOffset + scrollViewSize) {
       endIndex = i;
       break;
     }
   }
 
-  // Scrollview is larger than occupied columns
+  // Scrollview is larger than occupied items
   if (endIndex === 0) {
-    endIndex = columns.length - 1;
+    endIndex = items.length - 1;
   }
 
   return { startIndex, endIndex };
@@ -572,7 +433,7 @@ interface RowContainerProps {
   y: number;
   row: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
-  columns: ColumnData[];
+  columns: RecycleItem[];
 }
 
 const RowContainer = memo(function RowContainer(props: RowContainerProps) {
@@ -581,10 +442,10 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
   return (
     <View style={[{ height, top: y }, styles.row]}>
       {columns.map((columnData) => {
-        const { key, width, column, x } = columnData;
+        const { key, size: width, num: column, offset } = columnData;
 
         return (
-          <View key={key} style={[{ left: x, width }, styles.cell]}>
+          <View key={key} style={[{ left: offset, width }, styles.cell]}>
             {renderCell({ row, column })}
           </View>
         );
@@ -595,7 +456,7 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
 
 interface HeaderContainerProps {
   renderHeaderCell: (props: RenderHeaderCellProps) => React.ReactNode;
-  columns: Column[];
+  columns: Item[];
 }
 
 const HeaderContainer = memo(function HeaderContainer(
@@ -606,7 +467,7 @@ const HeaderContainer = memo(function HeaderContainer(
   return (
     <View style={[styles.header]}>
       {columns.map((columnData) => {
-        const { width, column } = columnData;
+        const { size: width, num: column } = columnData;
 
         return (
           <View key={column} style={[{ width }]}>
