@@ -52,79 +52,72 @@ export function intersect<T>(a: T[], b: T[]): T[] {
   return Array.from(intersection);
 }
 
-type Iteratee<T> = ((item: T) => string) | string;
+/** Returns array of values found in left and right array */
+export function intersectBy<
+  T extends { [key: string]: any },
+  K extends { [key: string]: any }
+>(a: T[], b: K[], prop: keyof T): T[] {
+  const bMap: { [key: string]: K } = {};
 
-/** TODO: Optimize */
-export function intersectBy<T extends { [key: string]: any }>(
-  a: T[],
-  b: T[],
-  iteratee: Iteratee<T>,
-): T[] {
-  function getKey(item: T): string {
-    if (typeof iteratee === 'string') {
-      return item[iteratee];
+  for (let i = 0; i < b.length; i++) {
+    const itemB = b[i];
+    // @ts-ignore: its ok.
+    const val = itemB[prop];
+    if (val === undefined) {
+      throw new Error(
+        `Property '${prop}' does not exist in values in right array.`,
+      );
     }
-
-    return iteratee(item);
+    bMap[val] = itemB;
   }
 
   const result: T[] = [];
 
   for (let i = 0; i < a.length; i++) {
     const itemA = a[i];
-    const keyA = getKey(itemA);
+    const val = itemA[prop];
 
-    for (let j = 0; j < b.length; j++) {
-      const itemB = b[j];
-      const keyB = getKey(itemB);
-
-      if (keyA === keyB) {
-        result.push(itemA);
-        break;
-      }
+    if (bMap[val] !== undefined) {
+      result.push(itemA);
     }
   }
 
   return result;
 }
 
-/** TODO: Optimize */
-export function differenceBy<T extends { [key: string]: any }>(
-  a: T[],
-  b: T[],
-  iteratee: Iteratee<T>,
-): T[] {
-  function getKey(item: T): string {
-    if (typeof iteratee === 'string') {
-      return item[iteratee];
-    }
+/** Returns array of values in left array that are not in the right array */
+export function differenceBy<
+  T extends { [key: string]: any },
+  K extends { [key: string]: any }
+>(a: T[], b: K[], prop: keyof T): T[] {
+  const bMap: { [key: string]: K } = {};
 
-    return iteratee(item);
+  for (let i = 0; i < b.length; i++) {
+    const itemB = b[i];
+    // @ts-ignore: we want autocompletion.
+    const val = itemB[prop];
+    bMap[val] = itemB;
   }
 
   const result: T[] = [];
 
   for (let i = 0; i < a.length; i++) {
     const itemA = a[i];
-    const keyA = getKey(itemA);
-    let contains = false;
+    const val = itemA[prop];
 
-    for (let j = 0; j < b.length; j++) {
-      const itemB = b[j];
-      const keyB = getKey(itemB);
-
-      if (keyA === keyB) {
-        contains = true;
-        break;
-      }
-    }
-
-    if (contains === false) {
+    if (bMap[val] === undefined) {
       result.push(itemA);
     }
   }
 
   return result;
+}
+
+export function maxBy<T extends { [key: string]: any }>(
+  a: T[],
+  prop: keyof T,
+): number {
+  return Math.max(...a.map((c) => c[prop])) + 1;
 }
 
 export function hasAnyOf<T>(a: T[], b: T[]): boolean {

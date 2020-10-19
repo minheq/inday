@@ -14,6 +14,7 @@ import {
   sum,
   intersectBy,
   differenceBy,
+  maxBy,
 } from '../../lib/data_structures';
 
 export interface RenderCellProps {
@@ -355,33 +356,27 @@ interface RecycleItemsParams {
 export function recycleItems(params: RecycleItemsParams): RecycleItem[] {
   const { items, startIndex, endIndex, prevItems } = params;
 
-  let currentItems = items.slice(startIndex, endIndex + 1);
+  const currentItems = items.slice(startIndex, endIndex + 1);
 
   if (isEmpty(prevItems)) {
     return currentItems.map((col, index) => ({ ...col, key: index }));
   }
 
-  const reusedColumns = intersectBy(
-    prevItems,
-    currentItems,
-    'num',
-  ) as RecycleItem[];
-  const recycledColumns = differenceBy(
-    prevItems,
-    currentItems,
-    'num',
-  ) as RecycleItem[];
-  const newColumns = differenceBy(currentItems, prevItems, 'num') as Item[];
+  const reusedColumns = intersectBy(prevItems, currentItems, 'num');
+  const recycledColumns = differenceBy(prevItems, currentItems, 'num');
+  const newColumns = differenceBy(currentItems, prevItems, 'num');
 
   const recycledKeys = recycledColumns.map((c) => c.key);
   if (recycledKeys.length < newColumns.length) {
-    let maxKey = Math.max(...prevItems.map((c) => c.key)) + 1;
+    let maxKey = maxBy(prevItems, 'key') + 1;
     recycledKeys.push(maxKey++);
   }
 
-  return reusedColumns
+  const nextColumns = reusedColumns
     .concat(newColumns.map((c, i) => ({ ...c, key: recycledKeys[i] })))
     .sort((a, b) => a.num - b.num);
+
+  return nextColumns;
 }
 
 interface Item {
