@@ -1,15 +1,11 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
+  GestureResponderEvent,
+  Pressable as RNPressable,
   Animated,
   ViewStyle,
   StyleProp,
-  StyleSheet,
-  Platform,
 } from 'react-native';
-import { PressabilityConfig } from '../lib/pressability/pressability';
-import { usePressability } from '../lib/pressability/use_pressability';
-
-import { useTheme } from './theme';
 
 export interface StateCallback {
   pressed: boolean;
@@ -17,7 +13,10 @@ export interface StateCallback {
   focused: boolean;
 }
 
-interface PressableProps extends PressabilityConfig {
+interface PressableProps {
+  onPress?: (event: GestureResponderEvent) => void;
+  onLongPress?: (event: GestureResponderEvent) => void;
+  onDoublePress?: (event: GestureResponderEvent) => void;
   children?: React.ReactNode | ((props: StateCallback) => React.ReactNode);
   style?:
     | Animated.WithAnimatedValue<StyleProp<ViewStyle>>
@@ -27,156 +26,41 @@ interface PressableProps extends PressabilityConfig {
 }
 
 export function Pressable(props: PressableProps) {
-  const {
-    children,
-    onPress = () => {},
-    style,
-    disabled,
-    delayHoverIn,
-    delayHoverOut,
-    delayLongPress,
-    delayPressIn,
-    delayPressOut,
-    onHoverIn = () => {},
-    onHoverOut = () => {},
-    onFocus: propOnFocus = () => {},
-    onBlur: propOnBlur = () => {},
-  } = props;
-  const theme = useTheme();
-  const background = React.useRef(new Animated.Value(0)).current;
-  const [focused, setFocused] = React.useState(false);
-  const [hovered, setHovered] = React.useState(false);
-  const [pressed, setPressed] = React.useState(false);
+  const { children, style, onPress, onDoublePress, onLongPress } = props;
+  const timeoutRef = useRef<number | null>(null);
 
-  const config: PressabilityConfig = React.useMemo(
-    () => ({
-      delayHoverIn,
-      delayHoverOut,
-      delayLongPress,
-      delayPressIn,
-      delayPressOut,
-      disabled,
-      onPress,
-      onHoverIn: (e) => {
-        setHovered(true);
-        onHoverIn(e);
-      },
-      onHoverOut: (e) => {
-        setHovered(false);
-        onHoverOut(e);
-      },
-      onFocus: (e) => {
-        setFocused(true);
-        propOnFocus(e);
-      },
-      onBlur: (e) => {
-        setFocused(false);
-        propOnBlur(e);
-      },
-      onPressIn: () => {
-        setPressed(true);
-      },
-      onPressOut: () => {
-        setPressed(false);
-      },
-    }),
-    [
-      delayHoverIn,
-      delayHoverOut,
-      delayLongPress,
-      delayPressIn,
-      delayPressOut,
-      disabled,
-      onPress,
-      onHoverIn,
-      onHoverOut,
-      propOnFocus,
-      propOnBlur,
-    ],
+  const handlePress = useCallback(
+    (event: GestureResponderEvent) => {
+      if (onDoublePress !== undefined) {
+        if (timeoutRef.current !== null) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+          if (onDoublePress) {
+            onDoublePress(event);
+          }
+          return;
+        }
+
+        timeoutRef.current = setTimeout(() => {
+          timeoutRef.current = null;
+        }, 500);
+      }
+
+      if (onPress) {
+        onPress(event);
+      }
+    },
+    [timeoutRef, onPress, onDoublePress],
   );
-
-  const {
-    onBlur,
-    onFocus,
-    onMouseEnter,
-    onMouseLeave,
-    // onClick,
-    onResponderGrant,
-    onResponderMove,
-    onResponderRelease,
-    onResponderTerminate,
-    onResponderTerminationRequest,
-    onStartShouldSetResponder,
-  } = usePressability(config) || {};
-
-  const childrenProps: StateCallback = {
-    pressed: pressed,
-    focused: focused,
-    hovered: !pressed && hovered,
-  };
-
-  Animated.spring(background, {
-    toValue: pressed ? 1 : hovered ? 0.5 : 0,
-    useNativeDriver: false,
-    bounciness: 0,
-  }).start();
 
   return (
-    <Animated.View
-      style={[
-        styles.base,
-        webStyle.outline,
-        disabled && styles.disabled,
-        {
-          backgroundColor: background.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [
-              theme.button.backgroundDefault,
-              theme.button.backgroundHovered,
-              theme.button.backgroundPressed,
-            ],
-          }),
-        },
-        typeof style === 'function' ? style(childrenProps) : style,
-      ]}
-      onResponderGrant={onResponderGrant}
-      onResponderMove={onResponderMove}
-      onResponderRelease={onResponderRelease}
-      onResponderTerminate={onResponderTerminate}
-      onResponderTerminationRequest={onResponderTerminationRequest}
-      onStartShouldSetResponder={onStartShouldSetResponder}
-      accessible={!disabled}
-      // @ts-ignore web event handlers
-      onBlur={onBlur}
-      onFocus={onFocus}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      // onClick={onClick}
+    <RNPressable
+      onLongPress={onLongPress}
+      onPress={handlePress}
+      // @ts-ignore
+      style={style}
     >
-      {typeof children === 'function' ? children(childrenProps) : children}
-    </Animated.View>
+      {children}
+    </RNPressable>
   );
 }
-
-const styles = StyleSheet.create({
-  // @ts-ignore
-  base: {
-    ...(Platform.OS === 'web' && {
-      touchAction: 'manipulation',
-      cursor: 'pointer',
-      userSelect: 'none',
-    }),
-  },
-  // @ts-ignore
-  disabled: {
-    ...(Platform.OS === 'web' && {
-      cursor: 'auto',
-    }),
-  },
-});
-
-const webStyle = {
-  outline: {
-    outline: 'none',
-  },
-};

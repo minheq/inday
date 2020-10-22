@@ -20,13 +20,20 @@ import {
 export interface RenderCellProps {
   row: number;
   column: number;
+  selected: boolean;
 }
 
 export interface RenderHeaderCellProps {
   column: number;
 }
 
+export interface SelectedCell {
+  row: number;
+  column: number;
+}
+
 export interface GridProps {
+  selectedCell?: SelectedCell | null;
   scrollViewHeight: number;
   scrollViewWidth: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
@@ -56,270 +63,269 @@ interface GridRef {
   scrollTo: (params: ScrollToParams) => void;
 }
 
-/**
- * TODO:
- * - Smooth header sync
- *   - Memoize calculations
- *   - Recycle cells
- * - Fix overscan 0
- * - Sections
- */
-export const Grid = forwardRef<GridRef, GridProps>(function Grid(props, ref) {
-  const {
-    columns,
-    fixedColumnCount,
-    rowCount,
-    rowHeight,
-    headerHeight,
-    scrollViewHeight,
-    scrollViewWidth,
-    renderCell,
-    renderHeaderCell,
-    contentOffset,
-    onContentOffsetLoaded,
-  } = props;
-  const verticalScrollViewRef = useRef<ScrollView>(null);
-  const horizontalScrollViewRef = useRef<ScrollView>(null);
-  const headerScrollViewRef = useRef<ScrollView>(null);
-  const scrollYObservable = useRef(new Animated.Value(0)).current;
-  const scrollXObservable = useRef(new Animated.Value(0)).current;
-  const [scrollY, setScrollY] = useState(0);
-  const [scrollX, setScrollX] = useState(0);
-  const prevRowsDataRef = useRef<RecycleItem[]>([]);
-  const prevBodyRightPaneColumnsDataRef = useRef<RecycleItem[]>([]);
+export const Grid = memo(
+  forwardRef<GridRef, GridProps>(function Grid(props, ref) {
+    const {
+      selectedCell,
+      columns,
+      fixedColumnCount,
+      rowCount,
+      rowHeight,
+      headerHeight,
+      scrollViewHeight,
+      scrollViewWidth,
+      renderCell,
+      renderHeaderCell,
+      contentOffset,
+      onContentOffsetLoaded,
+    } = props;
+    const verticalScrollViewRef = useRef<ScrollView>(null);
+    const horizontalScrollViewRef = useRef<ScrollView>(null);
+    const headerScrollViewRef = useRef<ScrollView>(null);
+    const scrollYObservable = useRef(new Animated.Value(0)).current;
+    const scrollXObservable = useRef(new Animated.Value(0)).current;
+    const [scrollY, setScrollY] = useState(0);
+    const [scrollX, setScrollX] = useState(0);
+    const prevRowsDataRef = useRef<RecycleItem[]>([]);
+    const prevBodyRightPaneColumnsDataRef = useRef<RecycleItem[]>([]);
 
-  const handleScrollTo = useCallback(
-    (params: ScrollToParams) => {
-      if (verticalScrollViewRef.current) {
-        verticalScrollViewRef.current.scrollTo(params);
-      }
-      if (horizontalScrollViewRef.current) {
-        horizontalScrollViewRef.current.scrollTo(params);
-      }
-    },
-    [verticalScrollViewRef, horizontalScrollViewRef],
-  );
+    const handleScrollTo = useCallback(
+      (params: ScrollToParams) => {
+        if (verticalScrollViewRef.current) {
+          verticalScrollViewRef.current.scrollTo(params);
+        }
+        if (horizontalScrollViewRef.current) {
+          horizontalScrollViewRef.current.scrollTo(params);
+        }
+      },
+      [verticalScrollViewRef, horizontalScrollViewRef],
+    );
 
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        scrollTo: handleScrollTo,
-      };
-    },
-    [handleScrollTo],
-  );
+    useImperativeHandle(
+      ref,
+      () => {
+        return {
+          scrollTo: handleScrollTo,
+        };
+      },
+      [handleScrollTo],
+    );
 
-  // Set up scroll listeners
-  useEffect(() => {
-    const scrollYListenerID = scrollYObservable.addListener((state) => {
-      setScrollY(state.value);
-    });
-    const scrollXListenerID = scrollXObservable.addListener((state) => {
-      setScrollX(state.value);
+    // Set up scroll listeners
+    useEffect(() => {
+      const scrollYListenerID = scrollYObservable.addListener((state) => {
+        setScrollY(state.value);
+      });
+      const scrollXListenerID = scrollXObservable.addListener((state) => {
+        setScrollX(state.value);
 
-      if (headerScrollViewRef.current !== null) {
-        headerScrollViewRef.current.scrollTo({
-          x: state.value,
-          animated: false,
-        });
-      }
-    });
-
-    return () => {
-      scrollYObservable.removeListener(scrollYListenerID);
-      scrollXObservable.removeListener(scrollXListenerID);
-    };
-  }, [scrollYObservable, scrollXObservable, headerScrollViewRef]);
-
-  useEffect(() => {
-    if (Platform.OS === 'web' && contentOffset) {
-      handleScrollTo({
-        y: contentOffset.y,
-        x: contentOffset.x,
-        animated: false,
+        if (headerScrollViewRef.current !== null) {
+          headerScrollViewRef.current.scrollTo({
+            x: state.value,
+            animated: false,
+          });
+        }
       });
 
-      if (onContentOffsetLoaded) {
-        onContentOffsetLoaded();
+      return () => {
+        scrollYObservable.removeListener(scrollYListenerID);
+        scrollXObservable.removeListener(scrollXListenerID);
+      };
+    }, [scrollYObservable, scrollXObservable, headerScrollViewRef]);
+
+    useEffect(() => {
+      if (Platform.OS === 'web' && contentOffset) {
+        handleScrollTo({
+          y: contentOffset.y,
+          x: contentOffset.x,
+          animated: false,
+        });
+
+        if (onContentOffsetLoaded) {
+          onContentOffsetLoaded();
+        }
       }
-    }
-  }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
+    }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
 
-  const leftPaneColumnWidths = useMemo(
-    () => columns.slice(0, fixedColumnCount),
-    [columns, fixedColumnCount],
-  );
-  const leftPaneColumns = useMemo(() => getItems(leftPaneColumnWidths), [
-    leftPaneColumnWidths,
-  ]);
-  const rightPaneColumnWidths = useMemo(() => columns.slice(fixedColumnCount), [
-    columns,
-    fixedColumnCount,
-  ]);
-  const rightPaneColumns = useMemo(
-    () => getItems(rightPaneColumnWidths, fixedColumnCount),
-    [rightPaneColumnWidths, fixedColumnCount],
-  );
-  const rows = useMemo(() => {
-    const items: Item[] = [];
-    for (let i = 0; i < rowCount; i++) {
-      items.push({ num: i + 1, size: rowHeight, offset: i * rowHeight });
-    }
-    return items;
-  }, [rowCount, rowHeight]);
-  const leftPaneContentWidth = sum(leftPaneColumnWidths);
-  const rightPaneContentWidth = sum(rightPaneColumnWidths);
-  const rightPaneScrollViewWidth = scrollViewWidth - leftPaneContentWidth;
-  const contentHeight = rowCount * rowHeight;
+    const leftPaneColumnWidths = useMemo(
+      () => columns.slice(0, fixedColumnCount),
+      [columns, fixedColumnCount],
+    );
+    const leftPaneColumns = useMemo(() => getItems(leftPaneColumnWidths), [
+      leftPaneColumnWidths,
+    ]);
+    const rightPaneColumnWidths = useMemo(
+      () => columns.slice(fixedColumnCount),
+      [columns, fixedColumnCount],
+    );
+    const rightPaneColumns = useMemo(
+      () => getItems(rightPaneColumnWidths, fixedColumnCount),
+      [rightPaneColumnWidths, fixedColumnCount],
+    );
+    const rows = useMemo(() => {
+      const items: Item[] = [];
+      for (let i = 0; i < rowCount; i++) {
+        items.push({ num: i + 1, size: rowHeight, offset: i * rowHeight });
+      }
+      return items;
+    }, [rowCount, rowHeight]);
+    const leftPaneContentWidth = sum(leftPaneColumnWidths);
+    const rightPaneContentWidth = sum(rightPaneColumnWidths);
+    const rightPaneScrollViewWidth = scrollViewWidth - leftPaneContentWidth;
+    const contentHeight = rowCount * rowHeight;
 
-  const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
-    () =>
-      getIndex({
-        items: rows,
-        scrollOffset: scrollY,
-        scrollViewSize: scrollViewHeight,
-      }),
-    [rows, scrollY, scrollViewHeight],
-  );
+    const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
+      () =>
+        getIndex({
+          items: rows,
+          scrollOffset: scrollY,
+          scrollViewSize: scrollViewHeight,
+          overscan: 1,
+        }),
+      [rows, scrollY, scrollViewHeight],
+    );
 
-  const recycledRows = useMemo(
-    () =>
-      recycleItems({
-        items: rows,
-        prevItems: prevRowsDataRef.current,
-        startIndex: rowStartIndex,
-        endIndex: rowEndIndex,
-      }),
-    [rows, rowStartIndex, rowEndIndex],
-  );
+    const recycledRows = useMemo(
+      () =>
+        recycleItems({
+          items: rows,
+          prevItems: prevRowsDataRef.current,
+          startIndex: rowStartIndex,
+          endIndex: rowEndIndex,
+        }),
+      [rows, rowStartIndex, rowEndIndex],
+    );
 
-  const bodyLeftPaneColumns = useMemo(
-    () =>
-      recycleItems({
-        items: leftPaneColumns,
-        prevItems: [],
-        startIndex: 0,
-        endIndex: fixedColumnCount - 1,
-      }),
-    [leftPaneColumns, fixedColumnCount],
-  );
+    const bodyLeftPaneColumns = useMemo(
+      () =>
+        recycleItems({
+          items: leftPaneColumns,
+          prevItems: [],
+          startIndex: 0,
+          endIndex: fixedColumnCount - 1,
+        }),
+      [leftPaneColumns, fixedColumnCount],
+    );
 
-  const {
-    startIndex: rightPaneStartIndex,
-    endIndex: rightPaneEndIndex,
-  } = useMemo(
-    () =>
-      getIndex({
-        items: rightPaneColumns,
-        scrollOffset: scrollX,
-        scrollViewSize: rightPaneScrollViewWidth,
-      }),
-    [scrollX, rightPaneScrollViewWidth, rightPaneColumns],
-  );
+    const {
+      startIndex: rightPaneStartIndex,
+      endIndex: rightPaneEndIndex,
+    } = useMemo(
+      () =>
+        getIndex({
+          items: rightPaneColumns,
+          scrollOffset: scrollX,
+          scrollViewSize: rightPaneScrollViewWidth,
+          overscan: 1,
+        }),
+      [scrollX, rightPaneScrollViewWidth, rightPaneColumns],
+    );
 
-  const bodyRightPaneColumns = useMemo(
-    () =>
-      recycleItems({
-        items: rightPaneColumns,
-        prevItems: prevBodyRightPaneColumnsDataRef.current,
-        startIndex: rightPaneStartIndex,
-        endIndex: rightPaneEndIndex,
-      }),
-    [rightPaneColumns, rightPaneStartIndex, rightPaneEndIndex],
-  );
+    const bodyRightPaneColumns = useMemo(
+      () =>
+        recycleItems({
+          items: rightPaneColumns,
+          prevItems: prevBodyRightPaneColumnsDataRef.current,
+          startIndex: rightPaneStartIndex,
+          endIndex: rightPaneEndIndex,
+        }),
+      [rightPaneColumns, rightPaneStartIndex, rightPaneEndIndex],
+    );
 
-  prevRowsDataRef.current = recycledRows;
-  prevBodyRightPaneColumnsDataRef.current = bodyRightPaneColumns;
+    prevRowsDataRef.current = recycledRows;
+    prevBodyRightPaneColumnsDataRef.current = bodyRightPaneColumns;
 
-  return (
-    <View style={[{ height: scrollViewHeight }]}>
-      {headerHeight && renderHeaderCell && (
-        <View style={[{ height: headerHeight }, styles.header]}>
-          <HeaderContainer
-            columns={leftPaneColumns}
-            renderHeaderCell={renderHeaderCell}
-          />
-          <ScrollView
-            horizontal
-            ref={headerScrollViewRef}
-            scrollEnabled={false}
-          >
+    return (
+      <View style={[{ height: scrollViewHeight }]}>
+        {headerHeight && renderHeaderCell && (
+          <View style={[{ height: headerHeight }, styles.header]}>
             <HeaderContainer
-              columns={rightPaneColumns}
+              columns={leftPaneColumns}
               renderHeaderCell={renderHeaderCell}
             />
-          </ScrollView>
-        </View>
-      )}
-      <ScrollView
-        ref={verticalScrollViewRef}
-        contentOffset={contentOffset}
-        onScroll={Animated.event(
-          [
-            {
-              nativeEvent: {
-                contentOffset: {
-                  y: scrollYObservable,
+            <ScrollView
+              horizontal
+              ref={headerScrollViewRef}
+              scrollEnabled={false}
+            >
+              <HeaderContainer
+                columns={rightPaneColumns}
+                renderHeaderCell={renderHeaderCell}
+              />
+            </ScrollView>
+          </View>
+        )}
+        <ScrollView
+          ref={verticalScrollViewRef}
+          contentOffset={contentOffset}
+          onScroll={Animated.event(
+            [
+              {
+                nativeEvent: {
+                  contentOffset: {
+                    y: scrollYObservable,
+                  },
                 },
               },
-            },
-          ],
-          { useNativeDriver: false },
-        )}
-        contentContainerStyle={{ height: contentHeight }}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.wrapper}>
-          <View style={[{ width: leftPaneContentWidth }]}>
-            {recycledRows.map(({ key, size, offset, num }) => (
-              <RowContainer
-                columns={bodyLeftPaneColumns}
-                renderCell={renderCell}
-                key={key}
-                y={offset}
-                row={num}
-                height={size}
-              />
-            ))}
-          </View>
-          <View style={styles.rightPaneWrapper}>
-            <ScrollView
-              ref={horizontalScrollViewRef}
-              contentOffset={contentOffset}
-              horizontal
-              onScroll={Animated.event(
-                [
-                  {
-                    nativeEvent: {
-                      contentOffset: {
-                        x: scrollXObservable,
-                      },
-                    },
-                  },
-                ],
-                { useNativeDriver: false },
-              )}
-              contentContainerStyle={{ width: rightPaneContentWidth }}
-              scrollEventThrottle={16}
-            >
+            ],
+            { useNativeDriver: false },
+          )}
+          contentContainerStyle={{ height: contentHeight }}
+          scrollEventThrottle={16}
+        >
+          <View style={styles.wrapper}>
+            <View style={[{ width: leftPaneContentWidth }]}>
               {recycledRows.map(({ key, size, offset, num }) => (
                 <RowContainer
-                  columns={bodyRightPaneColumns}
+                  columns={bodyLeftPaneColumns}
                   renderCell={renderCell}
                   key={key}
                   y={offset}
                   row={num}
                   height={size}
+                  selectedCell={selectedCell}
                 />
               ))}
-            </ScrollView>
+            </View>
+            <View style={styles.rightPaneWrapper}>
+              <ScrollView
+                ref={horizontalScrollViewRef}
+                contentOffset={contentOffset}
+                horizontal
+                onScroll={Animated.event(
+                  [
+                    {
+                      nativeEvent: {
+                        contentOffset: {
+                          x: scrollXObservable,
+                        },
+                      },
+                    },
+                  ],
+                  { useNativeDriver: false },
+                )}
+                contentContainerStyle={{ width: rightPaneContentWidth }}
+                scrollEventThrottle={16}
+              >
+                {recycledRows.map(({ key, size, offset, num }) => (
+                  <RowContainer
+                    columns={bodyRightPaneColumns}
+                    renderCell={renderCell}
+                    key={key}
+                    y={offset}
+                    row={num}
+                    height={size}
+                    selectedCell={selectedCell}
+                  />
+                ))}
+              </ScrollView>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </View>
-  );
-});
+        </ScrollView>
+      </View>
+    );
+  }),
+);
 
 export function getItems(itemSizes: number[], offsetNum: number = 0) {
   const items: Item[] = [];
@@ -389,10 +395,11 @@ interface GetIndexParams {
   items: Item[];
   scrollOffset: number;
   scrollViewSize: number;
+  overscan?: number;
 }
 
 export function getIndex(params: GetIndexParams) {
-  const { items, scrollOffset, scrollViewSize } = params;
+  const { items, scrollOffset, scrollViewSize, overscan = 0 } = params;
 
   let startIndex = 0;
   let endIndex = 0;
@@ -420,6 +427,9 @@ export function getIndex(params: GetIndexParams) {
     endIndex = items.length - 1;
   }
 
+  startIndex = Math.max(startIndex - overscan, 0);
+  endIndex = Math.min(endIndex + overscan, items.length - 1);
+
   return { startIndex, endIndex };
 }
 
@@ -429,15 +439,20 @@ interface RowContainerProps {
   row: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   columns: RecycleItem[];
+  selectedCell?: SelectedCell | null;
 }
 
 const RowContainer = memo(function RowContainer(props: RowContainerProps) {
-  const { height, y, row, columns, renderCell } = props;
+  const { height, y, row, columns, selectedCell, renderCell } = props;
+  const selectedRow = selectedCell?.row === row;
 
   return (
-    <View style={[{ height, top: y }, styles.row]}>
+    <View
+      style={[{ height, top: y }, styles.row, selectedRow && styles.selected]}
+    >
       {columns.map((columnData) => {
         const { key, size: width, num: column, offset } = columnData;
+        const selected = selectedRow && selectedCell?.column === column;
 
         return (
           <CellContainer
@@ -447,6 +462,7 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
             height={height}
             column={column}
             x={offset}
+            selected={selected}
             renderCell={renderCell}
           />
         );
@@ -462,14 +478,28 @@ interface CellContainerProps {
   renderCell: (props: RenderCellProps) => React.ReactNode;
   column: number;
   row: number;
+  selected: boolean;
 }
 
+const borderOffset = 2;
+
 const CellContainer = memo(function CellContainer(props: CellContainerProps) {
-  const { x, row, column, width, height, renderCell } = props;
+  const { x, row, column, width, height, selected, renderCell } = props;
 
   return (
-    <View style={[{ left: x, width, height }, styles.cell]}>
-      {renderCell({ row, column })}
+    <View
+      style={[
+        {
+          left: selected ? x - borderOffset : x,
+          width: selected ? width + borderOffset * 2 : width,
+          height: selected ? height + borderOffset * 2 : height,
+          top: selected ? -borderOffset : borderOffset - borderOffset,
+        },
+        styles.cell,
+        selected && styles.selected,
+      ]}
+    >
+      {renderCell({ row, column, selected })}
     </View>
   );
 });
@@ -516,5 +546,8 @@ const styles = StyleSheet.create({
   },
   cell: {
     position: 'absolute',
+  },
+  selected: {
+    zIndex: 1,
   },
 });

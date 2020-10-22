@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Container, Text } from '../components';
+import { Container, Pressable, Text, useTheme } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -69,11 +69,29 @@ import {
   assertSingleLineTextFieldValue,
   assertSingleOptionFieldValue,
   assertURLFieldValue,
+  FieldID,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView } from '../data/views';
 import { Grid, RenderCellProps, RenderHeaderCellProps } from './grid';
 import { format } from 'date-fns';
+import { Record, RecordID } from '../data/records';
+import { atom, useRecoilState, useRecoilValue } from 'recoil';
+
+interface ListViewDisplayState {
+  selectedCell: {
+    recordID: RecordID;
+    fieldID: FieldID;
+    editing: boolean;
+  } | null;
+}
+
+const listViewDisplayState = atom<ListViewDisplayState>({
+  key: 'ListViewDisplay',
+  default: {
+    selectedCell: null,
+  },
+});
 
 interface ListViewDisplayProps {
   view: ListView;
@@ -84,8 +102,47 @@ const RECORD_ROW_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
+  const { selectedCell } = useRecoilValue(listViewDisplayState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
+
+  const recordToRowMap = useMemo(() => {
+    const map: {
+      [recordID: string]: number;
+    } = {};
+
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
+      map[record.id] = i + 1;
+    }
+
+    return map;
+  }, [records]);
+  const fieldToColumnMap = useMemo(() => {
+    const map: {
+      [fieldID: string]: number;
+    } = {};
+
+    for (let i = 0; i < fields.length; i++) {
+      const field = fields[i];
+      map[field.id] = i + 1;
+    }
+
+    return map;
+  }, [fields]);
+  const gridSelectedCell = useMemo(() => {
+    if (selectedCell === undefined || selectedCell === null) {
+      return selectedCell;
+    }
+
+    return {
+      row: recordToRowMap[selectedCell.recordID],
+      column: fieldToColumnMap[selectedCell.fieldID],
+    };
+  }, [selectedCell, recordToRowMap, fieldToColumnMap]);
+  const contentOffset = useMemo(() => {
+    return { x: 0, y: 0 };
+  }, []);
 
   const { fixedFieldCount } = view;
 
@@ -95,9 +152,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
       const record = records[row - 1];
       const value = record.fields[field.id];
 
-      const renderer = rendererByFieldType[field.type];
-
-      return <View style={styles.cell}>{renderer({ field, value })}</View>;
+      return <Cell record={record} field={field} value={value} />;
     },
     [fields, records],
   );
@@ -106,11 +161,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     ({ column }: RenderHeaderCellProps) => {
       const field = fields[column - 1];
 
-      return (
-        <View style={styles.cell}>
-          <Text>{field.name}</Text>
-        </View>
-      );
+      return <HeaderCell field={field} />;
     },
     [fields],
   );
@@ -125,7 +176,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
           <Grid
             scrollViewWidth={width}
             scrollViewHeight={height}
-            contentOffset={{ x: 0, y: 0 }}
+            contentOffset={contentOffset}
             rowCount={rowCount}
             renderCell={renderCell}
             renderHeaderCell={renderHeaderCell}
@@ -133,10 +184,84 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             headerHeight={FIELD_ROW_HEIGHT}
             columns={columns}
             fixedColumnCount={fixedFieldCount}
+            selectedCell={gridSelectedCell}
           />
         )}
       </AutoSizer>
     </Container>
+  );
+}
+
+interface CellProps {
+  field: Field;
+  value: FieldValue;
+  record: Record;
+}
+
+function Cell(props: CellProps) {
+  const { record, field, value } = props;
+  const theme = useTheme();
+  const [state, setState] = useRecoilState(listViewDisplayState);
+
+  const handlePress = useCallback(() => {
+    setState({
+      selectedCell: { recordID: record.id, fieldID: field.id, editing: false },
+    });
+  }, [setState, record, field]);
+
+  const handleDoublePress = useCallback(() => {
+    setState({
+      selectedCell: { recordID: record.id, fieldID: field.id, editing: true },
+    });
+  }, [setState, record, field]);
+
+  const selected =
+    state.selectedCell &&
+    state.selectedCell.recordID === record.id &&
+    state.selectedCell.fieldID === field.id;
+
+  const renderer = rendererByFieldType[field.type];
+
+  return (
+    <Pressable
+      style={[
+        {
+          backgroundColor: theme.container.color.content,
+          borderColor: selected
+            ? theme.border.color.focus
+            : theme.border.color.default,
+        },
+        styles.cell,
+        selected && styles.selected,
+      ]}
+      onPress={handlePress}
+      onDoublePress={handleDoublePress}
+    >
+      {renderer({ field, value })}
+    </Pressable>
+  );
+}
+
+interface HeaderCellProps {
+  field: Field;
+}
+
+function HeaderCell(props: HeaderCellProps) {
+  const { field } = props;
+  const theme = useTheme();
+
+  return (
+    <View
+      style={[
+        {
+          backgroundColor: theme.container.color.content,
+          borderColor: theme.border.color.default,
+        },
+        styles.cell,
+      ]}
+    >
+      <Text>{field.name}</Text>
+    </View>
   );
 }
 
@@ -246,7 +371,7 @@ interface CheckboxCellProps {
 function CheckboxCell(props: CheckboxCellProps) {
   const { value } = props;
 
-  return <Text>{value ? 'checked' : 'unchecked'}</Text>;
+  return <Text numberOfLines={1}>{value ? 'checked' : 'unchecked'}</Text>;
 }
 
 interface CurrencyCellProps {
@@ -257,7 +382,7 @@ interface CurrencyCellProps {
 function CurrencyCell(props: CurrencyCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 
 interface DateCellProps {
@@ -269,10 +394,10 @@ function DateCell(props: DateCellProps) {
   const { value } = props;
 
   if (value === null) {
-    return <Text>No date</Text>;
+    return <Text numberOfLines={1}>No date</Text>;
   }
 
-  return <Text>{format(value, 'dd-MM-yyyy')}</Text>;
+  return <Text numberOfLines={1}>{format(value, 'dd-MM-yyyy')}</Text>;
 }
 interface EmailCellProps {
   value: EmailFieldValue;
@@ -282,7 +407,7 @@ interface EmailCellProps {
 function EmailCell(props: EmailCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
@@ -292,7 +417,7 @@ interface MultiCollaboratorCellProps {
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   const { value } = props;
 
-  return <Text>{value[0]}</Text>;
+  return <Text numberOfLines={1}>{value[0]}</Text>;
 }
 interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
@@ -302,7 +427,7 @@ interface MultiRecordLinkCellProps {
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
   const { value } = props;
 
-  return <Text>{value[0]}</Text>;
+  return <Text numberOfLines={1}>{value[0]}</Text>;
 }
 interface MultiLineTextCellProps {
   value: MultiLineTextFieldValue;
@@ -312,7 +437,7 @@ interface MultiLineTextCellProps {
 function MultiLineTextCell(props: MultiLineTextCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 interface MultiOptionCellProps {
   value: MultiOptionFieldValue;
@@ -322,7 +447,7 @@ interface MultiOptionCellProps {
 function MultiOptionCell(props: MultiOptionCellProps) {
   const { value } = props;
 
-  return <Text>{value[0]}</Text>;
+  return <Text numberOfLines={1}>{value[0]}</Text>;
 }
 interface NumberCellProps {
   value: NumberFieldValue;
@@ -332,7 +457,7 @@ interface NumberCellProps {
 function NumberCell(props: NumberCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
@@ -342,7 +467,7 @@ interface PhoneNumberCellProps {
 function PhoneNumberCell(props: PhoneNumberCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 interface SingleCollaboratorCellProps {
   value: SingleCollaboratorFieldValue;
@@ -352,7 +477,7 @@ interface SingleCollaboratorCellProps {
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 interface SingleRecordLinkCellProps {
   value: SingleRecordLinkFieldValue;
@@ -362,7 +487,7 @@ interface SingleRecordLinkCellProps {
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
@@ -372,7 +497,7 @@ interface SingleLineTextCellProps {
 function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 
 interface SingleOptionCellProps {
@@ -383,7 +508,7 @@ interface SingleOptionCellProps {
 function SingleOptionCell(props: SingleOptionCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 
 interface URLCellProps {
@@ -394,11 +519,23 @@ interface URLCellProps {
 function URLCell(props: URLCellProps) {
   const { value } = props;
 
-  return <Text>{value}</Text>;
+  return <Text numberOfLines={1}>{value}</Text>;
 }
 
 const styles = StyleSheet.create({
   cell: {
+    padding: 8,
     width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    justifyContent: 'center',
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+  },
+  selected: {
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
   },
 });

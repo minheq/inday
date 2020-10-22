@@ -14,6 +14,7 @@ export interface TextProps {
   color?: TextColor;
   align?: 'left' | 'right' | 'center';
   bold?: boolean;
+  selectable?: boolean;
   testID?: string;
   numberOfLines?: number;
   decoration?: TextDecorationLine;
@@ -29,6 +30,7 @@ export function Text(props: TextProps) {
     children,
     color = 'default',
     size = 'md',
+    selectable = false,
     testID,
     bold,
     numberOfLines,
@@ -50,6 +52,7 @@ export function Text(props: TextProps) {
           textTransform: transform,
         },
       ]}
+      selectable={selectable}
       numberOfLines={numberOfLines}
     >
       {children}

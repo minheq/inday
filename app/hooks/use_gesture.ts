@@ -601,10 +601,10 @@ export class Gesture {
       prevState === TouchState.NotResponder &&
       nextState === TouchState.ResponderInactivePressIn;
 
-    const isActivationTransiton =
+    const isActivationTransition =
       !isActivationSignal(prevState) && isActivationSignal(nextState);
 
-    if (isInitialTransition || isActivationTransiton) {
+    if (isInitialTransition || isActivationTransition) {
       this._measureResponderRegion();
     }
 
