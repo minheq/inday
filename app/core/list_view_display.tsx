@@ -76,7 +76,7 @@ import { ListView } from '../data/views';
 import { Grid, RenderCellProps, RenderHeaderCellProps } from './grid';
 import { format } from 'date-fns';
 import { Record, RecordID } from '../data/records';
-import { atom, useRecoilState, useRecoilValue } from 'recoil';
+import { atom, useRecoilValue, useSetRecoilState } from 'recoil';
 
 interface ListViewDisplayState {
   selectedCell: {
@@ -147,12 +147,14 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   const { fixedFieldCount } = view;
 
   const renderCell = useCallback(
-    ({ row, column }: RenderCellProps) => {
+    ({ row, column, selected }: RenderCellProps) => {
       const field = fields[column - 1];
       const record = records[row - 1];
       const value = record.fields[field.id];
 
-      return <Cell record={record} field={field} value={value} />;
+      return (
+        <Cell selected={selected} record={record} field={field} value={value} />
+      );
     },
     [fields, records],
   );
@@ -166,7 +168,9 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     [fields],
   );
 
-  const columns = fields.map((field) => field.config.width);
+  const columns = useMemo(() => fields.map((field) => field.config.width), [
+    fields,
+  ]);
   const rowCount = records.length;
 
   return (
@@ -196,12 +200,13 @@ interface CellProps {
   field: Field;
   value: FieldValue;
   record: Record;
+  selected: boolean;
 }
 
 function Cell(props: CellProps) {
-  const { record, field, value } = props;
+  const { record, field, value, selected } = props;
   const theme = useTheme();
-  const [state, setState] = useRecoilState(listViewDisplayState);
+  const setState = useSetRecoilState(listViewDisplayState);
 
   const handlePress = useCallback(() => {
     setState({
@@ -214,11 +219,6 @@ function Cell(props: CellProps) {
       selectedCell: { recordID: record.id, fieldID: field.id, editing: true },
     });
   }, [setState, record, field]);
-
-  const selected =
-    state.selectedCell &&
-    state.selectedCell.recordID === record.id &&
-    state.selectedCell.fieldID === field.id;
 
   const renderer = rendererByFieldType[field.type];
 

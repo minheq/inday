@@ -235,6 +235,17 @@ export const Grid = memo(
     prevRowsDataRef.current = recycledRows;
     prevBodyRightPaneColumnsDataRef.current = bodyRightPaneColumns;
 
+    const effectiveRows = useMemo(() => {
+      return recycledRows.map((row) => ({
+        key: row.key,
+        height: row.size,
+        y: row.offset,
+        row: row.num,
+        selectedColumn:
+          selectedCell?.row === row.num ? selectedCell?.column : null,
+      }));
+    }, [recycledRows, selectedCell]);
+
     return (
       <View style={[{ height: scrollViewHeight }]}>
         {headerHeight && renderHeaderCell && (
@@ -275,15 +286,15 @@ export const Grid = memo(
         >
           <View style={styles.wrapper}>
             <View style={[{ width: leftPaneContentWidth }]}>
-              {recycledRows.map(({ key, size, offset, num }) => (
+              {effectiveRows.map(({ key, height, y, row, selectedColumn }) => (
                 <RowContainer
                   columns={bodyLeftPaneColumns}
                   renderCell={renderCell}
                   key={key}
-                  y={offset}
-                  row={num}
-                  height={size}
-                  selectedCell={selectedCell}
+                  y={y}
+                  row={row}
+                  height={height}
+                  selectedColumn={selectedColumn}
                 />
               ))}
             </View>
@@ -307,17 +318,19 @@ export const Grid = memo(
                 contentContainerStyle={{ width: rightPaneContentWidth }}
                 scrollEventThrottle={16}
               >
-                {recycledRows.map(({ key, size, offset, num }) => (
-                  <RowContainer
-                    columns={bodyRightPaneColumns}
-                    renderCell={renderCell}
-                    key={key}
-                    y={offset}
-                    row={num}
-                    height={size}
-                    selectedCell={selectedCell}
-                  />
-                ))}
+                {effectiveRows.map(
+                  ({ key, height, y, row, selectedColumn }) => (
+                    <RowContainer
+                      columns={bodyRightPaneColumns}
+                      renderCell={renderCell}
+                      key={key}
+                      y={y}
+                      row={row}
+                      height={height}
+                      selectedColumn={selectedColumn}
+                    />
+                  ),
+                )}
               </ScrollView>
             </View>
           </View>
@@ -439,20 +452,23 @@ interface RowContainerProps {
   row: number;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   columns: RecycleItem[];
-  selectedCell?: SelectedCell | null;
+  selectedColumn: number | null;
 }
 
 const RowContainer = memo(function RowContainer(props: RowContainerProps) {
-  const { height, y, row, columns, selectedCell, renderCell } = props;
-  const selectedRow = selectedCell?.row === row;
+  const { height, y, row, columns, selectedColumn, renderCell } = props;
 
   return (
     <View
-      style={[{ height, top: y }, styles.row, selectedRow && styles.selected]}
+      style={[
+        { height, top: y },
+        styles.row,
+        selectedColumn !== null && styles.selected,
+      ]}
     >
       {columns.map((columnData) => {
         const { key, size: width, num: column, offset } = columnData;
-        const selected = selectedRow && selectedCell?.column === column;
+        const selected = selectedColumn === column;
 
         return (
           <CellContainer

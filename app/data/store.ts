@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
 
 import { useEventEmitter, EventConfig, Event } from './events';
@@ -870,28 +870,30 @@ export function useGetSortedFieldsWithListViewConfig(
 
   const fields = useGetCollectionFields(view.collectionID);
 
-  return fields
-    .slice(0)
-    .sort((a, b) => {
-      const fieldConfigA = view.fieldsConfig[a.id];
-      const fieldConfigB = view.fieldsConfig[b.id];
+  return useMemo(() => {
+    return fields
+      .slice(0)
+      .sort((a, b) => {
+        const fieldConfigA = view.fieldsConfig[a.id];
+        const fieldConfigB = view.fieldsConfig[b.id];
 
-      if (fieldConfigA.order < fieldConfigB.order) {
-        return -1;
-      } else if (fieldConfigA.order > fieldConfigB.order) {
-        return 1;
-      }
+        if (fieldConfigA.order < fieldConfigB.order) {
+          return -1;
+        } else if (fieldConfigA.order > fieldConfigB.order) {
+          return 1;
+        }
 
-      return 0;
-    })
-    .map((f) => {
-      const config = view.fieldsConfig[f.id];
+        return 0;
+      })
+      .map((f) => {
+        const config = view.fieldsConfig[f.id];
 
-      return {
-        ...f,
-        config,
-      };
-    });
+        return {
+          ...f,
+          config,
+        };
+      });
+  }, [fields, view]);
 }
 
 export function useUpdateListViewFieldConfig() {
