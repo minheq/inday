@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { RecoilRoot, useTransactionObservation_UNSTABLE } from 'recoil';
+import { RecoilRoot, useRecoilTransactionObserver_UNSTABLE } from 'recoil';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -8,17 +8,22 @@ import { Text } from './components';
 import { ErrorBoundary } from './core/error_boundary';
 import { SpaceScreen, SpaceScreenHeader } from './screens/space_screen';
 import { linking, ScreenName, RootStackParamsMap } from './linking';
+import { spacesByIDState } from './data/atoms';
 
 const RootStack = createStackNavigator<RootStackParamsMap>();
 
+declare global {
+  interface Window {
+    debugState: any;
+  }
+}
+
 function PersistenceObserver() {
-  useTransactionObservation_UNSTABLE(
-    ({ atomValues, atomInfo, modifiedAtoms }) => {
-      for (const modifiedAtom of modifiedAtoms) {
-        window[`atom__${modifiedAtom}`] = atomValues.get(modifiedAtom);
-      }
-    },
-  );
+  useRecoilTransactionObserver_UNSTABLE(({ snapshot }) => {
+    window.debugState = {
+      spacesByIDState: snapshot.getLoadable(spacesByIDState).contents,
+    };
+  });
 
   return null;
 }

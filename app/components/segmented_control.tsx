@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { Button } from './button';
@@ -27,7 +27,7 @@ export function SegmentedControl<TValue = any>(
         const selected = value === option.value;
 
         return (
-          <>
+          <Fragment key={option.label}>
             <Button
               key={option.label}
               state={selected ? 'active' : 'default'}
@@ -36,7 +36,7 @@ export function SegmentedControl<TValue = any>(
               title={option.label}
             />
             <Spacer size={4} />
-          </>
+          </Fragment>
         );
       })}
     </Row>

@@ -1,16 +1,13 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, Fragment, useContext } from 'react';
 import { useGetView, useGetCollectionViews } from '../data/store';
 import { Container, Text, Spacer, Button } from '../components';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
-import { createStackNavigator } from '@react-navigation/stack';
 
 const ViewsMenuContext = createContext({
   spaceID: '1',
   viewID: '1',
 });
-
-const ViewsMenuStack = createStackNavigator();
 
 interface ViewsMenuProps {
   spaceID: SpaceID;
@@ -22,9 +19,7 @@ export function ViewsMenu(props: ViewsMenuProps) {
 
   return (
     <ViewsMenuContext.Provider value={{ spaceID, viewID }}>
-      <ViewsMenuStack.Navigator>
-        <ViewsMenuStack.Screen name="Views" component={Views} />
-      </ViewsMenuStack.Navigator>
+      <Views />
     </ViewsMenuContext.Provider>
   );
 }
@@ -40,16 +35,16 @@ function Views() {
         TEAM VIEWS
       </Text>
       <Spacer size={16} />
-      {views.map((v) => (
-        <>
+      {views.map((view) => (
+        <Fragment key={view.id}>
           <Button
-            title={v.name}
+            title={view.name}
             iconBefore="layout"
             alignTitle="left"
-            state={activeView.id === v.id ? 'active' : 'default'}
+            state={activeView.id === view.id ? 'active' : 'default'}
           />
           <Spacer size={4} />
-        </>
+        </Fragment>
       ))}
       <Spacer size={32} />
       <Text color="muted" size="sm" bold>
