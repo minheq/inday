@@ -1,13 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import {
-  Checkbox,
-  Container,
-  Pressable,
-  Spacer,
-  Text,
-  useTheme,
-} from '../components';
+import { Checkbox, Container, Pressable, Text, useTheme } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -168,16 +161,13 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   const { fixedFieldCount } = view;
 
   const renderCell = useCallback(
-    ({ row, column, focused, editing, inSelectedRow }: RenderCellProps) => {
+    ({ row, column, focused, editing }: RenderCellProps) => {
       const field = fields[column - 1];
       const record = records[row - 1];
       const value = record.fields[field.id];
-      const firstColumn = column === 1;
 
       return (
         <Cell
-          inSelectedRecord={inSelectedRow}
-          firstColumn={firstColumn}
           focused={focused}
           editing={editing}
           record={record}
@@ -263,20 +253,10 @@ interface CellProps {
   record: Record;
   focused: boolean;
   editing: boolean;
-  firstColumn: boolean;
-  inSelectedRecord: boolean;
 }
 
 function Cell(props: CellProps) {
-  const {
-    record,
-    field,
-    value,
-    focused,
-    firstColumn,
-    inSelectedRecord,
-    editing,
-  } = props;
+  const { record, field, value, focused, editing } = props;
   const theme = useTheme();
   const setState = useSetRecoilState(listViewDisplayState);
 
@@ -294,29 +274,6 @@ function Cell(props: CellProps) {
     }
   }, [setState, focused, record, field]);
 
-  const handleCheck = useCallback(
-    (checked: boolean) => {
-      setState((prevState) => {
-        const { focusedCell, selectedRecordIDs } = prevState;
-
-        if (checked) {
-          return {
-            focusedCell,
-            selectedRecordIDs: [...selectedRecordIDs, record.id],
-          };
-        } else {
-          return {
-            focusedCell,
-            selectedRecordIDs: selectedRecordIDs.filter(
-              (recordID) => recordID !== record.id,
-            ),
-          };
-        }
-      });
-    },
-    [setState, record],
-  );
-
   const renderer = rendererByFieldType[field.type];
 
   return (
@@ -332,26 +289,8 @@ function Cell(props: CellProps) {
       ]}
       onPress={handlePress}
     >
-      {firstColumn && (
-        <SelectCheckbox value={inSelectedRecord} onChange={handleCheck} />
-      )}
       {renderer({ field, value })}
     </Pressable>
-  );
-}
-
-interface SelectCheckboxProps {
-  value: boolean;
-  onChange: (value: boolean) => void;
-}
-
-function SelectCheckbox(props: SelectCheckboxProps) {
-  const { value, onChange } = props;
-
-  return (
-    <Container center width={40} height={RECORD_ROW_HEIGHT}>
-      <Checkbox value={value} onChange={onChange} />
-    </Container>
   );
 }
 
@@ -646,9 +585,21 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderBottomWidth: 1,
   },
+  firstColumnCell: {
+    width: '100%',
+    height: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   row: {
     width: '100%',
     height: '100%',
+  },
+  selectCheckbox: {
+    width: 40,
+    height: RECORD_ROW_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   selected: {
     // borderRightWidth: 2,

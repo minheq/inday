@@ -48,7 +48,7 @@ export interface RenderCellProps {
   column: number;
   focused: boolean;
   editing: boolean;
-  inSelectedRow: boolean;
+  selected: boolean;
 }
 
 export interface RenderHeaderCellProps {
@@ -522,7 +522,7 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
         x={offset}
         focused={focused}
         editing={editing}
-        inSelectedRow={selected}
+        selected={selected}
         renderCell={renderCell}
       />
     );
@@ -552,7 +552,7 @@ interface CellContainerProps {
   row: number;
   focused: boolean;
   editing: boolean;
-  inSelectedRow: boolean;
+  selected: boolean;
 }
 
 const CellContainer = memo(function CellContainer(props: CellContainerProps) {
@@ -564,7 +564,7 @@ const CellContainer = memo(function CellContainer(props: CellContainerProps) {
     height,
     focused,
     editing,
-    inSelectedRow,
+    selected,
     renderCell,
   } = props;
 
@@ -576,7 +576,7 @@ const CellContainer = memo(function CellContainer(props: CellContainerProps) {
         focused && styles.selected,
       ]}
     >
-      {renderCell({ row, column, focused, editing, inSelectedRow })}
+      {renderCell({ row, column, focused, editing, selected })}
     </View>
   );
 });
