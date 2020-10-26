@@ -14,6 +14,7 @@ export interface StateCallback {
 }
 
 interface PressableProps {
+  disabled?: boolean;
   onPress?: (event: GestureResponderEvent) => void;
   onLongPress?: (event: GestureResponderEvent) => void;
   onDoublePress?: (event: GestureResponderEvent) => void;
@@ -26,7 +27,14 @@ interface PressableProps {
 }
 
 export function Pressable(props: PressableProps) {
-  const { children, style, onPress, onDoublePress, onLongPress } = props;
+  const {
+    children,
+    disabled,
+    style,
+    onPress,
+    onDoublePress,
+    onLongPress,
+  } = props;
   const timeoutRef = useRef<number | null>(null);
 
   const handlePress = useCallback(
@@ -57,6 +65,7 @@ export function Pressable(props: PressableProps) {
     <RNPressable
       onLongPress={onLongPress}
       onPress={handlePress}
+      disabled={disabled}
       // @ts-ignore
       style={style}
     >
