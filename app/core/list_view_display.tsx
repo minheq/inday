@@ -1,6 +1,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Container, Pressable, Text, useTheme } from '../components';
+import {
+  Checkbox,
+  Container,
+  Pressable,
+  Spacer,
+  Text,
+  useTheme,
+} from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -73,23 +80,30 @@ import {
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView } from '../data/views';
-import { Grid, RenderCellProps, RenderHeaderCellProps } from './grid';
+import {
+  Grid,
+  RenderCellProps,
+  RenderHeaderCellProps,
+  RenderRowProps,
+} from './grid';
 import { format } from 'date-fns';
 import { Record, RecordID } from '../data/records';
 import { atom, useRecoilValue, useSetRecoilState } from 'recoil';
 
 interface ListViewDisplayState {
-  selectedCell: {
+  focusedCell: {
     recordID: RecordID;
     fieldID: FieldID;
     editing: boolean;
   } | null;
+  selectedRecordIDs: RecordID[];
 }
 
 const listViewDisplayState = atom<ListViewDisplayState>({
   key: 'ListViewDisplay',
   default: {
-    selectedCell: null,
+    focusedCell: null,
+    selectedRecordIDs: [],
   },
 });
 
@@ -102,7 +116,9 @@ const RECORD_ROW_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
-  const { selectedCell } = useRecoilValue(listViewDisplayState);
+  const { focusedCell, selectedRecordIDs } = useRecoilValue(
+    listViewDisplayState,
+  );
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
 
@@ -130,16 +146,21 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
 
     return map;
   }, [fields]);
-  const gridSelectedCell = useMemo(() => {
-    if (selectedCell === undefined || selectedCell === null) {
-      return selectedCell;
+  const gridFocusedCell = useMemo(() => {
+    if (focusedCell === undefined || focusedCell === null) {
+      return focusedCell;
     }
 
     return {
-      row: recordToRowMap[selectedCell.recordID],
-      column: fieldToColumnMap[selectedCell.fieldID],
+      row: recordToRowMap[focusedCell.recordID],
+      column: fieldToColumnMap[focusedCell.fieldID],
+      editing: focusedCell.editing,
     };
-  }, [selectedCell, recordToRowMap, fieldToColumnMap]);
+  }, [focusedCell, recordToRowMap, fieldToColumnMap]);
+  const selectedRows = useMemo(() => {
+    return selectedRecordIDs.map((recordID) => recordToRowMap[recordID]);
+  }, [recordToRowMap, selectedRecordIDs]);
+
   const contentOffset = useMemo(() => {
     return { x: 0, y: 0 };
   }, []);
@@ -147,17 +168,30 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   const { fixedFieldCount } = view;
 
   const renderCell = useCallback(
-    ({ row, column, selected }: RenderCellProps) => {
+    ({ row, column, focused, editing, inSelectedRow }: RenderCellProps) => {
       const field = fields[column - 1];
       const record = records[row - 1];
       const value = record.fields[field.id];
+      const firstColumn = column === 1;
 
       return (
-        <Cell selected={selected} record={record} field={field} value={value} />
+        <Cell
+          inSelectedRecord={inSelectedRow}
+          firstColumn={firstColumn}
+          focused={focused}
+          editing={editing}
+          record={record}
+          field={field}
+          value={value}
+        />
       );
     },
     [fields, records],
   );
+
+  const renderRow = useCallback(({ selected, children }: RenderRowProps) => {
+    return <Row selected={selected}>{children}</Row>;
+  }, []);
 
   const renderHeaderCell = useCallback(
     ({ column }: RenderHeaderCellProps) => {
@@ -188,7 +222,9 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             headerHeight={FIELD_ROW_HEIGHT}
             columns={columns}
             fixedColumnCount={fixedFieldCount}
-            selectedCell={gridSelectedCell}
+            focusedCell={gridFocusedCell}
+            selectedRows={selectedRows}
+            renderRow={renderRow}
           />
         )}
       </AutoSizer>
@@ -196,29 +232,90 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   );
 }
 
+interface RowProps {
+  selected: boolean;
+  children: React.ReactNode;
+}
+
+function Row(props: RowProps) {
+  const { selected, children } = props;
+  const theme = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.row,
+        {
+          backgroundColor: selected
+            ? theme.container.color.tint
+            : theme.container.color.content,
+        },
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+
 interface CellProps {
   field: Field;
   value: FieldValue;
   record: Record;
-  selected: boolean;
+  focused: boolean;
+  editing: boolean;
+  firstColumn: boolean;
+  inSelectedRecord: boolean;
 }
 
 function Cell(props: CellProps) {
-  const { record, field, value, selected } = props;
+  const {
+    record,
+    field,
+    value,
+    focused,
+    firstColumn,
+    inSelectedRecord,
+    editing,
+  } = props;
   const theme = useTheme();
   const setState = useSetRecoilState(listViewDisplayState);
 
   const handlePress = useCallback(() => {
-    setState({
-      selectedCell: { recordID: record.id, fieldID: field.id, editing: false },
-    });
-  }, [setState, record, field]);
+    if (focused) {
+      setState({
+        focusedCell: { recordID: record.id, fieldID: field.id, editing: false },
+        selectedRecordIDs: [record.id],
+      });
+    } else {
+      setState({
+        focusedCell: { recordID: record.id, fieldID: field.id, editing: true },
+        selectedRecordIDs: [record.id],
+      });
+    }
+  }, [setState, focused, record, field]);
 
-  const handleDoublePress = useCallback(() => {
-    setState({
-      selectedCell: { recordID: record.id, fieldID: field.id, editing: true },
-    });
-  }, [setState, record, field]);
+  const handleCheck = useCallback(
+    (checked: boolean) => {
+      setState((prevState) => {
+        const { focusedCell, selectedRecordIDs } = prevState;
+
+        if (checked) {
+          return {
+            focusedCell,
+            selectedRecordIDs: [...selectedRecordIDs, record.id],
+          };
+        } else {
+          return {
+            focusedCell,
+            selectedRecordIDs: selectedRecordIDs.filter(
+              (recordID) => recordID !== record.id,
+            ),
+          };
+        }
+      });
+    },
+    [setState, record],
+  );
 
   const renderer = rendererByFieldType[field.type];
 
@@ -226,19 +323,35 @@ function Cell(props: CellProps) {
     <Pressable
       style={[
         {
-          backgroundColor: theme.container.color.content,
-          borderColor: selected
+          borderColor: focused
             ? theme.border.color.focus
             : theme.border.color.default,
         },
         styles.cell,
-        selected && styles.selected,
+        focused && styles.selected,
       ]}
       onPress={handlePress}
-      onDoublePress={handleDoublePress}
     >
+      {firstColumn && (
+        <SelectCheckbox value={inSelectedRecord} onChange={handleCheck} />
+      )}
       {renderer({ field, value })}
     </Pressable>
+  );
+}
+
+interface SelectCheckboxProps {
+  value: boolean;
+  onChange: (value: boolean) => void;
+}
+
+function SelectCheckbox(props: SelectCheckboxProps) {
+  const { value, onChange } = props;
+
+  return (
+    <Container center width={40} height={RECORD_ROW_HEIGHT}>
+      <Checkbox value={value} onChange={onChange} />
+    </Container>
   );
 }
 
@@ -524,18 +637,23 @@ function URLCell(props: URLCellProps) {
 
 const styles = StyleSheet.create({
   cell: {
-    padding: 8,
+    paddingHorizontal: 8,
     width: '100%',
     height: '100%',
     overflow: 'hidden',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRightWidth: 1,
     borderBottomWidth: 1,
   },
+  row: {
+    width: '100%',
+    height: '100%',
+  },
   selected: {
-    borderRightWidth: 2,
-    borderBottomWidth: 2,
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
+    // borderRightWidth: 2,
+    // borderBottomWidth: 2,
+    // borderTopWidth: 2,
+    // borderLeftWidth: 2,
   },
 });

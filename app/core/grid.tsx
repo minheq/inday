@@ -17,25 +17,12 @@ import {
   maxBy,
 } from '../../lib/data_structures';
 
-export interface RenderCellProps {
-  row: number;
-  column: number;
-  selected: boolean;
-}
-
-export interface RenderHeaderCellProps {
-  column: number;
-}
-
-export interface SelectedCell {
-  row: number;
-  column: number;
-}
-
 export interface GridProps {
-  selectedCell?: SelectedCell | null;
+  focusedCell?: FocusedCell | null;
+  selectedRows?: number[] | null;
   scrollViewHeight: number;
   scrollViewWidth: number;
+  renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   rowHeight: number;
@@ -48,6 +35,30 @@ export interface GridProps {
   contentOffset?: ContentOffset;
   /** (Web) Starting scroll offset has loaded */
   onContentOffsetLoaded?: () => void;
+}
+
+export interface RenderRowProps {
+  row: number;
+  selected: boolean;
+  children: React.ReactNode;
+}
+
+export interface RenderCellProps {
+  row: number;
+  column: number;
+  focused: boolean;
+  editing: boolean;
+  inSelectedRow: boolean;
+}
+
+export interface RenderHeaderCellProps {
+  column: number;
+}
+
+export interface FocusedCell {
+  row: number;
+  column: number;
+  editing: boolean;
 }
 
 interface ContentOffset {
@@ -66,7 +77,9 @@ interface GridRef {
 export const Grid = memo(
   forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     const {
-      selectedCell,
+      focusedCell,
+      renderRow,
+      selectedRows,
       columns,
       fixedColumnCount,
       rowCount,
@@ -174,6 +187,21 @@ export const Grid = memo(
     const rightPaneScrollViewWidth = scrollViewWidth - leftPaneContentWidth;
     const contentHeight = rowCount * rowHeight;
 
+    const selectedRowsMap = useMemo(() => {
+      const map: { [row: number]: boolean } = {};
+
+      if (selectedRows === undefined || selectedRows === null) {
+        return map;
+      }
+
+      for (let i = 0; i < selectedRows.length; i++) {
+        const selectedRow = selectedRows[i];
+        map[selectedRow] = true;
+      }
+
+      return map;
+    }, [selectedRows]);
+
     const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
       () =>
         getIndex({
@@ -241,10 +269,10 @@ export const Grid = memo(
         height: row.size,
         y: row.offset,
         row: row.num,
-        selectedColumn:
-          selectedCell?.row === row.num ? selectedCell?.column : null,
+        selected: selectedRowsMap[row.num] || false,
+        focusedCell: focusedCell?.row === row.num ? focusedCell : null,
       }));
-    }, [recycledRows, selectedCell]);
+    }, [recycledRows, selectedRowsMap, focusedCell]);
 
     return (
       <View style={[{ height: scrollViewHeight }]}>
@@ -286,17 +314,22 @@ export const Grid = memo(
         >
           <View style={styles.wrapper}>
             <View style={[{ width: leftPaneContentWidth }]}>
-              {effectiveRows.map(({ key, height, y, row, selectedColumn }) => (
-                <RowContainer
-                  columns={bodyLeftPaneColumns}
-                  renderCell={renderCell}
-                  key={key}
-                  y={y}
-                  row={row}
-                  height={height}
-                  selectedColumn={selectedColumn}
-                />
-              ))}
+              {effectiveRows.map(
+                ({ key, height, y, row, selected, focusedCell }) => (
+                  <RowContainer
+                    width={leftPaneContentWidth}
+                    columns={bodyLeftPaneColumns}
+                    renderCell={renderCell}
+                    key={key}
+                    y={y}
+                    row={row}
+                    height={height}
+                    renderRow={renderRow}
+                    selected={selected}
+                    focusedCell={focusedCell}
+                  />
+                ),
+              )}
             </View>
             <View style={styles.rightPaneWrapper}>
               <ScrollView
@@ -319,15 +352,18 @@ export const Grid = memo(
                 scrollEventThrottle={16}
               >
                 {effectiveRows.map(
-                  ({ key, height, y, row, selectedColumn }) => (
+                  ({ key, height, y, row, selected, focusedCell }) => (
                     <RowContainer
+                      width={rightPaneContentWidth}
                       columns={bodyRightPaneColumns}
                       renderCell={renderCell}
                       key={key}
                       y={y}
                       row={row}
                       height={height}
-                      selectedColumn={selectedColumn}
+                      renderRow={renderRow}
+                      selected={selected}
+                      focusedCell={focusedCell}
                     />
                   ),
                 )}
@@ -448,41 +484,61 @@ export function getIndex(params: GetIndexParams) {
 
 interface RowContainerProps {
   height: number;
+  width: number;
   y: number;
   row: number;
+  renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   columns: RecycleItem[];
-  selectedColumn: number | null;
+  selected: boolean;
+  focusedCell: FocusedCell | null;
 }
 
 const RowContainer = memo(function RowContainer(props: RowContainerProps) {
-  const { height, y, row, columns, selectedColumn, renderCell } = props;
+  const {
+    width,
+    height,
+    y,
+    row,
+    columns,
+    focusedCell,
+    selected,
+    renderCell,
+    renderRow,
+  } = props;
+
+  const children = columns.map((columnData) => {
+    const { key, size, num: column, offset } = columnData;
+    const focused = !!(focusedCell?.column === column);
+    const editing = !!(focused && focusedCell?.editing);
+
+    return (
+      <CellContainer
+        key={key}
+        width={size}
+        row={row}
+        height={height}
+        column={column}
+        x={offset}
+        focused={focused}
+        editing={editing}
+        inSelectedRow={selected}
+        renderCell={renderCell}
+      />
+    );
+  });
+
+  const child = renderRow({ row, selected, children });
 
   return (
     <View
       style={[
-        { height, top: y },
+        { height, width, top: y },
         styles.row,
-        selectedColumn !== null && styles.selected,
+        selected && styles.selected,
       ]}
     >
-      {columns.map((columnData) => {
-        const { key, size: width, num: column, offset } = columnData;
-        const selected = selectedColumn === column;
-
-        return (
-          <CellContainer
-            key={key}
-            width={width}
-            row={row}
-            height={height}
-            column={column}
-            x={offset}
-            selected={selected}
-            renderCell={renderCell}
-          />
-        );
-      })}
+      {child}
     </View>
   );
 });
@@ -494,28 +550,33 @@ interface CellContainerProps {
   renderCell: (props: RenderCellProps) => React.ReactNode;
   column: number;
   row: number;
-  selected: boolean;
+  focused: boolean;
+  editing: boolean;
+  inSelectedRow: boolean;
 }
 
-const borderOffset = 2;
-
 const CellContainer = memo(function CellContainer(props: CellContainerProps) {
-  const { x, row, column, width, height, selected, renderCell } = props;
+  const {
+    x,
+    row,
+    column,
+    width,
+    height,
+    focused,
+    editing,
+    inSelectedRow,
+    renderCell,
+  } = props;
 
   return (
     <View
       style={[
-        {
-          left: selected ? x - borderOffset : x,
-          width: selected ? width + borderOffset * 2 : width,
-          height: selected ? height + borderOffset * 2 : height,
-          top: selected ? -borderOffset : borderOffset - borderOffset,
-        },
+        { left: x, width, height },
         styles.cell,
-        selected && styles.selected,
+        focused && styles.selected,
       ]}
     >
-      {renderCell({ row, column, selected })}
+      {renderCell({ row, column, focused, editing, inSelectedRow })}
     </View>
   );
 });
