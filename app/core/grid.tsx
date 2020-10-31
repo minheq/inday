@@ -279,6 +279,7 @@ export const Grid = memo(
     return (
       <View style={[{ height: scrollViewHeight }]}>
         <ScrollView
+          bounces={false}
           ref={verticalScrollViewRef}
           contentOffset={contentOffset}
           onScroll={Animated.event(
@@ -297,6 +298,7 @@ export const Grid = memo(
           scrollEventThrottle={16}
         >
           <ScrollView
+            bounces={false}
             ref={horizontalScrollViewRef}
             contentOffset={contentOffset}
             horizontal
