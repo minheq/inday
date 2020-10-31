@@ -1,6 +1,11 @@
 import React from 'react';
 
-import { Grid, RenderCellProps, RenderHeaderCellProps } from './grid';
+import {
+  Grid,
+  RenderCellProps,
+  RenderHeaderCellProps,
+  RenderRowProps,
+} from './grid';
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text } from 'react-native';
 
@@ -19,6 +24,12 @@ function renderCell(props: RenderCellProps) {
       </Text>
     </View>
   );
+}
+
+function renderRow(props: RenderRowProps) {
+  const { children } = props;
+
+  return <View style={styles.cell}>{children}</View>;
 }
 
 function renderHeaderCell(props: RenderHeaderCellProps) {
@@ -50,6 +61,7 @@ export const Default = () => (
           headerHeight={40}
           renderHeaderCell={renderHeaderCell}
           rowHeight={40}
+          renderRow={renderRow}
           columns={[
             100,
             150,
