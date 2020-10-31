@@ -1,5 +1,5 @@
 import { AppRegistry } from 'react-native';
 import { name as appName } from './app.json';
-import { App } from './app/main';
+import { Default } from './app/core/grid.stories';
 
-AppRegistry.registerComponent(appName, () => App);
+AppRegistry.registerComponent(appName, () => Default);

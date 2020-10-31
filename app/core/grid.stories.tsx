@@ -43,51 +43,43 @@ function renderHeaderCell(props: RenderHeaderCellProps) {
 }
 
 export const Default = () => (
-  <div
-    style={{
-      height: 'calc(100vh - 32px)',
-      display: 'flex',
-      flexDirection: 'column',
-    }}
-  >
-    <AutoSizer>
-      {({ height, width }) => (
-        <Grid
-          scrollViewWidth={width}
-          scrollViewHeight={height}
-          // contentOffset={{ x: 400, y: 1000 }}
-          rowCount={5000}
-          renderCell={renderCell}
-          headerHeight={40}
-          renderHeaderCell={renderHeaderCell}
-          rowHeight={40}
-          renderRow={renderRow}
-          columns={[
-            100,
-            150,
-            100,
-            200,
-            100,
-            100,
-            100,
-            140,
-            100,
-            300,
-            100,
-            200,
-            150,
-            140,
-            100,
-            300,
-            100,
-            200,
-            150,
-          ]}
-          fixedColumnCount={2}
-        />
-      )}
-    </AutoSizer>
-  </div>
+  <AutoSizer>
+    {({ height, width }) => (
+      <Grid
+        scrollViewWidth={width}
+        scrollViewHeight={height}
+        // contentOffset={{ x: 400, y: 1000 }}
+        rowCount={5000}
+        renderCell={renderCell}
+        headerHeight={40}
+        renderHeaderCell={renderHeaderCell}
+        rowHeight={40}
+        renderRow={renderRow}
+        columns={[
+          100,
+          150,
+          100,
+          200,
+          100,
+          100,
+          100,
+          140,
+          100,
+          300,
+          100,
+          200,
+          150,
+          140,
+          100,
+          300,
+          100,
+          200,
+          150,
+        ]}
+        fixedColumnCount={2}
+      />
+    )}
+  </AutoSizer>
 );
 
 const styles = StyleSheet.create({

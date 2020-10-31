@@ -7,6 +7,7 @@ import React, {
   useImperativeHandle,
   useCallback,
   useMemo,
+  Fragment,
 } from 'react';
 import { Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import {
@@ -84,7 +85,7 @@ export const Grid = memo(
       fixedColumnCount,
       rowCount,
       rowHeight,
-      headerHeight,
+      headerHeight = 0,
       scrollViewHeight,
       scrollViewWidth,
       renderCell,
@@ -186,6 +187,7 @@ export const Grid = memo(
     const rightPaneContentWidth = sum(rightPaneColumnWidths);
     const rightPaneScrollViewWidth = scrollViewWidth - leftPaneContentWidth;
     const contentHeight = rowCount * rowHeight;
+    const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
 
     const selectedRowsMap = useMemo(() => {
       const map: { [row: number]: boolean } = {};
@@ -267,33 +269,15 @@ export const Grid = memo(
       return recycledRows.map((row) => ({
         key: row.key,
         height: row.size,
-        y: row.offset,
+        y: row.offset + headerHeight,
         row: row.num,
         selected: selectedRowsMap[row.num] || false,
         focusedCell: focusedCell?.row === row.num ? focusedCell : null,
       }));
-    }, [recycledRows, selectedRowsMap, focusedCell]);
+    }, [recycledRows, selectedRowsMap, focusedCell, headerHeight]);
 
     return (
       <View style={[{ height: scrollViewHeight }]}>
-        {headerHeight && renderHeaderCell && (
-          <View style={[{ height: headerHeight }, styles.header]}>
-            <HeaderContainer
-              columns={leftPaneColumns}
-              renderHeaderCell={renderHeaderCell}
-            />
-            <ScrollView
-              horizontal
-              ref={headerScrollViewRef}
-              scrollEnabled={false}
-            >
-              <HeaderContainer
-                columns={rightPaneColumns}
-                renderHeaderCell={renderHeaderCell}
-              />
-            </ScrollView>
-          </View>
-        )}
         <ScrollView
           ref={verticalScrollViewRef}
           contentOffset={contentOffset}
@@ -312,64 +296,56 @@ export const Grid = memo(
           contentContainerStyle={{ height: contentHeight }}
           scrollEventThrottle={16}
         >
-          <View style={styles.wrapper}>
-            <View style={[{ width: leftPaneContentWidth }]}>
-              {effectiveRows.map(
-                ({ key, height, y, row, selected, focusedCell }) => (
-                  <RowContainer
-                    width={leftPaneContentWidth}
-                    columns={bodyLeftPaneColumns}
-                    renderCell={renderCell}
-                    key={key}
-                    y={y}
-                    row={row}
-                    height={height}
-                    renderRow={renderRow}
-                    selected={selected}
-                    focusedCell={focusedCell}
-                  />
-                ),
-              )}
-            </View>
-            <View style={styles.rightPaneWrapper}>
-              <ScrollView
-                ref={horizontalScrollViewRef}
-                contentOffset={contentOffset}
-                horizontal
-                onScroll={Animated.event(
-                  [
-                    {
-                      nativeEvent: {
-                        contentOffset: {
-                          x: scrollXObservable,
-                        },
-                      },
+          <ScrollView
+            ref={horizontalScrollViewRef}
+            contentOffset={contentOffset}
+            horizontal
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: {
+                      x: scrollXObservable,
                     },
-                  ],
-                  { useNativeDriver: false },
-                )}
-                contentContainerStyle={{ width: rightPaneContentWidth }}
-                scrollEventThrottle={16}
-              >
-                {effectiveRows.map(
-                  ({ key, height, y, row, selected, focusedCell }) => (
-                    <RowContainer
-                      width={rightPaneContentWidth}
-                      columns={bodyRightPaneColumns}
-                      renderCell={renderCell}
-                      key={key}
-                      y={y}
-                      row={row}
-                      height={height}
-                      renderRow={renderRow}
-                      selected={selected}
-                      focusedCell={focusedCell}
-                    />
-                  ),
-                )}
-              </ScrollView>
-            </View>
-          </View>
+                  },
+                },
+              ],
+              { useNativeDriver: false },
+            )}
+            contentContainerStyle={{ width: contentWidth }}
+            scrollEventThrottle={16}
+          >
+            {headerHeight !== 0 && renderHeaderCell && (
+              <HeaderContainer
+                leftPaneContentWidth={leftPaneContentWidth}
+                scrollXObservable={scrollXObservable}
+                scrollYObservable={scrollYObservable}
+                height={headerHeight}
+                leftPaneColumns={leftPaneColumns}
+                rightPaneColumns={rightPaneColumns}
+                renderHeaderCell={renderHeaderCell}
+              />
+            )}
+            {effectiveRows.map(
+              ({ key, height, y, row, selected, focusedCell }) => (
+                <RowContainer
+                  leftPaneContentWidth={leftPaneContentWidth}
+                  scrollXObservable={scrollXObservable}
+                  width={rightPaneContentWidth}
+                  leftPaneColumns={bodyLeftPaneColumns}
+                  rightPaneColumns={bodyRightPaneColumns}
+                  renderCell={renderCell}
+                  key={key}
+                  y={y}
+                  row={row}
+                  height={height}
+                  renderRow={renderRow}
+                  selected={selected}
+                  focusedCell={focusedCell}
+                />
+              ),
+            )}
+          </ScrollView>
         </ScrollView>
       </View>
     );
@@ -487,10 +463,13 @@ interface RowContainerProps {
   width: number;
   y: number;
   row: number;
+  leftPaneContentWidth: number;
   renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
-  columns: RecycleItem[];
+  leftPaneColumns: RecycleItem[];
+  rightPaneColumns: RecycleItem[];
   selected: boolean;
+  scrollXObservable: Animated.Value;
   focusedCell: FocusedCell | null;
 }
 
@@ -500,35 +479,66 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
     height,
     y,
     row,
-    columns,
+    scrollXObservable,
+    leftPaneContentWidth,
+    leftPaneColumns,
+    rightPaneColumns,
     focusedCell,
     selected,
     renderCell,
     renderRow,
   } = props;
 
-  const children = columns.map((columnData) => {
-    const { key, size, num: column, offset } = columnData;
-    const focused = !!(focusedCell?.column === column);
-    const editing = !!(focused && focusedCell?.editing);
+  const children = (
+    <Fragment>
+      <Animated.View
+        style={[styles.leftPaneWrapper, { left: scrollXObservable }]}
+      >
+        {leftPaneColumns.map((columnData) => {
+          const { key, size, num: column, offset } = columnData;
+          const focused = !!(focusedCell?.column === column);
+          const editing = !!(focused && focusedCell?.editing);
 
-    return (
-      <CellContainer
-        key={key}
-        width={size}
-        row={row}
-        height={height}
-        column={column}
-        x={offset}
-        focused={focused}
-        editing={editing}
-        selected={selected}
-        renderCell={renderCell}
-      />
-    );
-  });
+          return (
+            <CellContainer
+              key={key}
+              width={size}
+              row={row}
+              height={height}
+              column={column}
+              x={offset}
+              focused={focused}
+              editing={editing}
+              selected={selected}
+              renderCell={renderCell}
+            />
+          );
+        })}
+      </Animated.View>
+      <View style={[styles.rightPaneWrapper, { left: leftPaneContentWidth }]}>
+        {rightPaneColumns.map((columnData) => {
+          const { key, size, num: column, offset } = columnData;
+          const focused = !!(focusedCell?.column === column);
+          const editing = !!(focused && focusedCell?.editing);
 
-  const child = renderRow({ row, selected, children });
+          return (
+            <CellContainer
+              key={key}
+              width={size}
+              row={row}
+              height={height}
+              column={column}
+              x={offset}
+              focused={focused}
+              editing={editing}
+              selected={selected}
+              renderCell={renderCell}
+            />
+          );
+        })}
+      </View>
+    </Fragment>
+  );
 
   return (
     <View
@@ -538,7 +548,7 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
         selected && styles.selected,
       ]}
     >
-      {child}
+      {renderRow({ row, selected, children })}
     </View>
   );
 });
@@ -582,27 +592,55 @@ const CellContainer = memo(function CellContainer(props: CellContainerProps) {
 });
 
 interface HeaderContainerProps {
+  height: number;
+  leftPaneContentWidth: number;
   renderHeaderCell: (props: RenderHeaderCellProps) => React.ReactNode;
-  columns: Item[];
+  leftPaneColumns: Item[];
+  rightPaneColumns: Item[];
+  scrollYObservable: Animated.Value;
+  scrollXObservable: Animated.Value;
 }
 
 const HeaderContainer = memo(function HeaderContainer(
   props: HeaderContainerProps,
 ) {
-  const { columns, renderHeaderCell } = props;
+  const {
+    height,
+    leftPaneContentWidth,
+    leftPaneColumns,
+    rightPaneColumns,
+    renderHeaderCell,
+    scrollYObservable,
+    scrollXObservable,
+  } = props;
 
   return (
-    <View style={[styles.header]}>
-      {columns.map((columnData) => {
-        const { size: width, num: column } = columnData;
+    <Animated.View style={[styles.header, { height, top: scrollYObservable }]}>
+      <Animated.View
+        style={[styles.leftPaneWrapper, { left: scrollXObservable }]}
+      >
+        {leftPaneColumns.map((columnData) => {
+          const { size: width, num: column } = columnData;
 
-        return (
-          <View key={column} style={[{ width }]}>
-            {renderHeaderCell({ column })}
-          </View>
-        );
-      })}
-    </View>
+          return (
+            <View key={column} style={[{ width }]}>
+              {renderHeaderCell({ column })}
+            </View>
+          );
+        })}
+      </Animated.View>
+      <View style={[styles.rightPaneWrapper, { left: leftPaneContentWidth }]}>
+        {rightPaneColumns.map((columnData) => {
+          const { size: width, num: column } = columnData;
+
+          return (
+            <View key={column} style={[{ width }]}>
+              {renderHeaderCell({ column })}
+            </View>
+          );
+        })}
+      </View>
+    </Animated.View>
   );
 });
 
@@ -611,15 +649,22 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
+  leftPaneWrapper: {
+    flexDirection: 'row',
+    position: 'absolute',
+  },
   rightPaneWrapper: {
-    flex: 1,
+    flexDirection: 'row',
+    position: 'absolute',
   },
   row: {
     flexDirection: 'row',
     position: 'absolute',
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
+    position: 'absolute',
   },
   cell: {
     position: 'absolute',
