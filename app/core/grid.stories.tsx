@@ -53,7 +53,7 @@ export const Default = () => (
         renderCell={renderCell}
         headerHeight={40}
         renderHeaderCell={renderHeaderCell}
-        rowHeight={40}
+        rowHeight={80}
         renderRow={renderRow}
         columns={[
           100,
