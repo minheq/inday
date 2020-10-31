@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Checkbox, Container, Pressable, Text, useTheme } from '../components';
+import { Container, Pressable, Text, useTheme } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -256,7 +256,7 @@ interface CellProps {
 }
 
 function Cell(props: CellProps) {
-  const { record, field, value, focused, editing } = props;
+  const { record, field, value, focused } = props;
   const theme = useTheme();
   const setState = useSetRecoilState(listViewDisplayState);
 
