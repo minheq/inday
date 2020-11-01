@@ -1,6 +1,12 @@
-import React, { useCallback, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Container, Pressable, Text, useTheme } from '../components';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
+import {
+  Container,
+  Pressable,
+  PressableRef,
+  Text,
+  useTheme,
+} from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -81,23 +87,18 @@ import {
 } from './grid';
 import { format } from 'date-fns';
 import { Record, RecordID } from '../data/records';
-import { atom, useRecoilValue, useSetRecoilState } from 'recoil';
+import { atom, useRecoilState, useSetRecoilState } from 'recoil';
+import { KeyValue, useKeyboard } from '../hooks/use_keyboard';
 
-interface ListViewDisplayState {
-  focusedCell: {
-    recordID: RecordID;
-    fieldID: FieldID;
-    editing: boolean;
-  } | null;
-  selectedRecordIDs: RecordID[];
+interface FocusedCell {
+  row: number;
+  column: number;
+  editing: boolean;
 }
 
-const listViewDisplayState = atom<ListViewDisplayState>({
-  key: 'ListViewDisplay',
-  default: {
-    focusedCell: null,
-    selectedRecordIDs: [],
-  },
+const focusedCellState = atom<FocusedCell | null>({
+  key: 'ListViewDisplay_FocusedCell',
+  default: null,
 });
 
 interface ListViewDisplayProps {
@@ -109,9 +110,7 @@ const RECORD_ROW_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
   const { view } = props;
-  const { focusedCell, selectedRecordIDs } = useRecoilValue(
-    listViewDisplayState,
-  );
+  const [focusedCell, setFocusedCell] = useRecoilState(focusedCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
 
@@ -127,36 +126,101 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
 
     return map;
   }, [records]);
-  const fieldToColumnMap = useMemo(() => {
+  const columnToFieldMap = useMemo(() => {
     const map: {
-      [fieldID: string]: number;
+      [column: number]: FieldID | undefined;
     } = {};
 
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
-      map[field.id] = i + 1;
+      map[i + 1] = field.id;
     }
 
     return map;
   }, [fields]);
-  const gridFocusedCell = useMemo(() => {
-    if (focusedCell === undefined || focusedCell === null) {
-      return focusedCell;
+  const rowToRecordMap = useMemo(() => {
+    const map: {
+      [row: number]: RecordID | undefined;
+    } = {};
+
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
+      map[i + 1] = record.id;
     }
 
-    return {
-      row: recordToRowMap[focusedCell.recordID],
-      column: fieldToColumnMap[focusedCell.fieldID],
-      editing: focusedCell.editing,
-    };
-  }, [focusedCell, recordToRowMap, fieldToColumnMap]);
+    return map;
+  }, [records]);
   const selectedRows = useMemo(() => {
-    return selectedRecordIDs.map((recordID) => recordToRowMap[recordID]);
-  }, [recordToRowMap, selectedRecordIDs]);
+    return [].map((recordID) => recordToRowMap[recordID]);
+  }, [recordToRowMap]);
 
   const contentOffset = useMemo(() => {
     return { x: 0, y: 0 };
   }, []);
+
+  const handleKeyPress = useCallback(
+    (keyValue: KeyValue) => {
+      if (focusedCell !== null) {
+        const { row, column } = focusedCell;
+
+        switch (keyValue) {
+          case 'ArrowDown':
+            const nextRow = row + 1;
+            if (rowToRecordMap[nextRow] === undefined) {
+              break;
+            }
+
+            setFocusedCell({
+              row: nextRow,
+              column,
+              editing: false,
+            });
+            break;
+          case 'ArrowUp':
+            const prevRow = row - 1;
+            if (rowToRecordMap[prevRow] === undefined) {
+              break;
+            }
+
+            setFocusedCell({
+              row: prevRow,
+              column,
+              editing: false,
+            });
+            break;
+          case 'ArrowLeft':
+            const prevColumn = column - 1;
+            if (columnToFieldMap[prevColumn] === undefined) {
+              break;
+            }
+
+            setFocusedCell({
+              row,
+              column: prevColumn,
+              editing: false,
+            });
+            break;
+          case 'ArrowRight':
+            const nextColumn = column + 1;
+            if (columnToFieldMap[nextColumn] === undefined) {
+              break;
+            }
+
+            setFocusedCell({
+              row,
+              column: nextColumn,
+              editing: false,
+            });
+            break;
+          default:
+            break;
+        }
+      }
+    },
+    [focusedCell, setFocusedCell, rowToRecordMap, columnToFieldMap],
+  );
+
+  useKeyboard(handleKeyPress);
 
   const { fixedFieldCount } = view;
 
@@ -175,6 +239,8 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
           field={field}
           value={value}
           primary={primary}
+          row={row}
+          column={column}
         />
       );
     },
@@ -214,7 +280,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             headerHeight={FIELD_ROW_HEIGHT}
             columns={columns}
             fixedColumnCount={fixedFieldCount}
-            focusedCell={gridFocusedCell}
+            focusedCell={focusedCell}
             selectedRows={selectedRows}
             renderRow={renderRow}
           />
@@ -256,43 +322,50 @@ interface CellProps {
   focused: boolean;
   editing: boolean;
   primary: boolean;
+  row: number;
+  column: number;
 }
 
 function Cell(props: CellProps) {
-  const { record, field, value, focused } = props;
+  const { field, value, focused, row, column } = props;
   const theme = useTheme();
-  const setState = useSetRecoilState(listViewDisplayState);
+  const setFocusedCell = useSetRecoilState(focusedCellState);
+  const pressableRef = useRef<PressableRef>(null);
 
+  useEffect(() => {
+    if (focused === true && pressableRef.current !== null) {
+      pressableRef.current.focus();
+    }
+  }, [focused]);
   const handlePress = useCallback(() => {
     if (focused) {
-      setState({
-        focusedCell: { recordID: record.id, fieldID: field.id, editing: false },
-        selectedRecordIDs: [record.id],
-      });
+      setFocusedCell({ row, column, editing: false });
     } else {
-      setState({
-        focusedCell: { recordID: record.id, fieldID: field.id, editing: true },
-        selectedRecordIDs: [record.id],
-      });
+      setFocusedCell({ row, column, editing: true });
     }
-  }, [setState, focused, record, field]);
+  }, [setFocusedCell, focused, row, column]);
 
   const renderer = rendererByFieldType[field.type];
 
   return (
     <Pressable
+      ref={pressableRef}
       style={[
-        {
-          borderColor: focused
-            ? theme.border.color.focus
-            : theme.border.color.default,
-        },
+        { borderColor: theme.border.color.default },
+        // @ts-ignore: works around how this property in StyleSheet gets ignored
+        Platform.OS === 'web' && { outline: 'none' }, // eslint-disable-line react-native/no-inline-styles
         styles.cell,
-        focused && styles.selected,
       ]}
       onPress={handlePress}
     >
-      {renderer({ field, value })}
+      <View
+        style={[
+          styles.cellWrapper,
+          focused && { borderColor: theme.border.color.focus },
+        ]}
+      >
+        {renderer({ field, value })}
+      </View>
     </Pressable>
   );
 }
@@ -579,35 +652,33 @@ function URLCell(props: URLCellProps) {
 
 const styles = StyleSheet.create({
   cell: {
-    paddingHorizontal: 8,
     width: '100%',
     height: '100%',
-    overflow: 'hidden',
-    flexDirection: 'row',
-    alignItems: 'center',
     borderRightWidth: 1,
     borderBottomWidth: 1,
-  },
-  firstColumnCell: {
-    width: '100%',
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    ...Platform.select({
+      web: {
+        cursor: 'auto',
+        // Gets ignored. Fixed by inlining this property.
+        outline: 'none',
+      },
+    }),
   },
   row: {
     width: '100%',
     height: '100%',
   },
-  selectCheckbox: {
-    width: 40,
-    height: RECORD_ROW_HEIGHT,
-    justifyContent: 'center',
+  cellWrapper: {
+    paddingHorizontal: 6, // Padding + border should equal to 8
+    width: '100%',
+    height: '100%',
+    borderLeftWidth: 2,
+    borderTopWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: 'transparent',
+    overflow: 'hidden',
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  selected: {
-    // borderRightWidth: 2,
-    // borderBottomWidth: 2,
-    // borderTopWidth: 2,
-    // borderLeftWidth: 2,
   },
 });

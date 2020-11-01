@@ -8,7 +8,15 @@ import { Text } from './components';
 import { ErrorBoundary } from './core/error_boundary';
 import { SpaceScreen, SpaceScreenHeader } from './screens/space_screen';
 import { linking, ScreenName, RootStackParamsMap } from './linking';
-import { spacesByIDState } from './data/atoms';
+import {
+  fieldsByIDState,
+  recordsByIDState,
+  spacesByIDState,
+  filtersByIDState,
+  workspaceState,
+  sortsByIDState,
+  eventsState,
+} from './data/atoms';
 
 const RootStack = createStackNavigator<RootStackParamsMap>();
 
@@ -22,6 +30,12 @@ function PersistenceObserver() {
   useRecoilTransactionObserver_UNSTABLE(({ snapshot }) => {
     window.debugState = {
       spacesByIDState: snapshot.getLoadable(spacesByIDState).contents,
+      recordsByIDState: snapshot.getLoadable(recordsByIDState).contents,
+      fieldsByIDState: snapshot.getLoadable(fieldsByIDState).contents,
+      filtersByIDState: snapshot.getLoadable(filtersByIDState).contents,
+      workspaceState: snapshot.getLoadable(workspaceState).contents,
+      sortsByIDState: snapshot.getLoadable(sortsByIDState).contents,
+      eventsState: snapshot.getLoadable(eventsState).contents,
     };
   });
 
