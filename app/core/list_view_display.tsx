@@ -165,6 +165,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
       const field = fields[column - 1];
       const record = records[row - 1];
       const value = record.fields[field.id];
+      const primary = column === 1;
 
       return (
         <Cell
@@ -173,6 +174,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
           record={record}
           field={field}
           value={value}
+          primary={primary}
         />
       );
     },
@@ -253,6 +255,7 @@ interface CellProps {
   record: Record;
   focused: boolean;
   editing: boolean;
+  primary: boolean;
 }
 
 function Cell(props: CellProps) {

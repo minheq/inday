@@ -221,5 +221,28 @@ describe('recycleItems', () => {
       { size: 200, offset: 100, num: 2, key: 1 },
       { size: 100, offset: 300, num: 3, key: 4 },
     ]);
+
+    prevItems = result;
+  });
+
+  test('scroll rightmost again', () => {
+    const { startIndex, endIndex } = getIndex({
+      items,
+      scrollValue: 500,
+      scrollViewSize,
+    });
+
+    const result = recycleItems({
+      items,
+      prevItems,
+      startIndex,
+      endIndex,
+    });
+
+    expect(result).toEqual([
+      { size: 200, offset: 400, num: 4, key: 0 },
+      { size: 100, offset: 600, num: 5, key: 1 },
+      { size: 200, offset: 700, num: 6, key: 4 },
+    ]);
   });
 });

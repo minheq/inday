@@ -20,13 +20,24 @@ export function AutoSizer(props: AutoSizerProps) {
     height: 0,
   });
 
-  const handleLayout = useCallback((event: LayoutChangeEvent) => {
-    setLayout(event.nativeEvent.layout);
-    setReady(true);
-  }, []);
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      if (ready === false) {
+        setLayout(event.nativeEvent.layout);
+        setReady(true);
+      }
+    },
+    [ready],
+  );
 
   return (
-    <View onLayout={handleLayout} style={styles.base}>
+    <View
+      onLayout={handleLayout}
+      style={[
+        styles.base,
+        ready && { width: layout.width, height: layout.height },
+      ]}
+    >
       {ready === true && children(layout)}
     </View>
   );

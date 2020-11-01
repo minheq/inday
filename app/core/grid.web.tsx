@@ -89,8 +89,6 @@ export const Grid = memo(
       }
     }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
 
-    console.log(scrollViewHeight, scrollViewWidth);
-
     const {
       rows,
       contentWidth,
@@ -100,7 +98,6 @@ export const Grid = memo(
       bodyLeftPaneColumns,
       bodyRightPaneColumns,
       leftPaneContentWidth,
-      rightPaneContentWidth,
     } = useGrid({
       focusedCell,
       selectedRows,
@@ -108,7 +105,7 @@ export const Grid = memo(
       fixedColumnCount,
       rowCount,
       rowHeight,
-      scrollViewHeight: scrollViewHeight - headerHeight,
+      scrollViewHeight,
       scrollViewWidth,
 
       scrollX: scrollPosition.x,
@@ -133,12 +130,12 @@ export const Grid = memo(
           )}
           {rows.map(({ key, height, y, row, selected, focusedCell }) => (
             <RowContainer
+              key={key}
               leftPaneContentWidth={leftPaneContentWidth}
-              width={rightPaneContentWidth}
+              width={contentWidth}
               leftPaneColumns={bodyLeftPaneColumns}
               rightPaneColumns={bodyRightPaneColumns}
               renderCell={renderCell}
-              key={key}
               y={y + headerHeight}
               row={row}
               height={height}
@@ -338,12 +335,14 @@ const styles = css.create({
     position: 'absolute',
   },
   header: {
+    zIndex: 1,
     position: 'sticky',
     top: 0,
     display: 'flex',
     flexDirection: 'row',
   },
   leftPaneColumns: {
+    zIndex: 1,
     position: 'sticky',
     left: 0,
     display: 'flex',
