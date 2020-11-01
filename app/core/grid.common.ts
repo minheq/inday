@@ -201,8 +201,11 @@ export function recycleItems(params: RecycleItemsParams): RecycleItem[] {
 
   const recycledKeys = recycledItems.map((c) => c.key);
   if (recycledKeys.length < newItems.length) {
-    let maxKey = maxBy(prevItems, 'key') + 1;
-    recycledKeys.push(maxKey++);
+    let maxKey = maxBy(prevItems, 'key');
+
+    while (recycledKeys.length !== newItems.length) {
+      recycledKeys.push(++maxKey);
+    }
   }
 
   const nextItems = reusedItems
