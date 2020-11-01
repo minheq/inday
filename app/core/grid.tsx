@@ -9,14 +9,15 @@ import React, {
   useMemo,
   Fragment,
 } from 'react';
-import { Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Animated, ScrollView, StyleSheet, View } from 'react-native';
+import { sum } from '../../lib/data_structures';
 import {
-  isEmpty,
-  sum,
-  intersectBy,
-  differenceBy,
-  maxBy,
-} from '../../lib/data_structures';
+  Item,
+  getIndex,
+  getItems,
+  RecycleItem,
+  recycleItems,
+} from './grid.common';
 
 export interface GridProps {
   focusedCell?: FocusedCell | null;
@@ -62,16 +63,16 @@ export interface FocusedCell {
   editing: boolean;
 }
 
-interface ContentOffset {
+export interface ContentOffset {
   x: number;
   y: number;
 }
 
-interface ScrollToParams extends Partial<ContentOffset> {
+export interface ScrollToParams extends Partial<ContentOffset> {
   animated?: boolean;
 }
 
-interface GridRef {
+export interface GridRef {
   scrollTo: (params: ScrollToParams) => void;
 }
 
@@ -91,7 +92,6 @@ export const Grid = memo(
       renderCell,
       renderHeaderCell,
       contentOffset,
-      onContentOffsetLoaded,
     } = props;
     const verticalScrollViewRef = useRef<ScrollView>(null);
     const horizontalScrollViewRef = useRef<ScrollView>(null);
@@ -147,20 +147,6 @@ export const Grid = memo(
       };
     }, [scrollYObservable, scrollXObservable, headerScrollViewRef]);
 
-    useEffect(() => {
-      if (Platform.OS === 'web' && contentOffset) {
-        handleScrollTo({
-          y: contentOffset.y,
-          x: contentOffset.x,
-          animated: false,
-        });
-
-        if (onContentOffsetLoaded) {
-          onContentOffsetLoaded();
-        }
-      }
-    }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
-
     const leftPaneColumnWidths = useMemo(
       () => columns.slice(0, fixedColumnCount),
       [columns, fixedColumnCount],
@@ -208,7 +194,7 @@ export const Grid = memo(
       () =>
         getIndex({
           items: rows,
-          scrollOffset: scrollY,
+          scrollValue: scrollY,
           scrollViewSize: scrollViewHeight,
           overscan: 1,
         }),
@@ -244,7 +230,7 @@ export const Grid = memo(
       () =>
         getIndex({
           items: rightPaneColumns,
-          scrollOffset: scrollX,
+          scrollValue: scrollX,
           scrollViewSize: rightPaneScrollViewWidth,
           overscan: 1,
         }),
@@ -353,112 +339,6 @@ export const Grid = memo(
     );
   }),
 );
-
-export function getItems(itemSizes: number[], offsetNum: number = 0) {
-  const items: Item[] = [];
-
-  for (let i = 0; i < itemSizes.length; i++) {
-    const size = itemSizes[i];
-    const prevColumn = items[i - 1];
-
-    if (prevColumn === undefined) {
-      items.push({ size, offset: 0, num: 1 + offsetNum });
-    } else {
-      items.push({
-        size,
-        offset: prevColumn.offset + prevColumn.size,
-        num: i + 1 + offsetNum,
-      });
-    }
-  }
-
-  return items;
-}
-
-export interface RecycleItem extends Item {
-  key: number;
-}
-
-interface RecycleItemsParams {
-  items: Item[];
-  prevItems: RecycleItem[];
-  startIndex: number;
-  endIndex: number;
-}
-
-export function recycleItems(params: RecycleItemsParams): RecycleItem[] {
-  const { items, startIndex, endIndex, prevItems } = params;
-
-  const currentItems = items.slice(startIndex, endIndex + 1);
-
-  if (isEmpty(prevItems)) {
-    return currentItems.map((col, index) => ({ ...col, key: index }));
-  }
-
-  const reusedItems = intersectBy(prevItems, currentItems, 'num');
-  const recycledItems = differenceBy(prevItems, currentItems, 'num');
-  const newItems = differenceBy(currentItems, prevItems, 'num');
-
-  const recycledKeys = recycledItems.map((c) => c.key);
-  if (recycledKeys.length < newItems.length) {
-    let maxKey = maxBy(prevItems, 'key') + 1;
-    recycledKeys.push(maxKey++);
-  }
-
-  const nextItems = reusedItems
-    .concat(newItems.map((c, i) => ({ ...c, key: recycledKeys[i] })))
-    .sort((a, b) => a.num - b.num);
-
-  return nextItems;
-}
-
-interface Item {
-  size: number;
-  offset: number;
-  num: number;
-}
-
-interface GetIndexParams {
-  items: Item[];
-  scrollOffset: number;
-  scrollViewSize: number;
-  overscan?: number;
-}
-
-export function getIndex(params: GetIndexParams) {
-  const { items, scrollOffset, scrollViewSize, overscan = 0 } = params;
-
-  let startIndex = 0;
-  let endIndex = 0;
-
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-
-    if (item.offset > scrollOffset) {
-      startIndex = i - 1;
-      break;
-    }
-  }
-
-  for (let i = startIndex; i < items.length; i++) {
-    const item = items[i];
-
-    if (item.offset + item.size >= scrollOffset + scrollViewSize) {
-      endIndex = i;
-      break;
-    }
-  }
-
-  // Scrollview is larger than occupied items
-  if (endIndex === 0) {
-    endIndex = items.length - 1;
-  }
-
-  startIndex = Math.max(startIndex - overscan, 0);
-  endIndex = Math.min(endIndex + overscan, items.length - 1);
-
-  return { startIndex, endIndex };
-}
 
 interface RowContainerProps {
   height: number;

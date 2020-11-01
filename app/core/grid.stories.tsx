@@ -36,7 +36,7 @@ function renderHeaderCell(props: RenderHeaderCellProps) {
   const { column } = props;
 
   return (
-    <View style={styles.cell}>
+    <View style={styles.row}>
       <Text>{column}</Text>
     </View>
   );
@@ -52,7 +52,7 @@ export const Default = () => (
           contentOffset={{ x: 0, y: 0 }}
           rowCount={5000}
           renderCell={renderCell}
-          headerHeight={40}
+          headerHeight={90}
           renderHeaderCell={renderHeaderCell}
           rowHeight={80}
           renderRow={renderRow}
@@ -77,7 +77,7 @@ export const Default = () => (
             200,
             150,
           ]}
-          fixedColumnCount={1}
+          fixedColumnCount={2}
         />
       )}
     </AutoSizer>
@@ -86,6 +86,10 @@ export const Default = () => (
 
 const styles = StyleSheet.create({
   cell: {
+    width: '100%',
+    height: '100%',
+  },
+  row: {
     width: '100%',
     height: '100%',
   },
