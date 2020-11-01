@@ -350,12 +350,7 @@ function Cell(props: CellProps) {
   return (
     <Pressable
       ref={pressableRef}
-      style={[
-        { borderColor: theme.border.color.default },
-        // @ts-ignore: works around how this property in StyleSheet gets ignored
-        Platform.OS === 'web' && { outline: 'none' }, // eslint-disable-line react-native/no-inline-styles
-        styles.cell,
-      ]}
+      style={[{ borderColor: theme.border.color.default }, styles.cell]}
       onPress={handlePress}
     >
       <View
@@ -659,8 +654,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       web: {
         cursor: 'auto',
-        // Gets ignored. Fixed by inlining this property.
-        outline: 'none',
+        outlineStyle: 'none',
       },
     }),
   },
