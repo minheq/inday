@@ -7,7 +7,7 @@ import {
   RenderRowProps,
 } from './grid';
 import { AutoSizer } from '../lib/autosizer';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
 
 export default {
   title: 'Grid',
@@ -43,43 +43,45 @@ function renderHeaderCell(props: RenderHeaderCellProps) {
 }
 
 export const Default = () => (
-  <AutoSizer>
-    {({ height, width }) => (
-      <Grid
-        scrollViewWidth={width}
-        scrollViewHeight={height}
-        // contentOffset={{ x: 400, y: 1000 }}
-        rowCount={5000}
-        renderCell={renderCell}
-        headerHeight={40}
-        renderHeaderCell={renderHeaderCell}
-        rowHeight={80}
-        renderRow={renderRow}
-        columns={[
-          100,
-          150,
-          100,
-          200,
-          100,
-          100,
-          100,
-          140,
-          100,
-          300,
-          100,
-          200,
-          150,
-          140,
-          100,
-          300,
-          100,
-          200,
-          150,
-        ]}
-        fixedColumnCount={2}
-      />
-    )}
-  </AutoSizer>
+  <SafeAreaView style={{ flex: 1 }}>
+    <AutoSizer>
+      {({ height, width }) => (
+        <Grid
+          scrollViewWidth={width}
+          scrollViewHeight={height}
+          contentOffset={{ x: 0, y: 0 }}
+          rowCount={5000}
+          renderCell={renderCell}
+          headerHeight={40}
+          renderHeaderCell={renderHeaderCell}
+          rowHeight={80}
+          renderRow={renderRow}
+          columns={[
+            100,
+            150,
+            100,
+            200,
+            100,
+            100,
+            100,
+            140,
+            100,
+            300,
+            100,
+            200,
+            150,
+            140,
+            100,
+            300,
+            100,
+            200,
+            150,
+          ]}
+          fixedColumnCount={1}
+        />
+      )}
+    </AutoSizer>
+  </SafeAreaView>
 );
 
 const styles = StyleSheet.create({
