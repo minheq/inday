@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
 export type KeyValue =
@@ -7,7 +7,7 @@ export type KeyValue =
   | 'Meta'
   | 'Shift'
   | 'Enter'
-  | ' '
+  | 'Space'
   | 'ArrowDown'
   | 'ArrowLeft'
   | 'ArrowRight'
@@ -18,14 +18,34 @@ export type KeyMap = {
 };
 export type KeyEventHandler = (keyMap: KeyMap) => void;
 
+function normalize(key: string): KeyValue {
+  switch (key) {
+    case 'Up':
+      return 'ArrowUp';
+    case 'Down':
+      return 'ArrowDown';
+    case 'Left':
+      return 'ArrowLeft';
+    case 'Right':
+      return 'ArrowRight';
+    case ' ':
+      return 'Space';
+    default:
+      break;
+  }
+
+  return key as KeyValue;
+}
+
 export function useKeyboard(handler: KeyEventHandler) {
-  const [keyMap, setKeyMap] = useState<KeyMap>({
+  // Use ref to not trigger re-renders
+  const keyMapRef = useRef({
     Alt: false,
     Control: false,
     Meta: false,
     Shift: false,
     Enter: false,
-    ' ': false,
+    Space: false,
     ArrowDown: false,
     ArrowLeft: false,
     ArrowRight: false,
@@ -37,15 +57,15 @@ export function useKeyboard(handler: KeyEventHandler) {
       event.preventDefault();
 
       const nextKeyMap: KeyMap = {
-        ...keyMap,
-        [event.key]: true,
+        ...keyMapRef.current,
+        [normalize(event.key)]: true,
       };
 
       handler(nextKeyMap);
 
-      setKeyMap(nextKeyMap);
+      keyMapRef.current = nextKeyMap;
     },
-    [handler, keyMap],
+    [handler, keyMapRef],
   );
 
   const handleOnKeyUp = useCallback(
@@ -53,13 +73,13 @@ export function useKeyboard(handler: KeyEventHandler) {
       event.preventDefault();
 
       const nextKeyMap: KeyMap = {
-        ...keyMap,
-        [event.key]: false,
+        ...keyMapRef.current,
+        [normalize(event.key)]: false,
       };
 
-      setKeyMap(nextKeyMap);
+      keyMapRef.current = nextKeyMap;
     },
-    [keyMap],
+    [keyMapRef],
   );
 
   useEffect(() => {

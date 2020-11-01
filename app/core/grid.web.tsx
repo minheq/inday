@@ -12,7 +12,7 @@ import { Item, RecycleItem, useGrid } from './grid.common';
 import {
   GridRef,
   GridProps,
-  ScrollToParams,
+  ScrollToOffsetParams,
   RenderCellProps,
   RenderHeaderCellProps,
   RenderRowProps,
@@ -43,8 +43,8 @@ export const Grid = memo(
       y: number;
     }>(contentOffset || { x: 0, y: 0 });
 
-    const handleScrollTo = useCallback(
-      (params: ScrollToParams) => {
+    const handleScrollToOffset = useCallback(
+      (params: ScrollToOffsetParams) => {
         if (scrollViewRef.current) {
           scrollViewRef.current.scrollTo({
             left: params.x,
@@ -59,10 +59,11 @@ export const Grid = memo(
       ref,
       () => {
         return {
-          scrollTo: handleScrollTo,
+          scrollToOffset: handleScrollToOffset,
+          scrollToCell: () => {},
         };
       },
-      [handleScrollTo],
+      [handleScrollToOffset],
     );
 
     const handleOnScroll = useCallback(
@@ -77,7 +78,7 @@ export const Grid = memo(
 
     useEffect(() => {
       if (contentOffset !== undefined) {
-        handleScrollTo({
+        handleScrollToOffset({
           y: contentOffset.y,
           x: contentOffset.x,
           animated: false,
@@ -87,7 +88,7 @@ export const Grid = memo(
           onContentOffsetLoaded();
         }
       }
-    }, [onContentOffsetLoaded, handleScrollTo, contentOffset]);
+    }, [onContentOffsetLoaded, handleScrollToOffset, contentOffset]);
 
     const {
       rows,

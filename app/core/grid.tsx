@@ -68,12 +68,19 @@ export interface ContentOffset {
   y: number;
 }
 
-export interface ScrollToParams extends Partial<ContentOffset> {
+export interface ScrollToOffsetParams extends Partial<ContentOffset> {
+  animated?: boolean;
+}
+
+export interface ScrollToCellParams {
+  row?: number;
+  column?: number;
   animated?: boolean;
 }
 
 export interface GridRef {
-  scrollTo: (params: ScrollToParams) => void;
+  scrollToOffset: (params: ScrollToOffsetParams) => void;
+  scrollToCell: (params: ScrollToCellParams) => void;
 }
 
 export const Grid = memo(
@@ -103,8 +110,8 @@ export const Grid = memo(
     const prevRowsDataRef = useRef<RecycleItem[]>([]);
     const prevBodyRightPaneColumnsDataRef = useRef<RecycleItem[]>([]);
 
-    const handleScrollTo = useCallback(
-      (params: ScrollToParams) => {
+    const handleScrollToOffset = useCallback(
+      (params: ScrollToOffsetParams) => {
         if (verticalScrollViewRef.current) {
           verticalScrollViewRef.current.scrollTo(params);
         }
@@ -119,10 +126,11 @@ export const Grid = memo(
       ref,
       () => {
         return {
-          scrollTo: handleScrollTo,
+          scrollToOffset: handleScrollToOffset,
+          scrollToCell: () => {},
         };
       },
-      [handleScrollTo],
+      [handleScrollToOffset],
     );
 
     // Set up scroll listeners
