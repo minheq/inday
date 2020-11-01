@@ -88,7 +88,7 @@ import {
 import { format } from 'date-fns';
 import { Record, RecordID } from '../data/records';
 import { atom, useRecoilState, useSetRecoilState } from 'recoil';
-import { KeyValue, useKeyboard } from '../hooks/use_keyboard';
+import { KeyMap, useKeyboard } from '../hooks/use_keyboard';
 
 interface FocusedCell {
   row: number;
@@ -159,61 +159,56 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   }, []);
 
   const handleKeyPress = useCallback(
-    (keyValue: KeyValue) => {
+    (keyMap: KeyMap) => {
+      const { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } = keyMap;
+
       if (focusedCell !== null) {
         const { row, column } = focusedCell;
 
-        switch (keyValue) {
-          case 'ArrowDown':
-            const nextRow = row + 1;
-            if (rowToRecordMap[nextRow] === undefined) {
-              break;
-            }
+        if (ArrowDown) {
+          const nextRow = row + 1;
+          if (rowToRecordMap[nextRow] === undefined) {
+            return;
+          }
 
-            setFocusedCell({
-              row: nextRow,
-              column,
-              editing: false,
-            });
-            break;
-          case 'ArrowUp':
-            const prevRow = row - 1;
-            if (rowToRecordMap[prevRow] === undefined) {
-              break;
-            }
+          setFocusedCell({
+            row: nextRow,
+            column,
+            editing: false,
+          });
+        } else if (ArrowUp) {
+          const prevRow = row - 1;
+          if (rowToRecordMap[prevRow] === undefined) {
+            return;
+          }
 
-            setFocusedCell({
-              row: prevRow,
-              column,
-              editing: false,
-            });
-            break;
-          case 'ArrowLeft':
-            const prevColumn = column - 1;
-            if (columnToFieldMap[prevColumn] === undefined) {
-              break;
-            }
+          setFocusedCell({
+            row: prevRow,
+            column,
+            editing: false,
+          });
+        } else if (ArrowLeft) {
+          const prevColumn = column - 1;
+          if (columnToFieldMap[prevColumn] === undefined) {
+            return;
+          }
 
-            setFocusedCell({
-              row,
-              column: prevColumn,
-              editing: false,
-            });
-            break;
-          case 'ArrowRight':
-            const nextColumn = column + 1;
-            if (columnToFieldMap[nextColumn] === undefined) {
-              break;
-            }
+          setFocusedCell({
+            row,
+            column: prevColumn,
+            editing: false,
+          });
+        } else if (ArrowRight) {
+          const nextColumn = column + 1;
+          if (columnToFieldMap[nextColumn] === undefined) {
+            return;
+          }
 
-            setFocusedCell({
-              row,
-              column: nextColumn,
-              editing: false,
-            });
-            break;
-          default:
-            break;
+          setFocusedCell({
+            row,
+            column: nextColumn,
+            editing: false,
+          });
         }
       }
     },
