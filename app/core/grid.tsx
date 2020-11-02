@@ -14,8 +14,8 @@ import { Item, RecycleItem, useGrid } from './grid.common';
 export interface GridProps {
   focusedCell?: FocusedCell | null;
   selectedRows?: number[] | null;
-  scrollViewHeight: number;
-  scrollViewWidth: number;
+  height: number;
+  width: number;
   renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
@@ -87,8 +87,8 @@ export const Grid = memo(
       rowCount,
       rowHeight,
       headerHeight,
-      scrollViewHeight,
-      scrollViewWidth,
+      height,
+      width,
       renderCell,
       renderHeaderCell,
       contentOffset,
@@ -153,8 +153,8 @@ export const Grid = memo(
       fixedColumnCount,
       rowCount,
       rowHeight,
-      scrollViewHeight,
-      scrollViewWidth,
+      scrollViewHeight: height,
+      scrollViewWidth: width,
       scrollX,
       scrollY,
     });
@@ -175,7 +175,7 @@ export const Grid = memo(
     );
 
     return (
-      <View style={[{ height: scrollViewHeight }]}>
+      <View style={[{ height }]}>
         <ScrollView
           bounces={false}
           ref={verticalScrollViewRef}

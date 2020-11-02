@@ -128,7 +128,7 @@ const col1View2 = makeView(
 );
 
 const col1Records = makeManyRecords(
-  500,
+  50,
   collection1WithFields,
   {
     [col1Field6.id]: [],

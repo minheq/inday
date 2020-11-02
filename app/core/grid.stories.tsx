@@ -47,10 +47,10 @@ export const Default = () => (
     <AutoSizer>
       {({ height, width }) => (
         <Grid
-          scrollViewWidth={width}
-          scrollViewHeight={height}
+          width={width}
+          height={height}
           contentOffset={{ x: 0, y: 0 }}
-          rowCount={5000}
+          rowCount={200}
           renderCell={renderCell}
           headerHeight={90}
           renderHeaderCell={renderHeaderCell}

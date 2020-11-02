@@ -397,8 +397,8 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
         {({ height, width }) => (
           <Grid
             ref={gridRef}
-            scrollViewWidth={width}
-            scrollViewHeight={height}
+            width={width}
+            height={height}
             contentOffset={contentOffset}
             rowCount={rowCount}
             renderCell={renderCell}
