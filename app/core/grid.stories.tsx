@@ -4,6 +4,7 @@ import {
   Grid,
   RenderCellProps,
   RenderHeaderCellProps,
+  RenderHeaderProps,
   RenderRowProps,
 } from './grid';
 import { AutoSizer } from '../lib/autosizer';
@@ -29,7 +30,13 @@ function renderCell(props: RenderCellProps) {
 function renderRow(props: RenderRowProps) {
   const { children } = props;
 
-  return <View style={styles.cell}>{children}</View>;
+  return <View style={styles.row}>{children}</View>;
+}
+
+function renderHeader(props: RenderHeaderProps) {
+  const { children } = props;
+
+  return <View style={styles.header}>{children}</View>;
 }
 
 function renderHeaderCell(props: RenderHeaderCellProps) {
@@ -37,7 +44,7 @@ function renderHeaderCell(props: RenderHeaderCellProps) {
 
   return (
     <View style={styles.row}>
-      <Text>{column}</Text>
+      <Text>0 {column}</Text>
     </View>
   );
 }
@@ -52,9 +59,10 @@ export const Default = () => (
           contentOffset={{ x: 0, y: 0 }}
           rowCount={200}
           renderCell={renderCell}
-          headerHeight={90}
+          headerHeight={80}
           renderHeaderCell={renderHeaderCell}
-          rowHeight={80}
+          renderHeader={renderHeader}
+          rowHeight={40}
           renderRow={renderRow}
           columns={[
             100,
@@ -92,5 +100,11 @@ const styles = StyleSheet.create({
   row: {
     width: '100%',
     height: '100%',
+  },
+  header: {
+    width: '100%',
+    height: '100%',
+    borderBottomWidth: 1,
+    backgroundColor: 'white',
   },
 });

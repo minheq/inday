@@ -18,9 +18,13 @@ export interface GridProps {
   width: number;
   renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
+  /** To display header, also pass `renderHeader` and `renderHeaderCell` props */
+  headerHeight?: number;
+  /** To display header, also pass `headerHeight` and `renderHeaderCell` props */
+  renderHeader?: (props: RenderHeaderProps) => React.ReactNode;
+  /** To display header, also pass `headerHeight` and `renderHeader` props */
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   rowHeight: number;
-  headerHeight?: number;
   rowCount: number;
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
@@ -34,6 +38,10 @@ export interface GridProps {
 export interface RenderRowProps {
   row: number;
   selected: boolean;
+  children: React.ReactNode;
+}
+
+export interface RenderHeaderProps {
   children: React.ReactNode;
 }
 
@@ -76,6 +84,9 @@ export interface GridRef {
   scrollToCell: (params: ScrollToCellParams) => void;
 }
 
+/**
+ * To display header, pass `headerHeight`, `renderHeader` and `renderHeaderCell` props
+ */
 export const Grid = memo(
   forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     const {
@@ -164,11 +175,8 @@ export const Grid = memo(
       () => {
         return {
           scrollToOffset: handleScrollToOffset,
-          scrollToCell: (cell) => {
-            const { x, y } = getScrollToCellOffset(cell);
-
-            handleScrollToOffset({ x, y });
-          },
+          scrollToCell: (cell) =>
+            handleScrollToOffset(getScrollToCellOffset(cell)),
         };
       },
       [handleScrollToOffset, getScrollToCellOffset],

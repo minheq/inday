@@ -14,9 +14,10 @@ import {
   GridRef,
   GridProps,
   ScrollToOffsetParams,
-  RenderCellProps,
-  RenderHeaderCellProps,
   RenderRowProps,
+  RenderCellProps,
+  RenderHeaderProps,
+  RenderHeaderCellProps,
   FocusedCell,
 } from './grid';
 import { sum } from '../../lib/data_structures';
@@ -36,6 +37,7 @@ export const Grid = memo(
       width,
       renderCell,
       renderHeaderCell,
+      renderHeader,
       contentOffset,
       onContentOffsetLoaded,
     } = props;
@@ -115,11 +117,8 @@ export const Grid = memo(
       () => {
         return {
           scrollToOffset: handleScrollToOffset,
-          scrollToCell: (cell) => {
-            const { x, y } = getScrollToCellOffset(cell);
-
-            handleScrollToOffset({ x, y });
-          },
+          scrollToCell: (cell) =>
+            handleScrollToOffset(getScrollToCellOffset(cell)),
         };
       },
       [handleScrollToOffset, getScrollToCellOffset],
@@ -133,14 +132,18 @@ export const Grid = memo(
             height: contentHeight,
           })}
         >
-          {headerHeight !== 0 && renderHeaderCell && (
-            <HeaderContainer
-              height={headerHeight}
-              leftPaneColumns={leftPaneColumns}
-              rightPaneColumns={rightPaneColumns}
-              renderHeaderCell={renderHeaderCell}
-            />
-          )}
+          {headerHeight !== 0 &&
+            renderHeaderCell !== undefined &&
+            renderHeader !== undefined && (
+              <HeaderContainer
+                height={headerHeight}
+                width={contentWidth}
+                leftPaneColumns={leftPaneColumns}
+                rightPaneColumns={rightPaneColumns}
+                renderHeader={renderHeader}
+                renderHeaderCell={renderHeaderCell}
+              />
+            )}
           {rows.map(({ key, height, y, row, selected, focusedCell }) => (
             <RowContainer
               key={key}
@@ -165,6 +168,8 @@ export const Grid = memo(
 
 interface HeaderContainerProps {
   height: number;
+  width: number;
+  renderHeader: (props: RenderHeaderProps) => React.ReactNode;
   renderHeaderCell: (props: RenderHeaderCellProps) => React.ReactNode;
   leftPaneColumns: Item[];
   rightPaneColumns: Item[];
@@ -173,16 +178,23 @@ interface HeaderContainerProps {
 const HeaderContainer = memo(function HeaderContainer(
   props: HeaderContainerProps,
 ) {
-  const { height, leftPaneColumns, rightPaneColumns, renderHeaderCell } = props;
+  const {
+    height,
+    width,
+    leftPaneColumns,
+    rightPaneColumns,
+    renderHeader,
+    renderHeaderCell,
+  } = props;
 
-  return (
-    <div style={styles('header', { height })}>
+  const children = (
+    <div style={styles('header')}>
       <div style={styles('leftPaneColumns')}>
         {leftPaneColumns.map((columnData) => {
-          const { size: width, num: column } = columnData;
+          const { size, num: column } = columnData;
 
           return (
-            <div key={column} style={{ width }}>
+            <div key={column} style={{ width: size }}>
               {renderHeaderCell({ column })}
             </div>
           );
@@ -190,15 +202,21 @@ const HeaderContainer = memo(function HeaderContainer(
       </div>
       <div style={styles('rightPaneColumns')}>
         {rightPaneColumns.map((columnData) => {
-          const { size: width, num: column } = columnData;
+          const { size, num: column } = columnData;
 
           return (
-            <div key={column} style={{ width }}>
+            <div key={column} style={{ width: size }}>
               {renderHeaderCell({ column })}
             </div>
           );
         })}
       </div>
+    </div>
+  );
+
+  return (
+    <div style={styles('headerWrapper', { width, height })}>
+      {renderHeader({ children })}
     </div>
   );
 });
@@ -347,12 +365,16 @@ const styles = css.create({
   cell: {
     position: 'absolute',
   },
-  header: {
+  headerWrapper: {
     zIndex: 1,
     position: 'sticky',
     top: 0,
+  },
+  header: {
     display: 'flex',
     flexDirection: 'row',
+    width: '100%',
+    height: '100%',
   },
   leftPaneColumns: {
     zIndex: 1,

@@ -40,16 +40,13 @@ export interface UseGridProps {
  *                  |            |              |             |
  * -----------------|-----------------------------------------|
  *                  |            |              |             |
- * -----------------|-----------------------------------------|
- *                  |            |              |             |
- * -----------------|-----------------------------------------|
- *                  |            |              |             |
  * -----------------------------------------------------------
  *    left pane     |         rightPane & scrollViewWidth
  *                  |
  *           fixedColumnCount
  */
 
+/** Common grid calculations */
 export function useGrid(props: UseGridProps) {
   const {
     focusedCell,

@@ -78,6 +78,7 @@ import {
   GridRef,
   RenderCellProps,
   RenderHeaderCellProps,
+  RenderHeaderProps,
   RenderRowProps,
 } from './grid';
 import { format } from 'date-fns';
@@ -377,6 +378,10 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     return <Row selected={selected}>{children}</Row>;
   }, []);
 
+  const renderHeader = useCallback(({ children }: RenderHeaderProps) => {
+    return <Header>{children}</Header>;
+  }, []);
+
   const renderHeaderCell = useCallback(
     ({ column }: RenderHeaderCellProps) => {
       const field = fields[column - 1];
@@ -402,6 +407,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             contentOffset={contentOffset}
             rowCount={rowCount}
             renderCell={renderCell}
+            renderHeader={renderHeader}
             renderHeaderCell={renderHeaderCell}
             rowHeight={RECORD_ROW_HEIGHT}
             headerHeight={FIELD_ROW_HEIGHT}
@@ -440,6 +446,16 @@ function Row(props: RowProps) {
       {children}
     </View>
   );
+}
+
+interface HeaderProps {
+  children: React.ReactNode;
+}
+
+function Header(props: HeaderProps) {
+  const { children } = props;
+
+  return <View style={[styles.row]}>{children}</View>;
 }
 
 interface CellProps {
