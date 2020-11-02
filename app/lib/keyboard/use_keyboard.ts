@@ -11,7 +11,7 @@ export interface KeyBinding {
 }
 
 interface ActiveKeys {
-  [key: string]: boolean;
+  [key: string]: boolean | undefined;
 }
 
 export function useKeyboard(keyBindings: KeyBinding[]) {
@@ -24,13 +24,8 @@ export function useKeyboard(keyBindings: KeyBinding[]) {
   const handleOnKeyDown = useCallback(
     (event: KeyboardEvent) => {
       const key = normalize(event.key);
-      console.log(key, 'key');
-
       const activeKeys = activeKeysRef.current;
-      const nextActiveKeys = {
-        ...activeKeys,
-        [key]: true,
-      };
+      const nextActiveKeys = { ...activeKeys, [key]: true };
 
       activeKeysRef.current = nextActiveKeys;
 
@@ -40,6 +35,8 @@ export function useKeyboard(keyBindings: KeyBinding[]) {
         return;
       }
 
+      // We sort so that we prioritize keybindings that contain
+      // most simultaneous modifier keys and handle them first
       matchedKeyBindings = matchedKeyBindings.slice(0).sort((a, b) => {
         const aCount = countKeyBinding(a);
         const bCount = countKeyBinding(b);
@@ -76,10 +73,7 @@ export function useKeyboard(keyBindings: KeyBinding[]) {
     (event: KeyboardEvent) => {
       const activeKeys = activeKeysRef.current;
       const key = normalize(event.key);
-      const nextActiveKeys = {
-        ...activeKeys,
-        [key]: false,
-      };
+      const nextActiveKeys = { ...activeKeys, [key]: false };
 
       activeKeysRef.current = nextActiveKeys;
     },
