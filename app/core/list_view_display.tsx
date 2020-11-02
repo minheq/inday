@@ -1,12 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
-import {
-  Container,
-  Pressable,
-  PressableRef,
-  Text,
-  useTheme,
-} from '../components';
+import { Container, Pressable, Text, useTheme } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -88,7 +82,12 @@ import {
 import { format } from 'date-fns';
 import { Record, RecordID } from '../data/records';
 import { atom, useRecoilState, useSetRecoilState } from 'recoil';
-import { KeyMap, useKeyboard } from '../hooks/use_keyboard';
+import {
+  NavigationKey,
+  KeyBinding,
+  useKeyboard,
+  WhiteSpaceKey,
+} from '../lib/keyboard';
 
 interface FocusedCell {
   row: number;
@@ -158,64 +157,123 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     return { x: 0, y: 0 };
   }, []);
 
-  const handleKeyPress = useCallback(
-    (keyMap: KeyMap) => {
-      const { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } = keyMap;
+  const focusedCellKeyBindings = useMemo(() => {
+    if (focusedCell === null) {
+      return [];
+    }
 
-      if (focusedCell !== null) {
-        const { row, column } = focusedCell;
+    const keyBindings: KeyBinding[] = [
+      {
+        key: NavigationKey.ArrowDown,
+        handler: () => {
+          if (focusedCell !== null) {
+            const { row, column } = focusedCell;
 
-        if (ArrowDown) {
-          const nextRow = row + 1;
-          if (rowToRecordMap[nextRow] === undefined) {
-            return;
+            const nextRow = row + 1;
+            if (rowToRecordMap[nextRow] === undefined) {
+              return;
+            }
+
+            setFocusedCell({
+              row: nextRow,
+              column,
+              editing: false,
+            });
           }
+        },
+      },
+      {
+        key: NavigationKey.ArrowUp,
+        handler: () => {
+          if (focusedCell !== null) {
+            const { row, column } = focusedCell;
 
-          setFocusedCell({
-            row: nextRow,
-            column,
-            editing: false,
-          });
-        } else if (ArrowUp) {
-          const prevRow = row - 1;
-          if (rowToRecordMap[prevRow] === undefined) {
-            return;
+            const prevRow = row - 1;
+            if (rowToRecordMap[prevRow] === undefined) {
+              return;
+            }
+
+            setFocusedCell({
+              row: prevRow,
+              column,
+              editing: false,
+            });
           }
+        },
+      },
+      {
+        key: NavigationKey.ArrowLeft,
+        handler: () => {
+          if (focusedCell !== null) {
+            const { row, column } = focusedCell;
+            const prevColumn = column - 1;
+            if (columnToFieldMap[prevColumn] === undefined) {
+              return;
+            }
 
-          setFocusedCell({
-            row: prevRow,
-            column,
-            editing: false,
-          });
-        } else if (ArrowLeft) {
-          const prevColumn = column - 1;
-          if (columnToFieldMap[prevColumn] === undefined) {
-            return;
+            setFocusedCell({
+              row,
+              column: prevColumn,
+              editing: false,
+            });
           }
+        },
+      },
+      {
+        key: NavigationKey.ArrowRight,
+        handler: () => {
+          if (focusedCell !== null) {
+            const { row, column } = focusedCell;
 
-          setFocusedCell({
-            row,
-            column: prevColumn,
-            editing: false,
-          });
-        } else if (ArrowRight) {
-          const nextColumn = column + 1;
-          if (columnToFieldMap[nextColumn] === undefined) {
-            return;
+            const nextColumn = column + 1;
+            if (columnToFieldMap[nextColumn] === undefined) {
+              return;
+            }
+
+            setFocusedCell({
+              row,
+              column: nextColumn,
+              editing: false,
+            });
           }
+        },
+      },
+      {
+        key: NavigationKey.ArrowDown,
+        meta: true,
+        handler: () => {},
+      },
+      {
+        key: NavigationKey.ArrowUp,
+        meta: true,
+        handler: () => {},
+      },
+      {
+        key: NavigationKey.ArrowLeft,
+        meta: true,
+        handler: () => {},
+      },
+      {
+        key: NavigationKey.ArrowRight,
+        meta: true,
+        handler: () => {},
+      },
+      {
+        key: WhiteSpaceKey.Enter,
+        meta: true,
+        handler: () => {},
+      },
+      {
+        key: WhiteSpaceKey.Space,
+        meta: true,
+        handler: () => {},
+      },
+    ];
 
-          setFocusedCell({
-            row,
-            column: nextColumn,
-            editing: false,
-          });
-        }
-      }
-    },
-    [focusedCell, setFocusedCell, rowToRecordMap, columnToFieldMap],
-  );
+    return keyBindings;
+  }, [focusedCell, setFocusedCell, rowToRecordMap, columnToFieldMap]);
 
-  useKeyboard(handleKeyPress);
+  useKeyboard(focusedCellKeyBindings);
 
   const { fixedFieldCount } = view;
 
@@ -325,13 +383,7 @@ function Cell(props: CellProps) {
   const { field, value, focused, row, column } = props;
   const theme = useTheme();
   const setFocusedCell = useSetRecoilState(focusedCellState);
-  const pressableRef = useRef<PressableRef>(null);
 
-  useEffect(() => {
-    if (focused === true && pressableRef.current !== null) {
-      pressableRef.current.focus();
-    }
-  }, [focused]);
   const handlePress = useCallback(() => {
     if (focused) {
       setFocusedCell({ row, column, editing: false });
@@ -344,7 +396,6 @@ function Cell(props: CellProps) {
 
   return (
     <Pressable
-      ref={pressableRef}
       style={[{ borderColor: theme.border.color.default }, styles.cell]}
       onPress={handlePress}
     >

@@ -136,21 +136,29 @@ export function hasNoneOf<T>(a: T[], b: T[]): boolean {
 
 type KeyedBy<T extends { [key: string]: any }> = { [key: string]: T };
 
+/**
+ * Returns an object with keys as chosen property of the item,
+ * and value as item.
+ */
 export function keyedBy<T extends { [key: string]: any }>(
   items: T[],
   prop: keyof T,
 ): KeyedBy<T> {
-  const grouped: KeyedBy<T> = {};
+  const result: KeyedBy<T> = {};
 
   for (const item of items) {
     const key = item[prop];
 
-    grouped[key] = item;
+    result[key] = item;
   }
 
-  return grouped;
+  return result;
 }
 
+/**
+ * Returns an object with keys as chosen property of the item,
+ * and value as array of item with same key.
+ */
 export function groupBy<T extends { [key: string]: any }>(
   items: T[],
   prop: keyof T,
