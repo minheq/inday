@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
   differenceBy,
   intersectBy,
@@ -6,7 +6,7 @@ import {
   maxBy,
   sum,
 } from '../../lib/data_structures';
-import { FocusedCell } from './grid';
+import { Cell, ContentOffset, FocusedCell } from './grid';
 
 export interface UseGridProps {
   // Passed from Props
@@ -23,6 +23,32 @@ export interface UseGridProps {
   scrollX: number;
   scrollY: number;
 }
+
+/**
+ * -----------------------------------------------------------
+ *                  |            |    Header    |             | headerHeight
+ * -----------------------------------------------------------
+ * -----------------------------------------------------------
+ *                  |            |              |             | rowHeight
+ * -----------------|-----------------------------------------|
+ *                  |            |              |             |
+ * -----------------|-----------------------------------------|
+ *                  |            |              |             |
+ * -----------------|-----------------------------------------|
+ *                  |            |              |             | scrollViewHeight
+ * -----------------|-----------------------------------------|
+ *                  |            |              |             |
+ * -----------------|-----------------------------------------|
+ *                  |            |              |             |
+ * -----------------|-----------------------------------------|
+ *                  |            |              |             |
+ * -----------------|-----------------------------------------|
+ *                  |            |              |             |
+ * -----------------------------------------------------------
+ *    left pane     |         rightPane & scrollViewWidth
+ *                  |
+ *           fixedColumnCount
+ */
 
 export function useGrid(props: UseGridProps) {
   const {
@@ -65,7 +91,6 @@ export function useGrid(props: UseGridProps) {
   }, [rowCount, rowHeight]);
   const leftPaneContentWidth = sum(leftPaneColumnWidths);
   const rightPaneContentWidth = sum(rightPaneColumnWidths);
-  const rightPaneScrollViewWidth = scrollViewWidth - leftPaneContentWidth;
   const contentHeight = rowCount * rowHeight;
   const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
 
@@ -88,9 +113,8 @@ export function useGrid(props: UseGridProps) {
     () =>
       getIndex({
         items: rows,
-        scrollValue: scrollY,
+        scrollOffset: scrollY,
         scrollViewSize: scrollViewHeight,
-        overscan: 1,
       }),
     [rows, scrollY, scrollViewHeight],
   );
@@ -124,11 +148,10 @@ export function useGrid(props: UseGridProps) {
     () =>
       getIndex({
         items: rightPaneColumns,
-        scrollValue: scrollX,
-        scrollViewSize: rightPaneScrollViewWidth,
-        overscan: 1,
+        scrollOffset: scrollX,
+        scrollViewSize: scrollViewWidth,
       }),
-    [scrollX, rightPaneScrollViewWidth, rightPaneColumns],
+    [scrollX, scrollViewWidth, rightPaneColumns],
   );
 
   const bodyRightPaneColumns = useMemo(
@@ -156,6 +179,66 @@ export function useGrid(props: UseGridProps) {
     }));
   }, [recycledRows, selectedRowsMap, focusedCell]);
 
+  const getScrollToRowOffset = useCallback(
+    (row?: number) => {
+      if (row === undefined) {
+        return;
+      }
+
+      const padding = 40;
+      const offset = rows[row - 1].offset;
+      const height = rows[row - 1].size;
+
+      const above = scrollY >= offset;
+      const below = offset + height >= scrollY + scrollViewHeight;
+
+      if (above) {
+        return Math.max(offset - padding, 0);
+      } else if (below) {
+        return offset + height - scrollViewHeight + padding;
+      }
+    },
+    [rows, scrollY, scrollViewHeight],
+  );
+
+  const getScrollToColumnOffset = useCallback(
+    (column?: number) => {
+      if (column === undefined) {
+        return;
+      }
+
+      if (column <= fixedColumnCount) {
+        return 0;
+      }
+
+      const padding = 40;
+      const offset = rightPaneColumns[column - 1 - fixedColumnCount].offset;
+      const width = rightPaneColumns[column - 1 - fixedColumnCount].size;
+
+      const left = scrollX >= offset;
+      const right = offset + width >= scrollX + scrollViewWidth;
+
+      if (left) {
+        return Math.max(offset - padding, 0);
+      } else if (right) {
+        return offset + width - scrollViewWidth + padding;
+      }
+    },
+    [scrollX, rightPaneColumns, fixedColumnCount, scrollViewWidth],
+  );
+
+  const getScrollToCellOffset = useCallback(
+    (cell: Partial<Cell>): Partial<ContentOffset> => {
+      const { row, column } = cell;
+
+      const y = getScrollToRowOffset(row);
+      const x = getScrollToColumnOffset(column);
+
+      return { y, x };
+    },
+    [getScrollToRowOffset, getScrollToColumnOffset],
+  );
+
   return {
     rows: effectiveRows,
     contentWidth,
@@ -166,6 +249,7 @@ export function useGrid(props: UseGridProps) {
     bodyRightPaneColumns,
     leftPaneContentWidth,
     rightPaneContentWidth,
+    getScrollToCellOffset,
   };
 }
 
@@ -217,13 +301,13 @@ export function recycleItems(params: RecycleItemsParams): RecycleItem[] {
 
 interface GetIndexParams {
   items: Item[];
-  scrollValue: number;
+  scrollOffset: number;
   scrollViewSize: number;
   overscan?: number;
 }
 
 export function getIndex(params: GetIndexParams) {
-  const { items, scrollValue, scrollViewSize, overscan = 0 } = params;
+  const { items, scrollOffset, scrollViewSize, overscan = 0 } = params;
 
   let startIndex = 0;
   let endIndex = 0;
@@ -231,7 +315,7 @@ export function getIndex(params: GetIndexParams) {
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
 
-    if (item.offset > scrollValue) {
+    if (item.offset > scrollOffset) {
       startIndex = i - 1;
       break;
     }
@@ -240,7 +324,7 @@ export function getIndex(params: GetIndexParams) {
   for (let i = startIndex; i < items.length; i++) {
     const item = items[i];
 
-    if (item.offset + item.size >= scrollValue + scrollViewSize) {
+    if (item.offset + item.size >= scrollOffset + scrollViewSize) {
       endIndex = i;
       break;
     }

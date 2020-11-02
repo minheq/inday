@@ -6,6 +6,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useCallback,
+  useMemo,
 } from 'react';
 import { css } from '../lib/css';
 import { Item, RecycleItem, useGrid } from './grid.common';
@@ -18,6 +19,7 @@ import {
   RenderRowProps,
   FocusedCell,
 } from './grid';
+import { sum } from '../../lib/data_structures';
 
 export const Grid = memo(
   forwardRef<GridRef, GridProps>(function Grid(props, ref) {
@@ -45,7 +47,10 @@ export const Grid = memo(
 
     const handleScrollToOffset = useCallback(
       (params: ScrollToOffsetParams) => {
-        if (scrollViewRef.current) {
+        if (
+          scrollViewRef.current &&
+          (params.x !== undefined || params.y !== undefined)
+        ) {
           scrollViewRef.current.scrollTo({
             left: params.x,
             top: params.y,
@@ -53,17 +58,6 @@ export const Grid = memo(
         }
       },
       [scrollViewRef],
-    );
-
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          scrollToOffset: handleScrollToOffset,
-          scrollToCell: () => {},
-        };
-      },
-      [handleScrollToOffset],
     );
 
     const handleOnScroll = useCallback(
@@ -90,6 +84,10 @@ export const Grid = memo(
       }
     }, [onContentOffsetLoaded, handleScrollToOffset, contentOffset]);
 
+    const leftPaneContentWidth = useMemo(() => {
+      return sum(columns.slice(0, fixedColumnCount));
+    }, [columns, fixedColumnCount]);
+
     const {
       rows,
       contentWidth,
@@ -98,7 +96,7 @@ export const Grid = memo(
       rightPaneColumns,
       bodyLeftPaneColumns,
       bodyRightPaneColumns,
-      leftPaneContentWidth,
+      getScrollToCellOffset,
     } = useGrid({
       focusedCell,
       selectedRows,
@@ -106,15 +104,29 @@ export const Grid = memo(
       fixedColumnCount,
       rowCount,
       rowHeight,
-      scrollViewHeight,
-      scrollViewWidth,
-
+      scrollViewHeight: scrollViewHeight - headerHeight,
+      scrollViewWidth: scrollViewWidth - leftPaneContentWidth,
       scrollX: scrollPosition.x,
       scrollY: scrollPosition.y,
     });
 
+    useImperativeHandle(
+      ref,
+      () => {
+        return {
+          scrollToOffset: handleScrollToOffset,
+          scrollToCell: (cell) => {
+            const { x, y } = getScrollToCellOffset(cell);
+
+            handleScrollToOffset({ x, y });
+          },
+        };
+      },
+      [handleScrollToOffset, getScrollToCellOffset],
+    );
+
     return (
-      <div style={styles('root')} onScroll={handleOnScroll}>
+      <div ref={scrollViewRef} style={styles('root')} onScroll={handleOnScroll}>
         <div
           style={styles('content', {
             width: contentWidth,

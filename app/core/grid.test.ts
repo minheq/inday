@@ -7,7 +7,7 @@ describe('getIndex', () => {
   test('left 0', () => {
     const result = getIndex({
       items,
-      scrollValue: 0,
+      scrollOffset: 0,
       scrollViewSize,
     });
 
@@ -20,7 +20,7 @@ describe('getIndex', () => {
   test('left 100', () => {
     const result = getIndex({
       items,
-      scrollValue: 100,
+      scrollOffset: 100,
       scrollViewSize,
     });
 
@@ -33,7 +33,7 @@ describe('getIndex', () => {
   test('left 350', () => {
     const result = getIndex({
       items,
-      scrollValue: 350,
+      scrollOffset: 350,
       scrollViewSize,
     });
 
@@ -46,7 +46,7 @@ describe('getIndex', () => {
   test('scroll rightmost', () => {
     const result = getIndex({
       items,
-      scrollValue: 500,
+      scrollOffset: 500,
       scrollViewSize,
     });
 
@@ -65,7 +65,7 @@ describe('recycleItems', () => {
   test('initial', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 0,
+      scrollOffset: 0,
       scrollViewSize,
     });
 
@@ -88,7 +88,7 @@ describe('recycleItems', () => {
   test('scroll 100', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 100,
+      scrollOffset: 100,
       scrollViewSize,
     });
 
@@ -111,7 +111,7 @@ describe('recycleItems', () => {
   test('scroll 350', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 350,
+      scrollOffset: 350,
       scrollViewSize,
     });
 
@@ -135,7 +135,7 @@ describe('recycleItems', () => {
   test('scroll rightmost', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 500,
+      scrollOffset: 500,
       scrollViewSize,
     });
 
@@ -158,7 +158,7 @@ describe('recycleItems', () => {
   test('scroll back to 350', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 350,
+      scrollOffset: 350,
       scrollViewSize,
     });
 
@@ -182,7 +182,7 @@ describe('recycleItems', () => {
   test('scroll back to 100', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 100,
+      scrollOffset: 100,
       scrollViewSize,
     });
 
@@ -205,7 +205,7 @@ describe('recycleItems', () => {
   test('scroll back to 0', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 0,
+      scrollOffset: 0,
       scrollViewSize,
     });
 
@@ -228,7 +228,7 @@ describe('recycleItems', () => {
   test('scroll rightmost again', () => {
     const { startIndex, endIndex } = getIndex({
       items,
-      scrollValue: 500,
+      scrollOffset: 500,
       scrollViewSize,
     });
 

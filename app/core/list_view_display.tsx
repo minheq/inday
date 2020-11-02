@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Container, Pressable, Text, useTheme } from '../components';
 import {
@@ -75,6 +75,7 @@ import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView } from '../data/views';
 import {
   Grid,
+  GridRef,
   RenderCellProps,
   RenderHeaderCellProps,
   RenderRowProps,
@@ -112,6 +113,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   const [focusedCell, setFocusedCell] = useRecoilState(focusedCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
+  const gridRef = useRef<GridRef>(null);
 
   const recordToRowMap = useMemo(() => {
     const map: {
@@ -166,7 +168,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
       {
         key: NavigationKey.ArrowDown,
         handler: () => {
-          if (focusedCell !== null) {
+          if (focusedCell !== null && gridRef.current !== null) {
             const { row, column } = focusedCell;
 
             const nextRow = row + 1;
@@ -179,13 +181,15 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
               column,
               editing: false,
             });
+
+            gridRef.current.scrollToCell({ row: nextRow });
           }
         },
       },
       {
         key: NavigationKey.ArrowUp,
         handler: () => {
-          if (focusedCell !== null) {
+          if (focusedCell !== null && gridRef.current !== null) {
             const { row, column } = focusedCell;
 
             const prevRow = row - 1;
@@ -198,13 +202,15 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
               column,
               editing: false,
             });
+
+            gridRef.current.scrollToCell({ row: prevRow });
           }
         },
       },
       {
         key: NavigationKey.ArrowLeft,
         handler: () => {
-          if (focusedCell !== null) {
+          if (focusedCell !== null && gridRef.current !== null) {
             const { row, column } = focusedCell;
             const prevColumn = column - 1;
             if (columnToFieldMap[prevColumn] === undefined) {
@@ -216,13 +222,15 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
               column: prevColumn,
               editing: false,
             });
+
+            gridRef.current.scrollToCell({ column: prevColumn });
           }
         },
       },
       {
         key: NavigationKey.ArrowRight,
         handler: () => {
-          if (focusedCell !== null) {
+          if (focusedCell !== null && gridRef.current !== null) {
             const { row, column } = focusedCell;
 
             const nextColumn = column + 1;
@@ -235,28 +243,86 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
               column: nextColumn,
               editing: false,
             });
+
+            gridRef.current.scrollToCell({ column: nextColumn });
           }
         },
       },
       {
         key: NavigationKey.ArrowDown,
         meta: true,
-        handler: () => {},
+        handler: () => {
+          if (focusedCell !== null && gridRef.current !== null) {
+            const { column } = focusedCell;
+
+            const nextRow = records.length;
+
+            setFocusedCell({
+              row: nextRow,
+              column,
+              editing: false,
+            });
+
+            gridRef.current.scrollToCell({ row: nextRow });
+          }
+        },
       },
       {
         key: NavigationKey.ArrowUp,
         meta: true,
-        handler: () => {},
+        handler: () => {
+          if (focusedCell !== null && gridRef.current !== null) {
+            const { column } = focusedCell;
+
+            const prevRow = 1;
+
+            setFocusedCell({
+              row: prevRow,
+              column,
+              editing: false,
+            });
+
+            gridRef.current.scrollToCell({ row: prevRow });
+          }
+        },
       },
       {
         key: NavigationKey.ArrowLeft,
         meta: true,
-        handler: () => {},
+        handler: () => {
+          if (focusedCell !== null && gridRef.current !== null) {
+            const { row } = focusedCell;
+
+            const prevColumn = 1;
+
+            setFocusedCell({
+              row,
+              column: prevColumn,
+              editing: false,
+            });
+
+            gridRef.current.scrollToCell({ column: prevColumn });
+          }
+        },
       },
       {
         key: NavigationKey.ArrowRight,
         meta: true,
-        handler: () => {},
+        handler: () => {
+          if (focusedCell !== null && gridRef.current !== null) {
+            const { row } = focusedCell;
+
+            const nextColumn = fields.length;
+
+            setFocusedCell({
+              row,
+              column: nextColumn,
+              editing: false,
+            });
+
+            gridRef.current.scrollToCell({ column: nextColumn });
+          }
+        },
       },
       {
         key: WhiteSpaceKey.Enter,
@@ -271,7 +337,14 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     ];
 
     return keyBindings;
-  }, [focusedCell, setFocusedCell, rowToRecordMap, columnToFieldMap]);
+  }, [
+    focusedCell,
+    setFocusedCell,
+    rowToRecordMap,
+    columnToFieldMap,
+    records,
+    fields,
+  ]);
 
   useKeyboard(focusedCellKeyBindings);
 
@@ -323,6 +396,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
       <AutoSizer>
         {({ height, width }) => (
           <Grid
+            ref={gridRef}
             scrollViewWidth={width}
             scrollViewHeight={height}
             contentOffset={contentOffset}
