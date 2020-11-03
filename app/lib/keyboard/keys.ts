@@ -1,3 +1,7 @@
+/**
+ * All keys derived from https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+ */
+
 export enum NavigationKey {
   ArrowDown = 'ArrowDown',
   ArrowLeft = 'ArrowLeft',
@@ -18,4 +22,8 @@ export enum ModifierKey {
   Shift = 'Shift',
 }
 
-export type KeyboardKey = NavigationKey | WhiteSpaceKey | ModifierKey;
+export enum UIKey {
+  Escape = 'Escape',
+}
+
+export type KeyboardKey = NavigationKey | WhiteSpaceKey | ModifierKey | UIKey;

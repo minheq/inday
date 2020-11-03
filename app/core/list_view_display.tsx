@@ -89,6 +89,7 @@ import {
   KeyBinding,
   useKeyboard,
   WhiteSpaceKey,
+  UIKey,
 } from '../lib/keyboard';
 
 interface FocusedCell {
@@ -322,6 +323,14 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             });
 
             gridRef.current.scrollToCell({ column: nextColumn });
+          }
+        },
+      },
+      {
+        key: UIKey.Escape,
+        handler: () => {
+          if (focusedCell !== null) {
+            setFocusedCell(null);
           }
         },
       },

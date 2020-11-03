@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { groupBy, isEmpty } from '../../../lib/data_structures';
-import { KeyboardKey, ModifierKey, NavigationKey, WhiteSpaceKey } from './keys';
+import {
+  KeyboardKey,
+  ModifierKey,
+  NavigationKey,
+  UIKey,
+  WhiteSpaceKey,
+} from './keys';
 
 export interface KeyBinding {
-  key: NavigationKey | WhiteSpaceKey;
+  key: NavigationKey | WhiteSpaceKey | UIKey;
   alt?: boolean;
   meta?: boolean;
   shift?: boolean;
