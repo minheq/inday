@@ -44,8 +44,8 @@ export function useKeyboard(keyBindings: KeyBinding[]) {
       // We sort so that we prioritize keybindings that contain
       // most simultaneous modifier keys and handle them first
       matchedKeyBindings = matchedKeyBindings.slice(0).sort((a, b) => {
-        const aCount = countKeyBinding(a);
-        const bCount = countKeyBinding(b);
+        const aCount = countModifierKeys(a);
+        const bCount = countModifierKeys(b);
 
         if (bCount < aCount) {
           return -1;
@@ -116,7 +116,7 @@ function normalize(key: string): KeyboardKey {
   return key as KeyboardKey;
 }
 
-function countKeyBinding(keyBinding: KeyBinding): number {
+function countModifierKeys(keyBinding: KeyBinding): number {
   return (
     (keyBinding.meta ? 1 : 0) +
     (keyBinding.shift ? 1 : 0) +
