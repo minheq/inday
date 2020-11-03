@@ -107,7 +107,7 @@ export const Grid = memo(
     const { recycledRows, recycledColumns } = useGridRecycler({
       rows,
       columns: rightPaneColumns,
-      scrollViewHeight: height,
+      scrollViewHeight: height - headerHeight,
       scrollViewWidth: width - leftPaneContentWidth,
       scrollX: scrollPosition.x,
       scrollY: scrollPosition.y,
@@ -144,7 +144,7 @@ export const Grid = memo(
         <div
           style={styles('content', {
             width: contentWidth,
-            height: contentHeight,
+            height: contentHeight + headerHeight,
           })}
         >
           {headerHeight !== 0 &&
@@ -159,24 +159,26 @@ export const Grid = memo(
                 renderHeaderCell={renderHeaderCell}
               />
             )}
-          {enhancedRecycledRows.map(
-            ({ key, size, offset, num, selected, focusedCell }) => (
-              <RowContainer
-                key={key}
-                leftPaneContentWidth={leftPaneContentWidth}
-                width={contentWidth}
-                leftPaneColumns={leftPaneColumns}
-                rightPaneColumns={recycledColumns}
-                renderCell={renderCell}
-                y={offset}
-                row={num}
-                height={size}
-                renderRow={renderRow}
-                selected={selected}
-                focusedCell={focusedCell}
-              />
-            ),
-          )}
+          <div style={styles('rowsWrapper', { top: headerHeight })}>
+            {enhancedRecycledRows.map(
+              ({ key, size, offset, num, selected, focusedCell }) => (
+                <RowContainer
+                  key={key}
+                  leftPaneContentWidth={leftPaneContentWidth}
+                  width={contentWidth}
+                  leftPaneColumns={leftPaneColumns}
+                  rightPaneColumns={recycledColumns}
+                  renderCell={renderCell}
+                  y={offset}
+                  row={num}
+                  height={size}
+                  renderRow={renderRow}
+                  selected={selected}
+                  focusedCell={focusedCell}
+                />
+              ),
+            )}
+          </div>
         </div>
       </div>
     );
@@ -370,6 +372,9 @@ const styles = css.create({
   },
   content: {
     position: 'relative',
+  },
+  rowsWrapper: {
+    position: 'absolute',
   },
   rowWrapper: {
     position: 'absolute',
