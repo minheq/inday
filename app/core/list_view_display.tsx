@@ -105,13 +105,14 @@ const focusedCellState = atom<FocusedCell | null>({
 
 interface ListViewDisplayProps {
   view: ListView;
+  onOpenRecord: (recordID: RecordID) => void;
 }
 
 const FIELD_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
 
 export function ListViewDisplay(props: ListViewDisplayProps) {
-  const { view } = props;
+  const { view, onOpenRecord } = props;
   const [focusedCell, setFocusedCell] = useRecoilState(focusedCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
@@ -143,7 +144,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   }, [fields]);
   const rowToRecordMap = useMemo(() => {
     const map: {
-      [row: number]: RecordID | undefined;
+      [row: number]: RecordID;
     } = {};
 
     for (let i = 0; i < records.length; i++) {
@@ -162,7 +163,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   }, []);
 
   const focusedCellKeyBindings = useMemo(() => {
-    if (focusedCell === null) {
+    if (focusedCell === null || focusedCell.editing === true) {
       return [];
     }
 
@@ -336,13 +337,23 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
       },
       {
         key: WhiteSpaceKey.Enter,
-        meta: true,
-        handler: () => {},
+        handler: () => {
+          if (focusedCell !== null) {
+            setFocusedCell({
+              row: focusedCell.row,
+              column: focusedCell.column,
+              editing: true,
+            });
+          }
+        },
       },
       {
         key: WhiteSpaceKey.Space,
-        meta: true,
-        handler: () => {},
+        handler: () => {
+          if (focusedCell !== null) {
+            onOpenRecord(rowToRecordMap[focusedCell.row]);
+          }
+        },
       },
     ];
 
@@ -354,6 +365,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     columnToFieldMap,
     records,
     fields,
+    onOpenRecord,
   ]);
 
   useKeyboard(focusedCellKeyBindings);
@@ -485,9 +497,9 @@ function Cell(props: CellProps) {
 
   const handlePress = useCallback(() => {
     if (focused) {
-      setFocusedCell({ row, column, editing: false });
-    } else {
       setFocusedCell({ row, column, editing: true });
+    } else {
+      setFocusedCell({ row, column, editing: false });
     }
   }, [setFocusedCell, focused, row, column]);
 

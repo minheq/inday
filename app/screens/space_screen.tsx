@@ -16,6 +16,7 @@ import { AutoSizer } from '../lib/autosizer/autosizer';
 import { View, ViewType, assertListView } from '../data/views';
 import { ListViewDisplay } from '../core/list_view_display';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
+import { RecordID } from '../data/records';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -166,6 +167,10 @@ function MainContent() {
     throw new Error('Invalid collection');
   }
 
+  const handleOpenRecord = useCallback((recordID: RecordID) => {
+    console.log('Open record', recordID);
+  }, []);
+
   const ViewDisplay = displaysByViewType[view.type];
 
   return (
@@ -178,7 +183,7 @@ function MainContent() {
             )}
           </Container>
         </Slide>
-        <ViewDisplay view={view} />
+        <ViewDisplay onOpenRecord={handleOpenRecord} view={view} />
         <Slide width={360} open={sidePanel === 'organize'}>
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
             <AutoSizer>
@@ -203,17 +208,18 @@ function MainContent() {
 
 interface ViewDisplayProps {
   view: View;
+  onOpenRecord: (recordID: RecordID) => void;
 }
 
 const displaysByViewType: {
   [viewType in ViewType]: (props: ViewDisplayProps) => JSX.Element;
 } = {
   list: (props: ViewDisplayProps) => {
-    const { view } = props;
+    const { view, onOpenRecord } = props;
 
     assertListView(view);
 
-    return <ListViewDisplay view={view} />;
+    return <ListViewDisplay view={view} onOpenRecord={onOpenRecord} />;
   },
   board: () => <></>,
 };
