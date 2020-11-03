@@ -57,7 +57,7 @@ export const Default = () => (
           width={width}
           height={height}
           contentOffset={{ x: 0, y: 0 }}
-          rowCount={200}
+          rowCount={100}
           renderCell={renderCell}
           headerHeight={80}
           renderHeaderCell={renderHeaderCell}
@@ -85,7 +85,7 @@ export const Default = () => (
             200,
             150,
           ]}
-          fixedColumnCount={2}
+          fixedColumnCount={1}
         />
       )}
     </AutoSizer>

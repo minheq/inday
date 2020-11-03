@@ -9,7 +9,14 @@ import React, {
   Fragment,
 } from 'react';
 import { Animated, ScrollView, StyleSheet, View } from 'react-native';
-import { Item, RecycleItem, useGrid } from './grid.common';
+import {
+  Item,
+  RecycledItem,
+  useGetEnhancedRecycledRows,
+  useGridGetScrollToCellOffset,
+  useGridMeasurer,
+  useGridRecycler,
+} from './grid.common';
 
 export interface GridProps {
   focusedCell?: FocusedCell | null;
@@ -147,23 +154,35 @@ export const Grid = memo(
     }, [scrollYObservable, scrollXObservable, headerScrollViewRef]);
 
     const {
-      rows,
-      contentWidth,
       contentHeight,
-      rightPaneContentWidth,
+      contentWidth,
       leftPaneColumns,
-      rightPaneColumns,
-      bodyLeftPaneColumns,
-      bodyRightPaneColumns,
       leftPaneContentWidth,
-      getScrollToCellOffset,
-    } = useGrid({
-      focusedCell,
-      selectedRows,
+      rightPaneColumns,
+      rows,
+    } = useGridMeasurer({
       columns,
       fixedColumnCount,
       rowCount,
       rowHeight,
+    });
+    const { recycledRows, recycledColumns } = useGridRecycler({
+      rows,
+      columns: rightPaneColumns,
+      scrollViewHeight: height,
+      scrollViewWidth: width,
+      scrollX,
+      scrollY,
+    });
+    const enhancedRecycledRows = useGetEnhancedRecycledRows({
+      recycledRows,
+      focusedCell,
+      selectedRows,
+    });
+    const getScrollToCellOffset = useGridGetScrollToCellOffset({
+      rows,
+      fixedColumnCount,
+      columns: rightPaneColumns,
       scrollViewHeight: height,
       scrollViewWidth: width,
       scrollX,
@@ -234,23 +253,25 @@ export const Grid = memo(
                 renderHeaderCell={renderHeaderCell}
               />
             )}
-            {rows.map(({ key, height, y, row, selected, focusedCell }) => (
-              <RowContainer
-                leftPaneContentWidth={leftPaneContentWidth}
-                scrollXObservable={scrollXObservable}
-                width={rightPaneContentWidth}
-                leftPaneColumns={bodyLeftPaneColumns}
-                rightPaneColumns={bodyRightPaneColumns}
-                renderCell={renderCell}
-                key={key}
-                y={y}
-                row={row}
-                height={height}
-                renderRow={renderRow}
-                selected={selected}
-                focusedCell={focusedCell}
-              />
-            ))}
+            {enhancedRecycledRows.map(
+              ({ key, size, offset, num, selected, focusedCell }) => (
+                <RowContainer
+                  leftPaneContentWidth={leftPaneContentWidth}
+                  scrollXObservable={scrollXObservable}
+                  width={contentWidth}
+                  leftPaneColumns={leftPaneColumns}
+                  rightPaneColumns={recycledColumns}
+                  renderCell={renderCell}
+                  key={key}
+                  y={offset}
+                  row={num}
+                  height={size}
+                  renderRow={renderRow}
+                  selected={selected}
+                  focusedCell={focusedCell}
+                />
+              ),
+            )}
           </ScrollView>
         </ScrollView>
       </View>
@@ -266,8 +287,8 @@ interface RowContainerProps {
   leftPaneContentWidth: number;
   renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
-  leftPaneColumns: RecycleItem[];
-  rightPaneColumns: RecycleItem[];
+  leftPaneColumns: Item[];
+  rightPaneColumns: RecycledItem[];
   selected: boolean;
   scrollXObservable: Animated.Value;
   focusedCell: FocusedCell | null;
@@ -295,13 +316,13 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
         style={[styles.leftPaneWrapper, { left: scrollXObservable }]}
       >
         {leftPaneColumns.map((columnData) => {
-          const { key, size, num: column, offset } = columnData;
+          const { size, num: column, offset } = columnData;
           const focused = !!(focusedCell?.column === column);
           const editing = !!(focused && focusedCell?.editing);
 
           return (
             <CellContainer
-              key={key}
+              key={column}
               width={size}
               row={row}
               height={height}

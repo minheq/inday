@@ -8,61 +8,25 @@ import {
 } from '../../lib/data_structures';
 import { Cell, ContentOffset, FocusedCell } from './grid';
 
-export interface UseGridProps {
-  // Passed from Props
-  focusedCell?: FocusedCell | null;
-  selectedRows?: number[] | null;
-  scrollViewHeight: number;
-  scrollViewWidth: number;
+interface UseGridMeasurerProps {
   rowHeight: number;
   rowCount: number;
   columns: number[];
   fixedColumnCount: number;
-
-  // Passed from Grid
-  scrollX: number;
-  scrollY: number;
 }
 
-/**
- * -----------------------------------------------------------
- *                  |            |    Header    |             | headerHeight
- * -----------------------------------------------------------
- * -----------------------------------------------------------
- *                  |            |              |             | rowHeight
- * -----------------|-----------------------------------------|
- *                  |            |              |             |
- * -----------------|-----------------------------------------|
- *                  |            |              |             |
- * -----------------|-----------------------------------------|
- *                  |            |              |             | scrollViewHeight
- * -----------------|-----------------------------------------|
- *                  |            |              |             |
- * -----------------|-----------------------------------------|
- *                  |            |              |             |
- * -----------------------------------------------------------
- *    left pane     |         rightPane & scrollViewWidth
- *                  |
- *           fixedColumnCount
- */
+interface GridMeasurerData {
+  contentHeight: number;
+  contentWidth: number;
+  leftPaneColumns: Item[];
+  leftPaneContentWidth: number;
+  rightPaneColumns: Item[];
+  rightPaneContentWidth: number;
+  rows: Item[];
+}
 
-/** Common grid calculations */
-export function useGrid(props: UseGridProps) {
-  const {
-    focusedCell,
-    selectedRows,
-    columns,
-    fixedColumnCount,
-    rowCount,
-    rowHeight,
-    scrollViewHeight,
-    scrollViewWidth,
-    scrollX,
-    scrollY,
-  } = props;
-
-  const prevRowsDataRef = useRef<RecycleItem[]>([]);
-  const prevBodyRightPaneColumnsDataRef = useRef<RecycleItem[]>([]);
+export function useGridMeasurer(props: UseGridMeasurerProps): GridMeasurerData {
+  const { columns, fixedColumnCount, rowCount, rowHeight } = props;
 
   const leftPaneColumnWidths = useMemo(
     () => columns.slice(0, fixedColumnCount),
@@ -79,6 +43,15 @@ export function useGrid(props: UseGridProps) {
     () => getItems(rightPaneColumnWidths, fixedColumnCount),
     [rightPaneColumnWidths, fixedColumnCount],
   );
+  const leftPaneContentWidth = useMemo(() => sum(leftPaneColumnWidths), [
+    leftPaneColumnWidths,
+  ]);
+  const rightPaneContentWidth = useMemo(() => sum(rightPaneColumnWidths), [
+    rightPaneColumnWidths,
+  ]);
+  const contentHeight = rowCount * rowHeight;
+  const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
+
   const rows = useMemo(() => {
     const items: Item[] = [];
     for (let i = 0; i < rowCount; i++) {
@@ -86,10 +59,106 @@ export function useGrid(props: UseGridProps) {
     }
     return items;
   }, [rowCount, rowHeight]);
-  const leftPaneContentWidth = sum(leftPaneColumnWidths);
-  const rightPaneContentWidth = sum(rightPaneColumnWidths);
-  const contentHeight = rowCount * rowHeight;
-  const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
+
+  return {
+    contentHeight,
+    contentWidth,
+    leftPaneColumns,
+    leftPaneContentWidth,
+    rightPaneColumns,
+    rightPaneContentWidth,
+    rows,
+  };
+}
+
+export interface UseGridRecyclerProps {
+  scrollViewHeight: number;
+  scrollViewWidth: number;
+  scrollX: number;
+  scrollY: number;
+  columns: Item[];
+  rows: Item[];
+}
+
+interface GridRecyclerData {
+  recycledRows: RecycledItem[];
+  recycledColumns: RecycledItem[];
+}
+
+export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
+  const {
+    columns,
+    rows,
+    scrollViewHeight,
+    scrollViewWidth,
+    scrollX,
+    scrollY,
+  } = props;
+
+  const prevRecycledRowsRef = useRef<RecycledItem[]>([]);
+  const prevRecycledColumnsRef = useRef<RecycledItem[]>([]);
+
+  const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
+    () =>
+      getIndex({
+        items: rows,
+        scrollOffset: scrollY,
+        scrollViewSize: scrollViewHeight,
+      }),
+    [rows, scrollY, scrollViewHeight],
+  );
+
+  const recycledRows = useMemo(
+    (): RecycledItem[] =>
+      recycleItems({
+        items: rows,
+        prevItems: prevRecycledRowsRef.current,
+        startIndex: rowStartIndex,
+        endIndex: rowEndIndex,
+      }),
+    [rows, rowStartIndex, rowEndIndex],
+  );
+
+  const { startIndex: columnStartIndex, endIndex: columnEndIndex } = useMemo(
+    () =>
+      getIndex({
+        items: columns,
+        scrollOffset: scrollX,
+        scrollViewSize: scrollViewWidth,
+      }),
+    [scrollX, scrollViewWidth, columns],
+  );
+
+  const recycledColumns = useMemo(
+    (): RecycledItem[] =>
+      recycleItems({
+        items: columns,
+        prevItems: prevRecycledColumnsRef.current,
+        startIndex: columnStartIndex,
+        endIndex: columnEndIndex,
+      }),
+    [columns, columnStartIndex, columnEndIndex],
+  );
+
+  prevRecycledRowsRef.current = recycledRows;
+  prevRecycledColumnsRef.current = recycledColumns;
+
+  return {
+    recycledRows,
+    recycledColumns,
+  };
+}
+
+interface UseGetEnhancedRecycledRowsProps {
+  focusedCell?: FocusedCell | null;
+  selectedRows?: number[] | null;
+  recycledRows: RecycledItem[];
+}
+
+export function useGetEnhancedRecycledRows(
+  props: UseGetEnhancedRecycledRowsProps,
+): RecycledRow[] {
+  const { recycledRows, focusedCell, selectedRows } = props;
 
   const selectedRowsMap = useMemo(() => {
     const map: { [row: number]: boolean } = {};
@@ -106,75 +175,40 @@ export function useGrid(props: UseGridProps) {
     return map;
   }, [selectedRows]);
 
-  const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
-    () =>
-      getIndex({
-        items: rows,
-        scrollOffset: scrollY,
-        scrollViewSize: scrollViewHeight,
-      }),
-    [rows, scrollY, scrollViewHeight],
-  );
+  return recycledRows.map((row) => ({
+    key: row.key,
+    size: row.size,
+    offset: row.offset,
+    num: row.num,
+    selected: selectedRowsMap[row.num] || false,
+    focusedCell: focusedCell?.row === row.num ? focusedCell : null,
+  }));
+}
 
-  const recycledRows = useMemo(
-    () =>
-      recycleItems({
-        items: rows,
-        prevItems: prevRowsDataRef.current,
-        startIndex: rowStartIndex,
-        endIndex: rowEndIndex,
-      }),
-    [rows, rowStartIndex, rowEndIndex],
-  );
+interface UseGridGetScrollToCellOffsetProps {
+  scrollViewHeight: number;
+  scrollViewWidth: number;
+  scrollX: number;
+  scrollY: number;
+  fixedColumnCount: number;
+  columns: Item[];
+  rows: Item[];
+  padding?: number;
+}
 
-  const bodyLeftPaneColumns = useMemo(
-    () =>
-      recycleItems({
-        items: leftPaneColumns,
-        prevItems: [],
-        startIndex: 0,
-        endIndex: fixedColumnCount - 1,
-      }),
-    [leftPaneColumns, fixedColumnCount],
-  );
-
+export function useGridGetScrollToCellOffset(
+  props: UseGridGetScrollToCellOffsetProps,
+): (cell: Partial<Cell>) => Partial<ContentOffset> {
   const {
-    startIndex: rightPaneStartIndex,
-    endIndex: rightPaneEndIndex,
-  } = useMemo(
-    () =>
-      getIndex({
-        items: rightPaneColumns,
-        scrollOffset: scrollX,
-        scrollViewSize: scrollViewWidth,
-      }),
-    [scrollX, scrollViewWidth, rightPaneColumns],
-  );
-
-  const bodyRightPaneColumns = useMemo(
-    () =>
-      recycleItems({
-        items: rightPaneColumns,
-        prevItems: prevBodyRightPaneColumnsDataRef.current,
-        startIndex: rightPaneStartIndex,
-        endIndex: rightPaneEndIndex,
-      }),
-    [rightPaneColumns, rightPaneStartIndex, rightPaneEndIndex],
-  );
-
-  prevRowsDataRef.current = recycledRows;
-  prevBodyRightPaneColumnsDataRef.current = bodyRightPaneColumns;
-
-  const effectiveRows = useMemo(() => {
-    return recycledRows.map((row) => ({
-      key: row.key,
-      height: row.size,
-      y: row.offset,
-      row: row.num,
-      selected: selectedRowsMap[row.num] || false,
-      focusedCell: focusedCell?.row === row.num ? focusedCell : null,
-    }));
-  }, [recycledRows, selectedRowsMap, focusedCell]);
+    columns,
+    rows,
+    scrollViewHeight,
+    scrollViewWidth,
+    fixedColumnCount,
+    scrollX,
+    scrollY,
+    padding = 40,
+  } = props;
 
   const getScrollToRowOffset = useCallback(
     (row?: number) => {
@@ -182,7 +216,6 @@ export function useGrid(props: UseGridProps) {
         return;
       }
 
-      const padding = 40;
       const offset = rows[row - 1].offset;
       const height = rows[row - 1].size;
 
@@ -195,7 +228,7 @@ export function useGrid(props: UseGridProps) {
         return offset + height - scrollViewHeight + padding;
       }
     },
-    [rows, scrollY, scrollViewHeight],
+    [rows, scrollY, scrollViewHeight, padding],
   );
 
   const getScrollToColumnOffset = useCallback(
@@ -208,9 +241,8 @@ export function useGrid(props: UseGridProps) {
         return 0;
       }
 
-      const padding = 40;
-      const offset = rightPaneColumns[column - 1 - fixedColumnCount].offset;
-      const width = rightPaneColumns[column - 1 - fixedColumnCount].size;
+      const offset = columns[column - 1 - fixedColumnCount].offset;
+      const width = columns[column - 1 - fixedColumnCount].size;
 
       const left = scrollX >= offset;
       const right = offset + width >= scrollX + scrollViewWidth;
@@ -221,7 +253,7 @@ export function useGrid(props: UseGridProps) {
         return offset + width - scrollViewWidth + padding;
       }
     },
-    [scrollX, rightPaneColumns, fixedColumnCount, scrollViewWidth],
+    [scrollX, columns, fixedColumnCount, scrollViewWidth, padding],
   );
 
   const getScrollToCellOffset = useCallback(
@@ -236,18 +268,7 @@ export function useGrid(props: UseGridProps) {
     [getScrollToRowOffset, getScrollToColumnOffset],
   );
 
-  return {
-    rows: effectiveRows,
-    contentWidth,
-    contentHeight,
-    leftPaneColumns,
-    rightPaneColumns,
-    bodyLeftPaneColumns,
-    bodyRightPaneColumns,
-    leftPaneContentWidth,
-    rightPaneContentWidth,
-    getScrollToCellOffset,
-  };
+  return getScrollToCellOffset;
 }
 
 export interface Item {
@@ -256,18 +277,23 @@ export interface Item {
   num: number;
 }
 
-export interface RecycleItem extends Item {
+export interface RecycledItem extends Item {
   key: number;
+}
+
+export interface RecycledRow extends RecycledItem {
+  focusedCell: FocusedCell | null;
+  selected: boolean;
 }
 
 interface RecycleItemsParams {
   items: Item[];
-  prevItems: RecycleItem[];
+  prevItems: RecycledItem[];
   startIndex: number;
   endIndex: number;
 }
 
-export function recycleItems(params: RecycleItemsParams): RecycleItem[] {
+export function recycleItems(params: RecycleItemsParams): RecycledItem[] {
   const { items, startIndex, endIndex, prevItems } = params;
 
   const currentItems = items.slice(startIndex, endIndex + 1);
@@ -358,3 +384,28 @@ export function getItems(itemSizes: number[], offsetNum: number = 0) {
 
   return items;
 }
+
+/**
+ * Appendix A.
+ *
+ *      leftPane                       rightPane
+ * -----------------------------------------------------------  <--------- scrollY
+ *                  |            |              |             |       |
+ * -----------------|-----------------------------------------|       |
+ *                  |            |              |             |       |
+ * -----------------|-----------------------------------------|       |
+ *                  |            |              |             |       |
+ * -----------------|-----------------------------------------|       |
+ *                  |            |              |             | scrollViewHeight
+ * -----------------|-----------------------------------------|       |
+ *                  |            |              |             |       |
+ * -----------------|-----------------------------------------|       |
+ *                  |            |              |             |       |
+ * ----------------------------------------------------------- <-------
+ *                  ^                                         ^
+ *                  |                                         |
+ *                  |------------scrollViewWidth--------------|
+ *                  |
+ *           fixedColumnCount (1)
+ *               scrollX
+ */

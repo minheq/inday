@@ -6,10 +6,16 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useCallback,
-  useMemo,
 } from 'react';
 import { css } from '../lib/css';
-import { Item, RecycleItem, useGrid } from './grid.common';
+import {
+  Item,
+  RecycledItem,
+  useGetEnhancedRecycledRows,
+  useGridGetScrollToCellOffset,
+  useGridMeasurer,
+  useGridRecycler,
+} from './grid.common';
 import {
   GridRef,
   GridProps,
@@ -19,8 +25,8 @@ import {
   RenderHeaderProps,
   RenderHeaderCellProps,
   FocusedCell,
+  ContentOffset,
 } from './grid';
-import { sum } from '../../lib/data_structures';
 
 export const Grid = memo(
   forwardRef<GridRef, GridProps>(function Grid(props, ref) {
@@ -42,10 +48,9 @@ export const Grid = memo(
       onContentOffsetLoaded,
     } = props;
     const scrollViewRef = useRef<HTMLDivElement>(null);
-    const [scrollPosition, setScrollPosition] = useState<{
-      x: number;
-      y: number;
-    }>(contentOffset || { x: 0, y: 0 });
+    const [scrollPosition, setScrollPosition] = useState<ContentOffset>(
+      contentOffset || { x: 0, y: 0 },
+    );
 
     const handleScrollToOffset = useCallback(
       (params: ScrollToOffsetParams) => {
@@ -86,28 +91,38 @@ export const Grid = memo(
       }
     }, [onContentOffsetLoaded, handleScrollToOffset, contentOffset]);
 
-    const leftPaneContentWidth = useMemo(() => {
-      return sum(columns.slice(0, fixedColumnCount));
-    }, [columns, fixedColumnCount]);
-
     const {
-      rows,
-      contentWidth,
       contentHeight,
+      contentWidth,
       leftPaneColumns,
+      leftPaneContentWidth,
       rightPaneColumns,
-      bodyLeftPaneColumns,
-      bodyRightPaneColumns,
-      getScrollToCellOffset,
-    } = useGrid({
-      focusedCell,
-      selectedRows,
+      rows,
+    } = useGridMeasurer({
       columns,
       fixedColumnCount,
       rowCount,
       rowHeight,
-      scrollViewHeight: height - headerHeight,
+    });
+    const { recycledRows, recycledColumns } = useGridRecycler({
+      rows,
+      columns: rightPaneColumns,
+      scrollViewHeight: height,
       scrollViewWidth: width - leftPaneContentWidth,
+      scrollX: scrollPosition.x,
+      scrollY: scrollPosition.y,
+    });
+    const enhancedRecycledRows = useGetEnhancedRecycledRows({
+      recycledRows,
+      focusedCell,
+      selectedRows,
+    });
+    const getScrollToCellOffset = useGridGetScrollToCellOffset({
+      rows,
+      fixedColumnCount,
+      columns: rightPaneColumns,
+      scrollViewHeight: height,
+      scrollViewWidth: width,
       scrollX: scrollPosition.x,
       scrollY: scrollPosition.y,
     });
@@ -144,22 +159,24 @@ export const Grid = memo(
                 renderHeaderCell={renderHeaderCell}
               />
             )}
-          {rows.map(({ key, height, y, row, selected, focusedCell }) => (
-            <RowContainer
-              key={key}
-              leftPaneContentWidth={leftPaneContentWidth}
-              width={contentWidth}
-              leftPaneColumns={bodyLeftPaneColumns}
-              rightPaneColumns={bodyRightPaneColumns}
-              renderCell={renderCell}
-              y={y + headerHeight}
-              row={row}
-              height={height}
-              renderRow={renderRow}
-              selected={selected}
-              focusedCell={focusedCell}
-            />
-          ))}
+          {enhancedRecycledRows.map(
+            ({ key, size, offset, num, selected, focusedCell }) => (
+              <RowContainer
+                key={key}
+                leftPaneContentWidth={leftPaneContentWidth}
+                width={contentWidth}
+                leftPaneColumns={leftPaneColumns}
+                rightPaneColumns={recycledColumns}
+                renderCell={renderCell}
+                y={offset}
+                row={num}
+                height={size}
+                renderRow={renderRow}
+                selected={selected}
+                focusedCell={focusedCell}
+              />
+            ),
+          )}
         </div>
       </div>
     );
@@ -229,8 +246,8 @@ interface RowContainerProps {
   leftPaneContentWidth: number;
   renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
-  leftPaneColumns: RecycleItem[];
-  rightPaneColumns: RecycleItem[];
+  leftPaneColumns: Item[];
+  rightPaneColumns: RecycledItem[];
   selected: boolean;
   focusedCell: FocusedCell | null;
 }
@@ -254,13 +271,13 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
     <div style={styles('row')}>
       <div style={styles('leftPaneColumns')}>
         {leftPaneColumns.map((columnData) => {
-          const { key, size, num: column, offset } = columnData;
+          const { size, num: column, offset } = columnData;
           const focused = !!(focusedCell?.column === column);
           const editing = !!(focused && focusedCell?.editing);
 
           return (
             <CellContainer
-              key={key}
+              key={column}
               width={size}
               row={row}
               height={height}
