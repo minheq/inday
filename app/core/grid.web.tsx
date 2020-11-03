@@ -104,11 +104,16 @@ export const Grid = memo(
       rowCount,
       rowHeight,
     });
+
+    const totalHeight = contentHeight + headerHeight;
+    const scrollViewHeight = height - headerHeight;
+    const scrollViewWidth = width - leftPaneContentWidth;
+
     const { recycledRows, recycledColumns } = useGridRecycler({
       rows,
       columns: rightPaneColumns,
-      scrollViewHeight: height - headerHeight,
-      scrollViewWidth: width - leftPaneContentWidth,
+      scrollViewHeight,
+      scrollViewWidth,
       scrollX: scrollPosition.x,
       scrollY: scrollPosition.y,
     });
@@ -121,8 +126,8 @@ export const Grid = memo(
       rows,
       fixedColumnCount,
       columns: rightPaneColumns,
-      scrollViewHeight: height,
-      scrollViewWidth: width,
+      scrollViewHeight,
+      scrollViewWidth,
       scrollX: scrollPosition.x,
       scrollY: scrollPosition.y,
     });
@@ -144,7 +149,7 @@ export const Grid = memo(
         <div
           style={styles('content', {
             width: contentWidth,
-            height: contentHeight + headerHeight,
+            height: totalHeight,
           })}
         >
           {headerHeight !== 0 &&
