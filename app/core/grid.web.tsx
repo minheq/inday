@@ -9,12 +9,13 @@ import React, {
 } from 'react';
 import { css } from '../lib/css';
 import {
-  Item,
-  RecycledItem,
   useGetEnhancedRecycledRows,
   useGridGetScrollToCellOffset,
-  useGridMeasurer,
+  useGridTransformer,
   useGridRecycler,
+  ContentOffset,
+  Column,
+  RecycledColumn,
 } from './grid.common';
 import {
   GridRef,
@@ -25,7 +26,6 @@ import {
   RenderHeaderProps,
   RenderHeaderCellProps,
   FocusedCell,
-  ContentOffset,
 } from './grid';
 
 export const Grid = memo(
@@ -98,7 +98,7 @@ export const Grid = memo(
       leftPaneContentWidth,
       rightPaneColumns,
       rows,
-    } = useGridMeasurer({
+    } = useGridTransformer({
       columns,
       fixedColumnCount,
       rowCount,
@@ -195,8 +195,8 @@ interface HeaderContainerProps {
   width: number;
   renderHeader: (props: RenderHeaderProps) => React.ReactNode;
   renderHeaderCell: (props: RenderHeaderCellProps) => React.ReactNode;
-  leftPaneColumns: Item[];
-  rightPaneColumns: Item[];
+  leftPaneColumns: Column[];
+  rightPaneColumns: Column[];
 }
 
 const HeaderContainer = memo(function HeaderContainer(
@@ -215,10 +215,10 @@ const HeaderContainer = memo(function HeaderContainer(
     <div style={styles('header')}>
       <div style={styles('leftPaneColumns')}>
         {leftPaneColumns.map((columnData) => {
-          const { size, num: column } = columnData;
+          const { width: columnWidth, column } = columnData;
 
           return (
-            <div key={column} style={{ width: size }}>
+            <div key={column} style={{ width: columnWidth }}>
               {renderHeaderCell({ column })}
             </div>
           );
@@ -226,10 +226,10 @@ const HeaderContainer = memo(function HeaderContainer(
       </div>
       <div style={styles('rightPaneColumns')}>
         {rightPaneColumns.map((columnData) => {
-          const { size, num: column } = columnData;
+          const { width: columnWidth, column } = columnData;
 
           return (
-            <div key={column} style={{ width: size }}>
+            <div key={column} style={{ width: columnWidth }}>
               {renderHeaderCell({ column })}
             </div>
           );
@@ -253,8 +253,8 @@ interface RowContainerProps {
   leftPaneContentWidth: number;
   renderRow: (props: RenderRowProps) => React.ReactNode;
   renderCell: (props: RenderCellProps) => React.ReactNode;
-  leftPaneColumns: Item[];
-  rightPaneColumns: RecycledItem[];
+  leftPaneColumns: Column[];
+  rightPaneColumns: RecycledColumn[];
   selected: boolean;
   focusedCell: FocusedCell | null;
 }
@@ -278,18 +278,18 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
     <div style={styles('row')}>
       <div style={styles('leftPaneColumns')}>
         {leftPaneColumns.map((columnData) => {
-          const { size, num: column, offset } = columnData;
+          const { width: columnWidth, column, x } = columnData;
           const focused = !!(focusedCell?.column === column);
           const editing = !!(focused && focusedCell?.editing);
 
           return (
             <CellContainer
               key={column}
-              width={size}
+              width={columnWidth}
               row={row}
               height={height}
               column={column}
-              x={offset}
+              x={x}
               focused={focused}
               editing={editing}
               selected={selected}
@@ -300,18 +300,18 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
       </div>
       <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
         {rightPaneColumns.map((columnData) => {
-          const { key, size, num: column, offset } = columnData;
+          const { key, width: columnWidth, column, x } = columnData;
           const focused = !!(focusedCell?.column === column);
           const editing = !!(focused && focusedCell?.editing);
 
           return (
             <CellContainer
               key={key}
-              width={size}
+              width={columnWidth}
               row={row}
               height={height}
               column={column}
-              x={offset}
+              x={x}
               focused={focused}
               editing={editing}
               selected={selected}

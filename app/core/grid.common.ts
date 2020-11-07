@@ -6,33 +6,35 @@ import {
   maxBy,
   sum,
 } from '../../lib/data_structures';
-import { Cell, ContentOffset, FocusedCell } from './grid';
 
-interface UseGridMeasurerProps {
+interface UseGridTransformerProps {
+  groups: Group[];
   rowHeight: number;
-  rowCount: number;
+  groupHeight: number;
   columns: number[];
   fixedColumnCount: number;
 }
 
-interface GridMeasurerData {
+interface GridTransformerData {
   contentHeight: number;
   contentWidth: number;
-  leftPaneColumns: Item[];
+  leftPaneColumns: Column[];
   leftPaneContentWidth: number;
-  rightPaneColumns: Item[];
+  rightPaneColumns: Column[];
   rightPaneContentWidth: number;
-  rows: Item[];
+  rows: Row[];
 }
 
-export function useGridMeasurer(props: UseGridMeasurerProps): GridMeasurerData {
-  const { columns, fixedColumnCount, rowCount, rowHeight } = props;
+export function useGridTransformer(
+  props: UseGridTransformerProps,
+): GridTransformerData {
+  const { columns, fixedColumnCount, groups, groupHeight, rowHeight } = props;
 
   const leftPaneColumnWidths = useMemo(
     () => columns.slice(0, fixedColumnCount),
     [columns, fixedColumnCount],
   );
-  const leftPaneColumns = useMemo(() => getItems(leftPaneColumnWidths), [
+  const leftPaneColumns = useMemo(() => getColumns(leftPaneColumnWidths), [
     leftPaneColumnWidths,
   ]);
   const rightPaneColumnWidths = useMemo(() => columns.slice(fixedColumnCount), [
@@ -40,7 +42,7 @@ export function useGridMeasurer(props: UseGridMeasurerProps): GridMeasurerData {
     fixedColumnCount,
   ]);
   const rightPaneColumns = useMemo(
-    () => getItems(rightPaneColumnWidths, fixedColumnCount),
+    () => getColumns(rightPaneColumnWidths, fixedColumnCount),
     [rightPaneColumnWidths, fixedColumnCount],
   );
   const leftPaneContentWidth = useMemo(() => sum(leftPaneColumnWidths), [
@@ -49,16 +51,17 @@ export function useGridMeasurer(props: UseGridMeasurerProps): GridMeasurerData {
   const rightPaneContentWidth = useMemo(() => sum(rightPaneColumnWidths), [
     rightPaneColumnWidths,
   ]);
-  const contentHeight = rowCount * rowHeight;
+  const contentHeight = useMemo(
+    () => getContentHeight(groups, groupHeight, rowHeight),
+    [groups, groupHeight, rowHeight],
+  );
   const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
 
-  const rows = useMemo(() => {
-    const items: Item[] = [];
-    for (let i = 0; i < rowCount; i++) {
-      items.push({ num: i + 1, size: rowHeight, offset: i * rowHeight });
-    }
-    return items;
-  }, [rowCount, rowHeight]);
+  const rows = useMemo(() => getRows(groups, groupHeight, rowHeight), [
+    groups,
+    groupHeight,
+    rowHeight,
+  ]);
 
   return {
     contentHeight,
@@ -76,13 +79,13 @@ export interface UseGridRecyclerProps {
   scrollViewWidth: number;
   scrollX: number;
   scrollY: number;
-  columns: Item[];
-  rows: Item[];
+  columns: Column[];
+  rows: Row[];
 }
 
 interface GridRecyclerData {
-  recycledRows: RecycledItem[];
-  recycledColumns: RecycledItem[];
+  recycledRows: RecycledRow[];
+  recycledColumns: RecycledColumn[];
 }
 
 export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
@@ -95,24 +98,24 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
     scrollY,
   } = props;
 
-  const prevRecycledRowsRef = useRef<RecycledItem[]>([]);
-  const prevRecycledColumnsRef = useRef<RecycledItem[]>([]);
+  const prevRecycledRowsRef = useRef<RecycledRow[]>([]);
+  const prevRecycledColumnsRef = useRef<RecycledColumn[]>([]);
 
   const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
     () =>
-      getIndex({
-        items: rows,
-        scrollOffset: scrollY,
-        scrollViewSize: scrollViewHeight,
+      getVisibleRowsIndexRange({
+        rows,
+        scrollY,
+        scrollViewHeight,
       }),
     [rows, scrollY, scrollViewHeight],
   );
 
   const recycledRows = useMemo(
-    (): RecycledItem[] =>
-      recycleItems({
-        items: rows,
-        prevItems: prevRecycledRowsRef.current,
+    (): RecycledRow[] =>
+      recycleRows({
+        rows,
+        prevRows: prevRecycledRowsRef.current,
         startIndex: rowStartIndex,
         endIndex: rowEndIndex,
       }),
@@ -121,19 +124,19 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
 
   const { startIndex: columnStartIndex, endIndex: columnEndIndex } = useMemo(
     () =>
-      getIndex({
-        items: columns,
-        scrollOffset: scrollX,
-        scrollViewSize: scrollViewWidth,
+      getVisibleColumnsIndexRange({
+        columns,
+        scrollX,
+        scrollViewWidth,
       }),
     [scrollX, scrollViewWidth, columns],
   );
 
   const recycledColumns = useMemo(
-    (): RecycledItem[] =>
-      recycleItems({
-        items: columns,
-        prevItems: prevRecycledColumnsRef.current,
+    (): RecycledColumn[] =>
+      recycleColumns({
+        columns,
+        prevColumns: prevRecycledColumnsRef.current,
         startIndex: columnStartIndex,
         endIndex: columnEndIndex,
       }),
@@ -149,40 +152,14 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
   };
 }
 
-interface UseGetEnhancedRecycledRowsProps {
-  focusedCell?: FocusedCell | null;
-  selectedRows?: number[] | null;
-  recycledRows: RecycledItem[];
+export interface Cell {
+  row: number;
+  column: number;
 }
 
-export function useGetEnhancedRecycledRows(
-  props: UseGetEnhancedRecycledRowsProps,
-): RecycledRow[] {
-  const { recycledRows, focusedCell, selectedRows } = props;
-
-  const selectedRowsMap = useMemo(() => {
-    const map: { [row: number]: boolean } = {};
-
-    if (selectedRows === undefined || selectedRows === null) {
-      return map;
-    }
-
-    for (let i = 0; i < selectedRows.length; i++) {
-      const selectedRow = selectedRows[i];
-      map[selectedRow] = true;
-    }
-
-    return map;
-  }, [selectedRows]);
-
-  return recycledRows.map((row) => ({
-    key: row.key,
-    size: row.size,
-    offset: row.offset,
-    num: row.num,
-    selected: selectedRowsMap[row.num] || false,
-    focusedCell: focusedCell?.row === row.num ? focusedCell : null,
-  }));
+export interface ContentOffset {
+  x: number;
+  y: number;
 }
 
 interface UseGridGetScrollToCellOffsetProps {
@@ -191,8 +168,8 @@ interface UseGridGetScrollToCellOffsetProps {
   scrollX: number;
   scrollY: number;
   fixedColumnCount: number;
-  columns: Item[];
-  rows: Item[];
+  columns: Column[];
+  rows: Row[];
   padding?: number;
 }
 
@@ -216,16 +193,15 @@ export function useGridGetScrollToCellOffset(
         return;
       }
 
-      const offset = rows[row - 1].offset;
-      const height = rows[row - 1].size;
+      const { y, height } = rows[row - 1];
 
-      const above = scrollY >= offset;
-      const below = offset + height >= scrollY + scrollViewHeight;
+      const above = scrollY >= y;
+      const below = y + height >= scrollY + scrollViewHeight;
 
       if (above) {
-        return Math.max(offset - padding, 0);
+        return Math.max(y - padding, 0);
       } else if (below) {
-        return offset + height - scrollViewHeight + padding;
+        return y + height - scrollViewHeight + padding;
       }
     },
     [rows, scrollY, scrollViewHeight, padding],
@@ -241,16 +217,15 @@ export function useGridGetScrollToCellOffset(
         return 0;
       }
 
-      const offset = columns[column - 1 - fixedColumnCount].offset;
-      const width = columns[column - 1 - fixedColumnCount].size;
+      const { x, width } = columns[column - 1 - fixedColumnCount];
 
-      const left = scrollX >= offset;
-      const right = offset + width >= scrollX + scrollViewWidth;
+      const left = scrollX >= x;
+      const right = x + width >= scrollX + scrollViewWidth;
 
       if (left) {
-        return Math.max(offset - padding, 0);
+        return Math.max(x - padding, 0);
       } else if (right) {
-        return offset + width - scrollViewWidth + padding;
+        return x + width - scrollViewWidth + padding;
       }
     },
     [scrollX, columns, fixedColumnCount, scrollViewWidth, padding],
@@ -271,40 +246,37 @@ export function useGridGetScrollToCellOffset(
   return getScrollToCellOffset;
 }
 
-export interface Item {
-  size: number;
-  offset: number;
-  num: number;
-}
-
-export interface RecycledItem extends Item {
-  key: number;
-}
-
-export interface RecycledRow extends RecycledItem {
-  focusedCell: FocusedCell | null;
-  selected: boolean;
-}
-
-interface RecycleItemsParams {
-  items: Item[];
-  prevItems: RecycledItem[];
+interface RecycleItemsParams<T extends object, K extends T & { key: number }> {
+  items: T[];
+  prevItems: K[];
   startIndex: number;
   endIndex: number;
+  toRecycledItem: (item: T, key: number) => K;
+  /** Identifies which value to recycle by (Column number or Row offset) */
+  getID: (item: T | K) => number;
 }
 
-export function recycleItems(params: RecycleItemsParams): RecycledItem[] {
-  const { items, startIndex, endIndex, prevItems } = params;
+export function recycleItems<T extends object, K extends T & { key: number }>(
+  params: RecycleItemsParams<T, K>,
+): K[] {
+  const {
+    items,
+    startIndex,
+    endIndex,
+    prevItems,
+    getID,
+    toRecycledItem,
+  } = params;
 
   const currentItems = items.slice(startIndex, endIndex + 1);
 
   if (isEmpty(prevItems)) {
-    return currentItems.map((col, index) => ({ ...col, key: index }));
+    return currentItems.map((item, index) => toRecycledItem(item, index));
   }
 
-  const reusedItems = intersectBy(prevItems, currentItems, 'num');
-  const recycledItems = differenceBy(prevItems, currentItems, 'num');
-  const newItems = differenceBy(currentItems, prevItems, 'num');
+  const reusedItems = intersectBy(prevItems, currentItems, getID);
+  const recycledItems = differenceBy(prevItems, currentItems, getID);
+  const newItems = differenceBy(currentItems, prevItems, getID);
 
   const recycledKeys = recycledItems.map((c) => c.key);
   if (recycledKeys.length < newItems.length) {
@@ -316,21 +288,83 @@ export function recycleItems(params: RecycleItemsParams): RecycledItem[] {
   }
 
   const nextItems = reusedItems
-    .concat(newItems.map((c, i) => ({ ...c, key: recycledKeys[i] })))
-    .sort((a, b) => a.num - b.num);
+    .concat(newItems.map((item, i) => toRecycledItem(item, recycledKeys[i])))
+    .sort((a, b) => getID(a) - getID(b));
 
   return nextItems;
 }
 
-interface GetIndexParams {
-  items: Item[];
+interface RecycleRowsParams {
+  rows: Row[];
+  prevRows: RecycledRow[];
+  startIndex: number;
+  endIndex: number;
+}
+
+function recycleRows(params: RecycleRowsParams) {
+  const { rows, prevRows, startIndex, endIndex } = params;
+
+  return recycleItems({
+    items: rows,
+    prevItems: prevRows,
+    startIndex,
+    endIndex,
+    getID: (row) => row.y,
+    toRecycledItem: (row, key) => ({
+      ...row,
+      key,
+    }),
+  });
+}
+
+interface RecycleColumnsParams {
+  columns: Column[];
+  prevColumns: RecycledColumn[];
+  startIndex: number;
+  endIndex: number;
+}
+
+function recycleColumns(params: RecycleColumnsParams) {
+  const { columns, prevColumns, startIndex, endIndex } = params;
+
+  return recycleItems({
+    items: columns,
+    prevItems: prevColumns,
+    startIndex,
+    endIndex,
+    getID: (item) => item.column,
+    toRecycledItem: (column, key) => ({
+      ...column,
+      key,
+    }),
+  });
+}
+
+interface GetVisibleIndexRangeParams<T = any> {
+  items: T[];
   scrollOffset: number;
   scrollViewSize: number;
+  getItemOffset: (item: T) => number;
+  getItemSize: (item: T) => number;
   overscan?: number;
 }
 
-export function getIndex(params: GetIndexParams) {
-  const { items, scrollOffset, scrollViewSize, overscan = 0 } = params;
+export interface VisibleIndexRange {
+  startIndex: number;
+  endIndex: number;
+}
+
+export function getVisibleIndexRange<T = any>(
+  params: GetVisibleIndexRangeParams<T>,
+): VisibleIndexRange {
+  const {
+    items,
+    scrollOffset,
+    scrollViewSize,
+    getItemOffset,
+    getItemSize,
+    overscan = 0,
+  } = params;
 
   let startIndex = 0;
   let endIndex = 0;
@@ -338,7 +372,7 @@ export function getIndex(params: GetIndexParams) {
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
 
-    if (item.offset > scrollOffset) {
+    if (getItemOffset(item) > scrollOffset) {
       startIndex = i - 1;
       break;
     }
@@ -347,13 +381,16 @@ export function getIndex(params: GetIndexParams) {
   for (let i = startIndex; i < items.length; i++) {
     const item = items[i];
 
-    if (item.offset + item.size >= scrollOffset + scrollViewSize) {
+    if (
+      getItemOffset(item) + getItemSize(item) >=
+      scrollOffset + scrollViewSize
+    ) {
       endIndex = i;
       break;
     }
   }
 
-  // Scrollview is larger than occupied items
+  // ScrollView is larger than occupied items
   if (endIndex === 0) {
     endIndex = items.length - 1;
   }
@@ -364,48 +401,166 @@ export function getIndex(params: GetIndexParams) {
   return { startIndex, endIndex };
 }
 
-export function getItems(itemSizes: number[], offsetNum: number = 0) {
-  const items: Item[] = [];
+export function getColumns(columnWidths: number[], offset: number = 0) {
+  const result: Column[] = [];
 
-  for (let i = 0; i < itemSizes.length; i++) {
-    const size = itemSizes[i];
-    const prevColumn = items[i - 1];
+  for (let i = 0; i < columnWidths.length; i++) {
+    const width = columnWidths[i];
+    const prevColumn = result[i - 1];
 
     if (prevColumn === undefined) {
-      items.push({ size, offset: 0, num: 1 + offsetNum });
+      result.push({ width, x: 0, column: 1 + offset });
     } else {
-      items.push({
-        size,
-        offset: prevColumn.offset + prevColumn.size,
-        num: i + 1 + offsetNum,
+      result.push({
+        width,
+        x: prevColumn.x + prevColumn.width,
+        column: i + 1 + offset,
       });
     }
   }
 
-  return items;
+  return result;
 }
 
-/**
- * Appendix A.
- *
- *      leftPane                       rightPane
- * -----------------------------------------------------------  <--------- scrollY
- *                  |            |              |             |       |
- * -----------------|-----------------------------------------|       |
- *                  |            |              |             |       |
- * -----------------|-----------------------------------------|       |
- *                  |            |              |             |       |
- * -----------------|-----------------------------------------|       |
- *                  |            |              |             | scrollViewHeight
- * -----------------|-----------------------------------------|       |
- *                  |            |              |             |       |
- * -----------------|-----------------------------------------|       |
- *                  |            |              |             |       |
- * ----------------------------------------------------------- <-------
- *                  ^                                         ^
- *                  |                                         |
- *                  |------------scrollViewWidth--------------|
- *                  |
- *           fixedColumnCount (1)
- *               scrollX
- */
+interface GetVisibleColumnsIndexRangeParams {
+  columns: Column[];
+  scrollX: number;
+  scrollViewWidth: number;
+}
+
+function getVisibleColumnsIndexRange(
+  params: GetVisibleColumnsIndexRangeParams,
+): VisibleIndexRange {
+  const { columns, scrollX, scrollViewWidth } = params;
+
+  return getVisibleIndexRange({
+    items: columns,
+    getItemOffset: (column) => column.x,
+    getItemSize: (column) => column.width,
+    scrollOffset: scrollX,
+    scrollViewSize: scrollViewWidth,
+  });
+}
+
+interface GetVisibleRowsIndexRangeParams {
+  rows: Row[];
+  scrollY: number;
+  scrollViewHeight: number;
+}
+
+function getVisibleRowsIndexRange(
+  params: GetVisibleRowsIndexRangeParams,
+): VisibleIndexRange {
+  const { rows, scrollY, scrollViewHeight } = params;
+
+  return getVisibleIndexRange({
+    items: rows,
+    getItemOffset: (column) => column.y,
+    getItemSize: (column) => column.height,
+    scrollOffset: scrollY,
+    scrollViewSize: scrollViewHeight,
+  });
+}
+
+export interface Group {
+  collapsed: boolean;
+  children: Group[] | number[];
+}
+
+export function getRows(
+  groupsOrRows: Group[] | number[],
+  groupHeight: number,
+  rowHeight: number,
+): Row[] {
+  if (isEmpty(groupsOrRows)) {
+    return [];
+  }
+
+  const firstItem = groupsOrRows[0];
+
+  if (typeof firstItem === 'number') {
+    return [];
+  }
+
+  return [];
+}
+
+export function getContentHeight(
+  groups: Group[],
+  groupHeight: number,
+  rowHeight: number,
+): number {
+  return 0;
+}
+
+export interface Column {
+  width: number;
+  x: number;
+  column: number;
+}
+
+export interface RecycledColumn extends Column {
+  key: number;
+}
+
+export interface NormalRow {
+  type: 'normal';
+  height: number;
+  y: number;
+  path: number[];
+  row: number;
+}
+
+export interface GroupRow {
+  type: 'group';
+  height: number;
+  y: number;
+  path: number[];
+  collapsed: number;
+}
+
+export interface RecycledNormalRow extends NormalRow {
+  key: number;
+}
+
+export interface RecycledGroupRow extends GroupRow {
+  key: number;
+}
+
+export type Row = NormalRow | GroupRow;
+export type RecycledRow = RecycledNormalRow | RecycledGroupRow;
+
+// interface UseGetStatefulRowsProps {
+//   focusedCell?: FocusedCell | null;
+//   selectedRows?: number[] | null;
+//   recycledRows: RecycledItem[];
+// }
+
+// export function useGetStatefulRows(
+//   props: UseGetStatefulRowsProps,
+// ): RecycledRow[] {
+//   const { recycledRows, focusedCell, selectedRows } = props;
+
+//   const selectedRowsMap = useMemo(() => {
+//     const map: { [row: number]: boolean } = {};
+
+//     if (selectedRows === undefined || selectedRows === null) {
+//       return map;
+//     }
+
+//     for (let i = 0; i < selectedRows.length; i++) {
+//       const selectedRow = selectedRows[i];
+//       map[selectedRow] = true;
+//     }
+
+//     return map;
+//   }, [selectedRows]);
+
+//   return recycledRows.map((row) => ({
+//     key: row.key,
+//     size: row.size,
+//     offset: row.offset,
+//     selected: selectedRowsMap[row.num] || false,
+//     focusedCell: focusedCell?.row === row.num ? focusedCell : null,
+//   }));
+// }

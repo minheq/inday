@@ -10,11 +10,11 @@ import React, {
 } from 'react';
 import { Animated, ScrollView, StyleSheet, View } from 'react-native';
 import {
-  Item,
-  RecycledItem,
+  Cell,
+  ContentOffset,
   useGetEnhancedRecycledRows,
   useGridGetScrollToCellOffset,
-  useGridMeasurer,
+  useGridTransformer,
   useGridRecycler,
 } from './grid.common';
 
@@ -32,7 +32,11 @@ export interface GridProps {
   /** To display header, also pass `headerHeight` and `renderHeader` props */
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   rowHeight: number;
-  rowCount: number;
+  groups: Group[];
+  /** To display group, also pass `headerHeight` and `renderHeader` props */
+  groupRowHeight?: number;
+  renderGroup?: (props: RenderGroupProps) => React.ReactNode;
+  renderGroupCell?: (props: RenderGroupCellProps) => React.ReactNode;
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
   fixedColumnCount: number;
@@ -42,9 +46,22 @@ export interface GridProps {
   onContentOffsetLoaded?: () => void;
 }
 
-export interface RenderRowProps {
+export interface RenderGroupProps {
+  path: number[];
+  collapsed: boolean;
+  children: React.ReactNode;
+}
+
+export interface RenderGroupCellProps {
+  path: number[];
   row: number;
-  selected: boolean;
+  column: number;
+}
+
+export interface RenderRowProps {
+  path: number[];
+  row: number;
+  state: 'selected' | 'hovered' | 'default';
   children: React.ReactNode;
 }
 
@@ -52,30 +69,19 @@ export interface RenderHeaderProps {
   children: React.ReactNode;
 }
 
-export interface RenderCellProps {
-  row: number;
-  column: number;
-  focused: boolean;
-  editing: boolean;
-  selected: boolean;
-}
-
 export interface RenderHeaderCellProps {
   column: number;
 }
 
-export interface Cell {
+export interface RenderCellProps {
+  path: number[];
   row: number;
   column: number;
+  state: 'focused' | 'editing' | 'hovered' | 'default';
 }
 
 export interface FocusedCell extends Cell {
   editing: boolean;
-}
-
-export interface ContentOffset {
-  x: number;
-  y: number;
 }
 
 export interface ScrollToOffsetParams extends Partial<ContentOffset> {
@@ -160,7 +166,7 @@ export const Grid = memo(
       leftPaneContentWidth,
       rightPaneColumns,
       rows,
-    } = useGridMeasurer({
+    } = useGridTransformer({
       columns,
       fixedColumnCount,
       rowCount,

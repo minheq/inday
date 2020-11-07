@@ -56,18 +56,12 @@ export function intersect<T>(a: T[], b: T[]): T[] {
 export function intersectBy<
   T extends { [key: string]: any },
   K extends { [key: string]: any }
->(a: T[], b: K[], prop: keyof T): T[] {
+>(a: T[], b: K[], getValue: (item: T | K) => string | number): T[] {
   const bMap: { [key: string]: K } = {};
 
   for (let i = 0; i < b.length; i++) {
     const itemB = b[i];
-    // @ts-ignore: its ok.
-    const val = itemB[prop];
-    if (val === undefined) {
-      throw new Error(
-        `Property '${prop}' does not exist in values in right array.`,
-      );
-    }
+    const val = getValue(itemB);
     bMap[val] = itemB;
   }
 
@@ -75,7 +69,7 @@ export function intersectBy<
 
   for (let i = 0; i < a.length; i++) {
     const itemA = a[i];
-    const val = itemA[prop];
+    const val = getValue(itemA);
 
     if (bMap[val] !== undefined) {
       result.push(itemA);
@@ -89,13 +83,12 @@ export function intersectBy<
 export function differenceBy<
   T extends { [key: string]: any },
   K extends { [key: string]: any }
->(a: T[], b: K[], prop: keyof T): T[] {
+>(a: T[], b: K[], getValue: (item: T | K) => string | number): T[] {
   const bMap: { [key: string]: K } = {};
 
   for (let i = 0; i < b.length; i++) {
     const itemB = b[i];
-    // @ts-ignore: we want autocompletion.
-    const val = itemB[prop];
+    const val = getValue(itemB);
     bMap[val] = itemB;
   }
 
@@ -103,7 +96,7 @@ export function differenceBy<
 
   for (let i = 0; i < a.length; i++) {
     const itemA = a[i];
-    const val = itemA[prop];
+    const val = getValue(itemA);
 
     if (bMap[val] === undefined) {
       result.push(itemA);
