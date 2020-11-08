@@ -9,39 +9,45 @@ import React, {
 } from 'react';
 import { css } from '../lib/css';
 import {
-  useGetEnhancedRecycledRows,
+  useGetStatefulRows,
   useGridGetScrollToCellOffset,
   useGridTransformer,
   useGridRecycler,
   ContentOffset,
   Column,
   RecycledColumn,
+  StatefulLeafRowCell,
+  LeafRowState,
+  LeafRowCellState,
 } from './grid.common';
 import {
   GridRef,
   GridProps,
   ScrollToOffsetParams,
-  RenderRowProps,
-  RenderCellProps,
+  RenderLeafRowProps,
+  RenderLeafRowCellProps,
   RenderHeaderProps,
   RenderHeaderCellProps,
-  FocusedCell,
 } from './grid';
 
 export const Grid = memo(
   forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     const {
-      focusedCell,
-      renderRow,
-      selectedRows,
+      cell = null,
+      renderLeafRow,
+      selectedRows = null,
       columns,
       fixedColumnCount,
-      rowCount,
-      rowHeight,
+      groups,
+      spacerHeight = 0,
+      groupRowHeight = 0,
+      renderGroupRow,
+      renderGroupRowCell,
+      leafRowHeight,
       headerHeight = 0,
       height,
       width,
-      renderCell,
+      renderLeafRowCell,
       renderHeaderCell,
       renderHeader,
       contentOffset,
@@ -93,7 +99,6 @@ export const Grid = memo(
 
     const {
       contentHeight,
-
       contentWidth,
       leftPaneColumns,
       leftPaneContentWidth,
@@ -102,8 +107,10 @@ export const Grid = memo(
     } = useGridTransformer({
       columns,
       fixedColumnCount,
-      rowCount,
-      rowHeight,
+      groups,
+      groupRowHeight,
+      leafRowHeight,
+      spacerHeight,
     });
 
     const totalHeight = contentHeight + headerHeight;
@@ -118,9 +125,9 @@ export const Grid = memo(
       scrollX: scrollPosition.x,
       scrollY: scrollPosition.y,
     });
-    const enhancedRecycledRows = useGetEnhancedRecycledRows({
-      recycledRows,
-      focusedCell,
+    const statefulRows = useGetStatefulRows({
+      rows: recycledRows,
+      cell,
       selectedRows,
     });
     const getScrollToCellOffset = useGridGetScrollToCellOffset({
@@ -138,8 +145,8 @@ export const Grid = memo(
       () => {
         return {
           scrollToOffset: handleScrollToOffset,
-          scrollToCell: (cell) =>
-            handleScrollToOffset(getScrollToCellOffset(cell)),
+          scrollToCell: (params) =>
+            handleScrollToOffset(getScrollToCellOffset(params)),
         };
       },
       [handleScrollToOffset, getScrollToCellOffset],
@@ -166,24 +173,38 @@ export const Grid = memo(
               />
             )}
           <div style={styles('rowsWrapper', { top: headerHeight })}>
-            {enhancedRecycledRows.map(
-              ({ key, size, offset, num, selected, focusedCell }) => (
-                <RowContainer
-                  key={key}
-                  leftPaneContentWidth={leftPaneContentWidth}
-                  width={contentWidth}
-                  leftPaneColumns={leftPaneColumns}
-                  rightPaneColumns={recycledColumns}
-                  renderCell={renderCell}
-                  y={offset}
-                  row={num}
-                  height={size}
-                  renderRow={renderRow}
-                  selected={selected}
-                  focusedCell={focusedCell}
-                />
-              ),
-            )}
+            {statefulRows.map((row) => {
+              switch (row.type) {
+                case 'leaf':
+                  return (
+                    <LeafRowContainer
+                      key={row.key}
+                      y={row.y}
+                      path={row.path}
+                      row={row.row}
+                      height={row.height}
+                      renderLeafRow={renderLeafRow}
+                      state={row.state}
+                      cell={row.cell}
+                      leftPaneContentWidth={leftPaneContentWidth}
+                      width={contentWidth}
+                      leftPaneColumns={leftPaneColumns}
+                      rightPaneColumns={recycledColumns}
+                      renderLeafRowCell={renderLeafRowCell}
+                    />
+                  );
+                case 'group':
+                  return null;
+                case 'spacer':
+                  return (
+                    <SpacerRowContainer
+                      key={row.key}
+                      y={row.y}
+                      height={row.height}
+                    />
+                  );
+              }
+            })}
           </div>
         </div>
       </div>
@@ -212,29 +233,28 @@ const HeaderContainer = memo(function HeaderContainer(
     renderHeaderCell,
   } = props;
 
+  const renderCells = useCallback(
+    (columns: Column[]) => {
+      return columns.map((columnData) => {
+        const { width: columnWidth, column } = columnData;
+
+        return (
+          <div key={column} style={{ width: columnWidth }}>
+            {renderHeaderCell({ column })}
+          </div>
+        );
+      });
+    },
+    [renderHeaderCell],
+  );
+
   const children = (
     <div style={styles('header')}>
       <div style={styles('leftPaneColumns')}>
-        {leftPaneColumns.map((columnData) => {
-          const { width: columnWidth, column } = columnData;
-
-          return (
-            <div key={column} style={{ width: columnWidth }}>
-              {renderHeaderCell({ column })}
-            </div>
-          );
-        })}
+        {renderCells(leftPaneColumns)}
       </div>
       <div style={styles('rightPaneColumns')}>
-        {rightPaneColumns.map((columnData) => {
-          const { width: columnWidth, column } = columnData;
-
-          return (
-            <div key={column} style={{ width: columnWidth }}>
-              {renderHeaderCell({ column })}
-            </div>
-          );
-        })}
+        {renderCells(rightPaneColumns)}
       </div>
     </div>
   );
@@ -246,33 +266,37 @@ const HeaderContainer = memo(function HeaderContainer(
   );
 });
 
-interface RowContainerProps {
+interface LeafRowContainerProps {
   height: number;
   width: number;
   y: number;
+  path: number[];
   row: number;
   leftPaneContentWidth: number;
-  renderRow: (props: RenderRowProps) => React.ReactNode;
-  renderCell: (props: RenderCellProps) => React.ReactNode;
+  renderLeafRow: (props: RenderLeafRowProps) => React.ReactNode;
+  renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
   leftPaneColumns: Column[];
   rightPaneColumns: RecycledColumn[];
-  selected: boolean;
-  focusedCell: FocusedCell | null;
+  state: LeafRowState;
+  cell: StatefulLeafRowCell | null;
 }
 
-const RowContainer = memo(function RowContainer(props: RowContainerProps) {
+const LeafRowContainer = memo(function LeafRowContainer(
+  props: LeafRowContainerProps,
+) {
   const {
     width,
     height,
     y,
+    path,
     row,
     leftPaneContentWidth,
     leftPaneColumns,
     rightPaneColumns,
-    focusedCell,
-    selected,
-    renderCell,
-    renderRow,
+    cell,
+    state,
+    renderLeafRowCell,
+    renderLeafRow,
   } = props;
 
   const children = (
@@ -280,21 +304,19 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
       <div style={styles('leftPaneColumns')}>
         {leftPaneColumns.map((columnData) => {
           const { width: columnWidth, column, x } = columnData;
-          const focused = !!(focusedCell?.column === column);
-          const editing = !!(focused && focusedCell?.editing);
+          const cellState = cell?.state || 'default';
 
           return (
-            <CellContainer
-              key={column}
-              width={columnWidth}
-              row={row}
-              height={height}
+            <LeafRowCellContainer
               column={column}
+              height={height}
+              key={column}
+              path={path}
+              renderLeafRowCell={renderLeafRowCell}
+              row={row}
+              state={cellState}
+              width={columnWidth}
               x={x}
-              focused={focused}
-              editing={editing}
-              selected={selected}
-              renderCell={renderCell}
             />
           );
         })}
@@ -302,21 +324,19 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
       <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
         {rightPaneColumns.map((columnData) => {
           const { key, width: columnWidth, column, x } = columnData;
-          const focused = !!(focusedCell?.column === column);
-          const editing = !!(focused && focusedCell?.editing);
+          const cellState = cell?.state || 'default';
 
           return (
-            <CellContainer
-              key={key}
-              width={columnWidth}
-              row={row}
-              height={height}
+            <LeafRowCellContainer
               column={column}
+              height={height}
+              key={key}
+              path={path}
+              renderLeafRowCell={renderLeafRowCell}
+              row={row}
+              state={cellState}
+              width={columnWidth}
               x={x}
-              focused={focused}
-              editing={editing}
-              selected={selected}
-              renderCell={renderCell}
             />
           );
         })}
@@ -329,44 +349,62 @@ const RowContainer = memo(function RowContainer(props: RowContainerProps) {
       style={styles(
         'rowWrapper',
         { height, width, top: y },
-        selected && 'selected',
+        (state === 'hovered' || state === 'selected') && 'selected',
       )}
     >
-      {renderRow({ row, selected, children })}
+      {renderLeafRow({ path, row, state, children })}
     </div>
   );
 });
 
-interface CellContainerProps {
+interface SpacerRowContainerProps {
+  y: number;
+  height: number;
+}
+
+const SpacerRowContainer = memo(function SpacerRowContainer(
+  props: SpacerRowContainerProps,
+) {
+  const { height, y } = props;
+
+  return <div style={styles({ height, top: y })} />;
+});
+
+interface LeafRowCellContainerProps {
   x: number;
   width: number;
   height: number;
-  renderCell: (props: RenderCellProps) => React.ReactNode;
+  renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
   column: number;
   row: number;
-  focused: boolean;
-  editing: boolean;
-  selected: boolean;
+  path: number[];
+  state: LeafRowCellState;
 }
 
-const CellContainer = memo(function CellContainer(props: CellContainerProps) {
+const LeafRowCellContainer = memo(function LeafRowCellContainer(
+  props: LeafRowCellContainerProps,
+) {
   const {
     x,
     row,
+    path,
     column,
     width,
     height,
-    focused,
-    editing,
-    selected,
-    renderCell,
+    state = 'default',
+    renderLeafRowCell,
   } = props;
 
   return (
     <div
-      style={styles('cell', { left: x, width, height }, focused && 'selected')}
+      style={styles(
+        'cell',
+        { left: x, width, height },
+        (state === 'editing' || state === 'focused' || state === 'hovered') &&
+          'selected',
+      )}
     >
-      {renderCell({ row, column, focused, editing, selected })}
+      {renderLeafRowCell({ path, row, column, state })}
     </div>
   );
 });
@@ -415,6 +453,9 @@ const styles = css.create({
     position: 'relative',
     display: 'flex',
     flexDirection: 'row',
+  },
+  spacer: {
+    width: '100%',
   },
   selected: {
     zIndex: 1,

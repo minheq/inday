@@ -12,31 +12,40 @@ import { Animated, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Cell,
   ContentOffset,
-  useGetEnhancedRecycledRows,
+  useGetStatefulRows,
   useGridGetScrollToCellOffset,
   useGridTransformer,
   useGridRecycler,
+  Group,
+  StatefulCell,
+  LeafRow,
+  LeafRowCell,
+  LeafRowState,
+  LeafRowCellState,
+  GroupRowCellState,
+  GroupRowState,
 } from './grid.common';
 
 export interface GridProps {
-  focusedCell?: FocusedCell | null;
-  selectedRows?: number[] | null;
+  cell?: StatefulCell | null;
+  selectedRows?: LeafRow[] | null;
   height: number;
   width: number;
-  renderRow: (props: RenderRowProps) => React.ReactNode;
-  renderCell: (props: RenderCellProps) => React.ReactNode;
+  renderLeafRow: (props: RenderLeafRowProps) => React.ReactNode;
+  renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
   /** To display header, also pass `renderHeader` and `renderHeaderCell` props */
   headerHeight?: number;
   /** To display header, also pass `headerHeight` and `renderHeaderCell` props */
   renderHeader?: (props: RenderHeaderProps) => React.ReactNode;
   /** To display header, also pass `headerHeight` and `renderHeader` props */
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
-  rowHeight: number;
+  leafRowHeight: number;
   groups: Group[];
   /** To display group, also pass `headerHeight` and `renderHeader` props */
   groupRowHeight?: number;
-  renderGroup?: (props: RenderGroupProps) => React.ReactNode;
-  renderGroupCell?: (props: RenderGroupCellProps) => React.ReactNode;
+  spacerHeight?: number;
+  renderGroupRow?: (props: RenderGroupRowProps) => React.ReactNode;
+  renderGroupRowCell?: (props: RenderGroupRowCellProps) => React.ReactNode;
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
   fixedColumnCount: number;
@@ -46,22 +55,24 @@ export interface GridProps {
   onContentOffsetLoaded?: () => void;
 }
 
-export interface RenderGroupProps {
+export interface RenderGroupRowProps {
   path: number[];
   collapsed: boolean;
   children: React.ReactNode;
+  state: GroupRowState;
 }
 
-export interface RenderGroupCellProps {
+export interface RenderGroupRowCellProps {
   path: number[];
   row: number;
   column: number;
+  state: GroupRowCellState;
 }
 
-export interface RenderRowProps {
+export interface RenderLeafRowProps {
   path: number[];
   row: number;
-  state: 'selected' | 'hovered' | 'default';
+  state: LeafRowState;
   children: React.ReactNode;
 }
 
@@ -73,22 +84,18 @@ export interface RenderHeaderCellProps {
   column: number;
 }
 
-export interface RenderCellProps {
+export interface RenderLeafRowCellProps {
   path: number[];
   row: number;
   column: number;
-  state: 'focused' | 'editing' | 'hovered' | 'default';
-}
-
-export interface FocusedCell extends Cell {
-  editing: boolean;
+  state: LeafRowCellState;
 }
 
 export interface ScrollToOffsetParams extends Partial<ContentOffset> {
   animated?: boolean;
 }
 
-export interface ScrollToCellParams extends Partial<Cell> {
+export interface ScrollToCellParams extends Partial<LeafRowCell> {
   animated?: boolean;
 }
 
@@ -180,7 +187,7 @@ export const Grid = memo(
       scrollX,
       scrollY,
     });
-    const enhancedRecycledRows = useGetEnhancedRecycledRows({
+    const enhancedRecycledRows = useGetStatefulRows({
       recycledRows,
       focusedCell,
       selectedRows,
