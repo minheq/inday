@@ -1,5 +1,5 @@
 import { isSameDay } from 'date-fns';
-import { hasAllOf } from '../../lib/data_structures/arrays';
+import { hasAllOf } from '../../lib/js_utils/array_utils';
 import { CollaboratorID } from './collaborators';
 import { RecordID } from './records';
 

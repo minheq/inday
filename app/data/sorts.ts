@@ -23,7 +23,7 @@ import {
   areFieldValuesEqual,
 } from './fields';
 import { Record, RecordID } from './records';
-import { first, isEmpty, keyedBy } from '../../lib/data_structures';
+import { first, isEmpty, keyedBy } from '../../lib/js_utils';
 import { CollaboratorID, Collaborator } from './collaborators';
 import { isBefore, isAfter } from 'date-fns';
 import { CollectionID, Collection } from './collections';

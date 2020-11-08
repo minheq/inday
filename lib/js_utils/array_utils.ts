@@ -1,5 +1,3 @@
-import { isEmpty } from './common';
-
 export function range(min: number, max: number, step?: number): number[];
 export function range(max: number): number[];
 export function range(arg0: any, arg1?: any, arg2?: any): number[] {
@@ -162,4 +160,8 @@ export function groupBy<T extends { [key: string]: any }>(
   }
 
   return grouped;
+}
+
+export function isEmpty<T = any>(data: T[]): boolean {
+  return data.length === 0;
 }

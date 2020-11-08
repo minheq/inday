@@ -1,8 +1,8 @@
-import { accessValue, assignValue } from './objects';
+import { get, set } from './object_utils';
 
-describe('assignValue', () => {
+describe('set', () => {
   test('happy', () => {
-    const result = assignValue({ b: 2 }, ['a', 'b', 'c'], 1);
+    const result = set({ b: 2 }, ['a', 'b', 'c'], 1);
 
     expect(result).toMatchObject({
       a: {
@@ -15,7 +15,7 @@ describe('assignValue', () => {
   });
 });
 
-describe('accessValue', () => {
+describe('get', () => {
   test('happy', () => {
     const obj = {
       a: {
@@ -26,7 +26,7 @@ describe('accessValue', () => {
       b: 2,
     };
 
-    const result = accessValue(obj, ['a', 'b', 'c']);
+    const result = get(obj, ['a', 'b', 'c']);
 
     expect(result).toBe(1);
   });

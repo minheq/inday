@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useRef } from 'react';
 import {
-  accessValue,
-  assignValue,
   differenceBy,
+  get,
   intersectBy,
   isEmpty,
   maxBy,
+  set,
   sum,
   sumBy,
-} from '../../lib/data_structures';
+} from '../../lib/js_utils';
 
 interface UseGridTransformerProps {
   groups: Group[];
@@ -635,7 +635,7 @@ export function useGetStatefulRows(
 
     for (let i = 0; i < selectedRows.length; i++) {
       const selectedRow = selectedRows[i];
-      assignValue(map, [...selectedRow.path, selectedRow.row], true);
+      set(map, [...selectedRow.path, selectedRow.row], true);
     }
 
     return map;
@@ -644,7 +644,7 @@ export function useGetStatefulRows(
   return useMemo(() => {
     return rows.map((row) => {
       if (isLeafRow(row)) {
-        const selected = accessValue(selectedRowsMap, [...row.path, row.row]);
+        const selected = get(selectedRowsMap, [...row.path, row.row]);
 
         return {
           key: row.key,
@@ -678,14 +678,4 @@ function isLeafRow(row: Row): row is LeafRow {
   }
 
   return false;
-}
-
-function arePathEqual(pathA: number[], pathB: number[]) {
-  for (let i = 0; i < pathA.length; i++) {
-    if (pathA[i] !== pathB[i]) {
-      return false;
-    }
-  }
-
-  return true;
 }

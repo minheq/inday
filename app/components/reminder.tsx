@@ -26,7 +26,7 @@ import { Content } from './content';
 import { DayPicker } from './day_picker';
 import { TimePicker } from './time_picker';
 import { Picker, ListPicker } from '.';
-import { range } from '../../lib/data_structures/arrays';
+import { range } from '../../lib/js_utils';
 import { WeekDay, getWeekDaysOptions } from '../../lib/datetime/week';
 
 export interface Reminder {

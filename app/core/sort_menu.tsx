@@ -28,7 +28,7 @@ import {
   useCreateSort,
   useGetSortsSequenceMax,
 } from '../data/store';
-import { first, isEmpty } from '../../lib/data_structures';
+import { first, isEmpty } from '../../lib/js_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { SortID, Sort, SortConfig, SortOrder } from '../data/sorts';

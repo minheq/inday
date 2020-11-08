@@ -1,7 +1,7 @@
 import React from 'react';
 import { Picker } from './picker';
 import { Row } from './row';
-import { range } from '../../lib/data_structures/arrays';
+import { range } from '../../lib/js_utils';
 import { setHours, setMinutes } from 'date-fns';
 import { Option } from './option';
 

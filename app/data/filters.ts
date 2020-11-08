@@ -1,11 +1,6 @@
 import { isSameDay, isWithinInterval, isBefore, isAfter } from 'date-fns';
 import { Record } from './records';
-import {
-  hasAnyOf,
-  hasAllOf,
-  hasNoneOf,
-  isEmpty,
-} from '../../lib/data_structures';
+import { hasAnyOf, hasAllOf, hasNoneOf, isEmpty } from '../../lib/js_utils';
 import {
   assertBooleanFieldKindValue,
   assertDateFieldValue,

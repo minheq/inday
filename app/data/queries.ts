@@ -23,7 +23,7 @@ import {
 } from './filters';
 import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
-import { last, isEmpty } from '../../lib/data_structures';
+import { last, isEmpty } from '../../lib/js_utils';
 import { Sort, SortID, sortRecords, SortGetters } from './sorts';
 import { CollaboratorID, Collaborator } from './collaborators';
 import { Group, GroupID } from './groups';

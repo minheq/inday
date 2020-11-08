@@ -5,6 +5,7 @@ import React, {
   Fragment,
   useEffect,
   createContext,
+  useMemo,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { ScrollView } from 'react-native';
@@ -28,7 +29,7 @@ import {
   useCreateGroup,
   useGetGroupsSequenceMax,
 } from '../data/store';
-import { first, isEmpty } from '../../lib/data_structures';
+import { first, isEmpty } from '../../lib/js_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { GroupID, Group, GroupConfig, GroupOrder } from '../data/groups';
@@ -173,10 +174,12 @@ function GroupNew() {
     );
   }
 
-  const defaultGroupConfig: GroupConfig = {
-    fieldID: firstField.id,
-    order: 'ascending',
-  };
+  const defaultGroupConfig: GroupConfig = useMemo(() => {
+    return {
+      fieldID: firstField.id,
+      order: 'ascending',
+    };
+  }, [firstField]);
 
   const [groupConfig, setGroupConfig] = useState<GroupConfig>(
     defaultGroupConfig,

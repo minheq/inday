@@ -13,7 +13,7 @@ import {
   addFieldsToCollection,
   makeManyRecords,
 } from './factory';
-import { keyedBy } from '../../lib/data_structures/arrays';
+import { keyedBy } from '../../lib/js_utils/array_utils';
 
 const space1 = makeSpace({
   id: '1',

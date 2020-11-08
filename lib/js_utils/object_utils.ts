@@ -1,4 +1,4 @@
-export function assignValue<T extends { [key: string]: any } = any>(
+export function set<T extends { [key: string]: any } = any>(
   obj: { [key: string]: any },
   arr: string[] | number[],
   value: any,
@@ -23,7 +23,7 @@ export function assignValue<T extends { [key: string]: any } = any>(
   return clone as T;
 }
 
-export function accessValue<T extends { [key: string]: any } = any>(
+export function get<T extends { [key: string]: any } = any>(
   obj: T,
   arr: string[] | number[],
 ) {
@@ -33,11 +33,7 @@ export function accessValue<T extends { [key: string]: any } = any>(
     const key = arr[i];
 
     if (current[key] === undefined) {
-      throw new Error(
-        `Value for key=${key} in nested object ${JSON.stringify(
-          current,
-        )} is undefined`,
-      );
+      return undefined;
     }
 
     current = current[key];

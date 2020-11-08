@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { groupBy, isEmpty } from '../../../lib/data_structures';
+import { groupBy, isEmpty } from '../../../lib/js_utils';
 import {
   KeyboardKey,
   ModifierKey,
