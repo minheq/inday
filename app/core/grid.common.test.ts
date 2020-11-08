@@ -4,10 +4,20 @@ import {
   getRows,
   Group,
   Row,
+  recycleItems,
+  Column,
 } from './grid.common';
 
 describe('getVisibleIndexRange', () => {
-  const columns = getColumns([100, 200, 100, 200, 100, 200]);
+  const items = [
+    { size: 100, offset: 0 },
+    { size: 200, offset: 100 },
+    { size: 100, offset: 300 },
+    { size: 200, offset: 400 },
+    { size: 100, offset: 600 },
+    { size: 200, offset: 700 },
+  ];
+
   const scrollViewSize = 400;
 
   test.concurrent.each([
@@ -19,16 +29,174 @@ describe('getVisibleIndexRange', () => {
     'scrollOffset=%i, startIndex=%i, endIndex=%i',
     async (scrollOffset, startIndex, endIndex) => {
       const result = getVisibleIndexRange({
-        items: columns,
+        items,
         scrollOffset,
         scrollViewSize,
-        getItemOffset: (column) => column.x,
-        getItemSize: (column) => column.width,
+        getItemOffset: (column) => column.offset,
+        getItemSize: (column) => column.size,
       });
 
       expect(result).toEqual([startIndex, endIndex]);
     },
   );
+});
+
+interface Item {
+  value: number;
+}
+
+interface RecycledItem {
+  key: number;
+  value: number;
+}
+
+describe('recycleItems', () => {
+  function run(
+    items: Item[],
+    prevItems: RecycledItem[],
+    startIndex: number,
+    endIndex: number,
+    expected: RecycledItem[],
+  ) {
+    const result = recycleItems({
+      items,
+      prevItems,
+      startIndex,
+      endIndex,
+      toRecycledItem: (item, key) => ({ value: item.value, key }),
+      getValue: (item) => item.value,
+      getKey: (item) => item.key,
+    });
+
+    expect(result).toEqual(expected);
+  }
+
+  test.concurrent('fresh from start', async () => {
+    const items: Item[] = [
+      { value: 1 },
+      { value: 2 },
+      { value: 3 },
+      { value: 4 },
+      { value: 5 },
+    ];
+
+    const expected: RecycledItem[] = [
+      { value: 1, key: 0 },
+      { value: 2, key: 1 },
+      { value: 3, key: 2 },
+    ];
+
+    run(items, [], 0, 2, expected);
+  });
+
+  test.concurrent('with previous items, in middle', async () => {
+    const items: Item[] = [
+      { value: 1 },
+      { value: 2 },
+      { value: 3 },
+      { value: 4 },
+      { value: 5 },
+    ];
+
+    const prevItems: RecycledItem[] = [
+      { value: 1, key: 0 },
+      { value: 2, key: 1 },
+      { value: 3, key: 2 },
+    ];
+
+    const expected: RecycledItem[] = [
+      { value: 2, key: 1 },
+      { value: 3, key: 2 },
+      { value: 4, key: 0 },
+    ];
+
+    run(items, prevItems, 1, 3, expected);
+  });
+
+  test.concurrent('with previous items, at the end', async () => {
+    const items: Item[] = [
+      { value: 1 },
+      { value: 2 },
+      { value: 3 },
+      { value: 4 },
+      { value: 5 },
+    ];
+
+    const prevItems: RecycledItem[] = [
+      { value: 2, key: 1 },
+      { value: 3, key: 2 },
+      { value: 4, key: 0 },
+    ];
+
+    const expected: RecycledItem[] = [
+      { value: 3, key: 2 },
+      { value: 4, key: 0 },
+      { value: 5, key: 1 },
+    ];
+
+    run(items, prevItems, 2, 4, expected);
+  });
+
+  test.concurrent('with no matching prev items', async () => {
+    const items: Item[] = [
+      { value: 1 },
+      { value: 2 },
+      { value: 3 },
+      { value: 4 },
+      { value: 5 },
+    ];
+
+    const prevItems: RecycledItem[] = [
+      { value: 1, key: 1 },
+      { value: 2, key: 2 },
+      { value: 3, key: 3 },
+    ];
+
+    const expected: RecycledItem[] = [
+      { value: 4, key: 1 },
+      { value: 5, key: 2 },
+    ];
+
+    run(items, prevItems, 3, 4, expected);
+  });
+
+  test.concurrent('more than previous', async () => {
+    const items: Item[] = [
+      { value: 1 },
+      { value: 2 },
+      { value: 3 },
+      { value: 4 },
+      { value: 5 },
+    ];
+
+    const prevItems: RecycledItem[] = [
+      { value: 1, key: 1 },
+      { value: 2, key: 2 },
+    ];
+
+    const expected: RecycledItem[] = [
+      { value: 3, key: 1 },
+      { value: 4, key: 2 },
+      { value: 5, key: 3 },
+    ];
+
+    run(items, prevItems, 2, 4, expected);
+  });
+});
+
+describe('getColumns', () => {
+  test.concurrent('happy', async () => {
+    const result = getColumns([100, 200, 100, 200, 100, 200]);
+    const expected: Column[] = [
+      { column: 1, width: 100, x: 0 },
+      { column: 2, width: 200, x: 100 },
+      { column: 3, width: 100, x: 300 },
+      { column: 4, width: 200, x: 400 },
+      { column: 5, width: 100, x: 600 },
+      { column: 6, width: 200, x: 700 },
+    ];
+    expect(result).toEqual(expected);
+  });
 });
 
 describe('getRows', () => {
@@ -182,217 +350,3 @@ describe('getRows', () => {
     expect(rows).toEqual(expected);
   });
 });
-
-// describe('recycleItems', () => {
-//   let prevRows: RecycledRow[] = [];
-//   const scrollViewSize = 400;
-
-//   const rows = getRows([100, 200, 100, 200, 100, 200]);
-
-//   function expectRows(scrollOffset: number) {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 100, offset: 0, num: 1, key: 0 },
-//       { size: 200, offset: 100, num: 2, key: 1 },
-//       { size: 100, offset: 300, num: 3, key: 2 },
-//     ]);
-
-//     prevRows = result;
-//   }
-
-//   test('initial', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 0,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 100, offset: 0, num: 1, key: 0 },
-//       { size: 200, offset: 100, num: 2, key: 1 },
-//       { size: 100, offset: 300, num: 3, key: 2 },
-//     ]);
-
-//     prevRows = result;
-//   });
-
-//   test('scroll 100', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 100,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 200, offset: 100, num: 2, key: 1 },
-//       { size: 100, offset: 300, num: 3, key: 2 },
-//       { size: 200, offset: 400, num: 4, key: 0 },
-//     ]);
-
-//     prevRows = result;
-//   });
-
-//   test('scroll 350', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 350,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 100, offset: 300, num: 3, key: 2 },
-//       { size: 200, offset: 400, num: 4, key: 0 },
-//       { size: 100, offset: 600, num: 5, key: 1 },
-//       { size: 200, offset: 700, num: 6, key: 3 },
-//     ]);
-
-//     prevRows = result;
-//   });
-
-//   test('scroll rightmost', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 500,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 200, offset: 400, num: 4, key: 0 },
-//       { size: 100, offset: 600, num: 5, key: 1 },
-//       { size: 200, offset: 700, num: 6, key: 3 },
-//     ]);
-
-//     prevRows = result;
-//   });
-
-//   test('scroll back to 350', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 350,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 100, offset: 300, num: 3, key: 4 },
-//       { size: 200, offset: 400, num: 4, key: 0 },
-//       { size: 100, offset: 600, num: 5, key: 1 },
-//       { size: 200, offset: 700, num: 6, key: 3 },
-//     ]);
-
-//     prevRows = result;
-//   });
-
-//   test('scroll back to 100', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 100,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 200, offset: 100, num: 2, key: 1 },
-//       { size: 100, offset: 300, num: 3, key: 4 },
-//       { size: 200, offset: 400, num: 4, key: 0 },
-//     ]);
-
-//     prevRows = result;
-//   });
-
-//   test('scroll back to 0', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 0,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 100, offset: 0, num: 1, key: 0 },
-//       { size: 200, offset: 100, num: 2, key: 1 },
-//       { size: 100, offset: 300, num: 3, key: 4 },
-//     ]);
-
-//     prevRows = result;
-//   });
-
-//   test('scroll rightmost again', () => {
-//     const { startIndex, endIndex } = getVisibleIndexRange({
-//       items,
-//       scrollOffset: 500,
-//       scrollViewSize,
-//     });
-
-//     const result = recycleItems({
-//       items,
-//       prevRows,
-//       startIndex,
-//       endIndex,
-//     });
-
-//     expect(result).toEqual([
-//       { size: 200, offset: 400, num: 4, key: 0 },
-//       { size: 100, offset: 600, num: 5, key: 1 },
-//       { size: 200, offset: 700, num: 6, key: 4 },
-//     ]);
-//   });
-// });
