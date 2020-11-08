@@ -743,7 +743,7 @@ interface UseGridGetScrollToCellOffsetProps {
 
 export function useGridGetScrollToCellOffset(
   props: UseGridGetScrollToCellOffsetProps,
-): (cell: Partial<Cell>) => Partial<ContentOffset> {
+): (cell: LeafRowCell) => Partial<ContentOffset> {
   const {
     columns,
     rows,
@@ -755,13 +755,49 @@ export function useGridGetScrollToCellOffset(
     padding = 40,
   } = props;
 
+  const leafRowsMap = useMemo(() => {
+    const map: object = {};
+
+    if (isEmpty(rows)) {
+      return map;
+    }
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+
+      if (isLeafRow(row)) {
+        set(map, [...row.path, row.row], row);
+      }
+    }
+
+    return map;
+  }, [rows]);
+
+  const getLeafRow = useCallback(
+    (path?: number[], row?: number): LeafRow | undefined => {
+      if (path !== undefined && row !== undefined) {
+        return get(leafRowsMap, [...path, row]);
+      }
+
+      if (
+        (path === undefined && row !== undefined) ||
+        (row === undefined && path !== undefined)
+      ) {
+        throw new Error(
+          'getLeafRow required either both `path` and `row` to be present, or neither.',
+        );
+      }
+    },
+    [leafRowsMap],
+  );
+
   const getScrollToRowOffset = useCallback(
-    (row?: number) => {
+    (row?: LeafRow) => {
       if (row === undefined) {
         return;
       }
 
-      const { y, height } = rows[row - 1];
+      const { y, height } = row;
 
       const above = scrollY >= y;
       const below = y + height >= scrollY + scrollViewHeight;
@@ -772,7 +808,7 @@ export function useGridGetScrollToCellOffset(
         return y + height - scrollViewHeight + padding;
       }
     },
-    [rows, scrollY, scrollViewHeight, padding],
+    [scrollY, scrollViewHeight, padding],
   );
 
   const getScrollToColumnOffset = useCallback(
@@ -800,14 +836,14 @@ export function useGridGetScrollToCellOffset(
   );
 
   return useCallback(
-    (cell: Partial<Cell>): Partial<ContentOffset> => {
-      const { row, column } = cell;
+    (cell: Partial<LeafRowCell>): Partial<ContentOffset> => {
+      const { path, row, column } = cell;
 
       return {
-        y: getScrollToRowOffset(row),
+        y: getScrollToRowOffset(getLeafRow(path, row)),
         x: getScrollToColumnOffset(column),
       };
     },
-    [getScrollToRowOffset, getScrollToColumnOffset],
+    [getScrollToRowOffset, getScrollToColumnOffset, getLeafRow],
   );
 }
