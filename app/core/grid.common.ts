@@ -98,7 +98,7 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
   const prevRecycledRowsRef = useRef<RecycledRow[]>([]);
   const prevRecycledColumnsRef = useRef<RecycledColumn[]>([]);
 
-  const { startIndex: rowStartIndex, endIndex: rowEndIndex } = useMemo(
+  const [rowStartIndex, rowEndIndex] = useMemo(
     () =>
       getVisibleRowsIndexRange({
         rows,
@@ -119,7 +119,7 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
     [rows, rowStartIndex, rowEndIndex],
   );
 
-  const { startIndex: columnStartIndex, endIndex: columnEndIndex } = useMemo(
+  const [columnStartIndex, columnEndIndex] = useMemo(
     () =>
       getVisibleColumnsIndexRange({
         columns,
@@ -346,10 +346,7 @@ interface GetVisibleIndexRangeParams<T = any> {
   overscan?: number;
 }
 
-export interface VisibleIndexRange {
-  startIndex: number;
-  endIndex: number;
-}
+type VisibleIndexRange = [startIndex: number, endIndex: number];
 
 export function getVisibleIndexRange<T = any>(
   params: GetVisibleIndexRangeParams<T>,
@@ -395,7 +392,7 @@ export function getVisibleIndexRange<T = any>(
   startIndex = Math.max(startIndex - overscan, 0);
   endIndex = Math.min(endIndex + overscan, items.length - 1);
 
-  return { startIndex, endIndex };
+  return [startIndex, endIndex];
 }
 
 export function getColumns(columnWidths: number[], offset: number = 0) {

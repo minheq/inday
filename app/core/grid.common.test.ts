@@ -16,7 +16,7 @@ describe('getVisibleIndexRange', () => {
     [500, 3, 5],
   ])(
     'scrollOffset=%i, startIndex=%i, endIndex=%i',
-    async (scrollOffset, expectedStartIndex, expectedEndIndex) => {
+    async (scrollOffset, startIndex, endIndex) => {
       const result = getVisibleIndexRange({
         items: columns,
         scrollOffset,
@@ -25,10 +25,7 @@ describe('getVisibleIndexRange', () => {
         getItemSize: (column) => column.width,
       });
 
-      expect(result).toEqual({
-        startIndex: expectedStartIndex,
-        endIndex: expectedEndIndex,
-      });
+      expect(result).toEqual([startIndex, endIndex]);
     },
   );
 });
