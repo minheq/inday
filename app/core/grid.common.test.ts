@@ -1,4 +1,9 @@
-import { getVisibleIndexRange, getColumns, Group } from './grid.common';
+import {
+  getVisibleIndexRange,
+  getColumns,
+  getRows,
+  Group,
+} from './grid.common';
 
 describe('getVisibleIndexRange', () => {
   const columns = getColumns([100, 200, 100, 200, 100, 200]);
@@ -29,37 +34,121 @@ describe('getVisibleIndexRange', () => {
 });
 
 describe('getRows', () => {
-  const groups: Group[] = [
-    {
-      collapsed: false,
-      children: [
-        {
-          collapsed: false,
-          rowCount: 0,
-        },
-      ],
-    },
-    {
-      collapsed: true,
-      children: [
-        {
-          collapsed: false,
-          rowCount: 5,
-        },
-      ],
-    },
-    {
-      type: 'ancestor',
-      collapsed: false,
-      children: [
-        {
-          type: 'leaf',
-          collapsed: true,
-          rowCount: 10,
-        },
-      ],
-    },
-  ];
+  test.concurrent('nested with leaf rows', async () => {
+    const groups: Group[] = [
+      {
+        type: 'ancestor',
+        collapsed: false,
+        children: [
+          {
+            type: 'leaf',
+            collapsed: false,
+            rowCount: 2,
+          },
+        ],
+      },
+      {
+        type: 'ancestor',
+        collapsed: false,
+        children: [
+          {
+            type: 'leaf',
+            collapsed: false,
+            rowCount: 2,
+          },
+        ],
+      },
+    ];
+
+    const rows = getRows(groups, 56, 40, [], 0);
+
+    const expected = [
+      { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
+      { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: false },
+      { type: 'leaf', height: 40, y: 112, path: [0, 0], row: 1 },
+      { type: 'leaf', height: 40, y: 152, path: [0, 0], row: 2 },
+      { type: 'group', height: 56, y: 192, path: [1], collapsed: false },
+      { type: 'group', height: 56, y: 248, path: [1, 0], collapsed: false },
+      { type: 'leaf', height: 40, y: 304, path: [1, 0], row: 1 },
+      { type: 'leaf', height: 40, y: 344, path: [1, 0], row: 2 },
+    ];
+
+    expect(rows).toEqual(expected);
+  });
+
+  test.concurrent('nested with empty leaf rows', async () => {
+    const groups: Group[] = [
+      {
+        type: 'ancestor',
+        collapsed: false,
+        children: [
+          {
+            type: 'leaf',
+            collapsed: false,
+            rowCount: 0,
+          },
+        ],
+      },
+    ];
+
+    const rows = getRows(groups, 56, 40, [], 0);
+
+    const expected = [
+      { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
+      { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: false },
+    ];
+
+    expect(rows).toEqual(expected);
+  });
+
+  test.concurrent('nested with collapsed ancestor', async () => {
+    const groups: Group[] = [
+      {
+        type: 'ancestor',
+        collapsed: true,
+        children: [
+          {
+            type: 'leaf',
+            collapsed: false,
+            rowCount: 1,
+          },
+        ],
+      },
+    ];
+
+    const rows = getRows(groups, 56, 40, [], 0);
+
+    const expected = [
+      { type: 'group', height: 56, y: 0, path: [0], collapsed: true },
+    ];
+
+    expect(rows).toEqual(expected);
+  });
+
+  test.concurrent('nested collapsed child', async () => {
+    const groups: Group[] = [
+      {
+        type: 'ancestor',
+        collapsed: false,
+        children: [
+          {
+            type: 'leaf',
+            collapsed: true,
+            rowCount: 5,
+          },
+        ],
+      },
+    ];
+
+    const rows = getRows(groups, 56, 40, [], 0);
+
+    const expected = [
+      { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
+      { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: true },
+    ];
+
+    expect(rows).toEqual(expected);
+  });
 });
 // describe('recycleItems', () => {
 //   let prevRows: RecycledRow[] = [];

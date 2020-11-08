@@ -52,11 +52,12 @@ export function useGridTransformer(
     () => getColumns(rightPaneColumnWidths, fixedColumnCount),
     [rightPaneColumnWidths, fixedColumnCount],
   );
-  const rows = useMemo(
-    () => getRows({ groups, groupHeight, rowHeight, offset: 0, path: [] }),
-    [groups, groupHeight, rowHeight],
-  );
-  const contentHeight = useMemo(() => getContentHeight(rows), [rows]);
+  const rows = useMemo(() => getRows(groups, groupHeight, rowHeight, [], 0), [
+    groups,
+    groupHeight,
+    rowHeight,
+  ]);
+  const contentHeight = useMemo(() => getRowsHeight(rows), [rows]);
   const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
 
   return {
@@ -472,34 +473,24 @@ export interface AncestorGroup {
 
 export type Group = LeafGroup | AncestorGroup;
 
-interface GetRowsParams {
-  groups: Group[];
-  groupHeight: number;
-  rowHeight: number;
-  path: number[];
-  offset: number;
-}
-
-export function getRows(params: GetRowsParams): Row[] {
-  const {
-    groups,
-    groupHeight,
-    rowHeight,
-    path: prevPath,
-    offset: prevOffset,
-  } = params;
-
+export function getRows(
+  groups: Group[],
+  groupHeight: number,
+  rowHeight: number,
+  prevPath: number[],
+  prevOffset: number,
+): Row[] {
   if (isEmpty(groups)) {
     return [];
   }
 
   let rows: Row[] = [];
+  let offset = prevOffset;
 
   for (let i = 0; i < groups.length; i++) {
     const group = groups[i];
     const { collapsed } = group;
     const path = [...prevPath, i];
-    const offset = prevOffset + groupHeight;
 
     rows = rows.concat({
       type: 'group',
@@ -509,34 +500,34 @@ export function getRows(params: GetRowsParams): Row[] {
       collapsed,
     });
 
+    offset += groupHeight;
+
     if (collapsed === true) {
       continue;
     }
 
     if (isLeafGroup(group)) {
       const { rowCount } = group;
-      rows = rows.concat(getLeafRows({ rowCount, rowHeight, path, offset }));
+      const leafRows = getLeafRows(rowCount, rowHeight, path, offset);
+      offset += getRowsHeight(leafRows);
+      rows = rows.concat(leafRows);
     } else {
       const { children } = group;
-
-      rows = rows.concat(
-        getRows({ groups: children, groupHeight, rowHeight, path, offset }),
-      );
+      const groupRows = getRows(children, groupHeight, rowHeight, path, offset);
+      offset += getRowsHeight(groupRows);
+      rows = rows.concat(groupRows);
     }
   }
 
   return rows;
 }
 
-interface GetLeafRowsParams {
-  rowCount: number;
-  rowHeight: number;
-  path: number[];
-  offset: number;
-}
-
-function getLeafRows(params: GetLeafRowsParams): LeafRow[] {
-  const { rowCount, rowHeight, path, offset } = params;
+function getLeafRows(
+  rowCount: number,
+  rowHeight: number,
+  path: number[],
+  offset: number,
+): LeafRow[] {
   const leafRows: LeafRow[] = [];
 
   for (let i = 0; i < rowCount; i++) {
@@ -560,7 +551,7 @@ function isLeafGroup(group: Group): group is LeafGroup {
   return false;
 }
 
-export function getContentHeight(rows: Row[]): number {
+export function getRowsHeight(rows: Row[]): number {
   return sumBy(rows, (row) => row.height);
 }
 
