@@ -81,7 +81,7 @@ export function useEmitEvent() {
   const workspace = useGetWorkspace();
   const setEvents = useSetRecoilState(eventsState);
 
-  const emitEvent = useCallback(
+  return useCallback(
     (eventConfig: EventConfig) => {
       const event: Event = {
         ...eventConfig,
@@ -97,8 +97,6 @@ export function useEmitEvent() {
     },
     [workspace, setEvents, eventEmitter, logger],
   );
-
-  return emitEvent;
 }
 
 export function useGetSpaces() {
@@ -108,7 +106,7 @@ export function useGetSpaces() {
 export function useGetSpaceCallback() {
   const spaces = useGetSpaces();
 
-  const getSpace = useCallback(
+  return useCallback(
     (spaceID: string) => {
       const space = spaces[spaceID];
 
@@ -120,8 +118,6 @@ export function useGetSpaceCallback() {
     },
     [spaces],
   );
-
-  return getSpace;
 }
 
 export function useGetSpace(spaceID: string) {
@@ -135,9 +131,7 @@ export function useGetSpace(spaceID: string) {
 }
 
 export function useGetSpaceCollections(spaceID: string): Collection[] {
-  const collections = useRecoilValue(spaceCollectionsQuery(spaceID));
-
-  return collections;
+  return useRecoilValue(spaceCollectionsQuery(spaceID));
 }
 
 export function useCreateSpace() {
@@ -146,7 +140,7 @@ export function useCreateSpace() {
   const setSpaces = useSetRecoilState(spacesByIDState);
   const createCollection = useCreateCollection();
 
-  const createSpace = useCallback(() => {
+  return useCallback(() => {
     const newSpace: Space = {
       id: generateID(),
       name: '',
@@ -169,15 +163,13 @@ export function useCreateSpace() {
 
     return newSpace;
   }, [emitEvent, workspace, setSpaces, createCollection]);
-
-  return createSpace;
 }
 
 export function useDeleteSpace() {
   const emitEvent = useEmitEvent();
   const setSpaces = useSetRecoilState(spacesByIDState);
 
-  const deleteSpace = useCallback(
+  return useCallback(
     (space: Space) => {
       setSpaces((previousSpaces) => {
         const updatedSpaces = { ...previousSpaces };
@@ -194,8 +186,6 @@ export function useDeleteSpace() {
     },
     [emitEvent, setSpaces],
   );
-
-  return deleteSpace;
 }
 
 export interface UpdateSpaceNameInput {
@@ -208,7 +198,7 @@ export function useUpdateSpaceName() {
   const getSpace = useGetSpaceCallback();
   const setSpaces = useSetRecoilState(spacesByIDState);
 
-  const updateSpaceName = useCallback(
+  return useCallback(
     (input: UpdateSpaceNameInput) => {
       const { spaceID, name } = input;
       const prevSpace = getSpace(spaceID);
@@ -231,8 +221,6 @@ export function useUpdateSpaceName() {
     },
     [emitEvent, setSpaces, getSpace],
   );
-
-  return updateSpaceName;
 }
 
 export function useGetCollections() {
@@ -242,7 +230,7 @@ export function useGetCollections() {
 export function useGetCollectionCallback() {
   const collections = useGetCollections();
 
-  const getCollection = useCallback(
+  return useCallback(
     (collectionID: string) => {
       const collection = collections[collectionID];
 
@@ -254,8 +242,6 @@ export function useGetCollectionCallback() {
     },
     [collections],
   );
-
-  return getCollection;
 }
 
 export function useGetCollection(collectionID: string) {
@@ -269,27 +255,19 @@ export function useGetCollection(collectionID: string) {
 }
 
 export function useGetCollectionFields(collectionID: string) {
-  const fields = useRecoilValue(collectionFieldsQuery(collectionID));
-
-  return fields;
+  return useRecoilValue(collectionFieldsQuery(collectionID));
 }
 
 export function useGetCollectionRecords(collectionID: string) {
-  const records = useRecoilValue(collectionRecordsQuery(collectionID));
-
-  return records;
+  return useRecoilValue(collectionRecordsQuery(collectionID));
 }
 
 export function useGetCollectionFieldsByID(collectionID: string) {
-  const fieldsByID = useRecoilValue(collectionFieldsByIDQuery(collectionID));
-
-  return fieldsByID;
+  return useRecoilValue(collectionFieldsByIDQuery(collectionID));
 }
 
 export function useGetCollectionViews(collectionID: string) {
-  const views = useRecoilValue(collectionViewsQuery(collectionID));
-
-  return views;
+  return useRecoilValue(collectionViewsQuery(collectionID));
 }
 
 export function useCreateCollection() {
@@ -297,7 +275,7 @@ export function useCreateCollection() {
   const setCollections = useSetRecoilState(collectionsByIDState);
   const createView = useCreateView();
 
-  const createCollection = useCallback(
+  return useCallback(
     (spaceID: string) => {
       let newCollection: Collection = {
         id: generateID(),
@@ -325,15 +303,13 @@ export function useCreateCollection() {
     },
     [emitEvent, setCollections, createView],
   );
-
-  return createCollection;
 }
 
 export function useDeleteCollection() {
   const emitEvent = useEmitEvent();
   const setCollections = useSetRecoilState(collectionsByIDState);
 
-  const deleteCollection = useCallback(
+  return useCallback(
     (collection: Collection) => {
       setCollections((previousCollections) => {
         const updatedCollections = { ...previousCollections };
@@ -350,8 +326,6 @@ export function useDeleteCollection() {
     },
     [emitEvent, setCollections],
   );
-
-  return deleteCollection;
 }
 
 export interface UpdateCollectionNameInput {
@@ -364,7 +338,7 @@ export function useUpdateCollectionName() {
   const getCollection = useGetCollectionCallback();
   const setCollections = useSetRecoilState(collectionsByIDState);
 
-  const updateCollectionName = useCallback(
+  return useCallback(
     (input: UpdateCollectionNameInput) => {
       const { collectionID, name } = input;
       const prevCollection = getCollection(collectionID);
@@ -387,16 +361,12 @@ export function useUpdateCollectionName() {
     },
     [getCollection, setCollections, emitEvent],
   );
-
-  return updateCollectionName;
 }
 
 export function useGetViewCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (viewID: ViewID) => {
-      const view = await snapshot.getPromise(viewQuery(viewID));
-
-      return view;
+      return snapshot.getPromise(viewQuery(viewID));
     },
     [],
   );
@@ -405,9 +375,7 @@ export function useGetViewCallback() {
 export function useGetGroupCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (groupID: GroupID) => {
-      const group = await snapshot.getPromise(groupQuery(groupID));
-
-      return group;
+      return snapshot.getPromise(groupQuery(groupID));
     },
     [],
   );
@@ -424,23 +392,17 @@ export function useGetView(viewID: string) {
 }
 
 export function useGetViewRecords(viewID: string) {
-  const records = useRecoilValue(viewRecordsQuery(viewID));
-
-  return records;
+  return useRecoilValue(viewRecordsQuery(viewID));
 }
 
 export function useGetFiltersByID() {
-  const filtersByID = useRecoilValue(filtersByIDState);
-
-  return filtersByID;
+  return useRecoilValue(filtersByIDState);
 }
 
 export function useGetFilterCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (filterID: FilterID) => {
-      const filter = await snapshot.getPromise(filterQuery(filterID));
-
-      return filter;
+      return snapshot.getPromise(filterQuery(filterID));
     },
     [],
   );
@@ -449,44 +411,32 @@ export function useGetFilterCallback() {
 export function useGetSortCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (sortID: SortID) => {
-      const sort = await snapshot.getPromise(sortQuery(sortID));
-
-      return sort;
+      return snapshot.getPromise(sortQuery(sortID));
     },
     [],
   );
 }
 
 export function useGetViewFiltersGroups(viewID: string) {
-  const filterGroups = useRecoilValue(viewFilterGroupsQuery(viewID));
-
-  return filterGroups;
+  return useRecoilValue(viewFilterGroupsQuery(viewID));
 }
 
 export function useGetViewFilters(viewID: string) {
-  const filters = useRecoilValue(viewFiltersQuery(viewID));
-
-  return filters;
+  return useRecoilValue(viewFiltersQuery(viewID));
 }
 
 export function useGetViewSorts(viewID: string) {
-  const sorts = useRecoilValue(viewSortsQuery(viewID));
-
-  return sorts;
+  return useRecoilValue(viewSortsQuery(viewID));
 }
 
 export function useGetViewGroups(viewID: string) {
-  const groups = useRecoilValue(viewGroupsQuery(viewID));
-
-  return groups;
+  return useRecoilValue(viewGroupsQuery(viewID));
 }
 
 export function useGetViewFiltersCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (viewID: string) => {
-      const filters = await snapshot.getPromise(viewFiltersQuery(viewID));
-
-      return filters;
+      return snapshot.getPromise(viewFiltersQuery(viewID));
     },
     [],
   );
@@ -495,9 +445,7 @@ export function useGetViewFiltersCallback() {
 export function useGetViewSortsCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (viewID: string) => {
-      const sorts = await snapshot.getPromise(viewSortsQuery(viewID));
-
-      return sorts;
+      return snapshot.getPromise(viewSortsQuery(viewID));
     },
     [],
   );
@@ -506,37 +454,29 @@ export function useGetViewSortsCallback() {
 export function useGetViewGroupsCallback() {
   return useRecoilCallback(
     ({ snapshot }) => async (viewID: string) => {
-      const groups = await snapshot.getPromise(viewGroupsQuery(viewID));
-
-      return groups;
+      return snapshot.getPromise(viewGroupsQuery(viewID));
     },
     [],
   );
 }
 
 export function useGetFiltersGroupMax(viewID: string) {
-  const groupMax = useRecoilValue(viewFiltersGroupMaxQuery(viewID));
-
-  return groupMax;
+  return useRecoilValue(viewFiltersGroupMaxQuery(viewID));
 }
 
 export function useGetSortsSequenceMax(viewID: string) {
-  const sequenceMax = useRecoilValue(viewSortsSequenceMaxQuery(viewID));
-
-  return sequenceMax;
+  return useRecoilValue(viewSortsSequenceMaxQuery(viewID));
 }
 
 export function useGetGroupsSequenceMax(viewID: string) {
-  const sequenceMax = useRecoilValue(viewGroupsSequenceMaxQuery(viewID));
-
-  return sequenceMax;
+  return useRecoilValue(viewGroupsSequenceMaxQuery(viewID));
 }
 
 export function useCreateFilter() {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
 
-  const createFilter = useCallback(
+  return useCallback(
     (viewID: string, group: number, filterConfig: FilterConfig) => {
       let newFilter: Filter = {
         id: generateID(),
@@ -559,8 +499,6 @@ export function useCreateFilter() {
     },
     [emitEvent, setFilters],
   );
-
-  return createFilter;
 }
 
 export function useUpdateFilterConfig() {
@@ -568,7 +506,7 @@ export function useUpdateFilterConfig() {
   const setFilters = useSetRecoilState(filtersByIDState);
   const getFilter = useGetFilterCallback();
 
-  const updateFilterConfig = useCallback(
+  return useCallback(
     async (filterID: string, group: number, filterConfig: FilterConfig) => {
       const prevFilter = await getFilter(filterID);
 
@@ -592,8 +530,6 @@ export function useUpdateFilterConfig() {
     },
     [emitEvent, setFilters, getFilter],
   );
-
-  return updateFilterConfig;
 }
 
 export function useUpdateFilterGroup() {
@@ -602,7 +538,7 @@ export function useUpdateFilterGroup() {
   const getViewFilters = useGetViewFiltersCallback();
   const getFilter = useGetFilterCallback();
 
-  const callback = useCallback(
+  return useCallback(
     async (filterID: string, value: 'and' | 'or') => {
       const prevFilter = await getFilter(filterID);
       const prevFilters = await getViewFilters(prevFilter.viewID);
@@ -624,8 +560,6 @@ export function useUpdateFilterGroup() {
     },
     [emitEvent, setFilters, getFilter, getViewFilters],
   );
-
-  return callback;
 }
 
 export function useDeleteFilter() {
@@ -633,7 +567,7 @@ export function useDeleteFilter() {
   const setFilters = useSetRecoilState<FiltersByIDState>(filtersByIDState);
   const getViewFilter = useGetViewFiltersCallback();
 
-  const callback = useCallback(
+  return useCallback(
     async (filter: Filter) => {
       const prevFilters = await getViewFilter(filter.viewID);
       const nextFilters = deleteFilter(filter, prevFilters);
@@ -659,15 +593,13 @@ export function useDeleteFilter() {
     },
     [emitEvent, setFilters, getViewFilter],
   );
-
-  return callback;
 }
 
 export function useCreateSort() {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState(sortsByIDState);
 
-  const callback = useCallback(
+  return useCallback(
     (viewID: string, sequence: number, sortConfig: SortConfig) => {
       let newSort: Sort = {
         id: generateID(),
@@ -690,8 +622,6 @@ export function useCreateSort() {
     },
     [emitEvent, setSorts],
   );
-
-  return callback;
 }
 
 export function useUpdateSortConfig() {
@@ -699,7 +629,7 @@ export function useUpdateSortConfig() {
   const setSorts = useSetRecoilState(sortsByIDState);
   const getSort = useGetSortCallback();
 
-  const callback = useCallback(
+  return useCallback(
     async (sortID: string, sortConfig: SortConfig) => {
       const prevSort = await getSort(sortID);
 
@@ -723,8 +653,6 @@ export function useUpdateSortConfig() {
     },
     [emitEvent, setSorts, getSort],
   );
-
-  return callback;
 }
 
 export function useDeleteSort() {
@@ -732,7 +660,7 @@ export function useDeleteSort() {
   const setSorts = useSetRecoilState<SortsByIDState>(sortsByIDState);
   const getViewSorts = useGetViewSortsCallback();
 
-  const callback = useCallback(
+  return useCallback(
     async (sort: Sort) => {
       const prevSorts = await getViewSorts(sort.viewID);
       const nextSorts = deleteSort(sort, prevSorts);
@@ -758,15 +686,13 @@ export function useDeleteSort() {
     },
     [emitEvent, setSorts, getViewSorts],
   );
-
-  return callback;
 }
 
 export function useCreateGroup() {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState(groupsByIDState);
 
-  const callback = useCallback(
+  return useCallback(
     (viewID: string, sequence: number, groupConfig: GroupConfig) => {
       let newGroup: Group = {
         id: generateID(),
@@ -789,8 +715,6 @@ export function useCreateGroup() {
     },
     [emitEvent, setGroups],
   );
-
-  return callback;
 }
 
 export function useUpdateGroupConfig() {
@@ -798,7 +722,7 @@ export function useUpdateGroupConfig() {
   const setGroups = useSetRecoilState(groupsByIDState);
   const getGroup = useGetGroupCallback();
 
-  const callback = useCallback(
+  return useCallback(
     async (groupID: string, groupConfig: GroupConfig) => {
       const prevGroup = await getGroup(groupID);
 
@@ -822,8 +746,6 @@ export function useUpdateGroupConfig() {
     },
     [emitEvent, setGroups, getGroup],
   );
-
-  return callback;
 }
 
 export function useDeleteGroup() {
@@ -831,7 +753,7 @@ export function useDeleteGroup() {
   const setGroups = useSetRecoilState<GroupsByIDState>(groupsByIDState);
   const getViewGroups = useGetViewGroupsCallback();
 
-  const callback = useCallback(
+  return useCallback(
     async (group: Group) => {
       const prevGroups = await getViewGroups(group.viewID);
       const nextGroups = deleteGroup(group, prevGroups);
@@ -857,8 +779,6 @@ export function useDeleteGroup() {
     },
     [emitEvent, setGroups, getViewGroups],
   );
-
-  return callback;
 }
 
 export function useGetSortedFieldsWithListViewConfig(
@@ -901,7 +821,7 @@ export function useUpdateListViewFieldConfig() {
   const getView = useGetViewCallback();
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
-  const callback = useCallback(
+  return useCallback(
     async (viewID: ViewID, fieldID: FieldID, config: ListViewFieldConfig) => {
       const prevView = await getView(viewID);
 
@@ -928,21 +848,19 @@ export function useUpdateListViewFieldConfig() {
     },
     [emitEvent, setViews, getView],
   );
-
-  return callback;
 }
 
 export function useCreateView() {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
-  const callback = useCallback(
+  return useCallback(
     (collectionID: string) => {
       let newView: View = {
         id: generateID(),
         name: '',
         type: 'list',
-        frozenFieldCount: 1,
+        fixedFieldCount: 1,
         fieldsConfig: {},
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -963,15 +881,13 @@ export function useCreateView() {
     },
     [emitEvent, setViews],
   );
-
-  return callback;
 }
 
 export function useDeleteView() {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState(viewsByIDState);
 
-  const deleteView = useCallback(
+  return useCallback(
     (view: View) => {
       setViews((previousViews) => {
         const updatedViews = { ...previousViews };
@@ -988,8 +904,6 @@ export function useDeleteView() {
     },
     [emitEvent, setViews],
   );
-
-  return deleteView;
 }
 
 export interface UpdateViewNameInput {
@@ -1002,7 +916,7 @@ export function useUpdateViewName() {
   const getView = useGetViewCallback();
   const setViews = useSetRecoilState(viewsByIDState);
 
-  const callback = useCallback(
+  return useCallback(
     async (input: UpdateViewNameInput) => {
       const { viewID, name } = input;
       const prevView = await getView(viewID);
@@ -1025,14 +939,12 @@ export function useUpdateViewName() {
     },
     [getView, setViews, emitEvent],
   );
-
-  return callback;
 }
 
 export function useGetFieldCallback() {
   const fields = useRecoilValue(fieldsByIDState);
 
-  const getField = useCallback(
+  return useCallback(
     (fieldID: string) => {
       const field = fields[fieldID];
 
@@ -1044,8 +956,6 @@ export function useGetFieldCallback() {
     },
     [fields],
   );
-
-  return getField;
 }
 
 export function useGetField(fieldID: string) {
@@ -1062,7 +972,7 @@ export function useCreateField() {
   const emitEvent = useEmitEvent();
   const setFields = useSetRecoilState(fieldsByIDState);
 
-  const createField = useCallback(
+  return useCallback(
     (
       collectionID: string,
       name: string,
@@ -1093,15 +1003,13 @@ export function useCreateField() {
     },
     [emitEvent, setFields],
   );
-
-  return createField;
 }
 
 export function useDeleteField() {
   const emitEvent = useEmitEvent();
   const setFields = useSetRecoilState(fieldsByIDState);
 
-  const deleteField = useCallback(
+  return useCallback(
     (field: Field) => {
       setFields((previousFields) => {
         const updatedFields = { ...previousFields };
@@ -1118,8 +1026,6 @@ export function useDeleteField() {
     },
     [emitEvent, setFields],
   );
-
-  return deleteField;
 }
 
 export interface UpdateFieldNameInput {
@@ -1132,7 +1038,7 @@ export function useUpdateFieldName() {
   const getField = useGetFieldCallback();
   const setFields = useSetRecoilState(fieldsByIDState);
 
-  const updateFieldName = useCallback(
+  return useCallback(
     (input: UpdateFieldNameInput) => {
       const { fieldID, name } = input;
       const prevField = getField(fieldID);
@@ -1155,14 +1061,12 @@ export function useUpdateFieldName() {
     },
     [getField, setFields, emitEvent],
   );
-
-  return updateFieldName;
 }
 
 export function useGetRecordCallback() {
   const records = useRecoilValue(recordsByIDState);
 
-  const getRecord = useCallback(
+  return useCallback(
     (recordID: string) => {
       const record = records[recordID];
 
@@ -1174,8 +1078,6 @@ export function useGetRecordCallback() {
     },
     [records],
   );
-
-  return getRecord;
 }
 
 export function useGetRecord(recordID: string) {
@@ -1192,7 +1094,7 @@ export function useCreateRecord() {
   const emitEvent = useEmitEvent();
   const setRecords = useSetRecoilState(recordsByIDState);
 
-  const createRecord = useCallback(
+  return useCallback(
     (collectionID: string) => {
       let newRecord: Record = {
         id: generateID(),
@@ -1216,15 +1118,13 @@ export function useCreateRecord() {
     },
     [emitEvent, setRecords],
   );
-
-  return createRecord;
 }
 
 export function useDeleteRecord() {
   const emitEvent = useEmitEvent();
   const setRecords = useSetRecoilState(recordsByIDState);
 
-  const deleteRecord = useCallback(
+  return useCallback(
     (record: Record) => {
       setRecords((previousRecords) => {
         const updatedRecords = { ...previousRecords };
@@ -1241,8 +1141,6 @@ export function useDeleteRecord() {
     },
     [emitEvent, setRecords],
   );
-
-  return deleteRecord;
 }
 
 export interface UpdateRecordNameInput {
@@ -1254,7 +1152,7 @@ export function useUpdateRecordName() {
   const getRecord = useGetRecordCallback();
   const setRecords = useSetRecoilState(recordsByIDState);
 
-  const updateRecordName = useCallback(
+  return useCallback(
     (input: UpdateRecordNameInput) => {
       const { recordID } = input;
       const prevRecord = getRecord(recordID);
@@ -1276,6 +1174,4 @@ export function useUpdateRecordName() {
     },
     [getRecord, setRecords, emitEvent],
   );
-
-  return updateRecordName;
 }
