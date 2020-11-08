@@ -95,7 +95,7 @@ export function useGridTransformer(
   );
   const rows = useMemo(
     () => getRows(groups, groupHeight, rowHeight, spacerHeight, [], 0),
-    [groups, groupHeight, rowHeight],
+    [groups, groupHeight, rowHeight, spacerHeight],
   );
   const contentHeight = useMemo(() => getRowsHeight(rows), [rows]);
   const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
