@@ -34,6 +34,26 @@ describe('getVisibleIndexRange', () => {
 });
 
 describe('getRows', () => {
+  test.concurrent('single flat group', async () => {
+    const groups: Group[] = [
+      {
+        type: 'leaf',
+        collapsed: false,
+        rowCount: 2,
+      },
+    ];
+
+    const rows = getRows(groups, 0, 40, [], 0);
+
+    const expected = [
+      { type: 'group', height: 0, y: 0, path: [0], collapsed: false },
+      { type: 'leaf', height: 40, y: 0, path: [0], row: 1 },
+      { type: 'leaf', height: 40, y: 40, path: [0], row: 2 },
+    ];
+
+    expect(rows).toEqual(expected);
+  });
+
   test.concurrent('nested with leaf rows', async () => {
     const groups: Group[] = [
       {
