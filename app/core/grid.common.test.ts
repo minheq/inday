@@ -54,15 +54,11 @@ describe('recycleItems', () => {
   function run(
     items: Item[],
     prevItems: RecycledItem[],
-    startIndex: number,
-    endIndex: number,
     expected: RecycledItem[],
   ) {
     const result = recycleItems({
       items,
       prevItems,
-      startIndex,
-      endIndex,
       toRecycledItem: (item, key) => ({ value: item.value, key }),
       getValue: (item) => item.value,
       getKey: (item) => item.key,
@@ -71,14 +67,8 @@ describe('recycleItems', () => {
     expect(result).toEqual(expected);
   }
 
-  test.concurrent('fresh from start', async () => {
-    const items: Item[] = [
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 },
-    ];
+  test.concurrent('with empty previous items', async () => {
+    const items: Item[] = [{ value: 1 }, { value: 2 }, { value: 3 }];
 
     const expected: RecycledItem[] = [
       { value: 1, key: 0 },
@@ -86,17 +76,11 @@ describe('recycleItems', () => {
       { value: 3, key: 2 },
     ];
 
-    run(items, [], 0, 2, expected);
+    run(items, [], expected);
   });
 
   test.concurrent('with previous items, in middle', async () => {
-    const items: Item[] = [
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 },
-    ];
+    const items: Item[] = [{ value: 2 }, { value: 3 }, { value: 4 }];
 
     const prevItems: RecycledItem[] = [
       { value: 1, key: 0 },
@@ -110,17 +94,11 @@ describe('recycleItems', () => {
       { value: 4, key: 0 },
     ];
 
-    run(items, prevItems, 1, 3, expected);
+    run(items, prevItems, expected);
   });
 
   test.concurrent('with previous items, at the end', async () => {
-    const items: Item[] = [
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 },
-    ];
+    const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
     const prevItems: RecycledItem[] = [
       { value: 2, key: 1 },
@@ -134,17 +112,11 @@ describe('recycleItems', () => {
       { value: 5, key: 1 },
     ];
 
-    run(items, prevItems, 2, 4, expected);
+    run(items, prevItems, expected);
   });
 
   test.concurrent('with no matching prev items', async () => {
-    const items: Item[] = [
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 },
-    ];
+    const items: Item[] = [{ value: 4 }, { value: 5 }];
 
     const prevItems: RecycledItem[] = [
       { value: 1, key: 1 },
@@ -157,17 +129,11 @@ describe('recycleItems', () => {
       { value: 5, key: 2 },
     ];
 
-    run(items, prevItems, 3, 4, expected);
+    run(items, prevItems, expected);
   });
 
   test.concurrent('more than previous', async () => {
-    const items: Item[] = [
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 },
-    ];
+    const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
     const prevItems: RecycledItem[] = [
       { value: 1, key: 1 },
@@ -180,7 +146,7 @@ describe('recycleItems', () => {
       { value: 5, key: 3 },
     ];
 
-    run(items, prevItems, 2, 4, expected);
+    run(items, prevItems, expected);
   });
 });
 

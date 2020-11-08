@@ -323,8 +323,6 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
 interface RecycleItemsParams<T extends object, K extends T> {
   items: T[];
   prevItems: K[];
-  startIndex: number;
-  endIndex: number;
   toRecycledItem: (item: T, key: number) => K;
   /** Value to recycle by */
   getValue: (item: T | K) => number;
@@ -334,25 +332,15 @@ interface RecycleItemsParams<T extends object, K extends T> {
 export function recycleItems<T extends object, K extends T>(
   params: RecycleItemsParams<T, K>,
 ): K[] {
-  const {
-    items,
-    startIndex,
-    endIndex,
-    prevItems,
-    getValue,
-    toRecycledItem,
-    getKey,
-  } = params;
+  const { items, prevItems, getValue, toRecycledItem, getKey } = params;
 
-  const currentItems = items.slice(startIndex, endIndex + 1);
+  const reusedItems = intersectBy(prevItems, items, getValue);
+  const recycledItems = differenceBy(prevItems, items, getValue);
+  const newItems = differenceBy(items, prevItems, getValue);
 
   if (isEmpty(prevItems)) {
-    return currentItems.map((item, index) => toRecycledItem(item, index));
+    return items.map((item, key) => toRecycledItem(item, key));
   }
-
-  const reusedItems = intersectBy(prevItems, currentItems, getValue);
-  const recycledItems = differenceBy(prevItems, currentItems, getValue);
-  const newItems = differenceBy(currentItems, prevItems, getValue);
 
   const recycledKeys = recycledItems.map((c) => getKey(c));
   if (recycledKeys.length < newItems.length) {
@@ -378,11 +366,11 @@ interface RecycleRowsParams {
 function recycleRows(params: RecycleRowsParams) {
   const { rows, prevRows, startIndex, endIndex } = params;
 
+  const nextRows = rows.slice(startIndex, endIndex + 1);
+
   return recycleItems({
-    items: rows,
+    items: nextRows,
     prevItems: prevRows,
-    startIndex,
-    endIndex,
     getValue: (row) => row.y,
     getKey: (row) => row.key,
     toRecycledItem: (row, key) => ({
@@ -402,11 +390,11 @@ interface RecycleColumnsParams {
 function recycleColumns(params: RecycleColumnsParams) {
   const { columns, prevColumns, startIndex, endIndex } = params;
 
+  const nextColumns = columns.slice(startIndex, endIndex + 1);
+
   return recycleItems({
-    items: columns,
+    items: nextColumns,
     prevItems: prevColumns,
-    startIndex,
-    endIndex,
     getValue: (column) => column.column,
     getKey: (column) => column.key,
     toRecycledItem: (column, key) => ({
