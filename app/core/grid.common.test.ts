@@ -3,6 +3,7 @@ import {
   getColumns,
   getRows,
   Group,
+  Row,
 } from './grid.common';
 
 describe('getVisibleIndexRange', () => {
@@ -40,12 +41,13 @@ describe('getRows', () => {
       },
     ];
 
-    const rows = getRows(groups, 0, 40, [], 0);
+    const rows = getRows(groups, 0, 40, 72, [], 0);
 
-    const expected = [
+    const expected: Row[] = [
       { type: 'group', height: 0, y: 0, path: [0], collapsed: false },
       { type: 'leaf', height: 40, y: 0, path: [0], row: 1 },
       { type: 'leaf', height: 40, y: 40, path: [0], row: 2 },
+      { type: 'spacer', height: 72, y: 80 },
     ];
 
     expect(rows).toEqual(expected);
@@ -82,20 +84,22 @@ describe('getRows', () => {
       },
     ];
 
-    const rows = getRows(groups, 56, 40, [], 0);
+    const rows = getRows(groups, 56, 40, 72, [], 0);
 
-    const expected = [
+    const expected: Row[] = [
       { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
       { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: false },
       { type: 'leaf', height: 40, y: 112, path: [0, 0], row: 1 },
       { type: 'leaf', height: 40, y: 152, path: [0, 0], row: 2 },
-      { type: 'group', height: 56, y: 192, path: [1], collapsed: false },
-      { type: 'group', height: 56, y: 248, path: [1, 0], collapsed: false },
-      { type: 'leaf', height: 40, y: 304, path: [1, 0], row: 1 },
-      { type: 'leaf', height: 40, y: 344, path: [1, 0], row: 2 },
-      { type: 'group', height: 56, y: 384, path: [1, 1], collapsed: false },
-      { type: 'leaf', height: 40, y: 440, path: [1, 1], row: 1 },
-      { type: 'leaf', height: 40, y: 480, path: [1, 1], row: 2 },
+      { type: 'spacer', height: 72, y: 192 },
+      { type: 'group', height: 56, y: 264, path: [1], collapsed: false },
+      { type: 'group', height: 56, y: 320, path: [1, 0], collapsed: false },
+      { type: 'leaf', height: 40, y: 376, path: [1, 0], row: 1 },
+      { type: 'leaf', height: 40, y: 416, path: [1, 0], row: 2 },
+      { type: 'group', height: 56, y: 456, path: [1, 1], collapsed: false },
+      { type: 'leaf', height: 40, y: 512, path: [1, 1], row: 1 },
+      { type: 'leaf', height: 40, y: 552, path: [1, 1], row: 2 },
+      { type: 'spacer', height: 72, y: 592 },
     ];
 
     expect(rows).toEqual(expected);
@@ -116,11 +120,12 @@ describe('getRows', () => {
       },
     ];
 
-    const rows = getRows(groups, 56, 40, [], 0);
+    const rows = getRows(groups, 56, 40, 72, [], 0);
 
-    const expected = [
+    const expected: Row[] = [
       { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
       { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: false },
+      { type: 'spacer', height: 72, y: 112 },
     ];
 
     expect(rows).toEqual(expected);
@@ -141,10 +146,11 @@ describe('getRows', () => {
       },
     ];
 
-    const rows = getRows(groups, 56, 40, [], 0);
+    const rows = getRows(groups, 56, 40, 72, [], 0);
 
-    const expected = [
+    const expected: Row[] = [
       { type: 'group', height: 56, y: 0, path: [0], collapsed: true },
+      { type: 'spacer', height: 72, y: 56 },
     ];
 
     expect(rows).toEqual(expected);
@@ -165,11 +171,12 @@ describe('getRows', () => {
       },
     ];
 
-    const rows = getRows(groups, 56, 40, [], 0);
+    const rows = getRows(groups, 56, 40, 72, [], 0);
 
-    const expected = [
+    const expected: Row[] = [
       { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
       { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: true },
+      { type: 'spacer', height: 72, y: 112 },
     ];
 
     expect(rows).toEqual(expected);

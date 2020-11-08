@@ -15,6 +15,7 @@ interface UseGridTransformerProps {
   groups: Group[];
   rowHeight: number;
   groupHeight: number;
+  spacerHeight: number;
   columns: number[];
   fixedColumnCount: number;
 }
@@ -51,12 +52,25 @@ export interface GroupRow {
   collapsed: boolean;
 }
 
-export type Row = LeafRow | GroupRow;
+export interface SpacerRow {
+  type: 'spacer';
+  y: number;
+  height: number;
+}
+
+export type Row = LeafRow | GroupRow | SpacerRow;
 
 export function useGridTransformer(
   props: UseGridTransformerProps,
 ): GridTransformerData {
-  const { columns, fixedColumnCount, groups, groupHeight, rowHeight } = props;
+  const {
+    columns,
+    fixedColumnCount,
+    groups,
+    groupHeight,
+    rowHeight,
+    spacerHeight,
+  } = props;
 
   const leftPaneColumnWidths = useMemo(
     () => columns.slice(0, fixedColumnCount),
@@ -79,11 +93,10 @@ export function useGridTransformer(
     () => getColumns(rightPaneColumnWidths, fixedColumnCount),
     [rightPaneColumnWidths, fixedColumnCount],
   );
-  const rows = useMemo(() => getRows(groups, groupHeight, rowHeight, [], 0), [
-    groups,
-    groupHeight,
-    rowHeight,
-  ]);
+  const rows = useMemo(
+    () => getRows(groups, groupHeight, rowHeight, spacerHeight, [], 0),
+    [groups, groupHeight, rowHeight],
+  );
   const contentHeight = useMemo(() => getRowsHeight(rows), [rows]);
   const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
 
@@ -116,6 +129,7 @@ export function getRows(
   groups: Group[],
   groupHeight: number,
   rowHeight: number,
+  spacerHeight: number,
   prevPath: number[],
   prevOffset: number,
 ): Row[] {
@@ -142,19 +156,32 @@ export function getRows(
     offset += groupHeight;
 
     if (collapsed === true) {
-      continue;
-    }
-
-    if (isLeafGroup(group)) {
+    } else if (isLeafGroup(group)) {
       const { rowCount } = group;
       const leafRows = getLeafRows(rowCount, rowHeight, path, offset);
       offset += getRowsHeight(leafRows);
       rows = rows.concat(leafRows);
     } else {
       const { children } = group;
-      const groupRows = getRows(children, groupHeight, rowHeight, path, offset);
+      const groupRows = getRows(
+        children,
+        groupHeight,
+        rowHeight,
+        spacerHeight,
+        path,
+        offset,
+      );
       offset += getRowsHeight(groupRows);
       rows = rows.concat(groupRows);
+    }
+
+    if (path.length === 1) {
+      rows = rows.concat({
+        type: 'spacer',
+        y: offset,
+        height: spacerHeight,
+      });
+      offset += spacerHeight;
     }
   }
 
@@ -216,7 +243,15 @@ export interface RecycledGroupRow extends GroupRow {
   key: number;
 }
 
-export type RecycledRow = RecycledLeafRow | RecycledGroupRow;
+export interface RecycledSpacerRow extends SpacerRow {
+  key: number;
+}
+
+export type RecycledRow =
+  | RecycledLeafRow
+  | RecycledGroupRow
+  | RecycledSpacerRow;
+
 export interface RecycledColumn extends Column {
   key: number;
 }
@@ -547,7 +582,7 @@ interface StatefulLeafRowCell extends LeafRowCell {
   state: LeafRowCellState;
 }
 
-type StatefulRow = StatefulLeafRow | StatefulGroupRow;
+type StatefulRow = StatefulLeafRow | StatefulGroupRow | SpacerRow;
 type StatefulCell = StatefulLeafRowCell | StatefulGroupRowCell;
 
 export function useGetStatefulRows(
@@ -572,6 +607,15 @@ export function useGetStatefulRows(
 
   return useMemo(() => {
     return rows.map((row) => {
+      if (isSpacerRow(row)) {
+        return {
+          key: row.key,
+          type: row.type,
+          height: row.height,
+          y: row.y,
+        };
+      }
+
       if (isLeafRow(row)) {
         const leafRowCell = getLeafRowCell(cell, row);
 
@@ -605,6 +649,14 @@ export function useGetStatefulRows(
 
 function isLeafRow(row: Row): row is LeafRow {
   if (row.type === 'leaf') {
+    return true;
+  }
+
+  return false;
+}
+
+function isSpacerRow(row: Row): row is SpacerRow {
+  if (row.type === 'spacer') {
     return true;
   }
 
