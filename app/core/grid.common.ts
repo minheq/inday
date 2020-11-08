@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import {
+  accessValue,
+  assignValue,
   differenceBy,
   intersectBy,
   isEmpty,
@@ -633,7 +635,7 @@ export function useGetStatefulRows(
 
     for (let i = 0; i < selectedRows.length; i++) {
       const selectedRow = selectedRows[i];
-      map[path] = true;
+      assignValue(map, [...selectedRow.path, selectedRow.row], true);
     }
 
     return map;
@@ -642,7 +644,7 @@ export function useGetStatefulRows(
   return useMemo(() => {
     return rows.map((row) => {
       if (isLeafRow(row)) {
-        const value = row.path;
+        const selected = accessValue(selectedRowsMap, [...row.path, row.row]);
 
         return {
           key: row.key,
@@ -651,7 +653,7 @@ export function useGetStatefulRows(
           path: row.path,
           row: row.row,
           y: row.y,
-          state: 'default',
+          state: selected ? 'selected' : 'default',
           cell: null,
         };
       }

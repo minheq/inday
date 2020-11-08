@@ -1,3 +1,47 @@
-export function assignValue(obj: object, arr: string[], value: any) {}
+export function assignValue<T extends { [key: string]: any } = any>(
+  obj: { [key: string]: any },
+  arr: string[] | number[],
+  value: any,
+): T {
+  const clone = { ...obj };
+  let current = clone;
 
-export function accessValue(obj: object, arr: string[]) {}
+  for (let i = 0; i < arr.length; i++) {
+    const key = arr[i];
+
+    if (i === arr.length - 1) {
+      current[key] = value;
+    } else {
+      if (current[key] === undefined) {
+        current[key] = {};
+      }
+
+      current = current[key];
+    }
+  }
+
+  return clone as T;
+}
+
+export function accessValue<T extends { [key: string]: any } = any>(
+  obj: T,
+  arr: string[] | number[],
+) {
+  let current = obj;
+
+  for (let i = 0; i < arr.length; i++) {
+    const key = arr[i];
+
+    if (current[key] === undefined) {
+      throw new Error(
+        `Value for key=${key} in nested object ${JSON.stringify(
+          current,
+        )} is undefined`,
+      );
+    }
+
+    current = current[key];
+  }
+
+  return current;
+}
