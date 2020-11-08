@@ -135,10 +135,6 @@ function makeNodes(
   const sort = first(sorts);
   const nextSorts = sorts.slice(1);
 
-  if (sorts.length === 1) {
-    return makeLeafNodes(sort, records, getters);
-  }
-
   const leafNodes = makeLeafNodes(sort, records, getters);
 
   if (sorts.length === 1) {

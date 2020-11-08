@@ -32,7 +32,32 @@ describe('getRows', () => {
   const groups: Group[] = [
     {
       collapsed: false,
-      children: [],
+      children: [
+        {
+          collapsed: false,
+          rowCount: 0,
+        },
+      ],
+    },
+    {
+      collapsed: true,
+      children: [
+        {
+          collapsed: false,
+          rowCount: 5,
+        },
+      ],
+    },
+    {
+      type: 'ancestor',
+      collapsed: false,
+      children: [
+        {
+          type: 'leaf',
+          collapsed: true,
+          rowCount: 10,
+        },
+      ],
     },
   ];
 });

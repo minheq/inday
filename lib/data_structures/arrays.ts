@@ -106,13 +106,6 @@ export function differenceBy<
   return result;
 }
 
-export function maxBy<T extends { [key: string]: any }>(
-  a: T[],
-  prop: keyof T,
-): number {
-  return Math.max(...a.map((c) => c[prop]));
-}
-
 export function hasAnyOf<T>(a: T[], b: T[]): boolean {
   return isNotEmpty(intersect(a, b));
 }

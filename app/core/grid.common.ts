@@ -5,6 +5,7 @@ import {
   isEmpty,
   maxBy,
   sum,
+  sumBy,
 } from '../../lib/data_structures';
 
 interface UseGridTransformerProps {
@@ -34,34 +35,29 @@ export function useGridTransformer(
     () => columns.slice(0, fixedColumnCount),
     [columns, fixedColumnCount],
   );
-  const leftPaneColumns = useMemo(() => getColumns(leftPaneColumnWidths), [
-    leftPaneColumnWidths,
-  ]);
   const rightPaneColumnWidths = useMemo(() => columns.slice(fixedColumnCount), [
     columns,
     fixedColumnCount,
   ]);
-  const rightPaneColumns = useMemo(
-    () => getColumns(rightPaneColumnWidths, fixedColumnCount),
-    [rightPaneColumnWidths, fixedColumnCount],
-  );
   const leftPaneContentWidth = useMemo(() => sum(leftPaneColumnWidths), [
     leftPaneColumnWidths,
   ]);
   const rightPaneContentWidth = useMemo(() => sum(rightPaneColumnWidths), [
     rightPaneColumnWidths,
   ]);
-  const contentHeight = useMemo(
-    () => getContentHeight(groups, groupHeight, rowHeight),
+  const leftPaneColumns = useMemo(() => getColumns(leftPaneColumnWidths), [
+    leftPaneColumnWidths,
+  ]);
+  const rightPaneColumns = useMemo(
+    () => getColumns(rightPaneColumnWidths, fixedColumnCount),
+    [rightPaneColumnWidths, fixedColumnCount],
+  );
+  const rows = useMemo(
+    () => getRows({ groups, groupHeight, rowHeight, offset: 0, path: [] }),
     [groups, groupHeight, rowHeight],
   );
+  const contentHeight = useMemo(() => getContentHeight(rows), [rows]);
   const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
-
-  const rows = useMemo(() => getRows(groups, groupHeight, rowHeight), [
-    groups,
-    groupHeight,
-    rowHeight,
-  ]);
 
   return {
     contentHeight,
@@ -231,32 +227,31 @@ export function useGridGetScrollToCellOffset(
     [scrollX, columns, fixedColumnCount, scrollViewWidth, padding],
   );
 
-  const getScrollToCellOffset = useCallback(
+  return useCallback(
     (cell: Partial<Cell>): Partial<ContentOffset> => {
       const { row, column } = cell;
 
-      const y = getScrollToRowOffset(row);
-      const x = getScrollToColumnOffset(column);
-
-      return { y, x };
+      return {
+        y: getScrollToRowOffset(row),
+        x: getScrollToColumnOffset(column),
+      };
     },
     [getScrollToRowOffset, getScrollToColumnOffset],
   );
-
-  return getScrollToCellOffset;
 }
 
-interface RecycleItemsParams<T extends object, K extends T & { key: number }> {
+interface RecycleItemsParams<T extends object, K extends T> {
   items: T[];
   prevItems: K[];
   startIndex: number;
   endIndex: number;
   toRecycledItem: (item: T, key: number) => K;
-  /** Identifies which value to recycle by (Column number or Row offset) */
-  getID: (item: T | K) => number;
+  /** Value to recycle by */
+  getValue: (item: T | K) => number;
+  getKey: (item: K) => number;
 }
 
-export function recycleItems<T extends object, K extends T & { key: number }>(
+export function recycleItems<T extends object, K extends T>(
   params: RecycleItemsParams<T, K>,
 ): K[] {
   const {
@@ -264,8 +259,9 @@ export function recycleItems<T extends object, K extends T & { key: number }>(
     startIndex,
     endIndex,
     prevItems,
-    getID,
+    getValue,
     toRecycledItem,
+    getKey,
   } = params;
 
   const currentItems = items.slice(startIndex, endIndex + 1);
@@ -274,24 +270,22 @@ export function recycleItems<T extends object, K extends T & { key: number }>(
     return currentItems.map((item, index) => toRecycledItem(item, index));
   }
 
-  const reusedItems = intersectBy(prevItems, currentItems, getID);
-  const recycledItems = differenceBy(prevItems, currentItems, getID);
-  const newItems = differenceBy(currentItems, prevItems, getID);
+  const reusedItems = intersectBy(prevItems, currentItems, getValue);
+  const recycledItems = differenceBy(prevItems, currentItems, getValue);
+  const newItems = differenceBy(currentItems, prevItems, getValue);
 
-  const recycledKeys = recycledItems.map((c) => c.key);
+  const recycledKeys = recycledItems.map((c) => getKey(c));
   if (recycledKeys.length < newItems.length) {
-    let maxKey = maxBy(prevItems, 'key');
+    let maxKey = maxBy(prevItems, getKey);
 
     while (recycledKeys.length !== newItems.length) {
       recycledKeys.push(++maxKey);
     }
   }
 
-  const nextItems = reusedItems
+  return reusedItems
     .concat(newItems.map((item, i) => toRecycledItem(item, recycledKeys[i])))
-    .sort((a, b) => getID(a) - getID(b));
-
-  return nextItems;
+    .sort((a, b) => getValue(a) - getValue(b));
 }
 
 interface RecycleRowsParams {
@@ -309,7 +303,8 @@ function recycleRows(params: RecycleRowsParams) {
     prevItems: prevRows,
     startIndex,
     endIndex,
-    getID: (row) => row.y,
+    getValue: (row) => row.y,
+    getKey: (row) => row.key,
     toRecycledItem: (row, key) => ({
       ...row,
       key,
@@ -332,7 +327,8 @@ function recycleColumns(params: RecycleColumnsParams) {
     prevItems: prevColumns,
     startIndex,
     endIndex,
-    getID: (item) => item.column,
+    getValue: (column) => column.column,
+    getKey: (column) => column.key,
     toRecycledItem: (column, key) => ({
       ...column,
       key,
@@ -462,35 +458,110 @@ function getVisibleRowsIndexRange(
   });
 }
 
-export interface Group {
+export interface LeafGroup {
+  type: 'leaf';
   collapsed: boolean;
-  children: Group[] | number[];
+  rowCount: number;
 }
 
-export function getRows(
-  groupsOrRows: Group[] | number[],
-  groupHeight: number,
-  rowHeight: number,
-): Row[] {
-  if (isEmpty(groupsOrRows)) {
+export interface AncestorGroup {
+  type: 'ancestor';
+  collapsed: boolean;
+  children: Group[];
+}
+
+export type Group = LeafGroup | AncestorGroup;
+
+interface GetRowsParams {
+  groups: Group[];
+  groupHeight: number;
+  rowHeight: number;
+  path: number[];
+  offset: number;
+}
+
+export function getRows(params: GetRowsParams): Row[] {
+  const {
+    groups,
+    groupHeight,
+    rowHeight,
+    path: prevPath,
+    offset: prevOffset,
+  } = params;
+
+  if (isEmpty(groups)) {
     return [];
   }
 
-  const firstItem = groupsOrRows[0];
+  let rows: Row[] = [];
 
-  if (typeof firstItem === 'number') {
-    return [];
+  for (let i = 0; i < groups.length; i++) {
+    const group = groups[i];
+    const { collapsed } = group;
+    const path = [...prevPath, i];
+    const offset = prevOffset + groupHeight;
+
+    rows = rows.concat({
+      type: 'group',
+      height: groupHeight,
+      y: offset,
+      path,
+      collapsed,
+    });
+
+    if (collapsed === true) {
+      continue;
+    }
+
+    if (isLeafGroup(group)) {
+      const { rowCount } = group;
+      rows = rows.concat(getLeafRows({ rowCount, rowHeight, path, offset }));
+    } else {
+      const { children } = group;
+
+      rows = rows.concat(
+        getRows({ groups: children, groupHeight, rowHeight, path, offset }),
+      );
+    }
   }
 
-  return [];
+  return rows;
 }
 
-export function getContentHeight(
-  groups: Group[],
-  groupHeight: number,
-  rowHeight: number,
-): number {
-  return 0;
+interface GetLeafRowsParams {
+  rowCount: number;
+  rowHeight: number;
+  path: number[];
+  offset: number;
+}
+
+function getLeafRows(params: GetLeafRowsParams): LeafRow[] {
+  const { rowCount, rowHeight, path, offset } = params;
+  const leafRows: LeafRow[] = [];
+
+  for (let i = 0; i < rowCount; i++) {
+    leafRows.push({
+      type: 'leaf',
+      height: rowHeight,
+      y: offset + i * rowHeight,
+      path,
+      row: i + 1,
+    });
+  }
+
+  return leafRows;
+}
+
+function isLeafGroup(group: Group): group is LeafGroup {
+  if (group.type === 'leaf') {
+    return true;
+  }
+
+  return false;
+}
+
+export function getContentHeight(rows: Row[]): number {
+  return sumBy(rows, (row) => row.height);
 }
 
 export interface Column {
@@ -503,8 +574,8 @@ export interface RecycledColumn extends Column {
   key: number;
 }
 
-export interface NormalRow {
-  type: 'normal';
+export interface LeafRow {
+  type: 'leaf';
   height: number;
   y: number;
   path: number[];
@@ -516,10 +587,10 @@ export interface GroupRow {
   height: number;
   y: number;
   path: number[];
-  collapsed: number;
+  collapsed: boolean;
 }
 
-export interface RecycledNormalRow extends NormalRow {
+export interface RecycledLeafRow extends LeafRow {
   key: number;
 }
 
@@ -527,8 +598,8 @@ export interface RecycledGroupRow extends GroupRow {
   key: number;
 }
 
-export type Row = NormalRow | GroupRow;
-export type RecycledRow = RecycledNormalRow | RecycledGroupRow;
+export type Row = LeafRow | GroupRow;
+export type RecycledRow = RecycledLeafRow | RecycledGroupRow;
 
 // interface UseGetStatefulRowsProps {
 //   focusedCell?: FocusedCell | null;
