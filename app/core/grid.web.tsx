@@ -93,6 +93,7 @@ export const Grid = memo(
 
     const {
       contentHeight,
+
       contentWidth,
       leftPaneColumns,
       leftPaneContentWidth,

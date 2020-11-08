@@ -26,6 +26,30 @@ interface GridTransformerData {
   rows: Row[];
 }
 
+export interface Column {
+  width: number;
+  x: number;
+  column: number;
+}
+
+export interface LeafRow {
+  type: 'leaf';
+  height: number;
+  y: number;
+  path: number[];
+  row: number;
+}
+
+export interface GroupRow {
+  type: 'group';
+  height: number;
+  y: number;
+  path: number[];
+  collapsed: boolean;
+}
+
+export type Row = LeafRow | GroupRow;
+
 export function useGridTransformer(
   props: UseGridTransformerProps,
 ): GridTransformerData {
@@ -71,6 +95,102 @@ export function useGridTransformer(
   };
 }
 
+export interface LeafGroup {
+  type: 'leaf';
+  collapsed: boolean;
+  rowCount: number;
+}
+
+export interface AncestorGroup {
+  type: 'ancestor';
+  collapsed: boolean;
+  children: Group[];
+}
+
+export type Group = LeafGroup | AncestorGroup;
+
+export function getRows(
+  groups: Group[],
+  groupHeight: number,
+  rowHeight: number,
+  prevPath: number[],
+  prevOffset: number,
+): Row[] {
+  if (isEmpty(groups)) {
+    return [];
+  }
+
+  let rows: Row[] = [];
+  let offset = prevOffset;
+
+  for (let i = 0; i < groups.length; i++) {
+    const group = groups[i];
+    const { collapsed } = group;
+    const path = [...prevPath, i];
+
+    rows = rows.concat({
+      type: 'group',
+      height: groupHeight,
+      y: offset,
+      path,
+      collapsed,
+    });
+
+    offset += groupHeight;
+
+    if (collapsed === true) {
+      continue;
+    }
+
+    if (isLeafGroup(group)) {
+      const { rowCount } = group;
+      const leafRows = getLeafRows(rowCount, rowHeight, path, offset);
+      offset += getRowsHeight(leafRows);
+      rows = rows.concat(leafRows);
+    } else {
+      const { children } = group;
+      const groupRows = getRows(children, groupHeight, rowHeight, path, offset);
+      offset += getRowsHeight(groupRows);
+      rows = rows.concat(groupRows);
+    }
+  }
+
+  return rows;
+}
+
+function getLeafRows(
+  rowCount: number,
+  rowHeight: number,
+  path: number[],
+  offset: number,
+): LeafRow[] {
+  const leafRows: LeafRow[] = [];
+
+  for (let i = 0; i < rowCount; i++) {
+    leafRows.push({
+      type: 'leaf',
+      height: rowHeight,
+      y: offset + i * rowHeight,
+      path,
+      row: i + 1,
+    });
+  }
+
+  return leafRows;
+}
+
+function isLeafGroup(group: Group): group is LeafGroup {
+  if (group.type === 'leaf') {
+    return true;
+  }
+
+  return false;
+}
+
+export function getRowsHeight(rows: Row[]): number {
+  return sumBy(rows, (row) => row.height);
+}
+
 export interface UseGridRecyclerProps {
   scrollViewHeight: number;
   scrollViewWidth: number;
@@ -83,6 +203,19 @@ export interface UseGridRecyclerProps {
 interface GridRecyclerData {
   recycledRows: RecycledRow[];
   recycledColumns: RecycledColumn[];
+}
+
+export interface RecycledLeafRow extends LeafRow {
+  key: number;
+}
+
+export interface RecycledGroupRow extends GroupRow {
+  key: number;
+}
+
+export type RecycledRow = RecycledLeafRow | RecycledGroupRow;
+export interface RecycledColumn extends Column {
+  key: number;
 }
 
 export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
@@ -150,6 +283,7 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
 }
 
 export interface Cell {
+  path: number[];
   row: number;
   column: number;
 }
@@ -456,170 +590,100 @@ function getVisibleRowsIndexRange(
   });
 }
 
-export interface LeafGroup {
+interface UseGetStatefulRowsProps {
+  rows: RecycledRow[];
+  cell: StatefulCell | null;
+  selectedRows: LeafRow[];
+}
+
+interface StatefulGroupRow extends RecycledGroupRow {
+  cell: StatefulGroupRowCell | null;
+  state: 'hovered' | 'default';
+}
+
+interface StatefulGroupRowCell extends Cell {
+  type: 'group';
+  state: 'editing' | 'hovered' | 'default';
+}
+
+interface StatefulLeafRow extends RecycledLeafRow {
+  cell: StatefulLeafRowCell | null;
+  state: 'selected' | 'hovered' | 'default';
+}
+
+interface StatefulLeafRowCell extends Cell {
   type: 'leaf';
-  collapsed: boolean;
-  rowCount: number;
+  state: 'focused' | 'editing' | 'hovered' | 'default';
 }
 
-export interface AncestorGroup {
-  type: 'ancestor';
-  collapsed: boolean;
-  children: Group[];
-}
+type StatefulRow = StatefulLeafRow | StatefulGroupRow;
+type StatefulCell = StatefulLeafRowCell | StatefulGroupRowCell;
 
-export type Group = LeafGroup | AncestorGroup;
+export function useGetStatefulRows(
+  props: UseGetStatefulRowsProps,
+): StatefulRow[] {
+  const { rows, cell, selectedRows } = props;
 
-export function getRows(
-  groups: Group[],
-  groupHeight: number,
-  rowHeight: number,
-  prevPath: number[],
-  prevOffset: number,
-): Row[] {
-  if (isEmpty(groups)) {
-    return [];
-  }
+  const selectedRowsMap = useMemo(() => {
+    const map: { [path: number]: boolean } = {};
 
-  let rows: Row[] = [];
-  let offset = prevOffset;
-
-  for (let i = 0; i < groups.length; i++) {
-    const group = groups[i];
-    const { collapsed } = group;
-    const path = [...prevPath, i];
-
-    rows = rows.concat({
-      type: 'group',
-      height: groupHeight,
-      y: offset,
-      path,
-      collapsed,
-    });
-
-    offset += groupHeight;
-
-    if (collapsed === true) {
-      continue;
+    if (isEmpty(selectedRows)) {
+      return map;
     }
 
-    if (isLeafGroup(group)) {
-      const { rowCount } = group;
-      const leafRows = getLeafRows(rowCount, rowHeight, path, offset);
-      offset += getRowsHeight(leafRows);
-      rows = rows.concat(leafRows);
-    } else {
-      const { children } = group;
-      const groupRows = getRows(children, groupHeight, rowHeight, path, offset);
-      offset += getRowsHeight(groupRows);
-      rows = rows.concat(groupRows);
+    for (let i = 0; i < selectedRows.length; i++) {
+      const selectedRow = selectedRows[i];
+      map[path] = true;
     }
-  }
 
-  return rows;
-}
+    return map;
+  }, [selectedRows]);
 
-function getLeafRows(
-  rowCount: number,
-  rowHeight: number,
-  path: number[],
-  offset: number,
-): LeafRow[] {
-  const leafRows: LeafRow[] = [];
+  return useMemo(() => {
+    return rows.map((row) => {
+      if (isLeafRow(row)) {
+        const value = row.path;
 
-  for (let i = 0; i < rowCount; i++) {
-    leafRows.push({
-      type: 'leaf',
-      height: rowHeight,
-      y: offset + i * rowHeight,
-      path,
-      row: i + 1,
+        return {
+          key: row.key,
+          type: row.type,
+          height: row.height,
+          path: row.path,
+          row: row.row,
+          y: row.y,
+          state: 'default',
+          cell: null,
+        };
+      }
+
+      return {
+        key: row.key,
+        type: row.type,
+        height: row.height,
+        y: row.y,
+        path: row.path,
+        state: 'default',
+        collapsed: row.collapsed,
+        cell: null,
+      };
     });
-  }
-
-  return leafRows;
+  }, [rows, cell, selectedRowsMap]);
 }
 
-function isLeafGroup(group: Group): group is LeafGroup {
-  if (group.type === 'leaf') {
+function isLeafRow(row: Row): row is LeafRow {
+  if (row.type === 'leaf') {
     return true;
   }
 
   return false;
 }
 
-export function getRowsHeight(rows: Row[]): number {
-  return sumBy(rows, (row) => row.height);
+function arePathEqual(pathA: number[], pathB: number[]) {
+  for (let i = 0; i < pathA.length; i++) {
+    if (pathA[i] !== pathB[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }
-
-export interface Column {
-  width: number;
-  x: number;
-  column: number;
-}
-
-export interface RecycledColumn extends Column {
-  key: number;
-}
-
-export interface LeafRow {
-  type: 'leaf';
-  height: number;
-  y: number;
-  path: number[];
-  row: number;
-}
-
-export interface GroupRow {
-  type: 'group';
-  height: number;
-  y: number;
-  path: number[];
-  collapsed: boolean;
-}
-
-export interface RecycledLeafRow extends LeafRow {
-  key: number;
-}
-
-export interface RecycledGroupRow extends GroupRow {
-  key: number;
-}
-
-export type Row = LeafRow | GroupRow;
-export type RecycledRow = RecycledLeafRow | RecycledGroupRow;
-
-// interface UseGetStatefulRowsProps {
-//   focusedCell?: FocusedCell | null;
-//   selectedRows?: number[] | null;
-//   recycledRows: RecycledItem[];
-// }
-
-// export function useGetStatefulRows(
-//   props: UseGetStatefulRowsProps,
-// ): RecycledRow[] {
-//   const { recycledRows, focusedCell, selectedRows } = props;
-
-//   const selectedRowsMap = useMemo(() => {
-//     const map: { [row: number]: boolean } = {};
-
-//     if (selectedRows === undefined || selectedRows === null) {
-//       return map;
-//     }
-
-//     for (let i = 0; i < selectedRows.length; i++) {
-//       const selectedRow = selectedRows[i];
-//       map[selectedRow] = true;
-//     }
-
-//     return map;
-//   }, [selectedRows]);
-
-//   return recycledRows.map((row) => ({
-//     key: row.key,
-//     size: row.size,
-//     offset: row.offset,
-//     selected: selectedRowsMap[row.num] || false,
-//     focusedCell: focusedCell?.row === row.num ? focusedCell : null,
-//   }));
-// }

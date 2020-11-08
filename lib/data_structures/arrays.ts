@@ -1,4 +1,4 @@
-import { isEmpty } from './primitive';
+import { isEmpty } from './common';
 
 export function range(min: number, max: number, step?: number): number[];
 export function range(max: number): number[];
