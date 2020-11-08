@@ -23,10 +23,14 @@ export function set<T extends { [key: string]: any } = any>(
   return clone as T;
 }
 
-export function get<T extends { [key: string]: any } = any>(
+export function get<
+  K extends any = any,
+  T extends { [key: string]: any } = any
+>(
   obj: T,
   arr: string[] | number[],
-) {
+  isValue = (item: any): item is K => true,
+): K | undefined {
   let current = obj;
 
   for (let i = 0; i < arr.length; i++) {
@@ -39,5 +43,9 @@ export function get<T extends { [key: string]: any } = any>(
     current = current[key];
   }
 
-  return current;
+  if (isValue(current)) {
+    return current;
+  }
+
+  return undefined;
 }

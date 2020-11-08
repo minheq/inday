@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import {
+  areEqual,
   differenceBy,
   get,
   intersectBy,
@@ -284,99 +285,6 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
   };
 }
 
-export interface Cell {
-  path: number[];
-  row: number;
-  column: number;
-}
-
-export interface ContentOffset {
-  x: number;
-  y: number;
-}
-
-interface UseGridGetScrollToCellOffsetProps {
-  scrollViewHeight: number;
-  scrollViewWidth: number;
-  scrollX: number;
-  scrollY: number;
-  fixedColumnCount: number;
-  columns: Column[];
-  rows: Row[];
-  padding?: number;
-}
-
-export function useGridGetScrollToCellOffset(
-  props: UseGridGetScrollToCellOffsetProps,
-): (cell: Partial<Cell>) => Partial<ContentOffset> {
-  const {
-    columns,
-    rows,
-    scrollViewHeight,
-    scrollViewWidth,
-    fixedColumnCount,
-    scrollX,
-    scrollY,
-    padding = 40,
-  } = props;
-
-  const getScrollToRowOffset = useCallback(
-    (row?: number) => {
-      if (row === undefined) {
-        return;
-      }
-
-      const { y, height } = rows[row - 1];
-
-      const above = scrollY >= y;
-      const below = y + height >= scrollY + scrollViewHeight;
-
-      if (above) {
-        return Math.max(y - padding, 0);
-      } else if (below) {
-        return y + height - scrollViewHeight + padding;
-      }
-    },
-    [rows, scrollY, scrollViewHeight, padding],
-  );
-
-  const getScrollToColumnOffset = useCallback(
-    (column?: number) => {
-      if (column === undefined) {
-        return;
-      }
-
-      if (column <= fixedColumnCount) {
-        return 0;
-      }
-
-      const { x, width } = columns[column - 1 - fixedColumnCount];
-
-      const left = scrollX >= x;
-      const right = x + width >= scrollX + scrollViewWidth;
-
-      if (left) {
-        return Math.max(x - padding, 0);
-      } else if (right) {
-        return x + width - scrollViewWidth + padding;
-      }
-    },
-    [scrollX, columns, fixedColumnCount, scrollViewWidth, padding],
-  );
-
-  return useCallback(
-    (cell: Partial<Cell>): Partial<ContentOffset> => {
-      const { row, column } = cell;
-
-      return {
-        y: getScrollToRowOffset(row),
-        x: getScrollToColumnOffset(column),
-      };
-    },
-    [getScrollToRowOffset, getScrollToColumnOffset],
-  );
-}
-
 interface RecycleItemsParams<T extends object, K extends T> {
   items: T[];
   prevItems: K[];
@@ -598,24 +506,45 @@ interface UseGetStatefulRowsProps {
   selectedRows: LeafRow[];
 }
 
-interface StatefulGroupRow extends RecycledGroupRow {
-  cell: StatefulGroupRowCell | null;
-  state: 'hovered' | 'default';
+export interface GroupRowCell {
+  type: 'group';
+  path: number[];
+  column: number;
 }
 
-interface StatefulGroupRowCell extends Cell {
-  type: 'group';
-  state: 'editing' | 'hovered' | 'default';
+export interface LeafRowCell {
+  type: 'leaf';
+  path: number[];
+  row: number;
+  column: number;
 }
+
+export type Cell = GroupRowCell | LeafRowCell;
+
+type GroupRowState = 'hovered' | 'default';
+
+interface StatefulGroupRow extends RecycledGroupRow {
+  cell: StatefulGroupRowCell | null;
+  state: GroupRowState;
+}
+
+type GroupRowCellState = 'editing' | 'hovered' | 'default';
+
+interface StatefulGroupRowCell extends GroupRowCell {
+  state: GroupRowCellState;
+}
+
+type LeafRowState = 'selected' | 'hovered' | 'default';
 
 interface StatefulLeafRow extends RecycledLeafRow {
   cell: StatefulLeafRowCell | null;
-  state: 'selected' | 'hovered' | 'default';
+  state: LeafRowState;
 }
 
-interface StatefulLeafRowCell extends Cell {
-  type: 'leaf';
-  state: 'focused' | 'editing' | 'hovered' | 'default';
+type LeafRowCellState = 'focused' | 'editing' | 'hovered' | 'default';
+
+interface StatefulLeafRowCell extends LeafRowCell {
+  state: LeafRowCellState;
 }
 
 type StatefulRow = StatefulLeafRow | StatefulGroupRow;
@@ -627,7 +556,7 @@ export function useGetStatefulRows(
   const { rows, cell, selectedRows } = props;
 
   const selectedRowsMap = useMemo(() => {
-    const map: { [path: number]: boolean } = {};
+    const map: object = {};
 
     if (isEmpty(selectedRows)) {
       return map;
@@ -644,7 +573,7 @@ export function useGetStatefulRows(
   return useMemo(() => {
     return rows.map((row) => {
       if (isLeafRow(row)) {
-        const selected = get(selectedRowsMap, [...row.path, row.row]);
+        const leafRowCell = getLeafRowCell(cell, row);
 
         return {
           key: row.key,
@@ -653,10 +582,12 @@ export function useGetStatefulRows(
           path: row.path,
           row: row.row,
           y: row.y,
-          state: selected ? 'selected' : 'default',
-          cell: null,
+          state: getLeafRowState(leafRowCell, row, selectedRowsMap),
+          cell: leafRowCell,
         };
       }
+
+      const groupRowCell = getGroupRowCell(cell, row);
 
       return {
         key: row.key,
@@ -666,7 +597,7 @@ export function useGetStatefulRows(
         path: row.path,
         state: 'default',
         collapsed: row.collapsed,
-        cell: null,
+        cell: groupRowCell,
       };
     });
   }, [rows, cell, selectedRowsMap]);
@@ -678,4 +609,153 @@ function isLeafRow(row: Row): row is LeafRow {
   }
 
   return false;
+}
+
+function getLeafRowCell(
+  cell: StatefulCell | null,
+  row: RecycledLeafRow,
+): StatefulLeafRowCell | null {
+  if (cell === null) {
+    return null;
+  }
+
+  if (cell.type === 'group') {
+    return null;
+  }
+
+  if (
+    areEqual([...cell.path, cell.row], [...row.path, row.row], true) === false
+  ) {
+    return null;
+  }
+
+  return cell;
+}
+
+function getGroupRowCell(
+  cell: StatefulCell | null,
+  row: RecycledGroupRow,
+): StatefulGroupRowCell | null {
+  if (cell === null) {
+    return null;
+  }
+
+  if (cell.type === 'leaf') {
+    return null;
+  }
+
+  if (areEqual(cell.path, row.path, true) === false) {
+    return null;
+  }
+
+  return cell;
+}
+
+function getLeafRowState(
+  cell: StatefulLeafRowCell | null,
+  row: RecycledLeafRow,
+  selectedRowsMap: object,
+): LeafRowState {
+  if (cell !== null && cell.type === 'leaf') {
+    if (cell.state === 'hovered') {
+      return 'hovered';
+    } else if (cell.state === 'editing' || cell.state === 'focused') {
+      return 'selected';
+    }
+  }
+
+  const selected = get<boolean>(selectedRowsMap, [...row.path, row.row]);
+
+  if (selected === true) {
+    return 'selected';
+  }
+
+  return 'default';
+}
+
+export interface ContentOffset {
+  x: number;
+  y: number;
+}
+
+interface UseGridGetScrollToCellOffsetProps {
+  scrollViewHeight: number;
+  scrollViewWidth: number;
+  scrollX: number;
+  scrollY: number;
+  fixedColumnCount: number;
+  columns: Column[];
+  rows: Row[];
+  padding?: number;
+}
+
+export function useGridGetScrollToCellOffset(
+  props: UseGridGetScrollToCellOffsetProps,
+): (cell: Partial<Cell>) => Partial<ContentOffset> {
+  const {
+    columns,
+    rows,
+    scrollViewHeight,
+    scrollViewWidth,
+    fixedColumnCount,
+    scrollX,
+    scrollY,
+    padding = 40,
+  } = props;
+
+  const getScrollToRowOffset = useCallback(
+    (row?: number) => {
+      if (row === undefined) {
+        return;
+      }
+
+      const { y, height } = rows[row - 1];
+
+      const above = scrollY >= y;
+      const below = y + height >= scrollY + scrollViewHeight;
+
+      if (above) {
+        return Math.max(y - padding, 0);
+      } else if (below) {
+        return y + height - scrollViewHeight + padding;
+      }
+    },
+    [rows, scrollY, scrollViewHeight, padding],
+  );
+
+  const getScrollToColumnOffset = useCallback(
+    (column?: number) => {
+      if (column === undefined) {
+        return;
+      }
+
+      if (column <= fixedColumnCount) {
+        return 0;
+      }
+
+      const { x, width } = columns[column - 1 - fixedColumnCount];
+
+      const left = scrollX >= x;
+      const right = x + width >= scrollX + scrollViewWidth;
+
+      if (left) {
+        return Math.max(x - padding, 0);
+      } else if (right) {
+        return x + width - scrollViewWidth + padding;
+      }
+    },
+    [scrollX, columns, fixedColumnCount, scrollViewWidth, padding],
+  );
+
+  return useCallback(
+    (cell: Partial<Cell>): Partial<ContentOffset> => {
+      const { row, column } = cell;
+
+      return {
+        y: getScrollToRowOffset(row),
+        x: getScrollToColumnOffset(column),
+      };
+    },
+    [getScrollToRowOffset, getScrollToColumnOffset],
+  );
 }

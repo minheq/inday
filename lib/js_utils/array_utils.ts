@@ -165,3 +165,28 @@ export function groupBy<T extends { [key: string]: any }>(
 export function isEmpty<T = any>(data: T[]): boolean {
   return data.length === 0;
 }
+
+/**
+ * Compares whether 2 arrays are equal
+ * @param order If true, both array items must be in the same order
+ */
+export function areEqual<T extends number | string = any>(
+  a: T[],
+  b: T[],
+  order = false,
+): boolean {
+  if (order === true) {
+    for (let i = 0; i < a.length; i++) {
+      const itemA = a[i];
+      const itemB = b[i];
+
+      if (itemA !== itemB) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return hasAllOf(a, b);
+}

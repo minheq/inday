@@ -73,6 +73,11 @@ describe('getRows', () => {
             collapsed: false,
             rowCount: 2,
           },
+          {
+            type: 'leaf',
+            collapsed: false,
+            rowCount: 2,
+          },
         ],
       },
     ];
@@ -88,6 +93,9 @@ describe('getRows', () => {
       { type: 'group', height: 56, y: 248, path: [1, 0], collapsed: false },
       { type: 'leaf', height: 40, y: 304, path: [1, 0], row: 1 },
       { type: 'leaf', height: 40, y: 344, path: [1, 0], row: 2 },
+      { type: 'group', height: 56, y: 384, path: [1, 1], collapsed: false },
+      { type: 'leaf', height: 40, y: 440, path: [1, 1], row: 1 },
+      { type: 'leaf', height: 40, y: 480, path: [1, 1], row: 2 },
     ];
 
     expect(rows).toEqual(expected);
@@ -167,6 +175,7 @@ describe('getRows', () => {
     expect(rows).toEqual(expected);
   });
 });
+
 // describe('recycleItems', () => {
 //   let prevRows: RecycledRow[] = [];
 //   const scrollViewSize = 400;
