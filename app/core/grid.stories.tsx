@@ -2,10 +2,10 @@ import React from 'react';
 
 import {
   Grid,
-  RenderCellProps,
+  RenderLeafRowCellProps,
   RenderHeaderCellProps,
   RenderHeaderProps,
-  RenderRowProps,
+  RenderLeafRowProps,
 } from './grid';
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
@@ -15,7 +15,7 @@ export default {
   component: Grid,
 };
 
-function renderCell(props: RenderCellProps) {
+function renderLeafRowCell(props: RenderLeafRowCellProps) {
   const { row, column } = props;
 
   return (
@@ -27,7 +27,7 @@ function renderCell(props: RenderCellProps) {
   );
 }
 
-function renderRow(props: RenderRowProps) {
+function renderLeafRow(props: RenderLeafRowProps) {
   const { children } = props;
 
   return <View style={styles.row}>{children}</View>;
@@ -57,13 +57,13 @@ export const Default = () => (
           width={width}
           height={height}
           contentOffset={{ x: 0, y: 0 }}
-          rowCount={100}
-          renderCell={renderCell}
+          groups={[]}
+          renderLeafRowCell={renderLeafRowCell}
           headerHeight={80}
           renderHeaderCell={renderHeaderCell}
           renderHeader={renderHeader}
-          rowHeight={40}
-          renderRow={renderRow}
+          leafRowHeight={40}
+          renderLeafRow={renderLeafRow}
           columns={[
             100,
             150,
