@@ -260,7 +260,7 @@ export function makeView(
         width: 180,
         order: i,
       })),
-      'id',
+      (field) => field.id,
     ),
   };
 }
@@ -272,7 +272,7 @@ export function makeManyRecords(
     [fieldID: string]: Record[];
   },
   collaborators?: Collaborator[],
-) {
+): Record[] {
   return range(0, count).map(() => {
     return makeRecord({}, collection, recordsByFieldID, collaborators);
   });

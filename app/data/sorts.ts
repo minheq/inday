@@ -254,7 +254,7 @@ export function applyTextFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField } = getters;
 
@@ -281,7 +281,7 @@ export function applyNumberFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField } = getters;
 
@@ -308,7 +308,7 @@ export function applyDateFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField } = getters;
 
@@ -335,7 +335,7 @@ export function applySingleOptionFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField } = getters;
 
@@ -343,7 +343,7 @@ export function applySingleOptionFieldSort(
 
   assertSingleOptionField(field);
 
-  const optionsByValue = keyedBy(field.options, 'value');
+  const optionsByValue = keyedBy(field.options, (item) => item.value);
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
@@ -406,7 +406,7 @@ export function applyMultiOptionFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField } = getters;
 
@@ -414,7 +414,7 @@ export function applyMultiOptionFieldSort(
 
   assertMultiOptionField(field);
 
-  const optionsByValue = keyedBy(field.options, 'value');
+  const optionsByValue = keyedBy(field.options, (item) => item.value);
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
@@ -477,7 +477,7 @@ export function applySingleCollaboratorFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField, getCollaborator } = getters;
 
@@ -546,7 +546,7 @@ export function applyMultiCollaboratorFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField, getCollaborator } = getters;
 
@@ -615,7 +615,7 @@ export function applySingleRecordLinkFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField, getRecord, getCollection } = getters;
 
@@ -691,7 +691,7 @@ export function applyMultiRecordLinkFieldSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField, getRecord, getCollection } = getters;
 
@@ -766,7 +766,7 @@ export function applyBooleanFieldKindSort(
   sort: Sort,
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   const recordsClone = records.slice(0);
   const { getField } = getters;
 

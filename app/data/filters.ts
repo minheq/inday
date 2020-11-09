@@ -921,42 +921,48 @@ export const filtersByFieldType: {
   [FieldType.URL]: textFieldKindFilter,
 };
 
-function textFieldKindFilter(value: FieldValue, filter: Filter) {
+function textFieldKindFilter(value: FieldValue, filter: Filter): boolean {
   assertTextFieldKindValue(value);
   assertTextFilter(filter);
 
   return applyTextFieldKindFilter(value, filter);
 }
 
-function numberFieldKindFilter(value: FieldValue, filter: Filter) {
+function numberFieldKindFilter(value: FieldValue, filter: Filter): boolean {
   assertNumberFieldValue(value);
   assertNumberFilter(filter);
 
   return applyNumberFieldKindFilter(value, filter);
 }
 
-function dateFieldKindFilter(value: FieldValue, filter: Filter) {
+function dateFieldKindFilter(value: FieldValue, filter: Filter): boolean {
   assertDateFieldValue(value);
   assertDateFilter(filter);
 
   return applyDateFieldKindFilter(value, filter);
 }
 
-function singleSelectFieldKindFilter(value: FieldValue, filter: Filter) {
+function singleSelectFieldKindFilter(
+  value: FieldValue,
+  filter: Filter,
+): boolean {
   assertSingleSelectFieldKindValue(value);
   assertSingleSelectFilter(filter);
 
   return applySingleSelectFieldKindFilter(value, filter);
 }
 
-function multiSelectFieldKindFilter(value: FieldValue, filter: Filter) {
+function multiSelectFieldKindFilter(
+  value: FieldValue,
+  filter: Filter,
+): boolean {
   assertMultiSelectFieldKindValue(value);
   assertMultiSelectFilter(filter);
 
   return applyMultiSelectFieldKindFilter(value, filter);
 }
 
-function booleanFieldKindFilter(value: FieldValue, filter: Filter) {
+function booleanFieldKindFilter(value: FieldValue, filter: Filter): boolean {
   assertBooleanFieldKindValue(value);
   assertBooleanFilter(filter);
 

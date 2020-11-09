@@ -2,11 +2,10 @@ import { useCallback, useMemo, useRef } from 'react';
 import {
   areEqual,
   differenceBy,
-  get,
+  FlatObject,
   intersectBy,
   isEmpty,
   maxBy,
-  set,
   sum,
   sumBy,
 } from '../../lib/js_utils';
@@ -321,7 +320,7 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
   };
 }
 
-interface RecycleItemsParams<T extends { [key: string]: any }, K extends T> {
+interface RecycleItemsParams<T, K extends T> {
   items: T[];
   prevItems: K[];
   toRecycledItem: (item: T, key: number) => K;
@@ -330,7 +329,7 @@ interface RecycleItemsParams<T extends { [key: string]: any }, K extends T> {
   getKey: (item: K) => number;
 }
 
-export function recycleItems<T extends { [key: string]: any }, K extends T>(
+export function recycleItems<T, K extends T>(
   params: RecycleItemsParams<T, K>,
 ): K[] {
   const { items, prevItems, getValue, toRecycledItem, getKey } = params;
@@ -405,7 +404,7 @@ function recycleColumns(params: RecycleColumnsParams) {
   });
 }
 
-interface GetVisibleIndexRangeParams<T = any> {
+interface GetVisibleIndexRangeParams<T> {
   items: T[];
   scrollOffset: number;
   scrollViewSize: number;
@@ -416,7 +415,7 @@ interface GetVisibleIndexRangeParams<T = any> {
 
 type VisibleIndexRange = [startIndex: number, endIndex: number];
 
-export function getVisibleIndexRange<T = any>(
+export function getVisibleIndexRange<T>(
   params: GetVisibleIndexRangeParams<T>,
 ): VisibleIndexRange {
   const {
@@ -583,7 +582,7 @@ export function useGetStatefulRows(
   const { rows, cell, selectedRows } = props;
 
   const selectedRowsMap = useMemo(() => {
-    let map: object = {};
+    const map = FlatObject<boolean>();
 
     if (selectedRows === null || isEmpty(selectedRows)) {
       return map;
@@ -591,7 +590,7 @@ export function useGetStatefulRows(
 
     for (let i = 0; i < selectedRows.length; i++) {
       const selectedRow = selectedRows[i];
-      map = set(map, [...selectedRow.path, selectedRow.row], true);
+      map.set([...selectedRow.path, selectedRow.row], true);
     }
 
     return map;
@@ -698,7 +697,7 @@ function getGroupRowCell(
 function getLeafRowState(
   cell: StatefulLeafRowCell | null,
   row: RecycledLeafRow,
-  selectedRowsMap: object,
+  selectedRowsMap: FlatObject<boolean>,
 ): LeafRowState {
   if (cell !== null && cell.type === 'leaf') {
     if (cell.state === 'hovered') {
@@ -708,7 +707,7 @@ function getLeafRowState(
     }
   }
 
-  const selected = get<boolean>(selectedRowsMap, [...row.path, row.row]);
+  const selected = selectedRowsMap.get([...row.path, row.row]);
 
   if (selected === true) {
     return 'selected';
@@ -748,7 +747,7 @@ export function useGridGetScrollToCellOffset(
   } = props;
 
   const leafRowsMap = useMemo(() => {
-    let map: object = {};
+    const map = FlatObject<LeafRow>();
 
     if (isEmpty(rows)) {
       return map;
@@ -758,7 +757,7 @@ export function useGridGetScrollToCellOffset(
       const row = rows[i];
 
       if (isLeafRow(row)) {
-        map = set(map, [...row.path, row.row], row);
+        map.set([...row.path, row.row], row);
       }
     }
 
@@ -768,7 +767,7 @@ export function useGridGetScrollToCellOffset(
   const getLeafRow = useCallback(
     (path?: number[], row?: number): LeafRow | undefined => {
       if (path !== undefined && row !== undefined) {
-        return get(leafRowsMap, [...path, row]);
+        return leafRowsMap.get([...path, row]);
       }
 
       if (

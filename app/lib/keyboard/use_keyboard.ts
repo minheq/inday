@@ -20,11 +20,11 @@ interface ActiveKeys {
   [key: string]: boolean | undefined;
 }
 
-export function useKeyboard(keyBindings: KeyBinding[]) {
+export function useKeyboard(keyBindings: KeyBinding[]): void {
   const activeKeysRef = useRef<ActiveKeys>({});
 
   const groupedKeyBindingsByKey = useMemo(() => {
-    return groupBy(keyBindings, 'key');
+    return groupBy(keyBindings, (keyBinding) => keyBinding.key);
   }, [keyBindings]);
 
   const handleOnKeyDown = useCallback(

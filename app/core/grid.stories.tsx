@@ -107,7 +107,7 @@ export function Flat(): JSX.Element {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.wrapper}>
       <AutoSizer>
         {({ height, width }) => (
           <Fragment>
@@ -196,7 +196,7 @@ export function Grouped(): JSX.Element {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.wrapper}>
       <AutoSizer>
         {({ height, width }) => (
           <Fragment>
@@ -295,6 +295,9 @@ function ScrollToCell(props: ScrollToCellProps) {
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   groupRowCell: {
     width: '100%',
     height: '100%',

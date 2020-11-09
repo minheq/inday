@@ -1,6 +1,6 @@
 export function range(min: number, max: number, step?: number): number[];
 export function range(max: number): number[];
-export function range(arg0: any, arg1?: any, arg2?: any): number[] {
+export function range(arg0: number, arg1?: number, arg2?: number): number[] {
   const arr: number[] = [];
 
   if (!arg1) {
@@ -22,7 +22,7 @@ export function range(arg0: any, arg1?: any, arg2?: any): number[] {
  * Get first item in the array.
  * IMPORTANT: Make sure to check that the array is not empty first.
  */
-export function first<T = any>(arr: T[]): T {
+export function first<T>(arr: T[]): T {
   return arr[0];
 }
 
@@ -30,15 +30,15 @@ export function first<T = any>(arr: T[]): T {
  * Get last item in the array.
  * IMPORTANT: Make sure to check that the array is not empty first.
  */
-export function last<T = any>(arr: T[]): T {
+export function last<T>(arr: T[]): T {
   return arr[arr.length - 1];
 }
 
-export function secondLast<T = any>(arr: T[]): T {
+export function secondLast<T>(arr: T[]): T {
   return arr[arr.length - 2];
 }
 
-export function isNotEmpty<T = any>(arr: T[]): boolean {
+export function isNotEmpty<T>(arr: T[]): boolean {
   return arr.length > 0;
 }
 
@@ -51,10 +51,11 @@ export function intersect<T>(a: T[], b: T[]): T[] {
 }
 
 /** Returns array of values found in left and right array */
-export function intersectBy<
-  T extends { [key: string]: any },
-  K extends { [key: string]: any }
->(a: T[], b: K[], getValue: (item: T | K) => string | number): T[] {
+export function intersectBy<T, K>(
+  a: T[],
+  b: K[],
+  getValue: (item: T | K) => string | number,
+): T[] {
   const bMap: { [key: string]: K } = {};
 
   for (let i = 0; i < b.length; i++) {
@@ -78,10 +79,11 @@ export function intersectBy<
 }
 
 /** Returns array of values in left array that are not in the right array */
-export function differenceBy<
-  T extends { [key: string]: any },
-  K extends { [key: string]: any }
->(a: T[], b: K[], getValue: (item: T | K) => string | number): T[] {
+export function differenceBy<T, K>(
+  a: T[],
+  b: K[],
+  getValue: (item: T | K) => string | number,
+): T[] {
   const bMap: { [key: string]: K } = {};
 
   for (let i = 0; i < b.length; i++) {
@@ -115,23 +117,23 @@ export function hasAllOf<T>(a: T[], b: T[]): boolean {
 }
 
 export function hasNoneOf<T>(a: T[], b: T[]): boolean {
-  return isEmpty(intersect(a, b));
+  return isEmptyArray(intersect(a, b));
 }
 
-type KeyedBy<T extends { [key: string]: any }> = { [key: string]: T };
+type KeyedBy<T> = { [key: string]: T };
 
 /**
  * Returns an object with keys as chosen property of the item,
  * and value as item.
  */
-export function keyedBy<T extends { [key: string]: any }>(
+export function keyedBy<T>(
   items: T[],
-  prop: keyof T,
+  getKey: (item: T) => string,
 ): KeyedBy<T> {
   const result: KeyedBy<T> = {};
 
   for (const item of items) {
-    const key = item[prop];
+    const key = getKey(item);
 
     result[key] = item;
   }
@@ -155,14 +157,14 @@ export function splitLast<T>(items: T[]): [T[], T] {
  * Returns an object with keys as chosen property of the item,
  * and value as array of item with same key.
  */
-export function groupBy<T extends { [key: string]: any }>(
+export function groupBy<T>(
   items: T[],
-  prop: keyof T,
-) {
+  getKey: (item: T) => string,
+): { [key: string]: T[] } {
   const grouped: { [key: string]: T[] } = {};
 
   for (const item of items) {
-    const key = item[prop];
+    const key = getKey(item);
 
     if (grouped[key]) {
       grouped[key].push(item);
@@ -174,7 +176,7 @@ export function groupBy<T extends { [key: string]: any }>(
   return grouped;
 }
 
-export function isEmptyArray<T = any>(data: T[]): boolean {
+export function isEmptyArray<T>(data: T[]): boolean {
   return data.length === 0;
 }
 
@@ -182,7 +184,7 @@ export function isEmptyArray<T = any>(data: T[]): boolean {
  * Compares whether 2 arrays are equal
  * @param order If true, both array items must be in the same order
  */
-export function areArraysEqual<T extends number | string = any>(
+export function areArraysEqual<T extends number | string>(
   a: T[],
   b: T[],
   order = false,
