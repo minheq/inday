@@ -611,7 +611,7 @@ export function assertBooleanFieldKindValue(
 export function assertDateFieldKindValue(
   value: FieldValue,
 ): asserts value is DateFieldKindValue {
-  if (value !== null && !((value as any) instanceof Date)) {
+  if (value !== null && !(value instanceof Date)) {
     throw new Error(`Expected DateFieldKindValue. Received ${value}`);
   }
 }

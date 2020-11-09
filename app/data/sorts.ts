@@ -56,7 +56,7 @@ export function sortRecords(
   sorts: Sort[],
   records: Record[],
   getters: SortGetters,
-) {
+): Record[] {
   if (isEmpty(sorts)) {
     return records;
   }

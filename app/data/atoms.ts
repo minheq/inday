@@ -28,72 +28,54 @@ export const workspaceState = atom<WorkspaceState>({
     name: 'My Workspace',
     ownerID: '1',
   },
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type RecordsByIDState = { [recordID: string]: Record | undefined };
 export const recordsByIDState = atom<RecordsByIDState>({
   key: RecoilKey.RecordsByID,
   default: recordsByIDFixtures,
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type CollectionsByIDState = { [id: string]: Collection | undefined };
 export const collectionsByIDState = atom<CollectionsByIDState>({
   key: RecoilKey.CollectionsByID,
   default: collectionsByIDFixtures,
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type FieldsByIDState = { [fieldID: string]: Field | undefined };
 export const fieldsByIDState = atom<FieldsByIDState>({
   key: RecoilKey.FieldsByID,
   default: fieldsByIDFixtures,
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type FiltersByIDState = { [filterID: string]: Filter | undefined };
 export const filtersByIDState = atom<FiltersByIDState>({
   key: RecoilKey.FiltersByID,
   default: {},
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type SortsByIDState = { [sortID: string]: Sort | undefined };
 export const sortsByIDState = atom<SortsByIDState>({
   key: RecoilKey.SortsByID,
   default: {},
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type GroupsByIDState = { [groupID: string]: Group | undefined };
 export const groupsByIDState = atom<GroupsByIDState>({
   key: RecoilKey.GroupsByID,
   default: {},
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type SpacesByIDState = { [spaceID: string]: Space | undefined };
 export const spacesByIDState = atom<SpacesByIDState>({
   key: RecoilKey.SpacesByID,
   default: spacesByIDFixtures,
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type ViewsByIDState = { [viewID: string]: View | undefined };
 export const viewsByIDState = atom<ViewsByIDState>({
   key: RecoilKey.ViewsByID,
   default: viewsByIDFixtures,
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type CollaboratorsByIDState = {
@@ -102,14 +84,10 @@ export type CollaboratorsByIDState = {
 export const collaboratorsByIDState = atom<CollaboratorsByIDState>({
   key: RecoilKey.CollaboratorsByID,
   default: {},
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });
 
 export type EventsState = Event[];
 export const eventsState = atom<EventsState>({
   key: RecoilKey.Events,
   default: [],
-  // @ts-ignore: will be stable
-  persistence_UNSTABLE: { type: true },
 });

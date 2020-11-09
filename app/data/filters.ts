@@ -372,7 +372,7 @@ export function filterRecords(
   filterGroups: FilterGroup[],
   records: Record[],
   getters: FilterGetters,
-) {
+): Record[] {
   const { getField } = getters;
 
   let filteredRecords = records;
