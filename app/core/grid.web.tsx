@@ -6,6 +6,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useCallback,
+  useMemo,
 } from 'react';
 import { css } from '../lib/css';
 import {
@@ -19,6 +20,9 @@ import {
   StatefulLeafRowCell,
   LeafRowState,
   LeafRowCellState,
+  GroupRowState,
+  StatefulGroupRowCell,
+  GroupRowCellState,
 } from './grid.common';
 import {
   GridRef,
@@ -28,6 +32,8 @@ import {
   RenderLeafRowCellProps,
   RenderHeaderProps,
   RenderHeaderCellProps,
+  RenderGroupRowProps,
+  RenderGroupRowCellProps,
 } from './grid';
 
 export const Grid = memo(
@@ -183,18 +189,40 @@ export const Grid = memo(
                       path={row.path}
                       row={row.row}
                       height={row.height}
-                      renderLeafRow={renderLeafRow}
                       state={row.state}
                       cell={row.cell}
                       leftPaneContentWidth={leftPaneContentWidth}
                       width={contentWidth}
                       leftPaneColumns={leftPaneColumns}
                       rightPaneColumns={recycledColumns}
+                      renderLeafRow={renderLeafRow}
                       renderLeafRowCell={renderLeafRowCell}
                     />
                   );
                 case 'group':
-                  return null;
+                  if (
+                    renderGroupRow === undefined ||
+                    renderGroupRowCell === undefined
+                  ) {
+                    return null;
+                  }
+                  return (
+                    <GroupRowContainer
+                      key={row.key}
+                      y={row.y}
+                      path={row.path}
+                      height={row.height}
+                      collapsed={row.collapsed}
+                      state={row.state}
+                      cell={row.cell}
+                      leftPaneContentWidth={leftPaneContentWidth}
+                      width={contentWidth}
+                      leftPaneColumns={leftPaneColumns}
+                      rightPaneColumns={recycledColumns}
+                      renderGroupRow={renderGroupRow}
+                      renderGroupRowCell={renderGroupRowCell}
+                    />
+                  );
                 case 'spacer':
                   return (
                     <SpacerRowContainer
@@ -248,15 +276,18 @@ const HeaderContainer = memo(function HeaderContainer(
     [renderHeaderCell],
   );
 
-  const children = (
-    <div style={styles('header')}>
-      <div style={styles('leftPaneColumns')}>
-        {renderCells(leftPaneColumns)}
+  const children = useMemo(
+    () => (
+      <div style={styles('header')}>
+        <div style={styles('leftPaneColumns')}>
+          {renderCells(leftPaneColumns)}
+        </div>
+        <div style={styles('rightPaneColumns')}>
+          {renderCells(rightPaneColumns)}
+        </div>
       </div>
-      <div style={styles('rightPaneColumns')}>
-        {renderCells(rightPaneColumns)}
-      </div>
-    </div>
+    ),
+    [renderCells, leftPaneColumns, rightPaneColumns],
   );
 
   return (
@@ -299,49 +330,61 @@ const LeafRowContainer = memo(function LeafRowContainer(
     renderLeafRow,
   } = props;
 
-  const children = (
-    <div style={styles('row')}>
-      <div style={styles('leftPaneColumns')}>
-        {leftPaneColumns.map((columnData) => {
-          const { width: columnWidth, column, x } = columnData;
-          const cellState = cell?.state || 'default';
+  const children = useMemo(
+    () => (
+      <div style={styles('row')}>
+        <div style={styles('leftPaneColumns')}>
+          {leftPaneColumns.map((columnData) => {
+            const { width: columnWidth, column, x } = columnData;
+            const cellState = cell?.state || 'default';
 
-          return (
-            <LeafRowCellContainer
-              column={column}
-              height={height}
-              key={column}
-              path={path}
-              renderLeafRowCell={renderLeafRowCell}
-              row={row}
-              state={cellState}
-              width={columnWidth}
-              x={x}
-            />
-          );
-        })}
-      </div>
-      <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
-        {rightPaneColumns.map((columnData) => {
-          const { key, width: columnWidth, column, x } = columnData;
-          const cellState = cell?.state || 'default';
+            return (
+              <LeafRowCellContainer
+                column={column}
+                height={height}
+                key={column}
+                path={path}
+                renderLeafRowCell={renderLeafRowCell}
+                row={row}
+                state={cellState}
+                width={columnWidth}
+                x={x}
+              />
+            );
+          })}
+        </div>
+        <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
+          {rightPaneColumns.map((columnData) => {
+            const { key, width: columnWidth, column, x } = columnData;
+            const cellState = cell?.state || 'default';
 
-          return (
-            <LeafRowCellContainer
-              column={column}
-              height={height}
-              key={key}
-              path={path}
-              renderLeafRowCell={renderLeafRowCell}
-              row={row}
-              state={cellState}
-              width={columnWidth}
-              x={x}
-            />
-          );
-        })}
+            return (
+              <LeafRowCellContainer
+                column={column}
+                height={height}
+                key={key}
+                path={path}
+                renderLeafRowCell={renderLeafRowCell}
+                row={row}
+                state={cellState}
+                width={columnWidth}
+                x={x}
+              />
+            );
+          })}
+        </div>
       </div>
-    </div>
+    ),
+    [
+      cell?.state,
+      height,
+      leftPaneColumns,
+      leftPaneContentWidth,
+      path,
+      renderLeafRowCell,
+      rightPaneColumns,
+      row,
+    ],
   );
 
   return (
@@ -357,6 +400,106 @@ const LeafRowContainer = memo(function LeafRowContainer(
   );
 });
 
+interface GroupRowContainerProps {
+  height: number;
+  width: number;
+  y: number;
+  collapsed: boolean;
+  path: number[];
+  leftPaneContentWidth: number;
+  renderGroupRow: (props: RenderGroupRowProps) => React.ReactNode;
+  renderGroupRowCell: (props: RenderGroupRowCellProps) => React.ReactNode;
+  leftPaneColumns: Column[];
+  rightPaneColumns: RecycledColumn[];
+  state: GroupRowState;
+  cell: StatefulGroupRowCell | null;
+}
+
+const GroupRowContainer = memo(function GroupRowContainer(
+  props: GroupRowContainerProps,
+) {
+  const {
+    width,
+    height,
+    y,
+    collapsed,
+    path,
+    leftPaneContentWidth,
+    leftPaneColumns,
+    rightPaneColumns,
+    cell,
+    state,
+    renderGroupRowCell,
+    renderGroupRow,
+  } = props;
+
+  const children = useMemo(
+    () => (
+      <div style={styles('row')}>
+        <div style={styles('leftPaneColumns')}>
+          {leftPaneColumns.map((columnData) => {
+            const { width: columnWidth, column, x } = columnData;
+            const cellState = cell?.state || 'default';
+
+            return (
+              <GroupRowCellContainer
+                column={column}
+                height={height}
+                key={column}
+                path={path}
+                renderGroupRowCell={renderGroupRowCell}
+                state={cellState}
+                width={columnWidth}
+                x={x}
+              />
+            );
+          })}
+        </div>
+        <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
+          {rightPaneColumns.map((columnData) => {
+            const { key, width: columnWidth, column, x } = columnData;
+            const cellState = cell?.state || 'default';
+
+            return (
+              <GroupRowCellContainer
+                column={column}
+                height={height}
+                key={key}
+                path={path}
+                renderGroupRowCell={renderGroupRowCell}
+                state={cellState}
+                width={columnWidth}
+                x={x}
+              />
+            );
+          })}
+        </div>
+      </div>
+    ),
+    [
+      cell?.state,
+      height,
+      leftPaneColumns,
+      leftPaneContentWidth,
+      path,
+      renderGroupRowCell,
+      rightPaneColumns,
+    ],
+  );
+
+  return (
+    <div
+      style={styles(
+        'rowWrapper',
+        { height, width, top: y },
+        state === 'hovered' && 'selected',
+      )}
+    >
+      {renderGroupRow({ path, collapsed, state, children })}
+    </div>
+  );
+});
+
 interface SpacerRowContainerProps {
   y: number;
   height: number;
@@ -367,7 +510,7 @@ const SpacerRowContainer = memo(function SpacerRowContainer(
 ) {
   const { height, y } = props;
 
-  return <div style={styles({ height, top: y })} />;
+  return <div style={styles('spacer', { height, top: y })} />;
 });
 
 interface LeafRowCellContainerProps {
@@ -405,6 +548,42 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
       )}
     >
       {renderLeafRowCell({ path, row, column, state })}
+    </div>
+  );
+});
+
+interface GroupRowCellContainerProps {
+  x: number;
+  width: number;
+  height: number;
+  renderGroupRowCell: (props: RenderGroupRowCellProps) => React.ReactNode;
+  column: number;
+  path: number[];
+  state: GroupRowCellState;
+}
+
+const GroupRowCellContainer = memo(function GroupRowCellContainer(
+  props: GroupRowCellContainerProps,
+) {
+  const {
+    x,
+    path,
+    column,
+    width,
+    height,
+    state = 'default',
+    renderGroupRowCell,
+  } = props;
+
+  return (
+    <div
+      style={styles(
+        'cell',
+        { left: x, width, height },
+        (state === 'editing' || state === 'hovered') && 'selected',
+      )}
+    >
+      {renderGroupRowCell({ path, column, state })}
     </div>
   );
 });
@@ -455,6 +634,7 @@ const styles = css.create({
     flexDirection: 'row',
   },
   spacer: {
+    position: 'absolute',
     width: '100%',
   },
   selected: {

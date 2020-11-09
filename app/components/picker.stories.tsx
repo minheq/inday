@@ -8,7 +8,7 @@ export default {
   component: Picker,
 };
 
-export const Default = () => {
+export function Basic(): JSX.Element {
   const [value, setValue] = React.useState(1);
   return (
     <Container padding={16}>
@@ -23,4 +23,22 @@ export const Default = () => {
       />
     </Container>
   );
-};
+}
+
+export function WithSearch(): JSX.Element {
+  const [value, setValue] = React.useState(1);
+  return (
+    <Container padding={16}>
+      <Picker
+        searchable
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: 1, label: 'Option A' },
+          { value: 2, label: 'Option B' },
+          { value: 3, label: 'Option C' },
+        ]}
+      />
+    </Container>
+  );
+}

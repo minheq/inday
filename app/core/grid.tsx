@@ -64,7 +64,6 @@ export interface RenderGroupRowProps {
 
 export interface RenderGroupRowCellProps {
   path: number[];
-  row: number;
   column: number;
   state: GroupRowCellState;
 }

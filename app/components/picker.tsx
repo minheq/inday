@@ -36,7 +36,7 @@ const SEARCH_HEIGHT = 56;
 const PICKER_OFFSET = 4;
 const SCREEN_OFFSET = 16;
 
-export function Picker<TValue = any>(props: PickerProps<TValue>) {
+export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
   const {
     value,
     placeholder = '',
@@ -47,7 +47,6 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
   } = props;
   const buttonRef = useRef<View>(null);
   const borderColor = React.useRef(new Animated.Value(0)).current;
-  const [focused, setFocused] = React.useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [picker, setPicker] = useState({
@@ -142,14 +141,6 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
     setActiveIndex(index);
   }, []);
 
-  const handleBlur = React.useCallback(() => {
-    setFocused(false);
-  }, []);
-
-  const handleFocus = React.useCallback(() => {
-    setFocused(true);
-  }, []);
-
   const handleSubmitEditing = useCallback(() => {
     if (activeIndex !== null) {
       handleClosePicker();
@@ -183,19 +174,17 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
 
   React.useEffect(() => {
     Animated.spring(borderColor, {
-      toValue: focused || picker.visible ? 1 : 0,
+      toValue: picker.visible ? 1 : 0,
       useNativeDriver: true,
       bounciness: 0,
     }).start();
-  }, [borderColor, focused, picker]);
+  }, [borderColor, picker]);
 
   return (
     <Fragment>
       <View ref={buttonRef}>
         <Pressable
           onPress={handleOpenPicker}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
           style={[
             styles.button,
             {
@@ -252,6 +241,7 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
                   renderOption(o, active)
                 ) : (
                   <Pressable
+                    key={String(o.value)}
                     onHoverIn={() => handleHoverIn(i)}
                     onPress={() => handleSelectOption(o)}
                     style={[

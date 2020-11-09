@@ -155,24 +155,25 @@ export function getRows(
 
     offset += groupRowHeight;
 
-    if (collapsed === true) {
-    } else if (isLeafGroup(group)) {
-      const { rowCount } = group;
-      const leafRows = getLeafRows(rowCount, leafRowHeight, path, offset);
-      offset += getRowsHeight(leafRows);
-      rows = rows.concat(leafRows);
-    } else {
-      const { children } = group;
-      const groupRows = getRows(
-        children,
-        groupRowHeight,
-        leafRowHeight,
-        spacerHeight,
-        path,
-        offset,
-      );
-      offset += getRowsHeight(groupRows);
-      rows = rows.concat(groupRows);
+    if (collapsed === false) {
+      if (isLeafGroup(group)) {
+        const { rowCount } = group;
+        const leafRows = getLeafRows(rowCount, leafRowHeight, path, offset);
+        offset += getRowsHeight(leafRows);
+        rows = rows.concat(leafRows);
+      } else {
+        const { children } = group;
+        const groupRows = getRows(
+          children,
+          groupRowHeight,
+          leafRowHeight,
+          spacerHeight,
+          path,
+          offset,
+        );
+        offset += getRowsHeight(groupRows);
+        rows = rows.concat(groupRows);
+      }
     }
 
     if (path.length === 1) {
@@ -320,7 +321,7 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
   };
 }
 
-interface RecycleItemsParams<T extends object, K extends T> {
+interface RecycleItemsParams<T extends { [key: string]: any }, K extends T> {
   items: T[];
   prevItems: K[];
   toRecycledItem: (item: T, key: number) => K;
@@ -329,7 +330,7 @@ interface RecycleItemsParams<T extends object, K extends T> {
   getKey: (item: K) => number;
 }
 
-export function recycleItems<T extends object, K extends T>(
+export function recycleItems<T extends { [key: string]: any }, K extends T>(
   params: RecycleItemsParams<T, K>,
 ): K[] {
   const { items, prevItems, getValue, toRecycledItem, getKey } = params;
@@ -462,7 +463,7 @@ export function getVisibleIndexRange<T = any>(
   return [startIndex, endIndex];
 }
 
-export function getColumns(columnWidths: number[], offset: number = 0) {
+export function getColumns(columnWidths: number[], offset = 0): Column[] {
   const result: Column[] = [];
 
   for (let i = 0; i < columnWidths.length; i++) {
@@ -582,7 +583,7 @@ export function useGetStatefulRows(
   const { rows, cell, selectedRows } = props;
 
   const selectedRowsMap = useMemo(() => {
-    const map: object = {};
+    let map: object = {};
 
     if (selectedRows === null || isEmpty(selectedRows)) {
       return map;
@@ -590,7 +591,7 @@ export function useGetStatefulRows(
 
     for (let i = 0; i < selectedRows.length; i++) {
       const selectedRow = selectedRows[i];
-      set(map, [...selectedRow.path, selectedRow.row], true);
+      map = set(map, [...selectedRow.path, selectedRow.row], true);
     }
 
     return map;
@@ -734,7 +735,7 @@ interface UseGridGetScrollToCellOffsetProps {
 
 export function useGridGetScrollToCellOffset(
   props: UseGridGetScrollToCellOffsetProps,
-) {
+): (cell: Partial<LeafRowCell>) => Partial<ContentOffset> {
   const {
     columns,
     rows,
@@ -747,7 +748,7 @@ export function useGridGetScrollToCellOffset(
   } = props;
 
   const leafRowsMap = useMemo(() => {
-    const map: object = {};
+    let map: object = {};
 
     if (isEmpty(rows)) {
       return map;
@@ -757,7 +758,7 @@ export function useGridGetScrollToCellOffset(
       const row = rows[i];
 
       if (isLeafRow(row)) {
-        set(map, [...row.path, row.row], row);
+        map = set(map, [...row.path, row.row], row);
       }
     }
 

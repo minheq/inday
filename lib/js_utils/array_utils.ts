@@ -140,6 +140,18 @@ export function keyedBy<T extends { [key: string]: any }>(
 }
 
 /**
+ *
+ * Example:
+ * ```
+ * splitLast([1, 2, 3])
+ * // => [[1, 2], 3]
+ * ```
+ */
+export function splitLast<T>(items: T[]): [T[], T] {
+  return [items.slice(0, items.length - 1), items[items.length - 1]];
+}
+
+/**
  * Returns an object with keys as chosen property of the item,
  * and value as array of item with same key.
  */
@@ -162,7 +174,7 @@ export function groupBy<T extends { [key: string]: any }>(
   return grouped;
 }
 
-export function isEmpty<T = any>(data: T[]): boolean {
+export function isEmptyArray<T = any>(data: T[]): boolean {
   return data.length === 0;
 }
 
@@ -170,7 +182,7 @@ export function isEmpty<T = any>(data: T[]): boolean {
  * Compares whether 2 arrays are equal
  * @param order If true, both array items must be in the same order
  */
-export function areEqual<T extends number | string = any>(
+export function areArraysEqual<T extends number | string = any>(
   a: T[],
   b: T[],
   order = false,
