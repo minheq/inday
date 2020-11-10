@@ -76,10 +76,10 @@ import { ListView } from '../data/views';
 import {
   Grid,
   GridRef,
-  RenderCellProps,
+  RenderLeafRowCellProps,
   RenderHeaderCellProps,
   RenderHeaderProps,
-  RenderRowProps,
+  RenderLeafRowProps,
 } from './grid';
 import { format } from 'date-fns';
 import { Record, RecordID } from '../data/records';
@@ -91,15 +91,10 @@ import {
   WhiteSpaceKey,
   UIKey,
 } from '../lib/keyboard';
+import { StatefulLeafRowCell } from './grid.common';
 
-interface FocusedCell {
-  row: number;
-  column: number;
-  editing: boolean;
-}
-
-const focusedCellState = atom<FocusedCell | null>({
-  key: 'ListViewDisplay_FocusedCell',
+const cellState = atom<StatefulLeafRowCell | null>({
+  key: 'ListViewDisplay_Cell',
   default: null,
 });
 
@@ -111,278 +106,66 @@ interface ListViewDisplayProps {
 const FIELD_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
 
-export function ListViewDisplay(props: ListViewDisplayProps) {
+export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const { view, onOpenRecord } = props;
-  const [focusedCell, setFocusedCell] = useRecoilState(focusedCellState);
+  const [cell, setCell] = useRecoilState(cellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
   const gridRef = useRef<GridRef>(null);
 
-  const recordToRowMap = useMemo(() => {
-    const map: {
-      [recordID: string]: number;
-    } = {};
-
-    for (let i = 0; i < records.length; i++) {
-      const record = records[i];
-      map[record.id] = i + 1;
-    }
-
-    return map;
-  }, [records]);
-  const columnToFieldMap = useMemo(() => {
-    const map: {
-      [column: number]: FieldID | undefined;
+  const columnToFieldCache = useMemo(() => {
+    const cache: {
+      [column: number]: FieldID;
     } = {};
 
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
-      map[i + 1] = field.id;
+      cache[i + 1] = field.id;
     }
 
-    return map;
+    return cache;
   }, [fields]);
-  const rowToRecordMap = useMemo(() => {
-    const map: {
+  const rowToRecordCache = useMemo(() => {
+    const cache: {
       [row: number]: RecordID;
     } = {};
 
     for (let i = 0; i < records.length; i++) {
       const record = records[i];
-      map[i + 1] = record.id;
+      cache[i + 1] = record.id;
     }
 
-    return map;
+    return cache;
   }, [records]);
-  const selectedRows = useMemo(() => {
-    return [].map((recordID) => recordToRowMap[recordID]);
-  }, [recordToRowMap]);
+
+  useCellKeyBindings({
+    rowToRecordCache,
+    records,
+    cell,
+    columnToFieldCache,
+    setCell,
+    onOpenRecord,
+    gridRef,
+    fields,
+  });
 
   const contentOffset = useMemo(() => {
     return { x: 0, y: 0 };
   }, []);
 
-  const focusedCellKeyBindings = useMemo(() => {
-    if (focusedCell === null || focusedCell.editing === true) {
-      return [];
-    }
-
-    const keyBindings: KeyBinding[] = [
-      {
-        key: NavigationKey.ArrowDown,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { row, column } = focusedCell;
-
-            const nextRow = row + 1;
-            if (rowToRecordMap[nextRow] === undefined) {
-              return;
-            }
-
-            setFocusedCell({
-              row: nextRow,
-              column,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ row: nextRow });
-          }
-        },
-      },
-      {
-        key: NavigationKey.ArrowUp,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { row, column } = focusedCell;
-
-            const prevRow = row - 1;
-            if (rowToRecordMap[prevRow] === undefined) {
-              return;
-            }
-
-            setFocusedCell({
-              row: prevRow,
-              column,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ row: prevRow });
-          }
-        },
-      },
-      {
-        key: NavigationKey.ArrowLeft,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { row, column } = focusedCell;
-            const prevColumn = column - 1;
-            if (columnToFieldMap[prevColumn] === undefined) {
-              return;
-            }
-
-            setFocusedCell({
-              row,
-              column: prevColumn,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ column: prevColumn });
-          }
-        },
-      },
-      {
-        key: NavigationKey.ArrowRight,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { row, column } = focusedCell;
-
-            const nextColumn = column + 1;
-            if (columnToFieldMap[nextColumn] === undefined) {
-              return;
-            }
-
-            setFocusedCell({
-              row,
-              column: nextColumn,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ column: nextColumn });
-          }
-        },
-      },
-      {
-        key: NavigationKey.ArrowDown,
-        meta: true,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { column } = focusedCell;
-
-            const nextRow = records.length;
-
-            setFocusedCell({
-              row: nextRow,
-              column,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ row: nextRow });
-          }
-        },
-      },
-      {
-        key: NavigationKey.ArrowUp,
-        meta: true,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { column } = focusedCell;
-
-            const prevRow = 1;
-
-            setFocusedCell({
-              row: prevRow,
-              column,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ row: prevRow });
-          }
-        },
-      },
-      {
-        key: NavigationKey.ArrowLeft,
-        meta: true,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { row } = focusedCell;
-
-            const prevColumn = 1;
-
-            setFocusedCell({
-              row,
-              column: prevColumn,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ column: prevColumn });
-          }
-        },
-      },
-      {
-        key: NavigationKey.ArrowRight,
-        meta: true,
-        handler: () => {
-          if (focusedCell !== null && gridRef.current !== null) {
-            const { row } = focusedCell;
-
-            const nextColumn = fields.length;
-
-            setFocusedCell({
-              row,
-              column: nextColumn,
-              editing: false,
-            });
-
-            gridRef.current.scrollToCell({ column: nextColumn });
-          }
-        },
-      },
-      {
-        key: UIKey.Escape,
-        handler: () => {
-          if (focusedCell !== null) {
-            setFocusedCell(null);
-          }
-        },
-      },
-      {
-        key: WhiteSpaceKey.Enter,
-        handler: () => {
-          if (focusedCell !== null) {
-            setFocusedCell({
-              row: focusedCell.row,
-              column: focusedCell.column,
-              editing: true,
-            });
-          }
-        },
-      },
-      {
-        key: WhiteSpaceKey.Space,
-        handler: () => {
-          if (focusedCell !== null) {
-            onOpenRecord(rowToRecordMap[focusedCell.row]);
-          }
-        },
-      },
-    ];
-
-    return keyBindings;
-  }, [
-    focusedCell,
-    setFocusedCell,
-    rowToRecordMap,
-    columnToFieldMap,
-    records,
-    fields,
-    onOpenRecord,
-  ]);
-
-  useKeyboard(focusedCellKeyBindings);
-
   const { fixedFieldCount } = view;
 
   const renderCell = useCallback(
-    ({ row, column, focused, editing }: RenderCellProps) => {
+    ({ row, column, path, state }: RenderLeafRowCellProps) => {
       const field = fields[column - 1];
       const record = records[row - 1];
       const value = record.fields[field.id];
       const primary = column === 1;
 
       return (
-        <Cell
-          focused={focused}
-          editing={editing}
+        <LeafRowCell
+          state={state}
+          path={path}
           record={record}
           field={field}
           value={value}
@@ -395,9 +178,16 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
     [fields, records],
   );
 
-  const renderRow = useCallback(({ selected, children }: RenderRowProps) => {
-    return <Row selected={selected}>{children}</Row>;
-  }, []);
+  const renderRow = useCallback(
+    ({ path, row, state, children }: RenderLeafRowProps) => {
+      return (
+        <LeafRow row={row} state={state} path={path}>
+          {children}
+        </LeafRow>
+      );
+    },
+    [],
+  );
 
   const renderHeader = useCallback(({ children }: RenderHeaderProps) => {
     return <Header>{children}</Header>;
@@ -434,8 +224,7 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
             headerHeight={FIELD_ROW_HEIGHT}
             columns={columns}
             fixedColumnCount={fixedFieldCount}
-            focusedCell={focusedCell}
-            selectedRows={selectedRows}
+            cell={cell}
             renderRow={renderRow}
           />
         )}
@@ -444,13 +233,12 @@ export function ListViewDisplay(props: ListViewDisplayProps) {
   );
 }
 
-interface RowProps {
-  selected: boolean;
+interface LeafRowProps extends RenderLeafRowProps {
   children: React.ReactNode;
 }
 
-function Row(props: RowProps) {
-  const { selected, children } = props;
+function LeafRow(props: LeafRowProps) {
+  const { state, children } = props;
   const theme = useTheme();
 
   return (
@@ -458,9 +246,10 @@ function Row(props: RowProps) {
       style={[
         styles.row,
         {
-          backgroundColor: selected
-            ? theme.container.color.tint
-            : theme.container.color.content,
+          backgroundColor:
+            state === 'hovered'
+              ? theme.container.color.tint
+              : theme.container.color.content,
         },
       ]}
     >
@@ -479,29 +268,25 @@ function Header(props: HeaderProps) {
   return <View style={[styles.row]}>{children}</View>;
 }
 
-interface CellProps {
+interface LeafRowCellProps extends RenderLeafRowCellProps {
   field: Field;
   value: FieldValue;
   record: Record;
-  focused: boolean;
-  editing: boolean;
   primary: boolean;
-  row: number;
-  column: number;
 }
 
-function Cell(props: CellProps) {
-  const { field, value, focused, row, column } = props;
+function LeafRowCell(props: LeafRowCellProps) {
+  const { field, value, path, state, row, column } = props;
   const theme = useTheme();
-  const setFocusedCell = useSetRecoilState(focusedCellState);
+  const setCell = useSetRecoilState(cellState);
 
   const handlePress = useCallback(() => {
-    if (focused) {
-      setFocusedCell({ row, column, editing: true });
+    if (state === 'focused') {
+      setCell({ type: 'leaf', row, path, column, state: 'editing' });
     } else {
-      setFocusedCell({ row, column, editing: false });
+      setCell({ type: 'leaf', row, path, column, state: 'focused' });
     }
-  }, [setFocusedCell, focused, row, column]);
+  }, [setCell, state, row, column, path]);
 
   const renderer = rendererByFieldType[field.type];
 
@@ -513,7 +298,7 @@ function Cell(props: CellProps) {
       <View
         style={[
           styles.cellWrapper,
-          focused && { borderColor: theme.border.color.focus },
+          state === 'focused' && { borderColor: theme.border.color.focus },
         ]}
       >
         {renderer({ field, value })}
@@ -543,6 +328,287 @@ function HeaderCell(props: HeaderCellProps) {
       <Text>{field.name}</Text>
     </View>
   );
+}
+
+interface UseCellKeyBindingsProps {
+  cell: StatefulLeafRowCell | null;
+  setCell: (cell: StatefulLeafRowCell | null) => void;
+  rowToRecordCache: {
+    [row: number]: RecordID;
+  };
+  columnToFieldCache: {
+    [column: number]: FieldID;
+  };
+  records: Record[];
+  fields: Field[];
+  onOpenRecord: (recordID: RecordID) => void;
+  gridRef: React.RefObject<GridRef>;
+}
+
+function useCellKeyBindings(props: UseCellKeyBindingsProps) {
+  const {
+    cell,
+    setCell,
+    rowToRecordCache,
+    columnToFieldCache,
+    records,
+    fields,
+    onOpenRecord,
+    gridRef,
+  } = props;
+
+  const onArrowDown = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { row, column, path } = cell;
+
+      const nextRow = row + 1;
+      if (rowToRecordCache[nextRow] === undefined) {
+        return;
+      }
+
+      setCell({
+        type: 'leaf',
+        row: nextRow,
+        column,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ row: nextRow });
+    }
+  }, [cell, gridRef, setCell, rowToRecordCache]);
+
+  const onArrowUp = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { row, column, path } = cell;
+
+      const prevRow = row - 1;
+      if (rowToRecordCache[prevRow] === undefined) {
+        return;
+      }
+
+      setCell({
+        type: 'leaf',
+        row: prevRow,
+        column,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ row: prevRow });
+    }
+  }, [cell, gridRef, setCell, rowToRecordCache]);
+
+  const onArrowLeft = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { row, column, path } = cell;
+      const prevColumn = column - 1;
+      if (columnToFieldCache[prevColumn] === undefined) {
+        return;
+      }
+
+      setCell({
+        type: 'leaf',
+        row,
+        column: prevColumn,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ column: prevColumn });
+    }
+  }, [cell, gridRef, setCell, columnToFieldCache]);
+
+  const onArrowRight = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { row, column, path } = cell;
+
+      const nextColumn = column + 1;
+      if (columnToFieldCache[nextColumn] === undefined) {
+        return;
+      }
+
+      setCell({
+        type: 'leaf',
+        row,
+        column: nextColumn,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ column: nextColumn });
+    }
+  }, [cell, gridRef, setCell, columnToFieldCache]);
+
+  const onMetaArrowDown = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { column, path } = cell;
+
+      const nextRow = records.length;
+
+      setCell({
+        type: 'leaf',
+        row: nextRow,
+        column,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ row: nextRow });
+    }
+  }, [cell, gridRef, setCell, records]);
+
+  const onMetaArrowUp = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { column, path } = cell;
+
+      const prevRow = 1;
+
+      setCell({
+        type: 'leaf',
+        row: prevRow,
+        column,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ row: prevRow });
+    }
+  }, [cell, gridRef, setCell]);
+
+  const onMetaArrowLeft = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { row, path } = cell;
+
+      const prevColumn = 1;
+
+      setCell({
+        type: 'leaf',
+        row,
+        column: prevColumn,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ column: prevColumn });
+    }
+  }, [cell, gridRef, setCell]);
+
+  const onMetaArrowRight = useCallback(() => {
+    if (cell !== null && gridRef.current !== null) {
+      const { row, path } = cell;
+
+      const nextColumn = fields.length;
+
+      setCell({
+        type: 'leaf',
+        row,
+        column: nextColumn,
+        path,
+        state: 'focused',
+      });
+
+      gridRef.current.scrollToCell({ column: nextColumn });
+    }
+  }, [cell, gridRef, setCell, fields]);
+
+  const onEscape = useCallback(() => {
+    if (cell !== null) {
+      setCell(null);
+    }
+  }, [cell, setCell]);
+
+  const onEnter = useCallback(() => {
+    if (cell !== null) {
+      const { row, column, path } = cell;
+
+      setCell({
+        type: 'leaf',
+        row,
+        column,
+        path,
+        state: 'editing',
+      });
+    }
+  }, [cell, setCell]);
+
+  const onSpace = useCallback(() => {
+    if (cell !== null) {
+      onOpenRecord(rowToRecordCache[cell.row]);
+    }
+  }, [cell, onOpenRecord, rowToRecordCache]);
+
+  const focusedCellKeyBindings = useMemo((): KeyBinding[] => {
+    if (cell === null || cell.state === 'editing') {
+      return [];
+    }
+
+    return [
+      {
+        key: NavigationKey.ArrowDown,
+        handler: onArrowDown,
+      },
+      {
+        key: NavigationKey.ArrowUp,
+        handler: onArrowUp,
+      },
+      {
+        key: NavigationKey.ArrowLeft,
+        handler: onArrowLeft,
+      },
+      {
+        key: NavigationKey.ArrowRight,
+        handler: onArrowRight,
+      },
+      {
+        key: NavigationKey.ArrowDown,
+        meta: true,
+        handler: onMetaArrowDown,
+      },
+      {
+        key: NavigationKey.ArrowUp,
+        meta: true,
+        handler: onMetaArrowUp,
+      },
+      {
+        key: NavigationKey.ArrowLeft,
+        meta: true,
+        handler: onMetaArrowLeft,
+      },
+      {
+        key: NavigationKey.ArrowRight,
+        meta: true,
+        handler: onMetaArrowRight,
+      },
+      {
+        key: UIKey.Escape,
+        handler: onEscape,
+      },
+      {
+        key: WhiteSpaceKey.Enter,
+        handler: onEnter,
+      },
+      {
+        key: WhiteSpaceKey.Space,
+        handler: onSpace,
+      },
+    ];
+  }, [
+    cell,
+    onArrowDown,
+    onArrowUp,
+    onArrowLeft,
+    onArrowRight,
+    onMetaArrowDown,
+    onMetaArrowUp,
+    onMetaArrowLeft,
+    onMetaArrowRight,
+    onEscape,
+    onEnter,
+    onSpace,
+  ]);
+
+  useKeyboard(focusedCellKeyBindings);
 }
 
 const rendererByFieldType: {
