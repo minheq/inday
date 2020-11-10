@@ -581,19 +581,19 @@ export function useGetStatefulRows(
 ): StatefulRow[] {
   const { rows, cell, selectedRows } = props;
 
-  const selectedRowsMap = useMemo(() => {
-    const map = FlatObject<boolean>();
+  const selectedRowsCache = useMemo(() => {
+    const cache = FlatObject<boolean>();
 
     if (selectedRows === null || isEmpty(selectedRows)) {
-      return map;
+      return cache;
     }
 
     for (let i = 0; i < selectedRows.length; i++) {
       const selectedRow = selectedRows[i];
-      map.set([...selectedRow.path, selectedRow.row], true);
+      cache.set([...selectedRow.path, selectedRow.row], true);
     }
 
-    return map;
+    return cache;
   }, [selectedRows]);
 
   return useMemo(() => {
@@ -617,7 +617,7 @@ export function useGetStatefulRows(
           path: row.path,
           row: row.row,
           y: row.y,
-          state: getLeafRowState(leafRowCell, row, selectedRowsMap),
+          state: getLeafRowState(leafRowCell, row, selectedRowsCache),
           cell: leafRowCell,
         };
       }
@@ -635,7 +635,7 @@ export function useGetStatefulRows(
         cell: groupRowCell,
       };
     });
-  }, [rows, cell, selectedRowsMap]);
+  }, [rows, cell, selectedRowsCache]);
 }
 
 function isLeafRow(row: Row): row is LeafRow {
@@ -697,7 +697,7 @@ function getGroupRowCell(
 function getLeafRowState(
   cell: StatefulLeafRowCell | null,
   row: RecycledLeafRow,
-  selectedRowsMap: FlatObject<boolean>,
+  selectedRowsCache: FlatObject<boolean>,
 ): LeafRowState {
   if (cell !== null && cell.type === 'leaf') {
     if (cell.state === 'hovered') {
@@ -707,7 +707,7 @@ function getLeafRowState(
     }
   }
 
-  const selected = selectedRowsMap.get([...row.path, row.row]);
+  const selected = selectedRowsCache.get([...row.path, row.row]);
 
   if (selected === true) {
     return 'selected';
@@ -746,28 +746,28 @@ export function useGridGetScrollToCellOffset(
     padding = 40,
   } = props;
 
-  const leafRowsMap = useMemo(() => {
-    const map = FlatObject<LeafRow>();
+  const leafRowsCache = useMemo(() => {
+    const cache = FlatObject<LeafRow>();
 
     if (isEmpty(rows)) {
-      return map;
+      return cache;
     }
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
 
       if (isLeafRow(row)) {
-        map.set([...row.path, row.row], row);
+        cache.set([...row.path, row.row], row);
       }
     }
 
-    return map;
+    return cache;
   }, [rows]);
 
   const getLeafRow = useCallback(
     (path?: number[], row?: number): LeafRow | undefined => {
       if (path !== undefined && row !== undefined) {
-        return leafRowsMap.get([...path, row]);
+        return leafRowsCache.get([...path, row]);
       }
 
       if (
@@ -779,7 +779,7 @@ export function useGridGetScrollToCellOffset(
         );
       }
     },
-    [leafRowsMap],
+    [leafRowsCache],
   );
 
   const getScrollToRowOffset = useCallback(
