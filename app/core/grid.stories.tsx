@@ -9,6 +9,8 @@ import {
   RenderGroupRowProps,
   RenderGroupRowCellProps,
   GridRef,
+  RenderFooterProps,
+  RenderFooterCellProps,
 } from './grid';
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
@@ -71,6 +73,22 @@ function renderHeaderCell(props: RenderHeaderCellProps) {
   );
 }
 
+function renderFooter(props: RenderFooterProps) {
+  const { children } = props;
+
+  return <View style={styles.footer}>{children}</View>;
+}
+
+function renderFooterCell(props: RenderFooterCellProps) {
+  const { column } = props;
+
+  return (
+    <View style={styles.row}>
+      <Text>{column}</Text>
+    </View>
+  );
+}
+
 export function Flat(): JSX.Element {
   const gridRef = useRef<GridRef>(null);
 
@@ -123,6 +141,9 @@ export function Flat(): JSX.Element {
               renderHeader={renderHeader}
               leafRowHeight={40}
               renderLeafRow={renderLeafRow}
+              renderFooter={renderFooter}
+              renderFooterCell={renderFooterCell}
+              footerHeight={40}
               columns={columns}
               fixedColumnCount={1}
             />
@@ -215,6 +236,9 @@ export function Grouped(): JSX.Element {
               renderGroupRow={renderGroupRow}
               renderGroupRowCell={renderGroupRowCell}
               groupRowHeight={56}
+              renderFooter={renderFooter}
+              renderFooterCell={renderFooterCell}
+              footerHeight={40}
               spacerHeight={80}
               columns={columns}
               fixedColumnCount={1}
@@ -313,20 +337,26 @@ const styles = StyleSheet.create({
   groupRow: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'pink',
+    backgroundColor: '#EAE2F8',
   },
   header: {
     width: '100%',
     height: '100%',
     borderBottomWidth: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#DCEEFB',
+  },
+  footer: {
+    width: '100%',
+    height: '100%',
+    borderBottomWidth: 1,
+    backgroundColor: '#F0F4F8',
   },
   scrollToCell: {
     backgroundColor: 'white',
     borderRadius: 8,
     width: 200,
     position: 'absolute',
-    bottom: 16,
+    bottom: 64,
     right: 16,
   },
 });

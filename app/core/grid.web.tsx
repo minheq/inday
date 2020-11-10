@@ -34,29 +34,35 @@ import {
   RenderHeaderCellProps,
   RenderGroupRowProps,
   RenderGroupRowCellProps,
+  RenderFooterProps,
+  RenderFooterCellProps,
 } from './grid';
 
 export const Grid = memo(
   forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     const {
       cell = null,
-      renderLeafRow,
       selectedRows = null,
       columns,
       fixedColumnCount,
       groups,
       spacerHeight = 0,
       groupRowHeight = 0,
-      renderGroupRow,
-      renderGroupRowCell,
-      leafRowHeight,
+      footerHeight = 0,
       headerHeight = 0,
+      leafRowHeight,
       height,
       width,
+      renderFooter,
+      renderFooterCell,
+      renderGroupRow,
+      renderGroupRowCell,
+      renderLeafRow,
       renderLeafRowCell,
       renderHeaderCell,
       renderHeader,
       contentOffset,
+      onHeaderCellResize,
       onContentOffsetLoaded,
     } = props;
     const scrollViewRef = useRef<HTMLDivElement>(null);
@@ -119,8 +125,8 @@ export const Grid = memo(
       spacerHeight,
     });
 
-    const totalHeight = contentHeight + headerHeight;
-    const scrollViewHeight = height - headerHeight;
+    const totalHeight = contentHeight + headerHeight + footerHeight;
+    const scrollViewHeight = height - headerHeight - footerHeight;
     const scrollViewWidth = width - leftPaneContentWidth;
 
     const { recycledRows, recycledColumns } = useGridRecycler({
@@ -176,6 +182,19 @@ export const Grid = memo(
                 rightPaneColumns={rightPaneColumns}
                 renderHeader={renderHeader}
                 renderHeaderCell={renderHeaderCell}
+              />
+            )}
+          {footerHeight !== 0 &&
+            renderFooterCell !== undefined &&
+            renderFooter !== undefined && (
+              <FooterContainer
+                y={scrollViewHeight + headerHeight}
+                height={footerHeight}
+                width={contentWidth}
+                leftPaneColumns={leftPaneColumns}
+                rightPaneColumns={rightPaneColumns}
+                renderFooter={renderFooter}
+                renderFooterCell={renderFooterCell}
               />
             )}
           <div style={styles('rowsWrapper', { top: headerHeight })}>
@@ -293,6 +312,65 @@ const HeaderContainer = memo(function HeaderContainer(
   return (
     <div style={styles('headerWrapper', { width, height })}>
       {renderHeader({ children })}
+    </div>
+  );
+});
+
+interface FooterContainerProps {
+  height: number;
+  width: number;
+  y: number;
+  renderFooter: (props: RenderFooterProps) => React.ReactNode;
+  renderFooterCell: (props: RenderFooterCellProps) => React.ReactNode;
+  leftPaneColumns: Column[];
+  rightPaneColumns: Column[];
+}
+
+const FooterContainer = memo(function FooterContainer(
+  props: FooterContainerProps,
+) {
+  const {
+    y,
+    height,
+    width,
+    leftPaneColumns,
+    rightPaneColumns,
+    renderFooter,
+    renderFooterCell,
+  } = props;
+
+  const renderCells = useCallback(
+    (columns: Column[]) => {
+      return columns.map((columnData) => {
+        const { width: columnWidth, column } = columnData;
+
+        return (
+          <div key={column} style={{ width: columnWidth }}>
+            {renderFooterCell({ column })}
+          </div>
+        );
+      });
+    },
+    [renderFooterCell],
+  );
+
+  const children = useMemo(
+    () => (
+      <div style={styles('footer')}>
+        <div style={styles('leftPaneColumns')}>
+          {renderCells(leftPaneColumns)}
+        </div>
+        <div style={styles('rightPaneColumns')}>
+          {renderCells(rightPaneColumns)}
+        </div>
+      </div>
+    ),
+    [renderCells, leftPaneColumns, rightPaneColumns],
+  );
+
+  return (
+    <div style={styles('footerWrapper', { top: y, width, height })}>
+      {renderFooter({ children })}
     </div>
   );
 });
@@ -615,7 +693,18 @@ const styles = css.create({
     position: 'sticky',
     top: 0,
   },
+  footerWrapper: {
+    zIndex: 1,
+    position: 'sticky',
+    bottom: 0,
+  },
   header: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    height: '100%',
+  },
+  footer: {
     display: 'flex',
     flexDirection: 'row',
     width: '100%',

@@ -31,17 +31,17 @@ export interface GridProps {
   selectedRows?: LeafRow[] | null;
   height: number;
   width: number;
+  onHeaderCellResize?: () => void;
+  footerHeight?: number;
+  renderFooter?: (props: RenderFooterProps) => React.ReactNode;
+  renderFooterCell?: (props: RenderFooterCellProps) => React.ReactNode;
   renderLeafRow: (props: RenderLeafRowProps) => React.ReactNode;
   renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
-  /** To display header, also pass `renderHeader` and `renderHeaderCell` props */
   headerHeight?: number;
-  /** To display header, also pass `headerHeight` and `renderHeaderCell` props */
   renderHeader?: (props: RenderHeaderProps) => React.ReactNode;
-  /** To display header, also pass `headerHeight` and `renderHeader` props */
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   leafRowHeight: number;
   groups: Group[];
-  /** To display group, also pass `headerHeight` and `renderHeader` props */
   groupRowHeight?: number;
   spacerHeight?: number;
   renderGroupRow?: (props: RenderGroupRowProps) => React.ReactNode;
@@ -80,6 +80,14 @@ export interface RenderHeaderProps {
 }
 
 export interface RenderHeaderCellProps {
+  column: number;
+}
+
+export interface RenderFooterProps {
+  children: React.ReactNode;
+}
+
+export interface RenderFooterCellProps {
   column: number;
 }
 
