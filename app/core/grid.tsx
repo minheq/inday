@@ -31,7 +31,6 @@ export interface GridProps {
   selectedRows?: LeafRow[] | null;
   height: number;
   width: number;
-  onHeaderCellResize?: () => void;
   footerHeight?: number;
   renderFooter?: (props: RenderFooterProps) => React.ReactNode;
   renderFooterCell?: (props: RenderFooterCellProps) => React.ReactNode;

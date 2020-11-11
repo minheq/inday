@@ -62,7 +62,6 @@ export const Grid = memo(
       renderHeaderCell,
       renderHeader,
       contentOffset,
-      onHeaderCellResize,
       onContentOffsetLoaded,
     } = props;
     const scrollViewRef = useRef<HTMLDivElement>(null);
@@ -414,7 +413,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
         <div style={styles('leftPaneColumns')}>
           {leftPaneColumns.map((columnData) => {
             const { width: columnWidth, column, x } = columnData;
-            const cellState = cell?.state || 'default';
+            const cellState = cell?.column === column ? cell.state : 'default';
 
             return (
               <LeafRowCellContainer
@@ -434,7 +433,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
         <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
           {rightPaneColumns.map((columnData) => {
             const { key, width: columnWidth, column, x } = columnData;
-            const cellState = cell?.state || 'default';
+            const cellState = cell?.column === column ? cell.state : 'default';
 
             return (
               <LeafRowCellContainer
@@ -454,7 +453,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
       </div>
     ),
     [
-      cell?.state,
+      cell,
       height,
       leftPaneColumns,
       leftPaneContentWidth,
@@ -517,7 +516,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
         <div style={styles('leftPaneColumns')}>
           {leftPaneColumns.map((columnData) => {
             const { width: columnWidth, column, x } = columnData;
-            const cellState = cell?.state || 'default';
+            const cellState = cell?.column === column ? cell.state : 'default';
 
             return (
               <GroupRowCellContainer
@@ -536,7 +535,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
         <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
           {rightPaneColumns.map((columnData) => {
             const { key, width: columnWidth, column, x } = columnData;
-            const cellState = cell?.state || 'default';
+            const cellState = cell?.column === column ? cell.state : 'default';
 
             return (
               <GroupRowCellContainer
@@ -555,7 +554,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
       </div>
     ),
     [
-      cell?.state,
+      cell,
       height,
       leftPaneColumns,
       leftPaneContentWidth,

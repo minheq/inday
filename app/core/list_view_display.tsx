@@ -155,7 +155,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
 
   const { fixedFieldCount } = view;
 
-  const renderCell = useCallback(
+  const renderLeafRowCell = useCallback(
     ({ row, column, path, state }: RenderLeafRowCellProps) => {
       const field = fields[column - 1];
       const record = records[row - 1];
@@ -178,7 +178,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     [fields, records],
   );
 
-  const renderRow = useCallback(
+  const renderLeafRow = useCallback(
     ({ path, row, state, children }: RenderLeafRowProps) => {
       return (
         <LeafRow row={row} state={state} path={path}>
@@ -216,16 +216,16 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
             width={width}
             height={height}
             contentOffset={contentOffset}
-            rowCount={rowCount}
-            renderCell={renderCell}
+            groups={[{ type: 'leaf', rowCount, collapsed: false }]}
+            renderLeafRowCell={renderLeafRowCell}
             renderHeader={renderHeader}
             renderHeaderCell={renderHeaderCell}
-            rowHeight={RECORD_ROW_HEIGHT}
+            leafRowHeight={RECORD_ROW_HEIGHT}
             headerHeight={FIELD_ROW_HEIGHT}
             columns={columns}
             fixedColumnCount={fixedFieldCount}
             cell={cell}
-            renderRow={renderRow}
+            renderLeafRow={renderLeafRow}
           />
         )}
       </AutoSizer>
@@ -374,7 +374,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
 
-      gridRef.current.scrollToCell({ row: nextRow });
+      gridRef.current.scrollToCell({ row: nextRow, path });
     }
   }, [cell, gridRef, setCell, rowToRecordCache]);
 
@@ -395,7 +395,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
 
-      gridRef.current.scrollToCell({ row: prevRow });
+      gridRef.current.scrollToCell({ row: prevRow, path });
     }
   }, [cell, gridRef, setCell, rowToRecordCache]);
 
@@ -454,7 +454,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
 
-      gridRef.current.scrollToCell({ row: nextRow });
+      gridRef.current.scrollToCell({ row: nextRow, path });
     }
   }, [cell, gridRef, setCell, records]);
 
@@ -472,7 +472,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
 
-      gridRef.current.scrollToCell({ row: prevRow });
+      gridRef.current.scrollToCell({ row: prevRow, path });
     }
   }, [cell, gridRef, setCell]);
 

@@ -33,7 +33,7 @@ const SpaceScreenContext = createContext({
   collectionID: '1',
 });
 
-export function SpaceScreen() {
+export function SpaceScreen(): JSX.Element {
   const route = useRoute<SpaceScreenParams>();
 
   const { spaceID, viewID } = route.params;
@@ -56,7 +56,7 @@ interface SpaceScreenHeaderProps {
   navigation: NavigationHelpers<RootStackParamsMap>;
 }
 
-export function SpaceScreenHeader(props: SpaceScreenHeaderProps) {
+export function SpaceScreenHeader(props: SpaceScreenHeaderProps): JSX.Element {
   const { route, navigation } = props;
 
   const space = useGetSpace(route.params.spaceID);

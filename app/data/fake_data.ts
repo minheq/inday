@@ -175,10 +175,10 @@ export const viewsByIDFixtures: { [viewID: string]: View } = {
 };
 
 export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
-  ...keyedBy(col1Fields, 'id'),
-  ...keyedBy(col2Fields, 'id'),
+  ...keyedBy(col1Fields, (field) => field.id),
+  ...keyedBy(col2Fields, (field) => field.id),
 };
 
 export const recordsByIDFixtures: {
   [recordID: string]: Record;
-} = keyedBy(col1Records, 'id');
+} = keyedBy(col1Records, (field) => field.id);
