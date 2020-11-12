@@ -180,6 +180,16 @@ export function isEmptyArray<T>(data: T[]): boolean {
   return data.length === 0;
 }
 
+export function chunk<T>(arr: T[], size: number): T[][] {
+  const result = [];
+
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, size + i));
+  }
+
+  return result;
+}
+
 /**
  * Compares whether 2 arrays are equal
  * @param order If true, both array items must be in the same order
