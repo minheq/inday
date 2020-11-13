@@ -1,6 +1,6 @@
 import React, { createContext, Fragment, useContext } from 'react';
 import { useGetView, useGetCollectionViews } from '../data/store';
-import { Container, Text, Spacer, Button } from '../components';
+import { Container, Text, Spacer, FlatButton } from '../components';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
 
@@ -14,7 +14,7 @@ interface ViewsMenuProps {
   viewID: ViewID;
 }
 
-export function ViewsMenu(props: ViewsMenuProps) {
+export function ViewsMenu(props: ViewsMenuProps): JSX.Element {
   const { spaceID, viewID } = props;
 
   return (
@@ -37,10 +37,9 @@ function Views() {
       <Spacer size={16} />
       {views.map((view) => (
         <Fragment key={view.id}>
-          <Button
+          <FlatButton
             title={view.name}
-            iconBefore="layout"
-            alignTitle="left"
+            icon="Table"
             state={activeView.id === view.id ? 'active' : 'default'}
           />
           <Spacer size={4} />

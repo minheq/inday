@@ -22,5 +22,7 @@ export * from './list_picker';
 export * from './picker';
 export * from './fade';
 export * from './theme';
+export * from './tokens';
 export * from './spacer';
-export * from './button';
+export * from './flat_button';
+export * from './icon_button';

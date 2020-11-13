@@ -1,54 +1,62 @@
-import React from 'react';
-import { Pressable } from 'react-native';
-import { tokens } from './tokens';
-import { Icon, IconName } from './icon';
-import { Spacer } from './spacer';
-import { Text } from './text';
+import React, { Fragment, useRef } from 'react';
+import { Animated, Pressable } from 'react-native';
 import { DynamicStyleSheet } from './stylesheet';
-
-type ButtonColor = 'primary' | 'muted' | 'default';
 
 interface ButtonProps {
   onPress?: () => void;
   disabled?: boolean;
-  title?: string;
-  color?: ButtonColor;
-  icon?: IconName;
+  children?: React.ReactNode;
+  radius?: number;
 }
 
 export function Button(props: ButtonProps): JSX.Element {
-  const { onPress, icon, disabled = false, color = 'default', title } = props;
+  const { onPress, children, radius = 8, disabled = false } = props;
+  const state = useRef(new Animated.Value(0)).current;
 
   return (
     <Pressable
       disabled={disabled}
-      style={({ pressed, hovered }: any) => [
-        styles.root,
-        hovered && styles.hovered,
-        pressed && styles.pressed,
-      ]}
+      style={[styles.root, { borderRadius: radius }]}
       onPress={onPress}
     >
-      {icon && <Icon name={icon} color={color} />}
-      <Spacer size={4} />
-      {title && <Text color={color}>{title}</Text>}
+      {({ hovered, pressed }: any) => {
+        Animated.spring(state, {
+          toValue: pressed ? 2 : hovered ? 1 : 0,
+          useNativeDriver: true,
+          bounciness: 0,
+          speed: 40,
+        }).start();
+
+        return (
+          <Fragment>
+            <Animated.View
+              style={[
+                styles.background,
+                {
+                  backgroundColor: state.interpolate({
+                    inputRange: [0, 1, 2],
+                    outputRange: [
+                      'rgba(0, 0, 0, 0)',
+                      'rgba(0, 0, 0, 0.03)',
+                      'rgba(0, 0, 0, 0.06)',
+                    ],
+                  }),
+                },
+              ]}
+            />
+            {children}
+          </Fragment>
+        );
+      }}
     </Pressable>
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
-  root: {
-    borderRadius: tokens.radius,
-    minWidth: 40,
-    height: 40,
-    paddingHorizontal: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  hovered: {
-    backgroundColor: theme.button.hovered,
-  },
-  pressed: {
-    backgroundColor: theme.button.pressed,
+const styles = DynamicStyleSheet.create(() => ({
+  root: {},
+  background: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
 }));

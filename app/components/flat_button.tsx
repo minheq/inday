@@ -6,22 +6,23 @@ import { Spacer } from './spacer';
 import { Text } from './text';
 import { Button } from './button';
 
-interface IconButtonProps {
+interface FlatButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   title?: string;
   icon?: IconName;
+  color?: 'primary' | 'muted' | 'default';
 }
 
-export function IconButton(props: IconButtonProps): JSX.Element {
-  const { onPress, icon, disabled = false, title } = props;
+export function FlatButton(props: FlatButtonProps): JSX.Element {
+  const { onPress, icon, disabled = false, title, color = 'default' } = props;
 
   return (
     <Button onPress={onPress} disabled={disabled}>
       <View style={styles.root}>
         {icon && <Icon name={icon} />}
         <Spacer size={4} />
-        {title && <Text size="xs">{title}</Text>}
+        {title && <Text color={color}>{title}</Text>}
       </View>
     </Button>
   );
@@ -30,6 +31,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 const styles = StyleSheet.create({
   root: {
     borderRadius: tokens.radius,
+    flexDirection: 'row',
     minWidth: 40,
     height: 40,
     justifyContent: 'center',

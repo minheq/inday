@@ -13,11 +13,11 @@ import { ScrollView, Pressable } from 'react-native';
 import {
   Container,
   Spacer,
-  Button,
   Text,
   Row,
   tokens,
   SegmentedControl,
+  FlatButton,
 } from '../components';
 import {
   useGetCollectionFields,
@@ -222,7 +222,7 @@ function SortNew() {
     );
   }
 
-  return <Button onPress={handlePressAddSort} title="+ Add sort" />;
+  return <FlatButton onPress={handlePressAddSort} title="+ Add sort" />;
 }
 
 interface SortEditProps {

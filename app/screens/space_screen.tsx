@@ -4,10 +4,10 @@ import {
   Container,
   Row,
   BackButton,
-  Button,
   Text,
   IconButton,
   Spacer,
+  FlatButton,
 } from '../components';
 import {
   useRoute,
@@ -142,9 +142,13 @@ function CollectionsMenu() {
     <Container color="content" borderBottomWidth={1}>
       <Row>
         {collections.map((collection) => (
-          <Button color="muted" key={collection.id} title={collection.name} />
+          <FlatButton
+            color="muted"
+            key={collection.id}
+            title={collection.name}
+          />
         ))}
-        <Button icon="Plus" color="muted" />
+        <FlatButton icon="Plus" color="muted" />
       </Row>
     </Container>
   );

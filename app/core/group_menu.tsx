@@ -8,15 +8,14 @@ import React, {
   useMemo,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView } from 'react-native';
+import { ScrollView, Pressable } from 'react-native';
 
 import {
   Container,
   Spacer,
-  Button,
+  FlatButton,
   Text,
   Row,
-  Pressable,
   tokens,
   SegmentedControl,
 } from '../components';
@@ -228,11 +227,7 @@ function GroupNew() {
   }
 
   return (
-    <Button
-      alignTitle="left"
-      onPress={handlePressAddGroup}
-      title="+ Add group"
-    />
+    <FlatButton icon="Plus" onPress={handlePressAddGroup} title="Add group" />
   );
 }
 

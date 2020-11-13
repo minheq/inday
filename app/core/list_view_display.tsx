@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { View, StyleSheet, Platform, Pressable } from 'react-native';
+import { View, Platform, Pressable } from 'react-native';
 import { Container, Text, useTheme } from '../components';
 import {
   useGetViewRecords,

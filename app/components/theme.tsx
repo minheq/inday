@@ -13,10 +13,6 @@ export interface Theme {
   scheme: ThemeScheme;
   text: TextColors;
   background: BackgroundColors;
-  button: {
-    hovered: string;
-    pressed: string;
-  };
   shadow: {
     shadowColor: string;
     shadowOffset: {
@@ -67,10 +63,6 @@ export const lightTheme: Theme = {
     },
     shadowOpacity: 0.15,
     shadowRadius: 32,
-  },
-  button: {
-    hovered: 'rgba(0, 0, 0, 0.03)',
-    pressed: 'rgba(0, 0, 0, 0.06)',
   },
   text: {
     default: 'rgba(34, 34, 34, 1)',
