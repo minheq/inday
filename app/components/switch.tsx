@@ -1,6 +1,8 @@
 import React from 'react';
-import { StyleSheet, Animated } from 'react-native';
-import { Pressable } from './pressable';
+import { Pressable, Animated } from 'react-native';
+import { isNonNullish } from '../../lib/js_utils';
+import { palette } from './palette';
+import { DynamicStyleSheet } from './stylesheet';
 import { useTheme } from './theme';
 
 interface SwitchProps {
@@ -8,13 +10,15 @@ interface SwitchProps {
   onChange?: (value: boolean) => void;
 }
 
-export function Switch(props: SwitchProps) {
-  const { value, onChange = () => {} } = props;
+export function Switch(props: SwitchProps): JSX.Element {
+  const { value, onChange } = props;
   const theme = useTheme();
   const checked = React.useRef(new Animated.Value(0)).current;
 
   const handlePress = React.useCallback(() => {
-    onChange(!value);
+    if (isNonNullish(onChange)) {
+      onChange(!value);
+    }
   }, [value, onChange]);
 
   React.useEffect(() => {
@@ -29,26 +33,12 @@ export function Switch(props: SwitchProps) {
   return (
     <Pressable
       onPress={handlePress}
-      style={[
-        styles.root,
-        {
-          borderColor: theme.border.color.default,
-        },
-        {
-          backgroundColor: checked.interpolate({
-            inputRange: [0, 1],
-            outputRange: [
-              theme.container.color.tint,
-              theme.container.color.primary,
-            ],
-          }),
-        },
-      ]}
+      style={[styles.root, value && styles.checked]}
     >
       <Animated.View
         style={[
           styles.slider,
-          theme.container.shadow,
+          theme.shadow,
           {
             transform: [
               {
@@ -65,12 +55,17 @@ export function Switch(props: SwitchProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create((theme) => ({
   root: {
     borderRadius: 999,
     width: 56,
     height: 32,
     borderWidth: 1,
+    borderColor: theme.border.default,
+    backgroundColor: theme.background.tint,
+  },
+  checked: {
+    backgroundColor: palette.blue[500],
   },
   slider: {
     borderRadius: 999,
@@ -82,4 +77,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
+}));

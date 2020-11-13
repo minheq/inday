@@ -8,10 +8,12 @@ export default {
   component: ListItem,
 };
 
-export const Default = () => (
-  <Column>
-    <ListItem title="Title" description="Description" />
-    <ListItem title="Title" />
-    <ListItem description="Description" />
-  </Column>
-);
+export function Basic(): JSX.Element {
+  return (
+    <Column>
+      <ListItem title="Title" description="Description" />
+      <ListItem title="Title" />
+      <ListItem description="Description" />
+    </Column>
+  );
+}

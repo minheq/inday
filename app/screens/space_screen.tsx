@@ -1,5 +1,14 @@
 import React, { useCallback, createContext, useContext } from 'react';
-import { Screen, Container, Row, BackButton, Button } from '../components';
+import {
+  Screen,
+  Container,
+  Row,
+  BackButton,
+  Button,
+  Text,
+  IconButton,
+  Spacer,
+} from '../components';
 import {
   useRoute,
   RouteProp,
@@ -65,35 +74,19 @@ export function SpaceScreenHeader(props: SpaceScreenHeaderProps): JSX.Element {
     navigation.goBack();
   }, [navigation]);
 
-  const canGoBack = navigation.canGoBack();
-
   return (
-    <Row>
-      <Container flex={1}>
+    <Row justifyContent="space-between">
+      <Container>
         <Row alignItems="center">
-          {canGoBack && <BackButton onPress={handlePressBack} />}
+          <BackButton onPress={handlePressBack} />
+          <Text size="lg" bold>
+            {space.name}
+          </Text>
         </Row>
       </Container>
-      <Container flex={1}>
-        <SpaceTitle space={space} />
-      </Container>
-      <Container flex={1}>
+      <Container>
         <TopMenu />
       </Container>
-    </Row>
-  );
-}
-
-interface SpaceTitleProps {
-  space: Space;
-}
-
-function SpaceTitle(props: SpaceTitleProps) {
-  const { space } = props;
-
-  return (
-    <Row alignItems="center" justifyContent="center" expanded>
-      <Button title={space.name} />
     </Row>
   );
 }
@@ -118,9 +111,16 @@ function TopMenu() {
   }, [sidePanel, setSidePanel]);
 
   return (
-    <Row expanded alignItems="center" justifyContent="flex-end">
-      <Button onPress={handleToggleView} iconTitle="layout" />
-      <Button onPress={handleToggleOrganize} iconTitle="filter" />
+    <Row>
+      <IconButton icon="Search" title="Search" />
+      <Spacer size={4} />
+      <IconButton icon="Users" title="Share" />
+      <Spacer size={4} />
+      <IconButton icon="Bolt" title="Automate" />
+      <Spacer size={4} />
+      <IconButton icon="Help" title="Help" />
+      <Spacer size={4} />
+      <IconButton icon="DotsInCircle" title="More" />
     </Row>
   );
 }
@@ -142,13 +142,9 @@ function CollectionsMenu() {
     <Container color="content" borderBottomWidth={1}>
       <Row>
         {collections.map((collection) => (
-          <Button
-            key={collection.id}
-            state={activeCollection.id === collection.id ? 'active' : 'default'}
-            radius={0}
-            title={collection.name}
-          />
+          <Button color="muted" key={collection.id} title={collection.name} />
         ))}
+        <Button icon="Plus" color="muted" />
       </Row>
     </Container>
   );

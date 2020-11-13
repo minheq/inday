@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
-import { Container, Pressable, Text, useTheme } from '../components';
+import { View, StyleSheet, Platform, Pressable } from 'react-native';
+import { Container, Text, useTheme } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -92,6 +92,7 @@ import {
   UIKey,
 } from '../lib/keyboard';
 import { StatefulLeafRowCell } from './grid.common';
+import { DynamicStyleSheet } from '../components/stylesheet';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -238,24 +239,9 @@ interface LeafRowProps extends RenderLeafRowProps {
 }
 
 function LeafRow(props: LeafRowProps) {
-  const { state, children } = props;
-  const theme = useTheme();
+  const { children } = props;
 
-  return (
-    <View
-      style={[
-        styles.row,
-        {
-          backgroundColor:
-            state === 'hovered'
-              ? theme.container.color.tint
-              : theme.container.color.content,
-        },
-      ]}
-    >
-      {children}
-    </View>
-  );
+  return <View style={[styles.row]}>{children}</View>;
 }
 
 interface HeaderProps {
@@ -292,13 +278,13 @@ function LeafRowCell(props: LeafRowCellProps) {
 
   return (
     <Pressable
-      style={[{ borderColor: theme.border.color.default }, styles.cell]}
+      style={[{ borderColor: theme.border.default }, styles.cell]}
       onPress={handlePress}
     >
       <View
         style={[
           styles.cellWrapper,
-          state === 'focused' && { borderColor: theme.border.color.focus },
+          state === 'focused' && { borderColor: theme.border.focus },
         ]}
       >
         {renderer({ field, value })}
@@ -319,8 +305,8 @@ function HeaderCell(props: HeaderCellProps) {
     <View
       style={[
         {
-          backgroundColor: theme.container.color.content,
-          borderColor: theme.border.color.default,
+          backgroundColor: theme.background.content,
+          borderColor: theme.border.default,
         },
         styles.cell,
       ]}
@@ -868,7 +854,7 @@ function URLCell(props: URLCellProps) {
   return <Text numberOfLines={1}>{value}</Text>;
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create((theme) => ({
   cell: {
     width: '100%',
     height: '100%',
@@ -884,6 +870,7 @@ const styles = StyleSheet.create({
   row: {
     width: '100%',
     height: '100%',
+    backgroundColor: theme.background.content,
   },
   cellWrapper: {
     paddingHorizontal: 6, // Padding + border should equal to 8
@@ -898,4 +885,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-});
+}));

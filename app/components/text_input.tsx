@@ -7,10 +7,12 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
+  Pressable,
 } from 'react-native';
+import { isNonNullish } from '../../lib/js_utils';
 import { IconName, Icon } from './icon';
-import { tokens, useTheme } from './theme';
-import { Pressable } from './pressable';
+import { useTheme } from './theme';
+import { tokens } from './tokens';
 
 export interface TextInputProps {
   icon?: IconName;
@@ -28,16 +30,16 @@ export interface TextInputProps {
   placeholder?: string;
 }
 
-export function TextInput(props: TextInputProps) {
+export function TextInput(props: TextInputProps): JSX.Element {
   const {
     testID,
     autoFocus,
     icon,
     value,
     clearable,
-    onChange = () => {},
-    onKeyPress = () => {},
-    onSubmitEditing = () => {},
+    onChange,
+    onKeyPress,
+    onSubmitEditing,
     placeholder,
   } = props;
   const [focused, setFocused] = React.useState(false);
@@ -53,7 +55,9 @@ export function TextInput(props: TextInputProps) {
   }, []);
 
   const handleClear = React.useCallback(() => {
-    onChange('');
+    if (isNonNullish(onChange)) {
+      onChange('');
+    }
   }, [onChange]);
 
   React.useEffect(() => {
@@ -77,10 +81,10 @@ export function TextInput(props: TextInputProps) {
       style={[
         styles.base,
         {
-          backgroundColor: theme.container.color.content,
+          backgroundColor: theme.background.content,
           borderColor: borderColor.interpolate({
             inputRange: [0, 1],
-            outputRange: [theme.border.color.default, theme.border.color.focus],
+            outputRange: [theme.border.default, theme.border.focus],
           }),
         },
       ]}
@@ -100,27 +104,17 @@ export function TextInput(props: TextInputProps) {
         onBlur={handleBlur}
         onKeyPress={onKeyPress}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.text.color.muted}
-        style={[
-          styles.input,
-          tokens.text.size.md,
-          !!icon && styles.hasIcon,
-          // @ts-ignore
-          webStyle,
-        ]}
+        placeholderTextColor={theme.text.muted}
+        style={[styles.input, tokens.text.size.md, !!icon && styles.hasIcon]}
       />
       {clearable && value !== undefined && value !== '' && (
         <Pressable onPress={handleClear} style={styles.clearButton}>
-          <Icon name="x" size="lg" />
+          <Icon name="X" size="lg" />
         </Pressable>
       )}
     </Animated.View>
   );
 }
-
-const webStyle = {
-  outline: 'none',
-};
 
 const styles = StyleSheet.create({
   base: {

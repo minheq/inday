@@ -1,20 +1,12 @@
 import React from 'react';
-import { Icon } from './icon';
 import { Button } from './button';
-import { Container } from './container';
 
 interface CloseButtonProps {
   onPress?: () => void;
 }
 
-export function CloseButton(props: CloseButtonProps) {
+export function CloseButton(props: CloseButtonProps): JSX.Element {
   const { onPress } = props;
 
-  return (
-    <Button onPress={onPress}>
-      <Container center width={40} height={40}>
-        <Icon name="x" size="xl" />
-      </Container>
-    </Button>
-  );
+  return <Button onPress={onPress} icon="X" />;
 }

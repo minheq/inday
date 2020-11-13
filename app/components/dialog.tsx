@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Animated,
-  StyleSheet,
   useWindowDimensions,
   View,
   ViewStyle,
@@ -9,8 +8,10 @@ import {
 } from 'react-native';
 import { Modal, ModalProps } from './modal';
 import { usePressability } from '../lib/pressability/use_pressability';
-import { useTheme, tokens } from './theme';
+import { tokens } from './tokens';
 import { PressabilityConfig } from '../lib/pressability/pressability';
+import { DynamicStyleSheet } from './stylesheet';
+import { isNonNullish } from '../../lib/js_utils';
 
 const OFFSET_TOP = 64;
 
@@ -19,10 +20,10 @@ interface DialogProps extends ModalProps {
 }
 
 // TODO: Add 'fade' and 'none' animationType handlers
-export function Dialog(props: DialogProps) {
+export function Dialog(props: DialogProps): JSX.Element {
   const {
     visible,
-    onRequestClose = () => {},
+    onRequestClose,
     onShow,
     onDismiss,
     animationType = 'none',
@@ -30,7 +31,6 @@ export function Dialog(props: DialogProps) {
     children,
   } = props;
   const { height } = useWindowDimensions();
-  const theme = useTheme();
   const [internalVisible, setInternalVisible] = React.useState(visible);
   const slide = React.useRef(
     new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
@@ -130,7 +130,9 @@ export function Dialog(props: DialogProps) {
   ]);
 
   const handlePressBackground = React.useCallback(() => {
-    onRequestClose();
+    if (isNonNullish(onRequestClose)) {
+      onRequestClose();
+    }
   }, [onRequestClose]);
 
   const config: PressabilityConfig = React.useMemo(
@@ -157,10 +159,7 @@ export function Dialog(props: DialogProps) {
           {
             backgroundColor: overlayFade.interpolate({
               inputRange: [0, 1],
-              outputRange: [
-                theme.container.color.default,
-                'rgba(0, 0, 0, 0.3)',
-              ],
+              outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.3)'],
             }),
           },
         ]}
@@ -171,7 +170,6 @@ export function Dialog(props: DialogProps) {
             styles.dialog,
             style,
             {
-              backgroundColor: theme.container.color.content,
               opacity: fade,
               transform: [{ translateY: slide }],
             },
@@ -184,7 +182,7 @@ export function Dialog(props: DialogProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create((theme) => ({
   base: {
     height: '100%',
     width: '100%',
@@ -195,6 +193,7 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
     maxWidth: '90%',
     borderRadius: tokens.radius,
+    backgroundColor: theme.background.content,
   },
   background: {
     position: 'absolute',
@@ -203,4 +202,4 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-});
+}));

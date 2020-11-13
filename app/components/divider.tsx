@@ -1,25 +1,18 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useTheme } from './theme';
-
-interface DividerProps {}
+import { View } from 'react-native';
+import { DynamicStyleSheet } from './stylesheet';
 
 /**
  * Visual separator between components.
  */
-export function Divider(_props: DividerProps) {
-  const theme = useTheme();
-
-  return (
-    <View
-      style={[styles.base, { backgroundColor: theme.border.color.default }]}
-    />
-  );
+export function Divider(): JSX.Element {
+  return <View style={styles.base} />;
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create((theme) => ({
   base: {
     width: '100%',
     height: 1,
+    borderColor: theme.border.default,
   },
-});
+}));

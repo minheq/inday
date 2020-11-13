@@ -8,6 +8,6 @@ export default {
   component: Button,
 };
 
-export const Default = () => (
-  <Button onPress={action('clicked')} title="Hello Button" />
-);
+export function Basic(): JSX.Element {
+  return <Button onPress={action('clicked')} title="Hello Button" />;
+}

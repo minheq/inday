@@ -11,9 +11,9 @@ interface RowProps {
 }
 
 /**
- * Displays its children in a vertical array.
+ * Displays its children in a horizontal array.
  */
-export function Row(props: RowProps) {
+export function Row(props: RowProps): JSX.Element {
   const { children, flex, justifyContent, alignItems, expanded } = props;
 
   return (

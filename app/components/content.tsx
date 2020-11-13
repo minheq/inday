@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { tokens } from './theme';
+import { tokens } from './tokens';
 
 interface ContentProps {
   children?: React.ReactNode;

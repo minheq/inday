@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text as RNText, StyleSheet } from 'react-native';
-import { useTheme, TextSize, TextColor, tokens } from './theme';
+import { useTheme, TextColor } from './theme';
+import { TextSize, tokens } from './tokens';
 
 type TextDecorationLine =
   | 'none'
@@ -24,7 +25,7 @@ export interface TextProps {
 /**
  * Run of text with a single style.
  */
-export function Text(props: TextProps) {
+export function Text(props: TextProps): JSX.Element {
   const {
     align = 'left',
     children,
@@ -47,7 +48,7 @@ export function Text(props: TextProps) {
         styles[size],
         bold && styles.bold,
         {
-          color: theme.text.color[color],
+          color: theme.text[color],
           textDecorationLine: decoration,
           textTransform: transform,
         },

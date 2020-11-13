@@ -8,10 +8,11 @@ import {
   Animated,
   Dimensions,
   ScrollView,
+  Pressable,
 } from 'react-native';
-import { tokens, useTheme } from './theme';
+import { useTheme } from './theme';
+import { tokens } from './tokens';
 import { Container } from './container';
-import { Pressable } from './pressable';
 import { Row } from './row';
 import { Text } from './text';
 import { Icon } from './icon';
@@ -19,13 +20,20 @@ import { TextInput } from './text_input';
 import { Option } from './option';
 import { Checkbox } from './checkbox';
 import { Popover, initialPopoverAnchor, PopoverAnchor } from './popover';
-import { measure, initialMeasurements } from '../lib/measurements';
+import {
+  measure,
+  initialMeasurements,
+  Measurements,
+} from '../lib/measurements';
+import { isNonNullish } from '../../lib/js_utils';
+import { DynamicStyleSheet } from './stylesheet';
+import { palette } from './palette';
 
-export interface PickerProps<TValue = any> {
-  value?: TValue;
-  options: Option<TValue>[];
-  onChange?: (value: TValue) => void;
-  renderOption?: (option: Option<TValue>, active: boolean) => React.ReactNode;
+export interface PickerProps<T> {
+  value?: T;
+  options: Option<T>[];
+  onChange?: (value: T) => void;
+  renderOption?: (option: Option<T>, active: boolean) => React.ReactNode;
   disabled?: boolean;
   placeholder?: string;
   searchable?: boolean;
@@ -36,13 +44,13 @@ const SEARCH_HEIGHT = 56;
 const PICKER_OFFSET = 4;
 const SCREEN_OFFSET = 16;
 
-export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
+export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const {
     value,
     placeholder = '',
     options,
     renderOption,
-    onChange = () => {},
+    onChange,
     searchable = false,
   } = props;
   const buttonRef = useRef<View>(null);
@@ -64,8 +72,10 @@ export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
         )
       : options;
 
-  const popoverHeight = filteredOptions.length * OPTION_HEIGHT + SEARCH_HEIGHT;
-  const [height, setHeight] = useState(popoverHeight);
+  const popoverContentHeight =
+    filteredOptions.length * OPTION_HEIGHT + (searchable ? SEARCH_HEIGHT : 0);
+
+  const [height, setHeight] = useState(popoverContentHeight);
 
   const handleClosePicker = useCallback(() => {
     setPicker((prevPicker) => ({ ...prevPicker, visible: false }));
@@ -74,61 +84,26 @@ export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
 
   const handleOpenPicker = useCallback(async () => {
     const button = await measure(buttonRef);
+    const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
+      button,
+      popoverContentHeight,
+    );
 
-    const screenSize = Dimensions.get('window');
-
-    const bottomY = button.pageY + button.height + PICKER_OFFSET;
-    const topY = button.pageY - PICKER_OFFSET - popoverHeight;
-
-    const overflowsBottom = bottomY + popoverHeight > screenSize.height;
-
-    let anchor: PopoverAnchor = initialPopoverAnchor;
-
-    if (overflowsBottom) {
-      const heightIfBottomY = screenSize.height - bottomY;
-      const heightIfTopY = button.pageY;
-
-      if (heightIfTopY < heightIfBottomY) {
-        anchor = {
-          x: button.pageX,
-          y: bottomY,
-        };
-
-        if (screenSize.height - bottomY < popoverHeight) {
-          setHeight(screenSize.height - bottomY - SCREEN_OFFSET);
-        }
-      } else {
-        if (topY < 0) {
-          setHeight(button.pageY - SCREEN_OFFSET);
-          anchor = {
-            x: button.pageX,
-            y: SCREEN_OFFSET,
-          };
-        } else {
-          anchor = {
-            x: button.pageX,
-            y: topY,
-          };
-        }
-      }
-    } else {
-      anchor = {
-        x: button.pageX,
-        y: bottomY,
-      };
-    }
-
+    setHeight(popoverHeight);
     setPicker({
       visible: true,
       button,
       anchor,
     });
-  }, [buttonRef, popoverHeight]);
+  }, [buttonRef, popoverContentHeight]);
 
   const handleSelectOption = useCallback(
-    (option: Option<TValue>) => {
+    (option: Option<T>) => {
       handleClosePicker();
-      onChange(option.value);
+
+      if (isNonNullish(onChange)) {
+        onChange(option.value);
+      }
     },
     [onChange, handleClosePicker],
   );
@@ -137,15 +112,13 @@ export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
     setSearch(text);
   }, []);
 
-  const handleHoverIn = useCallback((index: number) => {
-    setActiveIndex(index);
-  }, []);
-
   const handleSubmitEditing = useCallback(() => {
     if (activeIndex !== null) {
       handleClosePicker();
       const option = options[activeIndex];
-      onChange(option.value);
+      if (isNonNullish(onChange)) {
+        onChange(option.value);
+      }
     }
   }, [activeIndex, options, handleClosePicker, onChange]);
 
@@ -183,28 +156,11 @@ export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
   return (
     <Fragment>
       <View ref={buttonRef}>
-        <Pressable
-          onPress={handleOpenPicker}
-          style={[
-            styles.button,
-            {
-              backgroundColor: theme.container.color.content,
-              borderColor: borderColor.interpolate({
-                inputRange: [0, 1],
-                outputRange: [
-                  theme.border.color.default,
-                  theme.border.color.focus,
-                ],
-              }),
-            },
-          ]}
-        >
-          <Container center height={40} paddingHorizontal={16}>
-            <Row expanded alignItems="center" justifyContent="space-between">
-              <Text>{selected ? selected.label : placeholder}</Text>
-              <Icon size="lg" name="chevron-down" />
-            </Row>
-          </Container>
+        <Pressable onPress={handleOpenPicker} style={styles.button}>
+          <Text>{selected ? selected.label : placeholder}</Text>
+          <View style={styles.caretWrapper}>
+            <Icon size="lg" name="CaretDown" color="default" />
+          </View>
         </Pressable>
       </View>
       <Popover
@@ -242,33 +198,39 @@ export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
                 ) : (
                   <Pressable
                     key={String(o.value)}
-                    onHoverIn={() => handleHoverIn(i)}
                     onPress={() => handleSelectOption(o)}
-                    style={[
+                    style={({ hovered }) => [
                       styles.option,
                       {
-                        backgroundColor: active
-                          ? theme.button.backgroundActive
-                          : theme.button.backgroundDefault,
+                        backgroundColor:
+                          active || hovered
+                            ? palette.blue[400]
+                            : theme.background.content,
                       },
                     ]}
                   >
-                    <Container
-                      height={32}
-                      paddingHorizontal={8}
-                      borderRadius={tokens.radius}
-                    >
-                      <Row
-                        expanded
-                        alignItems="center"
-                        justifyContent="space-between"
+                    {({ hovered }) => (
+                      <Container
+                        height={32}
+                        paddingHorizontal={8}
+                        borderRadius={tokens.radius}
                       >
-                        <Text>{o.label}</Text>
-                        {selected && selected.value === o.value && (
-                          <Checkbox value={true} />
-                        )}
-                      </Row>
-                    </Container>
+                        <Row
+                          expanded
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Text
+                            color={hovered || active ? 'contrast' : 'default'}
+                          >
+                            {o.label}
+                          </Text>
+                          {selected && selected.value === o.value && (
+                            <Checkbox value={true} />
+                          )}
+                        </Row>
+                      </Container>
+                    )}
                   </Pressable>
                 );
               })}
@@ -280,10 +242,70 @@ export function Picker<TValue = any>(props: PickerProps<TValue>): JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
+function getPopoverAnchorAndHeight(
+  opener: Measurements,
+  popoverContentHeight: number,
+): [PopoverAnchor, number] {
+  const screenSize = Dimensions.get('window');
+
+  const bottomY = opener.pageY + opener.height + PICKER_OFFSET;
+  const topY = opener.pageY - PICKER_OFFSET - popoverContentHeight;
+
+  const overflowsBottom = bottomY + popoverContentHeight > screenSize.height;
+
+  let anchor: PopoverAnchor = initialPopoverAnchor;
+  let popoverHeight = popoverContentHeight;
+
+  if (overflowsBottom) {
+    const heightIfBottomY = screenSize.height - bottomY;
+    const heightIfTopY = opener.pageY;
+
+    if (heightIfTopY < heightIfBottomY) {
+      anchor = {
+        x: opener.pageX,
+        y: bottomY,
+      };
+
+      if (screenSize.height - bottomY < popoverContentHeight) {
+        popoverHeight = screenSize.height - bottomY - SCREEN_OFFSET;
+      }
+    } else {
+      if (topY < 0) {
+        popoverHeight = opener.pageY - SCREEN_OFFSET;
+        anchor = {
+          x: opener.pageX,
+          y: SCREEN_OFFSET,
+        };
+      } else {
+        anchor = {
+          x: opener.pageX,
+          y: topY,
+        };
+      }
+    }
+  } else {
+    anchor = {
+      x: opener.pageX,
+      y: bottomY,
+    };
+  }
+
+  return [anchor, popoverHeight];
+}
+
+const styles = DynamicStyleSheet.create((theme) => ({
   button: {
     borderRadius: tokens.radius,
     borderWidth: 1,
+    borderColor: theme.border.default,
+    flexDirection: 'row',
+    height: 40,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  caretWrapper: {
+    position: 'absolute',
+    right: 16,
   },
   optionsContainer: {
     position: 'absolute',
@@ -293,4 +315,4 @@ const styles = StyleSheet.create({
   option: {
     borderRadius: tokens.radius,
   },
-});
+}));

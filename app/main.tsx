@@ -58,6 +58,9 @@ export function App() {
                   name={ScreenName.Space}
                   component={SpaceScreen}
                   options={({ route, navigation }) => ({
+                    headerStyle: {
+                      height: 56,
+                    },
                     headerTitle: () => (
                       <SpaceScreenHeader
                         navigation={navigation}

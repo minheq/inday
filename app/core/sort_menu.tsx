@@ -5,9 +5,10 @@ import React, {
   Fragment,
   useEffect,
   createContext,
+  useMemo,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView } from 'react-native';
+import { ScrollView, Pressable } from 'react-native';
 
 import {
   Container,
@@ -15,7 +16,6 @@ import {
   Button,
   Text,
   Row,
-  Pressable,
   tokens,
   SegmentedControl,
 } from '../components';
@@ -48,7 +48,7 @@ interface SortMenuProps {
   collectionID: string;
 }
 
-export function SortMenu(props: SortMenuProps) {
+export function SortMenu(props: SortMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
   const sorts = useGetViewSorts(viewID);
 
@@ -170,10 +170,13 @@ function SortNew() {
     );
   }
 
-  const defaultSortConfig: SortConfig = {
-    fieldID: firstField.id,
-    order: 'ascending',
-  };
+  const defaultSortConfig = useMemo(
+    (): SortConfig => ({
+      fieldID: firstField.id,
+      order: 'ascending',
+    }),
+    [firstField],
+  );
 
   const [sortConfig, setSortConfig] = useState<SortConfig>(defaultSortConfig);
   const sequenceMax = useGetSortsSequenceMax(context.viewID);
@@ -219,9 +222,7 @@ function SortNew() {
     );
   }
 
-  return (
-    <Button alignTitle="left" onPress={handlePressAddSort} title="+ Add sort" />
-  );
+  return <Button onPress={handlePressAddSort} title="+ Add sort" />;
 }
 
 interface SortEditProps {
