@@ -31,26 +31,35 @@ export function Switch(props: SwitchProps): JSX.Element {
   }, [checked, value]);
 
   return (
-    <Pressable
-      onPress={handlePress}
-      style={[styles.root, value && styles.checked]}
-    >
+    <Pressable onPress={handlePress} style={[styles.root]}>
       <Animated.View
         style={[
-          styles.slider,
-          theme.shadow,
+          styles.wrapper,
           {
-            transform: [
-              {
-                translateX: checked.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [2, 26],
-                }),
-              },
-            ],
+            backgroundColor: checked.interpolate({
+              inputRange: [0, 1],
+              outputRange: [theme.background.tint, palette.blue[500]],
+            }),
           },
         ]}
-      />
+      >
+        <Animated.View
+          style={[
+            styles.slider,
+            theme.shadow,
+            {
+              transform: [
+                {
+                  translateX: checked.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [2, 26],
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
+      </Animated.View>
     </Pressable>
   );
 }
@@ -62,10 +71,12 @@ const styles = DynamicStyleSheet.create((theme) => ({
     height: 32,
     borderWidth: 1,
     borderColor: theme.border.default,
-    backgroundColor: theme.background.tint,
   },
-  checked: {
-    backgroundColor: palette.blue[500],
+  wrapper: {
+    borderRadius: 999,
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
   slider: {
     borderRadius: 999,
