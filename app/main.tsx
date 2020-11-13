@@ -42,7 +42,7 @@ function PersistenceObserver() {
   return null;
 }
 
-export function App() {
+export function App(): JSX.Element {
   return (
     <RecoilRoot>
       <ErrorBoundary>
@@ -60,6 +60,7 @@ export function App() {
                   options={({ route, navigation }) => ({
                     headerStyle: {
                       height: 56,
+                      borderBottomWidth: 0,
                     },
                     headerTitle: () => (
                       <SpaceScreenHeader

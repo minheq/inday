@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { Appearance, ColorSchemeName } from 'react-native';
+import { palette } from './palette';
 
 export type ThemeScheme = 'dark' | 'light';
 
@@ -25,7 +26,6 @@ export interface Theme {
   border: {
     transparent: string;
     default: string;
-    dark: string;
     focus: string;
   };
 }
@@ -44,6 +44,7 @@ interface BackgroundColors {
   default: string;
   content: string;
   tint: string;
+  primary: string;
 }
 
 export type BackgroundColor = keyof BackgroundColors;
@@ -51,12 +52,13 @@ export type BackgroundColor = keyof BackgroundColors;
 export const lightTheme: Theme = {
   scheme: 'light',
   background: {
-    default: 'rgba(0, 0, 0, 0)',
-    content: 'rgba(255, 255, 255, 1)',
-    tint: 'rgba(240, 240, 240, 1)',
+    default: palette.basic.transparent,
+    content: palette.basic.white,
+    tint: palette.neutral[1000],
+    primary: palette.blue[400],
   },
   shadow: {
-    shadowColor: 'rgba(0, 0, 0, 1)',
+    shadowColor: palette.basic.black,
     shadowOffset: {
       width: 8,
       height: 8,
@@ -65,17 +67,16 @@ export const lightTheme: Theme = {
     shadowRadius: 32,
   },
   text: {
-    default: 'rgba(34, 34, 34, 1)',
-    primary: 'rgba(0, 102, 204, 1)',
-    muted: 'rgba(134, 134, 139, 1)',
-    error: 'rgba(234, 0, 68, 1)',
-    contrast: 'rgba(255, 255, 255, 1)',
+    default: palette.neutral[100],
+    primary: palette.blue[300],
+    muted: palette.neutral[500],
+    error: palette.red[300],
+    contrast: palette.basic.white,
   },
   border: {
-    transparent: 'rgba(255, 255, 255, 0)',
-    default: 'rgba(34, 34, 34, 0.15)',
-    dark: 'rgba(34, 34, 34, 0.4)',
-    focus: 'rgba(0, 102, 204, 1)',
+    transparent: palette.basic.transparent,
+    default: palette.basic.grey,
+    focus: palette.blue[400],
   },
 };
 

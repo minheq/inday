@@ -858,7 +858,6 @@ const styles = DynamicStyleSheet.create((theme) => ({
   cell: {
     width: '100%',
     height: '100%',
-    borderRightWidth: 1,
     borderBottomWidth: 1,
     ...Platform.select({
       web: {

@@ -31,22 +31,18 @@ function Views() {
 
   return (
     <Container flex={1} padding={8} color="content" borderRightWidth={1}>
-      <Text color="muted" size="sm" bold>
+      <Text color="muted" size="sm" weight="bold">
         TEAM VIEWS
       </Text>
       <Spacer size={16} />
       {views.map((view) => (
         <Fragment key={view.id}>
-          <FlatButton
-            title={view.name}
-            icon="Table"
-            state={activeView.id === view.id ? 'active' : 'default'}
-          />
+          <FlatButton title={view.name} icon="Table" />
           <Spacer size={4} />
         </Fragment>
       ))}
       <Spacer size={32} />
-      <Text color="muted" size="sm" bold>
+      <Text color="muted" size="sm" weight="bold">
         PERSONAL VIEWS
       </Text>
     </Container>

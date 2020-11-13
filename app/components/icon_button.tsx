@@ -17,7 +17,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
   const { onPress, icon, disabled = false, title } = props;
 
   return (
-    <Button onPress={onPress} disabled={disabled}>
+    <Button onPress={onPress} disabled={disabled} style={styles.button}>
       <View style={styles.root}>
         {icon && <Icon name={icon} />}
         <Spacer size={4} />
@@ -35,5 +35,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 8,
+  },
+  button: {
+    borderRadius: tokens.radius,
   },
 });

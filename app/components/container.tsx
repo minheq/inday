@@ -38,7 +38,7 @@ interface ContainerProps {
   children?: React.ReactNode;
   maxWidth?: number | string;
   minWidth?: number | string;
-  color?: BackgroundColor | string;
+  color?: BackgroundColor;
   borderRadius?: number;
   borderTopRightRadius?: number;
   borderTopLeftRadius?: number;
@@ -130,9 +130,7 @@ export function Container(props: ContainerProps): JSX.Element {
         style={[
           {
             borderWidth,
-            backgroundColor: isBackgroundColor(color)
-              ? theme.background[color]
-              : color,
+            backgroundColor: color ? theme.background[color] : undefined,
             width: effectiveWidth,
             flex,
             maxWidth,
@@ -163,7 +161,11 @@ export function Container(props: ContainerProps): JSX.Element {
             overflow,
             zIndex,
           },
-          borderWidth && styles.borderColor,
+          (borderWidth ||
+            borderBottomWidth ||
+            borderLeftWidth ||
+            borderRightWidth) &&
+            styles.borderColor,
           shadow && styles.shadow,
           center && styles.center,
           shape && styles[shape],

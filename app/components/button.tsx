@@ -1,22 +1,23 @@
 import React, { Fragment, useRef } from 'react';
-import { Animated, Pressable } from 'react-native';
+import { Animated, Pressable, StyleProp, ViewStyle } from 'react-native';
 import { DynamicStyleSheet } from './stylesheet';
+import { tokens } from './tokens';
 
 interface ButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   children?: React.ReactNode;
-  radius?: number;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Button(props: ButtonProps): JSX.Element {
-  const { onPress, children, radius = 8, disabled = false } = props;
+  const { onPress, children, style, disabled = false } = props;
   const state = useRef(new Animated.Value(0)).current;
 
   return (
     <Pressable
       disabled={disabled}
-      style={[styles.root, { borderRadius: radius }]}
+      style={[styles.root, style]}
       onPress={onPress}
     >
       {({ hovered, pressed }: any) => {
@@ -42,6 +43,7 @@ export function Button(props: ButtonProps): JSX.Element {
                     ],
                   }),
                 },
+                style,
               ]}
             />
             {children}

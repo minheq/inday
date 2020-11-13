@@ -8,6 +8,11 @@ import {
   IconButton,
   Spacer,
   FlatButton,
+  Button,
+  DynamicStyleSheet,
+  tokens,
+  IconName,
+  Icon,
 } from '../components';
 import {
   useRoute,
@@ -16,16 +21,16 @@ import {
 } from '@react-navigation/native';
 import { RootStackParamsMap } from '../linking';
 import { useGetSpace, useGetView, useGetSpaceCollections } from '../data/store';
-import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
 
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer/autosizer';
-import { View, ViewType, assertListView } from '../data/views';
+import { View, ViewType, assertListView, ViewID } from '../data/views';
 import { ListViewDisplay } from '../core/list_view_display';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { RecordID } from '../data/records';
+import { Collection, CollectionID } from '../data/collections';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -53,7 +58,8 @@ export function SpaceScreen(): JSX.Element {
       value={{ spaceID, viewID, collectionID: view.collectionID }}
     >
       <Screen>
-        <CollectionsMenu />
+        <CollectionsList />
+        <ViewSettings />
         <MainContent />
       </Screen>
     </SpaceScreenContext.Provider>
@@ -79,7 +85,7 @@ export function SpaceScreenHeader(props: SpaceScreenHeaderProps): JSX.Element {
       <Container>
         <Row alignItems="center">
           <BackButton onPress={handlePressBack} />
-          <Text size="lg" bold>
+          <Text size="lg" weight="bold">
             {space.name}
           </Text>
         </Row>
@@ -92,6 +98,24 @@ export function SpaceScreenHeader(props: SpaceScreenHeaderProps): JSX.Element {
 }
 
 function TopMenu() {
+  return (
+    <Row>
+      <IconButton icon="Search" title="Search" />
+      <Spacer size={4} />
+      <IconButton icon="Users" title="Share" />
+      <Spacer size={4} />
+      <IconButton icon="Bolt" title="Automate" />
+      <Spacer size={4} />
+      <IconButton icon="Help" title="Help" />
+      <Spacer size={4} />
+      <IconButton icon="DotsInCircle" title="More" />
+    </Row>
+  );
+}
+
+function ViewSettings() {
+  const context = useContext(SpaceScreenContext);
+  const view = useGetView(context.viewID);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
 
   const handleToggleView = React.useCallback(() => {
@@ -111,21 +135,61 @@ function TopMenu() {
   }, [sidePanel, setSidePanel]);
 
   return (
-    <Row>
-      <IconButton icon="Search" title="Search" />
-      <Spacer size={4} />
-      <IconButton icon="Users" title="Share" />
-      <Spacer size={4} />
-      <IconButton icon="Bolt" title="Automate" />
-      <Spacer size={4} />
-      <IconButton icon="Help" title="Help" />
-      <Spacer size={4} />
-      <IconButton icon="DotsInCircle" title="More" />
-    </Row>
+    <Container color="content">
+      <Spacer size={16} />
+      <Row justifyContent="space-between">
+        <Container>
+          <ViewMenuButton view={view} onPress={handleToggleView} />
+        </Container>
+        <Row>
+          <FlatButton
+            onPress={handleToggleOrganize}
+            icon="Organize"
+            title="Organize"
+          />
+          <FlatButton title="Select" />
+          <FlatButton
+            weight="bold"
+            color="primary"
+            icon="Plus"
+            title="Add record"
+          />
+        </Row>
+      </Row>
+      <Spacer size={16} />
+    </Container>
   );
 }
 
-function CollectionsMenu() {
+interface ViewMenuButtonProps {
+  view: View;
+  onPress: (viewID: ViewID) => void;
+}
+
+function ViewMenuButton(props: ViewMenuButtonProps) {
+  const { view, onPress } = props;
+
+  const handlePress = useCallback(() => {
+    onPress(view.id);
+  }, [onPress, view]);
+
+  return (
+    <Button onPress={handlePress} style={styles.viewMenuButton}>
+      <Row>
+        <Icon name={viewIconMap[view.type]} />
+        <Spacer size={4} />
+        <Text>{view.name}</Text>
+      </Row>
+    </Button>
+  );
+}
+
+const viewIconMap: { [viewType in ViewType]: IconName } = {
+  list: 'Table',
+  board: 'Board',
+};
+
+function CollectionsList() {
   const context = useContext(SpaceScreenContext);
   const space = useGetSpace(context.spaceID);
   const view = useGetView(context.viewID);
@@ -139,18 +203,49 @@ function CollectionsMenu() {
   }
 
   return (
-    <Container color="content" borderBottomWidth={1}>
+    <Container color="content" borderBottomWidth={1} shadow zIndex={1}>
       <Row>
         {collections.map((collection) => (
-          <FlatButton
-            color="muted"
+          <CollectionItem
+            active={collection.id === activeCollection.id}
             key={collection.id}
-            title={collection.name}
+            collection={collection}
+            onPress={() => {
+              return;
+            }}
           />
         ))}
         <FlatButton icon="Plus" color="muted" />
       </Row>
     </Container>
+  );
+}
+
+interface CollectionItemProps {
+  active: boolean;
+  collection: Collection;
+  onPress: (collectionID: CollectionID) => void;
+}
+
+function CollectionItem(props: CollectionItemProps) {
+  const { active, collection, onPress } = props;
+
+  const handlePress = useCallback(() => {
+    onPress(collection.id);
+  }, [onPress, collection]);
+
+  return (
+    <Button
+      onPress={handlePress}
+      style={[styles.collectionItem, active && styles.activeCollectionItem]}
+    >
+      <Text
+        weight={active ? 'bold' : 'normal'}
+        color={active ? 'primary' : 'muted'}
+      >
+        {collection.name}
+      </Text>
+    </Button>
   );
 }
 
@@ -223,3 +318,28 @@ const displaysByViewType: {
   },
   board: () => <></>,
 };
+
+const styles = DynamicStyleSheet.create((theme) => ({
+  collectionItem: {
+    borderTopLeftRadius: tokens.radius,
+    borderTopRightRadius: tokens.radius,
+    minWidth: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  activeCollectionItem: {
+    borderBottomWidth: 2,
+    borderColor: theme.border.focus,
+  },
+  viewMenuButton: {
+    borderRadius: tokens.radius,
+    flexDirection: 'row',
+    minWidth: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+}));

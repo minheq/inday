@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useRef, Fragment } from 'react';
 
 import {
-  StyleSheet,
   View,
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
@@ -27,7 +26,6 @@ import {
 } from '../lib/measurements';
 import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
-import { palette } from './palette';
 
 export interface PickerProps<T> {
   value?: T;
@@ -204,7 +202,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       {
                         backgroundColor:
                           active || hovered
-                            ? palette.blue[400]
+                            ? theme.background.primary
                             : theme.background.content,
                       },
                     ]}

@@ -9,12 +9,23 @@ type TextDecorationLine =
   | 'line-through'
   | 'underline line-through';
 
+export type TextWeight =
+  | 'normal'
+  | 'bold'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900';
+
 export interface TextProps {
   children?: React.ReactNode;
   size?: TextSize;
   color?: TextColor;
   align?: 'left' | 'right' | 'center';
-  bold?: boolean;
+  weight?: TextWeight;
   selectable?: boolean;
   testID?: string;
   numberOfLines?: number;
@@ -33,10 +44,10 @@ export function Text(props: TextProps): JSX.Element {
     size = 'md',
     selectable = false,
     testID,
-    bold,
     numberOfLines,
     decoration = 'none',
     transform = 'none',
+    weight = 'normal',
   } = props;
   const theme = useTheme();
 
@@ -46,8 +57,8 @@ export function Text(props: TextProps): JSX.Element {
       style={[
         styles[align],
         styles[size],
-        bold && styles.bold,
         {
+          fontWeight: weight,
           color: theme.text[color],
           textDecorationLine: decoration,
           textTransform: transform,
@@ -66,7 +77,7 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
     fontWeight: 'normal',
-    fontFamily: tokens.fontFamily,
+    fontFamily: tokens.text.fontFamily,
   },
   xl: tokens.text.size.xl,
   lg: tokens.text.size.lg,
@@ -81,8 +92,5 @@ const styles = StyleSheet.create({
   },
   center: {
     textAlign: 'center',
-  },
-  bold: {
-    fontWeight: 'bold',
   },
 });
