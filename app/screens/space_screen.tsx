@@ -82,28 +82,28 @@ export function SpaceScreenHeader(props: SpaceScreenHeaderProps): JSX.Element {
   }, [navigation]);
 
   return (
-    <Row justifyContent="space-between">
-      <Container>
-        <Row alignItems="center">
-          <BackButton onPress={handlePressBack} />
-          <Spacer size={16} />
-          <Text size="lg" weight="bold">
-            {space.name}
-          </Text>
-        </Row>
-      </Container>
-      <Container>
-        <TopMenu />
-      </Container>
-    </Row>
+    <Container expanded paddingHorizontal={8} paddingVertical={4}>
+      <Row justifyContent="space-between">
+        <Container>
+          <Row alignItems="center">
+            <BackButton onPress={handlePressBack} />
+            <Spacer size={8} />
+            <Text size="lg" weight="bold">
+              {space.name}
+            </Text>
+          </Row>
+        </Container>
+        <Container>
+          <TopMenu />
+        </Container>
+      </Row>
+    </Container>
   );
 }
 
 function TopMenu() {
   return (
     <Row>
-      <IconButton icon="Search" title="Search" />
-      <Spacer size={4} />
       <IconButton icon="Users" title="Share" />
       <Spacer size={4} />
       <IconButton icon="Bolt" title="Automate" />
@@ -145,11 +145,8 @@ function ViewSettings() {
           <ViewMenuButton view={view} onPress={handleToggleView} />
         </Row>
         <Row>
-          <FlatButton
-            onPress={handleToggleOrganize}
-            icon="Organize"
-            title="Organize"
-          />
+          <FlatButton title="Search" />
+          <FlatButton onPress={handleToggleOrganize} title="Organize" />
           <FlatButton title="Select" />
           <FlatButton
             weight="bold"
@@ -205,8 +202,11 @@ function CollectionsList() {
   }
 
   return (
-    <Container color="content" borderBottomWidth={1}>
+    <Container color="content" zIndex={2} borderBottomWidth={1}>
       <Row>
+        <Button style={[styles.collectionItem, styles.addCollectionItem]}>
+          <Icon name="Plus" color="muted" />
+        </Button>
         {collections.map((collection) => (
           <CollectionItem
             active={collection.id === activeCollection.id}
@@ -217,9 +217,6 @@ function CollectionsList() {
             }}
           />
         ))}
-        <Button style={[styles.collectionItem, styles.addCollectionItem]}>
-          <Icon name="Plus" color="muted" />
-        </Button>
       </Row>
     </Container>
   );
@@ -282,10 +279,10 @@ function MainContent() {
             )}
           </Container>
         </Slide>
-        <Column flex={1}>
+        <Container color="content" flex={1}>
           <Spacer size={16} />
           <ViewDisplay onOpenRecord={handleOpenRecord} view={view} />
-        </Column>
+        </Container>
         <Slide width={360} open={sidePanel === 'organize'}>
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
             <AutoSizer>

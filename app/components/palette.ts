@@ -1,9 +1,10 @@
 export const palette = {
   basic: {
     transparent: 'rgba(0, 0, 0, 0)',
-    white: 'rgba(255, 255, 255, 1.0)',
-    black: 'rgba(0, 0, 0, 1.0)',
-    grey: 'rgba(228, 224, 224, 1.0)',
+    white: 'rgba(255, 255, 255, 1)',
+    black: 'rgba(0, 0, 0, 1)',
+    tint: 'rgba(248, 248, 248, 1)',
+    grey: 'rgba(228, 224, 224, 1)',
   },
 
   green: {

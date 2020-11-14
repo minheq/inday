@@ -60,11 +60,13 @@ export function App(): JSX.Element {
                   options={({ route, navigation }) => ({
                     headerStyle: {
                       height: 48,
+                      padding: 0,
                       borderBottomWidth: 0,
                     },
                     headerTitleContainerStyle: {
-                      left: 8,
-                      right: 8,
+                      left: 0,
+                      right: 0,
+                      height: 48,
                     },
                     // headerBackTitleStyle: {
                     //   backgroundColor: 'blue',

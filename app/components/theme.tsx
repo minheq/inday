@@ -54,17 +54,17 @@ export const lightTheme: Theme = {
   background: {
     default: palette.basic.transparent,
     content: palette.basic.white,
-    tint: palette.neutral[1000],
+    tint: palette.basic.tint,
     primary: palette.blue[400],
   },
   shadow: {
-    shadowColor: palette.basic.black,
+    shadowColor: palette.neutral[100],
     shadowOffset: {
       width: 8,
       height: 8,
     },
     shadowOpacity: 0.08,
-    shadowRadius: 32,
+    shadowRadius: 24,
   },
   text: {
     default: palette.neutral[100],
