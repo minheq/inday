@@ -1,7 +1,5 @@
-import React, { Fragment, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Animated, Pressable, StyleProp, ViewStyle } from 'react-native';
-import { DynamicStyleSheet } from './stylesheet';
-import { tokens } from './tokens';
 
 interface ButtonProps {
   onPress?: () => void;
@@ -15,11 +13,7 @@ export function Button(props: ButtonProps): JSX.Element {
   const state = useRef(new Animated.Value(0)).current;
 
   return (
-    <Pressable
-      disabled={disabled}
-      style={[styles.root, style]}
-      onPress={onPress}
-    >
+    <Pressable disabled={disabled} onPress={onPress}>
       {({ hovered, pressed }: any) => {
         Animated.spring(state, {
           toValue: pressed ? 2 : hovered ? 1 : 0,
@@ -29,36 +23,25 @@ export function Button(props: ButtonProps): JSX.Element {
         }).start();
 
         return (
-          <Fragment>
-            <Animated.View
-              style={[
-                styles.background,
-                {
-                  backgroundColor: state.interpolate({
-                    inputRange: [0, 1, 2],
-                    outputRange: [
-                      'rgba(0, 0, 0, 0)',
-                      'rgba(0, 0, 0, 0.03)',
-                      'rgba(0, 0, 0, 0.06)',
-                    ],
-                  }),
-                },
-                style,
-              ]}
-            />
+          <Animated.View
+            style={[
+              {
+                backgroundColor: state.interpolate({
+                  inputRange: [0, 1, 2],
+                  outputRange: [
+                    'rgba(0, 0, 0, 0)',
+                    'rgba(0, 0, 0, 0.03)',
+                    'rgba(0, 0, 0, 0.06)',
+                  ],
+                }),
+              },
+              style,
+            ]}
+          >
             {children}
-          </Fragment>
+          </Animated.View>
         );
       }}
     </Pressable>
   );
 }
-
-const styles = DynamicStyleSheet.create(() => ({
-  root: {},
-  background: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-}));

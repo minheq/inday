@@ -11,8 +11,8 @@ import {
   Button,
   DynamicStyleSheet,
   tokens,
-  IconName,
   Icon,
+  Column,
 } from '../components';
 import {
   useRoute,
@@ -31,6 +31,7 @@ import { ListViewDisplay } from '../core/list_view_display';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
+import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
 
 type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
@@ -85,6 +86,7 @@ export function SpaceScreenHeader(props: SpaceScreenHeaderProps): JSX.Element {
       <Container>
         <Row alignItems="center">
           <BackButton onPress={handlePressBack} />
+          <Spacer size={16} />
           <Text size="lg" weight="bold">
             {space.name}
           </Text>
@@ -135,12 +137,13 @@ function ViewSettings() {
   }, [sidePanel, setSidePanel]);
 
   return (
-    <Container color="content">
-      <Spacer size={16} />
+    <Container color="content" shadow zIndex={1}>
+      <Spacer size={4} />
       <Row justifyContent="space-between">
-        <Container>
+        <Row>
+          <Spacer size={8} />
           <ViewMenuButton view={view} onPress={handleToggleView} />
-        </Container>
+        </Row>
         <Row>
           <FlatButton
             onPress={handleToggleOrganize}
@@ -154,9 +157,10 @@ function ViewSettings() {
             icon="Plus"
             title="Add record"
           />
+          <Spacer size={8} />
         </Row>
       </Row>
-      <Spacer size={16} />
+      <Spacer size={4} />
     </Container>
   );
 }
@@ -176,18 +180,16 @@ function ViewMenuButton(props: ViewMenuButtonProps) {
   return (
     <Button onPress={handlePress} style={styles.viewMenuButton}>
       <Row>
-        <Icon name={viewIconMap[view.type]} />
+        <Icon
+          name={getViewIcon(view.type)}
+          customColor={getViewIconColor(view.type)}
+        />
         <Spacer size={4} />
         <Text>{view.name}</Text>
       </Row>
     </Button>
   );
 }
-
-const viewIconMap: { [viewType in ViewType]: IconName } = {
-  list: 'Table',
-  board: 'Board',
-};
 
 function CollectionsList() {
   const context = useContext(SpaceScreenContext);
@@ -203,7 +205,7 @@ function CollectionsList() {
   }
 
   return (
-    <Container color="content" borderBottomWidth={1} shadow zIndex={1}>
+    <Container color="content" borderBottomWidth={1}>
       <Row>
         {collections.map((collection) => (
           <CollectionItem
@@ -215,7 +217,9 @@ function CollectionsList() {
             }}
           />
         ))}
-        <FlatButton icon="Plus" color="muted" />
+        <Button style={[styles.collectionItem, styles.addCollectionItem]}>
+          <Icon name="Plus" color="muted" />
+        </Button>
       </Row>
     </Container>
   );
@@ -269,7 +273,7 @@ function MainContent() {
   const ViewDisplay = displaysByViewType[view.type];
 
   return (
-    <Container flex={1}>
+    <Container flex={1} color="content">
       <Row expanded flex={1}>
         <Slide width={240} open={sidePanel === 'views'}>
           <Container width={240} expanded color="content" borderRightWidth={1}>
@@ -278,7 +282,10 @@ function MainContent() {
             )}
           </Container>
         </Slide>
-        <ViewDisplay onOpenRecord={handleOpenRecord} view={view} />
+        <Column flex={1}>
+          <Spacer size={16} />
+          <ViewDisplay onOpenRecord={handleOpenRecord} view={view} />
+        </Column>
         <Slide width={360} open={sidePanel === 'organize'}>
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
             <AutoSizer>
@@ -324,10 +331,13 @@ const styles = DynamicStyleSheet.create((theme) => ({
     borderTopLeftRadius: tokens.radius,
     borderTopRightRadius: tokens.radius,
     minWidth: 40,
-    height: 40,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
+  },
+  addCollectionItem: {
+    paddingHorizontal: 8,
   },
   activeCollectionItem: {
     borderBottomWidth: 2,

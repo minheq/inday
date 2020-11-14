@@ -63,7 +63,7 @@ export const lightTheme: Theme = {
       width: 8,
       height: 8,
     },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.08,
     shadowRadius: 32,
   },
   text: {

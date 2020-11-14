@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import Svg, { G, Path, Defs, ClipPath } from 'react-native-svg';
-import { TextColor, useTheme } from './theme';
+import { TextColor, Theme, useTheme } from './theme';
 
 export type IconName =
   | 'AlignLeft'
@@ -62,17 +62,17 @@ interface IconProps {
    */
   size?: IconSize;
   color?: TextColor;
+  /** Overrides color */
+  customColor?: string;
 }
 
 export function Icon(props: IconProps): JSX.Element {
-  const { name, size = 'md', color = 'default' } = props;
+  const { name, size = 'md', color = 'default', customColor } = props;
   const theme = useTheme();
   const TheIcon = iconMap[name];
 
   return (
-    <Fragment>
-      <TheIcon size={sizeMap[size]} color={theme.text[color]} />
-    </Fragment>
+    <TheIcon size={sizeMap[size]} color={customColor ?? theme.text[color]} />
   );
 }
 

@@ -59,9 +59,22 @@ export function App(): JSX.Element {
                   component={SpaceScreen}
                   options={({ route, navigation }) => ({
                     headerStyle: {
-                      height: 56,
+                      height: 48,
                       borderBottomWidth: 0,
                     },
+                    headerTitleContainerStyle: {
+                      left: 8,
+                      right: 8,
+                    },
+                    // headerBackTitleStyle: {
+                    //   backgroundColor: 'blue',
+                    // },
+                    // headerLeftContainerStyle: {
+                    //   backgroundColor: 'blue',
+                    // },
+                    // headerRightContainerStyle: {
+                    //   backgroundColor: 'blue',
+                    // },
                     headerTitle: () => (
                       <SpaceScreenHeader
                         navigation={navigation}
