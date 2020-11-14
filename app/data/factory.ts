@@ -76,9 +76,7 @@ const makeFieldByType: {
     const base = makeBaseField(field);
     return {
       type: FieldType.Currency,
-      currency: '$',
-      precision: 2,
-      allowNegative: false,
+      currency: 'USD',
       ...base,
     };
   },

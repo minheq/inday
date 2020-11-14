@@ -103,10 +103,11 @@ export interface DateOnlyFieldConfig {
 }
 export interface DateAndTimeFieldConfig {
   type: FieldType.Date;
-  format: 'time';
+  style: 'time';
+  format: string;
   /** Use same time zone for all collaborators */
-  uniform: boolean;
-  hourCycle: 'h12' | 'h23' | 'h11' | 'h24';
+  timezone: boolean;
+  hourCycle: 'h12' | 'h24';
 }
 
 export type DateFieldConfig = DateOnlyFieldConfig | DateAndTimeFieldConfig;
