@@ -96,13 +96,21 @@ export interface MultiRecordLinkField
   extends BaseField,
     MultiRecordLinkFieldConfig {}
 
-export interface DateFieldConfig {
+export interface DateOnlyFieldConfig {
   type: FieldType.Date;
+  style: 'date';
   format: string;
-  includeTime: boolean;
-  timeFormat: '12hour' | '24hour';
 }
-export interface DateField extends BaseField, DateFieldConfig {}
+export interface DateAndTimeFieldConfig {
+  type: FieldType.Date;
+  format: 'time';
+  /** Use same time zone for all collaborators */
+  uniform: boolean;
+  hourCycle: 'h12' | 'h23' | 'h11' | 'h24';
+}
+
+export type DateFieldConfig = DateOnlyFieldConfig | DateAndTimeFieldConfig;
+export type DateField = BaseField & DateFieldConfig;
 
 export interface PhoneNumberFieldConfig {
   type: FieldType.PhoneNumber;
@@ -119,31 +127,83 @@ export interface URLFieldConfig {
 }
 export interface URLField extends BaseField, URLFieldConfig {}
 
+export interface UnitFieldConfig {
+  type: FieldType.Number;
+  default: number;
+  style: 'unit';
+  unit:
+    | 'acre'
+    | 'bit'
+    | 'byte'
+    | 'celsius'
+    | 'centimeter'
+    | 'day'
+    | 'degree'
+    | 'fahrenheit'
+    | 'fluid-ounce'
+    | 'foot'
+    | 'gallon'
+    | 'gigabit'
+    | 'gigabyte'
+    | 'gram'
+    | 'hectare'
+    | 'hour'
+    | 'inch'
+    | 'kilobit'
+    | 'kilobyte'
+    | 'kilogram'
+    | 'kilometer'
+    | 'liter'
+    | 'megabit'
+    | 'megabyte'
+    | 'meter'
+    | 'mile'
+    | 'mile-scandinavian'
+    | 'milliliter'
+    | 'millimeter'
+    | 'millisecond'
+    | 'minute'
+    | 'month'
+    | 'ounce'
+    | 'percent'
+    | 'petabyte'
+    | 'pound'
+    | 'second'
+    | 'stone'
+    | 'terabit'
+    | 'terabyte'
+    | 'week'
+    | 'yard'
+    | 'year';
+}
 export interface DecimalFieldConfig {
   type: FieldType.Number;
   default: number;
-  format: 'decimal';
-  precision: number;
+  style: 'decimal';
+  minimumFractionDigits: number;
+  maximumFractionDigits: number;
 }
 export interface IntegerFieldConfig {
   type: FieldType.Number;
   default: number | null;
   format: 'integer';
 }
-export type NumberFieldConfig = DecimalFieldConfig | IntegerFieldConfig;
+export type NumberFieldConfig =
+  | DecimalFieldConfig
+  | IntegerFieldConfig
+  | UnitFieldConfig;
 export type NumberField = BaseField & NumberFieldConfig;
 
 export interface CurrencyFieldConfig {
   type: FieldType.Currency;
   currency: string;
-  precision: number;
-  allowNegative: boolean;
 }
 export interface CurrencyField extends BaseField, CurrencyFieldConfig {}
 
 export interface CheckboxFieldConfig {
   type: FieldType.Checkbox;
   emoji: string;
+  color: string;
 }
 export interface CheckboxField extends BaseField, CheckboxFieldConfig {}
 

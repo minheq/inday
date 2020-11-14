@@ -205,7 +205,7 @@ function SortNew() {
   if (open) {
     return (
       <Container padding={16} borderRadius={tokens.radius} shadow>
-        <Text bold>New sort</Text>
+        <Text weight="bold">New sort</Text>
         <Spacer size={16} />
         <SortEdit sortConfig={sortConfig} onChange={setSortConfig} />
         <Spacer size={16} />

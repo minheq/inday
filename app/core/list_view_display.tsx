@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { View, Platform, Pressable } from 'react-native';
-import { Container, Text, useTheme } from '../components';
+import { View, Pressable } from 'react-native';
+import { Container, Icon, Row, Spacer, Text } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -93,6 +93,7 @@ import {
 } from '../lib/keyboard';
 import { StatefulLeafRowCell } from './grid.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
+import { getFieldIcon } from './icon_helpers';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -241,7 +242,7 @@ interface LeafRowProps extends RenderLeafRowProps {
 function LeafRow(props: LeafRowProps) {
   const { children } = props;
 
-  return <View style={[styles.row]}>{children}</View>;
+  return <View style={styles.leafRow}>{children}</View>;
 }
 
 interface HeaderProps {
@@ -251,7 +252,7 @@ interface HeaderProps {
 function Header(props: HeaderProps) {
   const { children } = props;
 
-  return <View style={[styles.row]}>{children}</View>;
+  return <View style={styles.headerRow}>{children}</View>;
 }
 
 interface LeafRowCellProps extends RenderLeafRowCellProps {
@@ -263,7 +264,6 @@ interface LeafRowCellProps extends RenderLeafRowCellProps {
 
 function LeafRowCell(props: LeafRowCellProps) {
   const { field, value, path, state, row, column } = props;
-  const theme = useTheme();
   const setCell = useSetRecoilState(cellState);
 
   const handlePress = useCallback(() => {
@@ -277,14 +277,12 @@ function LeafRowCell(props: LeafRowCellProps) {
   const renderer = rendererByFieldType[field.type];
 
   return (
-    <Pressable
-      style={[{ borderColor: theme.border.default }, styles.cell]}
-      onPress={handlePress}
-    >
+    <Pressable style={styles.cell} onPress={handlePress}>
       <View
         style={[
           styles.cellWrapper,
-          state === 'focused' && { borderColor: theme.border.focus },
+          state === 'hovered' && styles.hoveredCell,
+          state === 'focused' && styles.focusedCell,
         ]}
       >
         {renderer({ field, value })}
@@ -299,19 +297,14 @@ interface HeaderCellProps {
 
 function HeaderCell(props: HeaderCellProps) {
   const { field } = props;
-  const theme = useTheme();
 
   return (
-    <View
-      style={[
-        {
-          backgroundColor: theme.background.content,
-          borderColor: theme.border.default,
-        },
-        styles.cell,
-      ]}
-    >
-      <Text>{field.name}</Text>
+    <View style={styles.headerCell}>
+      <Row>
+        <Icon name={getFieldIcon(field.type)} />
+        <Spacer size={4} />
+        <Text weight="bold">{field.name}</Text>
+      </Row>
     </View>
   );
 }
@@ -712,9 +705,14 @@ interface CurrencyCellProps {
 }
 
 function CurrencyCell(props: CurrencyCellProps) {
-  const { value } = props;
+  const { value, field } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  return (
+    <Text numberOfLines={1}>
+      {field.currency}
+      {value}
+    </Text>
+  );
 }
 
 interface DateCellProps {
@@ -859,14 +857,29 @@ const styles = DynamicStyleSheet.create((theme) => ({
     width: '100%',
     height: '100%',
     borderBottomWidth: 1,
-    ...Platform.select({
-      web: {
-        cursor: 'auto',
-        outlineStyle: 'none',
-      },
-    }),
+    backgroundColor: theme.background.content,
+    borderColor: theme.border.default,
   },
-  row: {
+  headerCell: {
+    height: '100%',
+    paddingHorizontal: 8,
+    justifyContent: 'center',
+    backgroundColor: theme.background.content,
+    borderColor: theme.border.default,
+    borderBottomWidth: 1,
+  },
+  focusedCell: {
+    borderColor: theme.border.focus,
+  },
+  hoveredCell: {
+    borderColor: theme.border.default,
+  },
+  headerRow: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: theme.background.content,
+  },
+  leafRow: {
     width: '100%',
     height: '100%',
     backgroundColor: theme.background.content,

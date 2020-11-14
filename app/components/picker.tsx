@@ -197,7 +197,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                   <Pressable
                     key={String(o.value)}
                     onPress={() => handleSelectOption(o)}
-                    style={({ hovered }) => [
+                    style={({ hovered }: any) => [
                       styles.option,
                       {
                         backgroundColor:
@@ -207,7 +207,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       },
                     ]}
                   >
-                    {({ hovered }) => (
+                    {({ hovered }: any) => (
                       <Container
                         height={32}
                         paddingHorizontal={8}

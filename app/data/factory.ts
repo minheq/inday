@@ -69,7 +69,6 @@ const makeFieldByType: {
     const base = makeBaseField(field);
     return {
       type: FieldType.Checkbox,
-      emoji: '',
       ...base,
     };
   },
@@ -143,7 +142,6 @@ const makeFieldByType: {
     return {
       type: FieldType.Number,
       default: null,
-      format: 'integer',
       ...base,
     };
   },

@@ -42,6 +42,32 @@ export function isNotEmpty<T>(arr: T[]): boolean {
   return arr.length > 0;
 }
 
+export function uniqueBy<T>(
+  arr: T[],
+  getValue: (item: T) => string | number,
+): T[] {
+  const map: { [key: string]: true } = {};
+  const result: T[] = [];
+
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i];
+    const val = getValue(item);
+
+    if (map[val]) {
+      continue;
+    }
+
+    map[val] = true;
+    result.push(item);
+  }
+
+  return result;
+}
+
+export function unique<T>(arr: T[]): T[] {
+  return Array.from(new Set(arr));
+}
+
 export function intersect<T>(a: T[], b: T[]): T[] {
   const setA = new Set(a);
   const setB = new Set(b);

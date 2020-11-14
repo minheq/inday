@@ -22,21 +22,21 @@ export function getViewIconColor(viewType: ViewType): string {
 }
 
 const fieldIconMap: { [fieldType in FieldType]: IconName } = {
-  [FieldType.Checkbox]: 'Archive',
-  [FieldType.Currency]: 'Archive',
-  [FieldType.Date]: 'Archive',
-  [FieldType.Email]: 'Archive',
-  [FieldType.MultiCollaborator]: 'Archive',
-  [FieldType.MultiLineText]: 'Archive',
-  [FieldType.MultiOption]: 'Archive',
-  [FieldType.MultiRecordLink]: 'Archive',
-  [FieldType.Number]: 'Archive',
-  [FieldType.PhoneNumber]: 'Archive',
-  [FieldType.SingleCollaborator]: 'Archive',
-  [FieldType.SingleLineText]: 'Archive',
-  [FieldType.SingleOption]: 'Archive',
-  [FieldType.SingleRecordLink]: 'Archive',
-  [FieldType.URL]: 'Archive',
+  [FieldType.Checkbox]: 'Checkbox',
+  [FieldType.Currency]: 'Currency',
+  [FieldType.Date]: 'CalendarEvent',
+  [FieldType.Email]: 'Email',
+  [FieldType.MultiCollaborator]: 'User',
+  [FieldType.MultiLineText]: 'AlignLeft',
+  [FieldType.MultiOption]: 'MultiSelect',
+  [FieldType.MultiRecordLink]: 'LinkToRecord',
+  [FieldType.Number]: 'Number',
+  [FieldType.PhoneNumber]: 'Phone',
+  [FieldType.SingleCollaborator]: 'User',
+  [FieldType.SingleLineText]: 'Typography',
+  [FieldType.SingleOption]: 'Select',
+  [FieldType.SingleRecordLink]: 'LinkToRecord',
+  [FieldType.URL]: 'Link',
 };
 
 export function getFieldIcon(fieldType: FieldType): IconName {

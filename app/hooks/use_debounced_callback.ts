@@ -3,7 +3,7 @@ import React from 'react';
 export function useDebouncedCallback<TArgs extends any[]>(
   callback: (...args: TArgs) => void,
   deps: React.DependencyList,
-  wait: number = 500,
+  wait = 500,
 ) {
   // track args & timeout handle between calls
   const argsRef = React.useRef<TArgs>();

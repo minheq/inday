@@ -10,37 +10,49 @@ interface Option<T> {
 }
 
 interface ListPickerProps<T> {
-  value?: T | null;
+  value?: T[] | null;
   options: Option<T>[];
-  onChange?: (value: T) => void;
+  onChange?: (value: T[]) => void;
 }
 
 export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
   const { value, options, onChange } = props;
 
   const handleSelect = React.useCallback(
-    (newVal: T) => {
+    (newVal: T, selected: boolean) => {
       if (isNonNullish(onChange)) {
-        onChange(newVal);
+        if (selected) {
+          if (isNonNullish(value)) {
+            onChange(value.filter((val) => val !== newVal));
+          }
+        } else {
+          if (value) {
+            onChange(value.concat(newVal));
+          } else {
+            onChange([newVal]);
+          }
+        }
       }
     },
-    [onChange],
+    [value, onChange],
   );
 
   return (
     <Fragment>
       {options.map((o) => {
-        const selected = value === o.value;
+        const selected = value
+          ? value.some((selVal) => selVal === o.value)
+          : false;
 
         return (
           <Fragment>
             <ListItem
               description={o.label}
-              onPress={() => handleSelect(o.value)}
+              onPress={() => handleSelect(o.value, selected)}
               actions={
                 <Checkbox
                   value={selected}
-                  onChange={() => handleSelect(o.value)}
+                  onChange={() => handleSelect(o.value, selected)}
                 />
               }
             />
