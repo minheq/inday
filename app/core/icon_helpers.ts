@@ -13,8 +13,8 @@ export function getViewIcon(viewType: ViewType): IconName {
 }
 
 const viewIconColorMap: { [viewType in ViewType]: string } = {
-  list: palette.blue[400],
-  board: palette.red[400],
+  list: palette.blue[600],
+  board: palette.red[600],
 };
 
 export function getViewIconColor(viewType: ViewType): string {

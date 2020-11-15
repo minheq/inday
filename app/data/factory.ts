@@ -12,6 +12,18 @@ import {
   assertMultiOptionField,
   assertSingleOptionField,
   assertMultiCollaboratorField,
+  NumberField,
+  PhoneNumberField,
+  SingleCollaboratorField,
+  MultiOptionField,
+  MultiLineTextField,
+  DateField,
+  CurrencyField,
+  CheckboxField,
+  SingleRecordLinkField,
+  SingleLineTextField,
+  SingleOptionField,
+  URLField,
 } from './fields';
 import { BaseView, View } from './views';
 import { Collection } from './collections';
@@ -19,6 +31,7 @@ import { Record } from './records';
 import { Filter, FilterConfig } from './filters';
 import { keyedBy, range, isEmpty } from '../../lib/js_utils';
 import { Sort, SortConfig } from './sorts';
+import { palette } from '../components/palette';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -65,14 +78,14 @@ export function makeBaseField(field: Partial<Field>): BaseField {
 const makeFieldByType: {
   [fieldType in FieldType]: (field: Partial<Field>) => Field;
 } = {
-  [FieldType.Checkbox]: (field) => {
+  [FieldType.Checkbox]: (field): CheckboxField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Checkbox,
       ...base,
     };
   },
-  [FieldType.Currency]: (field) => {
+  [FieldType.Currency]: (field): CurrencyField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Currency,
@@ -80,13 +93,13 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.Date]: (field) => {
+  [FieldType.Date]: (field): DateField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Date,
       format: 'yyyy-MM-dd',
-      includeTime: false,
-      timeFormat: '12hour',
+      hourCycle: 'h24',
+      timezone: true,
       ...base,
     };
   },
@@ -115,7 +128,7 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.MultiLineText]: (field) => {
+  [FieldType.MultiLineText]: (field): MultiLineTextField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.MultiLineText,
@@ -123,41 +136,44 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.MultiOption]: (field) => {
+  [FieldType.MultiOption]: (field): MultiOptionField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.MultiOption,
       options: [
-        { value: faker.random.word(), color: 'green', order: 1 },
-        { value: faker.random.word(), color: 'blue', order: 2 },
-        { value: faker.random.word(), color: 'red', order: 3 },
+        { value: faker.random.word(), color: palette.green[50], order: 1 },
+        { value: faker.random.word(), color: palette.blue[50], order: 2 },
+        { value: faker.random.word(), color: palette.red[50], order: 3 },
       ],
       ...base,
     };
   },
-  [FieldType.Number]: (field) => {
+  [FieldType.Number]: (field): NumberField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Number,
+      style: 'decimal',
       default: null,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
       ...base,
     };
   },
-  [FieldType.PhoneNumber]: (field) => {
+  [FieldType.PhoneNumber]: (field): PhoneNumberField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.PhoneNumber,
       ...base,
     };
   },
-  [FieldType.SingleCollaborator]: (field) => {
+  [FieldType.SingleCollaborator]: (field): SingleCollaboratorField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleCollaborator,
       ...base,
     };
   },
-  [FieldType.SingleRecordLink]: (field) => {
+  [FieldType.SingleRecordLink]: (field): SingleRecordLinkField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleRecordLink,
@@ -167,7 +183,7 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.SingleLineText]: (field) => {
+  [FieldType.SingleLineText]: (field): SingleLineTextField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleLineText,
@@ -175,19 +191,19 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.SingleOption]: (field) => {
+  [FieldType.SingleOption]: (field): SingleOptionField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleOption,
       options: [
-        { value: faker.random.word(), color: 'green', order: 1 },
-        { value: faker.random.word(), color: 'blue', order: 2 },
-        { value: faker.random.word(), color: 'red', order: 3 },
+        { value: faker.random.word(), color: palette.green[50], order: 1 },
+        { value: faker.random.word(), color: palette.blue[50], order: 2 },
+        { value: faker.random.word(), color: palette.red[50], order: 3 },
       ],
       ...base,
     };
   },
-  [FieldType.URL]: (field) => {
+  [FieldType.URL]: (field): URLField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.URL,
@@ -330,7 +346,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.Email]: () => {
     return faker.internet.email();
   },
-  [FieldType.MultiCollaborator]: (field, recordsByFieldID, collaborators) => {
+  [FieldType.MultiCollaborator]: (field, _recordsByFieldID, collaborators) => {
     assertMultiCollaboratorField(field);
 
     if (collaborators === undefined) {

@@ -32,6 +32,7 @@ export interface Theme {
 
 interface TextColors {
   default: string;
+  success: string;
   primary: string;
   muted: string;
   error: string;
@@ -52,13 +53,13 @@ export type BackgroundColor = keyof BackgroundColors;
 export const lightTheme: Theme = {
   scheme: 'light',
   background: {
-    default: palette.basic.transparent,
-    content: palette.basic.white,
-    tint: palette.basic.tint,
+    default: palette.base.transparent,
+    content: palette.base.white,
+    tint: palette.gray[50],
     primary: palette.blue[400],
   },
   shadow: {
-    shadowColor: palette.neutral[100],
+    shadowColor: palette.gray[800],
     shadowOffset: {
       width: 8,
       height: 8,
@@ -67,16 +68,17 @@ export const lightTheme: Theme = {
     shadowRadius: 24,
   },
   text: {
-    default: palette.neutral[100],
-    primary: palette.blue[300],
-    muted: palette.neutral[500],
-    error: palette.red[300],
-    contrast: palette.basic.white,
+    default: palette.gray[900],
+    primary: palette.blue[700],
+    muted: palette.gray[500],
+    error: palette.red[700],
+    success: palette.green[700],
+    contrast: palette.base.white,
   },
   border: {
-    transparent: palette.basic.transparent,
-    default: palette.basic.grey,
-    focus: palette.blue[400],
+    transparent: palette.base.transparent,
+    default: palette.gray[300],
+    focus: palette.blue[600],
   },
 };
 

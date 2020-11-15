@@ -1,6 +1,14 @@
-import React, { useCallback, useMemo, useRef } from 'react';
-import { View, Pressable } from 'react-native';
-import { Container, Icon, Row, Spacer, Text } from '../components';
+import React, { Fragment, useCallback, useMemo, useRef } from 'react';
+import { View, Pressable, Platform } from 'react-native';
+import {
+  Checkbox,
+  Container,
+  Icon,
+  Row,
+  Spacer,
+  Text,
+  tokens,
+} from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -94,6 +102,9 @@ import {
 import { StatefulLeafRowCell } from './grid.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
+import { formatCurrency } from '../../lib/i18n';
+import { isNullish } from '../../lib/js_utils';
+import { getSystemLocale } from '../lib/locale';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -696,7 +707,11 @@ interface CheckboxCellProps {
 function CheckboxCell(props: CheckboxCellProps) {
   const { value } = props;
 
-  return <Text numberOfLines={1}>{value ? 'checked' : 'unchecked'}</Text>;
+  return (
+    <View style={styles.checkboxCell}>
+      {value === true && <Icon name="Check" color="success" />}
+    </View>
+  );
 }
 
 interface CurrencyCellProps {
@@ -707,11 +722,16 @@ interface CurrencyCellProps {
 function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
 
+  if (isNullish(value)) {
+    return null;
+  }
+
   return (
-    <Text numberOfLines={1}>
-      {field.currency}
-      {value}
-    </Text>
+    <View style={styles.numberCell}>
+      <Text numberOfLines={1}>
+        {formatCurrency(value, getSystemLocale(), field.currency)}
+      </Text>
+    </View>
   );
 }
 
@@ -721,13 +741,13 @@ interface DateCellProps {
 }
 
 function DateCell(props: DateCellProps) {
-  const { value } = props;
+  const { value, field } = props;
 
-  if (value === null) {
-    return <Text numberOfLines={1}>No date</Text>;
+  if (isNullish(value)) {
+    return null;
   }
 
-  return <Text numberOfLines={1}>{format(value, 'dd-MM-yyyy')}</Text>;
+  return <Text numberOfLines={1}>{format(value, field.format)}</Text>;
 }
 interface EmailCellProps {
   value: EmailFieldValue;
@@ -745,7 +765,7 @@ interface MultiCollaboratorCellProps {
 }
 
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
-  const { value } = props;
+  const { value, field } = props;
 
   return <Text numberOfLines={1}>{value[0]}</Text>;
 }
@@ -775,9 +795,27 @@ interface MultiOptionCellProps {
 }
 
 function MultiOptionCell(props: MultiOptionCellProps) {
-  const { value } = props;
+  const { value, field } = props;
 
-  return <Text numberOfLines={1}>{value[0]}</Text>;
+  return (
+    <Fragment>
+      {value.map((_value) => {
+        const selected = field.options.find((o) => o.value === _value);
+        if (isNullish(selected)) {
+          throw new Error(
+            `Expected ${value} to be within field options ${JSON.stringify(
+              field,
+            )}`,
+          );
+        }
+        return (
+          <View style={[styles.option, { backgroundColor: selected.color }]}>
+            <Text numberOfLines={1}>{selected.value}</Text>
+          </View>
+        );
+      })}
+    </Fragment>
+  );
 }
 interface NumberCellProps {
   value: NumberFieldValue;
@@ -785,9 +823,43 @@ interface NumberCellProps {
 }
 
 function NumberCell(props: NumberCellProps) {
-  const { value } = props;
+  const { value, field } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  if (isNullish(value)) {
+    return null;
+  }
+
+  switch (field.style) {
+    case 'decimal':
+      return (
+        <View style={styles.numberCell}>
+          <Text numberOfLines={1}>
+            {Intl.NumberFormat(getSystemLocale(), {
+              style: 'decimal',
+              minimumFractionDigits: field.minimumFractionDigits,
+              maximumFractionDigits: field.maximumFractionDigits,
+            }).format(value)}
+          </Text>
+        </View>
+      );
+    case 'unit':
+      return (
+        <View style={styles.numberCell}>
+          <Text numberOfLines={1}>
+            {Intl.NumberFormat(getSystemLocale(), {
+              style: 'unit',
+              unit: field.unit,
+            }).format(value)}
+          </Text>
+        </View>
+      );
+    default:
+      return (
+        <View style={styles.numberCell}>
+          <Text numberOfLines={1}>{value}</Text>;
+        </View>
+      );
+  }
 }
 interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
@@ -836,9 +908,23 @@ interface SingleOptionCellProps {
 }
 
 function SingleOptionCell(props: SingleOptionCellProps) {
-  const { value } = props;
+  const { value, field } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  if (isNullish(value)) {
+    return null;
+  }
+
+  const selected = field.options.find((o) => o.value === value);
+
+  if (isNullish(selected)) {
+    return null;
+  }
+
+  return (
+    <View style={[styles.option, { backgroundColor: selected.color }]}>
+      <Text numberOfLines={1}>{selected.value}</Text>
+    </View>
+  );
 }
 
 interface URLCellProps {
@@ -859,6 +945,29 @@ const styles = DynamicStyleSheet.create((theme) => ({
     borderBottomWidth: 1,
     backgroundColor: theme.background.content,
     borderColor: theme.border.default,
+    ...Platform.select({
+      web: {
+        cursor: 'auto',
+      },
+    }),
+  },
+  checkboxCell: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  option: {
+    borderRadius: tokens.radius,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  numberCell: {
+    width: '100%',
+    height: '100%',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   headerCell: {
     height: '100%',

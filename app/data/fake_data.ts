@@ -99,6 +99,11 @@ const col1Field15 = makeField({
   collectionID: collection1.id,
 });
 
+const col1Field16 = makeField({
+  type: FieldType.Checkbox,
+  collectionID: collection1.id,
+});
+
 const col1Fields = [
   col1Field1,
   col1Field2,
@@ -115,6 +120,7 @@ const col1Fields = [
   col1Field13,
   col1Field14,
   col1Field15,
+  col1Field16,
 ];
 const collection1WithFields = addFieldsToCollection(collection1, col1Fields);
 

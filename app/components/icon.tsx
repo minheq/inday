@@ -2,6 +2,27 @@ import React from 'react';
 import Svg, { G, Path, Defs, ClipPath } from 'react-native-svg';
 import { TextColor, useTheme } from './theme';
 
+type IconSize = 'sm' | 'md' | 'lg';
+interface IconProps {
+  name: IconName;
+  /**
+   * @default 'md'
+   */
+  size?: IconSize;
+  color?: TextColor;
+  /** Overrides color */
+  customColor?: string;
+}
+
+export function Icon(props: IconProps): JSX.Element {
+  const { name, size = 'md', color = 'default', customColor } = props;
+  const theme = useTheme();
+  const TheIcon = iconMap[name];
+
+  return (
+    <TheIcon size={sizeMap[size]} color={customColor ?? theme.text[color]} />
+  );
+}
 export type IconName =
   | 'AlignLeft'
   | 'Archive'
@@ -54,28 +75,6 @@ export type IconName =
   | 'UserCheck'
   | 'Users'
   | 'X';
-
-type IconSize = 'sm' | 'md' | 'lg';
-interface IconProps {
-  name: IconName;
-  /**
-   * @default 'md'
-   */
-  size?: IconSize;
-  color?: TextColor;
-  /** Overrides color */
-  customColor?: string;
-}
-
-export function Icon(props: IconProps): JSX.Element {
-  const { name, size = 'md', color = 'default', customColor } = props;
-  const theme = useTheme();
-  const TheIcon = iconMap[name];
-
-  return (
-    <TheIcon size={sizeMap[size]} color={customColor ?? theme.text[color]} />
-  );
-}
 
 interface TheIconProps {
   size: number;

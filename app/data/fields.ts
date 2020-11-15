@@ -98,12 +98,10 @@ export interface MultiRecordLinkField
 
 export interface DateOnlyFieldConfig {
   type: FieldType.Date;
-  style: 'date';
   format: string;
 }
 export interface DateAndTimeFieldConfig {
   type: FieldType.Date;
-  style: 'time';
   format: string;
   /** Use same time zone for all collaborators */
   timezone: boolean;
@@ -179,7 +177,7 @@ export interface UnitFieldConfig {
 }
 export interface DecimalFieldConfig {
   type: FieldType.Number;
-  default: number;
+  default: number | null;
   style: 'decimal';
   minimumFractionDigits: number;
   maximumFractionDigits: number;
@@ -187,7 +185,7 @@ export interface DecimalFieldConfig {
 export interface IntegerFieldConfig {
   type: FieldType.Number;
   default: number | null;
-  format: 'integer';
+  style: 'integer';
 }
 export type NumberFieldConfig =
   | DecimalFieldConfig
@@ -203,8 +201,6 @@ export interface CurrencyField extends BaseField, CurrencyFieldConfig {}
 
 export interface CheckboxFieldConfig {
   type: FieldType.Checkbox;
-  emoji: string;
-  color: string;
 }
 export interface CheckboxField extends BaseField, CheckboxFieldConfig {}
 

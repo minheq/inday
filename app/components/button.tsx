@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Animated, Pressable, StyleProp, ViewStyle } from 'react-native';
+import { palette } from './palette';
 
 interface ButtonProps {
   onPress?: () => void;
@@ -29,9 +30,9 @@ export function Button(props: ButtonProps): JSX.Element {
                 backgroundColor: state.interpolate({
                   inputRange: [0, 1, 2],
                   outputRange: [
-                    'rgba(0, 0, 0, 0)',
-                    'rgba(0, 0, 0, 0.03)',
-                    'rgba(0, 0, 0, 0.06)',
+                    palette.base.transparent,
+                    palette.gray[50],
+                    palette.gray[100],
                   ],
                 }),
               },

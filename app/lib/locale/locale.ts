@@ -2,7 +2,7 @@ import { NativeModules, Platform } from 'react-native';
 import { canUseDOM } from '../env';
 
 export function getSystemLocale(): string {
-  let locale = 'en_US';
+  let locale = 'en-US';
 
   // iOS
   if (
