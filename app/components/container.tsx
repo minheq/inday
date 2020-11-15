@@ -177,14 +177,6 @@ export function Container(props: ContainerProps): JSX.Element {
   );
 }
 
-function isBackgroundColor(color: string): color is BackgroundColor {
-  if (color === 'tint' || color === 'content' || color === 'default') {
-    return true;
-  }
-
-  return false;
-}
-
 const styles = DynamicStyleSheet.create((theme) => ({
   center: {
     display: 'flex',

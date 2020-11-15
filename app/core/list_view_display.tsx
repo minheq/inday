@@ -825,8 +825,6 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
       })}
     </Fragment>
   );
-
-  return <Text numberOfLines={1}>{value[0]}</Text>;
 }
 interface MultiLineTextCellProps {
   value: MultiLineTextFieldValue;

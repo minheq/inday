@@ -9,7 +9,7 @@ interface ContentProps {
 /**
  * Contents of a screen
  */
-export function Content(props: ContentProps) {
+export function Content(props: ContentProps): JSX.Element {
   const { children } = props;
 
   return (

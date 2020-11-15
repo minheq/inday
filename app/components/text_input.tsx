@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  StyleSheet,
   TextInput as RNTextInput,
   View,
   Animated,
@@ -8,9 +7,11 @@ import {
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
   Pressable,
+  Platform,
 } from 'react-native';
 import { isNonNullish } from '../../lib/js_utils';
 import { IconName, Icon } from './icon';
+import { DynamicStyleSheet } from './stylesheet';
 import { useTheme } from './theme';
 import { tokens } from './tokens';
 
@@ -116,7 +117,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create({
   base: {
     flexDirection: 'row',
     borderRadius: tokens.radius,
@@ -142,5 +143,10 @@ const styles = StyleSheet.create({
     paddingRight: 40,
     borderRadius: tokens.radius,
     flex: 1,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
 });

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Animated } from 'react-native';
 
-interface FadeProps<TValue = any> {
+interface FadeProps<T> {
   open?: boolean;
-  value?: TValue;
+  value?: T;
   children?: React.ReactNode;
 }
 
-export function Fade<TValue = any>(props: FadeProps<TValue>) {
+export function Fade<T>(props: FadeProps<T>): JSX.Element {
   const { open, value, children } = props;
   const opacity = React.useRef(new Animated.Value(open ? 1 : 0)).current;
 

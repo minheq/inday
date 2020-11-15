@@ -5,11 +5,11 @@ import { Animated, StyleSheet, useWindowDimensions } from 'react-native';
 
 RModal.setAppElement('#root');
 
-export function Modal(props: ModalProps) {
+export function Modal(props: ModalProps): JSX.Element {
   const {
     animationType = 'none',
     visible,
-    onRequestClose = () => {},
+    onRequestClose,
     children,
     transparent = false,
     onShow,

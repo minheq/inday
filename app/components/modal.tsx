@@ -11,7 +11,7 @@ export interface ModalProps {
   onDismiss?: () => void;
 }
 
-export function Modal(props: ModalProps) {
+export function Modal(props: ModalProps): JSX.Element {
   const {
     children,
     visible,

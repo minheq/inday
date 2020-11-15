@@ -1,5 +1,6 @@
 import React from 'react';
 import { Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { isNonNullish } from '../../lib/js_utils';
 
 interface ExpandProps {
   open?: boolean;
@@ -8,13 +9,8 @@ interface ExpandProps {
   onCollapsed?: () => void;
 }
 
-export function Expand(props: ExpandProps) {
-  const {
-    open,
-    children,
-    onExpanded = () => {},
-    onCollapsed = () => {},
-  } = props;
+export function Expand(props: ExpandProps): JSX.Element {
+  const { open, children, onExpanded, onCollapsed } = props;
   const height = React.useRef(new Animated.Value(0)).current;
   const translateY = React.useRef(new Animated.Value(0)).current;
   const [intrinsicHeight, setIntrinsicHeight] = React.useState(0);
@@ -37,9 +33,13 @@ export function Expand(props: ExpandProps) {
       }),
     ]).start(() => {
       if (open) {
-        onExpanded();
+        if (isNonNullish(onExpanded)) {
+          onExpanded();
+        }
       } else {
-        onCollapsed();
+        if (isNonNullish(onCollapsed)) {
+          onCollapsed();
+        }
       }
     });
   }, [height, translateY, open, intrinsicHeight, onExpanded, onCollapsed]);

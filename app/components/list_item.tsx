@@ -31,7 +31,7 @@ export function ListItem(props: ListItemProps): JSX.Element {
                 </>
               )}
               <Column justifyContent="center">
-                {title && <Text bold>{title}</Text>}
+                {title && <Text weight="bold">{title}</Text>}
                 {description && <Text>{description}</Text>}
               </Column>
             </Row>
