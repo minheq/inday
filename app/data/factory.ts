@@ -141,9 +141,24 @@ const makeFieldByType: {
     return {
       type: FieldType.MultiOption,
       options: [
-        { value: faker.random.word(), color: palette.green[50], order: 1 },
-        { value: faker.random.word(), color: palette.blue[50], order: 2 },
-        { value: faker.random.word(), color: palette.red[50], order: 3 },
+        {
+          id: generateID(),
+          label: faker.random.word(),
+          color: palette.green[50],
+          order: 1,
+        },
+        {
+          id: generateID(),
+          label: faker.random.word(),
+          color: palette.blue[50],
+          order: 2,
+        },
+        {
+          id: generateID(),
+          label: faker.random.word(),
+          color: palette.red[50],
+          order: 3,
+        },
       ],
       ...base,
     };
@@ -196,9 +211,24 @@ const makeFieldByType: {
     return {
       type: FieldType.SingleOption,
       options: [
-        { value: faker.random.word(), color: palette.green[50], order: 1 },
-        { value: faker.random.word(), color: palette.blue[50], order: 2 },
-        { value: faker.random.word(), color: palette.red[50], order: 3 },
+        {
+          id: generateID(),
+          label: faker.random.word(),
+          color: palette.green[50],
+          order: 1,
+        },
+        {
+          id: generateID(),
+          label: faker.random.word(),
+          color: palette.blue[50],
+          order: 2,
+        },
+        {
+          id: generateID(),
+          label: faker.random.word(),
+          color: palette.red[50],
+          order: 3,
+        },
       ],
       ...base,
     };
@@ -378,7 +408,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.MultiOption]: (field) => {
     assertMultiOptionField(field);
 
-    return [faker.helpers.randomize(field.options).value];
+    return [faker.helpers.randomize(field.options).id];
   },
   [FieldType.Number]: () => {
     return faker.random.number();
@@ -416,7 +446,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.SingleOption]: (field) => {
     assertSingleOptionField(field);
 
-    return faker.helpers.randomize(field.options).value;
+    return faker.helpers.randomize(field.options).id;
   },
   [FieldType.URL]: () => {
     return faker.internet.url();

@@ -800,17 +800,17 @@ function MultiOptionCell(props: MultiOptionCellProps) {
   return (
     <Fragment>
       {value.map((_value) => {
-        const selected = field.options.find((o) => o.value === _value);
+        const selected = field.options.find((o) => o.id === _value);
         if (isNullish(selected)) {
           throw new Error(
-            `Expected ${value} to be within field options ${JSON.stringify(
+            `Expected ${_value} to be within field options ${JSON.stringify(
               field,
             )}`,
           );
         }
         return (
           <View style={[styles.option, { backgroundColor: selected.color }]}>
-            <Text numberOfLines={1}>{selected.value}</Text>
+            <Text numberOfLines={1}>{selected.label}</Text>
           </View>
         );
       })}

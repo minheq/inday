@@ -49,7 +49,8 @@ export interface MultiLineTextField
     MultiLineTextFieldConfig {}
 
 interface SelectOption {
-  value: string;
+  id: string;
+  label: string;
   color: string;
   order: number;
 }

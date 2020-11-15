@@ -1,9 +1,14 @@
-import { v4 } from 'uuid';
+import { customAlphabet } from 'nanoid';
 
-export function generateID() {
-  return v4();
+const nanoid = customAlphabet(
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  15,
+);
+
+export function generateID(prefix?: string): string {
+  return `${prefix ?? ''}${nanoid()}`;
 }
 
-export function validateID(_id: string) {
+export function validateID(_id: string): void {
   // TODO: https://github.com/jquense/yup/issues/986
 }
