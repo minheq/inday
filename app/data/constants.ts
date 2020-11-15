@@ -18,6 +18,7 @@ export enum RecoilKey {
   Collections = 'Collections',
   CollectionFields = 'CollectionFields',
   CollectionViews = 'CollectionViews',
+  CollectionRecordsByID = 'CollectionRecordsByID',
   Collaborator = 'Collaborator',
   ViewFilterGroups = 'ViewFilterGroups',
   ViewFiltersGroupMax = 'ViewFiltersGroupMax',

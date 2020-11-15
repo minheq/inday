@@ -48,7 +48,9 @@ export function makeCollaborator(
 ): Collaborator {
   return {
     id: collaborator.id ?? generateID(),
-    name: collaborator.name ?? faker.name.lastName(),
+    profileImageID: collaborator.profileImageID ?? generateID(),
+    name:
+      collaborator.name ?? `${faker.name.lastName()} ${faker.name.firstName()}`,
     email: collaborator.email ?? faker.internet.email(),
     spaceID: collaborator.spaceID ?? generateID(),
     updatedAt: collaborator.updatedAt ?? new Date(),

@@ -68,6 +68,10 @@ export function unique<T>(arr: T[]): T[] {
   return Array.from(new Set(arr));
 }
 
+export function take<T>(arr: T[], size: number): T[] {
+  return arr.slice(0, size);
+}
+
 export function intersect<T>(a: T[], b: T[]): T[] {
   const setA = new Set(a);
   const setB = new Set(b);

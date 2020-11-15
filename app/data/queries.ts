@@ -10,6 +10,7 @@ import {
   sortsByIDState,
   collaboratorsByIDState,
   groupsByIDState,
+  RecordsByIDState,
 } from './atoms';
 import { Record, RecordID } from './records';
 import { Collection, CollectionID } from './collections';
@@ -23,7 +24,7 @@ import {
 } from './filters';
 import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
-import { last, isEmpty } from '../../lib/js_utils';
+import { last, isEmpty, keyedBy } from '../../lib/js_utils';
 import { Sort, SortID, sortRecords, SortGetters } from './sorts';
 import { CollaboratorID, Collaborator } from './collaborators';
 import { Group, GroupID } from './groups';
@@ -362,12 +363,32 @@ export const viewGroupsSequenceMaxQuery = selectorFamily<number, ViewID>({
   },
 });
 
-export const collectionViewsQuery = selectorFamily<View[], string>({
+export const collectionViewsQuery = selectorFamily<View[], CollectionID>({
   key: RecoilKey.CollectionViews,
-  get: (collectionID: string) => ({ get }) => {
+  get: (collectionID: CollectionID) => ({ get }) => {
     const views = get(viewsQuery);
 
     return views.filter((v) => v.collectionID === collectionID);
+  },
+});
+
+export const collectionRecordsByIDQuery = selectorFamily<
+  RecordsByIDState,
+  CollectionID
+>({
+  key: RecoilKey.CollectionRecordsByID,
+  get: (collectionID: CollectionID) => ({ get }) => {
+    const records = get(recordsQuery);
+
+    console.log(records);
+
+    const collectionRecords = records.filter(
+      (r) => r.collectionID === collectionID,
+    );
+
+    console.log(collectionRecords, 'collectionRecords');
+
+    return keyedBy(collectionRecords, (r) => r.id);
   },
 });
 

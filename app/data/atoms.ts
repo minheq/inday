@@ -7,6 +7,7 @@ import {
   fieldsByIDFixtures,
   spacesByIDFixtures,
   viewsByIDFixtures,
+  collaboratorsByIDFixtures,
 } from './fake_data';
 import { Record } from './records';
 import { Collection } from './collections';
@@ -83,7 +84,7 @@ export type CollaboratorsByIDState = {
 };
 export const collaboratorsByIDState = atom<CollaboratorsByIDState>({
   key: RecoilKey.CollaboratorsByID,
-  default: {},
+  default: collaboratorsByIDFixtures,
 });
 
 export type EventsState = Event[];

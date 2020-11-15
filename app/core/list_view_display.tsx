@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useMemo, useRef } from 'react';
 import { View, Pressable, Platform } from 'react-native';
 import {
-  Checkbox,
+  Avatar,
   Container,
   Icon,
   Row,
@@ -12,6 +12,9 @@ import {
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
+  useGetCollaboratorsByID,
+  useGetCollectionRecordsByID,
+  useGetCollection,
 } from '../data/store';
 import {
   FieldType,
@@ -105,6 +108,7 @@ import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
 import { isNullish } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
+import { palette } from '../components/palette';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -765,9 +769,28 @@ interface MultiCollaboratorCellProps {
 }
 
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
-  const { value, field } = props;
+  const { value } = props;
+  const collaboratorsByID = useGetCollaboratorsByID();
 
-  return <Text numberOfLines={1}>{value[0]}</Text>;
+  return (
+    <Fragment>
+      {value.map((collaboratorID) => {
+        const collaborator = collaboratorsByID[collaboratorID];
+
+        if (isNullish(collaborator)) {
+          return null;
+        }
+
+        return (
+          <View key={collaborator.id} style={styles.collaboratorCell}>
+            <Avatar size="sm" name={collaborator.name} />
+            <Spacer direction="row" size={4} />
+            <Text numberOfLines={1}>{collaborator.name}</Text>
+          </View>
+        );
+      })}
+    </Fragment>
+  );
 }
 interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
@@ -775,7 +798,33 @@ interface MultiRecordLinkCellProps {
 }
 
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
-  const { value } = props;
+  const { value, field } = props;
+  const recordsByID = useGetCollectionRecordsByID(
+    field.recordsFromCollectionID,
+  );
+  const collection = useGetCollection(field.recordsFromCollectionID);
+
+  return (
+    <Fragment>
+      {value.map((recordID) => {
+        if (isNullish(value)) {
+          return null;
+        }
+        const record = recordsByID[recordID];
+
+        if (isNullish(record)) {
+          return null;
+        }
+        const mainFieldText = record.fields[collection.mainFieldID];
+
+        return (
+          <View style={[styles.recordLinkCell]}>
+            <Text numberOfLines={1}>{mainFieldText}</Text>
+          </View>
+        );
+      })}
+    </Fragment>
+  );
 
   return <Text numberOfLines={1}>{value[0]}</Text>;
 }
@@ -809,7 +858,10 @@ function MultiOptionCell(props: MultiOptionCellProps) {
           );
         }
         return (
-          <View style={[styles.option, { backgroundColor: selected.color }]}>
+          <View
+            key={_value}
+            style={[styles.option, { backgroundColor: selected.color }]}
+          >
             <Text numberOfLines={1}>{selected.label}</Text>
           </View>
         );
@@ -878,8 +930,25 @@ interface SingleCollaboratorCellProps {
 
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   const { value } = props;
+  const collaboratorsByID = useGetCollaboratorsByID();
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  if (isNullish(value)) {
+    return null;
+  }
+
+  const collaborator = collaboratorsByID[value];
+
+  if (isNullish(collaborator)) {
+    return null;
+  }
+
+  return (
+    <View style={styles.collaboratorCell}>
+      <Avatar size="sm" name={collaborator.name} />
+      <Spacer direction="row" size={4} />
+      <Text numberOfLines={1}>{collaborator.name}</Text>
+    </View>
+  );
 }
 interface SingleRecordLinkCellProps {
   value: SingleRecordLinkFieldValue;
@@ -887,9 +956,27 @@ interface SingleRecordLinkCellProps {
 }
 
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
-  const { value } = props;
+  const { value, field } = props;
+  const recordsByID = useGetCollectionRecordsByID(
+    field.recordsFromCollectionID,
+  );
+  const collection = useGetCollection(field.recordsFromCollectionID);
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  if (isNullish(value)) {
+    return null;
+  }
+  const record = recordsByID[value];
+
+  if (isNullish(record)) {
+    return null;
+  }
+  const mainFieldText = record.fields[collection.mainFieldID];
+
+  return (
+    <View style={[styles.recordLinkCell]}>
+      <Text numberOfLines={1}>{mainFieldText}</Text>
+    </View>
+  );
 }
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
@@ -914,7 +1001,7 @@ function SingleOptionCell(props: SingleOptionCellProps) {
     return null;
   }
 
-  const selected = field.options.find((o) => o.value === value);
+  const selected = field.options.find((o) => o.id === value);
 
   if (isNullish(selected)) {
     return null;
@@ -922,7 +1009,7 @@ function SingleOptionCell(props: SingleOptionCellProps) {
 
   return (
     <View style={[styles.option, { backgroundColor: selected.color }]}>
-      <Text numberOfLines={1}>{selected.value}</Text>
+      <Text numberOfLines={1}>{selected.label}</Text>
     </View>
   );
 }
@@ -958,6 +1045,19 @@ const styles = DynamicStyleSheet.create((theme) => ({
     alignItems: 'center',
   },
   option: {
+    borderRadius: tokens.radius,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  recordLinkCell: {
+    backgroundColor: palette.blue[200],
+    borderRadius: tokens.radius,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  collaboratorCell: {
+    backgroundColor: palette.blue[200],
+    flexDirection: 'row',
     borderRadius: tokens.radius,
     paddingHorizontal: 8,
     paddingVertical: 4,

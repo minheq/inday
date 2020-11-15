@@ -59,7 +59,7 @@ export const lightTheme: Theme = {
     primary: palette.blue[400],
   },
   shadow: {
-    shadowColor: palette.gray[800],
+    shadowColor: palette.gray[700],
     shadowOffset: {
       width: 8,
       height: 8,

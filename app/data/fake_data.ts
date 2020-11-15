@@ -52,6 +52,7 @@ const col1Field5 = makeField({
 const col1Field6 = makeField({
   type: FieldType.MultiRecordLink,
   collectionID: collection1.id,
+  recordsFromCollectionID: collection2.id,
 });
 
 const col1Field7 = makeField({
@@ -82,6 +83,7 @@ const col1Field11 = makeField({
 const col1Field12 = makeField({
   type: FieldType.SingleRecordLink,
   collectionID: collection1.id,
+  recordsFromCollectionID: collection2.id,
 });
 
 const col1Field13 = makeField({
@@ -133,16 +135,6 @@ const col1View2 = makeView(
   collection1WithFields,
 );
 
-const col1Records = makeManyRecords(
-  50,
-  collection1WithFields,
-  {
-    [col1Field6.id]: [],
-    [col1Field12.id]: [],
-  },
-  [collaborator1, collaborator2],
-);
-
 const col2Field1 = makeField({
   type: FieldType.SingleLineText,
   collectionID: collection2.id,
@@ -154,9 +146,23 @@ const col2Field2 = makeField({
 });
 
 const col2Fields = [col2Field1, col2Field2];
-const collection2WithFields = addFieldsToCollection(collection1, col2Fields);
+collection2.mainFieldID = col2Field1.id;
+
+const collection2WithFields = addFieldsToCollection(collection2, col2Fields);
 
 const col2View1 = makeView({}, collection2WithFields);
+
+const col2Records = makeManyRecords(2, collection2WithFields);
+
+const col1Records = makeManyRecords(
+  50,
+  collection1WithFields,
+  {
+    [col1Field6.id]: col2Records,
+    [col1Field12.id]: col2Records,
+  },
+  [collaborator1, collaborator2],
+);
 
 export const spacesByIDFixtures: { [spaceID: string]: Space } = {
   [space1.id]: space1,
@@ -187,4 +193,7 @@ export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
 
 export const recordsByIDFixtures: {
   [recordID: string]: Record;
-} = keyedBy(col1Records, (field) => field.id);
+} = {
+  ...keyedBy(col1Records, (field) => field.id),
+  ...keyedBy(col2Records, (field) => field.id),
+};

@@ -1,3 +1,4 @@
+export * from './avatar';
 export * from './screen';
 export * from './text';
 export * from './column';

@@ -4,17 +4,20 @@ import { useParentContainer } from './container';
 
 interface SpacerProps {
   size?: number;
+  direction?: 'column' | 'row';
 }
 
-export function Spacer(props: SpacerProps) {
-  const { size } = props;
+export function Spacer(props: SpacerProps): JSX.Element {
+  const { size, direction: directionOverride } = props;
   const { direction } = useParentContainer();
+
+  const effectiveDirection = directionOverride || direction;
 
   return (
     <View
       style={
         size
-          ? direction === 'column'
+          ? effectiveDirection === 'column'
             ? { height: size }
             : { width: size }
           : styles.base
