@@ -818,7 +818,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
         const mainFieldText = record.fields[collection.mainFieldID];
 
         return (
-          <View style={[styles.recordLinkCell]}>
+          <View key={recordID} style={styles.recordLinkCell}>
             <Text numberOfLines={1}>{mainFieldText}</Text>
           </View>
         );
@@ -973,7 +973,7 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
   const mainFieldText = record.fields[collection.mainFieldID];
 
   return (
-    <View style={[styles.recordLinkCell]}>
+    <View style={styles.recordLinkCell}>
       <Text numberOfLines={1}>{mainFieldText}</Text>
     </View>
   );

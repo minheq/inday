@@ -380,13 +380,9 @@ export const collectionRecordsByIDQuery = selectorFamily<
   get: (collectionID: CollectionID) => ({ get }) => {
     const records = get(recordsQuery);
 
-    console.log(records);
-
     const collectionRecords = records.filter(
       (r) => r.collectionID === collectionID,
     );
-
-    console.log(collectionRecords, 'collectionRecords');
 
     return keyedBy(collectionRecords, (r) => r.id);
   },
