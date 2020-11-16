@@ -1,13 +1,12 @@
-import React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-export function useDebouncedCallback<TArgs extends any[]>(
+export function useDebouncedCallback<TArgs extends (number | string)[]>(
   callback: (...args: TArgs) => void,
-  deps: React.DependencyList,
   wait = 500,
-) {
+): (...args: TArgs) => void {
   // track args & timeout handle between calls
-  const argsRef = React.useRef<TArgs>();
-  const timeout = React.useRef<ReturnType<typeof setTimeout>>();
+  const argsRef = useRef<TArgs>();
+  const timeout = useRef<ReturnType<typeof setTimeout>>();
 
   function cleanup() {
     if (timeout.current) {
@@ -17,20 +16,23 @@ export function useDebouncedCallback<TArgs extends any[]>(
 
   // make sure our timeout gets cleared if
   // our consuming component gets unmounted
-  React.useEffect(() => cleanup, []);
+  useEffect(() => cleanup, []);
 
-  return React.useCallback((...args: TArgs) => {
-    // capture latest args
-    argsRef.current = args;
+  return useCallback(
+    (...args: TArgs) => {
+      // capture latest args
+      argsRef.current = args;
 
-    // clear debounce timer
-    cleanup();
+      // clear debounce timer
+      cleanup();
 
-    // start waiting again
-    timeout.current = setTimeout(() => {
-      if (argsRef.current) {
-        callback(...argsRef.current);
-      }
-    }, wait);
-  }, deps);
+      // start waiting again
+      timeout.current = setTimeout(() => {
+        if (argsRef.current) {
+          callback(...argsRef.current);
+        }
+      }, wait);
+    },
+    [callback, wait],
+  );
 }

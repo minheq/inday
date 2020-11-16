@@ -45,7 +45,7 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
           : false;
 
         return (
-          <Fragment>
+          <Fragment key={o.label}>
             <ListItem
               description={o.label}
               onPress={() => handleSelect(o.value, selected)}

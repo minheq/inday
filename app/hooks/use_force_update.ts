@@ -1,9 +1,7 @@
-import React from 'react';
+import { useCallback, useState } from 'react';
 
-export function useForceUpdate() {
-  const [, setValue] = React.useState(0);
+export function useForceUpdate(): () => void {
+  const [, setValue] = useState(0);
 
-  const forceUpdate = React.useCallback(() => setValue((value) => ++value), []);
-
-  return forceUpdate;
+  return useCallback(() => setValue((value) => ++value), []);
 }

@@ -58,7 +58,7 @@ describe('Workspaces', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Workspace;
+      const result = res.json<Workspace>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -83,7 +83,7 @@ describe('Workspaces', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Workspace;
+      const result = res.json<Workspace>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -104,7 +104,7 @@ describe('Workspaces', () => {
         url: `/v0/workspaces/${workspace.id}/delete`,
         method: 'POST',
       });
-      const result = res.json();
+      const result = res.json<Workspace>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.id).toBe(workspace.id);
@@ -125,7 +125,7 @@ describe('Workspaces', () => {
         url: `/v0/workspaces/${workspace.id}`,
         method: 'GET',
       });
-      const result = res.json() as Workspace;
+      const result = res.json<Workspace>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(workspace.name);
@@ -152,7 +152,7 @@ describe('Spaces', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Space;
+      const result = res.json<Space>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -172,7 +172,7 @@ describe('Spaces', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Space;
+      const result = res.json<Space>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -188,7 +188,7 @@ describe('Spaces', () => {
         url: `/v0/spaces/${space.id}/delete`,
         method: 'POST',
       });
-      const result = res.json();
+      const result = res.json<Space>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.id).toBe(space.id);
@@ -204,7 +204,7 @@ describe('Spaces', () => {
         url: `/v0/spaces/${space.id}`,
         method: 'GET',
       });
-      const result = res.json() as Space;
+      const result = res.json<Space>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(space.name);
@@ -233,7 +233,7 @@ describe('Collections', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Collection;
+      const result = res.json<Collection>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -258,7 +258,7 @@ describe('Collections', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Collection;
+      const result = res.json<Collection>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -279,7 +279,7 @@ describe('Collections', () => {
         url: `/v0/collections/${collection.id}/delete`,
         method: 'POST',
       });
-      const result = res.json();
+      const result = res.json<Collection>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.id).toBe(collection.id);
@@ -300,7 +300,7 @@ describe('Collections', () => {
         url: `/v0/collections/${collection.id}`,
         method: 'GET',
       });
-      const result = res.json() as Collection;
+      const result = res.json<Collection>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(collection.name);
@@ -332,7 +332,7 @@ describe('Views', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as View;
+      const result = res.json<View>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -358,7 +358,7 @@ describe('Views', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as View;
+      const result = res.json<View>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -380,7 +380,7 @@ describe('Views', () => {
         url: `/v0/views/${view.id}/delete`,
         method: 'POST',
       });
-      const result = res.json();
+      const result = res.json<View>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.id).toBe(view.id);
@@ -402,7 +402,7 @@ describe('Views', () => {
         url: `/v0/views/${view.id}`,
         method: 'GET',
       });
-      const result = res.json() as View;
+      const result = res.json<View>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(view.name);
@@ -434,7 +434,7 @@ describe('Fields', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Field;
+      const result = res.json<Field>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -462,7 +462,7 @@ describe('Fields', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Field;
+      const result = res.json<Field>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(field.name);
@@ -488,7 +488,7 @@ describe('Fields', () => {
         method: 'POST',
         payload: input,
       });
-      const result = res.json() as Field;
+      const result = res.json<Field>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(input.name);
@@ -510,7 +510,7 @@ describe('Fields', () => {
         url: `/v0/fields/${field.id}/delete`,
         method: 'POST',
       });
-      const result = res.json();
+      const result = res.json<Field>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.id).toBe(field.id);
@@ -532,7 +532,7 @@ describe('Fields', () => {
         url: `/v0/fields/${field.id}`,
         method: 'GET',
       });
-      const result = res.json() as Field;
+      const result = res.json<Field>();
 
       expect(res.statusCode).toEqual(200);
       expect(result.name).toBe(field.name);

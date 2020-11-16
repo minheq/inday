@@ -304,6 +304,6 @@ class EventEmitter {
 
 export const eventEmitter = new EventEmitter();
 
-export function useEventEmitter() {
+export function useEventEmitter(): EventEmitter {
   return eventEmitter;
 }
