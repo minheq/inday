@@ -6,6 +6,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:sonarjs/recommended',
     'plugin:react/recommended',
+    'plugin:react-native/all',
     'plugin:react-hooks/recommended',
     'plugin:jest/recommended',
     'prettier',
@@ -14,7 +15,19 @@ module.exports = {
   ],
   parserOptions: {
     project: `./tsconfig.json`,
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+    'react-native/style-sheet-object-names': ['DynamicStyleSheet'],
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'sonarjs'],
+  plugins: ['@typescript-eslint', 'sonarjs', 'react', 'react-native'],
+  rules: {
+    'react-native/sort-styles': 0,
+  },
 };

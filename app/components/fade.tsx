@@ -36,5 +36,5 @@ export function Fade<T>(props: FadeProps<T>): JSX.Element {
     ]).start();
   }, [value, opacity]);
 
-  return <Animated.View style={[{ opacity }]}>{children}</Animated.View>;
+  return <Animated.View style={{ opacity }}>{children}</Animated.View>;
 }

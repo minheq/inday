@@ -906,7 +906,7 @@ function NumberCell(props: NumberCellProps) {
     default:
       return (
         <View style={styles.numberCell}>
-          <Text numberOfLines={1}>{value}</Text>;
+          <Text numberOfLines={1}>{value}</Text>
         </View>
       );
   }

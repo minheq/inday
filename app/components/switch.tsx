@@ -31,7 +31,7 @@ export function Switch(props: SwitchProps): JSX.Element {
   }, [checked, value]);
 
   return (
-    <Pressable onPress={handlePress} style={[styles.root]}>
+    <Pressable onPress={handlePress} style={styles.root}>
       <Animated.View
         style={[
           styles.wrapper,

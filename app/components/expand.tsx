@@ -48,7 +48,7 @@ export function Expand(props: ExpandProps): JSX.Element {
     <Animated.View style={[styles.base, { height }]}>
       <Animated.View
         onLayout={handleLayout}
-        style={[{ transform: [{ translateY }] }]}
+        style={{ transform: [{ translateY }] }}
       >
         {children}
       </Animated.View>

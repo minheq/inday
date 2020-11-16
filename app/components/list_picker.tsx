@@ -33,7 +33,7 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
         const selected = value === o.value;
 
         return (
-          <Fragment>
+          <Fragment key={o.label}>
             <ListItem
               description={o.label}
               onPress={() => handleSelect(o.value)}
