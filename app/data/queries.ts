@@ -410,21 +410,12 @@ export const viewRecordsQuery = selectorFamily<Record[], string>({
     const filterGroups = get(viewFilterGroupsQuery(viewID));
     const sorts = get(viewSortsQuery(viewID));
 
-    const getField = (fieldID: FieldID) => {
-      return get(fieldQuery(fieldID));
-    };
-
-    const getRecord = (recordID: RecordID) => {
-      return get(recordQuery(recordID));
-    };
-
-    const getCollaborator = (collaboratorID: CollaboratorID) => {
-      return get(collaboratorQuery(collaboratorID));
-    };
-
-    const getCollection = (collectionID: CollectionID) => {
-      return get(collectionQuery(collectionID));
-    };
+    const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
+    const getRecord = (recordID: RecordID) => get(recordQuery(recordID));
+    const getCollaborator = (collaboratorID: CollaboratorID) =>
+      get(collaboratorQuery(collaboratorID));
+    const getCollection = (collectionID: CollectionID) =>
+      get(collectionQuery(collectionID));
 
     const filterGetters: FilterGetters = {
       getField,

@@ -11,21 +11,13 @@ export type AvatarSize = 'sm' | 'md' | 'lg';
 interface AvatarProps {
   size?: AvatarSize;
   source?: ImageURISource;
-  name?: string;
+  name: string;
 }
 
 export function Avatar(props: AvatarProps): JSX.Element {
   const { source, size = 'md', name } = props;
 
   if (isNullish(source)) {
-    if (isNullish(name)) {
-      return (
-        <View style={[styles.base, styles.initials, styles[size]]}>
-          <Text size={getTextSize(size)}>?</Text>
-        </View>
-      );
-    }
-
     return (
       <View style={[styles.base, styles.initials, styles[size]]}>
         <Text size={getTextSize(size)}>{getInitials(name, size)}</Text>
