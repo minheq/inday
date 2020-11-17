@@ -40,6 +40,7 @@ export type IconName =
   | 'CaretRight'
   | 'ChartBar'
   | 'Check'
+  | 'CheckThick'
   | 'Checkbox'
   | 'ChevronLeft'
   | 'Clock'
@@ -108,6 +109,7 @@ const iconMap: {
   CaretRight,
   ChartBar,
   Check,
+  CheckThick,
   Checkbox,
   ChevronLeft,
   Clock,
@@ -420,9 +422,9 @@ function ChartBar(props: TheIconProps) {
 
 function Check(props: TheIconProps) {
   const { size, color } = props;
+
   return (
-    <svg
-      className="icon icon-tabler icon-tabler-check"
+    <Svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
@@ -432,9 +434,29 @@ function Check(props: TheIconProps) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M0 0h24v24H0z" stroke="none" />
-      <path d="M5 12l5 5L20 7" />
-    </svg>
+      <Path d="M0 0h24v24H0z" stroke="none" />
+      <Path d="M5 12l5 5L20 7" />
+    </Svg>
+  );
+}
+
+function CheckThick(props: TheIconProps) {
+  const { size, color } = props;
+
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      strokeWidth={3}
+      stroke={color}
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M0 0h24v24H0z" stroke="none" />
+      <Path d="M5 12l5 5L20 7" />
+    </Svg>
   );
 }
 

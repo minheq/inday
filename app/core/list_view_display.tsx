@@ -34,21 +34,6 @@ import {
   SingleOptionField,
   URLField,
   Field,
-  assertCheckboxField,
-  assertCurrencyField,
-  assertDateField,
-  assertEmailField,
-  assertMultiCollaboratorField,
-  assertMultiRecordLinkField,
-  assertMultiLineTextField,
-  assertMultiOptionField,
-  assertNumberField,
-  assertPhoneNumberField,
-  assertSingleCollaboratorField,
-  assertSingleRecordLinkField,
-  assertSingleLineTextField,
-  assertSingleOptionField,
-  assertURLField,
   CheckboxFieldValue,
   CurrencyFieldValue,
   DateFieldValue,
@@ -92,7 +77,6 @@ import {
   RenderHeaderProps,
   RenderLeafRowProps,
 } from './grid';
-import { format } from 'date-fns';
 import { Record, RecordID } from '../data/records';
 import { atom, useRecoilState, useSetRecoilState } from 'recoil';
 import {
@@ -109,6 +93,7 @@ import { formatCurrency } from '../../lib/i18n';
 import { isNullish } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { palette } from '../components/palette';
+import { formatDate } from '../../lib/datetime/format';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -289,7 +274,58 @@ function LeafRowCell(props: LeafRowCellProps) {
     }
   }, [setCell, state, row, column, path]);
 
-  const renderer = rendererByFieldType[field.type];
+  const renderCell = useCallback(() => {
+    switch (field.type) {
+      case FieldType.Checkbox:
+        assertCheckboxFieldValue(value);
+        return <CheckboxCell field={field} value={value} />;
+      case FieldType.Currency:
+        assertCurrencyFieldValue(value);
+        return <CurrencyCell field={field} value={value} />;
+      case FieldType.Date:
+        assertDateFieldValue(value);
+        return <DateCell field={field} value={value} />;
+      case FieldType.Email:
+        assertEmailFieldValue(value);
+        return <EmailCell field={field} value={value} />;
+      case FieldType.MultiCollaborator:
+        assertMultiCollaboratorFieldValue(value);
+        return <MultiCollaboratorCell field={field} value={value} />;
+      case FieldType.MultiRecordLink:
+        assertMultiRecordLinkFieldValue(value);
+        return <MultiRecordLinkCell field={field} value={value} />;
+      case FieldType.MultiLineText:
+        assertMultiLineTextFieldValue(value);
+        return <MultiLineTextCell field={field} value={value} />;
+      case FieldType.MultiOption:
+        assertMultiOptionFieldValue(value);
+        return <MultiOptionCell field={field} value={value} />;
+      case FieldType.Number:
+        assertNumberFieldValue(value);
+        return <NumberCell field={field} value={value} />;
+      case FieldType.PhoneNumber:
+        assertPhoneNumberFieldValue(value);
+        return <PhoneNumberCell field={field} value={value} />;
+      case FieldType.SingleCollaborator:
+        assertSingleCollaboratorFieldValue(value);
+        return <SingleCollaboratorCell field={field} value={value} />;
+      case FieldType.SingleRecordLink:
+        assertSingleRecordLinkFieldValue(value);
+        return <SingleRecordLinkCell field={field} value={value} />;
+      case FieldType.SingleLineText:
+        assertSingleLineTextFieldValue(value);
+        return <SingleLineTextCell field={field} value={value} />;
+      case FieldType.SingleOption:
+        assertSingleOptionFieldValue(value);
+        return <SingleOptionCell field={field} value={value} />;
+      case FieldType.URL:
+        assertURLFieldValue(value);
+        return <URLCell field={field} value={value} />;
+
+      default:
+        throw new Error('Unhandled FieldType cell rendering');
+    }
+  }, [field, value]);
 
   return (
     <Pressable style={styles.cell} onPress={handlePress}>
@@ -300,7 +336,7 @@ function LeafRowCell(props: LeafRowCellProps) {
           state === 'focused' && styles.focusedCell,
         ]}
       >
-        {renderer({ field, value })}
+        {renderCell()}
       </View>
     </Pressable>
   );
@@ -605,104 +641,6 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
   useKeyboard(focusedCellKeyBindings);
 }
 
-const rendererByFieldType: {
-  [fieldType in FieldType]: (props: {
-    field: Field;
-    value: FieldValue;
-  }) => React.ReactNode;
-} = {
-  [FieldType.Checkbox]: ({ field, value }) => {
-    assertCheckboxFieldValue(value);
-    assertCheckboxField(field);
-
-    return <CheckboxCell field={field} value={value} />;
-  },
-  [FieldType.Currency]: ({ field, value }) => {
-    assertCurrencyFieldValue(value);
-    assertCurrencyField(field);
-
-    return <CurrencyCell field={field} value={value} />;
-  },
-  [FieldType.Date]: ({ field, value }) => {
-    assertDateFieldValue(value);
-    assertDateField(field);
-
-    return <DateCell field={field} value={value} />;
-  },
-  [FieldType.Email]: ({ field, value }) => {
-    assertEmailFieldValue(value);
-    assertEmailField(field);
-
-    return <EmailCell field={field} value={value} />;
-  },
-  [FieldType.MultiCollaborator]: ({ field, value }) => {
-    assertMultiCollaboratorFieldValue(value);
-    assertMultiCollaboratorField(field);
-
-    return <MultiCollaboratorCell field={field} value={value} />;
-  },
-  [FieldType.MultiRecordLink]: ({ field, value }) => {
-    assertMultiRecordLinkFieldValue(value);
-    assertMultiRecordLinkField(field);
-
-    return <MultiRecordLinkCell field={field} value={value} />;
-  },
-  [FieldType.MultiLineText]: ({ field, value }) => {
-    assertMultiLineTextFieldValue(value);
-    assertMultiLineTextField(field);
-
-    return <MultiLineTextCell field={field} value={value} />;
-  },
-  [FieldType.MultiOption]: ({ field, value }) => {
-    assertMultiOptionFieldValue(value);
-    assertMultiOptionField(field);
-
-    return <MultiOptionCell field={field} value={value} />;
-  },
-  [FieldType.Number]: ({ field, value }) => {
-    assertNumberFieldValue(value);
-    assertNumberField(field);
-
-    return <NumberCell field={field} value={value} />;
-  },
-  [FieldType.PhoneNumber]: ({ field, value }) => {
-    assertPhoneNumberFieldValue(value);
-    assertPhoneNumberField(field);
-
-    return <PhoneNumberCell field={field} value={value} />;
-  },
-  [FieldType.SingleCollaborator]: ({ field, value }) => {
-    assertSingleCollaboratorFieldValue(value);
-    assertSingleCollaboratorField(field);
-
-    return <SingleCollaboratorCell field={field} value={value} />;
-  },
-  [FieldType.SingleRecordLink]: ({ field, value }) => {
-    assertSingleRecordLinkFieldValue(value);
-    assertSingleRecordLinkField(field);
-
-    return <SingleRecordLinkCell field={field} value={value} />;
-  },
-  [FieldType.SingleLineText]: ({ field, value }) => {
-    assertSingleLineTextFieldValue(value);
-    assertSingleLineTextField(field);
-
-    return <SingleLineTextCell field={field} value={value} />;
-  },
-  [FieldType.SingleOption]: ({ field, value }) => {
-    assertSingleOptionFieldValue(value);
-    assertSingleOptionField(field);
-
-    return <SingleOptionCell field={field} value={value} />;
-  },
-  [FieldType.URL]: ({ field, value }) => {
-    assertURLFieldValue(value);
-    assertURLField(field);
-
-    return <URLCell field={field} value={value} />;
-  },
-};
-
 interface CheckboxCellProps {
   value: CheckboxFieldValue;
   field: CheckboxField;
@@ -713,7 +651,7 @@ function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={styles.checkboxCell}>
-      {value === true && <Icon name="Check" color="success" />}
+      {value === true && <Icon name="CheckThick" color="success" />}
     </View>
   );
 }
@@ -751,7 +689,11 @@ function DateCell(props: DateCellProps) {
     return null;
   }
 
-  return <Text numberOfLines={1}>{format(value, field.format)}</Text>;
+  return (
+    <Text numberOfLines={1}>
+      {formatDate(value, field.format, getSystemLocale())}
+    </Text>
+  );
 }
 interface EmailCellProps {
   value: EmailFieldValue;
@@ -761,7 +703,11 @@ interface EmailCellProps {
 function EmailCell(props: EmailCellProps) {
   const { value } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  return (
+    <Text decoration="underline" numberOfLines={1}>
+      {value}
+    </Text>
+  );
 }
 interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
@@ -1020,7 +966,11 @@ interface URLCellProps {
 function URLCell(props: URLCellProps) {
   const { value } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  return (
+    <Text decoration="underline" numberOfLines={1}>
+      {value}
+    </Text>
+  );
 }
 
 const styles = DynamicStyleSheet.create((theme) => ({
@@ -1048,13 +998,13 @@ const styles = DynamicStyleSheet.create((theme) => ({
     paddingVertical: 4,
   },
   recordLinkCell: {
-    backgroundColor: palette.blue[200],
+    backgroundColor: palette.purple[50],
     borderRadius: tokens.radius,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   collaboratorCell: {
-    backgroundColor: palette.blue[200],
+    backgroundColor: palette.blue[50],
     flexDirection: 'row',
     borderRadius: tokens.radius,
     paddingHorizontal: 8,

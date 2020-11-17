@@ -75,7 +75,7 @@ export function take<T>(arr: T[], size: number): T[] {
 export function intersect<T>(a: T[], b: T[]): T[] {
   const setA = new Set(a);
   const setB = new Set(b);
-  const intersection = new Set([...setA].filter((x) => setB.has(x)));
+  const intersection = new Set(Array.from(setA).filter((x) => setB.has(x)));
 
   return Array.from(intersection);
 }

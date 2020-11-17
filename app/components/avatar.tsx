@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, ImageURISource } from 'react-native';
+import { View, Image } from 'react-native';
 import { isNullish, take } from '../../lib/js_utils';
 import { palette } from './palette';
 import { DynamicStyleSheet } from './stylesheet';
@@ -10,14 +10,14 @@ export type AvatarSize = 'sm' | 'md' | 'lg';
 
 interface AvatarProps {
   size?: AvatarSize;
-  source?: ImageURISource;
+  sourceURI?: string;
   name: string;
 }
 
 export function Avatar(props: AvatarProps): JSX.Element {
-  const { source, size = 'md', name } = props;
+  const { sourceURI, size = 'md', name } = props;
 
-  if (isNullish(source)) {
+  if (isNullish(sourceURI)) {
     return (
       <View style={[styles.base, styles.initials, styles[size]]}>
         <Text size={getTextSize(size)}>{getInitials(name, size)}</Text>
@@ -29,7 +29,7 @@ export function Avatar(props: AvatarProps): JSX.Element {
     <Image
       style={styles.base}
       source={{
-        ...source,
+        uri: sourceURI,
         width: sizeMap[size],
         height: sizeMap[size],
       }}
@@ -88,7 +88,7 @@ const styles = DynamicStyleSheet.create(() => ({
     height: 32,
   },
   lg: {
-    width: 64,
-    height: 64,
+    width: 56,
+    height: 56,
   },
 }));
