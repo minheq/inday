@@ -1,15 +1,6 @@
 import React, { Fragment, useCallback, useMemo, useRef } from 'react';
 import { View, Pressable, Platform } from 'react-native';
-import {
-  Avatar,
-  Badge,
-  Container,
-  Icon,
-  Row,
-  Spacer,
-  Text,
-  tokens,
-} from '../components';
+import { Badge, Container, Icon, Row, Spacer, Text } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -95,6 +86,10 @@ import { isNullish } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { palette } from '../components/palette';
 import { formatDate } from '../../lib/datetime/format';
+import { BadgeOption } from './badge_option';
+import { BadgeCollaborator } from './badge_collaborator';
+import { BadgeRecordLink } from './badge_record_link';
+import { formatUnit } from '../../lib/i18n/unit';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -729,11 +724,9 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
         }
 
         return (
-          <Badge
-            color={palette.blue[50]}
+          <BadgeCollaborator
+            collaborator={collaborator}
             key={collaborator.name}
-            showAvatar
-            title={collaborator.name}
           />
         );
       })}
@@ -769,13 +762,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
           throw new Error('Main field expected to be string');
         }
 
-        return (
-          <Badge
-            color={palette.purple[50]}
-            key={recordID}
-            title={mainFieldText}
-          />
-        );
+        return <BadgeRecordLink key={recordID} title={mainFieldText} />;
       })}
     </Fragment>
   );
@@ -809,14 +796,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
             )}`,
           );
         }
-        return (
-          <View
-            key={_value}
-            style={[styles.option, { backgroundColor: selected.color }]}
-          >
-            <Text numberOfLines={1}>{selected.label}</Text>
-          </View>
-        );
+        return <BadgeOption key={selected.id} option={selected} />;
       })}
     </Fragment>
   );
@@ -850,10 +830,7 @@ function NumberCell(props: NumberCellProps) {
       return (
         <View style={styles.numberCell}>
           <Text numberOfLines={1}>
-            {Intl.NumberFormat(getSystemLocale(), {
-              style: 'unit',
-              unit: field.unit,
-            }).format(value)}
+            {formatUnit(value, getSystemLocale(), field.unit)}
           </Text>
         </View>
       );
@@ -895,7 +872,7 @@ function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   }
 
   return (
-    <Badge color={palette.blue[50]} showAvatar title={collaborator.name} />
+    <BadgeCollaborator collaborator={collaborator} key={collaborator.name} />
   );
 }
 interface SingleRecordLinkCellProps {
@@ -924,7 +901,7 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
     throw new Error('Main field expected to be string');
   }
 
-  return <Badge color={palette.purple[50]} title={mainFieldText} />;
+  return <BadgeRecordLink title={mainFieldText} />;
 }
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
@@ -955,11 +932,7 @@ function SingleOptionCell(props: SingleOptionCellProps) {
     return null;
   }
 
-  return (
-    <View style={[styles.option, { backgroundColor: selected.color }]}>
-      <Text numberOfLines={1}>{selected.label}</Text>
-    </View>
-  );
+  return <BadgeOption option={selected} />;
 }
 
 interface URLCellProps {
@@ -995,11 +968,6 @@ const styles = DynamicStyleSheet.create((theme) => ({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  option: {
-    borderRadius: tokens.radius,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
   },
   numberCell: {
     width: '100%',

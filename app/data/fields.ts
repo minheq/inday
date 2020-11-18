@@ -1,4 +1,5 @@
 import { isSameDay } from 'date-fns';
+import { NumberUnit } from '../../lib/i18n/unit';
 import { hasAllOf } from '../../lib/js_utils/array_utils';
 import { CollaboratorID } from './collaborators';
 import { RecordID } from './records';
@@ -48,7 +49,7 @@ export interface MultiLineTextField
   extends BaseField,
     MultiLineTextFieldConfig {}
 
-interface SelectOption {
+export interface SelectOption {
   id: string;
   label: string;
   color: string;
@@ -97,13 +98,18 @@ export interface MultiRecordLinkField
   extends BaseField,
     MultiRecordLinkFieldConfig {}
 
+export type SupportedDateFormat =
+  | 'yyyy-MM-dd' // ISO
+  | 'MMMM do, yyyy';
+
 export interface DateOnlyFieldConfig {
   type: FieldType.Date;
-  format: string;
+  format: SupportedDateFormat;
 }
+
 export interface DateAndTimeFieldConfig {
   type: FieldType.Date;
-  format: string;
+  format: SupportedDateFormat;
   /** Use same time zone for all collaborators */
   timezone: boolean;
   hourCycle: 'h12' | 'h24';
@@ -131,50 +137,7 @@ export interface UnitFieldConfig {
   type: FieldType.Number;
   default: number;
   style: 'unit';
-  unit:
-    | 'acre'
-    | 'bit'
-    | 'byte'
-    | 'celsius'
-    | 'centimeter'
-    | 'day'
-    | 'degree'
-    | 'fahrenheit'
-    | 'fluid-ounce'
-    | 'foot'
-    | 'gallon'
-    | 'gigabit'
-    | 'gigabyte'
-    | 'gram'
-    | 'hectare'
-    | 'hour'
-    | 'inch'
-    | 'kilobit'
-    | 'kilobyte'
-    | 'kilogram'
-    | 'kilometer'
-    | 'liter'
-    | 'megabit'
-    | 'megabyte'
-    | 'meter'
-    | 'mile'
-    | 'mile-scandinavian'
-    | 'milliliter'
-    | 'millimeter'
-    | 'millisecond'
-    | 'minute'
-    | 'month'
-    | 'ounce'
-    | 'percent'
-    | 'petabyte'
-    | 'pound'
-    | 'second'
-    | 'stone'
-    | 'terabit'
-    | 'terabyte'
-    | 'week'
-    | 'yard'
-    | 'year';
+  unit: NumberUnit;
 }
 export interface DecimalFieldConfig {
   type: FieldType.Number;
