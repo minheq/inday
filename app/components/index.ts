@@ -1,4 +1,5 @@
 export * from './avatar';
+export * from './badge';
 export * from './screen';
 export * from './text';
 export * from './column';

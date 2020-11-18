@@ -2,6 +2,7 @@ import React, { Fragment, useCallback, useMemo, useRef } from 'react';
 import { View, Pressable, Platform } from 'react-native';
 import {
   Avatar,
+  Badge,
   Container,
   Icon,
   Row,
@@ -728,11 +729,12 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
         }
 
         return (
-          <View key={collaborator.id} style={styles.collaboratorCell}>
-            <Avatar size="sm" name={collaborator.name} />
-            <Spacer direction="row" size={4} />
-            <Text numberOfLines={1}>{collaborator.name}</Text>
-          </View>
+          <Badge
+            color={palette.blue[50]}
+            key={collaborator.name}
+            showAvatar
+            title={collaborator.name}
+          />
         );
       })}
     </Fragment>
@@ -763,10 +765,16 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
         }
         const mainFieldText = record.fields[collection.mainFieldID];
 
+        if (typeof mainFieldText !== 'string') {
+          throw new Error('Main field expected to be string');
+        }
+
         return (
-          <View key={recordID} style={styles.recordLinkCell}>
-            <Text numberOfLines={1}>{mainFieldText}</Text>
-          </View>
+          <Badge
+            color={palette.purple[50]}
+            key={recordID}
+            title={mainFieldText}
+          />
         );
       })}
     </Fragment>
@@ -887,11 +895,7 @@ function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   }
 
   return (
-    <View style={styles.collaboratorCell}>
-      <Avatar size="sm" name={collaborator.name} />
-      <Spacer direction="row" size={4} />
-      <Text numberOfLines={1}>{collaborator.name}</Text>
-    </View>
+    <Badge color={palette.blue[50]} showAvatar title={collaborator.name} />
   );
 }
 interface SingleRecordLinkCellProps {
@@ -916,11 +920,11 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
   }
   const mainFieldText = record.fields[collection.mainFieldID];
 
-  return (
-    <View style={styles.recordLinkCell}>
-      <Text numberOfLines={1}>{mainFieldText}</Text>
-    </View>
-  );
+  if (typeof mainFieldText !== 'string') {
+    throw new Error('Main field expected to be string');
+  }
+
+  return <Badge color={palette.purple[50]} title={mainFieldText} />;
 }
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
@@ -993,19 +997,6 @@ const styles = DynamicStyleSheet.create((theme) => ({
     alignItems: 'center',
   },
   option: {
-    borderRadius: tokens.radius,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  recordLinkCell: {
-    backgroundColor: palette.purple[50],
-    borderRadius: tokens.radius,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  collaboratorCell: {
-    backgroundColor: palette.blue[50],
-    flexDirection: 'row',
     borderRadius: tokens.radius,
     paddingHorizontal: 8,
     paddingVertical: 4,
