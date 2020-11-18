@@ -98,18 +98,13 @@ export interface MultiRecordLinkField
   extends BaseField,
     MultiRecordLinkFieldConfig {}
 
-export type SupportedDateFormat =
-  | 'yyyy-MM-dd' // ISO
-  | 'MMMM do, yyyy';
-
 export interface DateOnlyFieldConfig {
   type: FieldType.Date;
-  format: SupportedDateFormat;
+  format: string;
 }
-
 export interface DateAndTimeFieldConfig {
   type: FieldType.Date;
-  format: SupportedDateFormat;
+  format: string;
   /** Use same time zone for all collaborators */
   timezone: boolean;
   hourCycle: 'h12' | 'h24';

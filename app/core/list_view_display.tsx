@@ -194,8 +194,9 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const renderHeaderCell = useCallback(
     ({ column }: RenderHeaderCellProps) => {
       const field = fields[column - 1];
+      const primary = column === 1;
 
-      return <HeaderCell field={field} />;
+      return <HeaderCell field={field} primary={primary} />;
     },
     [fields],
   );
@@ -259,7 +260,7 @@ interface LeafRowCellProps extends RenderLeafRowCellProps {
 }
 
 function LeafRowCell(props: LeafRowCellProps) {
-  const { field, value, path, state, row, column } = props;
+  const { field, value, path, state, row, column, primary } = props;
   const setCell = useSetRecoilState(cellState);
 
   const handlePress = useCallback(() => {
@@ -324,7 +325,10 @@ function LeafRowCell(props: LeafRowCellProps) {
   }, [field, value]);
 
   return (
-    <Pressable style={styles.cell} onPress={handlePress}>
+    <Pressable
+      style={[styles.cell, primary && styles.primaryCell]}
+      onPress={handlePress}
+    >
       <View
         style={[
           styles.cellWrapper,
@@ -340,13 +344,14 @@ function LeafRowCell(props: LeafRowCellProps) {
 
 interface HeaderCellProps {
   field: Field;
+  primary: boolean;
 }
 
 function HeaderCell(props: HeaderCellProps) {
-  const { field } = props;
+  const { field, primary } = props;
 
   return (
-    <View style={styles.headerCell}>
+    <View style={[styles.headerCell, primary && styles.primaryCell]}>
       <Row>
         <Icon name={getFieldIcon(field.type)} />
         <Spacer size={4} />
@@ -756,13 +761,13 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
         if (isNullish(record)) {
           return null;
         }
-        const mainFieldText = record.fields[collection.mainFieldID];
+        const primaryFieldText = record.fields[collection.primaryFieldID];
 
-        if (typeof mainFieldText !== 'string') {
+        if (typeof primaryFieldText !== 'string') {
           throw new Error('Main field expected to be string');
         }
 
-        return <BadgeRecordLink key={recordID} title={mainFieldText} />;
+        return <BadgeRecordLink key={recordID} title={primaryFieldText} />;
       })}
     </Fragment>
   );
@@ -895,13 +900,13 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
   if (isNullish(record)) {
     return null;
   }
-  const mainFieldText = record.fields[collection.mainFieldID];
+  const primaryFieldText = record.fields[collection.primaryFieldID];
 
-  if (typeof mainFieldText !== 'string') {
+  if (typeof primaryFieldText !== 'string') {
     throw new Error('Main field expected to be string');
   }
 
-  return <BadgeRecordLink title={mainFieldText} />;
+  return <BadgeRecordLink title={primaryFieldText} />;
 }
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
@@ -968,6 +973,16 @@ const styles = DynamicStyleSheet.create((theme) => ({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  primaryCell: {
+    borderRightWidth: 1,
+    shadowColor: palette.gray[700],
+    shadowOffset: {
+      width: 4,
+      height: 0,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
   },
   numberCell: {
     width: '100%',

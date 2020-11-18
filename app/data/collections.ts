@@ -9,5 +9,5 @@ export interface Collection {
   createdAt: Date;
   updatedAt: Date;
   spaceID: SpaceID;
-  mainFieldID: FieldID;
+  primaryFieldID: FieldID;
 }

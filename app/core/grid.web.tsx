@@ -38,6 +38,8 @@ import {
   RenderFooterCellProps,
 } from './grid';
 
+// False positive  https://github.com/yannickcr/eslint-plugin-react/issues/2269
+// eslint-disable-next-line
 export const Grid = memo(
   forwardRef<GridRef, GridProps>(function Grid(props, ref) {
     const {
@@ -410,7 +412,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
   const children = useMemo(
     () => (
       <div style={styles('row')}>
-        <div style={styles('leftPaneColumns')}>
+        <div style={styles('leftPaneColumns', { height })}>
           {leftPaneColumns.map((columnData) => {
             const { width: columnWidth, column, x } = columnData;
             const cellState = cell?.column === column ? cell.state : 'default';
@@ -430,7 +432,12 @@ const LeafRowContainer = memo(function LeafRowContainer(
             );
           })}
         </div>
-        <div style={styles('rightPaneColumns', { left: leftPaneContentWidth })}>
+        <div
+          style={styles('rightPaneColumns', {
+            left: leftPaneContentWidth,
+            height,
+          })}
+        >
           {rightPaneColumns.map((columnData) => {
             const { key, width: columnWidth, column, x } = columnData;
             const cellState = cell?.column === column ? cell.state : 'default';
@@ -688,12 +695,12 @@ const styles = css.create({
     position: 'absolute',
   },
   headerWrapper: {
-    zIndex: 1,
+    zIndex: 2,
     position: 'sticky',
     top: 0,
   },
   footerWrapper: {
-    zIndex: 1,
+    zIndex: 2,
     position: 'sticky',
     bottom: 0,
   },
@@ -710,7 +717,7 @@ const styles = css.create({
     height: '100%',
   },
   leftPaneColumns: {
-    zIndex: 1,
+    zIndex: 2,
     position: 'sticky',
     left: 0,
     display: 'flex',

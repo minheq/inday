@@ -291,7 +291,7 @@ export function useCreateCollection() {
         id: generateID(),
         name: '',
         // TODO: create field
-        mainFieldID: '',
+        primaryFieldID: '',
         createdAt: new Date(),
         updatedAt: new Date(),
         spaceID,

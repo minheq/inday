@@ -29,5 +29,6 @@ module.exports = {
   plugins: ['@typescript-eslint', 'sonarjs', 'react', 'react-native'],
   rules: {
     'react-native/sort-styles': 0,
+    'react/prop-types': 0,
   },
 };

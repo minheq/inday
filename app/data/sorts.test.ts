@@ -308,7 +308,7 @@ describe('records', () => {
     type: FieldType.SingleLineText,
     collectionID: otherCollection.id,
   });
-  otherCollection.mainFieldID = otherField.id;
+  otherCollection.primaryFieldID = otherField.id;
   const collectionWithFields = addFieldsToCollection(otherCollection, [
     otherField,
   ]);

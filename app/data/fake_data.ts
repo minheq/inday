@@ -146,7 +146,7 @@ const col2Field2 = makeField({
 });
 
 const col2Fields = [col2Field1, col2Field2];
-collection2.mainFieldID = col2Field1.id;
+collection2.primaryFieldID = col2Field1.id;
 
 const collection2WithFields = addFieldsToCollection(collection2, col2Fields);
 

@@ -255,7 +255,7 @@ export function makeCollection(collection: Partial<Collection>): Collection {
     spaceID: collection.spaceID ?? generateID(),
     updatedAt: collection.updatedAt ?? new Date(),
     createdAt: collection.createdAt ?? new Date(),
-    mainFieldID: collection.mainFieldID ?? generateID(),
+    primaryFieldID: collection.primaryFieldID ?? generateID(),
   };
 }
 

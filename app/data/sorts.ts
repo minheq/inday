@@ -624,7 +624,7 @@ export function applySingleRecordLinkFieldSort(
 
   const collection = getCollection(field.recordsFromCollectionID);
 
-  const mainField = getField(collection.mainFieldID);
+  const mainField = getField(collection.primaryFieldID);
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
@@ -699,7 +699,7 @@ export function applyMultiRecordLinkFieldSort(
   assertMultiRecordLinkField(field);
 
   const collection = getCollection(field.recordsFromCollectionID);
-  const mainField = getField(collection.mainFieldID);
+  const mainField = getField(collection.primaryFieldID);
 
   if (sort.order === 'ascending') {
     return recordsClone.sort((a, b) => {
