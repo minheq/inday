@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useMemo, useRef } from 'react';
 import { View, Pressable, Platform } from 'react-native';
-import { Badge, Container, Icon, Row, Spacer, Text } from '../components';
+import { Container, Icon, Row, Spacer, Text } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -264,10 +264,10 @@ function LeafRowCell(props: LeafRowCellProps) {
   const setCell = useSetRecoilState(cellState);
 
   const handlePress = useCallback(() => {
-    if (state === 'focused') {
-      setCell({ type: 'leaf', row, path, column, state: 'editing' });
-    } else {
+    if (state === 'default') {
       setCell({ type: 'leaf', row, path, column, state: 'focused' });
+    } else if (state === 'focused') {
+      setCell({ type: 'leaf', row, path, column, state: 'editing' });
     }
   }, [setCell, state, row, column, path]);
 
@@ -326,7 +326,7 @@ function LeafRowCell(props: LeafRowCellProps) {
 
   return (
     <Pressable
-      style={[styles.cell, primary && styles.primaryCell]}
+      style={[styles.leafRowCell, primary && styles.primaryCell]}
       onPress={handlePress}
     >
       <View
@@ -956,7 +956,7 @@ function URLCell(props: URLCellProps) {
 }
 
 const styles = DynamicStyleSheet.create((theme) => ({
-  cell: {
+  leafRowCell: {
     width: '100%',
     height: '100%',
     borderBottomWidth: 1,

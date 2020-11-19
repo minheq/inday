@@ -15,3 +15,22 @@ export const breakpoints: Breakpoints = {
 };
 
 export const ascendingBreakpoints: Breakpoint[] = ['sm', 'md', 'lg', 'xl'];
+export const ascendingScreenSizes: ScreenSize[] = [
+  'xs',
+  'sm',
+  'md',
+  'lg',
+  'xl',
+];
+
+export const screenSizeHierarchy: {
+  [key in ScreenSize]: number;
+} = {
+  xs: 1,
+  sm: 2,
+  md: 3,
+  lg: 4,
+  xl: 5,
+};
+
+export type ScreenSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
