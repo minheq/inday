@@ -12,8 +12,8 @@ import {
   FieldWithListViewConfig,
   ListViewFieldConfig,
 } from './views';
-import { Field, FieldConfig, FieldID } from './fields';
-import { Record } from './records';
+import { Field, FieldConfig, FieldID, FieldValue } from './fields';
+import { Record, RecordID } from './records';
 import { generateID } from '../../lib/id/id';
 import {
   Filter,
@@ -42,6 +42,7 @@ import {
   collaboratorsByIDState,
   CollaboratorsByIDState,
   RecordsByIDState,
+  CollectionsByIDState,
 } from './atoms';
 import {
   spaceQuery,
@@ -233,15 +234,17 @@ export function useGetCollaboratorsByID(): CollaboratorsByIDState {
   return useRecoilValue(collaboratorsByIDState);
 }
 
-export function useGetCollections() {
+export function useGetCollectionsByID(): CollectionsByIDState {
   return useRecoilValue(collectionsByIDState);
 }
 
-export function useGetCollectionCallback() {
-  const collections = useGetCollections();
+export function useGetCollectionCallback(): (
+  collectionID: CollectionID,
+) => Collection {
+  const collections = useGetCollectionsByID();
 
   return useCallback(
-    (collectionID: string) => {
+    (collectionID) => {
       const collection = collections[collectionID];
 
       if (collection === undefined) {
@@ -254,7 +257,7 @@ export function useGetCollectionCallback() {
   );
 }
 
-export function useGetCollection(collectionID: string) {
+export function useGetCollection(collectionID: CollectionID): Collection {
   const collection = useRecoilValue(collectionQuery(collectionID));
 
   if (collection === null) {
@@ -264,19 +267,23 @@ export function useGetCollection(collectionID: string) {
   return collection;
 }
 
-export function useGetCollectionFields(collectionID: string) {
+export function useGetCollectionFields(collectionID: CollectionID): Field[] {
   return useRecoilValue(collectionFieldsQuery(collectionID));
 }
 
-export function useGetCollectionRecords(collectionID: string) {
+export function useGetCollectionRecords(collectionID: CollectionID): Record[] {
   return useRecoilValue(collectionRecordsQuery(collectionID));
 }
 
-export function useGetCollectionFieldsByID(collectionID: string) {
+export function useGetCollectionFieldsByID(
+  collectionID: CollectionID,
+): {
+  [fieldID: string]: Field;
+} {
   return useRecoilValue(collectionFieldsByIDQuery(collectionID));
 }
 
-export function useGetCollectionViews(collectionID: string) {
+export function useGetCollectionViews(collectionID: CollectionID) {
   return useRecoilValue(collectionViewsQuery(collectionID));
 }
 
@@ -315,6 +322,42 @@ export function useCreateCollection() {
   );
 }
 
+export function useUpdateRecordField(): (
+  recordID: RecordID,
+  fieldID: FieldID,
+  value: FieldValue,
+) => void {
+  const emitEvent = useEmitEvent();
+  const setRecordsByID = useSetRecoilState(recordsByIDState);
+  const getRecord = useGetRecordCallback();
+
+  return useCallback(
+    (recordID, fieldID, value) => {
+      const prevRecord = getRecord(recordID);
+
+      const nextRecord: Record = {
+        ...prevRecord,
+        fields: {
+          ...prevRecord.fields,
+          [fieldID]: value,
+        },
+      };
+
+      setRecordsByID((previousRecordsByID) => ({
+        ...previousRecordsByID,
+        [nextRecord.id]: nextRecord,
+      }));
+
+      emitEvent({
+        name: 'RecordFieldUpdated',
+        prevRecord,
+        nextRecord,
+      });
+    },
+    [emitEvent, getRecord, setRecordsByID],
+  );
+}
+
 export function useDeleteCollection() {
   const emitEvent = useEmitEvent();
   const setCollections = useSetRecoilState(collectionsByIDState);
@@ -339,7 +382,7 @@ export function useDeleteCollection() {
 }
 
 export interface UpdateCollectionNameInput {
-  collectionID: string;
+  collectionID: CollectionID;
   name: string;
 }
 
@@ -871,7 +914,7 @@ export function useCreateView() {
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
   return useCallback(
-    (collectionID: string) => {
+    (collectionID: CollectionID) => {
       const newView: View = {
         id: generateID(),
         name: '',
@@ -990,7 +1033,7 @@ export function useCreateField() {
 
   return useCallback(
     (
-      collectionID: string,
+      collectionID: CollectionID,
       name: string,
       description: string,
       fieldConfig: FieldConfig,
@@ -1083,7 +1126,7 @@ export function useGetRecordCallback() {
   const records = useRecoilValue(recordsByIDState);
 
   return useCallback(
-    (recordID: string) => {
+    (recordID: RecordID) => {
       const record = records[recordID];
 
       if (record === undefined) {
@@ -1096,7 +1139,7 @@ export function useGetRecordCallback() {
   );
 }
 
-export function useGetRecord(recordID: string) {
+export function useGetRecord(recordID: RecordID) {
   const record = useRecoilValue(recordQuery(recordID));
 
   if (record === null) {
@@ -1111,7 +1154,7 @@ export function useCreateRecord() {
   const setRecords = useSetRecoilState(recordsByIDState);
 
   return useCallback(
-    (collectionID: string) => {
+    (collectionID: CollectionID) => {
       const newRecord: Record = {
         id: generateID(),
         fields: {},

@@ -26,7 +26,7 @@ import { Slide } from '../components/slide';
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer/autosizer';
-import { View, ViewType, assertListView, ViewID } from '../data/views';
+import { View, ViewID } from '../data/views';
 import { ListViewDisplay } from '../core/list_view_display';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { RecordID } from '../data/records';

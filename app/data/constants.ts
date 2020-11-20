@@ -37,6 +37,7 @@ export enum RecoilKey {
   Filter = 'Filter',
   Filters = 'Filters',
   Record = 'Record',
+  RecordFieldValue = 'RecordFieldValue',
   Records = 'Records',
   Space = 'Space',
   Spaces = 'Spaces',

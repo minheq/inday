@@ -1,12 +1,5 @@
-import React, {
-  createContext,
-  Fragment,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-} from 'react';
-import { View, Pressable, Platform } from 'react-native';
+import React, { Fragment, useCallback, useMemo, useRef } from 'react';
+import { View, Pressable, Platform, TextInput } from 'react-native';
 import {
   Button,
   Container,
@@ -22,6 +15,7 @@ import {
   useGetCollaboratorsByID,
   useGetCollectionRecordsByID,
   useGetCollection,
+  useUpdateRecordField,
 } from '../data/store';
 import {
   FieldType,
@@ -253,14 +247,13 @@ function LeafRowCell(props: LeafRowCellProps) {
     primary,
     width,
     height,
+    record,
   } = props;
   const setCell = useSetRecoilState(cellState);
 
   const handlePress = useCallback(() => {
     if (state === 'default') {
       setCell({ type: 'leaf', row, path, column, state: 'focused' });
-    } else if (state === 'focused') {
-      setCell({ type: 'leaf', row, path, column, state: 'editing' });
     }
   }, [setCell, state, row, column, path]);
 
@@ -270,21 +263,50 @@ function LeafRowCell(props: LeafRowCellProps) {
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
-        return <CheckboxCell focused={focused} field={field} value={value} />;
+        return (
+          <CheckboxCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
+        );
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
-        return <CurrencyCell focused={focused} field={field} value={value} />;
+        return (
+          <CurrencyCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
+        );
       case FieldType.Date:
         assertDateFieldValue(value);
-        return <DateCell focused={focused} field={field} value={value} />;
+        return (
+          <DateCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
+        );
       case FieldType.Email:
         assertEmailFieldValue(value);
-        return <EmailCell focused={focused} field={field} value={value} />;
+        return (
+          <EmailCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
+        );
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
         return (
           <MultiCollaboratorCell
             focused={focused}
+            record={record}
             field={field}
             value={value}
           />
@@ -292,31 +314,59 @@ function LeafRowCell(props: LeafRowCellProps) {
       case FieldType.MultiRecordLink:
         assertMultiRecordLinkFieldValue(value);
         return (
-          <MultiRecordLinkCell focused={focused} field={field} value={value} />
+          <MultiRecordLinkCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return (
-          <MultiLineTextCell focused={focused} field={field} value={value} />
+          <MultiLineTextCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
         return (
-          <MultiOptionCell focused={focused} field={field} value={value} />
+          <MultiOptionCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.Number:
         assertNumberFieldValue(value);
-        return <NumberCell focused={focused} field={field} value={value} />;
+        return (
+          <NumberCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
+        );
       case FieldType.PhoneNumber:
         assertPhoneNumberFieldValue(value);
         return (
-          <PhoneNumberCell focused={focused} field={field} value={value} />
+          <PhoneNumberCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
         return (
           <SingleCollaboratorCell
             focused={focused}
+            record={record}
             field={field}
             value={value}
           />
@@ -324,26 +374,48 @@ function LeafRowCell(props: LeafRowCellProps) {
       case FieldType.SingleRecordLink:
         assertSingleRecordLinkFieldValue(value);
         return (
-          <SingleRecordLinkCell focused={focused} field={field} value={value} />
+          <SingleRecordLinkCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return (
-          <SingleLineTextCell focused={focused} field={field} value={value} />
+          <SingleLineTextCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.SingleOption:
         assertSingleOptionFieldValue(value);
         return (
-          <SingleOptionCell focused={focused} field={field} value={value} />
+          <SingleOptionCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.URL:
         assertURLFieldValue(value);
-        return <URLCell focused={focused} field={field} value={value} />;
+        return (
+          <URLCell
+            focused={focused}
+            record={record}
+            field={field}
+            value={value}
+          />
+        );
 
       default:
         throw new Error('Unhandled FieldType cell rendering');
     }
-  }, [field, value, state]);
+  }, [field, value, state, record]);
 
   return (
     <Pressable
@@ -669,6 +741,7 @@ interface CheckboxCellProps {
   value: CheckboxFieldValue;
   field: CheckboxField;
   focused: boolean;
+  record: Record;
 }
 
 function CheckboxCell(props: CheckboxCellProps) {
@@ -685,6 +758,7 @@ interface CurrencyCellProps {
   value: CurrencyFieldValue;
   field: CurrencyField;
   focused: boolean;
+  record: Record;
 }
 
 function CurrencyCell(props: CurrencyCellProps) {
@@ -707,6 +781,7 @@ interface DateCellProps {
   value: DateFieldValue;
   field: DateField;
   focused: boolean;
+  record: Record;
 }
 
 function DateCell(props: DateCellProps) {
@@ -740,6 +815,7 @@ interface EmailCellProps {
   value: EmailFieldValue;
   field: EmailField;
   focused: boolean;
+  record: Record;
 }
 
 function EmailCell(props: EmailCellProps) {
@@ -771,6 +847,7 @@ interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
   focused: boolean;
+  record: Record;
 }
 
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
@@ -800,6 +877,7 @@ interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
   field: MultiRecordLinkField;
   focused: boolean;
+  record: Record;
 }
 
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
@@ -835,6 +913,7 @@ interface MultiLineTextCellProps {
   value: MultiLineTextFieldValue;
   field: MultiLineTextField;
   focused: boolean;
+  record: Record;
 }
 
 function MultiLineTextCell(props: MultiLineTextCellProps) {
@@ -859,6 +938,7 @@ interface MultiOptionCellProps {
   value: MultiOptionFieldValue;
   field: MultiOptionField;
   focused: boolean;
+  record: Record;
 }
 
 function MultiOptionCell(props: MultiOptionCellProps) {
@@ -884,6 +964,7 @@ interface NumberCellProps {
   value: NumberFieldValue;
   field: NumberField;
   focused: boolean;
+  record: Record;
 }
 
 function NumberCell(props: NumberCellProps) {
@@ -926,6 +1007,7 @@ interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
   focused: boolean;
+  record: Record;
 }
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
@@ -955,6 +1037,7 @@ interface SingleCollaboratorCellProps {
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
   focused: boolean;
+  record: Record;
 }
 
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
@@ -979,6 +1062,7 @@ interface SingleRecordLinkCellProps {
   value: SingleRecordLinkFieldValue;
   field: SingleRecordLinkField;
   focused: boolean;
+  record: Record;
 }
 
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
@@ -1009,15 +1093,34 @@ interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
   field: SingleLineTextField;
   focused: boolean;
+  record: Record;
 }
 
 function SingleLineTextCell(props: SingleLineTextCellProps) {
-  const { value } = props;
+  const { field, value, focused, record } = props;
+
+  const updateRecordField = useUpdateRecordField();
+  const handleChange = useCallback(
+    (newValue: SingleLineTextFieldValue) => {
+      updateRecordField(record.id, field.id, newValue);
+    },
+    [updateRecordField, record, field],
+  );
+
+  if (focused === false) {
+    return (
+      <View style={styles.textCellContainer}>
+        <Text numberOfLines={1}>{value}</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.textCellContainer}>
-      <Text numberOfLines={1}>{value}</Text>
-    </View>
+    <TextInput
+      style={styles.textCellInput}
+      value={value}
+      onChangeText={handleChange}
+    />
   );
 }
 
@@ -1025,6 +1128,7 @@ interface SingleOptionCellProps {
   value: SingleOptionFieldValue;
   field: SingleOptionField;
   focused: boolean;
+  record: Record;
 }
 
 function SingleOptionCell(props: SingleOptionCellProps) {
@@ -1047,6 +1151,7 @@ interface URLCellProps {
   value: URLFieldValue;
   field: URLField;
   focused: boolean;
+  record: Record;
 }
 
 function URLCell(props: URLCellProps) {
@@ -1094,6 +1199,16 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   focusedMultiLineTextCellContainer: {
     paddingTop: FOCUS_BORDER_WIDTH + 1,
+  },
+  textCellInput: {
+    height: 32,
+    borderRadius: tokens.radius,
+    ...tokens.text.size.md,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
   focusedLeafRowCell: {
     height: 'auto',

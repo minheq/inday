@@ -126,6 +126,15 @@ export interface RecordNameUpdatedEvent
   extends BaseEvent,
     RecordNameUpdatedEventConfig {}
 
+export interface RecordFieldUpdatedEventConfig {
+  name: 'RecordFieldUpdated';
+  prevRecord: Record;
+  nextRecord: Record;
+}
+export interface RecordFieldUpdatedEvent
+  extends BaseEvent,
+    RecordFieldUpdatedEventConfig {}
+
 export interface RecordDeletedEventConfig {
   name: 'RecordDeleted';
   record: Record;
@@ -238,6 +247,7 @@ export type EventConfig =
   | FieldDeletedEventConfig
   | RecordCreatedEventConfig
   | RecordNameUpdatedEventConfig
+  | RecordFieldUpdatedEventConfig
   | RecordDeletedEventConfig
   | FilterCreatedEventConfig
   | FilterConfigUpdatedEventConfig
@@ -267,6 +277,7 @@ export type Event =
   | FieldDeletedEvent
   | RecordCreatedEvent
   | RecordNameUpdatedEvent
+  | RecordFieldUpdatedEvent
   | RecordDeletedEvent
   | FilterCreatedEvent
   | FilterConfigUpdatedEvent
