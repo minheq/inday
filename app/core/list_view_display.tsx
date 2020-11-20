@@ -81,8 +81,6 @@ import {
   GridRef,
   RenderLeafRowCellProps,
   RenderHeaderCellProps,
-  RenderHeaderProps,
-  RenderLeafRowProps,
 } from './grid';
 import { Record, RecordID } from '../data/records';
 import { atom, useRecoilState, useSetRecoilState } from 'recoil';
@@ -196,21 +194,6 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     [fields, records],
   );
 
-  const renderLeafRow = useCallback(
-    ({ path, row, state, children }: RenderLeafRowProps) => {
-      return (
-        <LeafRow row={row} state={state} path={path}>
-          {children}
-        </LeafRow>
-      );
-    },
-    [],
-  );
-
-  const renderHeader = useCallback(({ children }: RenderHeaderProps) => {
-    return <Header>{children}</Header>;
-  }, []);
-
   const renderHeaderCell = useCallback(
     ({ column }: RenderHeaderCellProps) => {
       const field = fields[column - 1];
@@ -237,39 +220,17 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
             contentOffset={contentOffset}
             groups={[{ type: 'leaf', rowCount, collapsed: false }]}
             renderLeafRowCell={renderLeafRowCell}
-            renderHeader={renderHeader}
             renderHeaderCell={renderHeaderCell}
             leafRowHeight={RECORD_ROW_HEIGHT}
             headerHeight={FIELD_ROW_HEIGHT}
             columns={columns}
             fixedColumnCount={fixedFieldCount}
             cell={cell}
-            renderLeafRow={renderLeafRow}
           />
         )}
       </AutoSizer>
     </Container>
   );
-}
-
-interface LeafRowProps extends RenderLeafRowProps {
-  children: React.ReactNode;
-}
-
-function LeafRow(props: LeafRowProps) {
-  const { children } = props;
-
-  return <View style={styles.leafRow}>{children}</View>;
-}
-
-interface HeaderProps {
-  children: React.ReactNode;
-}
-
-function Header(props: HeaderProps) {
-  const { children } = props;
-
-  return <View style={styles.headerRow}>{children}</View>;
 }
 
 interface LeafRowCellProps extends RenderLeafRowCellProps {
@@ -1187,15 +1148,5 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   hoveredCell: {
     borderColor: theme.border.default,
-  },
-  headerRow: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: theme.background.content,
-  },
-  leafRow: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: theme.background.content,
   },
 }));

@@ -267,7 +267,16 @@ function MainContent() {
     console.log('Open record', recordID);
   }, []);
 
-  const ViewDisplay = displaysByViewType[view.type];
+  const renderView = useCallback((): React.ReactNode => {
+    switch (view.type) {
+      case 'list':
+        return <ListViewDisplay view={view} onOpenRecord={handleOpenRecord} />;
+      case 'board':
+        return null;
+      default:
+        throw new Error('View type not supported');
+    }
+  }, [view, handleOpenRecord]);
 
   return (
     <Container flex={1} color="content">
@@ -281,7 +290,7 @@ function MainContent() {
         </Slide>
         <Container color="content" flex={1}>
           <Spacer size={16} />
-          <ViewDisplay onOpenRecord={handleOpenRecord} view={view} />
+          {renderView()}
         </Container>
         <Slide width={360} open={sidePanel === 'organize'}>
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
@@ -304,24 +313,6 @@ function MainContent() {
     </Container>
   );
 }
-
-interface ViewDisplayProps {
-  view: View;
-  onOpenRecord: (recordID: RecordID) => void;
-}
-
-const displaysByViewType: {
-  [viewType in ViewType]: (props: ViewDisplayProps) => JSX.Element;
-} = {
-  list: (props: ViewDisplayProps) => {
-    const { view, onOpenRecord } = props;
-
-    assertListView(view);
-
-    return <ListViewDisplay view={view} onOpenRecord={onOpenRecord} />;
-  },
-  board: () => <></>,
-};
 
 const styles = DynamicStyleSheet.create((theme) => ({
   collectionItem: {
