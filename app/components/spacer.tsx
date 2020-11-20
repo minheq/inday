@@ -7,6 +7,9 @@ interface SpacerProps {
   direction?: 'column' | 'row';
 }
 
+/**
+ * By default, creates vertical space
+ */
 export function Spacer(props: SpacerProps): JSX.Element {
   const { size, direction: directionOverride } = props;
   const { direction } = useParentContainer();
@@ -17,9 +20,9 @@ export function Spacer(props: SpacerProps): JSX.Element {
     <View
       style={
         size
-          ? effectiveDirection === 'column'
-            ? { height: size }
-            : { width: size }
+          ? effectiveDirection === 'row'
+            ? { width: size }
+            : { height: size }
           : styles.base
       }
     />

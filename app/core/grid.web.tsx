@@ -695,12 +695,12 @@ const styles = css.create({
     position: 'absolute',
   },
   headerWrapper: {
-    zIndex: 2,
+    zIndex: 3,
     position: 'sticky',
     top: 0,
   },
   footerWrapper: {
-    zIndex: 2,
+    zIndex: 3,
     position: 'sticky',
     bottom: 0,
   },
@@ -717,7 +717,7 @@ const styles = css.create({
     height: '100%',
   },
   leftPaneColumns: {
-    zIndex: 2,
+    zIndex: 3,
     position: 'sticky',
     left: 0,
     display: 'flex',

@@ -3,11 +3,11 @@ import { Badge } from '../components';
 import { palette } from '../components/palette';
 import { Collaborator } from '../data/collaborators';
 
-interface BadgeCollaboratorProps {
+interface CollaboratorBadgeProps {
   collaborator: Collaborator;
 }
 
-export function BadgeCollaborator(props: BadgeCollaboratorProps): JSX.Element {
+export function CollaboratorBadge(props: CollaboratorBadgeProps): JSX.Element {
   const { collaborator } = props;
 
   return (

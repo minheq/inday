@@ -35,6 +35,8 @@ const styles = DynamicStyleSheet.create((theme) => ({
     height: 32,
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
   },
   avatarWrapper: {
     paddingRight: 4,

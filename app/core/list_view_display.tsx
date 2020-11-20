@@ -1,6 +1,21 @@
-import React, { Fragment, useCallback, useMemo, useRef } from 'react';
+import React, {
+  createContext,
+  Fragment,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+} from 'react';
 import { View, Pressable, Platform } from 'react-native';
-import { Container, Icon, Row, Spacer, Text } from '../components';
+import {
+  Button,
+  Container,
+  Icon,
+  Row,
+  Spacer,
+  Text,
+  tokens,
+} from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -86,9 +101,9 @@ import { isNullish } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { palette } from '../components/palette';
 import { formatDate } from '../../lib/datetime/format';
-import { BadgeOption } from './badge_option';
-import { BadgeCollaborator } from './badge_collaborator';
-import { BadgeRecordLink } from './badge_record_link';
+import { OptionBadge } from './option_badge';
+import { CollaboratorBadge } from './collaborator_badge';
+import { RecordLinkBadge } from './record_link_badge';
 import { formatUnit } from '../../lib/i18n/unit';
 
 const cellState = atom<StatefulLeafRowCell | null>({
@@ -103,6 +118,7 @@ interface ListViewDisplayProps {
 
 const FIELD_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
+const FOCUS_BORDER_WIDTH = 3;
 
 export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const { view, onOpenRecord } = props;
@@ -159,6 +175,8 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
       const record = records[row - 1];
       const value = record.fields[field.id];
       const primary = column === 1;
+      const width = field.config.width;
+      const height = FIELD_ROW_HEIGHT;
 
       return (
         <LeafRowCell
@@ -170,6 +188,8 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
           primary={primary}
           row={row}
           column={column}
+          width={width}
+          height={height}
         />
       );
     },
@@ -257,10 +277,22 @@ interface LeafRowCellProps extends RenderLeafRowCellProps {
   value: FieldValue;
   record: Record;
   primary: boolean;
+  width: number;
+  height: number;
 }
 
 function LeafRowCell(props: LeafRowCellProps) {
-  const { field, value, path, state, row, column, primary } = props;
+  const {
+    field,
+    value,
+    path,
+    state,
+    row,
+    column,
+    primary,
+    width,
+    height,
+  } = props;
   const setCell = useSetRecoilState(cellState);
 
   const handlePress = useCallback(() => {
@@ -272,72 +304,102 @@ function LeafRowCell(props: LeafRowCellProps) {
   }, [setCell, state, row, column, path]);
 
   const renderCell = useCallback(() => {
+    const focused = state === 'focused';
+
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
-        return <CheckboxCell field={field} value={value} />;
+        return <CheckboxCell focused={focused} field={field} value={value} />;
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
-        return <CurrencyCell field={field} value={value} />;
+        return <CurrencyCell focused={focused} field={field} value={value} />;
       case FieldType.Date:
         assertDateFieldValue(value);
-        return <DateCell field={field} value={value} />;
+        return <DateCell focused={focused} field={field} value={value} />;
       case FieldType.Email:
         assertEmailFieldValue(value);
-        return <EmailCell field={field} value={value} />;
+        return <EmailCell focused={focused} field={field} value={value} />;
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
-        return <MultiCollaboratorCell field={field} value={value} />;
+        return (
+          <MultiCollaboratorCell
+            focused={focused}
+            field={field}
+            value={value}
+          />
+        );
       case FieldType.MultiRecordLink:
         assertMultiRecordLinkFieldValue(value);
-        return <MultiRecordLinkCell field={field} value={value} />;
+        return (
+          <MultiRecordLinkCell focused={focused} field={field} value={value} />
+        );
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
-        return <MultiLineTextCell field={field} value={value} />;
+        return (
+          <MultiLineTextCell focused={focused} field={field} value={value} />
+        );
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
-        return <MultiOptionCell field={field} value={value} />;
+        return (
+          <MultiOptionCell focused={focused} field={field} value={value} />
+        );
       case FieldType.Number:
         assertNumberFieldValue(value);
-        return <NumberCell field={field} value={value} />;
+        return <NumberCell focused={focused} field={field} value={value} />;
       case FieldType.PhoneNumber:
         assertPhoneNumberFieldValue(value);
-        return <PhoneNumberCell field={field} value={value} />;
+        return (
+          <PhoneNumberCell focused={focused} field={field} value={value} />
+        );
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
-        return <SingleCollaboratorCell field={field} value={value} />;
+        return (
+          <SingleCollaboratorCell
+            focused={focused}
+            field={field}
+            value={value}
+          />
+        );
       case FieldType.SingleRecordLink:
         assertSingleRecordLinkFieldValue(value);
-        return <SingleRecordLinkCell field={field} value={value} />;
+        return (
+          <SingleRecordLinkCell focused={focused} field={field} value={value} />
+        );
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
-        return <SingleLineTextCell field={field} value={value} />;
+        return (
+          <SingleLineTextCell focused={focused} field={field} value={value} />
+        );
       case FieldType.SingleOption:
         assertSingleOptionFieldValue(value);
-        return <SingleOptionCell field={field} value={value} />;
+        return (
+          <SingleOptionCell focused={focused} field={field} value={value} />
+        );
       case FieldType.URL:
         assertURLFieldValue(value);
-        return <URLCell field={field} value={value} />;
+        return <URLCell focused={focused} field={field} value={value} />;
 
       default:
         throw new Error('Unhandled FieldType cell rendering');
     }
-  }, [field, value]);
+  }, [field, value, state]);
 
   return (
     <Pressable
-      style={[styles.leafRowCell, primary && styles.primaryCell]}
+      style={[
+        styles.leafRowCell,
+        primary && styles.primaryCell,
+        state === 'focused' && styles.focusedLeafRowCell,
+        state === 'focused' && {
+          minHeight: height + FOCUS_BORDER_WIDTH * 2,
+          width: width + FOCUS_BORDER_WIDTH * 2,
+          top: -FOCUS_BORDER_WIDTH,
+          left: -FOCUS_BORDER_WIDTH,
+        },
+      ]}
       onPress={handlePress}
     >
-      <View
-        style={[
-          styles.cellWrapper,
-          state === 'hovered' && styles.hoveredCell,
-          state === 'focused' && styles.focusedCell,
-        ]}
-      >
-        {renderCell()}
-      </View>
+      {renderCell()}
     </Pressable>
   );
 }
@@ -645,6 +707,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 interface CheckboxCellProps {
   value: CheckboxFieldValue;
   field: CheckboxField;
+  focused: boolean;
 }
 
 function CheckboxCell(props: CheckboxCellProps) {
@@ -660,6 +723,7 @@ function CheckboxCell(props: CheckboxCellProps) {
 interface CurrencyCellProps {
   value: CurrencyFieldValue;
   field: CurrencyField;
+  focused: boolean;
 }
 
 function CurrencyCell(props: CurrencyCellProps) {
@@ -670,7 +734,7 @@ function CurrencyCell(props: CurrencyCellProps) {
   }
 
   return (
-    <View style={styles.numberCell}>
+    <View style={styles.numberCellContainer}>
       <Text numberOfLines={1}>
         {formatCurrency(value, getSystemLocale(), field.currency)}
       </Text>
@@ -681,38 +745,71 @@ function CurrencyCell(props: CurrencyCellProps) {
 interface DateCellProps {
   value: DateFieldValue;
   field: DateField;
+  focused: boolean;
 }
 
 function DateCell(props: DateCellProps) {
-  const { value, field } = props;
+  const { value, field, focused } = props;
 
   if (isNullish(value)) {
     return null;
   }
 
+  if (focused === false) {
+    return (
+      <View style={styles.textCellContainer}>
+        <Text numberOfLines={1}>
+          {formatDate(value, field.format, getSystemLocale())}
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <Text numberOfLines={1}>
-      {formatDate(value, field.format, getSystemLocale())}
-    </Text>
+    <View>
+      <View style={styles.textCellContainer}>
+        <Text>{formatDate(value, field.format, getSystemLocale())}</Text>
+      </View>
+      <Spacer size={8} />
+      <Text decoration="underline">Close</Text>
+    </View>
   );
 }
 interface EmailCellProps {
   value: EmailFieldValue;
   field: EmailField;
+  focused: boolean;
 }
 
 function EmailCell(props: EmailCellProps) {
-  const { value } = props;
+  const { value, focused } = props;
+
+  if (focused === false) {
+    return (
+      <View style={styles.textCellContainer}>
+        <Text decoration="underline" numberOfLines={1}>
+          {value}
+        </Text>
+      </View>
+    );
+  }
 
   return (
-    <Text decoration="underline" numberOfLines={1}>
-      {value}
-    </Text>
+    <View>
+      <Button style={styles.textCellContainer}>
+        <Text numberOfLines={1}>{value}</Text>
+      </Button>
+      <Spacer size={8} />
+      <Text decoration="underline" size="sm" color="primary">
+        Send email
+      </Text>
+    </View>
   );
 }
 interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
+  focused: boolean;
 }
 
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
@@ -729,7 +826,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
         }
 
         return (
-          <BadgeCollaborator
+          <CollaboratorBadge
             collaborator={collaborator}
             key={collaborator.name}
           />
@@ -741,6 +838,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
 interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
   field: MultiRecordLinkField;
+  focused: boolean;
 }
 
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
@@ -767,7 +865,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
           throw new Error('Main field expected to be string');
         }
 
-        return <BadgeRecordLink key={recordID} title={primaryFieldText} />;
+        return <RecordLinkBadge key={recordID} title={primaryFieldText} />;
       })}
     </Fragment>
   );
@@ -775,16 +873,31 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
 interface MultiLineTextCellProps {
   value: MultiLineTextFieldValue;
   field: MultiLineTextField;
+  focused: boolean;
 }
 
 function MultiLineTextCell(props: MultiLineTextCellProps) {
-  const { value } = props;
+  const { value, focused } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  if (focused === false) {
+    return (
+      <View style={styles.textCellContainer}>
+        <Text numberOfLines={1}>{value}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.focusedMultiLineTextCellContainer}>
+      <Text>{value}</Text>
+    </View>
+  );
 }
+
 interface MultiOptionCellProps {
   value: MultiOptionFieldValue;
   field: MultiOptionField;
+  focused: boolean;
 }
 
 function MultiOptionCell(props: MultiOptionCellProps) {
@@ -801,7 +914,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
             )}`,
           );
         }
-        return <BadgeOption key={selected.id} option={selected} />;
+        return <OptionBadge key={selected.id} option={selected} />;
       })}
     </Fragment>
   );
@@ -809,6 +922,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
 interface NumberCellProps {
   value: NumberFieldValue;
   field: NumberField;
+  focused: boolean;
 }
 
 function NumberCell(props: NumberCellProps) {
@@ -821,7 +935,7 @@ function NumberCell(props: NumberCellProps) {
   switch (field.style) {
     case 'decimal':
       return (
-        <View style={styles.numberCell}>
+        <View style={styles.numberCellContainer}>
           <Text numberOfLines={1}>
             {Intl.NumberFormat(getSystemLocale(), {
               style: 'decimal',
@@ -833,7 +947,7 @@ function NumberCell(props: NumberCellProps) {
       );
     case 'unit':
       return (
-        <View style={styles.numberCell}>
+        <View style={styles.numberCellContainer}>
           <Text numberOfLines={1}>
             {formatUnit(value, getSystemLocale(), field.unit)}
           </Text>
@@ -841,7 +955,7 @@ function NumberCell(props: NumberCellProps) {
       );
     default:
       return (
-        <View style={styles.numberCell}>
+        <View style={styles.numberCellContainer}>
           <Text numberOfLines={1}>{value}</Text>
         </View>
       );
@@ -850,16 +964,36 @@ function NumberCell(props: NumberCellProps) {
 interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
+  focused: boolean;
 }
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
-  const { value } = props;
+  const { value, focused } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  if (focused === false) {
+    return (
+      <View style={styles.textCellContainer}>
+        <Text numberOfLines={1}>{value}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View>
+      <View style={styles.textCellContainer}>
+        <Text>{value}</Text>
+      </View>
+      <Spacer size={8} />
+      <Text size="sm" color="primary">
+        Call
+      </Text>
+    </View>
+  );
 }
 interface SingleCollaboratorCellProps {
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
+  focused: boolean;
 }
 
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
@@ -877,12 +1011,13 @@ function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   }
 
   return (
-    <BadgeCollaborator collaborator={collaborator} key={collaborator.name} />
+    <CollaboratorBadge collaborator={collaborator} key={collaborator.name} />
   );
 }
 interface SingleRecordLinkCellProps {
   value: SingleRecordLinkFieldValue;
   field: SingleRecordLinkField;
+  focused: boolean;
 }
 
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
@@ -906,22 +1041,29 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
     throw new Error('Main field expected to be string');
   }
 
-  return <BadgeRecordLink title={primaryFieldText} />;
+  return <RecordLinkBadge title={primaryFieldText} />;
 }
+
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
   field: SingleLineTextField;
+  focused: boolean;
 }
 
 function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { value } = props;
 
-  return <Text numberOfLines={1}>{value}</Text>;
+  return (
+    <View style={styles.textCellContainer}>
+      <Text numberOfLines={1}>{value}</Text>
+    </View>
+  );
 }
 
 interface SingleOptionCellProps {
   value: SingleOptionFieldValue;
   field: SingleOptionField;
+  focused: boolean;
 }
 
 function SingleOptionCell(props: SingleOptionCellProps) {
@@ -937,36 +1079,77 @@ function SingleOptionCell(props: SingleOptionCellProps) {
     return null;
   }
 
-  return <BadgeOption option={selected} />;
+  return <OptionBadge option={selected} />;
 }
 
 interface URLCellProps {
   value: URLFieldValue;
   field: URLField;
+  focused: boolean;
 }
 
 function URLCell(props: URLCellProps) {
-  const { value } = props;
+  const { value, focused } = props;
+
+  if (focused === false) {
+    return (
+      <View style={styles.textCellContainer}>
+        <Text decoration="underline" numberOfLines={1}>
+          {value}
+        </Text>
+      </View>
+    );
+  }
 
   return (
-    <Text decoration="underline" numberOfLines={1}>
-      {value}
-    </Text>
+    <View>
+      <View style={styles.textCellContainer}>
+        <Text numberOfLines={1}>{value}</Text>
+      </View>
+      <Spacer size={8} />
+      <Text decoration="underline" size="sm" color="primary">
+        Open link
+      </Text>
+    </View>
   );
 }
 
 const styles = DynamicStyleSheet.create((theme) => ({
   leafRowCell: {
-    width: '100%',
     height: '100%',
     borderBottomWidth: 1,
     backgroundColor: theme.background.content,
     borderColor: theme.border.default,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    overflowY: 'hidden',
+    overflowX: 'hidden',
     ...Platform.select({
       web: {
         cursor: 'auto',
+        outlineStyle: 'none',
       },
     }),
+  },
+  focusedMultiLineTextCellContainer: {
+    paddingTop: FOCUS_BORDER_WIDTH + 1,
+  },
+  focusedLeafRowCell: {
+    height: 'auto',
+    borderRadius: tokens.radius,
+    overflowY: 'visible',
+    overflowX: 'hidden',
+    borderBottomWidth: FOCUS_BORDER_WIDTH,
+    borderTopWidth: FOCUS_BORDER_WIDTH,
+    borderLeftWidth: FOCUS_BORDER_WIDTH,
+    borderRightWidth: FOCUS_BORDER_WIDTH,
+    borderColor: theme.border.focus,
+  },
+  textCellContainer: {
+    height: 32,
+    width: '100%',
+    overflow: 'hidden',
+    justifyContent: 'center',
   },
   checkboxCell: {
     width: '100%',
@@ -984,9 +1167,9 @@ const styles = DynamicStyleSheet.create((theme) => ({
     shadowOpacity: 0.05,
     shadowRadius: 8,
   },
-  numberCell: {
+  numberCellContainer: {
+    height: 32,
     width: '100%',
-    height: '100%',
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
@@ -1014,18 +1197,5 @@ const styles = DynamicStyleSheet.create((theme) => ({
     width: '100%',
     height: '100%',
     backgroundColor: theme.background.content,
-  },
-  cellWrapper: {
-    paddingHorizontal: 6, // Padding + border should equal to 8
-    width: '100%',
-    height: '100%',
-    borderLeftWidth: 2,
-    borderTopWidth: 2,
-    borderRightWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: 'transparent',
-    overflow: 'hidden',
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 }));
