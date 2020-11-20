@@ -32,18 +32,14 @@ export interface GridProps {
   height: number;
   width: number;
   footerHeight?: number;
-  renderFooter?: (props: RenderFooterProps) => React.ReactNode;
   renderFooterCell?: (props: RenderFooterCellProps) => React.ReactNode;
-  renderLeafRow: (props: RenderLeafRowProps) => React.ReactNode;
   renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
   headerHeight?: number;
-  renderHeader?: (props: RenderHeaderProps) => React.ReactNode;
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   leafRowHeight: number;
   groups: Group[];
   groupRowHeight?: number;
   spacerHeight?: number;
-  renderGroupRow?: (props: RenderGroupRowProps) => React.ReactNode;
   renderGroupRowCell?: (props: RenderGroupRowCellProps) => React.ReactNode;
   /** Length of the array determines number of columns. Array values correspond to their width. */
   columns: number[];
@@ -54,36 +50,14 @@ export interface GridProps {
   onContentOffsetLoaded?: () => void;
 }
 
-export interface RenderGroupRowProps {
-  path: number[];
-  collapsed: boolean;
-  children: React.ReactNode;
-  state: GroupRowState;
-}
-
 export interface RenderGroupRowCellProps {
   path: number[];
   column: number;
   state: GroupRowCellState;
 }
 
-export interface RenderLeafRowProps {
-  path: number[];
-  row: number;
-  state: LeafRowState;
-  children: React.ReactNode;
-}
-
-export interface RenderHeaderProps {
-  children: React.ReactNode;
-}
-
 export interface RenderHeaderCellProps {
   column: number;
-}
-
-export interface RenderFooterProps {
-  children: React.ReactNode;
 }
 
 export interface RenderFooterCellProps {

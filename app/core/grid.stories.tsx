@@ -4,12 +4,8 @@ import {
   Grid,
   RenderLeafRowCellProps,
   RenderHeaderCellProps,
-  RenderHeaderProps,
-  RenderLeafRowProps,
-  RenderGroupRowProps,
   RenderGroupRowCellProps,
   GridRef,
-  RenderFooterProps,
   RenderFooterCellProps,
 } from './grid';
 import { AutoSizer } from '../lib/autosizer';
@@ -27,18 +23,12 @@ function renderLeafRowCell(props: RenderLeafRowCellProps) {
   const { row, column } = props;
 
   return (
-    <View style={styles.cell}>
+    <View style={styles.leafRowCell}>
       <Text>
         {row} {column}
       </Text>
     </View>
   );
-}
-
-function renderLeafRow(props: RenderLeafRowProps) {
-  const { children } = props;
-
-  return <View style={styles.row}>{children}</View>;
 }
 
 function renderGroupRowCell(props: RenderGroupRowCellProps) {
@@ -51,39 +41,21 @@ function renderGroupRowCell(props: RenderGroupRowCellProps) {
   );
 }
 
-function renderGroupRow(props: RenderGroupRowProps) {
-  const { children } = props;
-
-  return <View style={styles.groupRow}>{children}</View>;
-}
-
-function renderHeader(props: RenderHeaderProps) {
-  const { children } = props;
-
-  return <View style={styles.header}>{children}</View>;
-}
-
 function renderHeaderCell(props: RenderHeaderCellProps) {
   const { column } = props;
 
   return (
-    <View style={styles.row}>
+    <View style={styles.headerCell}>
       <Text>0 {column}</Text>
     </View>
   );
-}
-
-function renderFooter(props: RenderFooterProps) {
-  const { children } = props;
-
-  return <View style={styles.footer}>{children}</View>;
 }
 
 function renderFooterCell(props: RenderFooterCellProps) {
   const { column } = props;
 
   return (
-    <View style={styles.row}>
+    <View style={styles.footerCell}>
       <Text>{column}</Text>
     </View>
   );
@@ -138,10 +110,7 @@ export function Flat(): JSX.Element {
               renderLeafRowCell={renderLeafRowCell}
               headerHeight={80}
               renderHeaderCell={renderHeaderCell}
-              renderHeader={renderHeader}
               leafRowHeight={40}
-              renderLeafRow={renderLeafRow}
-              renderFooter={renderFooter}
               renderFooterCell={renderFooterCell}
               footerHeight={40}
               columns={columns}
@@ -230,13 +199,9 @@ export function Grouped(): JSX.Element {
               renderLeafRowCell={renderLeafRowCell}
               headerHeight={80}
               renderHeaderCell={renderHeaderCell}
-              renderHeader={renderHeader}
               leafRowHeight={40}
-              renderLeafRow={renderLeafRow}
-              renderGroupRow={renderGroupRow}
               renderGroupRowCell={renderGroupRowCell}
               groupRowHeight={56}
-              renderFooter={renderFooter}
               renderFooterCell={renderFooterCell}
               footerHeight={40}
               spacerHeight={80}
@@ -322,33 +287,24 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
   },
+  leafRowCell: {
+    width: '100%',
+    height: '100%',
+  },
   groupRowCell: {
-    width: '100%',
-    height: '100%',
-  },
-  cell: {
-    width: '100%',
-    height: '100%',
-  },
-  row: {
-    width: '100%',
-    height: '100%',
-  },
-  groupRow: {
     width: '100%',
     height: '100%',
     backgroundColor: '#EAE2F8',
   },
-  header: {
+  headerCell: {
     width: '100%',
     height: '100%',
     borderBottomWidth: 1,
     backgroundColor: '#DCEEFB',
   },
-  footer: {
+  footerCell: {
     width: '100%',
     height: '100%',
-    borderBottomWidth: 1,
     backgroundColor: '#F0F4F8',
   },
   scrollToCell: {

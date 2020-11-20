@@ -221,20 +221,6 @@ export function getRowsHeight(rows: Row[]): number {
   return sumBy(rows, (row) => row.height);
 }
 
-export interface UseGridRecyclerProps {
-  scrollViewHeight: number;
-  scrollViewWidth: number;
-  scrollX: number;
-  scrollY: number;
-  columns: Column[];
-  rows: Row[];
-}
-
-interface GridRecyclerData {
-  recycledRows: RecycledRow[];
-  recycledColumns: RecycledColumn[];
-}
-
 export interface RecycledLeafRow extends LeafRow {
   key: number;
 }
@@ -256,39 +242,18 @@ export interface RecycledColumn extends Column {
   key: number;
 }
 
-export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
-  const {
-    columns,
-    rows,
-    scrollViewHeight,
-    scrollViewWidth,
-    scrollX,
-    scrollY,
-  } = props;
+export interface UseColumnsRecyclerProps {
+  scrollViewWidth: number;
+  scrollX: number;
+  columns: Column[];
+}
 
-  const prevRecycledRowsRef = useRef<RecycledRow[]>([]);
+export function useColumnsRecycler(
+  props: UseColumnsRecyclerProps,
+): RecycledColumn[] {
+  const { columns, scrollViewWidth, scrollX } = props;
+
   const prevRecycledColumnsRef = useRef<RecycledColumn[]>([]);
-
-  const [rowStartIndex, rowEndIndex] = useMemo(
-    () =>
-      getVisibleRowsIndexRange({
-        rows,
-        scrollY,
-        scrollViewHeight,
-      }),
-    [rows, scrollY, scrollViewHeight],
-  );
-
-  const recycledRows = useMemo(
-    (): RecycledRow[] =>
-      recycleRows({
-        rows,
-        prevRows: prevRecycledRowsRef.current,
-        startIndex: rowStartIndex,
-        endIndex: rowEndIndex,
-      }),
-    [rows, rowStartIndex, rowEndIndex],
-  );
 
   const [columnStartIndex, columnEndIndex] = useMemo(
     () =>
@@ -311,13 +276,9 @@ export function useGridRecycler(props: UseGridRecyclerProps): GridRecyclerData {
     [columns, columnStartIndex, columnEndIndex],
   );
 
-  prevRecycledRowsRef.current = recycledRows;
   prevRecycledColumnsRef.current = recycledColumns;
 
-  return {
-    recycledRows,
-    recycledColumns,
-  };
+  return recycledColumns;
 }
 
 interface RecycleItemsParams<T, K extends T> {
@@ -354,6 +315,43 @@ export function recycleItems<T, K extends T>(
   return reusedItems
     .concat(newItems.map((item, i) => toRecycledItem(item, recycledKeys[i])))
     .sort((a, b) => getValue(a) - getValue(b));
+}
+
+export interface UseRowsRecyclerProps {
+  scrollViewHeight: number;
+  scrollY: number;
+  rows: Row[];
+}
+
+export function useRowsRecycler(props: UseRowsRecyclerProps): RecycledRow[] {
+  const { rows, scrollViewHeight, scrollY } = props;
+
+  const prevRecycledRowsRef = useRef<RecycledRow[]>([]);
+
+  const [rowStartIndex, rowEndIndex] = useMemo(
+    () =>
+      getVisibleRowsIndexRange({
+        rows,
+        scrollY,
+        scrollViewHeight,
+      }),
+    [rows, scrollY, scrollViewHeight],
+  );
+
+  const recycledRows = useMemo(
+    (): RecycledRow[] =>
+      recycleRows({
+        rows,
+        prevRows: prevRecycledRowsRef.current,
+        startIndex: rowStartIndex,
+        endIndex: rowEndIndex,
+      }),
+    [rows, rowStartIndex, rowEndIndex],
+  );
+
+  prevRecycledRowsRef.current = recycledRows;
+
+  return recycledRows;
 }
 
 interface RecycleRowsParams {
