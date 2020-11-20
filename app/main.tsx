@@ -53,10 +53,11 @@ export function App(): JSX.Element {
               linking={linking}
               fallback={<Text>Loading...</Text>}
             >
-              <RootStack.Navigator>
+              <RootStack.Navigator initialRouteName="Space">
                 <RootStack.Screen
                   name={ScreenName.Space}
                   component={SpaceScreen}
+                  initialParams={{ spaceID: '1', viewID: '1' }}
                   options={({ route, navigation }) => ({
                     headerStyle: {
                       height: 48,

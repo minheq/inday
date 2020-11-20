@@ -5,10 +5,10 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "desktop": "npm run build && electron index.desktop.js",
+    "desktop": "electron index.desktop.js",
     "web": "webpack-dev-server",
     "server": "ts-node-dev --respawn --transpile-only --no-notify server/main.ts",
-    "build": "webpack --mode=production",
+    "build": "NODE_ENV=production webpack --mode=production",
     "build:storybook": "build-storybook",
     "test": "jest",
     "analyze": "webpack --profile --json > stats.json",

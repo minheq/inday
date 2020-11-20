@@ -12,7 +12,6 @@ import {
   DynamicStyleSheet,
   tokens,
   Icon,
-  Column,
 } from '../components';
 import {
   useRoute,
