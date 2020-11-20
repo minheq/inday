@@ -14,7 +14,7 @@ import {
 } from './atoms';
 import { Record, RecordID } from './records';
 import { Collection, CollectionID } from './collections';
-import { Field, FieldID } from './fields';
+import { Field, FieldID, FieldValue } from './fields';
 import {
   Filter,
   FilterGroup,
@@ -399,6 +399,23 @@ export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
     }
 
     return collaborator;
+  },
+});
+
+export const recordFieldValueQuery = selectorFamily<
+  FieldValue,
+  { recordID: RecordID; fieldID: FieldID }
+>({
+  key: RecoilKey.RecordFieldValue,
+  get: ({ recordID, fieldID }) => ({ get }) => {
+    const recordsByID = get(recordsByIDState);
+    const record = recordsByID[recordID];
+
+    if (record === undefined) {
+      throw new Error('Record not found');
+    }
+
+    return record.fields[fieldID];
   },
 });
 

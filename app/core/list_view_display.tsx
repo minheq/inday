@@ -1,4 +1,12 @@
-import React, { Fragment, useCallback, useMemo, useRef } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { View, Pressable, Platform, TextInput } from 'react-native';
 import {
   Button,
@@ -16,6 +24,9 @@ import {
   useGetCollectionRecordsByID,
   useGetCollection,
   useUpdateRecordField,
+  useGetField,
+  useGetRecordFieldValue,
+  useGetListViewFieldConfig,
 } from '../data/store';
 import {
   FieldType,
@@ -69,7 +80,7 @@ import {
   FieldID,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
-import { ListView } from '../data/views';
+import { ListView, ViewID } from '../data/views';
 import {
   Grid,
   GridRef,
@@ -97,6 +108,8 @@ import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
 import { RecordLinkBadge } from './record_link_badge';
 import { formatUnit } from '../../lib/i18n/unit';
+import { usePrevious } from '../hooks/use_previous';
+import { useWhatChanged } from '../hooks/use_what_changed';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -112,43 +125,67 @@ const FIELD_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
 const FOCUS_BORDER_WIDTH = 3;
 
+function getColumnToFieldIDCache(fields: Field[]) {
+  const cache: {
+    [column: number]: FieldID;
+  } = {};
+
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i];
+    cache[i + 1] = field.id;
+  }
+
+  return cache;
+}
+
+// TODO: Include path
+function getRowToRecordIDCache(records: Record[]) {
+  const cache: {
+    [row: number]: RecordID;
+  } = {};
+
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    cache[i + 1] = record.id;
+  }
+
+  return cache;
+}
+
 export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const { view, onOpenRecord } = props;
   const [cell, setCell] = useRecoilState(cellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
   const gridRef = useRef<GridRef>(null);
+  const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
+    getColumnToFieldIDCache(fields),
+  );
+  const [rowToRecordIDCache, setRowToRecordIDCache] = useState(
+    getRowToRecordIDCache(records),
+  );
+  const prevFields = usePrevious(fields);
+  const prevRecords = usePrevious(records);
+  const fixedFieldCount = view.fixedFieldCount;
 
-  const columnToFieldCache = useMemo(() => {
-    const cache: {
-      [column: number]: FieldID;
-    } = {};
-
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i];
-      cache[i + 1] = field.id;
+  useEffect(() => {
+    // TODO: Handle change in sort, view
+    if (records.length !== prevRecords.length) {
+      setRowToRecordIDCache(getRowToRecordIDCache(records));
     }
-
-    return cache;
-  }, [fields]);
-  const rowToRecordCache = useMemo(() => {
-    const cache: {
-      [row: number]: RecordID;
-    } = {};
-
-    for (let i = 0; i < records.length; i++) {
-      const record = records[i];
-      cache[i + 1] = record.id;
+  }, [records, prevRecords]);
+  useEffect(() => {
+    // TODO: Handle change in sort, view
+    if (fields.length !== prevFields.length) {
+      setColumnToFieldIDCache(getColumnToFieldIDCache(fields));
     }
-
-    return cache;
-  }, [records]);
+  }, [fields, prevFields]);
 
   useCellKeyBindings({
-    rowToRecordCache,
+    rowToRecordIDCache,
     records,
     cell,
-    columnToFieldCache,
+    columnToFieldIDCache,
     setCell,
     onOpenRecord,
     gridRef,
@@ -159,33 +196,28 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     return { x: 0, y: 0 };
   }, []);
 
-  const { fixedFieldCount } = view;
-
   const renderLeafRowCell = useCallback(
     ({ row, column, path, state }: RenderLeafRowCellProps) => {
-      const field = fields[column - 1];
-      const record = records[row - 1];
-      const value = record.fields[field.id];
+      const fieldID = columnToFieldIDCache[column];
+      const recordID = rowToRecordIDCache[row];
       const primary = column === 1;
-      const width = field.config.width;
       const height = FIELD_ROW_HEIGHT;
 
       return (
         <LeafRowCell
           state={state}
           path={path}
-          record={record}
-          field={field}
-          value={value}
+          recordID={recordID}
+          viewID={view.id}
+          fieldID={fieldID}
           primary={primary}
           row={row}
           column={column}
-          width={width}
           height={height}
         />
       );
     },
-    [fields, records],
+    [columnToFieldIDCache, rowToRecordIDCache, view.id],
   );
 
   const renderHeaderCell = useCallback(
@@ -228,45 +260,86 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
 }
 
 interface LeafRowCellProps extends RenderLeafRowCellProps {
-  field: Field;
-  value: FieldValue;
-  record: Record;
   primary: boolean;
-  width: number;
   height: number;
+  viewID: ViewID;
+  fieldID: FieldID;
+  recordID: RecordID;
 }
 
 function LeafRowCell(props: LeafRowCellProps) {
   const {
-    field,
-    value,
     path,
     state,
     row,
     column,
     primary,
-    width,
     height,
-    record,
+    viewID,
+    fieldID,
+    recordID,
+  } = props;
+
+  const field = useGetField(fieldID);
+  const fieldConfig = useGetListViewFieldConfig(viewID, fieldID);
+  const value = useGetRecordFieldValue(recordID, fieldID);
+  const width = fieldConfig.width;
+
+  return (
+    <LeafRowCellRenderer
+      field={field}
+      recordID={recordID}
+      focused={state === 'focused'}
+      width={width}
+      height={height}
+      value={value}
+      primary={primary}
+      row={row}
+      path={path}
+      column={column}
+    />
+  );
+}
+
+// This component primarily serves as a optimization
+interface LeafRowCellRendererProps {
+  field: Field;
+  recordID: RecordID;
+  focused: boolean;
+  width: number;
+  height: number;
+  value: FieldValue;
+  primary: boolean;
+  row: number;
+  path: number[];
+  column: number;
+}
+
+const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
+  props: LeafRowCellRendererProps,
+) {
+  const {
+    primary,
+    height,
+    field,
+    recordID,
+    focused,
+    width,
+    value,
+    row,
+    path,
+    column,
   } = props;
   const setCell = useSetRecoilState(cellState);
 
-  const handlePress = useCallback(() => {
-    if (state === 'default') {
-      setCell({ type: 'leaf', row, path, column, state: 'focused' });
-    }
-  }, [setCell, state, row, column, path]);
-
   const renderCell = useCallback(() => {
-    const focused = state === 'focused';
-
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
         return (
           <CheckboxCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -276,7 +349,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <CurrencyCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -286,7 +359,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <DateCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -296,7 +369,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <EmailCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -306,7 +379,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <MultiCollaboratorCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -316,7 +389,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <MultiRecordLinkCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -326,7 +399,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <MultiLineTextCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -336,7 +409,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <MultiOptionCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -346,7 +419,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <NumberCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -356,7 +429,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <PhoneNumberCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -366,7 +439,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <SingleCollaboratorCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -376,7 +449,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <SingleRecordLinkCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -386,7 +459,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <SingleLineTextCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -396,7 +469,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <SingleOptionCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -406,7 +479,7 @@ function LeafRowCell(props: LeafRowCellProps) {
         return (
           <URLCell
             focused={focused}
-            record={record}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -415,15 +488,21 @@ function LeafRowCell(props: LeafRowCellProps) {
       default:
         throw new Error('Unhandled FieldType cell rendering');
     }
-  }, [field, value, state, record]);
+  }, [field, value, focused, recordID]);
+
+  const handlePress = useCallback(() => {
+    if (focused === false) {
+      setCell({ type: 'leaf', row, path, column, state: 'focused' });
+    }
+  }, [setCell, focused, row, column, path]);
 
   return (
     <Pressable
       style={[
         styles.leafRowCell,
         primary && styles.primaryCell,
-        state === 'focused' && styles.focusedLeafRowCell,
-        state === 'focused' && {
+        focused && styles.focusedLeafRowCell,
+        focused && {
           minHeight: height + FOCUS_BORDER_WIDTH * 2,
           width: width + FOCUS_BORDER_WIDTH * 2,
           top: -FOCUS_BORDER_WIDTH,
@@ -435,7 +514,7 @@ function LeafRowCell(props: LeafRowCellProps) {
       {renderCell()}
     </Pressable>
   );
-}
+});
 
 interface HeaderCellProps {
   field: Field;
@@ -459,10 +538,10 @@ function HeaderCell(props: HeaderCellProps) {
 interface UseCellKeyBindingsProps {
   cell: StatefulLeafRowCell | null;
   setCell: (cell: StatefulLeafRowCell | null) => void;
-  rowToRecordCache: {
+  rowToRecordIDCache: {
     [row: number]: RecordID;
   };
-  columnToFieldCache: {
+  columnToFieldIDCache: {
     [column: number]: FieldID;
   };
   records: Record[];
@@ -475,8 +554,8 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
   const {
     cell,
     setCell,
-    rowToRecordCache,
-    columnToFieldCache,
+    rowToRecordIDCache,
+    columnToFieldIDCache,
     records,
     fields,
     onOpenRecord,
@@ -488,7 +567,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
       const { row, column, path } = cell;
 
       const nextRow = row + 1;
-      if (rowToRecordCache[nextRow] === undefined) {
+      if (rowToRecordIDCache[nextRow] === undefined) {
         return;
       }
 
@@ -502,14 +581,14 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       gridRef.current.scrollToCell({ row: nextRow, path });
     }
-  }, [cell, gridRef, setCell, rowToRecordCache]);
+  }, [cell, gridRef, setCell, rowToRecordIDCache]);
 
   const onArrowUp = useCallback(() => {
     if (cell !== null && gridRef.current !== null) {
       const { row, column, path } = cell;
 
       const prevRow = row - 1;
-      if (rowToRecordCache[prevRow] === undefined) {
+      if (rowToRecordIDCache[prevRow] === undefined) {
         return;
       }
 
@@ -523,13 +602,13 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       gridRef.current.scrollToCell({ row: prevRow, path });
     }
-  }, [cell, gridRef, setCell, rowToRecordCache]);
+  }, [cell, gridRef, setCell, rowToRecordIDCache]);
 
   const onArrowLeft = useCallback(() => {
     if (cell !== null && gridRef.current !== null) {
       const { row, column, path } = cell;
       const prevColumn = column - 1;
-      if (columnToFieldCache[prevColumn] === undefined) {
+      if (columnToFieldIDCache[prevColumn] === undefined) {
         return;
       }
 
@@ -543,14 +622,14 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       gridRef.current.scrollToCell({ column: prevColumn });
     }
-  }, [cell, gridRef, setCell, columnToFieldCache]);
+  }, [cell, gridRef, setCell, columnToFieldIDCache]);
 
   const onArrowRight = useCallback(() => {
     if (cell !== null && gridRef.current !== null) {
       const { row, column, path } = cell;
 
       const nextColumn = column + 1;
-      if (columnToFieldCache[nextColumn] === undefined) {
+      if (columnToFieldIDCache[nextColumn] === undefined) {
         return;
       }
 
@@ -564,7 +643,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       gridRef.current.scrollToCell({ column: nextColumn });
     }
-  }, [cell, gridRef, setCell, columnToFieldCache]);
+  }, [cell, gridRef, setCell, columnToFieldIDCache]);
 
   const onMetaArrowDown = useCallback(() => {
     if (cell !== null && gridRef.current !== null) {
@@ -660,9 +739,9 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
   const onSpace = useCallback(() => {
     if (cell !== null) {
-      onOpenRecord(rowToRecordCache[cell.row]);
+      onOpenRecord(rowToRecordIDCache[cell.row]);
     }
-  }, [cell, onOpenRecord, rowToRecordCache]);
+  }, [cell, onOpenRecord, rowToRecordIDCache]);
 
   const focusedCellKeyBindings = useMemo((): KeyBinding[] => {
     if (cell === null || cell.state === 'editing') {
@@ -741,7 +820,7 @@ interface CheckboxCellProps {
   value: CheckboxFieldValue;
   field: CheckboxField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function CheckboxCell(props: CheckboxCellProps) {
@@ -758,7 +837,7 @@ interface CurrencyCellProps {
   value: CurrencyFieldValue;
   field: CurrencyField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function CurrencyCell(props: CurrencyCellProps) {
@@ -781,7 +860,7 @@ interface DateCellProps {
   value: DateFieldValue;
   field: DateField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function DateCell(props: DateCellProps) {
@@ -815,7 +894,7 @@ interface EmailCellProps {
   value: EmailFieldValue;
   field: EmailField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function EmailCell(props: EmailCellProps) {
@@ -847,7 +926,7 @@ interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
@@ -877,7 +956,7 @@ interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
   field: MultiRecordLinkField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
@@ -913,7 +992,7 @@ interface MultiLineTextCellProps {
   value: MultiLineTextFieldValue;
   field: MultiLineTextField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function MultiLineTextCell(props: MultiLineTextCellProps) {
@@ -938,7 +1017,7 @@ interface MultiOptionCellProps {
   value: MultiOptionFieldValue;
   field: MultiOptionField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function MultiOptionCell(props: MultiOptionCellProps) {
@@ -964,7 +1043,7 @@ interface NumberCellProps {
   value: NumberFieldValue;
   field: NumberField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function NumberCell(props: NumberCellProps) {
@@ -1007,7 +1086,7 @@ interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
@@ -1037,7 +1116,7 @@ interface SingleCollaboratorCellProps {
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
@@ -1062,7 +1141,7 @@ interface SingleRecordLinkCellProps {
   value: SingleRecordLinkFieldValue;
   field: SingleRecordLinkField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
@@ -1093,18 +1172,18 @@ interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
   field: SingleLineTextField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function SingleLineTextCell(props: SingleLineTextCellProps) {
-  const { field, value, focused, record } = props;
+  const { field, value, focused, recordID } = props;
 
   const updateRecordField = useUpdateRecordField();
   const handleChange = useCallback(
     (newValue: SingleLineTextFieldValue) => {
-      updateRecordField(record.id, field.id, newValue);
+      updateRecordField(recordID, field.id, newValue);
     },
-    [updateRecordField, record, field],
+    [updateRecordField, recordID, field],
   );
 
   if (focused === false) {
@@ -1128,7 +1207,7 @@ interface SingleOptionCellProps {
   value: SingleOptionFieldValue;
   field: SingleOptionField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function SingleOptionCell(props: SingleOptionCellProps) {
@@ -1151,7 +1230,7 @@ interface URLCellProps {
   value: URLFieldValue;
   field: URLField;
   focused: boolean;
-  record: Record;
+  recordID: RecordID;
 }
 
 function URLCell(props: URLCellProps) {
