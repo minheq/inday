@@ -13,7 +13,6 @@ import {
   Platform,
   TextInput,
   NativeSyntheticEvent,
-  TextInputChangeEventData,
   TextInputKeyPressEventData,
 } from 'react-native';
 import {
@@ -181,11 +180,9 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const prevCell = usePrevious(cell);
   const fixedFieldCount = view.fixedFieldCount;
 
-  useEffect(() => {
-    if (cell !== prevCell && gridRef.current !== null && cell !== null) {
-      gridRef.current.scrollToCell(cell);
-    }
-  }, [cell, prevCell]);
+  if (cell !== prevCell && gridRef.current !== null && cell !== null) {
+    gridRef.current.scrollToCell(cell);
+  }
 
   useEffect(() => {
     // TODO: Handle change in sort, view
@@ -925,7 +922,27 @@ interface EmailCellProps {
 }
 
 function EmailCell(props: EmailCellProps) {
-  const { value, focused } = props;
+  const { field, value, recordID, focused } = props;
+
+  const updateRecordField = useUpdateRecordField();
+  const setCell = useSetRecoilState(cellState);
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+      if (key === UIKey.Escape) {
+        setCell(null);
+      }
+    },
+    [setCell],
+  );
+
+  const handleChangeText = useCallback(
+    (newValue: EmailFieldValue) => {
+      updateRecordField(recordID, field.id, newValue);
+    },
+    [updateRecordField, recordID, field],
+  );
 
   if (focused === false) {
     return (
@@ -939,9 +956,12 @@ function EmailCell(props: EmailCellProps) {
 
   return (
     <View>
-      <Button style={styles.textCellContainer}>
-        <Text numberOfLines={1}>{value}</Text>
-      </Button>
+      <TextInput
+        style={styles.textCellInput}
+        value={value}
+        onKeyPress={handleKeyPress}
+        onChangeText={handleChangeText}
+      />
       <Spacer size={8} />
       <Text decoration="underline" size="sm" color="primary">
         Send email
@@ -1074,41 +1094,77 @@ interface NumberCellProps {
 }
 
 function NumberCell(props: NumberCellProps) {
-  const { value, field } = props;
+  const { value, field, focused, recordID } = props;
+
+  const updateRecordField = useUpdateRecordField<CurrencyFieldValue>();
+  const setCell = useSetRecoilState(cellState);
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+      if (key === UIKey.Escape) {
+        setCell(null);
+      }
+    },
+    [setCell],
+  );
+
+  const handleChangeText = useCallback(
+    (newValue: string) => {
+      if (isNumeric(newValue) === false) {
+        return;
+      }
+
+      updateRecordField(recordID, field.id, Number(newValue));
+    },
+    [updateRecordField, recordID, field],
+  );
 
   if (isNullish(value)) {
     return null;
   }
 
-  switch (field.style) {
-    case 'decimal':
-      return (
-        <View style={styles.numberCellContainer}>
-          <Text numberOfLines={1}>
-            {Intl.NumberFormat(getSystemLocale(), {
-              style: 'decimal',
-              minimumFractionDigits: field.minimumFractionDigits,
-              maximumFractionDigits: field.maximumFractionDigits,
-            }).format(value)}
-          </Text>
-        </View>
-      );
-    case 'unit':
-      return (
-        <View style={styles.numberCellContainer}>
-          <Text numberOfLines={1}>
-            {formatUnit(value, getSystemLocale(), field.unit)}
-          </Text>
-        </View>
-      );
-    default:
-      return (
-        <View style={styles.numberCellContainer}>
-          <Text numberOfLines={1}>{value}</Text>
-        </View>
-      );
+  if (focused === false) {
+    switch (field.style) {
+      case 'decimal':
+        return (
+          <View style={styles.numberCellContainer}>
+            <Text numberOfLines={1}>
+              {Intl.NumberFormat(getSystemLocale(), {
+                style: 'decimal',
+                minimumFractionDigits: field.minimumFractionDigits,
+                maximumFractionDigits: field.maximumFractionDigits,
+              }).format(value)}
+            </Text>
+          </View>
+        );
+      case 'unit':
+        return (
+          <View style={styles.numberCellContainer}>
+            <Text numberOfLines={1}>
+              {formatUnit(value, getSystemLocale(), field.unit)}
+            </Text>
+          </View>
+        );
+      default:
+        return (
+          <View style={styles.numberCellContainer}>
+            <Text numberOfLines={1}>{value}</Text>
+          </View>
+        );
+    }
   }
+
+  return (
+    <TextInput
+      style={styles.numberCellInput}
+      value={String(value)}
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
+    />
+  );
 }
+
 interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
@@ -1117,7 +1173,27 @@ interface PhoneNumberCellProps {
 }
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
-  const { value, focused } = props;
+  const { field, value, focused, recordID } = props;
+
+  const updateRecordField = useUpdateRecordField<PhoneNumberFieldValue>();
+  const setCell = useSetRecoilState(cellState);
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+      if (key === UIKey.Escape) {
+        setCell(null);
+      }
+    },
+    [setCell],
+  );
+
+  const handleChangeText = useCallback(
+    (newValue: PhoneNumberFieldValue) => {
+      updateRecordField(recordID, field.id, newValue);
+    },
+    [updateRecordField, recordID, field],
+  );
 
   if (focused === false) {
     return (
@@ -1129,11 +1205,14 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
 
   return (
     <View>
-      <View style={styles.textCellContainer}>
-        <Text>{value}</Text>
-      </View>
+      <TextInput
+        style={styles.textCellInput}
+        value={value}
+        onKeyPress={handleKeyPress}
+        onChangeText={handleChangeText}
+      />
       <Spacer size={8} />
-      <Text size="sm" color="primary">
+      <Text decoration="underline" size="sm" color="primary">
         Call
       </Text>
     </View>
@@ -1214,9 +1293,6 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
       if (key === UIKey.Escape) {
         setCell(null);
       }
-      if (key === WhiteSpaceKey.Enter) {
-        setCell(null);
-      }
     },
     [setCell],
   );
@@ -1277,7 +1353,27 @@ interface URLCellProps {
 }
 
 function URLCell(props: URLCellProps) {
-  const { value, focused } = props;
+  const { field, value, recordID, focused } = props;
+
+  const updateRecordField = useUpdateRecordField();
+  const setCell = useSetRecoilState(cellState);
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+      if (key === UIKey.Escape) {
+        setCell(null);
+      }
+    },
+    [setCell],
+  );
+
+  const handleChangeText = useCallback(
+    (newValue: URLFieldValue) => {
+      updateRecordField(recordID, field.id, newValue);
+    },
+    [updateRecordField, recordID, field],
+  );
 
   if (focused === false) {
     return (
@@ -1291,9 +1387,12 @@ function URLCell(props: URLCellProps) {
 
   return (
     <View>
-      <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>{value}</Text>
-      </View>
+      <TextInput
+        style={styles.textCellInput}
+        value={value}
+        onKeyPress={handleKeyPress}
+        onChangeText={handleChangeText}
+      />
       <Spacer size={8} />
       <Text decoration="underline" size="sm" color="primary">
         Open link
