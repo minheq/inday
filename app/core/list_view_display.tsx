@@ -516,6 +516,8 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
 
   return (
     <Pressable
+      accessible={false}
+      pointerEvents={state === 'default' ? 'box-only' : 'box-none'}
       style={[
         styles.leafRowCell,
         primary && styles.primaryCell,
@@ -1256,13 +1258,15 @@ function URLCell(props: URLCellProps) {
   );
 
   if (state === 'focused') {
-    <View>
-      <Pressable onPress={onStartEditing}>{child}</Pressable>
-      <Spacer size={8} />
-      <Text decoration="underline" size="sm" color="primary">
-        Open link
-      </Text>
-    </View>;
+    return (
+      <View>
+        <Pressable onPress={onStartEditing}>{child}</Pressable>
+        <Spacer size={8} />
+        <Text decoration="underline" size="sm" color="primary">
+          Open link
+        </Text>
+      </View>
+    );
   }
 
   return <Fragment>{child}</Fragment>;
@@ -1363,7 +1367,6 @@ const styles = DynamicStyleSheet.create((theme) => ({
     ...Platform.select({
       web: {
         cursor: 'auto',
-        outlineStyle: 'none',
       },
     }),
   },
