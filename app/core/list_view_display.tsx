@@ -82,6 +82,8 @@ import {
   assertSingleOptionFieldValue,
   assertURLFieldValue,
   FieldID,
+  TextFieldKindValue,
+  NumberFieldKindValue,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView, ViewID } from '../data/views';
@@ -835,60 +837,23 @@ function CurrencyCell(props: CurrencyCellProps) {
     return null;
   }
 
-  if (state === 'default') {
-    return (
-      <View style={styles.textCellContainer}>
-        <Text numberOfLines={1} align="right">
-          {formatCurrency(value, getSystemLocale(), field.currency)}
-        </Text>
-      </View>
-    );
+  if (state === 'editing') {
+    return <NumberFieldKindCellEditing<CurrencyFieldValue> value={value} />;
   }
+
+  const child = (
+    <View style={styles.textCellContainer}>
+      <Text numberOfLines={1} align="right">
+        {formatCurrency(value, getSystemLocale(), field.currency)}
+      </Text>
+    </View>
+  );
 
   if (state === 'focused') {
-    return (
-      <Pressable onPress={onStartEditing}>
-        <View style={styles.textCellContainer}>
-          <Text numberOfLines={1} align="right">
-            {formatCurrency(value, getSystemLocale(), field.currency)}
-          </Text>
-        </View>
-      </Pressable>
-    );
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
-  return <CurrencyCellEditing value={value} />;
-}
-
-interface CurrencyCellEditingProps {
-  value: CurrencyFieldValue;
-}
-
-function CurrencyCellEditing(props: CurrencyCellEditingProps) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<CurrencyFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      if (isNumeric(newValue) === false) {
-        return;
-      }
-
-      updateRecordFieldValue(recordID, fieldID, Number(newValue));
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.numberCellInput}
-      value={String(value)}
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
+  return <Fragment>{child}</Fragment>;
 }
 
 interface DateCellProps {
@@ -930,26 +895,22 @@ function EmailCell(props: EmailCellProps) {
   const { value } = props;
   const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'default') {
-    return (
-      <View style={styles.textCellContainer}>
-        <Text decoration="underline" numberOfLines={1}>
-          {value}
-        </Text>
-      </View>
-    );
+  if (state === 'editing') {
+    return <TextFieldKindCellEditing<EmailFieldValue> value={value} />;
   }
+
+  const child = (
+    <View style={styles.textCellContainer}>
+      <Text decoration="underline" numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
 
   if (state === 'focused') {
     return (
       <View>
-        <Pressable onPress={onStartEditing}>
-          <View style={styles.textCellContainer}>
-            <Text decoration="underline" numberOfLines={1}>
-              {value}
-            </Text>
-          </View>
-        </Pressable>
+        <Pressable onPress={onStartEditing}>{child}</Pressable>
         <Spacer size={8} />
         <Row>
           <Pressable>
@@ -962,34 +923,7 @@ function EmailCell(props: EmailCellProps) {
     );
   }
 
-  return <EmailCellEditing value={value} />;
-}
-
-interface EmailCellEditingProps {
-  value: EmailFieldValue;
-}
-
-function EmailCellEditing(props: EmailCellEditingProps) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<EmailFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
-  const handleChangeText = useCallback(
-    (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.textCellInput}
-      value={value}
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
+  return <Fragment>{child}</Fragment>;
 }
 
 interface MultiCollaboratorCellProps {
@@ -1111,77 +1045,59 @@ interface NumberCellProps {
 
 function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { state } = useLeafRowCellContext();
+  const { state, onStartEditing } = useLeafRowCellContext();
 
   if (isNullish(value)) {
     return null;
   }
 
-  if (state === 'default') {
-    switch (field.style) {
-      case 'decimal':
-        return (
-          <View style={styles.textCellContainer}>
-            <Text numberOfLines={1} align="right">
-              {Intl.NumberFormat(getSystemLocale(), {
-                style: 'decimal',
-                minimumFractionDigits: field.minimumFractionDigits,
-                maximumFractionDigits: field.maximumFractionDigits,
-              }).format(value)}
-            </Text>
-          </View>
-        );
-      case 'unit':
-        return (
-          <View style={styles.textCellContainer}>
-            <Text numberOfLines={1} align="right">
-              {formatUnit(value, getSystemLocale(), field.unit)}
-            </Text>
-          </View>
-        );
-      default:
-        return (
-          <View style={styles.textCellContainer}>
-            <Text numberOfLines={1} align="right">
-              {value}
-            </Text>
-          </View>
-        );
-    }
+  if (state === 'editing') {
+    return <NumberFieldKindCellEditing<NumberFieldKindValue> value={value} />;
   }
 
-  return <NumberCellEditing value={value} />;
-}
+  let child: React.ReactNode = null;
 
-interface NumberCellEditingProps {
-  value: NumberFieldValue;
-}
+  switch (field.style) {
+    case 'decimal':
+      child = (
+        <View style={styles.textCellContainer}>
+          <Text numberOfLines={1} align="right">
+            {Intl.NumberFormat(getSystemLocale(), {
+              style: 'decimal',
+              minimumFractionDigits: field.minimumFractionDigits,
+              maximumFractionDigits: field.maximumFractionDigits,
+            }).format(value)}
+          </Text>
+        </View>
+      );
+      break;
+    case 'unit':
+      child = (
+        <View style={styles.textCellContainer}>
+          <Text numberOfLines={1} align="right">
+            {formatUnit(value, getSystemLocale(), field.unit)}
+          </Text>
+        </View>
+      );
+      break;
+    case 'integer':
+      child = (
+        <View style={styles.textCellContainer}>
+          <Text numberOfLines={1} align="right">
+            {value}
+          </Text>
+        </View>
+      );
+      break;
+    default:
+      throw new Error('Field style not supported');
+  }
 
-function NumberCellEditing(props: NumberCellEditingProps) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<NumberFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      if (isNumeric(newValue) === false) {
-        return;
-      }
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+  }
 
-      updateRecordFieldValue(recordID, fieldID, Number(newValue));
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.numberCellInput}
-      value={String(value)}
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
+  return <Fragment>{child}</Fragment>;
 }
 
 interface PhoneNumberCellProps {
@@ -1191,22 +1107,22 @@ interface PhoneNumberCellProps {
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
   const { value } = props;
-  const { state } = useLeafRowCellContext();
+  const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'default') {
-    return (
-      <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>{value}</Text>
-      </View>
-    );
+  if (state === 'editing') {
+    return <TextFieldKindCellEditing<PhoneNumberFieldValue> value={value} />;
   }
+
+  const child = (
+    <View style={styles.textCellContainer}>
+      <Text numberOfLines={1}>{value}</Text>
+    </View>
+  );
 
   if (state === 'focused') {
     return (
       <View>
-        <View style={styles.textCellContainer}>
-          <Text numberOfLines={1}>{value}</Text>
-        </View>
+        <Pressable onPress={onStartEditing}>{child}</Pressable>
         <Spacer size={8} />
         <Text decoration="underline" size="sm" color="primary">
           Call
@@ -1215,34 +1131,7 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
     );
   }
 
-  return <PhoneNumberCellEditing value={value} />;
-}
-
-interface PhoneNumberCellEditingProps {
-  value: PhoneNumberFieldValue;
-}
-
-function PhoneNumberCellEditing(props: PhoneNumberCellEditingProps) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<PhoneNumberFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
-  const handleChangeText = useCallback(
-    (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.textCellInput}
-      value={value}
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
+  return <Fragment>{child}</Fragment>;
 }
 
 interface SingleCollaboratorCellProps {
@@ -1307,52 +1196,21 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { value } = props;
   const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'default') {
-    return (
-      <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>{value}</Text>
-      </View>
-    );
+  if (state === 'editing') {
+    return <TextFieldKindCellEditing<SingleLineTextFieldValue> value={value} />;
   }
+
+  const child = (
+    <View style={styles.textCellContainer}>
+      <Text numberOfLines={1}>{value}</Text>
+    </View>
+  );
 
   if (state === 'focused') {
-    return (
-      <Pressable onPress={onStartEditing}>
-        <View style={styles.textCellContainer}>
-          <Text numberOfLines={1}>{value}</Text>
-        </View>
-      </Pressable>
-    );
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
-  return <SingleLineTextCellEditing value={value} />;
-}
-
-interface SingleLineTextCellEditingProps {
-  value: SingleLineTextFieldValue;
-}
-
-function SingleLineTextCellEditing(props: SingleLineTextCellEditingProps) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<SingleLineTextFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
-  const handleChangeText = useCallback(
-    (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.textCellInput}
-      value={value}
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
+  return <Fragment>{child}</Fragment>;
 }
 
 interface SingleOptionCellProps {
@@ -1382,41 +1240,93 @@ interface URLCellProps {
 }
 
 function URLCell(props: URLCellProps) {
-  const { field, value } = props;
-  const { state, recordID } = useLeafRowCellContext();
-  const updateRecordField = useUpdateRecordFieldValue<URLFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
+  const { value } = props;
+  const { state, onStartEditing } = useLeafRowCellContext();
 
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      updateRecordField(recordID, field.id, newValue);
-    },
-    [updateRecordField, recordID, field],
-  );
-
-  if (state === 'default') {
-    return (
-      <View style={styles.textCellContainer}>
-        <Text decoration="underline" numberOfLines={1}>
-          {value}
-        </Text>
-      </View>
-    );
+  if (state === 'editing') {
+    return <TextFieldKindCellEditing<URLFieldValue> value={value} />;
   }
 
-  return (
+  const child = (
+    <View style={styles.textCellContainer}>
+      <Text decoration="underline" numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+
+  if (state === 'focused') {
     <View>
-      <TextInput
-        style={styles.textCellInput}
-        value={value}
-        onKeyPress={handleKeyPress}
-        onChangeText={handleChangeText}
-      />
+      <Pressable onPress={onStartEditing}>{child}</Pressable>
       <Spacer size={8} />
       <Text decoration="underline" size="sm" color="primary">
         Open link
       </Text>
-    </View>
+    </View>;
+  }
+
+  return <Fragment>{child}</Fragment>;
+}
+
+interface TextFieldKindCellEditingProps<T extends TextFieldKindValue> {
+  value: T;
+}
+
+function TextFieldKindCellEditing<T extends TextFieldKindValue>(
+  props: TextFieldKindCellEditingProps<T>,
+) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue();
+  const handleKeyPress = useCellKeyPressHandler();
+  const handleChangeText = useCallback(
+    (nextValue: string) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
+  return (
+    <TextInput
+      autoFocus
+      style={styles.textCellInput}
+      value={value}
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
+    />
+  );
+}
+
+interface NumberFieldKindCellEditingProps<T extends NumberFieldKindValue> {
+  value: T;
+}
+
+function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
+  props: NumberFieldKindCellEditingProps<T>,
+) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue();
+  const handleKeyPress = useCellKeyPressHandler();
+  const handleChangeText = useCallback(
+    (newValue: string) => {
+      if (isNumeric(newValue) === false) {
+        return;
+      }
+
+      updateRecordFieldValue(recordID, fieldID, Number(newValue));
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
+  return (
+    <TextInput
+      autoFocus
+      style={styles.numberCellInput}
+      value={String(value)}
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
+    />
   );
 }
 
