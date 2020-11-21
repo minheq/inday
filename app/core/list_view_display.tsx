@@ -17,15 +17,7 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
 } from 'react-native';
-import {
-  Button,
-  Container,
-  Icon,
-  Row,
-  Spacer,
-  Text,
-  tokens,
-} from '../components';
+import { Container, Icon, Row, Spacer, Text, tokens } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -113,7 +105,7 @@ import {
   WhiteSpaceKey,
   UIKey,
 } from '../lib/keyboard';
-import { StatefulLeafRowCell } from './grid.common';
+import { StatefulLeafRowCell, LeafRowCellState } from './grid.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
@@ -141,10 +133,16 @@ const FIELD_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
 const FOCUS_BORDER_WIDTH = 3;
 
+type ColumnToFieldIDCache = {
+  [column: number]: FieldID;
+};
+
+type RowToRecordIDCache = {
+  [row: number]: RecordID;
+};
+
 function getColumnToFieldIDCache(fields: Field[]) {
-  const cache: {
-    [column: number]: FieldID;
-  } = {};
+  const cache: ColumnToFieldIDCache = {};
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
@@ -156,9 +154,7 @@ function getColumnToFieldIDCache(fields: Field[]) {
 
 // TODO: Include path
 function getRowToRecordIDCache(records: Record[]) {
-  const cache: {
-    [row: number]: RecordID;
-  } = {};
+  const cache: RowToRecordIDCache = {};
 
   for (let i = 0; i < records.length; i++) {
     const record = records[i];
@@ -169,12 +165,8 @@ function getRowToRecordIDCache(records: Record[]) {
 }
 
 interface ListViewDisplayContext {
-  rowToRecordIDCache: {
-    [row: number]: RecordID;
-  };
-  columnToFieldIDCache: {
-    [column: number]: FieldID;
-  };
+  rowToRecordIDCache: RowToRecordIDCache;
+  columnToFieldIDCache: ColumnToFieldIDCache;
 }
 
 const ListViewDisplayContext = createContext<ListViewDisplayContext>({
@@ -243,6 +235,8 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   }, [fields, fieldsOrderChanged]);
 
   useCellKeyBindings({
+    columnToFieldIDCache,
+    rowToRecordIDCache,
     records,
     fields,
     onOpenRecord,
@@ -350,7 +344,7 @@ function LeafRowCell(props: LeafRowCellProps) {
     <LeafRowCellRenderer
       field={field}
       recordID={recordID}
-      focused={state === 'focused'}
+      state={state}
       width={width}
       height={height}
       value={value}
@@ -366,7 +360,7 @@ function LeafRowCell(props: LeafRowCellProps) {
 interface LeafRowCellRendererProps {
   field: Field;
   recordID: RecordID;
-  focused: boolean;
+  state: LeafRowCellState;
   width: number;
   height: number;
   value: FieldValue;
@@ -384,14 +378,48 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
     height,
     field,
     recordID,
-    focused,
+    state,
     width,
     value,
     row,
     path,
     column,
   } = props;
+  const { rowToRecordIDCache } = useContext(ListViewDisplayContext);
   const setCell = useSetRecoilState(cellState);
+
+  const handleFocus = useCallback(() => {
+    if (state === 'default') {
+      setCell({ type: 'leaf', row, path, column, state: 'focused' });
+    }
+  }, [setCell, state, row, column, path]);
+
+  const handleStartEditing = useCallback(() => {
+    if (state === 'focused') {
+      setCell({ type: 'leaf', row, path, column, state: 'editing' });
+    }
+  }, [setCell, state, row, column, path]);
+
+  const handleStopEditing = useCallback(() => {
+    if (state === 'editing') {
+      setCell({ type: 'leaf', row, path, column, state: 'focused' });
+    }
+  }, [setCell, state, row, column, path]);
+
+  const handleNextRecord = useCallback(() => {
+    const nextRow = row + 1;
+    if (rowToRecordIDCache[nextRow] === undefined) {
+      return;
+    }
+
+    setCell({
+      type: 'leaf',
+      row: nextRow,
+      column,
+      path,
+      state: 'focused',
+    });
+  }, [setCell, row, column, path, rowToRecordIDCache]);
 
   const renderCell = useCallback(() => {
     switch (field.type) {
@@ -399,178 +427,225 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
         assertCheckboxFieldValue(value);
         return (
           <CheckboxCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
         return (
           <CurrencyCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.Date:
         assertDateFieldValue(value);
         return (
           <DateCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.Email:
         assertEmailFieldValue(value);
         return (
           <EmailCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
         return (
           <MultiCollaboratorCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.MultiRecordLink:
         assertMultiRecordLinkFieldValue(value);
         return (
           <MultiRecordLinkCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return (
           <MultiLineTextCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
         return (
           <MultiOptionCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.Number:
         assertNumberFieldValue(value);
         return (
           <NumberCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.PhoneNumber:
         assertPhoneNumberFieldValue(value);
         return (
           <PhoneNumberCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
         return (
           <SingleCollaboratorCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.SingleRecordLink:
         assertSingleRecordLinkFieldValue(value);
         return (
           <SingleRecordLinkCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return (
           <SingleLineTextCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.SingleOption:
         assertSingleOptionFieldValue(value);
         return (
           <SingleOptionCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
       case FieldType.URL:
         assertURLFieldValue(value);
         return (
           <URLCell
-            focused={focused}
+            state={state}
             recordID={recordID}
             field={field}
             value={value}
+            onStartEditing={handleStartEditing}
+            onStopEditing={handleStopEditing}
+            onNextRecord={handleNextRecord}
           />
         );
 
       default:
         throw new Error('Unhandled FieldType cell rendering');
     }
-  }, [field, value, focused, recordID]);
-
-  const handlePress = useCallback(() => {
-    if (focused === false) {
-      setCell({ type: 'leaf', row, path, column, state: 'focused' });
-    }
-  }, [setCell, focused, row, column, path]);
+  }, [
+    field,
+    value,
+    state,
+    recordID,
+    handleStartEditing,
+    handleStopEditing,
+    handleNextRecord,
+  ]);
 
   return (
     <Pressable
       style={[
         styles.leafRowCell,
         primary && styles.primaryCell,
-        focused && styles.focusedLeafRowCell,
-        focused && {
+        state !== 'default' && styles.focusedLeafRowCell,
+        state !== 'default' && {
           minHeight: height + FOCUS_BORDER_WIDTH * 2,
           width: width + FOCUS_BORDER_WIDTH * 2,
           top: -FOCUS_BORDER_WIDTH,
           left: -FOCUS_BORDER_WIDTH,
         },
       ]}
-      onPress={handlePress}
+      onPress={handleFocus}
     >
       {renderCell()}
     </Pressable>
@@ -596,11 +671,25 @@ function HeaderCell(props: HeaderCellProps) {
   );
 }
 
-function useFocusToCellBelow() {
-  const [cell, setCell] = useRecoilState(cellState);
-  const { rowToRecordIDCache } = useContext(ListViewDisplayContext);
+interface UseCellKeyBindingsProps {
+  records: Record[];
+  fields: Field[];
+  onOpenRecord: (recordID: RecordID) => void;
+  rowToRecordIDCache: RowToRecordIDCache;
+  columnToFieldIDCache: ColumnToFieldIDCache;
+}
 
-  return useCallback(() => {
+function useCellKeyBindings(props: UseCellKeyBindingsProps) {
+  const {
+    rowToRecordIDCache,
+    columnToFieldIDCache,
+    records,
+    fields,
+    onOpenRecord,
+  } = props;
+  const [cell, setCell] = useRecoilState(cellState);
+
+  const onArrowDown = useCallback(() => {
     if (cell !== null) {
       const { row, column, path } = cell;
 
@@ -618,25 +707,6 @@ function useFocusToCellBelow() {
       });
     }
   }, [cell, setCell, rowToRecordIDCache]);
-}
-
-interface UseCellKeyBindingsProps {
-  records: Record[];
-  fields: Field[];
-  onOpenRecord: (recordID: RecordID) => void;
-}
-
-function useCellKeyBindings(props: UseCellKeyBindingsProps) {
-  const { records, fields, onOpenRecord } = props;
-  const { rowToRecordIDCache, columnToFieldIDCache } = useContext(
-    ListViewDisplayContext,
-  );
-  const [cell, setCell] = useRecoilState(cellState);
-  const focusToCellBelow = useFocusToCellBelow();
-
-  const onArrowDown = useCallback(() => {
-    focusToCellBelow();
-  }, [focusToCellBelow]);
 
   const onArrowUp = useCallback(() => {
     if (cell !== null) {
@@ -860,8 +930,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 interface CheckboxCellProps {
   value: CheckboxFieldValue;
   field: CheckboxField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function CheckboxCell(props: CheckboxCellProps) {
@@ -877,15 +950,28 @@ function CheckboxCell(props: CheckboxCellProps) {
 interface CurrencyCellProps {
   value: CurrencyFieldValue;
   field: CurrencyField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function CurrencyCell(props: CurrencyCellProps) {
-  const { value, field, focused, recordID } = props;
-  const [editing, startEditing] = useCellEditingState(focused);
+  const {
+    value,
+    field,
+    state,
+    recordID,
+    onStartEditing,
+    onStopEditing,
+    onNextRecord,
+  } = props;
   const updateRecordField = useUpdateRecordField<CurrencyFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
+  const handleKeyPress = useCellKeyPressHandler({
+    onStopEditing,
+    onNextRecord,
+  });
 
   const handleChangeText = useCallback(
     (newValue: string) => {
@@ -902,7 +988,7 @@ function CurrencyCell(props: CurrencyCellProps) {
     return null;
   }
 
-  if (focused === false) {
+  if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
         <Text numberOfLines={1} align="right">
@@ -912,9 +998,9 @@ function CurrencyCell(props: CurrencyCellProps) {
     );
   }
 
-  if (editing === false) {
+  if (state === 'focused') {
     return (
-      <Pressable onPress={startEditing}>
+      <Pressable onPress={onStartEditing}>
         <View style={styles.textCellContainer}>
           <Text numberOfLines={1} align="right">
             {formatCurrency(value, getSystemLocale(), field.currency)}
@@ -938,18 +1024,21 @@ function CurrencyCell(props: CurrencyCellProps) {
 interface DateCellProps {
   value: DateFieldValue;
   field: DateField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function DateCell(props: DateCellProps) {
-  const { value, field, focused } = props;
+  const { value, field, state } = props;
 
   if (isNullish(value)) {
     return null;
   }
 
-  if (focused === false) {
+  if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
         <Text numberOfLines={1}>
@@ -968,15 +1057,28 @@ function DateCell(props: DateCellProps) {
 interface EmailCellProps {
   value: EmailFieldValue;
   field: EmailField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function EmailCell(props: EmailCellProps) {
-  const { field, value, recordID, focused } = props;
+  const {
+    field,
+    value,
+    recordID,
+    state,
+    onStartEditing,
+    onStopEditing,
+    onNextRecord,
+  } = props;
 
-  const [editing, startEditing] = useCellEditingState(focused);
-  const handleKeyPress = useCellKeyPressHandler();
+  const handleKeyPress = useCellKeyPressHandler({
+    onStopEditing,
+    onNextRecord,
+  });
   const updateRecordField = useUpdateRecordField();
 
   const handleChangeText = useCallback(
@@ -986,7 +1088,7 @@ function EmailCell(props: EmailCellProps) {
     [updateRecordField, recordID, field],
   );
 
-  if (focused === false) {
+  if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
         <Text decoration="underline" numberOfLines={1}>
@@ -996,10 +1098,10 @@ function EmailCell(props: EmailCellProps) {
     );
   }
 
-  if (editing === false) {
+  if (state === 'focused') {
     return (
       <View>
-        <Pressable onPress={startEditing}>
+        <Pressable onPress={onStartEditing}>
           <View style={styles.textCellContainer}>
             <Text decoration="underline" numberOfLines={1}>
               {value}
@@ -1028,11 +1130,15 @@ function EmailCell(props: EmailCellProps) {
     />
   );
 }
+
 interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
@@ -1061,8 +1167,11 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
 interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
   field: MultiRecordLinkField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
@@ -1094,17 +1203,21 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
     </Fragment>
   );
 }
+
 interface MultiLineTextCellProps {
   value: MultiLineTextFieldValue;
   field: MultiLineTextField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function MultiLineTextCell(props: MultiLineTextCellProps) {
-  const { value, focused } = props;
+  const { value, state } = props;
 
-  if (focused === false) {
+  if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
         <Text numberOfLines={1}>{value}</Text>
@@ -1122,8 +1235,11 @@ function MultiLineTextCell(props: MultiLineTextCellProps) {
 interface MultiOptionCellProps {
   value: MultiOptionFieldValue;
   field: MultiOptionField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function MultiOptionCell(props: MultiOptionCellProps) {
@@ -1145,18 +1261,25 @@ function MultiOptionCell(props: MultiOptionCellProps) {
     </Fragment>
   );
 }
+
 interface NumberCellProps {
   value: NumberFieldValue;
   field: NumberField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function NumberCell(props: NumberCellProps) {
-  const { value, field, focused, recordID } = props;
+  const { value, field, state, recordID, onStopEditing, onNextRecord } = props;
 
   const updateRecordField = useUpdateRecordField<CurrencyFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
+  const handleKeyPress = useCellKeyPressHandler({
+    onStopEditing,
+    onNextRecord,
+  });
 
   const handleChangeText = useCallback(
     (newValue: string) => {
@@ -1173,7 +1296,7 @@ function NumberCell(props: NumberCellProps) {
     return null;
   }
 
-  if (focused === false) {
+  if (state === 'default') {
     switch (field.style) {
       case 'decimal':
         return (
@@ -1219,15 +1342,21 @@ function NumberCell(props: NumberCellProps) {
 interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
-  const { field, value, focused, recordID } = props;
+  const { field, value, state, recordID, onStopEditing, onNextRecord } = props;
 
   const updateRecordField = useUpdateRecordField<PhoneNumberFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
+  const handleKeyPress = useCellKeyPressHandler({
+    onStopEditing,
+    onNextRecord,
+  });
 
   const handleChangeText = useCallback(
     (newValue: PhoneNumberFieldValue) => {
@@ -1236,7 +1365,7 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
     [updateRecordField, recordID, field],
   );
 
-  if (focused === false) {
+  if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
         <Text numberOfLines={1}>{value}</Text>
@@ -1262,8 +1391,11 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
 interface SingleCollaboratorCellProps {
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
@@ -1284,11 +1416,15 @@ function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
     <CollaboratorBadge collaborator={collaborator} key={collaborator.name} />
   );
 }
+
 interface SingleRecordLinkCellProps {
   value: SingleRecordLinkFieldValue;
   field: SingleRecordLinkField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
@@ -1318,15 +1454,28 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
   field: SingleLineTextField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function SingleLineTextCell(props: SingleLineTextCellProps) {
-  const { field, value, focused, recordID } = props;
+  const {
+    field,
+    value,
+    state,
+    recordID,
+    onStartEditing,
+    onStopEditing,
+    onNextRecord,
+  } = props;
 
-  const [editing, startEditing] = useCellEditingState(focused);
-  const handleKeyPress = useCellKeyPressHandler();
+  const handleKeyPress = useCellKeyPressHandler({
+    onStopEditing,
+    onNextRecord,
+  });
   const updateRecordField = useUpdateRecordField();
 
   const handleChangeText = useCallback(
@@ -1336,7 +1485,7 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
     [updateRecordField, recordID, field],
   );
 
-  if (focused === false) {
+  if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
         <Text numberOfLines={1}>{value}</Text>
@@ -1344,9 +1493,9 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
     );
   }
 
-  if (editing === false) {
+  if (state === 'focused') {
     return (
-      <Pressable onPress={startEditing}>
+      <Pressable onPress={onStartEditing}>
         <View style={styles.textCellContainer}>
           <Text numberOfLines={1}>{value}</Text>
         </View>
@@ -1368,8 +1517,11 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
 interface SingleOptionCellProps {
   value: SingleOptionFieldValue;
   field: SingleOptionField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function SingleOptionCell(props: SingleOptionCellProps) {
@@ -1391,15 +1543,29 @@ function SingleOptionCell(props: SingleOptionCellProps) {
 interface URLCellProps {
   value: URLFieldValue;
   field: URLField;
-  focused: boolean;
+  state: LeafRowCellState;
   recordID: RecordID;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onNextRecord: () => void;
 }
 
 function URLCell(props: URLCellProps) {
-  const { field, value, recordID, focused } = props;
+  const {
+    field,
+    value,
+    recordID,
+    state,
+    onStartEditing,
+    onStopEditing,
+    onNextRecord,
+  } = props;
 
   const updateRecordField = useUpdateRecordField<URLFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
+  const handleKeyPress = useCellKeyPressHandler({
+    onStopEditing,
+    onNextRecord,
+  });
 
   const handleChangeText = useCallback(
     (newValue: string) => {
@@ -1408,7 +1574,7 @@ function URLCell(props: URLCellProps) {
     [updateRecordField, recordID, field],
   );
 
-  if (focused === false) {
+  if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
         <Text decoration="underline" numberOfLines={1}>
@@ -1434,43 +1600,29 @@ function URLCell(props: URLCellProps) {
   );
 }
 
-function useCellKeyPressHandler(): (
-  event: NativeSyntheticEvent<TextInputKeyPressEventData>,
-) => void {
-  const setCell = useSetRecoilState(cellState);
-  const focusToCellBelow = useFocusToCellBelow();
+interface UseCellKeyPressHandlerProps {
+  onStopEditing: () => void;
+  onNextRecord: () => void;
+}
+
+function useCellKeyPressHandler(
+  props: UseCellKeyPressHandlerProps,
+): (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void {
+  const { onStopEditing, onNextRecord } = props;
 
   return useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
       const key = event.nativeEvent.key;
 
       if (key === UIKey.Escape) {
-        setCell(null);
+        onStopEditing();
       }
       if (key === WhiteSpaceKey.Enter) {
-        focusToCellBelow();
+        onNextRecord();
       }
     },
-    [setCell, focusToCellBelow],
+    [onStopEditing, onNextRecord],
   );
-}
-
-function useCellEditingState(
-  focused: boolean,
-): [editing: boolean, startEditing: () => void] {
-  const [editing, setEditing] = useState(false);
-
-  useEffect(() => {
-    if (focused === false) {
-      setEditing(false);
-    }
-  }, [focused]);
-
-  const startEditing = useCallback(() => {
-    setEditing(true);
-  }, []);
-
-  return [editing, startEditing];
 }
 
 const styles = DynamicStyleSheet.create((theme) => ({
@@ -1489,10 +1641,6 @@ const styles = DynamicStyleSheet.create((theme) => ({
         outlineStyle: 'none',
       },
     }),
-  },
-  cellActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   focusedMultiLineTextCellContainer: {
     paddingTop: FOCUS_BORDER_WIDTH + 1,
