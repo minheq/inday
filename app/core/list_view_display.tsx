@@ -7,7 +7,15 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View, Pressable, Platform, TextInput } from 'react-native';
+import {
+  View,
+  Pressable,
+  Platform,
+  TextInput,
+  NativeSyntheticEvent,
+  TextInputChangeEventData,
+  TextInputKeyPressEventData,
+} from 'react-native';
 import {
   Button,
   Container,
@@ -88,7 +96,12 @@ import {
   RenderHeaderCellProps,
 } from './grid';
 import { Record, RecordID } from '../data/records';
-import { atom, useRecoilState, useSetRecoilState } from 'recoil';
+import {
+  atom,
+  useRecoilState,
+  useRecoilValue,
+  useSetRecoilState,
+} from 'recoil';
 import {
   NavigationKey,
   KeyBinding,
@@ -100,7 +113,7 @@ import { StatefulLeafRowCell } from './grid.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import { isNullish } from '../../lib/js_utils';
+import { isNullish, isNumeric } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { palette } from '../components/palette';
 import { formatDate } from '../../lib/datetime/format';
@@ -109,7 +122,6 @@ import { CollaboratorBadge } from './collaborator_badge';
 import { RecordLinkBadge } from './record_link_badge';
 import { formatUnit } from '../../lib/i18n/unit';
 import { usePrevious } from '../hooks/use_previous';
-import { useWhatChanged } from '../hooks/use_what_changed';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -154,7 +166,7 @@ function getRowToRecordIDCache(records: Record[]) {
 
 export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const { view, onOpenRecord } = props;
-  const [cell, setCell] = useRecoilState(cellState);
+  const cell = useRecoilValue(cellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
   const gridRef = useRef<GridRef>(null);
@@ -166,7 +178,14 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   );
   const prevFields = usePrevious(fields);
   const prevRecords = usePrevious(records);
+  const prevCell = usePrevious(cell);
   const fixedFieldCount = view.fixedFieldCount;
+
+  useEffect(() => {
+    if (cell !== prevCell && gridRef.current !== null && cell !== null) {
+      gridRef.current.scrollToCell(cell);
+    }
+  }, [cell, prevCell]);
 
   useEffect(() => {
     // TODO: Handle change in sort, view
@@ -174,6 +193,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
       setRowToRecordIDCache(getRowToRecordIDCache(records));
     }
   }, [records, prevRecords]);
+
   useEffect(() => {
     // TODO: Handle change in sort, view
     if (fields.length !== prevFields.length) {
@@ -183,13 +203,10 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
 
   useCellKeyBindings({
     rowToRecordIDCache,
-    records,
-    cell,
     columnToFieldIDCache,
-    setCell,
-    onOpenRecord,
-    gridRef,
+    records,
     fields,
+    onOpenRecord,
   });
 
   const contentOffset = useMemo(() => {
@@ -536,8 +553,6 @@ function HeaderCell(props: HeaderCellProps) {
 }
 
 interface UseCellKeyBindingsProps {
-  cell: StatefulLeafRowCell | null;
-  setCell: (cell: StatefulLeafRowCell | null) => void;
   rowToRecordIDCache: {
     [row: number]: RecordID;
   };
@@ -547,23 +562,20 @@ interface UseCellKeyBindingsProps {
   records: Record[];
   fields: Field[];
   onOpenRecord: (recordID: RecordID) => void;
-  gridRef: React.RefObject<GridRef>;
 }
 
 function useCellKeyBindings(props: UseCellKeyBindingsProps) {
   const {
-    cell,
-    setCell,
     rowToRecordIDCache,
     columnToFieldIDCache,
     records,
     fields,
     onOpenRecord,
-    gridRef,
   } = props;
+  const [cell, setCell] = useRecoilState(cellState);
 
   const onArrowDown = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { row, column, path } = cell;
 
       const nextRow = row + 1;
@@ -578,13 +590,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ row: nextRow, path });
     }
-  }, [cell, gridRef, setCell, rowToRecordIDCache]);
+  }, [cell, setCell, rowToRecordIDCache]);
 
   const onArrowUp = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { row, column, path } = cell;
 
       const prevRow = row - 1;
@@ -599,13 +609,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ row: prevRow, path });
     }
-  }, [cell, gridRef, setCell, rowToRecordIDCache]);
+  }, [cell, setCell, rowToRecordIDCache]);
 
   const onArrowLeft = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { row, column, path } = cell;
       const prevColumn = column - 1;
       if (columnToFieldIDCache[prevColumn] === undefined) {
@@ -619,13 +627,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ column: prevColumn });
     }
-  }, [cell, gridRef, setCell, columnToFieldIDCache]);
+  }, [cell, setCell, columnToFieldIDCache]);
 
   const onArrowRight = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { row, column, path } = cell;
 
       const nextColumn = column + 1;
@@ -640,13 +646,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ column: nextColumn });
     }
-  }, [cell, gridRef, setCell, columnToFieldIDCache]);
+  }, [cell, setCell, columnToFieldIDCache]);
 
   const onMetaArrowDown = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { column, path } = cell;
 
       const nextRow = records.length;
@@ -658,13 +662,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ row: nextRow, path });
     }
-  }, [cell, gridRef, setCell, records]);
+  }, [cell, setCell, records]);
 
   const onMetaArrowUp = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { column, path } = cell;
 
       const prevRow = 1;
@@ -676,13 +678,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ row: prevRow, path });
     }
-  }, [cell, gridRef, setCell]);
+  }, [cell, setCell]);
 
   const onMetaArrowLeft = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { row, path } = cell;
 
       const prevColumn = 1;
@@ -694,13 +694,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ column: prevColumn });
     }
-  }, [cell, gridRef, setCell]);
+  }, [cell, setCell]);
 
   const onMetaArrowRight = useCallback(() => {
-    if (cell !== null && gridRef.current !== null) {
+    if (cell !== null) {
       const { row, path } = cell;
 
       const nextColumn = fields.length;
@@ -712,10 +710,8 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         path,
         state: 'focused',
       });
-
-      gridRef.current.scrollToCell({ column: nextColumn });
     }
-  }, [cell, gridRef, setCell, fields]);
+  }, [cell, setCell, fields]);
 
   const onEscape = useCallback(() => {
     if (cell !== null) {
@@ -841,18 +837,53 @@ interface CurrencyCellProps {
 }
 
 function CurrencyCell(props: CurrencyCellProps) {
-  const { value, field } = props;
+  const { value, field, focused, recordID } = props;
+
+  const updateRecordField = useUpdateRecordField<CurrencyFieldValue>();
+  const setCell = useSetRecoilState(cellState);
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+      if (key === UIKey.Escape) {
+        setCell(null);
+      }
+    },
+    [setCell],
+  );
+
+  const handleChangeText = useCallback(
+    (newValue: string) => {
+      if (isNumeric(newValue) === false) {
+        return;
+      }
+
+      updateRecordField(recordID, field.id, Number(newValue));
+    },
+    [updateRecordField, recordID, field],
+  );
 
   if (isNullish(value)) {
     return null;
   }
 
+  if (focused === false) {
+    return (
+      <View style={styles.numberCellContainer}>
+        <Text numberOfLines={1}>
+          {formatCurrency(value, getSystemLocale(), field.currency)}
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.numberCellContainer}>
-      <Text numberOfLines={1}>
-        {formatCurrency(value, getSystemLocale(), field.currency)}
-      </Text>
-    </View>
+    <TextInput
+      style={styles.numberCellInput}
+      value={String(value)}
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
+    />
   );
 }
 
@@ -881,12 +912,8 @@ function DateCell(props: DateCellProps) {
   }
 
   return (
-    <View>
-      <View style={styles.textCellContainer}>
-        <Text>{formatDate(value, field.format, getSystemLocale())}</Text>
-      </View>
-      <Spacer size={8} />
-      <Text decoration="underline">Close</Text>
+    <View style={styles.textCellContainer}>
+      <Text>{formatDate(value, field.format, getSystemLocale())}</Text>
     </View>
   );
 }
@@ -1179,7 +1206,22 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { field, value, focused, recordID } = props;
 
   const updateRecordField = useUpdateRecordField();
-  const handleChange = useCallback(
+  const setCell = useSetRecoilState(cellState);
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+      if (key === UIKey.Escape) {
+        setCell(null);
+      }
+      if (key === WhiteSpaceKey.Enter) {
+        setCell(null);
+      }
+    },
+    [setCell],
+  );
+
+  const handleChangeText = useCallback(
     (newValue: SingleLineTextFieldValue) => {
       updateRecordField(recordID, field.id, newValue);
     },
@@ -1198,7 +1240,8 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
     <TextInput
       style={styles.textCellInput}
       value={value}
-      onChangeText={handleChange}
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
     />
   );
 }
@@ -1276,12 +1319,27 @@ const styles = DynamicStyleSheet.create((theme) => ({
       },
     }),
   },
+  cellActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
   focusedMultiLineTextCellContainer: {
     paddingTop: FOCUS_BORDER_WIDTH + 1,
   },
   textCellInput: {
     height: 32,
     borderRadius: tokens.radius,
+    ...tokens.text.size.md,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
+  },
+  numberCellInput: {
+    height: 32,
+    borderRadius: tokens.radius,
+    textAlign: 'right',
     ...tokens.text.size.md,
     ...Platform.select({
       web: {

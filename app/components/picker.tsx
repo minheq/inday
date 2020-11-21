@@ -26,6 +26,7 @@ import {
 } from '../lib/measurements';
 import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
+import { NavigationKey, UIKey } from '../lib/keyboard';
 
 export interface PickerProps<T> {
   value?: T;
@@ -124,19 +125,19 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
       const key = event.nativeEvent.key;
 
-      if (key === 'ArrowDown') {
+      if (key === NavigationKey.ArrowDown) {
         if (activeIndex === null || activeIndex === options.length - 1) {
           setActiveIndex(0);
         } else {
           setActiveIndex(activeIndex + 1);
         }
-      } else if (key === 'ArrowUp') {
+      } else if (key === NavigationKey.ArrowUp) {
         if (activeIndex === null || activeIndex === 0) {
           setActiveIndex(options.length - 1);
         } else {
           setActiveIndex(activeIndex - 1);
         }
-      } else if (key === 'Escape') {
+      } else if (key === UIKey.Escape) {
         handleClosePicker();
       }
     },

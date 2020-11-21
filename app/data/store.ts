@@ -324,10 +324,10 @@ export function useCreateCollection() {
   );
 }
 
-export function useUpdateRecordField(): (
+export function useUpdateRecordField<T extends FieldValue>(): (
   recordID: RecordID,
   fieldID: FieldID,
-  value: FieldValue,
+  value: T,
 ) => void {
   const emitEvent = useEmitEvent();
   const setRecordsByID = useSetRecoilState(recordsByIDState);
