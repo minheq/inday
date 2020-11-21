@@ -174,6 +174,9 @@ const ListViewDisplayContext = createContext<ListViewDisplayContext>({
   columnToFieldIDCache: {},
 });
 
+// TODO:
+// - Make it obvious when changing state from editing -> focus (e.g. after pressing ESC)
+// - Display more information when focusing/editing cell
 export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const { view, onOpenRecord } = props;
   const cell = useRecoilValue(cellState);
@@ -317,16 +320,17 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
 interface LeafRowCellContext {
   state: LeafRowCellState;
   recordID: RecordID;
+  fieldID: FieldID;
   onFocus: () => void;
   onStartEditing: () => void;
   onStopEditing: () => void;
-  onNextRecord: () => void;
-  onUpdateRecordFieldValue: <T extends FieldValue>(value: T) => void;
+  onFocusNextRecord: () => void;
 }
 
 const LeafRowCellContext = createContext<LeafRowCellContext>({
   state: 'default',
   recordID: '',
+  fieldID: '',
   onFocus: () => {
     return;
   },
@@ -336,10 +340,7 @@ const LeafRowCellContext = createContext<LeafRowCellContext>({
   onStopEditing: () => {
     return;
   },
-  onNextRecord: () => {
-    return;
-  },
-  onUpdateRecordFieldValue: () => {
+  onFocusNextRecord: () => {
     return;
   },
 });
@@ -374,7 +375,6 @@ function LeafRowCell(props: LeafRowCellProps) {
   const width = fieldConfig.width;
   const { rowToRecordIDCache } = useContext(ListViewDisplayContext);
   const setCell = useSetRecoilState(cellState);
-  const updateRecordFieldValue = useUpdateRecordFieldValue();
 
   const handleFocus = useCallback(() => {
     if (state === 'default') {
@@ -393,13 +393,6 @@ function LeafRowCell(props: LeafRowCellProps) {
       setCell({ type: 'leaf', row, path, column, state: 'focused' });
     }
   }, [setCell, state, row, column, path]);
-
-  const handleUpdateRecordFieldValue = useCallback(
-    <T extends FieldValue>(newValue: T) => {
-      updateRecordFieldValue(recordID, fieldID, newValue);
-    },
-    [recordID, fieldID, updateRecordFieldValue],
-  );
 
   const handleNextRecord = useCallback(() => {
     const nextRow = row + 1;
@@ -420,20 +413,20 @@ function LeafRowCell(props: LeafRowCellProps) {
     return {
       state,
       recordID,
+      fieldID,
       onFocus: handleFocus,
       onStartEditing: handleStartEditing,
       onStopEditing: handleStopEditing,
-      onNextRecord: handleNextRecord,
-      onUpdateRecordFieldValue: handleUpdateRecordFieldValue,
+      onFocusNextRecord: handleNextRecord,
     };
   }, [
     state,
     recordID,
+    fieldID,
     handleFocus,
     handleStartEditing,
     handleStopEditing,
     handleNextRecord,
-    handleUpdateRecordFieldValue,
   ]);
 
   return useMemo(() => {
@@ -836,24 +829,7 @@ interface CurrencyCellProps {
 
 function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const {
-    state,
-    onStartEditing,
-    onUpdateRecordFieldValue,
-  } = useLeafRowCellContext();
-
-  const handleKeyPress = useCellKeyPressHandler();
-
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      if (isNumeric(newValue) === false) {
-        return;
-      }
-
-      onUpdateRecordFieldValue(Number(newValue));
-    },
-    [onUpdateRecordFieldValue],
-  );
+  const { state, onStartEditing } = useLeafRowCellContext();
 
   if (isNullish(value)) {
     return null;
@@ -880,6 +856,29 @@ function CurrencyCell(props: CurrencyCellProps) {
       </Pressable>
     );
   }
+
+  return <CurrencyCellEditing value={value} />;
+}
+
+interface CurrencyCellEditingProps {
+  value: CurrencyFieldValue;
+}
+
+function CurrencyCellEditing(props: CurrencyCellEditingProps) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<CurrencyFieldValue>();
+  const handleKeyPress = useCellKeyPressHandler();
+  const handleChangeText = useCallback(
+    (newValue: string) => {
+      if (isNumeric(newValue) === false) {
+        return;
+      }
+
+      updateRecordFieldValue(recordID, fieldID, Number(newValue));
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
 
   return (
     <TextInput
@@ -921,23 +920,15 @@ function DateCell(props: DateCellProps) {
     </View>
   );
 }
+
 interface EmailCellProps {
   value: EmailFieldValue;
   field: EmailField;
 }
 
 function EmailCell(props: EmailCellProps) {
-  const { field, value } = props;
-  const { state, recordID, onStartEditing } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
-  const updateRecordField = useUpdateRecordFieldValue();
-
-  const handleChangeText = useCallback(
-    (newValue: EmailFieldValue) => {
-      updateRecordField(recordID, field.id, newValue);
-    },
-    [updateRecordField, recordID, field],
-  );
+  const { value } = props;
+  const { state, onStartEditing } = useLeafRowCellContext();
 
   if (state === 'default') {
     return (
@@ -970,6 +961,25 @@ function EmailCell(props: EmailCellProps) {
       </View>
     );
   }
+
+  return <EmailCellEditing value={value} />;
+}
+
+interface EmailCellEditingProps {
+  value: EmailFieldValue;
+}
+
+function EmailCellEditing(props: EmailCellEditingProps) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<EmailFieldValue>();
+  const handleKeyPress = useCellKeyPressHandler();
+  const handleChangeText = useCallback(
+    (nextValue: string) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
 
   return (
     <TextInput
@@ -1101,20 +1111,7 @@ interface NumberCellProps {
 
 function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { state, onUpdateRecordFieldValue } = useLeafRowCellContext();
-
-  const handleKeyPress = useCellKeyPressHandler();
-
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      if (isNumeric(newValue) === false) {
-        return;
-      }
-
-      onUpdateRecordFieldValue(Number(newValue));
-    },
-    [onUpdateRecordFieldValue],
-  );
+  const { state } = useLeafRowCellContext();
 
   if (isNullish(value)) {
     return null;
@@ -1153,8 +1150,32 @@ function NumberCell(props: NumberCellProps) {
     }
   }
 
+  return <NumberCellEditing value={value} />;
+}
+
+interface NumberCellEditingProps {
+  value: NumberFieldValue;
+}
+
+function NumberCellEditing(props: NumberCellEditingProps) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<NumberFieldValue>();
+  const handleKeyPress = useCellKeyPressHandler();
+  const handleChangeText = useCallback(
+    (newValue: string) => {
+      if (isNumeric(newValue) === false) {
+        return;
+      }
+
+      updateRecordFieldValue(recordID, fieldID, Number(newValue));
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
   return (
     <TextInput
+      autoFocus
       style={styles.numberCellInput}
       value={String(value)}
       onKeyPress={handleKeyPress}
@@ -1169,17 +1190,8 @@ interface PhoneNumberCellProps {
 }
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
-  const { field, value } = props;
-  const { state, recordID } = useLeafRowCellContext();
-  const updateRecordField = useUpdateRecordFieldValue<PhoneNumberFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
-
-  const handleChangeText = useCallback(
-    (newValue: PhoneNumberFieldValue) => {
-      updateRecordField(recordID, field.id, newValue);
-    },
-    [updateRecordField, recordID, field],
-  );
+  const { value } = props;
+  const { state } = useLeafRowCellContext();
 
   if (state === 'default') {
     return (
@@ -1189,21 +1201,50 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
     );
   }
 
+  if (state === 'focused') {
+    return (
+      <View>
+        <View style={styles.textCellContainer}>
+          <Text numberOfLines={1}>{value}</Text>
+        </View>
+        <Spacer size={8} />
+        <Text decoration="underline" size="sm" color="primary">
+          Call
+        </Text>
+      </View>
+    );
+  }
+
+  return <PhoneNumberCellEditing value={value} />;
+}
+
+interface PhoneNumberCellEditingProps {
+  value: PhoneNumberFieldValue;
+}
+
+function PhoneNumberCellEditing(props: PhoneNumberCellEditingProps) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<PhoneNumberFieldValue>();
+  const handleKeyPress = useCellKeyPressHandler();
+  const handleChangeText = useCallback(
+    (nextValue: string) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
   return (
-    <View>
-      <TextInput
-        style={styles.textCellInput}
-        value={value}
-        onKeyPress={handleKeyPress}
-        onChangeText={handleChangeText}
-      />
-      <Spacer size={8} />
-      <Text decoration="underline" size="sm" color="primary">
-        Call
-      </Text>
-    </View>
+    <TextInput
+      autoFocus
+      style={styles.textCellInput}
+      value={value}
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
+    />
   );
 }
+
 interface SingleCollaboratorCellProps {
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
@@ -1264,20 +1305,7 @@ interface SingleLineTextCellProps {
 
 function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { value } = props;
-  const {
-    state,
-    onStartEditing,
-    onUpdateRecordFieldValue,
-  } = useLeafRowCellContext();
-
-  const handleKeyPress = useCellKeyPressHandler();
-
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      onUpdateRecordFieldValue(newValue);
-    },
-    [onUpdateRecordFieldValue],
-  );
+  const { state, onStartEditing } = useLeafRowCellContext();
 
   if (state === 'default') {
     return (
@@ -1296,6 +1324,25 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
       </Pressable>
     );
   }
+
+  return <SingleLineTextCellEditing value={value} />;
+}
+
+interface SingleLineTextCellEditingProps {
+  value: SingleLineTextFieldValue;
+}
+
+function SingleLineTextCellEditing(props: SingleLineTextCellEditingProps) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<SingleLineTextFieldValue>();
+  const handleKeyPress = useCellKeyPressHandler();
+  const handleChangeText = useCallback(
+    (nextValue: string) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
 
   return (
     <TextInput
@@ -1376,7 +1423,7 @@ function URLCell(props: URLCellProps) {
 function useCellKeyPressHandler(): (
   event: NativeSyntheticEvent<TextInputKeyPressEventData>,
 ) => void {
-  const { onStopEditing, onNextRecord } = useLeafRowCellContext();
+  const { onStopEditing, onFocusNextRecord } = useLeafRowCellContext();
 
   return useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -1386,10 +1433,10 @@ function useCellKeyPressHandler(): (
         onStopEditing();
       }
       if (key === WhiteSpaceKey.Enter) {
-        onNextRecord();
+        onFocusNextRecord();
       }
     },
-    [onStopEditing, onNextRecord],
+    [onStopEditing, onFocusNextRecord],
   );
 }
 

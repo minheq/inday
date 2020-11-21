@@ -2,7 +2,7 @@ import { Workspace } from './workspace';
 import { Space } from './spaces';
 import { Collection } from './collections';
 import { View, ListView } from './views';
-import { Field } from './fields';
+import { Field, FieldID, FieldValue } from './fields';
 import { Record } from './records';
 import { Filter } from './filters';
 import { Sort } from './sorts';
@@ -128,8 +128,9 @@ export interface RecordNameUpdatedEvent
 
 export interface RecordFieldValueUpdatedEventConfig {
   name: 'RecordFieldValueUpdated';
-  prevRecord: Record;
-  nextRecord: Record;
+  fieldID: FieldID;
+  prevValue: FieldValue;
+  nextValue: FieldValue;
 }
 export interface RecordFieldValueUpdatedEvent
   extends BaseEvent,
