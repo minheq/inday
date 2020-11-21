@@ -1040,11 +1040,11 @@ export function useGetField(fieldID: FieldID) {
   return field;
 }
 
-export function useGetFieldConfig(fieldID: FieldID) {
+export function useGetFieldConfig(fieldID: FieldID): FieldConfig {
   const field = useRecoilValue(fieldQuery(fieldID));
 
   if (field === null) {
-    throw new Error('Field not found');
+    throw new Error('Field config not found');
   }
 
   return field;
