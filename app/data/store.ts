@@ -324,39 +324,38 @@ export function useCreateCollection() {
   );
 }
 
-export function useUpdateRecordField<T extends FieldValue>(): (
+export function useUpdateRecordFieldValue<T extends FieldValue>(): (
   recordID: RecordID,
   fieldID: FieldID,
   value: T,
 ) => void {
   const emitEvent = useEmitEvent();
   const setRecordsByID = useSetRecoilState(recordsByIDState);
-  const getRecord = useGetRecordCallback();
 
   return useCallback(
     (recordID, fieldID, value) => {
-      const prevRecord = getRecord(recordID);
+      setRecordsByID((previousRecordsByID) => {
+        const prevRecord = previousRecordsByID[recordID];
 
-      const nextRecord: Record = {
-        ...prevRecord,
-        fields: {
-          ...prevRecord.fields,
-          [fieldID]: value,
-        },
-      };
+        if (prevRecord === undefined) {
+          throw new Error('Record not found');
+        }
 
-      setRecordsByID((previousRecordsByID) => ({
-        ...previousRecordsByID,
-        [nextRecord.id]: nextRecord,
-      }));
+        const nextRecord: Record = {
+          ...prevRecord,
+          fields: {
+            ...prevRecord.fields,
+            [fieldID]: value,
+          },
+        };
 
-      emitEvent({
-        name: 'RecordFieldUpdated',
-        prevRecord,
-        nextRecord,
+        return {
+          ...previousRecordsByID,
+          [nextRecord.id]: nextRecord,
+        };
       });
     },
-    [emitEvent, getRecord, setRecordsByID],
+    [setRecordsByID],
   );
 }
 
