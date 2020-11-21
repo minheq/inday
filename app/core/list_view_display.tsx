@@ -1,7 +1,9 @@
 import React, {
+  createContext,
   Fragment,
   memo,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -34,6 +36,9 @@ import {
   useGetField,
   useGetRecordFieldValue,
   useGetListViewFieldConfig,
+  useGetViewFilters,
+  useGetViewSorts,
+  useGetViewGroups,
 } from '../data/store';
 import {
   FieldType,
@@ -163,20 +168,40 @@ function getRowToRecordIDCache(records: Record[]) {
   return cache;
 }
 
+interface ListViewDisplayContext {
+  rowToRecordIDCache: {
+    [row: number]: RecordID;
+  };
+  columnToFieldIDCache: {
+    [column: number]: FieldID;
+  };
+}
+
+const ListViewDisplayContext = createContext<ListViewDisplayContext>({
+  rowToRecordIDCache: {},
+  columnToFieldIDCache: {},
+});
+
 export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const { view, onOpenRecord } = props;
   const cell = useRecoilValue(cellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
   const gridRef = useRef<GridRef>(null);
+  const filters = useGetViewFilters(view.id);
+  const sorts = useGetViewSorts(view.id);
+  const groups = useGetViewGroups(view.id);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
     getColumnToFieldIDCache(fields),
   );
   const [rowToRecordIDCache, setRowToRecordIDCache] = useState(
     getRowToRecordIDCache(records),
   );
-  const prevFields = usePrevious(fields);
   const prevRecords = usePrevious(records);
+  const prevFields = usePrevious(fields);
+  const prevFilters = usePrevious(filters);
+  const prevSorts = usePrevious(sorts);
+  const prevGroups = usePrevious(groups);
   const prevCell = usePrevious(cell);
   const fixedFieldCount = view.fixedFieldCount;
 
@@ -184,23 +209,40 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     gridRef.current.scrollToCell(cell);
   }
 
-  useEffect(() => {
-    // TODO: Handle change in sort, view
-    if (records.length !== prevRecords.length) {
-      setRowToRecordIDCache(getRowToRecordIDCache(records));
-    }
-  }, [records, prevRecords]);
-
-  useEffect(() => {
-    // TODO: Handle change in sort, view
-    if (fields.length !== prevFields.length) {
-      setColumnToFieldIDCache(getColumnToFieldIDCache(fields));
-    }
+  const recordsOrderChanged: boolean = useMemo(() => {
+    return (
+      records.length !== prevRecords.length ||
+      filters !== prevFilters ||
+      sorts !== prevSorts ||
+      groups !== prevGroups
+    );
+  }, [
+    records,
+    prevRecords,
+    filters,
+    prevFilters,
+    sorts,
+    prevSorts,
+    groups,
+    prevGroups,
+  ]);
+  const fieldsOrderChanged: boolean = useMemo(() => {
+    return fields.length !== prevFields.length;
   }, [fields, prevFields]);
 
+  useEffect(() => {
+    if (recordsOrderChanged === true) {
+      setRowToRecordIDCache(getRowToRecordIDCache(records));
+    }
+  }, [records, recordsOrderChanged]);
+
+  useEffect(() => {
+    if (fieldsOrderChanged === true) {
+      setColumnToFieldIDCache(getColumnToFieldIDCache(fields));
+    }
+  }, [fields, fieldsOrderChanged]);
+
   useCellKeyBindings({
-    rowToRecordIDCache,
-    columnToFieldIDCache,
     records,
     fields,
     onOpenRecord,
@@ -209,6 +251,9 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const contentOffset = useMemo(() => {
     return { x: 0, y: 0 };
   }, []);
+  const context = useMemo((): ListViewDisplayContext => {
+    return { rowToRecordIDCache, columnToFieldIDCache };
+  }, [rowToRecordIDCache, columnToFieldIDCache]);
 
   const renderLeafRowCell = useCallback(
     ({ row, column, path, state }: RenderLeafRowCellProps) => {
@@ -250,26 +295,28 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const rowCount = records.length;
 
   return (
-    <Container flex={1}>
-      <AutoSizer>
-        {({ height, width }) => (
-          <Grid
-            ref={gridRef}
-            width={width}
-            height={height}
-            contentOffset={contentOffset}
-            groups={[{ type: 'leaf', rowCount, collapsed: false }]}
-            renderLeafRowCell={renderLeafRowCell}
-            renderHeaderCell={renderHeaderCell}
-            leafRowHeight={RECORD_ROW_HEIGHT}
-            headerHeight={FIELD_ROW_HEIGHT}
-            columns={columns}
-            fixedColumnCount={fixedFieldCount}
-            cell={cell}
-          />
-        )}
-      </AutoSizer>
-    </Container>
+    <ListViewDisplayContext.Provider value={context}>
+      <Container flex={1}>
+        <AutoSizer>
+          {({ height, width }) => (
+            <Grid
+              ref={gridRef}
+              width={width}
+              height={height}
+              contentOffset={contentOffset}
+              groups={[{ type: 'leaf', rowCount, collapsed: false }]}
+              renderLeafRowCell={renderLeafRowCell}
+              renderHeaderCell={renderHeaderCell}
+              leafRowHeight={RECORD_ROW_HEIGHT}
+              headerHeight={FIELD_ROW_HEIGHT}
+              columns={columns}
+              fixedColumnCount={fixedFieldCount}
+              cell={cell}
+            />
+          )}
+        </AutoSizer>
+      </Container>
+    </ListViewDisplayContext.Provider>
   );
 }
 
@@ -549,29 +596,11 @@ function HeaderCell(props: HeaderCellProps) {
   );
 }
 
-interface UseCellKeyBindingsProps {
-  rowToRecordIDCache: {
-    [row: number]: RecordID;
-  };
-  columnToFieldIDCache: {
-    [column: number]: FieldID;
-  };
-  records: Record[];
-  fields: Field[];
-  onOpenRecord: (recordID: RecordID) => void;
-}
-
-function useCellKeyBindings(props: UseCellKeyBindingsProps) {
-  const {
-    rowToRecordIDCache,
-    columnToFieldIDCache,
-    records,
-    fields,
-    onOpenRecord,
-  } = props;
+function useFocusToCellBelow() {
   const [cell, setCell] = useRecoilState(cellState);
+  const { rowToRecordIDCache } = useContext(ListViewDisplayContext);
 
-  const onArrowDown = useCallback(() => {
+  return useCallback(() => {
     if (cell !== null) {
       const { row, column, path } = cell;
 
@@ -589,6 +618,25 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
       });
     }
   }, [cell, setCell, rowToRecordIDCache]);
+}
+
+interface UseCellKeyBindingsProps {
+  records: Record[];
+  fields: Field[];
+  onOpenRecord: (recordID: RecordID) => void;
+}
+
+function useCellKeyBindings(props: UseCellKeyBindingsProps) {
+  const { records, fields, onOpenRecord } = props;
+  const { rowToRecordIDCache, columnToFieldIDCache } = useContext(
+    ListViewDisplayContext,
+  );
+  const [cell, setCell] = useRecoilState(cellState);
+  const focusToCellBelow = useFocusToCellBelow();
+
+  const onArrowDown = useCallback(() => {
+    focusToCellBelow();
+  }, [focusToCellBelow]);
 
   const onArrowUp = useCallback(() => {
     if (cell !== null) {
@@ -1390,6 +1438,7 @@ function useCellKeyPressHandler(): (
   event: NativeSyntheticEvent<TextInputKeyPressEventData>,
 ) => void {
   const setCell = useSetRecoilState(cellState);
+  const focusToCellBelow = useFocusToCellBelow();
 
   return useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -1398,8 +1447,11 @@ function useCellKeyPressHandler(): (
       if (key === UIKey.Escape) {
         setCell(null);
       }
+      if (key === WhiteSpaceKey.Enter) {
+        focusToCellBelow();
+      }
     },
-    [setCell],
+    [setCell, focusToCellBelow],
   );
 }
 

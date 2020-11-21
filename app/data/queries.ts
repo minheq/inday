@@ -271,6 +271,7 @@ export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
     const filters = get(filtersQuery);
 
     return filters
+      .slice(0)
       .filter((f) => f.viewID === view.id)
       .sort((a, b) => a.group - b.group);
   },
@@ -283,6 +284,7 @@ export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
     const sorts = get(sortsQuery);
 
     return sorts
+      .slice(0)
       .filter((f) => f.viewID === view.id)
       .sort((a, b) => a.sequence - b.sequence);
   },
@@ -295,6 +297,7 @@ export const viewGroupsQuery = selectorFamily<Group[], GroupID>({
     const groups = get(groupsQuery);
 
     return groups
+      .slice(0)
       .filter((f) => f.viewID === view.id)
       .sort((a, b) => a.sequence - b.sequence);
   },
