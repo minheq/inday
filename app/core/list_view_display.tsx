@@ -835,19 +835,9 @@ interface CurrencyCellProps {
 
 function CurrencyCell(props: CurrencyCellProps) {
   const { value, field, focused, recordID } = props;
-
+  const [editing, startEditing] = useCellEditingState(focused);
   const updateRecordField = useUpdateRecordField<CurrencyFieldValue>();
-  const setCell = useSetRecoilState(cellState);
-
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-      if (key === UIKey.Escape) {
-        setCell(null);
-      }
-    },
-    [setCell],
-  );
+  const handleKeyPress = useCellKeyPressHandler();
 
   const handleChangeText = useCallback(
     (newValue: string) => {
@@ -866,16 +856,29 @@ function CurrencyCell(props: CurrencyCellProps) {
 
   if (focused === false) {
     return (
-      <View style={styles.numberCellContainer}>
-        <Text numberOfLines={1}>
+      <View style={styles.textCellContainer}>
+        <Text numberOfLines={1} align="right">
           {formatCurrency(value, getSystemLocale(), field.currency)}
         </Text>
       </View>
     );
   }
 
+  if (editing === false) {
+    return (
+      <Pressable onPress={startEditing}>
+        <View style={styles.textCellContainer}>
+          <Text numberOfLines={1} align="right">
+            {formatCurrency(value, getSystemLocale(), field.currency)}
+          </Text>
+        </View>
+      </Pressable>
+    );
+  }
+
   return (
     <TextInput
+      autoFocus
       style={styles.numberCellInput}
       value={String(value)}
       onKeyPress={handleKeyPress}
@@ -924,18 +927,9 @@ interface EmailCellProps {
 function EmailCell(props: EmailCellProps) {
   const { field, value, recordID, focused } = props;
 
+  const [editing, startEditing] = useCellEditingState(focused);
+  const handleKeyPress = useCellKeyPressHandler();
   const updateRecordField = useUpdateRecordField();
-  const setCell = useSetRecoilState(cellState);
-
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-      if (key === UIKey.Escape) {
-        setCell(null);
-      }
-    },
-    [setCell],
-  );
 
   const handleChangeText = useCallback(
     (newValue: EmailFieldValue) => {
@@ -954,19 +948,36 @@ function EmailCell(props: EmailCellProps) {
     );
   }
 
+  if (editing === false) {
+    return (
+      <View>
+        <Pressable onPress={startEditing}>
+          <View style={styles.textCellContainer}>
+            <Text decoration="underline" numberOfLines={1}>
+              {value}
+            </Text>
+          </View>
+        </Pressable>
+        <Spacer size={8} />
+        <Row>
+          <Pressable>
+            <Text decoration="underline" size="sm" color="primary">
+              Send email
+            </Text>
+          </Pressable>
+        </Row>
+      </View>
+    );
+  }
+
   return (
-    <View>
-      <TextInput
-        style={styles.textCellInput}
-        value={value}
-        onKeyPress={handleKeyPress}
-        onChangeText={handleChangeText}
-      />
-      <Spacer size={8} />
-      <Text decoration="underline" size="sm" color="primary">
-        Send email
-      </Text>
-    </View>
+    <TextInput
+      autoFocus
+      style={styles.textCellInput}
+      value={value}
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
+    />
   );
 }
 interface MultiCollaboratorCellProps {
@@ -1097,17 +1108,7 @@ function NumberCell(props: NumberCellProps) {
   const { value, field, focused, recordID } = props;
 
   const updateRecordField = useUpdateRecordField<CurrencyFieldValue>();
-  const setCell = useSetRecoilState(cellState);
-
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-      if (key === UIKey.Escape) {
-        setCell(null);
-      }
-    },
-    [setCell],
-  );
+  const handleKeyPress = useCellKeyPressHandler();
 
   const handleChangeText = useCallback(
     (newValue: string) => {
@@ -1128,8 +1129,8 @@ function NumberCell(props: NumberCellProps) {
     switch (field.style) {
       case 'decimal':
         return (
-          <View style={styles.numberCellContainer}>
-            <Text numberOfLines={1}>
+          <View style={styles.textCellContainer}>
+            <Text numberOfLines={1} align="right">
               {Intl.NumberFormat(getSystemLocale(), {
                 style: 'decimal',
                 minimumFractionDigits: field.minimumFractionDigits,
@@ -1140,16 +1141,18 @@ function NumberCell(props: NumberCellProps) {
         );
       case 'unit':
         return (
-          <View style={styles.numberCellContainer}>
-            <Text numberOfLines={1}>
+          <View style={styles.textCellContainer}>
+            <Text numberOfLines={1} align="right">
               {formatUnit(value, getSystemLocale(), field.unit)}
             </Text>
           </View>
         );
       default:
         return (
-          <View style={styles.numberCellContainer}>
-            <Text numberOfLines={1}>{value}</Text>
+          <View style={styles.textCellContainer}>
+            <Text numberOfLines={1} align="right">
+              {value}
+            </Text>
           </View>
         );
     }
@@ -1176,17 +1179,7 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
   const { field, value, focused, recordID } = props;
 
   const updateRecordField = useUpdateRecordField<PhoneNumberFieldValue>();
-  const setCell = useSetRecoilState(cellState);
-
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-      if (key === UIKey.Escape) {
-        setCell(null);
-      }
-    },
-    [setCell],
-  );
+  const handleKeyPress = useCellKeyPressHandler();
 
   const handleChangeText = useCallback(
     (newValue: PhoneNumberFieldValue) => {
@@ -1284,21 +1277,12 @@ interface SingleLineTextCellProps {
 function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { field, value, focused, recordID } = props;
 
+  const [editing, startEditing] = useCellEditingState(focused);
+  const handleKeyPress = useCellKeyPressHandler();
   const updateRecordField = useUpdateRecordField();
-  const setCell = useSetRecoilState(cellState);
-
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-      if (key === UIKey.Escape) {
-        setCell(null);
-      }
-    },
-    [setCell],
-  );
 
   const handleChangeText = useCallback(
-    (newValue: SingleLineTextFieldValue) => {
+    (newValue: string) => {
       updateRecordField(recordID, field.id, newValue);
     },
     [updateRecordField, recordID, field],
@@ -1312,8 +1296,19 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
     );
   }
 
+  if (editing === false) {
+    return (
+      <Pressable onPress={startEditing}>
+        <View style={styles.textCellContainer}>
+          <Text numberOfLines={1}>{value}</Text>
+        </View>
+      </Pressable>
+    );
+  }
+
   return (
     <TextInput
+      autoFocus
       style={styles.textCellInput}
       value={value}
       onKeyPress={handleKeyPress}
@@ -1355,21 +1350,11 @@ interface URLCellProps {
 function URLCell(props: URLCellProps) {
   const { field, value, recordID, focused } = props;
 
-  const updateRecordField = useUpdateRecordField();
-  const setCell = useSetRecoilState(cellState);
-
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-      if (key === UIKey.Escape) {
-        setCell(null);
-      }
-    },
-    [setCell],
-  );
+  const updateRecordField = useUpdateRecordField<URLFieldValue>();
+  const handleKeyPress = useCellKeyPressHandler();
 
   const handleChangeText = useCallback(
-    (newValue: URLFieldValue) => {
+    (newValue: string) => {
       updateRecordField(recordID, field.id, newValue);
     },
     [updateRecordField, recordID, field],
@@ -1399,6 +1384,41 @@ function URLCell(props: URLCellProps) {
       </Text>
     </View>
   );
+}
+
+function useCellKeyPressHandler(): (
+  event: NativeSyntheticEvent<TextInputKeyPressEventData>,
+) => void {
+  const setCell = useSetRecoilState(cellState);
+
+  return useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+
+      if (key === UIKey.Escape) {
+        setCell(null);
+      }
+    },
+    [setCell],
+  );
+}
+
+function useCellEditingState(
+  focused: boolean,
+): [editing: boolean, startEditing: () => void] {
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    if (focused === false) {
+      setEditing(false);
+    }
+  }, [focused]);
+
+  const startEditing = useCallback(() => {
+    setEditing(true);
+  }, []);
+
+  return [editing, startEditing];
 }
 
 const styles = DynamicStyleSheet.create((theme) => ({
@@ -1478,13 +1498,6 @@ const styles = DynamicStyleSheet.create((theme) => ({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-  },
-  numberCellContainer: {
-    height: 32,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
   },
   headerCell: {
     height: '100%',
