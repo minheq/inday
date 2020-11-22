@@ -18,9 +18,11 @@ import {
   TextInputKeyPressEventData,
 } from 'react-native';
 import {
+  FlatButton,
   Container,
   Icon,
   ListPickerOption,
+  Popover,
   Row,
   Spacer,
   Text,
@@ -120,7 +122,7 @@ import { StatefulLeafRowCell, LeafRowCellState } from './grid.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import { isNullish, isNumeric } from '../../lib/js_utils';
+import { isEmpty, isNullish, isNumeric } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { palette } from '../components/palette';
 import { formatDate } from '../../lib/datetime/format';
@@ -525,6 +527,22 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
     }
   }, [field, value]);
 
+  // Helps a bit more with squeezed content
+  let extraWidth = 0;
+
+  if (state === 'editing') {
+    switch (field.type) {
+      case FieldType.MultiCollaborator:
+      case FieldType.SingleCollaborator:
+      case FieldType.MultiRecordLink:
+      case FieldType.SingleRecordLink:
+        extraWidth = 100;
+        break;
+      default:
+        break;
+    }
+  }
+
   return (
     <Pressable
       accessible={false}
@@ -535,7 +553,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
         state !== 'default' && styles.focusedLeafRowCell,
         state !== 'default' && {
           minHeight: height + FOCUS_BORDER_WIDTH * 2,
-          width: width + FOCUS_BORDER_WIDTH * 2,
+          width: width + extraWidth + FOCUS_BORDER_WIDTH * 2,
           top: -FOCUS_BORDER_WIDTH,
           left: -FOCUS_BORDER_WIDTH,
         },
@@ -954,7 +972,9 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
     return <MultiCollaboratorCellEditing value={value} />;
   }
 
-  const child = (
+  const child = isEmpty(value) ? (
+    <View style={styles.badgePlaceholder} />
+  ) : (
     <View>
       {value.map((collaboratorID) => {
         const collaborator = collaboratorsByID[collaboratorID];
@@ -988,16 +1008,22 @@ function MultiCollaboratorCellEditing(
   props: MultiCollaboratorCellEditingProps,
 ) {
   const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
+  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
   const collaborators = useGetCollaborators();
   const collaboratorsByID = useGetCollaboratorsByID();
   const updateRecordFieldValue = useUpdateRecordFieldValue<MultiCollaboratorFieldValue>();
+
   const handleChange = useCallback(
     (nextValue: CollaboratorID[]) => {
       updateRecordFieldValue(recordID, fieldID, nextValue);
     },
     [updateRecordFieldValue, recordID, fieldID],
   );
+
+  const handleClear = useCallback(() => {
+    updateRecordFieldValue(recordID, fieldID, []);
+    onStopEditing();
+  }, [updateRecordFieldValue, recordID, fieldID, onStopEditing]);
 
   const options: ListPickerOption<CollaboratorID>[] = useMemo(() => {
     return collaborators.map((collaborator) => ({
@@ -1021,12 +1047,19 @@ function MultiCollaboratorCellEditing(
   );
 
   return (
-    <MultiListPicker
-      value={value}
-      options={options}
-      renderLabel={renderCollaborator}
-      onChange={handleChange}
-    />
+    <View style={styles.selectKindEditingContainer}>
+      <MultiListPicker
+        value={value}
+        options={options}
+        renderLabel={renderCollaborator}
+        onChange={handleChange}
+        onRequestClose={onStopEditing}
+      />
+      <View style={styles.actionRow}>
+        <FlatButton onPress={handleClear} title="Clear all" />
+        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
+      </View>
+    </View>
   );
 }
 
@@ -1515,6 +1548,15 @@ const styles = DynamicStyleSheet.create((theme) => ({
       },
     }),
   },
+  selectKindEditingContainer: {
+    maxHeight: 480,
+  },
+  actionRow: {
+    paddingTop: 24,
+    paddingBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   focusedLeafRowCell: {
     height: 'auto',
     borderRadius: tokens.radius,
@@ -1537,6 +1579,10 @@ const styles = DynamicStyleSheet.create((theme) => ({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  badgePlaceholder: {
+    height: 32,
+    width: '100%',
   },
   primaryCell: {
     borderRightWidth: 1,

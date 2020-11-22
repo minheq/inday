@@ -1,6 +1,7 @@
 import React, { Fragment, useCallback, useState } from 'react';
 import {
   NativeSyntheticEvent,
+  ScrollView,
   TextInputKeyPressEventData,
   View,
 } from 'react-native';
@@ -63,6 +64,11 @@ export function MultiListPicker<T>(
     [value, onChange],
   );
 
+  const handleSearchTermChange = useCallback((nextSearchTerm: string) => {
+    setSearchTerm(nextSearchTerm);
+    setActiveIndex(null);
+  }, []);
+
   const handleHoverChange = useCallback(
     (_value: T, hovered: boolean) => {
       const index = options.findIndex((option) => option.value === _value);
@@ -81,6 +87,7 @@ export function MultiListPicker<T>(
       const handled = handleNavigation(key);
 
       if (handled === true) {
+        event.preventDefault();
         return;
       }
 
@@ -120,20 +127,21 @@ export function MultiListPicker<T>(
   }, []);
 
   return (
-    <Fragment>
+    <View style={styles.base}>
       <View style={styles.searchInputWrapper}>
         <TextInput
           autoFocus
           value={searchTerm}
           onKeyPress={handleKeyPress}
-          onChange={setSearchTerm}
+          onChange={handleSearchTermChange}
           clearable
           placeholder="Search"
         />
       </View>
-      {options.map((option, index) => (
-        <View key={option.label} style={styles.listItemWrapper}>
+      <ScrollView>
+        {options.map((option, index) => (
           <ListPickerItem
+            key={option.label}
             option={option}
             selected={
               value ? value.some((selVal) => selVal === option.value) : false
@@ -144,16 +152,15 @@ export function MultiListPicker<T>(
             renderLabel={renderLabel}
             onHoverChange={handleHoverChange}
           />
-        </View>
-      ))}
-    </Fragment>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = DynamicStyleSheet.create(() => ({
-  base: {},
-  listItemWrapper: {
-    paddingBottom: 4,
+  base: {
+    flex: 1,
   },
   searchInputWrapper: {
     paddingBottom: 16,

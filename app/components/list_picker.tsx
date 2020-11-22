@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import {
   NativeSyntheticEvent,
+  ScrollView,
   TextInputKeyPressEventData,
   View,
 } from 'react-native';
@@ -57,6 +58,11 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
     options,
   );
 
+  const handleSearchTermChange = useCallback((nextSearchTerm: string) => {
+    setSearchTerm(nextSearchTerm);
+    setActiveIndex(null);
+  }, []);
+
   const handleSelect = useCallback(
     (newVal: T) => {
       if (isNonNullish(onChange)) {
@@ -98,6 +104,7 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
       const handled = handleNavigation(key);
 
       if (handled === true) {
+        event.preventDefault();
         return;
       }
 
@@ -116,14 +123,15 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
           value={searchTerm}
           onKeyPress={handleKeyPress}
           onSubmitEditing={handleSubmitEditing}
-          onChange={setSearchTerm}
+          onChange={handleSearchTermChange}
           clearable
           placeholder="Search"
         />
       </View>
-      {options.map((option, index) => (
-        <View key={option.label} style={styles.listItemWrapper}>
+      <ScrollView>
+        {options.map((option, index) => (
           <ListPickerItem
+            key={option.label}
             option={option}
             onSelect={handleSelect}
             onHoverChange={handleHoverChange}
@@ -131,8 +139,8 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
             active={activeIndex === index}
             renderLabel={renderLabel}
           />
-        </View>
-      ))}
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -173,6 +181,7 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
 
   return (
     <Button
+      containerStyle={styles.listItemContainer}
       style={[styles.listItem, active && styles.active]}
       onPress={handlePress}
     >
@@ -246,15 +255,17 @@ export function useOptionsSearch<T>(
 }
 
 const styles = DynamicStyleSheet.create(() => ({
-  base: {},
+  base: {
+    flex: 1,
+  },
   searchInputWrapper: {
     paddingBottom: 16,
   },
-  listItemWrapper: {
-    paddingBottom: 4,
-  },
   active: {
     backgroundColor: palette.lightBlue[50],
+  },
+  listItemContainer: {
+    marginBottom: 4,
   },
   listItem: {
     height: 40,

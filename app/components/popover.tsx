@@ -14,7 +14,7 @@ import { Measurements } from '../lib/measurements';
 export type PopoverAnchor = { y: number; x: number };
 
 interface PopoverProps {
-  visible?: boolean;
+  visible: boolean;
   onRequestClose?: () => void;
   children: React.ReactNode;
   anchor: PopoverAnchor;

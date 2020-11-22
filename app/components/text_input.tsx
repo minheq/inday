@@ -114,7 +114,11 @@ export function TextInput(props: TextInputProps): JSX.Element {
         style={[styles.input, tokens.text.size.md, !!icon && styles.hasIcon]}
       />
       {clearable && value !== undefined && value !== '' && (
-        <Button onPress={handleClear} containerStyle={styles.clearButton}>
+        <Button
+          onPress={handleClear}
+          style={styles.clearButton}
+          containerStyle={styles.clearButtonContainer}
+        >
           <Icon name="X" />
         </Button>
       )}
@@ -135,12 +139,15 @@ const styles = DynamicStyleSheet.create({
   hasIcon: {
     paddingLeft: 0,
   },
-  clearButton: {
+  clearButtonContainer: {
     width: 24,
     height: 24,
     position: 'absolute',
     right: 8,
     top: 8,
+    borderRadius: tokens.radius,
+  },
+  clearButton: {
     borderRadius: tokens.radius,
   },
   input: {
