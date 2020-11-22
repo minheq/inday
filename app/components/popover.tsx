@@ -1,8 +1,15 @@
 import React, { useRef, useCallback, useEffect } from 'react';
-import { View, StyleSheet, Animated, Pressable } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  Pressable,
+  Dimensions,
+} from 'react-native';
 import { tokens } from './tokens';
 import { Modal } from './modal';
 import { isNonNullish } from '../../lib/js_utils';
+import { Measurements } from '../lib/measurements';
 
 export const initialPopoverAnchor: PopoverAnchor = { y: 0, x: 0 };
 export type PopoverAnchor = { y: number; x: number };
@@ -60,6 +67,60 @@ export function Popover(props: PopoverProps): JSX.Element {
       </View>
     </Modal>
   );
+}
+
+export function getPopoverAnchorAndHeight(
+  openerMeasurements: Measurements,
+  contentHeight: number,
+  pickerOffset = 4,
+  screenOffset = 16,
+): [PopoverAnchor, number] {
+  const screenSize = Dimensions.get('window');
+
+  const bottomY =
+    openerMeasurements.pageY + openerMeasurements.height + pickerOffset;
+  const topY = openerMeasurements.pageY - pickerOffset - contentHeight;
+
+  const overflowsBottom = bottomY + contentHeight > screenSize.height;
+
+  let anchor: PopoverAnchor = initialPopoverAnchor;
+  let popoverHeight = contentHeight;
+
+  if (overflowsBottom) {
+    const heightIfBottomY = screenSize.height - bottomY;
+    const heightIfTopY = openerMeasurements.pageY;
+
+    if (heightIfTopY < heightIfBottomY) {
+      anchor = {
+        x: openerMeasurements.pageX,
+        y: bottomY,
+      };
+
+      if (screenSize.height - bottomY < contentHeight) {
+        popoverHeight = screenSize.height - bottomY - screenOffset;
+      }
+    } else {
+      if (topY < 0) {
+        popoverHeight = openerMeasurements.pageY - screenOffset;
+        anchor = {
+          x: openerMeasurements.pageX,
+          y: screenOffset,
+        };
+      } else {
+        anchor = {
+          x: openerMeasurements.pageX,
+          y: topY,
+        };
+      }
+    }
+  } else {
+    anchor = {
+      x: openerMeasurements.pageX,
+      y: bottomY,
+    };
+  }
+
+  return [anchor, popoverHeight];
 }
 
 const styles = StyleSheet.create({

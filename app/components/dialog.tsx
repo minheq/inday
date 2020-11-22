@@ -2,14 +2,12 @@ import React from 'react';
 import {
   Animated,
   useWindowDimensions,
-  View,
   ViewStyle,
   StyleProp,
+  Pressable,
 } from 'react-native';
 import { Modal, ModalProps } from './modal';
-import { usePressability } from '../lib/pressability/use_pressability';
 import { tokens } from './tokens';
-import { PressabilityConfig } from '../lib/pressability/pressability';
 import { DynamicStyleSheet } from './stylesheet';
 import { isNonNullish } from '../../lib/js_utils';
 
@@ -135,15 +133,6 @@ export function Dialog(props: DialogProps): JSX.Element {
     }
   }, [onRequestClose]);
 
-  const config: PressabilityConfig = React.useMemo(
-    () => ({
-      onPress: handlePressBackground,
-    }),
-    [handlePressBackground],
-  );
-
-  const eventHandlers = usePressability(config);
-
   return (
     <Modal
       visible={visible}
@@ -164,7 +153,11 @@ export function Dialog(props: DialogProps): JSX.Element {
           },
         ]}
       >
-        <View style={styles.background} {...eventHandlers} />
+        <Pressable
+          accessible={false}
+          style={styles.background}
+          onPress={handlePressBackground}
+        />
         <Animated.View
           style={[
             styles.dialog,

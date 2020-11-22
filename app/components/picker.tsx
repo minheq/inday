@@ -5,7 +5,6 @@ import {
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
   Animated,
-  Dimensions,
   ScrollView,
   Pressable,
 } from 'react-native';
@@ -18,12 +17,12 @@ import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { Option } from './option';
 import { Checkbox } from './checkbox';
-import { Popover, initialPopoverAnchor, PopoverAnchor } from './popover';
 import {
-  measure,
-  initialMeasurements,
-  Measurements,
-} from '../lib/measurements';
+  Popover,
+  initialPopoverAnchor,
+  getPopoverAnchorAndHeight,
+} from './popover';
+import { Measurements } from '../lib/measurements';
 import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
 import { NavigationKey, UIKey } from '../lib/keyboard';
@@ -40,8 +39,6 @@ export interface PickerProps<T> {
 
 const OPTION_HEIGHT = 40;
 const SEARCH_HEIGHT = 56;
-const PICKER_OFFSET = 4;
-const SCREEN_OFFSET = 16;
 
 export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const {
@@ -59,7 +56,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const [picker, setPicker] = useState({
     anchor: initialPopoverAnchor,
     visible: false,
-    button: initialMeasurements,
+    buttonWidth: 0,
   });
   const theme = useTheme();
 
@@ -71,30 +68,34 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         )
       : options;
 
-  const popoverContentHeight =
+  const contentHeight =
     filteredOptions.length * OPTION_HEIGHT + (searchable ? SEARCH_HEIGHT : 0);
 
-  const [height, setHeight] = useState(popoverContentHeight);
+  const [height, setHeight] = useState(contentHeight);
 
   const handleClosePicker = useCallback(() => {
     setPicker((prevPicker) => ({ ...prevPicker, visible: false }));
     setSearch('');
   }, []);
 
-  const handleOpenPicker = useCallback(async () => {
-    const button = await measure(buttonRef);
-    const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
-      button,
-      popoverContentHeight,
-    );
+  const handleOpenPicker = useCallback(() => {
+    if (buttonRef.current !== null) {
+      buttonRef.current.measure((...measurementsArgs) => {
+        const buttonMeasurements = Measurements.fromArray(measurementsArgs);
+        const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
+          buttonMeasurements,
+          contentHeight,
+        );
 
-    setHeight(popoverHeight);
-    setPicker({
-      visible: true,
-      button,
-      anchor,
-    });
-  }, [buttonRef, popoverContentHeight]);
+        setHeight(popoverHeight);
+        setPicker({
+          visible: true,
+          buttonWidth: buttonMeasurements.width,
+          anchor,
+        });
+      });
+    }
+  }, [buttonRef, contentHeight]);
 
   const handleSelectOption = useCallback(
     (option: Option<T>) => {
@@ -168,7 +169,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         onRequestClose={handleClosePicker}
       >
         <Container
-          width={picker.button.width}
+          width={picker.buttonWidth}
           height={height}
           color="content"
           borderWidth={1}
@@ -239,57 +240,6 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
       </Popover>
     </Fragment>
   );
-}
-
-function getPopoverAnchorAndHeight(
-  opener: Measurements,
-  popoverContentHeight: number,
-): [PopoverAnchor, number] {
-  const screenSize = Dimensions.get('window');
-
-  const bottomY = opener.pageY + opener.height + PICKER_OFFSET;
-  const topY = opener.pageY - PICKER_OFFSET - popoverContentHeight;
-
-  const overflowsBottom = bottomY + popoverContentHeight > screenSize.height;
-
-  let anchor: PopoverAnchor = initialPopoverAnchor;
-  let popoverHeight = popoverContentHeight;
-
-  if (overflowsBottom) {
-    const heightIfBottomY = screenSize.height - bottomY;
-    const heightIfTopY = opener.pageY;
-
-    if (heightIfTopY < heightIfBottomY) {
-      anchor = {
-        x: opener.pageX,
-        y: bottomY,
-      };
-
-      if (screenSize.height - bottomY < popoverContentHeight) {
-        popoverHeight = screenSize.height - bottomY - SCREEN_OFFSET;
-      }
-    } else {
-      if (topY < 0) {
-        popoverHeight = opener.pageY - SCREEN_OFFSET;
-        anchor = {
-          x: opener.pageX,
-          y: SCREEN_OFFSET,
-        };
-      } else {
-        anchor = {
-          x: opener.pageX,
-          y: topY,
-        };
-      }
-    }
-  } else {
-    anchor = {
-      x: opener.pageX,
-      y: bottomY,
-    };
-  }
-
-  return [anchor, popoverHeight];
 }
 
 const styles = DynamicStyleSheet.create((theme) => ({
