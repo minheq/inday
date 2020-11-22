@@ -80,7 +80,7 @@ export const viewsByIDState = atom<ViewsByIDState>({
 });
 
 export type CollaboratorsByIDState = {
-  [collaboratorID: string]: Collaborator | undefined;
+  [collaboratorID: string]: Collaborator;
 };
 export const collaboratorsByIDState = atom<CollaboratorsByIDState>({
   key: RecoilKey.CollaboratorsByID,

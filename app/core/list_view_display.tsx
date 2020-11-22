@@ -17,7 +17,15 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
 } from 'react-native';
-import { Container, Icon, Row, Spacer, Text, tokens } from '../components';
+import {
+  Container,
+  Icon,
+  ListPickerOption,
+  Row,
+  Spacer,
+  Text,
+  tokens,
+} from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
@@ -31,6 +39,7 @@ import {
   useGetViewFilters,
   useGetViewSorts,
   useGetViewGroups,
+  useGetCollaborators,
 } from '../data/store';
 import {
   FieldType,
@@ -120,6 +129,8 @@ import { CollaboratorBadge } from './collaborator_badge';
 import { RecordLinkBadge } from './record_link_badge';
 import { formatUnit } from '../../lib/i18n/unit';
 import { usePrevious } from '../hooks/use_previous';
+import { MultiListPicker } from '../components/multi_list_picker';
+import { CollaboratorID } from '../data/collaborators';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -937,8 +948,14 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   const { value } = props;
   const collaboratorsByID = useGetCollaboratorsByID();
 
-  return (
-    <Fragment>
+  const { state, onStartEditing } = useLeafRowCellContext();
+
+  if (state === 'editing') {
+    return <MultiCollaboratorCellEditing value={value} />;
+  }
+
+  const child = (
+    <View>
       {value.map((collaboratorID) => {
         const collaborator = collaboratorsByID[collaboratorID];
 
@@ -953,9 +970,65 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
           />
         );
       })}
-    </Fragment>
+    </View>
+  );
+
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+  }
+
+  return <Fragment>{child}</Fragment>;
+}
+
+interface MultiCollaboratorCellEditingProps {
+  value: MultiCollaboratorFieldValue;
+}
+
+function MultiCollaboratorCellEditing(
+  props: MultiCollaboratorCellEditingProps,
+) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const collaborators = useGetCollaborators();
+  const collaboratorsByID = useGetCollaboratorsByID();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<MultiCollaboratorFieldValue>();
+  const handleChange = useCallback(
+    (nextValue: CollaboratorID[]) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
+  const options: ListPickerOption<CollaboratorID>[] = useMemo(() => {
+    return collaborators.map((collaborator) => ({
+      value: collaborator.id,
+      label: collaborator.name,
+    }));
+  }, [collaborators]);
+
+  const renderCollaborator = useCallback(
+    (collaboratorID: CollaboratorID) => {
+      const collaborator = collaboratorsByID[collaboratorID];
+      return (
+        <CollaboratorBadge
+          collaborator={collaborator}
+          key={collaborator.name}
+        />
+      );
+    },
+    [collaboratorsByID],
+  );
+
+  return (
+    <MultiListPicker
+      value={value}
+      options={options}
+      renderItem={renderCollaborator}
+      onChange={handleChange}
+    />
   );
 }
+
 interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
   field: MultiRecordLinkField;
@@ -998,20 +1071,55 @@ interface MultiLineTextCellProps {
 
 function MultiLineTextCell(props: MultiLineTextCellProps) {
   const { value } = props;
-  const { state } = useLeafRowCellContext();
+  const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'default') {
+  if (state === 'editing') {
+    return <MultiLineTextCellEditing value={value} />;
+  }
+
+  if (state === 'focused') {
     return (
-      <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>{value}</Text>
-      </View>
+      <Pressable
+        onPress={onStartEditing}
+        style={styles.focusedMultiLineTextCellContainer}
+      >
+        <Text>{value}</Text>
+      </Pressable>
     );
   }
 
   return (
-    <View style={styles.focusedMultiLineTextCellContainer}>
-      <Text>{value}</Text>
+    <View style={styles.textCellContainer}>
+      <Text numberOfLines={1}>{value}</Text>
     </View>
+  );
+}
+
+interface MultiLineTextCellEditingProps {
+  value: MultiLineTextFieldValue;
+}
+
+function MultiLineTextCellEditing(props: MultiLineTextCellEditingProps) {
+  const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue();
+  const handleKeyPress = useCellKeyPressHandler({ enter: false });
+  const handleChangeText = useCallback(
+    (nextValue: string) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
+  return (
+    <TextInput
+      autoFocus
+      style={styles.multilineTextCellInput}
+      value={value}
+      multiline
+      onKeyPress={handleKeyPress}
+      onChangeText={handleChangeText}
+    />
   );
 }
 
@@ -1334,23 +1442,24 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
   );
 }
 
-function useCellKeyPressHandler(): (
-  event: NativeSyntheticEvent<TextInputKeyPressEventData>,
-) => void {
+function useCellKeyPressHandler(
+  config: { enter?: boolean; escape?: boolean } = {},
+): (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void {
+  const { enter = true, escape = true } = config;
   const { onStopEditing, onFocusNextRecord } = useLeafRowCellContext();
 
   return useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
       const key = event.nativeEvent.key;
 
-      if (key === UIKey.Escape) {
+      if (escape === true && key === UIKey.Escape) {
         onStopEditing();
       }
-      if (key === WhiteSpaceKey.Enter) {
+      if (enter === true && key === WhiteSpaceKey.Enter) {
         onFocusNextRecord();
       }
     },
-    [onStopEditing, onFocusNextRecord],
+    [onStopEditing, onFocusNextRecord, escape, enter],
   );
 }
 
@@ -1375,6 +1484,17 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   textCellInput: {
     height: 32,
+    borderRadius: tokens.radius,
+    ...tokens.text.size.md,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
+  },
+  multilineTextCellInput: {
+    paddingTop: FOCUS_BORDER_WIDTH + 1,
+    minHeight: 128,
     borderRadius: tokens.radius,
     ...tokens.text.size.md,
     ...Platform.select({

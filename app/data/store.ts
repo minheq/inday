@@ -69,10 +69,12 @@ import {
   groupQuery,
   collectionRecordsByIDQuery,
   recordFieldValueQuery,
+  collaboratorsQuery,
 } from './queries';
 import { SortConfig, Sort, SortID, deleteSort } from './sorts';
 import { GroupConfig, Group, GroupID, deleteGroup } from './groups';
 import { Workspace } from './workspace';
+import { Collaborator } from './collaborators';
 
 export function useGetWorkspace(): Workspace {
   const workspace = useRecoilValue(workspaceState);
@@ -234,6 +236,10 @@ export function useUpdateSpaceName() {
 
 export function useGetCollaboratorsByID(): CollaboratorsByIDState {
   return useRecoilValue(collaboratorsByIDState);
+}
+
+export function useGetCollaborators(): Collaborator[] {
+  return useRecoilValue(collaboratorsQuery);
 }
 
 export function useGetCollectionsByID(): CollectionsByIDState {

@@ -11,7 +11,6 @@ import { Modal } from './modal';
 import { isNonNullish } from '../../lib/js_utils';
 import { Measurements } from '../lib/measurements';
 
-export const initialPopoverAnchor: PopoverAnchor = { y: 0, x: 0 };
 export type PopoverAnchor = { y: number; x: number };
 
 interface PopoverProps {
@@ -83,7 +82,7 @@ export function getPopoverAnchorAndHeight(
 
   const overflowsBottom = bottomY + contentHeight > screenSize.height;
 
-  let anchor: PopoverAnchor = initialPopoverAnchor;
+  let anchor: PopoverAnchor = { x: 0, y: 0 };
   let popoverHeight = contentHeight;
 
   if (overflowsBottom) {

@@ -15,7 +15,6 @@ export * from './text_input';
 export * from './icon';
 export * from './segmented_control';
 export * from './modal';
-export * from './option';
 export * from './list_item';
 export * from './button';
 export * from './close_button';

@@ -405,6 +405,15 @@ export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
   },
 });
 
+export const collaboratorsQuery = selector<Collaborator[]>({
+  key: 'Collaborators',
+  get: ({ get }) => {
+    const collaboratorsByID = get(collaboratorsByIDState);
+
+    return Object.values(collaboratorsByID) as Collaborator[];
+  },
+});
+
 export const recordFieldValueQuery = selectorFamily<
   FieldValue,
   { recordID: RecordID; fieldID: FieldID }

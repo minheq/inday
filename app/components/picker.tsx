@@ -15,13 +15,8 @@ import { Row } from './row';
 import { Text } from './text';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
-import { Option } from './option';
 import { Checkbox } from './checkbox';
-import {
-  Popover,
-  initialPopoverAnchor,
-  getPopoverAnchorAndHeight,
-} from './popover';
+import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { Measurements } from '../lib/measurements';
 import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
@@ -29,12 +24,17 @@ import { NavigationKey, UIKey } from '../lib/keyboard';
 
 export interface PickerProps<T> {
   value?: T;
-  options: Option<T>[];
+  options: PickerOption<T>[];
   onChange?: (value: T) => void;
-  renderOption?: (option: Option<T>, active: boolean) => React.ReactNode;
+  renderOption?: (option: PickerOption<T>, active: boolean) => React.ReactNode;
   disabled?: boolean;
   placeholder?: string;
   searchable?: boolean;
+}
+
+export interface PickerOption<T> {
+  value: T;
+  label: string;
 }
 
 const OPTION_HEIGHT = 40;
@@ -54,7 +54,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [picker, setPicker] = useState({
-    anchor: initialPopoverAnchor,
+    anchor: { x: 0, y: 0 },
     visible: false,
     buttonWidth: 0,
   });
@@ -98,7 +98,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
   }, [buttonRef, contentHeight]);
 
   const handleSelectOption = useCallback(
-    (option: Option<T>) => {
+    (option: PickerOption<T>) => {
       handleClosePicker();
 
       if (isNonNullish(onChange)) {

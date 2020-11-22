@@ -1,22 +1,18 @@
 import React, { Fragment } from 'react';
-import { ListItem } from './list_item';
-import { Checkbox } from './checkbox';
-import { Spacer } from './spacer';
 import { isNonNullish } from '../../lib/js_utils';
+import { ListPickerItem, ListPickerOption } from './list_picker';
 
-interface Option<T> {
-  value: T;
-  label: string;
-}
-
-interface ListPickerProps<T> {
+interface MultiListPickerProps<T> {
   value?: T[] | null;
-  options: Option<T>[];
+  options: ListPickerOption<T>[];
   onChange?: (value: T[]) => void;
+  renderItem?: (value: T) => React.ReactNode;
 }
 
-export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
-  const { value, options, onChange } = props;
+export function MultiListPicker<T>(
+  props: MultiListPickerProps<T>,
+): JSX.Element {
+  const { value, options, onChange, renderItem } = props;
 
   const handleSelect = React.useCallback(
     (newVal: T, selected: boolean) => {
@@ -39,27 +35,15 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
 
   return (
     <Fragment>
-      {options.map((o) => {
-        const selected = value
-          ? value.some((selVal) => selVal === o.value)
-          : false;
-
-        return (
-          <Fragment key={o.label}>
-            <ListItem
-              description={o.label}
-              onPress={() => handleSelect(o.value, selected)}
-              actions={
-                <Checkbox
-                  value={selected}
-                  onChange={() => handleSelect(o.value, selected)}
-                />
-              }
-            />
-            <Spacer size={4} />
-          </Fragment>
-        );
-      })}
+      {options.map((o) => (
+        <ListPickerItem
+          key={o.label}
+          option={o}
+          selected={value ? value.some((selVal) => selVal === o.value) : false}
+          onSelect={handleSelect}
+          renderItem={renderItem}
+        />
+      ))}
     </Fragment>
   );
 }

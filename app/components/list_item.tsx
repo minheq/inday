@@ -1,9 +1,5 @@
 import React from 'react';
-import { StyleSheet, Pressable } from 'react-native';
-import { Container } from './container';
-import { Row } from './row';
-import { Spacer } from './spacer';
-import { Column } from './column';
+import { StyleSheet, Pressable, View } from 'react-native';
 import { Text } from './text';
 import { tokens } from './tokens';
 
@@ -20,30 +16,14 @@ export function ListItem(props: ListItemProps): JSX.Element {
 
   return (
     <Pressable style={styles.base} onPress={onPress}>
-      <Container paddingVertical={8} paddingHorizontal={16}>
-        <Row expanded justifyContent="space-between">
-          <Container flex={1}>
-            <Row expanded>
-              {leading && (
-                <>
-                  {leading}
-                  <Spacer size={8} />
-                </>
-              )}
-              <Column justifyContent="center">
-                {title && <Text weight="bold">{title}</Text>}
-                {description && <Text>{description}</Text>}
-              </Column>
-            </Row>
-          </Container>
-          {actions && (
-            <Row alignItems="center">
-              <Spacer size={8} />
-              {actions}
-            </Row>
-          )}
-        </Row>
-      </Container>
+      <View style={styles.content}>
+        {leading !== null && <View style={styles.leading}>{leading}</View>}
+        <View style={styles.text}>
+          {title && <Text weight="bold">{title}</Text>}
+          {description && <Text>{description}</Text>}
+        </View>
+      </View>
+      {actions && <View style={styles.actions}>{actions}</View>}
     </Pressable>
   );
 }
@@ -51,5 +31,25 @@ export function ListItem(props: ListItemProps): JSX.Element {
 const styles = StyleSheet.create({
   base: {
     borderRadius: tokens.radius,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  leading: {
+    paddingRight: 8,
+  },
+  content: {
+    flex: 1,
+    height: '100%',
+    flexDirection: 'row',
+  },
+  text: {
+    justifyContent: 'center',
+  },
+  actions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingTop: 8,
   },
 });
