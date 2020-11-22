@@ -1,10 +1,13 @@
 import React, { useCallback } from 'react';
-import { Checkbox } from './checkbox';
-import { Spacer } from './spacer';
-import { isNonNullish } from '../../lib/js_utils';
+import { View } from 'react-native';
+
 import { DynamicStyleSheet } from './stylesheet';
-import { Pressable, View } from 'react-native';
 import { Text } from './text';
+import { Button } from './button';
+import { tokens } from './tokens';
+
+import { isNonNullish } from '../../lib/js_utils';
+import { Icon } from './icon';
 
 export interface ListPickerOption<T> {
   value: T;
@@ -15,11 +18,11 @@ interface ListPickerProps<T> {
   value?: T | null;
   options: ListPickerOption<T>[];
   onChange?: (value: T) => void;
-  renderItem?: (value: T) => React.ReactNode;
+  renderLabel?: (value: T, selected: boolean) => React.ReactNode;
 }
 
 export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
-  const { value, options, onChange, renderItem } = props;
+  const { value, options, onChange, renderLabel } = props;
 
   const handleSelect = React.useCallback(
     (newVal: T) => {
@@ -33,52 +36,56 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
   return (
     <View style={styles.base}>
       {options.map((o) => (
-        <ListPickerItem
-          key={o.label}
-          option={o}
-          onSelect={handleSelect}
-          selected={o.value === value}
-          renderItem={renderItem}
-        />
+        <View style={styles.listItemWrapper}>
+          <ListPickerItem
+            key={o.label}
+            option={o}
+            onSelect={handleSelect}
+            selected={o.value === value}
+            renderLabel={renderLabel}
+          />
+        </View>
       ))}
     </View>
   );
 }
 
-interface ListPickerItemProps<T> {
+export interface ListPickerItemProps<T> {
   selected: boolean;
   option: ListPickerOption<T>;
-  onSelect: (value: T, selected: boolean) => void;
-  renderItem?: (value: T) => React.ReactNode;
+  onSelect: (value: T) => void;
+  renderLabel?: (value: T, selected: boolean) => React.ReactNode;
 }
 
 export function ListPickerItem<T>(props: ListPickerItemProps<T>) {
-  const { selected, option, onSelect, renderItem } = props;
+  const { selected, option, onSelect, renderLabel } = props;
 
   const handlePress = useCallback(() => {
-    onSelect(option.value, selected);
-  }, [onSelect, selected]);
+    onSelect(option.value);
+  }, [onSelect]);
 
   return (
-    <Pressable style={styles.listItem} onPress={handlePress}>
-      {renderItem ? (
-        renderItem(option.value)
+    <Button style={styles.listItem} onPress={handlePress}>
+      {renderLabel ? (
+        renderLabel(option.value, selected)
       ) : (
-        <View style={styles.defaultListItem}>
-          <Text>{option.label}</Text>
-          <Checkbox value={selected} onChange={handlePress} />
-        </View>
+        <Text>{option.label}</Text>
       )}
-      <Spacer size={4} />
-    </Pressable>
+      {selected && <Icon name="CheckThick" color="primary" />}
+    </Button>
   );
 }
 
 const styles = DynamicStyleSheet.create(() => ({
   base: {},
-  listItem: {},
-  defaultListItem: {
-    paddingHorizontal: 16,
+  listItemWrapper: {
+    paddingBottom: 4,
+  },
+  listItem: {
+    height: 40,
+    borderRadius: tokens.radius,
+    paddingHorizontal: 8,
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

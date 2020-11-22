@@ -31,14 +31,17 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
   }, [checked, value]);
 
   return (
-    <Pressable onPress={handlePress} style={styles.root}>
+    <Pressable
+      onPress={handlePress}
+      style={[styles.root, value && styles.checkedRoot]}
+    >
       <Animated.View
         style={[
           styles.wrapper,
           {
             backgroundColor: checked.interpolate({
               inputRange: [0, 1],
-              outputRange: [theme.background.tint, palette.blue[500]],
+              outputRange: [theme.background.tint, palette.lightBlue[700]],
             }),
           },
         ]}
@@ -60,6 +63,9 @@ const styles = DynamicStyleSheet.create((theme) => ({
     height: 24,
     borderWidth: 1,
     borderColor: theme.border.default,
+  },
+  checkedRoot: {
+    borderColor: palette.lightBlue[700],
   },
   wrapper: {
     borderRadius: 999,

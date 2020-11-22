@@ -1,3 +1,4 @@
+import { ThemeProvider } from '../app/components/theme';
 import React from 'react';
 
 export const decorators = [
@@ -9,7 +10,9 @@ export const decorators = [
         flexDirection: 'column',
       }}
     >
-      <Story />
+      <ThemeProvider>
+        <Story />
+      </ThemeProvider>
     </div>
   ),
 ];

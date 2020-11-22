@@ -26,6 +26,7 @@ export interface Theme {
   border: {
     transparent: string;
     default: string;
+    dark: string;
     focus: string;
   };
 }
@@ -55,7 +56,7 @@ export const lightTheme: Theme = {
   background: {
     default: palette.base.transparent,
     content: palette.base.white,
-    tint: palette.gray[50],
+    tint: palette.gray[100],
     primary: palette.blue[400],
   },
   shadow: {
@@ -78,6 +79,7 @@ export const lightTheme: Theme = {
   border: {
     transparent: palette.base.transparent,
     default: palette.gray[300],
+    dark: palette.gray[400],
     focus: palette.blue[600],
   },
 };
