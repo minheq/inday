@@ -1,24 +1,48 @@
-import React, { Fragment, useCallback } from 'react';
-import { View } from 'react-native';
+import React, { Fragment, useCallback, useState } from 'react';
+import {
+  NativeSyntheticEvent,
+  TextInputKeyPressEventData,
+  View,
+} from 'react-native';
 import { isNonNullish } from '../../lib/js_utils';
-import { Button } from './button';
+import { UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { Checkbox } from './checkbox';
-import { ListPickerItemProps, ListPickerOption } from './list_picker';
+import {
+  ListPickerItem,
+  ListPickerOption,
+  useListKeyboardNavigation,
+  useOptionsSearch,
+} from './list_picker';
 import { DynamicStyleSheet } from './stylesheet';
-import { Text } from './text';
-import { tokens } from './tokens';
+import { TextInput } from './text_input';
 
 interface MultiListPickerProps<T> {
   value?: T[] | null;
   options: ListPickerOption<T>[];
   onChange?: (value: T[]) => void;
+  onCreateNewOption?: (searchTerm: string) => void;
+  onRequestClose?: () => void;
   renderLabel?: (value: T, selected: boolean) => React.ReactNode;
 }
 
 export function MultiListPicker<T>(
   props: MultiListPickerProps<T>,
 ): JSX.Element {
-  const { value, options, onChange, renderLabel } = props;
+  const {
+    value,
+    options: initialOptions,
+    onChange,
+    onRequestClose,
+    renderLabel,
+  } = props;
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const options = useOptionsSearch(initialOptions, searchTerm);
+  const handleNavigation = useListKeyboardNavigation(
+    activeIndex,
+    setActiveIndex,
+    options,
+  );
 
   const handleSelect = React.useCallback(
     (newVal: T, selected: boolean) => {
@@ -39,50 +63,90 @@ export function MultiListPicker<T>(
     [value, onChange],
   );
 
+  const handleHoverChange = useCallback(
+    (_value: T, hovered: boolean) => {
+      const index = options.findIndex((option) => option.value === _value);
+
+      if (hovered && index >= 0) {
+        setActiveIndex(index);
+      }
+    },
+    [options],
+  );
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+
+      const handled = handleNavigation(key);
+
+      if (handled === true) {
+        return;
+      }
+
+      if (key === UIKey.Escape && onRequestClose !== undefined) {
+        onRequestClose();
+      }
+
+      if (key === WhiteSpaceKey.Enter) {
+        event.preventDefault();
+
+        if (activeIndex !== null) {
+          const option = options[activeIndex];
+
+          if (isNonNullish(value)) {
+            const selected = value.some((selVal) => selVal === option.value);
+            if (handleSelect !== undefined) {
+              handleSelect(option.value, selected);
+            }
+          } else {
+            handleSelect(option.value, true);
+          }
+        }
+      }
+    },
+    [
+      onRequestClose,
+      handleNavigation,
+      value,
+      activeIndex,
+      handleSelect,
+      options,
+    ],
+  );
+
+  const renderCheck = useCallback((_value: T, selected: boolean) => {
+    return <Checkbox value={selected} />;
+  }, []);
+
   return (
     <Fragment>
-      {options.map((o) => (
-        <View style={styles.listItemWrapper}>
-          <MultiListPickerItem
-            key={o.label}
-            option={o}
+      <View style={styles.searchInputWrapper}>
+        <TextInput
+          autoFocus
+          value={searchTerm}
+          onKeyPress={handleKeyPress}
+          onChange={setSearchTerm}
+          clearable
+          placeholder="Search"
+        />
+      </View>
+      {options.map((option, index) => (
+        <View key={option.label} style={styles.listItemWrapper}>
+          <ListPickerItem
+            option={option}
             selected={
-              value ? value.some((selVal) => selVal === o.value) : false
+              value ? value.some((selVal) => selVal === option.value) : false
             }
+            active={activeIndex === index}
+            renderCheck={renderCheck}
             onSelect={handleSelect}
             renderLabel={renderLabel}
+            onHoverChange={handleHoverChange}
           />
         </View>
       ))}
     </Fragment>
-  );
-}
-
-export interface MultiListPickerItemProps<T> {
-  selected: boolean;
-  option: ListPickerOption<T>;
-  onSelect: (value: T, selected: boolean) => void;
-  renderLabel?: (value: T, selected: boolean) => React.ReactNode;
-}
-
-export function MultiListPickerItem<T>(props: MultiListPickerItemProps<T>) {
-  const { selected, option, onSelect, renderLabel } = props;
-
-  const handlePress = useCallback(() => {
-    onSelect(option.value, selected);
-  }, [onSelect, selected]);
-
-  return (
-    <Button style={styles.listItem} onPress={handlePress}>
-      <View style={styles.checkboxWrapper}>
-        <Checkbox value={selected} onChange={handlePress} />
-      </View>
-      {renderLabel ? (
-        renderLabel(option.value, selected)
-      ) : (
-        <Text>{option.label}</Text>
-      )}
-    </Button>
   );
 }
 
@@ -91,14 +155,7 @@ const styles = DynamicStyleSheet.create(() => ({
   listItemWrapper: {
     paddingBottom: 4,
   },
-  checkboxWrapper: {
-    paddingRight: 8,
-  },
-  listItem: {
-    height: 40,
-    borderRadius: tokens.radius,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    flexDirection: 'row',
+  searchInputWrapper: {
+    paddingBottom: 16,
   },
 }));

@@ -1009,6 +1009,7 @@ function MultiCollaboratorCellEditing(
   const renderCollaborator = useCallback(
     (collaboratorID: CollaboratorID) => {
       const collaborator = collaboratorsByID[collaboratorID];
+
       return (
         <CollaboratorBadge
           collaborator={collaborator}
@@ -1023,7 +1024,7 @@ function MultiCollaboratorCellEditing(
     <MultiListPicker
       value={value}
       options={options}
-      renderItem={renderCollaborator}
+      renderLabel={renderCollaborator}
       onChange={handleChange}
     />
   );

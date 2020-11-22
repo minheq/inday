@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   TextInput as RNTextInput,
   View,
@@ -6,10 +6,10 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
-  Pressable,
   Platform,
 } from 'react-native';
 import { isNonNullish } from '../../lib/js_utils';
+import { Button } from './button';
 import { IconName, Icon } from './icon';
 import { DynamicStyleSheet } from './stylesheet';
 import { useTheme } from './theme';
@@ -46,7 +46,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
   const [focused, setFocused] = React.useState(false);
   const theme = useTheme();
   const borderColor = React.useRef(new Animated.Value(0)).current;
-
+  const ref = useRef<RNTextInput>(null);
   const handleBlur = React.useCallback(() => {
     setFocused(false);
   }, []);
@@ -56,6 +56,10 @@ export function TextInput(props: TextInputProps): JSX.Element {
   }, []);
 
   const handleClear = React.useCallback(() => {
+    if (ref.current !== null) {
+      ref.current.focus();
+    }
+
     if (isNonNullish(onChange)) {
       onChange('');
     }
@@ -96,6 +100,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
         </View>
       )}
       <RNTextInput
+        ref={ref}
         testID={testID}
         value={value}
         autoFocus={autoFocus}
@@ -109,9 +114,9 @@ export function TextInput(props: TextInputProps): JSX.Element {
         style={[styles.input, tokens.text.size.md, !!icon && styles.hasIcon]}
       />
       {clearable && value !== undefined && value !== '' && (
-        <Pressable onPress={handleClear} style={styles.clearButton}>
-          <Icon name="X" size="lg" />
-        </Pressable>
+        <Button onPress={handleClear} containerStyle={styles.clearButton}>
+          <Icon name="X" />
+        </Button>
       )}
     </Animated.View>
   );
@@ -135,11 +140,12 @@ const styles = DynamicStyleSheet.create({
     height: 24,
     position: 'absolute',
     right: 8,
+    top: 8,
     borderRadius: tokens.radius,
   },
   input: {
     height: 38,
-    paddingLeft: 16,
+    paddingLeft: 8,
     paddingRight: 40,
     borderRadius: tokens.radius,
     flex: 1,

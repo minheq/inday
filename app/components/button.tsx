@@ -5,17 +5,20 @@ import { palette } from './palette';
 interface ButtonProps {
   onPress?: () => void;
   disabled?: boolean;
-  children?: React.ReactNode;
+  children?:
+    | React.ReactNode
+    | ((state: { hovered: boolean; pressed: boolean }) => React.ReactNode);
   style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export function Button(props: ButtonProps): JSX.Element {
-  const { onPress, children, style, disabled = false } = props;
+  const { onPress, children, style, containerStyle, disabled = false } = props;
   const state = useRef(new Animated.Value(0)).current;
 
   return (
-    <Pressable disabled={disabled} onPress={onPress}>
-      {({ hovered, pressed }: any) => {
+    <Pressable style={containerStyle} disabled={disabled} onPress={onPress}>
+      {({ hovered, pressed }: { hovered: boolean; pressed: boolean }) => {
         Animated.spring(state, {
           toValue: pressed ? 2 : hovered ? 1 : 0,
           useNativeDriver: true,
@@ -39,7 +42,9 @@ export function Button(props: ButtonProps): JSX.Element {
               style,
             ]}
           >
-            {children}
+            {typeof children === 'function'
+              ? children({ hovered, pressed })
+              : children}
           </Animated.View>
         );
       }}

@@ -12,7 +12,7 @@
     "build:storybook": "build-storybook",
     "test": "jest",
     "analyze": "webpack --profile --json > stats.json",
-    "lint": "eslint .",
+    "lint": "eslint",
     "storybook": "start-storybook -p 6006",
     "db:create": "ts-node-dev ./scripts/create_db.ts",
     "db:migrate:up": "ts-node-dev ./scripts/migrate_up.ts",
