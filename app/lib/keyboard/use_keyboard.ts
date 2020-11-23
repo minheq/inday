@@ -87,8 +87,8 @@ export function useKeyboard(keyBindings: KeyBinding[]): void {
   );
 
   useEffect(() => {
-    window.addEventListener('keydown', handleOnKeyDown);
-    window.addEventListener('keyup', handleOnKeyUp);
+    window.addEventListener('keydown', handleOnKeyDown, { passive: true });
+    window.addEventListener('keyup', handleOnKeyUp, { passive: true });
 
     return () => {
       window.removeEventListener('keydown', handleOnKeyDown);
