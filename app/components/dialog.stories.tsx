@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 
 import { Dialog } from './dialog';
 import { Container } from './container';
-import { View } from 'react-native';
 import { FlatButton } from './flat_button';
-
-export default {
-  title: 'Dialog',
-  component: Dialog,
-};
 
 interface DialogBaseProps {
   animationType: 'fade' | 'slide' | 'none';

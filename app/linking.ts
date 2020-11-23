@@ -2,10 +2,12 @@ import { LinkingOptions } from '@react-navigation/native';
 
 export enum ScreenName {
   Space = 'Space',
+  Playground = 'Playground',
 }
 
 export type RootStackParamsMap = {
   Space: { spaceID: string; viewID: string };
+  Playground: { component: string };
 };
 
 export let linking: LinkingOptions = {
@@ -14,6 +16,9 @@ export let linking: LinkingOptions = {
     screens: {
       Space: {
         path: 'space/:spaceID/:viewID',
+      },
+      Playground: {
+        path: 'playground',
       },
     },
   },

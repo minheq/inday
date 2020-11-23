@@ -14,11 +14,6 @@ import { FlatButton, Picker } from '../components';
 import { Group, getRows, LeafRow } from './grid.common';
 import { splitLast } from '../../lib/js_utils';
 
-export default {
-  title: 'Grid',
-  component: Grid,
-};
-
 function renderLeafRowCell(props: RenderLeafRowCellProps) {
   const { row, column } = props;
 

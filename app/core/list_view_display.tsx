@@ -22,7 +22,6 @@ import {
   Container,
   Icon,
   ListPickerOption,
-  Popover,
   Row,
   Spacer,
   Text,
@@ -103,7 +102,7 @@ import {
   GridRef,
   RenderLeafRowCellProps,
   RenderHeaderCellProps,
-} from './grid';
+} from '../components/grid';
 import { Record, RecordID } from '../data/records';
 import {
   atom,
@@ -118,7 +117,10 @@ import {
   WhiteSpaceKey,
   UIKey,
 } from '../lib/keyboard';
-import { StatefulLeafRowCell, LeafRowCellState } from './grid.common';
+import {
+  StatefulLeafRowCell,
+  LeafRowCellState,
+} from '../components/grid.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';

@@ -17,6 +17,7 @@ import {
   sortsByIDState,
   eventsState,
 } from './data/atoms';
+import { Playground } from './components/playground';
 
 const RootStack = createStackNavigator<RootStackParamsMap>();
 
@@ -84,6 +85,10 @@ export function App(): JSX.Element {
                       />
                     ),
                   })}
+                />
+                <RootStack.Screen
+                  name={ScreenName.Playground}
+                  component={Playground}
                 />
               </RootStack.Navigator>
             </NavigationContainer>
