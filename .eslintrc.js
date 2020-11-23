@@ -1,5 +1,8 @@
 module.exports = {
   root: true,
+  rules: {
+    'no-shadow': 2,
+  },
   overrides: [
     {
       files: ['app/**/*.tsx', 'app/**/*.ts'],
