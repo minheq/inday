@@ -17,7 +17,6 @@ interface DialogProps extends ModalProps {
   style?: StyleProp<ViewStyle>;
 }
 
-// TODO: Add 'fade' and 'none' animationType handlers
 export function Dialog(props: DialogProps): JSX.Element {
   const {
     visible,
@@ -34,25 +33,53 @@ export function Dialog(props: DialogProps): JSX.Element {
     new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
   ).current;
   const overlayFade = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
-  const fade = React.useRef(
+  const opacity = React.useRef(
     new Animated.Value(animationType === 'fade' ? (visible ? 1 : 0) : 1),
   ).current;
+
+  React.useEffect(() => {
+    if (animationType !== 'none') {
+      return;
+    }
+
+    if (visible) {
+      setInternalVisible(visible);
+
+      opacity.setValue(1);
+      overlayFade.setValue(1);
+    } else {
+      setInternalVisible(false);
+      opacity.setValue(0);
+      overlayFade.setValue(0);
+    }
+  }, [
+    animationType,
+    overlayFade,
+    opacity,
+    visible,
+    internalVisible,
+    slide,
+    height,
+    onRequestClose,
+  ]);
 
   React.useEffect(() => {
     if (animationType !== 'fade') {
       return;
     }
+
     if (visible) {
       setInternalVisible(visible);
+
       Animated.parallel([
-        Animated.spring(fade, {
+        Animated.spring(opacity, {
           toValue: 1,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
         Animated.spring(overlayFade, {
           toValue: 1,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start();
@@ -60,12 +87,12 @@ export function Dialog(props: DialogProps): JSX.Element {
       Animated.parallel([
         Animated.spring(overlayFade, {
           toValue: 0,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
-        Animated.spring(fade, {
+        Animated.spring(opacity, {
           toValue: 0,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -75,7 +102,7 @@ export function Dialog(props: DialogProps): JSX.Element {
   }, [
     animationType,
     overlayFade,
-    fade,
+    opacity,
     visible,
     internalVisible,
     slide,
@@ -92,12 +119,12 @@ export function Dialog(props: DialogProps): JSX.Element {
       Animated.parallel([
         Animated.spring(slide, {
           toValue: OFFSET_TOP,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
         Animated.spring(overlayFade, {
           toValue: 1,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start();
@@ -105,12 +132,12 @@ export function Dialog(props: DialogProps): JSX.Element {
       Animated.parallel([
         Animated.spring(overlayFade, {
           toValue: 0,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
         Animated.spring(slide, {
           toValue: height,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -163,7 +190,7 @@ export function Dialog(props: DialogProps): JSX.Element {
             styles.dialog,
             style,
             {
-              opacity: fade,
+              opacity,
               transform: [{ translateY: slide }],
             },
           ]}
