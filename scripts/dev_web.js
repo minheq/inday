@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { serve } = require('esbuild');
-const { options } = require('./build');
+const { options } = require('./build_web');
 
 const BUILD_SERVER_PORT = 8000;
 const STATIC_SERVER_PORT = 8080;

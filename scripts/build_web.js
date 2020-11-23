@@ -27,7 +27,7 @@ const options = {
 };
 
 build(options).catch((error) => {
-  console.error(`Failed to build: ${JSON.stringify(error)}`);
+  console.error(`Failed to build: ${error.message}`);
   process.exit(1);
 });
 

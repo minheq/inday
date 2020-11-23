@@ -6,9 +6,9 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "desktop": "electron index.desktop.js",
-    "web": "node scripts/dev.js",
+    "web": "node scripts/dev_web.js",
+    "build:web": "NODE_ENV=production node scripts/build_web.js",
     "server": "ts-node-dev --respawn --transpile-only --no-notify server/main.ts",
-    "build": "NODE_ENV=production node scripts/build.js",
     "test": "jest",
     "lint": "eslint",
     "format": "prettier"
