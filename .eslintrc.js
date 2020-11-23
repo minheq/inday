@@ -1,3 +1,5 @@
+// https://github.com/typescript-eslint/typescript-eslint/issues/109
+
 module.exports = {
   root: true,
   extends: [

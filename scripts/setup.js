@@ -1,5 +1,5 @@
-import { Client } from 'pg';
-import { env } from '../server/env';
+const { Client } = require('pg');
+const { env } = require('../server/env');
 
 export const dbClient = new Client({
   user: env.database.username,

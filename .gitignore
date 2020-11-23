@@ -59,6 +59,7 @@ buck-out/
 /ios/Pods/
 
 # Web
+public/
 bundle.js
 *.map
 stats.json
@@ -66,6 +67,3 @@ temp
 
 # Logs
 *.log
-
-# Storybook
-storybook-static

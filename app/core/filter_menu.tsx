@@ -7,7 +7,7 @@ import React, {
   createContext,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 import {
   NumberFieldKindFilterRule,
@@ -25,11 +25,10 @@ import {
   Button,
   TextInput,
   Picker,
-  Option,
   Text,
   Row,
-  Pressable,
   tokens,
+  PickerOption,
 } from '../components';
 import {
   useCreateFilter,
@@ -424,7 +423,7 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
     [onChange, rule, fieldID],
   );
 
-  const options: Option<NumberFieldKindFilterRule>[] = [
+  const options: PickerOption<NumberFieldKindFilterRule>[] = [
     { value: 'equal', label: 'equal' },
     { value: 'notEqual', label: 'not equal' },
     { value: 'lessThan', label: 'less than' },
