@@ -7,12 +7,12 @@ const { options } = require('./web_config');
 const BUILD_SERVER_PORT = 8000;
 const STATIC_SERVER_PORT = 8080;
 
-let indexFile = '';
+let html = '';
 
 const server = http.createServer((_req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.writeHead(200);
-  res.end(indexFile);
+  res.end(html);
 });
 
 fs.readFile(path.resolve(__dirname, '../index.html'), (err, contents) => {
@@ -21,7 +21,7 @@ fs.readFile(path.resolve(__dirname, '../index.html'), (err, contents) => {
     process.exit(1);
   }
 
-  indexFile = contents
+  html = contents
     .toString()
     .replace('/public', `http://localhost:${BUILD_SERVER_PORT}`);
 
