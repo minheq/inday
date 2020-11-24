@@ -17,6 +17,7 @@ const options = {
   ],
   minify: nodeEnv === 'production',
   sourcemap: true,
+  metafile: 'meta.json',
   define: {
     ['process.env.NODE_ENV']: `"${nodeEnv}"`,
     ['global']: 'window',

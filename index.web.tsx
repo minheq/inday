@@ -16,7 +16,7 @@ import {
   eventsState,
 } from './app/data/atoms';
 import { Playground } from './app/components/playground';
-import { Router, Switch, Route, ScreenName } from './app/routes';
+import { Router, Route, ScreenName } from './app/routes';
 
 declare global {
   interface Window {

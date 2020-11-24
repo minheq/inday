@@ -1,7 +1,7 @@
 const nodeEnv = process.env.NODE_ENV || 'development';
 
 const options = {
-  entryPoints: ['server/main.ts'],
+  entryPoints: ['server.ts'],
   bundle: true,
   platform: 'node',
   outfile: 'server.js',

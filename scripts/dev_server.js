@@ -8,7 +8,7 @@ build({ ...options, incremental: true })
   .then((result) => {
     let server = startServer();
 
-    fs.watch(path.resolve(__dirname, '../server'), { recursive: true }, () => {
+    fs.watch(path.resolve(__dirname, '../api'), { recursive: true }, () => {
       result
         .rebuild()
         .then(() => {

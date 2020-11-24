@@ -62,7 +62,7 @@ buck-out/
 public/
 bundle.js
 *.map
-stats.json
+meta.json
 temp
 server.js
 

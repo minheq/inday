@@ -1,5 +1,5 @@
-import { env } from './env';
-import { createAPI } from './api';
+import { env } from './api/env';
+import { createAPI } from './api/api';
 
 const api = createAPI();
 
