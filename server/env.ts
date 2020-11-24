@@ -1,7 +1,3 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 const getOsEnv = (key: string, options = { required: false }): string => {
   const osEnv = process.env[key] as string;
   if (options.required && !osEnv) {
