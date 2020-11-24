@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   overrides: [
     {
-      files: ['app/**/*.tsx', 'app/**/*.ts'],
+      files: ['app/**/*.tsx', 'app/**/*.ts', 'index.web.tsx'],
       env: { browser: true },
       extends: [
         'eslint:recommended',
