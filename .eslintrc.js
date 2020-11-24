@@ -1,8 +1,5 @@
 module.exports = {
   root: true,
-  rules: {
-    'no-shadow': 2,
-  },
   overrides: [
     {
       files: ['app/**/*.tsx', 'app/**/*.ts'],
@@ -68,6 +65,9 @@ module.exports = {
       },
       extends: ['eslint:recommended', 'plugin:sonarjs/recommended', 'prettier'],
       plugins: ['sonarjs'],
+      rules: {
+        'no-shadow': 2,
+      },
     },
     {
       files: ['index.js'],
@@ -77,8 +77,16 @@ module.exports = {
         ecmaVersion: 10,
         sourceType: 'module',
       },
-      extends: ['eslint:recommended', 'plugin:sonarjs/recommended', 'prettier'],
+      extends: [
+        'eslint:recommended',
+        'plugin:sonarjs/recommended',
+        'prettier',
+        'prettier/react',
+      ],
       plugins: ['sonarjs'],
+      rules: {
+        'no-shadow': 2,
+      },
     },
   ],
 };

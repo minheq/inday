@@ -13,12 +13,7 @@ import {
   tokens,
   Icon,
 } from '../components';
-import {
-  useRoute,
-  RouteProp,
-  NavigationHelpers,
-} from '@react-navigation/native';
-import { RootStackParamsMap } from '../linking';
+import { ScreenName, useNavigation, useRoute } from '../routes';
 import { useGetSpace, useGetView, useGetSpaceCollections } from '../data/store';
 import { Slide } from '../components/slide';
 
@@ -31,8 +26,6 @@ import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
 import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
-
-type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
 
 type SidePanelState = 'views' | 'organize' | null;
 
@@ -48,8 +41,7 @@ const SpaceScreenContext = createContext({
 });
 
 export function SpaceScreen(): JSX.Element {
-  const route = useRoute<SpaceScreenParams>();
-
+  const route = useRoute<ScreenName.Space>();
   const { spaceID, viewID } = route.params;
   const view = useGetView(viewID);
 
@@ -58,6 +50,7 @@ export function SpaceScreen(): JSX.Element {
       value={{ spaceID, viewID, collectionID: view.collectionID }}
     >
       <Screen>
+        <SpaceScreenHeader />
         <CollectionsList />
         <ViewSettings />
         <MainContent />
@@ -66,22 +59,17 @@ export function SpaceScreen(): JSX.Element {
   );
 }
 
-interface SpaceScreenHeaderProps {
-  route: RouteProp<RootStackParamsMap, 'Space'>;
-  navigation: NavigationHelpers<RootStackParamsMap>;
-}
-
-export function SpaceScreenHeader(props: SpaceScreenHeaderProps): JSX.Element {
-  const { route, navigation } = props;
-
-  const space = useGetSpace(route.params.spaceID);
+function SpaceScreenHeader(): JSX.Element {
+  const { params } = useRoute<ScreenName.Space>();
+  const navigation = useNavigation();
+  const space = useGetSpace(params.spaceID);
 
   const handlePressBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
   return (
-    <Container expanded paddingHorizontal={8} paddingVertical={4}>
+    <Container height={56} paddingHorizontal={8} paddingVertical={4}>
       <Row justifyContent="space-between">
         <Container>
           <Row alignItems="center">

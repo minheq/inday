@@ -1,7 +1,7 @@
 const nodeEnv = process.env.NODE_ENV || 'development';
 
 const options = {
-  entryPoints: ['index.web.ts'],
+  entryPoints: ['index.web.tsx'],
   bundle: true,
   outdir: 'public',
   resolveExtensions: [
