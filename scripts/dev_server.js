@@ -9,10 +9,19 @@ build({ ...options, incremental: true })
     let server = startServer();
 
     fs.watch(path.resolve(__dirname, '../server'), { recursive: true }, () => {
-      result.rebuild().then(() => {
-        server.kill();
-        server = startServer();
-      });
+      result
+        .rebuild()
+        .then(() => {
+          server.kill();
+          server = startServer();
+        })
+        .catch(() => {
+          console.log('Failed to rebuild. Wait for change.');
+        });
+    });
+
+    process.on('exit', () => {
+      server.kill();
     });
   })
   .catch((error) => {
@@ -24,11 +33,8 @@ function startServer() {
   const server = fork(path.resolve(__dirname, '../server.js'));
 
   server.on('error', (err) => {
-    throw err;
-  });
-
-  process.on('exit', () => {
-    server.kill();
+    console.error(err.message);
+    process.exit(1);
   });
 
   return server;
