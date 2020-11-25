@@ -18,6 +18,7 @@ const options = {
   minify: nodeEnv === 'production',
   sourcemap: true,
   metafile: 'meta.json',
+  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
   define: {
     ['process.env.NODE_ENV']: `"${nodeEnv}"`,
     ['global']: 'window',
