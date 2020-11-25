@@ -13,7 +13,7 @@ import {
   tokens,
   Icon,
 } from '../components';
-import { ScreenName, useNavigation, useRoute } from '../routes';
+import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import { useGetSpace, useGetView, useGetSpaceCollections } from '../data/store';
 import { Slide } from '../components/slide';
 
@@ -40,9 +40,9 @@ const SpaceScreenContext = createContext({
   collectionID: '1',
 });
 
-export function SpaceScreen(): JSX.Element {
-  const route = useRoute<ScreenName.Space>();
-  const { spaceID, viewID } = route.params;
+export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
+  const { params } = props;
+  const { spaceID, viewID } = params;
   const view = useGetView(viewID);
 
   return (
@@ -60,9 +60,9 @@ export function SpaceScreen(): JSX.Element {
 }
 
 function SpaceScreenHeader(): JSX.Element {
-  const { params } = useRoute<ScreenName.Space>();
   const navigation = useNavigation();
-  const space = useGetSpace(params.spaceID);
+  const context = useContext(SpaceScreenContext);
+  const space = useGetSpace(context.spaceID);
 
   const handlePressBack = useCallback(() => {
     navigation.goBack();

@@ -1,5 +1,8 @@
 import { EmptyObject } from 'lib/js_utils';
-import { createRouter } from './lib/router';
+import {
+  RouterImplementation,
+  useNavigationImplementation,
+} from './lib/router';
 
 export enum ScreenName {
   Space = 'Space',
@@ -11,9 +14,26 @@ export type RootStackParamsMap = {
   [ScreenName.Playground]: EmptyObject;
 };
 
-export const {
-  useRoute,
-  useNavigation,
-  Router,
-  Route,
-} = createRouter<RootStackParamsMap>();
+export type ScreenProps<T extends ScreenName> = {
+  name: T;
+  params: RootStackParamsMap[T];
+};
+
+export const useNavigation = useNavigationImplementation as () => {
+  setParams: <T extends ScreenName>(params: RootStackParamsMap[T]) => void;
+  navigate: <T extends ScreenName>(
+    name: T,
+    params: RootStackParamsMap[T],
+  ) => void;
+  goBack: () => void;
+};
+
+export const Router = RouterImplementation as (props: {
+  fallback: React.ReactNode;
+  pathMap: {
+    [name in ScreenName]: {
+      path: string;
+      component: <T extends name>(p: ScreenProps<T>) => JSX.Element;
+    };
+  };
+}) => JSX.Element;

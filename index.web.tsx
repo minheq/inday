@@ -16,7 +16,7 @@ import {
   eventsState,
 } from './app/data/atoms';
 import { Playground } from './app/components/playground';
-import { Router, Route, ScreenName } from './app/routes';
+import { Router, ScreenName } from './app/routes';
 
 declare global {
   interface Window {
@@ -47,14 +47,24 @@ export function App(): JSX.Element {
         <Suspense fallback={<Text>Loading...</Text>}>
           <PersistenceObserver />
           <ThemeProvider>
-            <Router fallback={<Text>Not found</Text>}>
-              <Route name={ScreenName.Space} path="/space/:spaceID/:viewID">
-                <SpaceScreen />
-              </Route>
-              <Route name={ScreenName.Playground} path="/playground">
-                <Playground />
-              </Route>
-            </Router>
+            <Router
+              pathMap={{
+                Space: {
+                  path: '/space/:spaceID/:viewID',
+                  component: SpaceScreen,
+                },
+                Playground: {
+                  path: '/playground',
+                  component: Playground,
+                },
+              }}
+              fallback={
+                <SpaceScreen
+                  name={ScreenName.Space}
+                  params={{ viewID: '1', spaceID: '1' }}
+                />
+              }
+            />
           </ThemeProvider>
         </Suspense>
       </ErrorBoundary>

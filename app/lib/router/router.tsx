@@ -7,65 +7,31 @@ import React, {
   useReducer,
 } from 'react';
 import { match, compile } from 'path-to-regexp';
-import { usePrevious } from '../../hooks/use_previous';
-import { isEmpty, last } from '../../../lib/js_utils';
+import { isEmpty, keysOf, last } from '../../../lib/js_utils';
 
-interface UseNavigation<
-  T extends RouterMap,
-  ScreenName extends keyof T,
-  Params extends T[ScreenName]
-> {
-  reset: () => void;
+interface UseNavigation {
   setParams: (params: Params) => void;
   navigate: (name: string, params: Params) => void;
   goBack: () => void;
 }
 
-function useNavigation(): UseNavigation<
-  { [name: string]: Record<string, string> },
-  string,
-  Record<string, string>
-> {
-  const { navigate, goBack, setParams, reset } = useContext(RouterContext);
+export function useNavigationImplementation(): UseNavigation {
+  const { navigate, goBack, setParams } = useContext(RouterContext);
 
   return {
-    reset,
     setParams,
     navigate,
     goBack,
   };
 }
 
-interface UseRoute<
-  T extends RouterMap,
-  ScreenName extends keyof T,
-  Params extends T[ScreenName]
-> {
-  name: string;
-  params: Params;
-}
-
-function useRoute(): UseRoute<
-  { [name: string]: Record<string, string> },
-  string,
-  Record<string, string>
-> {
-  const context = useContext(RouterContext);
-
-  return {
-    name: context.name,
-    params: context.params,
-  };
-}
-
 type Stack = Action[];
 
 interface RouterContext {
-  pathMap: PathMap;
   name: string;
   params: Params;
   stack: Stack;
-  reset: () => void;
+  pathMap: PathMap;
   setParams: (params: Params) => void;
   navigate: (name: string, params: Params) => void;
   goBack: () => void;
@@ -79,9 +45,6 @@ const RouterContext = createContext<RouterContext>({
   navigate: () => {
     return;
   },
-  reset: () => {
-    return;
-  },
   setParams: () => {
     return;
   },
@@ -90,28 +53,27 @@ const RouterContext = createContext<RouterContext>({
   },
 });
 
-type RouterMap = {
-  [name: string]: Params;
-};
-
 interface Params {
   [param: string]: string;
 }
 
 interface State {
-  pathMap: PathMap;
   stack: Stack;
   name: string;
   params: Params;
 }
 
-type PathMap = { [name: string]: string };
+type PathMap = {
+  [name: string]: {
+    path: string;
+    component: (props: { name: string; params: Params }) => JSX.Element;
+  };
+};
 
 type Action =
   | { type: 'NAVIGATE'; name: string; params: Params }
   | { type: 'GO_BACK' }
-  | { type: 'SET_PARAMS'; params: Params }
-  | { type: 'RESET' };
+  | { type: 'SET_PARAMS'; params: Params };
 
 function reducer(prevState: State, action: Action): State {
   prevState = {
@@ -131,12 +93,6 @@ function reducer(prevState: State, action: Action): State {
         ...prevState,
         params: action.params,
       };
-    case 'RESET':
-      return {
-        ...prevState,
-        params: {},
-        name: '',
-      };
     case 'GO_BACK':
       return {
         ...prevState,
@@ -149,19 +105,19 @@ function reducer(prevState: State, action: Action): State {
 
 interface RouterProps {
   fallback: React.ReactNode;
-  children: React.ReactElement<RouteProps<string>>[];
+  pathMap: PathMap;
 }
 
-function getInitialState(screens: { name: string; path: string }[]): State {
-  const pathMap: PathMap = {};
+function getInitialState(pathMap: PathMap): State {
   let name = '';
   let params: Params = {};
 
-  for (const { name: _name, path } of screens) {
+  const screens = keysOf(pathMap) as string[];
+
+  for (const _name of screens) {
+    const { path } = pathMap[_name];
     const matcher = match<Params>(path, { decode: decodeURIComponent });
     const result = matcher(window.location.pathname);
-
-    pathMap[_name] = path;
 
     if (result !== false) {
       name = _name;
@@ -172,54 +128,38 @@ function getInitialState(screens: { name: string; path: string }[]): State {
   return {
     name,
     params,
-    pathMap,
     stack: [],
   };
 }
 
-function Router(props: RouterProps): JSX.Element {
-  const { children, fallback } = props;
-  const [state, dispatch] = useReducer(
-    reducer,
-    getInitialState(
-      React.Children.map(children, (child) => ({
-        name: child.props.name,
-        path: child.props.path,
-      })),
-    ),
-  );
-  const prevChildren = usePrevious(children);
-  const { pathMap, stack, name, params } = state;
+export function RouterImplementation(props: RouterProps): JSX.Element {
+  const { pathMap, fallback } = props;
+
+  const [state, dispatch] = useReducer(reducer, getInitialState(pathMap));
+  const { stack, name, params } = state;
 
   const handleGoBack = useCallback(() => {
     dispatch({ type: 'GO_BACK' });
   }, []);
 
-  const handleNavigate = useCallback((nextName: string, nextParams: Params) => {
-    dispatch({ type: 'NAVIGATE', name: nextName, params: nextParams });
-  }, []);
-
-  const handleReset = useCallback(() => {
-    dispatch({ type: 'RESET' });
-  }, []);
+  const handleNavigate = useCallback(
+    (nextName: string, nextParams: Params) => {
+      if (pathMap[nextName] !== undefined) {
+        dispatch({ type: 'NAVIGATE', name: nextName, params: nextParams });
+      } else {
+        console.error(`Screen ${nextName} was not set up`);
+      }
+    },
+    [pathMap],
+  );
 
   const handleSetParams = useCallback((nextParams: Params) => {
     dispatch({ type: 'SET_PARAMS', params: nextParams });
   }, []);
 
-  useEffect(() => {
-    if (React.Children.count(children) !== React.Children.count(prevChildren)) {
-      throw new Error('Router children must not change.');
-    }
-  }, [children, prevChildren]);
-
-  let child: React.ReactNode = null;
-
-  for (const _child of children) {
-    if (_child.props.name === name) {
-      child = _child;
-    }
-  }
+  const Screen = name !== '' ? pathMap[name].component : null;
+  const child =
+    Screen !== null ? <Screen name={name} params={params} /> : fallback;
 
   return (
     <RouterContext.Provider
@@ -228,14 +168,13 @@ function Router(props: RouterProps): JSX.Element {
         params,
         stack,
         pathMap,
-        reset: handleReset,
         goBack: handleGoBack,
         navigate: handleNavigate,
         setParams: handleSetParams,
       }}
     >
       <BrowserHistorySync />
-      {child !== null ? child : fallback}
+      {child}
     </RouterContext.Provider>
   );
 }
@@ -255,7 +194,7 @@ function BrowserHistorySync(): JSX.Element {
         history.pushState(
           null,
           action.name,
-          compile(pathMap[action.name], { encode: encodeURIComponent })(
+          compile(pathMap[action.name].path, { encode: encodeURIComponent })(
             action.params,
           ),
         );
@@ -267,7 +206,9 @@ function BrowserHistorySync(): JSX.Element {
         history.replaceState(
           null,
           name,
-          compile(pathMap[name], { encode: encodeURIComponent })(action.params),
+          compile(pathMap[name].path, { encode: encodeURIComponent })(
+            action.params,
+          ),
         );
         break;
       default:
@@ -276,52 +217,4 @@ function BrowserHistorySync(): JSX.Element {
   }, [stack, name, pathMap]);
 
   return <Fragment />;
-}
-
-interface RouteProps<T> {
-  path: string;
-  name: T;
-  children: React.ReactNode;
-}
-
-function Route(props: RouteProps<string>): JSX.Element {
-  const { children, name, path } = props;
-  const prevName = usePrevious(name);
-  const prevPath = usePrevious(path);
-
-  useEffect(() => {
-    if (prevName !== name || prevPath !== path) {
-      throw new Error(
-        'Screen name or path changed for component. Paths should be static. Remove any dynamic code that reassigns screen name or paths.',
-      );
-    }
-  }, [name, path, prevName, prevPath]);
-
-  return <Fragment>{children}</Fragment>;
-}
-
-interface CreateRouter<T extends RouterMap> {
-  useNavigation: () => UseNavigation<T, keyof T, T[keyof T]>;
-  useRoute: <Name extends keyof T>() => UseRoute<T, Name, T[Name]>;
-  Router: (props: {
-    fallback: React.ReactNode;
-    children: React.ReactElement<RouteProps<keyof T>>[];
-  }) => JSX.Element;
-  Route: (props: RouteProps<keyof T>) => JSX.Element;
-}
-
-export function createRouter<T extends RouterMap>(): CreateRouter<T> {
-  return {
-    useNavigation: useNavigation as () => UseNavigation<T, keyof T, T[keyof T]>,
-    useRoute: useRoute as <Name extends keyof T>() => UseRoute<
-      T,
-      Name,
-      T[Name]
-    >,
-    Router: Router as (props: {
-      fallback: React.ReactNode;
-      children: React.ReactElement<RouteProps<keyof T>>[];
-    }) => JSX.Element,
-    Route: Route as (props: RouteProps<keyof T>) => JSX.Element,
-  };
 }
