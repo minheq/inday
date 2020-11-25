@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
-    "countries-list": "^2.5.6",
     "date-fns": "^2.16.1",
     "fastify": "^3.5.1",
     "fuse.js": "^6.4.3",

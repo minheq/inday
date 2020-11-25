@@ -1,3 +1,5 @@
+// On the web, we use tsconfig to alias react-native to react-native-web. We are also selectively exporting
+// components to aid esbuild's tree shaking
 export { default as StyleSheet } from 'react-native-web/dist/exports/StyleSheet';
 export { default as View } from 'react-native-web/dist/exports/View';
 export { default as AppRegistry } from 'react-native-web/dist/exports/AppRegistry';
