@@ -15,7 +15,7 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "react-native": ["./node_modules/react-native-web"]
+      "react-native": ["./vendor/react-native"]
     }
   },
   "exclude": [
