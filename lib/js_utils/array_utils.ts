@@ -1,3 +1,5 @@
+import { getRandomInteger } from './number_utils';
+
 export function range(min: number, max: number, step?: number): number[];
 export function range(max: number): number[];
 export function range(arg0: number, arg1?: number, arg2?: number): number[] {
@@ -218,6 +220,12 @@ export function chunk<T>(arr: T[], size: number): T[][] {
   }
 
   return result;
+}
+
+export function sample<T>(arr: T[]): T {
+  const index = getRandomInteger(0, arr.length - 1);
+
+  return arr[index];
 }
 
 /**

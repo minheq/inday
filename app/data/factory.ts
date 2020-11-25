@@ -1,5 +1,4 @@
 import { Space } from './spaces';
-import faker from 'faker';
 import { generateID } from '../../lib/id/id';
 import { Collaborator } from './collaborators';
 import {
@@ -29,14 +28,24 @@ import { BaseView, View } from './views';
 import { Collection } from './collections';
 import { Record } from './records';
 import { Filter, FilterConfig } from './filters';
-import { keyedBy, range, isEmpty } from '../../lib/js_utils';
+import { keyedBy, range, isEmpty, sample } from '../../lib/js_utils';
 import { Sort, SortConfig } from './sorts';
 import { palette } from '../components/palette';
+import {
+  fakeBoolean,
+  fakeDate,
+  fakeEmail,
+  fakeNumber,
+  fakePhoneNumber,
+  fakeURL,
+  fakeWord,
+  fakeWords,
+} from '../../lib/faker';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
     id: space.id ?? generateID(),
-    name: space.name ?? faker.commerce.department(),
+    name: space.name ?? fakeWords(2),
     workspaceID: space.workspaceID ?? generateID(),
     updatedAt: space.updatedAt ?? new Date(),
     createdAt: space.createdAt ?? new Date(),
@@ -49,9 +58,8 @@ export function makeCollaborator(
   return {
     id: collaborator.id ?? generateID(),
     profileImageID: collaborator.profileImageID ?? generateID(),
-    name:
-      collaborator.name ?? `${faker.name.lastName()} ${faker.name.firstName()}`,
-    email: collaborator.email ?? faker.internet.email(),
+    name: collaborator.name ?? fakeWords(2),
+    email: collaborator.email ?? fakeEmail(),
     spaceID: collaborator.spaceID ?? generateID(),
     updatedAt: collaborator.updatedAt ?? new Date(),
     createdAt: collaborator.createdAt ?? new Date(),
@@ -69,8 +77,8 @@ export function makeField(field: Partial<Field>): Field {
 export function makeBaseField(field: Partial<Field>): BaseField {
   return {
     id: field.id ?? generateID(),
-    name: field.name ?? faker.name.lastName(),
-    description: field.description ?? faker.random.words(),
+    name: field.name ?? fakeWord(),
+    description: field.description ?? fakeWords(50),
     collectionID: field.collectionID ?? generateID(),
     updatedAt: field.updatedAt ?? new Date(),
     createdAt: field.createdAt ?? new Date(),
@@ -145,19 +153,19 @@ const makeFieldByType: {
       options: [
         {
           id: generateID(),
-          label: faker.random.word(),
+          label: fakeWord(),
           color: palette.green[100],
           order: 1,
         },
         {
           id: generateID(),
-          label: faker.random.word(),
+          label: fakeWord(),
           color: palette.blue[100],
           order: 2,
         },
         {
           id: generateID(),
-          label: faker.random.word(),
+          label: fakeWord(),
           color: palette.red[100],
           order: 3,
         },
@@ -215,19 +223,19 @@ const makeFieldByType: {
       options: [
         {
           id: generateID(),
-          label: faker.random.word(),
+          label: fakeWord(),
           color: palette.green[100],
           order: 1,
         },
         {
           id: generateID(),
-          label: faker.random.word(),
+          label: fakeWord(),
           color: palette.blue[100],
           order: 2,
         },
         {
           id: generateID(),
-          label: faker.random.word(),
+          label: fakeWord(),
           color: palette.red[100],
           order: 3,
         },
@@ -251,7 +259,7 @@ interface CollectionWithFields extends Collection {
 export function makeCollection(collection: Partial<Collection>): Collection {
   return {
     id: collection.id ?? generateID(),
-    name: collection.name ?? faker.commerce.department(),
+    name: collection.name ?? fakeWords(2),
     spaceID: collection.spaceID ?? generateID(),
     updatedAt: collection.updatedAt ?? new Date(),
     createdAt: collection.createdAt ?? new Date(),
@@ -279,7 +287,7 @@ export function makeView(
 ): View {
   const baseView: BaseView = {
     id: view.id ?? generateID(),
-    name: view.name ?? faker.commerce.department(),
+    name: view.name ?? fakeWords(2),
     collectionID: view.collectionID ?? generateID(),
     updatedAt: view.updatedAt ?? new Date(),
     createdAt: view.createdAt ?? new Date(),
@@ -367,16 +375,16 @@ const fakeFieldValuesByFieldType: {
   ) => FieldValue;
 } = {
   [FieldType.Checkbox]: () => {
-    return faker.random.boolean();
+    return fakeBoolean();
   },
   [FieldType.Currency]: () => {
-    return faker.random.number();
+    return fakeNumber();
   },
   [FieldType.Date]: () => {
-    return faker.date.future();
+    return fakeDate();
   },
   [FieldType.Email]: () => {
-    return faker.internet.email();
+    return fakeEmail();
   },
   [FieldType.MultiCollaborator]: (field, _recordsByFieldID, collaborators) => {
     assertMultiCollaboratorField(field);
@@ -389,7 +397,7 @@ const fakeFieldValuesByFieldType: {
       return [];
     }
 
-    return [faker.helpers.randomize(collaborators.map((c) => c.id))];
+    return [sample(collaborators).id];
   },
   [FieldType.MultiRecordLink]: (field, recordsByFieldID) => {
     if (recordsByFieldID === undefined) {
@@ -400,23 +408,21 @@ const fakeFieldValuesByFieldType: {
       return [];
     }
 
-    return [
-      faker.helpers.randomize(recordsByFieldID[field.id].map((d) => d.id)),
-    ];
+    return [sample(recordsByFieldID[field.id]).id];
   },
   [FieldType.MultiLineText]: () => {
-    return faker.random.words();
+    return fakeWords(50);
   },
   [FieldType.MultiOption]: (field) => {
     assertMultiOptionField(field);
 
-    return [faker.helpers.randomize(field.options).id];
+    return [sample(field.options).id];
   },
   [FieldType.Number]: () => {
-    return faker.random.number();
+    return fakeNumber();
   },
   [FieldType.PhoneNumber]: () => {
-    return faker.phone.phoneNumber();
+    return fakePhoneNumber();
   },
   [FieldType.SingleCollaborator]: (field, recordsByFieldID, collaborators) => {
     assertSingleCollaboratorField(field);
@@ -429,7 +435,7 @@ const fakeFieldValuesByFieldType: {
       return null;
     }
 
-    return faker.helpers.randomize(collaborators.map((c) => c.id));
+    return sample(collaborators).id;
   },
   [FieldType.SingleRecordLink]: (field, recordsByFieldID) => {
     if (recordsByFieldID === undefined) {
@@ -440,18 +446,18 @@ const fakeFieldValuesByFieldType: {
       return null;
     }
 
-    return faker.helpers.randomize(recordsByFieldID[field.id].map((d) => d.id));
+    return sample(recordsByFieldID[field.id]).id;
   },
   [FieldType.SingleLineText]: () => {
-    return faker.random.words();
+    return fakeWords(10);
   },
   [FieldType.SingleOption]: (field) => {
     assertSingleOptionField(field);
 
-    return faker.helpers.randomize(field.options).id;
+    return sample(field.options).id;
   },
   [FieldType.URL]: () => {
-    return faker.internet.url();
+    return fakeURL();
   },
 };
 
