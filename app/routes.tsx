@@ -21,11 +21,8 @@ export type ScreenProps<T extends ScreenName> = {
 
 export const useNavigation = useNavigationImplementation as () => {
   setParams: <T extends ScreenName>(params: RootStackParamsMap[T]) => void;
-  navigate: <T extends ScreenName>(
-    name: T,
-    params: RootStackParamsMap[T],
-  ) => void;
-  goBack: () => void;
+  push: <T extends ScreenName>(name: T, params: RootStackParamsMap[T]) => void;
+  back: () => void;
 };
 
 export const Router = RouterImplementation as (props: {

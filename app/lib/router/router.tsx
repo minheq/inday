@@ -7,25 +7,34 @@ import React, {
   useReducer,
 } from 'react';
 import { match, compile } from 'path-to-regexp';
-import { isEmpty, keysOf, last } from '../../../lib/js_utils';
+import {
+  append,
+  areEqual,
+  isEmpty,
+  keysOf,
+  last,
+  remove,
+  updateLast,
+} from '../../../lib/js_utils';
+import { usePrevious } from 'app/hooks/use_previous';
 
 interface UseNavigation {
   setParams: (params: Params) => void;
-  navigate: (name: string, params: Params) => void;
-  goBack: () => void;
+  push: (name: string, params: Params) => void;
+  back: () => void;
 }
 
 export function useNavigationImplementation(): UseNavigation {
-  const { navigate, goBack, setParams } = useContext(RouterContext);
+  const { push, back, setParams } = useContext(RouterContext);
 
   return {
     setParams,
-    navigate,
-    goBack,
+    push,
+    back,
   };
 }
 
-type Stack = Action[];
+type Stack = { name: string; params: Params }[];
 
 interface RouterContext {
   name: string;
@@ -33,8 +42,8 @@ interface RouterContext {
   stack: Stack;
   pathMap: PathMap;
   setParams: (params: Params) => void;
-  navigate: (name: string, params: Params) => void;
-  goBack: () => void;
+  push: (name: string, params: Params) => void;
+  back: () => void;
 }
 
 const RouterContext = createContext<RouterContext>({
@@ -42,13 +51,13 @@ const RouterContext = createContext<RouterContext>({
   params: {},
   pathMap: {},
   stack: [],
-  navigate: () => {
+  push: () => {
     return;
   },
   setParams: () => {
     return;
   },
-  goBack: () => {
+  back: () => {
     return;
   },
 });
@@ -71,31 +80,34 @@ type PathMap = {
 };
 
 type Action =
-  | { type: 'NAVIGATE'; name: string; params: Params }
-  | { type: 'GO_BACK' }
+  | { type: 'PUSH'; name: string; params: Params }
+  | { type: 'BACK' }
   | { type: 'SET_PARAMS'; params: Params };
 
 function reducer(prevState: State, action: Action): State {
-  prevState = {
-    ...prevState,
-    stack: prevState.stack.concat(action),
-  };
+  const { stack: prevStack } = prevState;
 
   switch (action.type) {
-    case 'NAVIGATE':
+    case 'PUSH':
       return {
         ...prevState,
         name: action.name,
         params: action.params,
+        stack: append(prevStack, { name: action.name, params: action.params }),
       };
     case 'SET_PARAMS':
       return {
         ...prevState,
         params: action.params,
+        stack: updateLast(prevStack, (item) => ({
+          name: item.name,
+          params: action.params,
+        })),
       };
-    case 'GO_BACK':
+    case 'BACK':
       return {
         ...prevState,
+        stack: remove(prevStack, 1),
       };
     default:
       console.error(action); // it should be never
@@ -128,7 +140,7 @@ function getInitialState(pathMap: PathMap): State {
   return {
     name,
     params,
-    stack: [],
+    stack: name !== '' ? [{ name, params }] : [],
   };
 }
 
@@ -139,13 +151,13 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
   const { stack, name, params } = state;
 
   const handleGoBack = useCallback(() => {
-    dispatch({ type: 'GO_BACK' });
+    dispatch({ type: 'BACK' });
   }, []);
 
   const handleNavigate = useCallback(
     (nextName: string, nextParams: Params) => {
       if (pathMap[nextName] !== undefined) {
-        dispatch({ type: 'NAVIGATE', name: nextName, params: nextParams });
+        dispatch({ type: 'PUSH', name: nextName, params: nextParams });
       } else {
         console.error(`Screen ${nextName} was not set up`);
       }
@@ -168,8 +180,8 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
         params,
         stack,
         pathMap,
-        goBack: handleGoBack,
-        navigate: handleNavigate,
+        back: handleGoBack,
+        push: handleNavigate,
         setParams: handleSetParams,
       }}
     >
@@ -180,41 +192,41 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
 }
 
 function BrowserHistorySync(): JSX.Element {
-  const { stack, pathMap, name } = useContext(RouterContext);
+  const { stack, pathMap, name, params } = useContext(RouterContext);
+  const prevStack = usePrevious(stack);
 
   useEffect(() => {
-    if (isEmpty(stack)) {
+    if (isEmpty(stack) || isEmpty(prevStack)) {
       return;
     }
 
-    const action = last(stack);
+    // Stack has new items
+    if (prevStack.length < stack.length) {
+      history.pushState(
+        null,
+        name,
+        compile(pathMap[name].path, { encode: encodeURIComponent })(params),
+      );
+      // Stack has removed bunch of items
+    } else if (prevStack.length > stack.length) {
+      history.go(-(prevStack.length - stack.length));
+      // Stack updated last item
+    } else if (prevStack.length === stack.length) {
+      const lastPrevItem = last(prevStack);
+      const lastItem = last(stack);
 
-    switch (action.type) {
-      case 'NAVIGATE':
-        history.pushState(
-          null,
-          action.name,
-          compile(pathMap[action.name].path, { encode: encodeURIComponent })(
-            action.params,
-          ),
-        );
-        break;
-      case 'GO_BACK':
-        history.back();
-        break;
-      case 'SET_PARAMS':
+      if (
+        lastPrevItem.name !== lastItem.name ||
+        areEqual(lastPrevItem.params, lastItem.params) === false
+      ) {
         history.replaceState(
           null,
           name,
-          compile(pathMap[name].path, { encode: encodeURIComponent })(
-            action.params,
-          ),
+          compile(pathMap[name].path, { encode: encodeURIComponent })(params),
         );
-        break;
-      default:
-        break;
+      }
     }
-  }, [stack, name, pathMap]);
+  }, [stack, prevStack, name, params, pathMap]);
 
   return <Fragment />;
 }

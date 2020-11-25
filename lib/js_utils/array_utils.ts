@@ -74,6 +74,20 @@ export function take<T>(arr: T[], size: number): T[] {
   return arr.slice(0, size);
 }
 
+export function remove<T>(arr: T[], size: number): T[] {
+  return arr.slice(0, arr.length - size);
+}
+
+export function append<T>(arr: T[], item: T): T[] {
+  return arr.concat(item);
+}
+
+export function updateLast<T>(arr: T[], updater: (item: T) => T): T[] {
+  const nextArr = arr.slice(0);
+  nextArr[arr.length - 1] = updater(arr[arr.length - 1]);
+  return nextArr;
+}
+
 export function intersect<T>(a: T[], b: T[]): T[] {
   const setA = new Set(a);
   const setB = new Set(b);

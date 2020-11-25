@@ -444,14 +444,8 @@ export function useGetGroupCallback() {
   );
 }
 
-export function useGetView(viewID: ViewID) {
-  const view = useRecoilValue(viewQuery(viewID));
-
-  if (view === null) {
-    throw new Error('View not found');
-  }
-
-  return view;
+export function useGetView(viewID: ViewID): View {
+  return useRecoilValue(viewQuery(viewID));
 }
 
 export function useGetViewRecords(viewID: ViewID): Record[] {

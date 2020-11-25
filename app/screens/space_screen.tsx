@@ -65,7 +65,7 @@ function SpaceScreenHeader(): JSX.Element {
   const space = useGetSpace(context.spaceID);
 
   const handlePressBack = useCallback(() => {
-    navigation.goBack();
+    navigation.back();
   }, [navigation]);
 
   return (
