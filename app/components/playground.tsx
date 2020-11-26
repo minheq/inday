@@ -3,13 +3,14 @@ import { View } from 'react-native';
 import { NoAnimation, Slide, Fade } from './dialog.stories';
 import { Flat, Grouped } from './grid.stories';
 import { FlatButton } from './flat_button';
+import { Basic as DayPickerBasic } from './day_picker.stories';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
 
-type Component = 'Intro' | 'Dialog' | 'Grid';
+type ComponentName = 'Intro' | 'Dialog' | 'Grid' | 'DayPicker';
 
 export function Playground(): JSX.Element {
-  const [component, setComponent] = useState<Component>('Intro');
+  const [component, setComponent] = useState<ComponentName>('Intro');
 
   let content: React.ReactNode = null;
 
@@ -23,6 +24,9 @@ export function Playground(): JSX.Element {
     case 'Grid':
       content = <Grid />;
       break;
+    case 'DayPicker':
+      content = <DayPicker />;
+      break;
 
     default:
       break;
@@ -34,6 +38,7 @@ export function Playground(): JSX.Element {
         <MenuItem onPress={setComponent} component="Intro" />
         <MenuItem onPress={setComponent} component="Dialog" />
         <MenuItem onPress={setComponent} component="Grid" />
+        <MenuItem onPress={setComponent} component="DayPicker" />
       </View>
       <View style={styles.content}>{content}</View>
     </View>
@@ -41,8 +46,8 @@ export function Playground(): JSX.Element {
 }
 
 interface MenuItemProps {
-  onPress: (component: Component) => void;
-  component: Component;
+  onPress: (component: ComponentName) => void;
+  component: ComponentName;
 }
 
 function MenuItem(props: MenuItemProps) {
@@ -78,6 +83,14 @@ function Grid() {
     <View>
       <Flat />
       <Grouped />
+    </View>
+  );
+}
+
+function DayPicker() {
+  return (
+    <View>
+      <DayPickerBasic />
     </View>
   );
 }

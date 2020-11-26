@@ -1,11 +1,8 @@
 export enum SupportedLocale {
   vi = 'vi',
   viVN = 'vi-VN',
-  enAU = 'en-AU',
-  enGB = 'en-GB',
+  en = 'en',
   enUS = 'en-US',
-  enCA = 'en-CA',
-  enIN = 'en-IN',
 }
 
 export const defaultLocale = SupportedLocale.enUS;

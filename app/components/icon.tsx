@@ -43,6 +43,7 @@ export type IconName =
   | 'CheckThick'
   | 'Checkbox'
   | 'ChevronLeft'
+  | 'ChevronRight'
   | 'Clock'
   | 'Command'
   | 'Currency'
@@ -112,6 +113,7 @@ const iconMap: {
   CheckThick,
   Checkbox,
   ChevronLeft,
+  ChevronRight,
   Clock,
   Command,
   Currency,
@@ -495,6 +497,26 @@ function ChevronLeft(props: TheIconProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </Svg>
+  );
+}
+
+function ChevronRight(props: TheIconProps) {
+  const { size, color } = props;
+
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke={color}
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M0 0h24v24H0z" stroke="none" />
+      <Path d="M9 6L15 12 9 18" />
     </Svg>
   );
 }

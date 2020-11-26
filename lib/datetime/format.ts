@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { enAU, enCA, enGB, enIN, enUS, vi } from 'date-fns/locale';
+import { enUS, vi } from 'date-fns/locale';
 import { SupportedLocale } from '../i18n';
 
 export function formatDate(
@@ -14,20 +14,9 @@ export function formatDate(
     case SupportedLocale.viVN:
       localeModule = vi;
       break;
-    case SupportedLocale.enAU:
-      localeModule = enAU;
-      break;
+    case SupportedLocale.en:
     case SupportedLocale.enUS:
       localeModule = enUS;
-      break;
-    case SupportedLocale.enIN:
-      localeModule = enIN;
-      break;
-    case SupportedLocale.enCA:
-      localeModule = enCA;
-      break;
-    case SupportedLocale.enGB:
-      localeModule = enGB;
       break;
     default:
       break;

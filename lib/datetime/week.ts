@@ -7,6 +7,8 @@ import {
   endOfDay,
   Interval,
 } from 'date-fns';
+import { Day } from './day';
+import { Month } from './month';
 
 export const DEFAULT_FIRST_DAY_OF_WEEK = 1;
 
@@ -20,7 +22,16 @@ export enum WeekDay {
   Sunday = 0,
 }
 
-export function getWeekDaysOptions() {
+export interface Week {
+  month: Month;
+  index: number;
+  days: Day[];
+}
+
+export function getWeekDaysOptions(): {
+  value: WeekDay;
+  label: string;
+}[] {
   return [
     { value: WeekDay.Monday, label: 'Monday' },
     { value: WeekDay.Tuesday, label: 'Tuesday' },
@@ -37,7 +48,7 @@ export type FirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export const getFirstDateOfWeek = (
   date: Date,
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
-) => {
+): Date => {
   const day = getDay(date);
   const diffDays = day - firstDayOfWeek;
 
@@ -68,6 +79,6 @@ export const getWeekInterval = (
 export const eachDayOfWeek = (
   date = new Date(),
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
-) => {
+): Date[] => {
   return eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
 };
