@@ -26,13 +26,11 @@ import {
   Spacer,
   Text,
   tokens,
+  ListPicker,
 } from '../components';
 import {
   useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
-  useGetCollaboratorsByID,
-  useGetCollectionRecordsByID,
-  useGetCollection,
   useUpdateRecordFieldValue,
   useGetField,
   useGetRecordFieldValue,
@@ -41,6 +39,9 @@ import {
   useGetViewSorts,
   useGetViewGroups,
   useGetCollaborators,
+  useGetCollectionRecords,
+  useGetRecordCallback,
+  useGetCollectionCallback,
 } from '../data/store';
 import {
   FieldType,
@@ -94,6 +95,9 @@ import {
   FieldID,
   TextFieldKindValue,
   NumberFieldKindValue,
+  MultiSelectFieldKindValue,
+  SingleSelectFieldKindValue,
+  SelectOption,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView, ViewID } from '../data/views';
@@ -124,7 +128,12 @@ import {
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import { isEmpty, isNullish, isNumeric } from '../../lib/js_utils';
+import {
+  InferArrayItemType,
+  isEmpty,
+  isNullish,
+  isNumeric,
+} from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { palette } from '../components/palette';
 import { formatDate } from '../../lib/datetime/format';
@@ -134,7 +143,7 @@ import { RecordLinkBadge } from './record_link_badge';
 import { formatUnit } from '../../lib/i18n/unit';
 import { usePrevious } from '../hooks/use_previous';
 import { MultiListPicker } from '../components/multi_list_picker';
-import { CollaboratorID } from '../data/collaborators';
+import { Collaborator, CollaboratorID } from '../data/collaborators';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -538,6 +547,8 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       case FieldType.SingleCollaborator:
       case FieldType.MultiRecordLink:
       case FieldType.SingleRecordLink:
+      case FieldType.MultiOption:
+      case FieldType.SingleOption:
         extraWidth = 100;
         break;
       default:
@@ -959,6 +970,25 @@ function EmailCell(props: EmailCellProps) {
   return <Fragment>{child}</Fragment>;
 }
 
+function useRenderCollaborator() {
+  return useCallback((collaboratorID: CollaboratorID) => {
+    return (
+      <CollaboratorBadge collaboratorID={collaboratorID} key={collaboratorID} />
+    );
+  }, []);
+}
+
+function useGetCollaboratorOptions(
+  collaborators: Collaborator[],
+): ListPickerOption<CollaboratorID>[] {
+  return useMemo(() => {
+    return collaborators.map((collaborator) => ({
+      value: collaborator.id,
+      label: collaborator.name,
+    }));
+  }, [collaborators]);
+}
+
 interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
@@ -966,33 +996,33 @@ interface MultiCollaboratorCellProps {
 
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   const { value } = props;
-  const collaboratorsByID = useGetCollaboratorsByID();
-
+  const collaborators = useGetCollaborators();
   const { state, onStartEditing } = useLeafRowCellContext();
 
+  const renderCollaborator = useRenderCollaborator();
+  const options = useGetCollaboratorOptions(collaborators);
+
   if (state === 'editing') {
-    return <MultiCollaboratorCellEditing value={value} />;
+    return (
+      <MultiSelectFieldKindCellEditing
+        renderLabel={renderCollaborator}
+        options={options}
+        value={value}
+      />
+    );
   }
 
   const child = isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
-    <View>
-      {value.map((collaboratorID) => {
-        const collaborator = collaboratorsByID[collaboratorID];
-
-        if (isNullish(collaborator)) {
-          return null;
-        }
-
-        return (
-          <CollaboratorBadge
-            collaborator={collaborator}
-            key={collaborator.name}
-          />
-        );
-      })}
-    </View>
+    <Row spacing={4}>
+      {value.map((collaboratorID) => (
+        <CollaboratorBadge
+          collaboratorID={collaboratorID}
+          key={collaboratorID}
+        />
+      ))}
+    </Row>
   );
 
   if (state === 'focused') {
@@ -1002,67 +1032,38 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   return <Fragment>{child}</Fragment>;
 }
 
-interface MultiCollaboratorCellEditingProps {
-  value: MultiCollaboratorFieldValue;
+function useGetRecordPrimaryTextField() {
+  const getRecord = useGetRecordCallback();
+  const getCollection = useGetCollectionCallback();
+
+  return useCallback(
+    (recordID: RecordID) => {
+      const record = getRecord(recordID);
+      const collection = getCollection(record.collectionID);
+
+      const primaryFieldText = record.fields[collection.primaryFieldID];
+      if (typeof primaryFieldText !== 'string') {
+        throw new Error('Main field expected to be string');
+      }
+      return primaryFieldText;
+    },
+    [getRecord, getCollection],
+  );
 }
 
-function MultiCollaboratorCellEditing(
-  props: MultiCollaboratorCellEditingProps,
-) {
-  const { value } = props;
-  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
-  const collaborators = useGetCollaborators();
-  const collaboratorsByID = useGetCollaboratorsByID();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<MultiCollaboratorFieldValue>();
+function useRenderRecordLink() {
+  return useCallback((recordID: RecordID) => {
+    return <RecordLinkBadge recordID={recordID} key={recordID} />;
+  }, []);
+}
 
-  const handleChange = useCallback(
-    (nextValue: CollaboratorID[]) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
+function useRecordLinkOptions(records: Record[]): ListPickerOption<RecordID>[] {
+  const getRecordPrimaryFieldText = useGetRecordPrimaryTextField();
 
-  const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, []);
-    onStopEditing();
-  }, [updateRecordFieldValue, recordID, fieldID, onStopEditing]);
-
-  const options: ListPickerOption<CollaboratorID>[] = useMemo(() => {
-    return collaborators.map((collaborator) => ({
-      value: collaborator.id,
-      label: collaborator.name,
-    }));
-  }, [collaborators]);
-
-  const renderCollaborator = useCallback(
-    (collaboratorID: CollaboratorID) => {
-      const collaborator = collaboratorsByID[collaboratorID];
-
-      return (
-        <CollaboratorBadge
-          collaborator={collaborator}
-          key={collaborator.name}
-        />
-      );
-    },
-    [collaboratorsByID],
-  );
-
-  return (
-    <View style={styles.selectKindEditingContainer}>
-      <MultiListPicker
-        value={value}
-        options={options}
-        renderLabel={renderCollaborator}
-        onChange={handleChange}
-        onRequestClose={onStopEditing}
-      />
-      <View style={styles.actionRow}>
-        <FlatButton onPress={handleClear} title="Clear all" />
-        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
-      </View>
-    </View>
-  );
+  return records.map((record) => ({
+    value: record.id,
+    label: getRecordPrimaryFieldText(record.id),
+  }));
 }
 
 interface MultiRecordLinkCellProps {
@@ -1072,32 +1073,37 @@ interface MultiRecordLinkCellProps {
 
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
   const { value, field } = props;
-  const recordsByID = useGetCollectionRecordsByID(
-    field.recordsFromCollectionID,
+  const { state, onStartEditing } = useLeafRowCellContext();
+
+  const records = useGetCollectionRecords(field.recordsFromCollectionID);
+  const renderRecordLink = useRenderRecordLink();
+  const options = useRecordLinkOptions(records);
+
+  if (state === 'editing') {
+    return (
+      <MultiSelectFieldKindCellEditing
+        renderLabel={renderRecordLink}
+        options={options}
+        value={value}
+      />
+    );
+  }
+
+  const child = isEmpty(value) ? (
+    <View style={styles.badgePlaceholder} />
+  ) : (
+    <Row spacing={4}>
+      {value.map((recordID) => (
+        <RecordLinkBadge key={recordID} recordID={recordID} />
+      ))}
+    </Row>
   );
-  const collection = useGetCollection(field.recordsFromCollectionID);
 
-  return (
-    <Fragment>
-      {value.map((recordID) => {
-        if (isNullish(value)) {
-          return null;
-        }
-        const record = recordsByID[recordID];
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+  }
 
-        if (isNullish(record)) {
-          return null;
-        }
-        const primaryFieldText = record.fields[collection.primaryFieldID];
-
-        if (typeof primaryFieldText !== 'string') {
-          throw new Error('Main field expected to be string');
-        }
-
-        return <RecordLinkBadge key={recordID} title={primaryFieldText} />;
-      })}
-    </Fragment>
-  );
+  return <Fragment>{child}</Fragment>;
 }
 
 interface MultiLineTextCellProps {
@@ -1164,11 +1170,51 @@ interface MultiOptionCellProps {
   field: MultiOptionField;
 }
 
+function useRenderOption(options: SelectOption[]) {
+  return useCallback(
+    (id: string) => {
+      const option = options.find((option) => option.id === id);
+
+      if (option === undefined) {
+        return <Fragment />;
+      }
+
+      return <OptionBadge option={option} key={option.id} />;
+    },
+    [options],
+  );
+}
+
+function useGetOptionOptions(
+  options: SelectOption[],
+): ListPickerOption<string>[] {
+  return options.map((option) => ({
+    value: option.id,
+    label: option.label,
+  }));
+}
+
 function MultiOptionCell(props: MultiOptionCellProps) {
   const { value, field } = props;
+  const { state, onStartEditing } = useLeafRowCellContext();
 
-  return (
-    <Fragment>
+  const renderOption = useRenderOption(field.options);
+  const options = useGetOptionOptions(field.options);
+
+  if (state === 'editing') {
+    return (
+      <MultiSelectFieldKindCellEditing
+        renderLabel={renderOption}
+        options={options}
+        value={value}
+      />
+    );
+  }
+
+  const child = isEmpty(value) ? (
+    <View style={styles.badgePlaceholder} />
+  ) : (
+    <Row spacing={4}>
       {value.map((_value) => {
         const selected = field.options.find((o) => o.id === _value);
         if (isNullish(selected)) {
@@ -1178,9 +1224,107 @@ function MultiOptionCell(props: MultiOptionCellProps) {
             )}`,
           );
         }
+
         return <OptionBadge key={selected.id} option={selected} />;
       })}
-    </Fragment>
+    </Row>
+  );
+
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+  }
+
+  return <Fragment>{child}</Fragment>;
+}
+
+interface MultiSelectFieldKindCellEditingProps<
+  T extends MultiSelectFieldKindValue
+> {
+  value: T;
+  renderLabel: (
+    value: InferArrayItemType<MultiSelectFieldKindValue>,
+  ) => JSX.Element;
+  options: ListPickerOption<InferArrayItemType<MultiSelectFieldKindValue>>[];
+}
+
+function MultiSelectFieldKindCellEditing<T extends MultiSelectFieldKindValue>(
+  props: MultiSelectFieldKindCellEditingProps<T>,
+) {
+  const { value, options, renderLabel } = props;
+  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<MultiSelectFieldKindValue>();
+
+  const handleChange = useCallback(
+    (nextValue: MultiSelectFieldKindValue) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
+  const handleClear = useCallback(() => {
+    updateRecordFieldValue(recordID, fieldID, []);
+    onStopEditing();
+  }, [updateRecordFieldValue, recordID, fieldID, onStopEditing]);
+
+  return (
+    <View style={styles.selectKindEditingContainer}>
+      <MultiListPicker<InferArrayItemType<MultiSelectFieldKindValue>>
+        value={value}
+        options={options}
+        renderLabel={renderLabel}
+        onChange={handleChange}
+        onRequestClose={onStopEditing}
+      />
+      <View style={styles.actionRow}>
+        <FlatButton onPress={handleClear} title="Clear all" />
+        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
+      </View>
+    </View>
+  );
+}
+
+interface SingleSelectFieldKindCellEditingProps<
+  T extends SingleSelectFieldKindValue
+> {
+  value: T;
+  renderLabel: (value: NonNullable<SingleSelectFieldKindValue>) => JSX.Element;
+  options: ListPickerOption<NonNullable<SingleSelectFieldKindValue>>[];
+}
+
+function SingleSelectFieldKindCellEditing<T extends SingleSelectFieldKindValue>(
+  props: SingleSelectFieldKindCellEditingProps<T>,
+) {
+  const { value, options, renderLabel } = props;
+  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<SingleSelectFieldKindValue>();
+
+  const handleChange = useCallback(
+    (nextValue: SingleSelectFieldKindValue) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+      onStopEditing();
+    },
+    [updateRecordFieldValue, recordID, fieldID, onStopEditing],
+  );
+
+  const handleClear = useCallback(() => {
+    updateRecordFieldValue(recordID, fieldID, null);
+    onStopEditing();
+  }, [updateRecordFieldValue, recordID, fieldID, onStopEditing]);
+
+  return (
+    <View style={styles.selectKindEditingContainer}>
+      <ListPicker<SingleSelectFieldKindValue>
+        value={value}
+        options={options}
+        renderLabel={renderLabel}
+        onChange={handleChange}
+        onRequestClose={onStopEditing}
+      />
+      <View style={styles.actionRow}>
+        <FlatButton onPress={handleClear} title="Clear" />
+        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
+      </View>
+    </View>
   );
 }
 
@@ -1287,21 +1431,37 @@ interface SingleCollaboratorCellProps {
 
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   const { value } = props;
-  const collaboratorsByID = useGetCollaboratorsByID();
 
-  if (isNullish(value)) {
-    return null;
+  const { state, onStartEditing } = useLeafRowCellContext();
+
+  const collaborators = useGetCollaborators();
+  const renderCollaborator = useRenderCollaborator();
+  const options = useGetCollaboratorOptions(collaborators);
+
+  if (state === 'editing') {
+    return (
+      <SingleSelectFieldKindCellEditing
+        renderLabel={renderCollaborator}
+        options={options}
+        value={value}
+      />
+    );
   }
 
-  const collaborator = collaboratorsByID[value];
+  const child =
+    value === null ? (
+      <View style={styles.badgePlaceholder} />
+    ) : (
+      <Row>
+        <CollaboratorBadge collaboratorID={value} key={value} />
+      </Row>
+    );
 
-  if (isNullish(collaborator)) {
-    return null;
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
-  return (
-    <CollaboratorBadge collaborator={collaborator} key={collaborator.name} />
-  );
+  return <Fragment>{child}</Fragment>;
 }
 
 interface SingleRecordLinkCellProps {
@@ -1311,26 +1471,36 @@ interface SingleRecordLinkCellProps {
 
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
   const { value, field } = props;
-  const recordsByID = useGetCollectionRecordsByID(
-    field.recordsFromCollectionID,
-  );
-  const collection = useGetCollection(field.recordsFromCollectionID);
+  const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (isNullish(value)) {
-    return null;
-  }
-  const record = recordsByID[value];
+  const renderRecordLink = useRenderRecordLink();
+  const records = useGetCollectionRecords(field.recordsFromCollectionID);
+  const options = useRecordLinkOptions(records);
 
-  if (isNullish(record)) {
-    return null;
-  }
-  const primaryFieldText = record.fields[collection.primaryFieldID];
-
-  if (typeof primaryFieldText !== 'string') {
-    throw new Error('Main field expected to be string');
+  if (state === 'editing') {
+    return (
+      <SingleSelectFieldKindCellEditing
+        renderLabel={renderRecordLink}
+        options={options}
+        value={value}
+      />
+    );
   }
 
-  return <RecordLinkBadge title={primaryFieldText} />;
+  const child =
+    value === null ? (
+      <View style={styles.badgePlaceholder} />
+    ) : (
+      <Row>
+        <RecordLinkBadge recordID={value} />
+      </Row>
+    );
+
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+  }
+
+  return <Fragment>{child}</Fragment>;
 }
 
 interface SingleLineTextCellProps {
@@ -1366,18 +1536,37 @@ interface SingleOptionCellProps {
 
 function SingleOptionCell(props: SingleOptionCellProps) {
   const { value, field } = props;
+  const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (isNullish(value)) {
-    return null;
+  const renderOption = useRenderOption(field.options);
+  const options = useGetOptionOptions(field.options);
+
+  if (state === 'editing') {
+    return (
+      <SingleSelectFieldKindCellEditing
+        renderLabel={renderOption}
+        options={options}
+        value={value}
+      />
+    );
   }
 
   const selected = field.options.find((o) => o.id === value);
 
-  if (isNullish(selected)) {
-    return null;
+  const child =
+    value === null || selected === undefined ? (
+      <View style={styles.badgePlaceholder} />
+    ) : (
+      <Row>
+        <OptionBadge option={selected} />
+      </Row>
+    );
+
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
-  return <OptionBadge option={selected} />;
+  return <Fragment>{child}</Fragment>;
 }
 
 interface URLCellProps {

@@ -266,3 +266,5 @@ export function areArraysEqual<T extends number | string>(
 
   return hasAllOf(a, b);
 }
+
+export type InferArrayItemType<T> = T extends (infer U)[] ? U : never;

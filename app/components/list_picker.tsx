@@ -33,11 +33,11 @@ export interface ListPickerOption<T> {
 
 interface ListPickerProps<T> {
   value?: T | null;
-  options: ListPickerOption<T>[];
+  options: ListPickerOption<NonNullable<T>>[];
   onChange?: (value: T) => void;
   onCreateNewOption?: (searchTerm: string) => void;
   onRequestClose?: () => void;
-  renderLabel?: (value: T, selected: boolean) => React.ReactNode;
+  renderLabel?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
 }
 
 export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
@@ -148,11 +148,11 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
 export interface ListPickerItemProps<T> {
   selected: boolean;
   active?: boolean;
-  option: ListPickerOption<T>;
-  onSelect: (value: T, selected: boolean) => void;
-  onHoverChange?: (value: T, hovered: boolean) => void;
-  renderLabel?: (value: T, selected: boolean) => React.ReactNode;
-  renderCheck?: (value: T, selected: boolean) => React.ReactNode;
+  option: ListPickerOption<NonNullable<T>>;
+  onSelect: (value: NonNullable<T>, selected: boolean) => void;
+  onHoverChange?: (value: NonNullable<T>, hovered: boolean) => void;
+  renderLabel?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
+  renderCheck?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
 }
 
 export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {

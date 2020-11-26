@@ -73,7 +73,7 @@ export function fakeNumber(): number {
 }
 
 export function fakeURL(): string {
-  return `https://${fakeWord()}.${fakeWord()}}`;
+  return `https://${fakeWord()}.${fakeWord()}`;
 }
 
 export function fakeDate(): Date {

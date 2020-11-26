@@ -1,14 +1,16 @@
+import { CollaboratorID } from 'app/data/collaborators';
+import { useGetCollaborator } from 'app/data/store';
 import React from 'react';
 import { View } from 'react-native';
 import { Avatar, DynamicStyleSheet, Text, tokens } from '../components';
-import { Collaborator } from '../data/collaborators';
 
 interface CollaboratorBadgeProps {
-  collaborator: Collaborator;
+  collaboratorID: CollaboratorID;
 }
 
 export function CollaboratorBadge(props: CollaboratorBadgeProps): JSX.Element {
-  const { collaborator } = props;
+  const { collaboratorID } = props;
+  const collaborator = useGetCollaborator(collaboratorID);
 
   return (
     <View style={styles.base}>

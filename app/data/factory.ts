@@ -449,7 +449,7 @@ const fakeFieldValuesByFieldType: {
     return sample(recordsByFieldID[field.id]).id;
   },
   [FieldType.SingleLineText]: () => {
-    return fakeWords(10);
+    return fakeWords(2);
   },
   [FieldType.SingleOption]: (field) => {
     assertSingleOptionField(field);
