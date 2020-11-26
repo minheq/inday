@@ -2,32 +2,59 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "name": "Web: Server",
       "request": "launch",
-      "name": "Jest single run all tests",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "env": { "CI": "true" },
-      "args": ["-i", "--no-cache"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "type": "node",
+      "program": "${workspaceFolder}/scripts/web.js"
     },
     {
-      "type": "node",
+      "name": "Web: Chrome",
       "request": "launch",
-      "name": "Jest watch all tests",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": ["-i", "--no-cache", "--watchAll"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "type": "chrome",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Server",
+      "request": "launch",
+      "type": "node",
+      "program": "${workspaceFolder}/server.js",
+      "preLaunchTask": "build:server",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Electron: Main",
       "type": "node",
       "request": "launch",
-      "name": "Jest watch current file",
+      "protocol": "inspector",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "runtimeArgs": ["--remote-debugging-port=9223", "index.desktop.js"],
+      "preLaunchTask": "build:web"
+    },
+    {
+      "name": "Electron: Renderer",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9223,
+      "webRoot": "${workspaceFolder}",
+      "timeout": 30000
+    },
+    {
+      "name": "Test",
+      "request": "launch",
+      "type": "node",
       "program": "${workspaceFolder}/node_modules/jest/bin/jest",
-      "args": ["${fileBasename}", "-i", "--no-cache", "--watchAll"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "args": ["${fileBasename}"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Desktop",
+      "configurations": ["Electron: Main", "Electron: Renderer"]
+    },
+    {
+      "name": "Web",
+      "configurations": ["Web: Server", "Web: Chrome"]
     }
   ]
 }

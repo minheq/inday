@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build:server",
+      "type": "npm",
+      "script": "build:server"
+    },
+    {
+      "label": "build:web",
+      "type": "npm",
+      "script": "build:web"
+    }
+  ]
+}

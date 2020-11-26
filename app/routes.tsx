@@ -1,4 +1,4 @@
-import { EmptyObject } from 'lib/js_utils';
+import { EmptyObject } from '../lib/js_utils';
 import {
   RouterImplementation,
   useNavigationImplementation,

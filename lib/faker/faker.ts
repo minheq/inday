@@ -1,4 +1,4 @@
-import { getRandomInteger, sample } from 'lib/js_utils';
+import { getRandomInteger, sample } from '../js_utils';
 
 const loremIpsum = [
   'Lorem',
