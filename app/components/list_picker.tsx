@@ -21,7 +21,7 @@ import { tokens } from './tokens';
 import { isNonNullish } from '../../lib/js_utils';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
-import { NavigationKey, UIKey } from '../lib/keyboard';
+import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { palette } from './palette';
 import { Hover } from './hover';
 
@@ -83,20 +83,6 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
     [options],
   );
 
-  const handleSubmitEditing = useCallback(() => {
-    if (activeIndex !== null) {
-      const option = options[activeIndex];
-
-      if (onChange !== undefined) {
-        onChange(option.value);
-      }
-
-      if (onRequestClose !== undefined) {
-        onRequestClose();
-      }
-    }
-  }, [activeIndex, onChange, options, onRequestClose]);
-
   const handleKeyPress = useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
       const key = event.nativeEvent.key;
@@ -108,11 +94,28 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
         return;
       }
 
+      if (key === WhiteSpaceKey.Enter) {
+        event.preventDefault();
+        if (activeIndex !== null) {
+          const option = options[activeIndex];
+
+          if (onChange !== undefined) {
+            onChange(option.value);
+          }
+
+          if (onRequestClose !== undefined) {
+            onRequestClose();
+          }
+        }
+
+        return;
+      }
+
       if (key === UIKey.Escape && onRequestClose !== undefined) {
         onRequestClose();
       }
     },
-    [onRequestClose, handleNavigation],
+    [onRequestClose, handleNavigation, activeIndex, onChange, options],
   );
 
   return (
@@ -122,7 +125,6 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
           autoFocus
           value={searchTerm}
           onKeyPress={handleKeyPress}
-          onSubmitEditing={handleSubmitEditing}
           onChange={handleSearchTermChange}
           clearable
           placeholder="Search"

@@ -19,11 +19,11 @@ import { TextInput } from './text_input';
 
 interface MultiListPickerProps<T> {
   value?: T[] | null;
-  options: ListPickerOption<T>[];
+  options: ListPickerOption<NonNullable<T>>[];
   onChange?: (value: T[]) => void;
   onCreateNewOption?: (searchTerm: string) => void;
   onRequestClose?: () => void;
-  renderLabel?: (value: T, selected: boolean) => React.ReactNode;
+  renderLabel?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
 }
 
 export function MultiListPicker<T>(
