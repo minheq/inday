@@ -1,7 +1,7 @@
 import { NativeModules, Platform } from 'react-native';
 import {
   defaultLocale,
-  isSupportedLocale,
+  getSupportedLocale,
   SupportedLocale,
 } from '../../../lib/i18n';
 import { canUseDOM } from '../env';
@@ -30,11 +30,9 @@ function getSystemLocaleIOS() {
   const nativeModules = NativeModules as NativeModulesIOS;
 
   if (nativeModules.SettingsManager?.settings?.AppleLanguages) {
-    const systemLocale =
-      nativeModules.SettingsManager.settings.AppleLanguages[0];
-    if (isSupportedLocale(systemLocale)) {
-      return systemLocale;
-    }
+    const systemLocale = nativeModules.SettingsManager.settings.AppleLanguages;
+
+    return getSupportedLocale(systemLocale);
   }
 
   return defaultLocale;
@@ -51,21 +49,18 @@ function getSystemLocaleAndroid() {
 
   if (nativeModules.I18nManager?.localeIdentifier) {
     const systemLocale = nativeModules.I18nManager?.localeIdentifier;
-    if (isSupportedLocale(systemLocale)) {
-      return systemLocale;
-    }
+
+    return getSupportedLocale(systemLocale);
   }
 
   return defaultLocale;
 }
 
 function getSystemLocaleWeb() {
-  if (
-    window.navigator.language &&
-    canUseDOM &&
-    isSupportedLocale(window.navigator.language)
-  ) {
-    return window.navigator.language;
+  if (window.navigator.language) {
+    return getSupportedLocale(window.navigator.language);
+  } else if (window.navigator.languages) {
+    return getSupportedLocale(window.navigator.languages);
   }
 
   return defaultLocale;

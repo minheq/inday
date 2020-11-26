@@ -46,7 +46,9 @@
       "request": "launch",
       "type": "node",
       "program": "${workspaceFolder}/node_modules/jest/bin/jest",
-      "args": ["${fileBasename}"]
+      "args": ["${fileBasename}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     }
   ],
   "compounds": [
