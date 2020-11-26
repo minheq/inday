@@ -5,7 +5,8 @@
       "name": "Web: Server",
       "request": "launch",
       "type": "node",
-      "program": "${workspaceFolder}/scripts/web.js"
+      "program": "${workspaceFolder}/scripts/web.js",
+      "envFile": "${workspaceFolder}/.env.web"
     },
     {
       "name": "Web: Chrome",
@@ -15,21 +16,14 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Server",
-      "request": "launch",
-      "type": "node",
-      "program": "${workspaceFolder}/server.js",
-      "preLaunchTask": "build:server",
-      "envFile": "${workspaceFolder}/.env"
-    },
-    {
       "name": "Electron: Main",
       "type": "node",
       "request": "launch",
       "protocol": "inspector",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
       "runtimeArgs": ["--remote-debugging-port=9223", "index.desktop.js"],
-      "preLaunchTask": "build:web"
+      "preLaunchTask": "build:web",
+      "envFile": "${workspaceFolder}/.env.web"
     },
     {
       "name": "Electron: Renderer",
@@ -40,7 +34,15 @@
       "timeout": 30000
     },
     {
-      "name": "Test",
+      "name": "Start Server",
+      "request": "launch",
+      "type": "node",
+      "program": "${workspaceFolder}/server.js",
+      "preLaunchTask": "build:server",
+      "envFile": "${workspaceFolder}/.env.server"
+    },
+    {
+      "name": "Test: File",
       "request": "launch",
       "type": "node",
       "program": "${workspaceFolder}/node_modules/jest/bin/jest",
@@ -49,11 +51,11 @@
   ],
   "compounds": [
     {
-      "name": "Desktop",
+      "name": "Start Desktop",
       "configurations": ["Electron: Main", "Electron: Renderer"]
     },
     {
-      "name": "Web",
+      "name": "Start Web",
       "configurations": ["Web: Server", "Web: Chrome"]
     }
   ]

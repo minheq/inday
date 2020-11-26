@@ -68,3 +68,7 @@ server.js
 
 # Logs
 *.log
+
+# Env
+.env
+.env.*
