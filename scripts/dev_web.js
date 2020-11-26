@@ -8,6 +8,7 @@ const BUILD_SERVER_PORT = 8000;
 const STATIC_SERVER_PORT = 8080;
 
 let html = '';
+let watcher = null;
 
 fs.readFile(path.resolve(__dirname, '../index.html'), (err, contents) => {
   if (err !== null) {
@@ -21,7 +22,18 @@ fs.readFile(path.resolve(__dirname, '../index.html'), (err, contents) => {
     `<script>fetch('http://localhost:${STATIC_SERVER_PORT}/check').then(() => window.location.reload())</script>`,
   );
 
-  serve({ port: BUILD_SERVER_PORT }, options)
+  serve(
+    {
+      port: BUILD_SERVER_PORT,
+      onRequest: () => {
+        if (watcher !== null) {
+          watcher.close();
+          watcher = null;
+        }
+      },
+    },
+    options,
+  )
     .then(() => {
       console.log(
         `Build server is running on http://localhost:${BUILD_SERVER_PORT}`,
@@ -29,7 +41,7 @@ fs.readFile(path.resolve(__dirname, '../index.html'), (err, contents) => {
 
       const server = http.createServer((req, res) => {
         if (req.method === 'GET' && req.url === '/check') {
-          const watcher = fs.watch(
+          watcher = fs.watch(
             path.resolve(__dirname, '../app'),
             { recursive: true },
             () => {
