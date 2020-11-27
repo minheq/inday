@@ -8,3 +8,4 @@ export * from './month';
 export * from './recurrence';
 export * from './time';
 export * from './week';
+export * from './year';

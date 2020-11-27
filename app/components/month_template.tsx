@@ -15,7 +15,7 @@ interface MonthTemplateProps {
   selected?: DayInterval | null;
   firstDayOfWeek?: FirstDayOfWeek;
   isOutsideRange?: (day: Day) => boolean;
-  isBlocked?: (day: Day) => boolean;
+  isDayBlocked?: (day: Day) => boolean;
   renderOtherMonthDay: (props: RenderOtherMonthProps) => React.ReactNode;
   renderDay: (props: RenderDayProps) => React.ReactNode;
   renderWeek: (props: RenderWeekProps) => React.ReactNode;
@@ -48,7 +48,7 @@ export function MonthTemplate(props: MonthTemplateProps): JSX.Element {
     firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
     selected,
     isOutsideRange,
-    isBlocked,
+    isDayBlocked,
     renderDay,
     renderOtherMonthDay,
     renderWeek,
@@ -63,7 +63,7 @@ export function MonthTemplate(props: MonthTemplateProps): JSX.Element {
           week={week}
           selected={selected}
           isOutsideRange={isOutsideRange}
-          isBlocked={isBlocked}
+          isDayBlocked={isDayBlocked}
           renderDay={renderDay}
           renderOtherMonthDay={renderOtherMonthDay}
           renderWeek={renderWeek}
@@ -77,7 +77,7 @@ interface WeekContainerProps {
   week: Week;
   selected?: DayInterval | null;
   isOutsideRange?: (day: Day) => boolean;
-  isBlocked?: (day: Day) => boolean;
+  isDayBlocked?: (day: Day) => boolean;
   renderOtherMonthDay: (props: RenderOtherMonthProps) => React.ReactNode;
   renderDay: (props: RenderDayProps) => React.ReactNode;
   renderWeek: (props: RenderWeekProps) => React.ReactNode;
@@ -88,7 +88,7 @@ function WeekContainer(props: WeekContainerProps): JSX.Element {
     week,
     selected,
     isOutsideRange,
-    isBlocked,
+    isDayBlocked,
     renderOtherMonthDay,
     renderDay,
     renderWeek,
@@ -114,7 +114,7 @@ function WeekContainer(props: WeekContainerProps): JSX.Element {
               : false;
           const outsideRange = isOutsideRange ? isOutsideRange(day) : false;
           const today = Day.isSameDay(Day.fromDate(new Date()), day);
-          const blocked = isBlocked ? isBlocked(day) : false;
+          const blocked = isDayBlocked ? isDayBlocked(day) : false;
 
           if (!isWithinCurrentMonth) {
             const hasSelectionNextMonth = selected
@@ -164,7 +164,7 @@ function WeekContainer(props: WeekContainerProps): JSX.Element {
     week,
     selected,
     isOutsideRange,
-    isBlocked,
+    isDayBlocked,
     renderOtherMonthDay,
     renderDay,
     som,

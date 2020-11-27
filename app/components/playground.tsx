@@ -43,7 +43,7 @@ export function Playground(
     params: { component },
   } = props;
   const mq = useMediaQuery();
-  const [open, setOpen] = useState(mq.sizeQuery.lgAndUp);
+  const [open, setOpen] = useState(false);
 
   const handleCloseMenu = useCallback(() => {
     setOpen(false);
@@ -74,9 +74,9 @@ export function Playground(
     >
       <View style={styles.base}>
         {mq.sizeQuery.lgAndUp ? (
-          <Slide width={MENU_WIDTH} open={open}>
+          <Container width={MENU_WIDTH} shadow>
             <Menu />
-          </Slide>
+          </Container>
         ) : (
           <Modal
             animationType="slide"
@@ -89,15 +89,17 @@ export function Playground(
             <Menu />
           </Modal>
         )}
-        <Container zIndex={1} right={16} bottom={16} position="absolute">
-          <Row>
-            <FlatButton
-              color="primary"
-              title="MENU"
-              onPress={() => setOpen(!open)}
-            />
-          </Row>
-        </Container>
+        {mq.sizeQuery.lgAndDown && (
+          <Container zIndex={1} right={16} bottom={16} position="absolute">
+            <Row>
+              <FlatButton
+                color="primary"
+                title="MENU"
+                onPress={() => setOpen(!open)}
+              />
+            </Row>
+          </Container>
+        )}
         <Content>
           <ScrollView>
             <Text weight="bold" size="xl">
@@ -115,13 +117,15 @@ export function Playground(
 function Menu() {
   return (
     <View style={styles.menu}>
-      <Container padding={8}>
+      <Container padding={8} paddingTop={16}>
         <Text weight="600" size="lg">
           Inday Playground
         </Text>
       </Container>
       <ScrollView>
+        <MenuSection title="GETTING STARTED" />
         <MenuItem component="Intro" />
+        <MenuSection title="COMPONENTS" />
         <MenuItem component="DayPicker" />
         <MenuItem component="Dialog" />
         <MenuItem component="Grid" />
@@ -140,23 +144,43 @@ function MenuItem(props: MenuItemProps) {
   const { component: currentComponent, onCloseMenu } = useContext(
     PlaygroundContext,
   );
-
-  const handlePress = useCallback(() => {
-    push(ScreenName.Playground, { component });
-    onCloseMenu();
-  }, [push, component, onCloseMenu]);
-
   const active = currentComponent === component;
 
+  const handlePress = useCallback(() => {
+    if (active === true) {
+      return;
+    }
+    push(ScreenName.Playground, { component });
+    onCloseMenu();
+  }, [active, push, component, onCloseMenu]);
+
   return (
-    <Button style={styles.menuButton} onPress={handlePress}>
-      <Text
-        weight={active ? 'bold' : 'normal'}
-        color={active ? 'primary' : 'default'}
-      >
-        {component}
+    <Container paddingHorizontal={8}>
+      <Button style={styles.menuButton} onPress={handlePress}>
+        <Text
+          weight={active ? 'bold' : 'normal'}
+          color={active ? 'primary' : 'default'}
+        >
+          {component}
+        </Text>
+      </Button>
+    </Container>
+  );
+}
+
+interface MenuSectionProps {
+  title: string;
+}
+
+function MenuSection(props: MenuSectionProps) {
+  const { title } = props;
+
+  return (
+    <Container paddingLeft={8} paddingTop={16} paddingBottom={8}>
+      <Text color="muted" weight="bold">
+        {title}
       </Text>
-    </Button>
+    </Container>
   );
 }
 
@@ -205,6 +229,8 @@ const styles = DynamicStyleSheet.create(() => ({
   },
   menuButton: {
     padding: 8,
+    paddingLeft: 24,
+    borderRadius: tokens.border.radius.default,
   },
   content: {
     flex: 1,

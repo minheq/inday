@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { View, Pressable } from 'react-native';
 
 import {
@@ -9,6 +9,7 @@ import {
   DayInterval,
   Day,
   Month,
+  Year,
 } from '../../lib/datetime';
 import { Text } from './text';
 import { Spacer } from './spacer';
@@ -20,16 +21,40 @@ import {
   RenderWeekProps,
 } from './month_template';
 import { DynamicStyleSheet } from './stylesheet';
+import { tokens } from './tokens';
+import { Button } from './button';
 
 interface DayPickerProps {
   value?: Day | null;
   onChange?: (value: Day) => void;
+  maxDay?: Day;
+  minDay?: Day;
   isOutsideRange?: (day: Day) => boolean;
-  isBlocked?: (day: Day) => boolean;
+  isDayBlocked?: (day: Day) => boolean;
 }
 
 export function DayPicker(props: DayPickerProps): JSX.Element {
-  const { value, onChange, isOutsideRange, isBlocked } = props;
+  const {
+    value,
+    onChange,
+    minDay = Day.subYears(Day.today(), 2),
+    maxDay = Day.addYears(Day.today(), 2),
+    isOutsideRange,
+    isDayBlocked,
+  } = props;
+
+  const yearsOptions = useMemo(() => {
+    return Year.eachYearOfInterval({
+      start: Year.fromDay(minDay),
+      end: Year.fromDay(maxDay),
+    });
+  }, [minDay, maxDay]);
+  const monthOptions = useMemo(() => {
+    return Month.eachMonthOfInterval({
+      start: Month.fromDay(minDay),
+      end: Month.fromDay(maxDay),
+    });
+  }, [minDay, maxDay]);
 
   const selected = useMemo((): DayInterval | null => {
     if (value === null || value === undefined) {
@@ -53,6 +78,15 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
     },
     [onChange],
   );
+
+  const handlePressNext = useCallback(() => {
+    setMonth(Month.addMonths(month, 1));
+  }, [month]);
+
+  const handlePressPrevious = useCallback(() => {
+    setMonth(Month.subMonths(month, 1));
+  }, [month]);
+
   const renderDay = useCallback(
     (p: RenderDayProps) => <DayDisplay {...p} onSelect={handleSelectDay} />,
     [handleSelectDay],
@@ -65,7 +99,19 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
 
   return (
     <View style={styles.root}>
-      <MonthNavigator month={month} onChange={setMonth} />
+      <View style={styles.monthNavigatorWrapper}>
+        <Text align="center">{format(Month.toDate(month), 'MMMM')}</Text>
+        <Text align="center">{format(Month.toDate(month), 'yyyy')}</Text>
+        <View style={styles.monthArrowsWrapper}>
+          <Button style={styles.arrowWrapper} onPress={handlePressPrevious}>
+            <Icon name="ChevronLeft" />
+          </Button>
+          <Spacer direction="row" size={8} />
+          <Button style={styles.arrowWrapper} onPress={handlePressNext}>
+            <Icon name="ChevronRight" />
+          </Button>
+        </View>
+      </View>
       <Spacer size={16} />
       <WeekDates />
       <Spacer size={16} />
@@ -73,7 +119,7 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
         selected={selected}
         month={month}
         isOutsideRange={isOutsideRange}
-        isBlocked={isBlocked}
+        isDayBlocked={isDayBlocked}
         renderDay={renderDay}
         renderOtherMonthDay={renderOtherMonthDay}
         renderWeek={renderWeek}
@@ -122,18 +168,30 @@ function DayDisplay(props: DayDisplayProps) {
   return (
     <View style={[styles.dayRoot, withinSelected && styles.withinSelected]}>
       <Pressable onPress={() => onSelect(day)} style={styles.dayButton}>
-        {selectedStart && !selectedEnd && (
-          <View style={[styles.selectedEdge, styles.selectedStart]} />
+        {({ hovered }: { hovered: boolean }) => (
+          <Fragment>
+            {selectedStart && !selectedEnd && (
+              <View style={[styles.selectedEdge, styles.selectedStart]} />
+            )}
+            {selectedEnd && !selectedStart && (
+              <View style={[styles.selectedEdge, styles.selectedEnd]} />
+            )}
+            <View
+              style={[
+                styles.dayWrapper,
+                today && styles.todayWrapper,
+                hovered && styles.hoveredDay,
+                selected && styles.selectedDay,
+              ]}
+            >
+              <Text
+                color={selected ? 'contrast' : today ? 'primary' : 'default'}
+              >
+                {format(Day.toDate(day), 'd')}
+              </Text>
+            </View>
+          </Fragment>
         )}
-        {selectedEnd && !selectedStart && (
-          <View style={[styles.selectedEdge, styles.selectedEnd]} />
-        )}
-        <View style={[styles.dayWrapper, selected && styles.selectedDay]}>
-          <Text color={selected ? 'contrast' : 'default'}>
-            {format(Day.toDate(day), 'd')}
-          </Text>
-          {today && <View style={styles.todayMarker} />}
-        </View>
       </Pressable>
     </View>
   );
@@ -145,10 +203,18 @@ interface OtherMonthDayProps {
 }
 
 function OtherMonthDay(props: OtherMonthDayProps) {
-  const { withinSelected } = props;
+  const { withinSelected, day } = props;
 
   return (
-    <View style={[styles.dayRoot, withinSelected && styles.withinSelected]} />
+    <View
+      style={[
+        styles.dayRoot,
+        styles.otherDay,
+        withinSelected && styles.withinSelected,
+      ]}
+    >
+      <Text color="muted">{format(Day.toDate(day), 'd')}</Text>
+    </View>
   );
 }
 
@@ -185,34 +251,6 @@ function WeekDates(props: WeekDatesProps) {
   );
 }
 
-interface MonthNavigatorProps {
-  month: Month;
-  onChange: (month: Month) => void;
-}
-
-function MonthNavigator(props: MonthNavigatorProps) {
-  const { month, onChange } = props;
-  const handlePressNext = useCallback(() => {
-    onChange(Month.addMonths(month, 1));
-  }, [month, onChange]);
-
-  const handlePressPrevious = useCallback(() => {
-    onChange(Month.subMonths(month, 1));
-  }, [month, onChange]);
-
-  return (
-    <View style={styles.monthNavigatorWrapper}>
-      <Pressable style={styles.arrowWrapper} onPress={handlePressPrevious}>
-        <Icon name="ChevronLeft" size="sm" />
-      </Pressable>
-      <Text align="center">{format(Month.toDate(month), 'MMMM yyyy')}</Text>
-      <Pressable style={styles.arrowWrapper} onPress={handlePressNext}>
-        <Icon name="ChevronRight" size="sm" />
-      </Pressable>
-    </View>
-  );
-}
-
 const styles = DynamicStyleSheet.create(() => ({
   root: {},
   dayRoot: {
@@ -242,25 +280,20 @@ const styles = DynamicStyleSheet.create(() => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 999,
+    borderRadius: tokens.border.radius.default,
+    borderColor: tokens.colors.gray[300],
     textAlign: 'center',
-    height: 24,
-    width: 24,
+    height: 32,
+    width: 32,
     borderWidth: 1,
+    ...tokens.shadow.elevation1,
   },
+  todayWrapper: {},
   withinSelected: {
-    backgroundColor: 'rgba(82,68,134,0.15)',
-  },
-  todayMarker: {
-    bottom: -4,
-    width: 4,
-    height: 4,
-    paddingTop: 4,
-    borderRadius: 999,
-    backgroundColor: 'black',
+    backgroundColor: tokens.colors.lightBlue[50],
   },
   selectedEdge: {
-    backgroundColor: 'rgba(82,68,134,0.15)',
+    backgroundColor: tokens.colors.lightBlue[50],
     position: 'absolute',
     zIndex: -1,
     width: '50%',
@@ -276,8 +309,15 @@ const styles = DynamicStyleSheet.create(() => ({
   monthNavigatorWrapper: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  monthArrowsWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  hoveredDay: {
+    backgroundColor: tokens.colors.lightBlue[100],
   },
   monthsWrapperHorizontal: {
     display: 'flex',
@@ -289,6 +329,9 @@ const styles = DynamicStyleSheet.create(() => ({
   week: {
     paddingTop: 2,
     paddingBottom: 2,
+  },
+  otherDay: {
+    opacity: 0.5,
   },
   arrow: {
     height: 40,
@@ -314,7 +357,7 @@ const styles = DynamicStyleSheet.create(() => ({
     width: '100%',
   },
   selectedDay: {
-    backgroundColor: 'rgba(82, 68, 134, 1)',
+    backgroundColor: tokens.colors.lightBlue[700],
   },
   dateWrapper: {
     display: 'flex',

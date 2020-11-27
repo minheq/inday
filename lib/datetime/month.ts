@@ -28,8 +28,13 @@ import {
 } from './week';
 
 export const MONTH_FORMAT = 'yyyy-MM';
-/** Month in `yyyy-MM` format */
-export type Month = string;
+
+export type Month = `${typeof MONTH_FORMAT}`;
+
+export interface MonthInterval {
+  start: Month;
+  end: Month;
+}
 
 export const Month = {
   getWeeks: (
@@ -45,6 +50,20 @@ export const Month = {
     }));
   },
   isSameMonth,
+  eachMonthOfInterval: (interval: MonthInterval): Month[] => {
+    const startDate = toDate(interval.start);
+    const endDate = toDate(interval.end);
+
+    const months: Month[] = [];
+    let current = startDate;
+
+    while (isBefore(current, endDate)) {
+      months.push(fromDate(current));
+      current = addMonths(current, 1);
+    }
+
+    return months;
+  },
   startOfMonth: (month: Month): Day => {
     return Day.fromDate(startOfMonth(toDate(month)));
   },
@@ -74,11 +93,11 @@ function isSameMonth(monthLeft: Month, monthRight: Month): boolean {
 }
 
 function getMonthFromDay(day: Day): Month {
-  return format(Day.toDate(day), MONTH_FORMAT);
+  return format(Day.toDate(day), MONTH_FORMAT) as Month;
 }
 
 function fromDate(date: Date): Month {
-  return format(date, MONTH_FORMAT);
+  return format(date, MONTH_FORMAT) as Month;
 }
 
 function toDate(month: Month): Date {

@@ -2,7 +2,7 @@ export const tokens = {
   border: {
     radius: {
       default: 8,
-      oval: 999,
+      circle: 999,
     },
   },
   shadow: {
