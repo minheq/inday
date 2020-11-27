@@ -2,18 +2,33 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Web: Server",
+      "name": "Start Web",
       "request": "launch",
       "type": "node",
       "program": "${workspaceFolder}/scripts/web.js",
-      "envFile": "${workspaceFolder}/.env.web"
+      "envFile": "${workspaceFolder}/.env.web",
+      "serverReadyAction": {
+        "pattern": "on http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "debugWithChrome"
+      }
     },
     {
-      "name": "Web: Chrome",
+      "name": "Start Server",
       "request": "launch",
-      "type": "chrome",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}"
+      "type": "node",
+      "program": "${workspaceFolder}/server.js",
+      "preLaunchTask": "build:server",
+      "envFile": "${workspaceFolder}/.env.server"
+    },
+    {
+      "name": "Test: File",
+      "request": "launch",
+      "type": "node",
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+      "args": ["${fileBasename}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     },
     {
       "name": "Electron: Main",
@@ -32,33 +47,12 @@
       "port": 9223,
       "webRoot": "${workspaceFolder}",
       "timeout": 30000
-    },
-    {
-      "name": "Start Server",
-      "request": "launch",
-      "type": "node",
-      "program": "${workspaceFolder}/server.js",
-      "preLaunchTask": "build:server",
-      "envFile": "${workspaceFolder}/.env.server"
-    },
-    {
-      "name": "Test: File",
-      "request": "launch",
-      "type": "node",
-      "program": "${workspaceFolder}/node_modules/jest/bin/jest",
-      "args": ["${fileBasename}"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
     }
   ],
   "compounds": [
     {
       "name": "Start Desktop",
       "configurations": ["Electron: Main", "Electron: Renderer"]
-    },
-    {
-      "name": "Start Web",
-      "configurations": ["Web: Server", "Web: Chrome"]
     }
   ]
 }
