@@ -1,14 +1,33 @@
-import React, { useCallback } from 'react';
-import { View } from 'react-native';
-import { NoAnimation, Slide, Fade } from './dialog.stories';
+import React, { createContext, useCallback, useContext, useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import {
+  NoAnimation as DialogNoAnimation,
+  Slide as DialogSlide,
+  Fade as DialogFade,
+} from './dialog.stories';
 import { Flat, Grouped } from './grid.stories';
-import { FlatButton } from './flat_button';
 import { Basic as DayPickerBasic } from './day_picker.stories';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
+import { Button } from './button';
+import { Container } from './container';
+import { tokens } from './tokens';
+import { Slide } from './slide';
+import { Spacer } from './spacer';
+import { Row } from './row';
+import { FlatButton } from './flat_button';
+import { Content } from './content';
 
-type ComponentName = 'Intro' | 'Dialog' | 'Grid' | 'DayPicker';
+const MENU_WIDTH = 280;
+
+interface PlaygroundContext {
+  component: string;
+}
+
+const PlaygroundContext = createContext<PlaygroundContext>({
+  component: 'Intro',
+});
 
 export function Playground(
   props: ScreenProps<ScreenName.Playground>,
@@ -16,6 +35,7 @@ export function Playground(
   const {
     params: { component },
   } = props;
+  const [open, setOpen] = useState(true);
 
   let content: React.ReactNode = null;
 
@@ -38,31 +58,75 @@ export function Playground(
   }
 
   return (
-    <View style={styles.base}>
-      <View style={styles.menu}>
+    <PlaygroundContext.Provider value={{ component }}>
+      <View style={styles.base}>
+        <Slide width={MENU_WIDTH} open={open}>
+          <Menu />
+        </Slide>
+        <Content>
+          <Container padding={16}>
+            <Row>
+              <FlatButton
+                color="primary"
+                title="MENU"
+                onPress={() => setOpen(!open)}
+              />
+            </Row>
+            <Text weight="bold" size="xl">
+              {component}
+            </Text>
+            <Spacer size={24} />
+            {content}
+          </Container>
+        </Content>
+      </View>
+    </PlaygroundContext.Provider>
+  );
+}
+
+function Menu() {
+  return (
+    <View style={styles.menu}>
+      <Container padding={8}>
+        <Text weight="600" size="lg">
+          Inday Playground
+        </Text>
+      </Container>
+      <ScrollView>
         <MenuItem component="Intro" />
+        <MenuItem component="DayPicker" />
         <MenuItem component="Dialog" />
         <MenuItem component="Grid" />
-        <MenuItem component="DayPicker" />
-      </View>
-      <View style={styles.content}>{content}</View>
+      </ScrollView>
     </View>
   );
 }
 
 interface MenuItemProps {
-  component: ComponentName;
+  component: string;
 }
 
 function MenuItem(props: MenuItemProps) {
   const { component } = props;
   const { push } = useNavigation();
+  const context = useContext(PlaygroundContext);
 
   const handlePress = useCallback(() => {
     push(ScreenName.Playground, { component });
   }, [push, component]);
 
-  return <FlatButton onPress={handlePress} title={component} />;
+  const active = context.component === component;
+
+  return (
+    <Button style={styles.menuButton} onPress={handlePress}>
+      <Text
+        weight={active ? 'bold' : 'normal'}
+        color={active ? 'primary' : 'default'}
+      >
+        {component}
+      </Text>
+    </Button>
+  );
 }
 
 function Intro() {
@@ -76,9 +140,9 @@ function Intro() {
 function Dialog() {
   return (
     <View>
-      <NoAnimation />
-      <Slide />
-      <Fade />
+      <DialogNoAnimation />
+      <DialogSlide />
+      <DialogFade />
     </View>
   );
 }
@@ -94,18 +158,24 @@ function Grid() {
 
 function DayPicker() {
   return (
-    <View>
+    <Container width={320}>
       <DayPickerBasic />
-    </View>
+    </Container>
   );
 }
 
 const styles = DynamicStyleSheet.create(() => ({
   base: {
     flexDirection: 'row',
+    height: '100%',
   },
   menu: {
-    width: 300,
+    width: MENU_WIDTH,
+    height: '100%',
+    ...tokens.shadow.elevation1,
+  },
+  menuButton: {
+    padding: 8,
   },
   content: {
     flex: 1,

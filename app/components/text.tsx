@@ -2,6 +2,19 @@ import React from 'react';
 import { Text as RNText, StyleSheet, TextStyle } from 'react-native';
 import { tokens } from './tokens';
 
+export interface TextProps {
+  children?: React.ReactNode;
+  size?: TextSize;
+  color?: TextColor;
+  align?: 'left' | 'right' | 'center';
+  weight?: TextWeight;
+  selectable?: boolean;
+  testID?: string;
+  numberOfLines?: number;
+  decoration?: TextDecorationLine;
+  transform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+}
+
 type TextDecorationLine =
   | 'none'
   | 'underline'
@@ -39,19 +52,6 @@ interface TextColors {
 }
 
 export type TextColor = keyof TextColors;
-
-export interface TextProps {
-  children?: React.ReactNode;
-  size?: TextSize;
-  color?: TextColor;
-  align?: 'left' | 'right' | 'center';
-  weight?: TextWeight;
-  selectable?: boolean;
-  testID?: string;
-  numberOfLines?: number;
-  decoration?: TextDecorationLine;
-  transform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
-}
 
 /**
  * Run of text with a single style.

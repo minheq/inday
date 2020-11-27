@@ -18,11 +18,7 @@ interface UseNavigation {
 export function useNavigationImplementation(): UseNavigation {
   const { push, back, setParams } = useContext(RouterContext);
 
-  return {
-    setParams,
-    push,
-    back,
-  };
+  return { setParams, push, back };
 }
 
 interface RouterContext {
@@ -150,16 +146,9 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
     dispatch({ type: 'BACK' });
   }, []);
 
-  const handleNavigate = useCallback(
-    (nextName: string, nextParams: Params) => {
-      if (pathMap[nextName] !== undefined) {
-        dispatch({ type: 'PUSH', name: nextName, params: nextParams });
-      } else {
-        console.error(`Screen ${nextName} was not set up`);
-      }
-    },
-    [pathMap],
-  );
+  const handleNavigate = useCallback((nextName: string, nextParams: Params) => {
+    dispatch({ type: 'PUSH', name: nextName, params: nextParams });
+  }, []);
 
   const handleSetParams = useCallback((nextParams: Params) => {
     dispatch({ type: 'SET_PARAMS', params: nextParams });
