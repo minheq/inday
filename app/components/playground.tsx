@@ -18,15 +18,22 @@ import { Spacer } from './spacer';
 import { Row } from './row';
 import { FlatButton } from './flat_button';
 import { Content } from './content';
+import { useMediaQuery } from '../lib/media_query';
+import { Modal } from './modal';
+import { CloseButton } from './close_button';
 
 const MENU_WIDTH = 280;
 
 interface PlaygroundContext {
   component: string;
+  onCloseMenu: () => void;
 }
 
 const PlaygroundContext = createContext<PlaygroundContext>({
   component: 'Intro',
+  onCloseMenu: () => {
+    return;
+  },
 });
 
 export function Playground(
@@ -35,8 +42,12 @@ export function Playground(
   const {
     params: { component },
   } = props;
-  const [open, setOpen] = useState(true);
+  const mq = useMediaQuery();
+  const [open, setOpen] = useState(mq.sizeQuery.lgAndUp);
 
+  const handleCloseMenu = useCallback(() => {
+    setOpen(false);
+  }, []);
   let content: React.ReactNode = null;
 
   switch (component) {
@@ -58,26 +69,43 @@ export function Playground(
   }
 
   return (
-    <PlaygroundContext.Provider value={{ component }}>
+    <PlaygroundContext.Provider
+      value={{ component, onCloseMenu: handleCloseMenu }}
+    >
       <View style={styles.base}>
-        <Slide width={MENU_WIDTH} open={open}>
-          <Menu />
-        </Slide>
-        <Content>
-          <Container padding={16}>
+        {mq.sizeQuery.lgAndUp ? (
+          <Slide width={MENU_WIDTH} open={open}>
+            <Menu />
+          </Slide>
+        ) : (
+          <Modal
+            animationType="slide"
+            onRequestClose={handleCloseMenu}
+            visible={open}
+          >
             <Row>
-              <FlatButton
-                color="primary"
-                title="MENU"
-                onPress={() => setOpen(!open)}
-              />
+              <CloseButton onPress={handleCloseMenu} />
             </Row>
+            <Menu />
+          </Modal>
+        )}
+        <Container zIndex={1} right={16} bottom={16} position="absolute">
+          <Row>
+            <FlatButton
+              color="primary"
+              title="MENU"
+              onPress={() => setOpen(!open)}
+            />
+          </Row>
+        </Container>
+        <Content>
+          <ScrollView>
             <Text weight="bold" size="xl">
               {component}
             </Text>
             <Spacer size={24} />
             {content}
-          </Container>
+          </ScrollView>
         </Content>
       </View>
     </PlaygroundContext.Provider>
@@ -109,13 +137,16 @@ interface MenuItemProps {
 function MenuItem(props: MenuItemProps) {
   const { component } = props;
   const { push } = useNavigation();
-  const context = useContext(PlaygroundContext);
+  const { component: currentComponent, onCloseMenu } = useContext(
+    PlaygroundContext,
+  );
 
   const handlePress = useCallback(() => {
     push(ScreenName.Playground, { component });
-  }, [push, component]);
+    onCloseMenu();
+  }, [push, component, onCloseMenu]);
 
-  const active = context.component === component;
+  const active = currentComponent === component;
 
   return (
     <Button style={styles.menuButton} onPress={handlePress}>
@@ -158,7 +189,7 @@ function Grid() {
 
 function DayPicker() {
   return (
-    <Container width={320}>
+    <Container>
       <DayPickerBasic />
     </Container>
   );
@@ -170,9 +201,7 @@ const styles = DynamicStyleSheet.create(() => ({
     height: '100%',
   },
   menu: {
-    width: MENU_WIDTH,
-    height: '100%',
-    ...tokens.shadow.elevation1,
+    flex: 1,
   },
   menuButton: {
     padding: 8,
