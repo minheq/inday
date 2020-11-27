@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { View } from 'react-native';
 import { NoAnimation, Slide, Fade } from './dialog.stories';
 import { Flat, Grouped } from './grid.stories';
@@ -6,11 +6,18 @@ import { FlatButton } from './flat_button';
 import { Basic as DayPickerBasic } from './day_picker.stories';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
+import { ScreenName, ScreenProps, useNavigation } from '../routes';
 
 type ComponentName = 'Intro' | 'Dialog' | 'Grid' | 'DayPicker';
 
-export function Playground(): JSX.Element {
-  const [component, setComponent] = useState<ComponentName>('Intro');
+export function Playground(
+  props: ScreenProps<ScreenName.Playground>,
+): JSX.Element {
+  const {
+    params: { component },
+  } = props;
+
+  console.log('render playground');
 
   let content: React.ReactNode = null;
 
@@ -35,10 +42,10 @@ export function Playground(): JSX.Element {
   return (
     <View style={styles.base}>
       <View style={styles.menu}>
-        <MenuItem onPress={setComponent} component="Intro" />
-        <MenuItem onPress={setComponent} component="Dialog" />
-        <MenuItem onPress={setComponent} component="Grid" />
-        <MenuItem onPress={setComponent} component="DayPicker" />
+        <MenuItem component="Intro" />
+        <MenuItem component="Dialog" />
+        <MenuItem component="Grid" />
+        <MenuItem component="DayPicker" />
       </View>
       <View style={styles.content}>{content}</View>
     </View>
@@ -46,16 +53,16 @@ export function Playground(): JSX.Element {
 }
 
 interface MenuItemProps {
-  onPress: (component: ComponentName) => void;
   component: ComponentName;
 }
 
 function MenuItem(props: MenuItemProps) {
-  const { onPress, component } = props;
+  const { component } = props;
+  const { push } = useNavigation();
 
   const handlePress = useCallback(() => {
-    onPress(component);
-  }, [onPress, component]);
+    push(ScreenName.Playground, { component });
+  }, [push, component]);
 
   return <FlatButton onPress={handlePress} title={component} />;
 }

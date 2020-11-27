@@ -54,7 +54,7 @@ export function App(): JSX.Element {
                   component: SpaceScreen,
                 },
                 Playground: {
-                  path: '/playground',
+                  path: '/playground/:component',
                   component: Playground,
                 },
               }}

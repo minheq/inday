@@ -7,16 +7,7 @@ import React, {
   useReducer,
 } from 'react';
 import { match, compile } from 'path-to-regexp';
-import {
-  append,
-  areEqual,
-  isEmpty,
-  keysOf,
-  last,
-  remove,
-  updateLast,
-} from '../../../lib/js_utils';
-import { usePrevious } from 'app/hooks/use_previous';
+import { keysOf } from '../../../lib/js_utils';
 
 interface UseNavigation {
   setParams: (params: Params) => void;
@@ -34,13 +25,12 @@ export function useNavigationImplementation(): UseNavigation {
   };
 }
 
-type Stack = { name: string; params: Params }[];
-
 interface RouterContext {
   name: string;
   params: Params;
-  stack: Stack;
+  lastAction: Action | null;
   pathMap: PathMap;
+  browserUpdate: (name: string, params: Params) => void;
   setParams: (params: Params) => void;
   push: (name: string, params: Params) => void;
   back: () => void;
@@ -50,7 +40,10 @@ const RouterContext = createContext<RouterContext>({
   name: '',
   params: {},
   pathMap: {},
-  stack: [],
+  lastAction: null,
+  browserUpdate: () => {
+    return;
+  },
   push: () => {
     return;
   },
@@ -67,7 +60,7 @@ interface Params {
 }
 
 interface State {
-  stack: Stack;
+  lastAction: Action | null;
   name: string;
   params: Params;
 }
@@ -82,32 +75,35 @@ type PathMap = {
 type Action =
   | { type: 'PUSH'; name: string; params: Params }
   | { type: 'BACK' }
-  | { type: 'SET_PARAMS'; params: Params };
+  | { type: 'SET_PARAMS'; params: Params }
+  | { type: 'BROWSER_UPDATE'; name: string; params: Params };
 
 function reducer(prevState: State, action: Action): State {
-  const { stack: prevStack } = prevState;
-
   switch (action.type) {
     case 'PUSH':
       return {
         ...prevState,
         name: action.name,
         params: action.params,
-        stack: append(prevStack, { name: action.name, params: action.params }),
+        lastAction: action,
       };
     case 'SET_PARAMS':
       return {
         ...prevState,
         params: action.params,
-        stack: updateLast(prevStack, (item) => ({
-          name: item.name,
-          params: action.params,
-        })),
+        lastAction: action,
+      };
+    case 'BROWSER_UPDATE':
+      return {
+        ...prevState,
+        name: action.name,
+        params: action.params,
+        lastAction: null,
       };
     case 'BACK':
       return {
         ...prevState,
-        stack: remove(prevStack, 1),
+        lastAction: action,
       };
     default:
       console.error(action); // it should be never
@@ -140,7 +136,7 @@ function getInitialState(pathMap: PathMap): State {
   return {
     name,
     params,
-    stack: name !== '' ? [{ name, params }] : [],
+    lastAction: null,
   };
 }
 
@@ -148,7 +144,7 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
   const { pathMap, fallback } = props;
 
   const [state, dispatch] = useReducer(reducer, getInitialState(pathMap));
-  const { stack, name, params } = state;
+  const { lastAction, name, params } = state;
 
   const handleGoBack = useCallback(() => {
     dispatch({ type: 'BACK' });
@@ -169,6 +165,13 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
     dispatch({ type: 'SET_PARAMS', params: nextParams });
   }, []);
 
+  const handleBrowserUpdate = useCallback(
+    (nextName: string, nextParams: Params) => {
+      dispatch({ type: 'BROWSER_UPDATE', name: nextName, params: nextParams });
+    },
+    [],
+  );
+
   const Screen = name !== '' ? pathMap[name].component : null;
   const child =
     Screen !== null ? <Screen name={name} params={params} /> : fallback;
@@ -178,8 +181,9 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
       value={{
         name,
         params,
-        stack,
+        lastAction,
         pathMap,
+        browserUpdate: handleBrowserUpdate,
         back: handleGoBack,
         push: handleNavigate,
         setParams: handleSetParams,
@@ -191,42 +195,66 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
   );
 }
 
+interface HistoryState {
+  name: string;
+  params: Params;
+}
+
 function BrowserHistorySync(): JSX.Element {
-  const { stack, pathMap, name, params } = useContext(RouterContext);
-  const prevStack = usePrevious(stack);
+  const { lastAction, pathMap, name, params, browserUpdate } = useContext(
+    RouterContext,
+  );
+
+  const handleBrowserPopState = useCallback(
+    (event: PopStateEvent) => {
+      const nextState = event.state as HistoryState | null;
+
+      if (nextState !== null) {
+        const { name: nextName, params: nextParams } = nextState;
+
+        browserUpdate(nextName, nextParams);
+      }
+    },
+    [browserUpdate],
+  );
 
   useEffect(() => {
-    if (isEmpty(stack) || isEmpty(prevStack)) {
+    window.addEventListener('popstate', handleBrowserPopState);
+
+    return () => {
+      window.removeEventListener('popstate', handleBrowserPopState);
+    };
+  }, [handleBrowserPopState]);
+
+  useEffect(() => {
+    if (lastAction === null) {
       return;
     }
 
-    // Stack has new items
-    if (prevStack.length < stack.length) {
-      history.pushState(
-        null,
-        name,
-        compile(pathMap[name].path, { encode: encodeURIComponent })(params),
-      );
-      // Stack has removed bunch of items
-    } else if (prevStack.length > stack.length) {
-      history.go(-(prevStack.length - stack.length));
-      // Stack updated last item
-    } else if (prevStack.length === stack.length) {
-      const lastPrevItem = last(prevStack);
-      const lastItem = last(stack);
+    const state: HistoryState = { name, params };
 
-      if (
-        lastPrevItem.name !== lastItem.name ||
-        areEqual(lastPrevItem.params, lastItem.params) === false
-      ) {
-        history.replaceState(
-          null,
+    switch (lastAction.type) {
+      case 'PUSH':
+        history.pushState(
+          state,
           name,
           compile(pathMap[name].path, { encode: encodeURIComponent })(params),
         );
-      }
+        break;
+      case 'SET_PARAMS':
+        history.replaceState(
+          state,
+          name,
+          compile(pathMap[name].path, { encode: encodeURIComponent })(params),
+        );
+        break;
+      case 'BACK':
+        history.back();
+        break;
+      default:
+        break;
     }
-  }, [stack, prevStack, name, params, pathMap]);
+  }, [lastAction, name, params, pathMap]);
 
   return <Fragment />;
 }

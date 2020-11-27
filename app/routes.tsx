@@ -1,4 +1,3 @@
-import { EmptyObject } from '../lib/js_utils';
 import {
   RouterImplementation,
   useNavigationImplementation,
@@ -11,7 +10,7 @@ export enum ScreenName {
 
 export type RootStackParamsMap = {
   [ScreenName.Space]: { spaceID: string; viewID: string };
-  [ScreenName.Playground]: EmptyObject;
+  [ScreenName.Playground]: { component: string };
 };
 
 export type ScreenProps<T extends ScreenName> = {
