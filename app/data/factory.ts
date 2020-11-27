@@ -30,7 +30,6 @@ import { Record } from './records';
 import { Filter, FilterConfig } from './filters';
 import { keyedBy, range, isEmpty, sample } from '../../lib/js_utils';
 import { Sort, SortConfig } from './sorts';
-import { palette } from '../components/palette';
 import {
   fakeBoolean,
   fakeDate,
@@ -41,6 +40,7 @@ import {
   fakeWord,
   fakeWords,
 } from '../../lib/faker';
+import { tokens } from 'app/components';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -154,19 +154,19 @@ const makeFieldByType: {
         {
           id: generateID(),
           label: fakeWord(),
-          color: palette.green[100],
+          color: tokens.colors.green[100],
           order: 1,
         },
         {
           id: generateID(),
           label: fakeWord(),
-          color: palette.blue[100],
+          color: tokens.colors.blue[100],
           order: 2,
         },
         {
           id: generateID(),
           label: fakeWord(),
-          color: palette.red[100],
+          color: tokens.colors.red[100],
           order: 3,
         },
       ],
@@ -224,19 +224,19 @@ const makeFieldByType: {
         {
           id: generateID(),
           label: fakeWord(),
-          color: palette.green[100],
+          color: tokens.colors.green[100],
           order: 1,
         },
         {
           id: generateID(),
           label: fakeWord(),
-          color: palette.blue[100],
+          color: tokens.colors.blue[100],
           order: 2,
         },
         {
           id: generateID(),
           label: fakeWord(),
-          color: palette.red[100],
+          color: tokens.colors.red[100],
           order: 3,
         },
       ],

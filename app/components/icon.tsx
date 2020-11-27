@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { G, Path, Defs, ClipPath } from 'react-native-svg';
-import { TextColor, useTheme } from './theme';
+import { fromTextColor, TextColor } from './text';
 
 type IconSize = 'sm' | 'md' | 'lg';
 interface IconProps {
@@ -16,13 +16,13 @@ interface IconProps {
 
 export function Icon(props: IconProps): JSX.Element {
   const { name, size = 'md', color = 'default', customColor } = props;
-  const theme = useTheme();
   const TheIcon = iconMap[name];
 
   return (
-    <TheIcon size={sizeMap[size]} color={customColor ?? theme.text[color]} />
+    <TheIcon size={sizeMap[size]} color={customColor ?? fromTextColor(color)} />
   );
 }
+
 export type IconName =
   | 'AlignLeft'
   | 'Archive'

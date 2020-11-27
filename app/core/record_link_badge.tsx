@@ -1,8 +1,7 @@
 import { RecordID } from 'app/data/records';
 import { useGetCollection, useGetRecord } from 'app/data/store';
 import React from 'react';
-import { Badge } from '../components';
-import { palette } from '../components/palette';
+import { Badge, tokens } from '../components';
 
 interface RecordLinkBadgeProps {
   recordID: RecordID;
@@ -18,5 +17,5 @@ export function RecordLinkBadge(props: RecordLinkBadgeProps): JSX.Element {
     throw new Error('Main field expected to be string');
   }
 
-  return <Badge color={palette.purple[50]} title={primaryFieldText} />;
+  return <Badge color={tokens.colors.purple[50]} title={primaryFieldText} />;
 }

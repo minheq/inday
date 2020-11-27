@@ -29,7 +29,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 
 const styles = StyleSheet.create({
   root: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     minWidth: 40,
     height: 40,
     justifyContent: 'center',
@@ -37,6 +37,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   button: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
 });

@@ -24,7 +24,7 @@ export function CollaboratorBadge(props: CollaboratorBadgeProps): JSX.Element {
 
 const styles = DynamicStyleSheet.create(() => ({
   base: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     height: 32,
     flexDirection: 'row',
     alignItems: 'center',

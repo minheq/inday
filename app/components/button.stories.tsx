@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { action } from '@storybook/addon-actions';
 import { Button } from './button';
 import { Text } from './text';
 
@@ -11,7 +10,11 @@ export default {
 
 export function Basic(): JSX.Element {
   return (
-    <Button onPress={action('clicked')}>
+    <Button
+      onPress={() => {
+        return;
+      }}
+    >
       <Text>Button</Text>
     </Button>
   );

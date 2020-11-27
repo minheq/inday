@@ -17,8 +17,6 @@ export function Playground(
     params: { component },
   } = props;
 
-  console.log('render playground');
-
   let content: React.ReactNode = null;
 
   switch (component) {

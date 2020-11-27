@@ -56,6 +56,12 @@ module.exports = {
       plugins: ['@typescript-eslint', 'sonarjs'],
     },
     {
+      files: ['**/*.test.ts'],
+      rules: {
+        '@typescript-eslint/require-await': 0,
+      },
+    },
+    {
       files: ['scripts/*.js', '*.js'],
       env: { node: true },
       parser: 'espree',

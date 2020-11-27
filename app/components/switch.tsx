@@ -1,9 +1,8 @@
 import React from 'react';
 import { Pressable, Animated } from 'react-native';
 import { isNonNullish } from '../../lib/js_utils';
-import { palette } from './palette';
 import { DynamicStyleSheet } from './stylesheet';
-import { useTheme } from './theme';
+import { tokens } from './tokens';
 
 interface SwitchProps {
   value?: boolean;
@@ -12,7 +11,6 @@ interface SwitchProps {
 
 export function Switch(props: SwitchProps): JSX.Element {
   const { value, onChange } = props;
-  const theme = useTheme();
   const checked = React.useRef(new Animated.Value(0)).current;
 
   const handlePress = React.useCallback(() => {
@@ -38,7 +36,7 @@ export function Switch(props: SwitchProps): JSX.Element {
           {
             backgroundColor: checked.interpolate({
               inputRange: [0, 1],
-              outputRange: [theme.background.tint, palette.blue[500]],
+              outputRange: [tokens.colors.blue[50], tokens.colors.blue[500]],
             }),
           },
         ]}
@@ -46,7 +44,7 @@ export function Switch(props: SwitchProps): JSX.Element {
         <Animated.View
           style={[
             styles.slider,
-            theme.shadow,
+            tokens.shadow.elevation1,
             {
               transform: [
                 {
@@ -64,13 +62,13 @@ export function Switch(props: SwitchProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   root: {
     borderRadius: 999,
     width: 56,
     height: 32,
     borderWidth: 1,
-    borderColor: theme.border.default,
+    borderColor: tokens.colors.gray[300],
   },
   wrapper: {
     borderRadius: 999,

@@ -19,10 +19,10 @@ export function Badge(props: BadgeProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   base: {
-    backgroundColor: theme.background.tint,
-    borderRadius: tokens.radius,
+    backgroundColor: tokens.colors.gray[100],
+    borderRadius: tokens.border.radius.default,
     paddingHorizontal: 8,
     height: 32,
     flexDirection: 'row',

@@ -12,7 +12,6 @@ import { isNonNullish } from '../../lib/js_utils';
 import { Button } from './button';
 import { IconName, Icon } from './icon';
 import { DynamicStyleSheet } from './stylesheet';
-import { useTheme } from './theme';
 import { tokens } from './tokens';
 
 export interface TextInputProps {
@@ -44,7 +43,6 @@ export function TextInput(props: TextInputProps): JSX.Element {
     placeholder,
   } = props;
   const [focused, setFocused] = React.useState(false);
-  const theme = useTheme();
   const borderColor = React.useRef(new Animated.Value(0)).current;
   const ref = useRef<RNTextInput>(null);
   const handleBlur = React.useCallback(() => {
@@ -86,10 +84,9 @@ export function TextInput(props: TextInputProps): JSX.Element {
       style={[
         styles.base,
         {
-          backgroundColor: theme.background.content,
           borderColor: borderColor.interpolate({
             inputRange: [0, 1],
-            outputRange: [theme.border.default, theme.border.focus],
+            outputRange: [tokens.colors.gray[300], tokens.colors.gray[600]],
           }),
         },
       ]}
@@ -110,7 +107,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
         onBlur={handleBlur}
         onKeyPress={onKeyPress}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.text.muted}
+        placeholderTextColor={tokens.colors.gray[700]}
         style={[styles.input, tokens.text.size.md, !!icon && styles.hasIcon]}
       />
       {clearable && value !== undefined && value !== '' && (
@@ -129,7 +126,8 @@ export function TextInput(props: TextInputProps): JSX.Element {
 const styles = DynamicStyleSheet.create({
   base: {
     flexDirection: 'row',
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
+    backgroundColor: tokens.colors.base.white,
     alignItems: 'center',
     borderWidth: 1,
   },
@@ -145,16 +143,16 @@ const styles = DynamicStyleSheet.create({
     position: 'absolute',
     right: 8,
     top: 8,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
   clearButton: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
   input: {
     height: 38,
     paddingLeft: 8,
     paddingRight: 40,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     flex: 1,
     ...Platform.select({
       web: {

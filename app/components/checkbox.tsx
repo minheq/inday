@@ -3,8 +3,7 @@ import { Icon } from './icon';
 import { View, Pressable, Animated } from 'react-native';
 import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
-import { palette } from './palette';
-import { useTheme } from './theme';
+import { tokens } from './tokens';
 
 interface CheckboxProps {
   value?: boolean;
@@ -14,7 +13,6 @@ interface CheckboxProps {
 export function Checkbox(props: CheckboxProps): JSX.Element {
   const { value, onChange } = props;
   const checked = React.useRef(new Animated.Value(0)).current;
-  const theme = useTheme();
   const handlePress = React.useCallback(() => {
     if (isNonNullish(onChange)) {
       onChange(!value);
@@ -41,7 +39,10 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
           {
             backgroundColor: checked.interpolate({
               inputRange: [0, 1],
-              outputRange: [theme.background.tint, palette.lightBlue[700]],
+              outputRange: [
+                tokens.colors.gray[50],
+                tokens.colors.lightBlue[700],
+              ],
             }),
           },
         ]}
@@ -56,16 +57,16 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   root: {
     borderRadius: 999,
     width: 24,
     height: 24,
     borderWidth: 1,
-    borderColor: theme.border.default,
+    borderColor: tokens.colors.gray[300],
   },
   checkedRoot: {
-    borderColor: palette.lightBlue[700],
+    borderColor: tokens.colors.lightBlue[700],
   },
   wrapper: {
     borderRadius: 999,

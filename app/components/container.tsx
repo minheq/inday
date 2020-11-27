@@ -1,8 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
 import { DynamicStyleSheet } from './stylesheet';
-import { BackgroundColor, useTheme } from './theme';
 import { tokens } from './tokens';
+
+interface BackgroundColors {
+  default: string;
+  content: string;
+  tint: string;
+  primary: string;
+}
+
+export type BackgroundColor = keyof BackgroundColors;
 
 type Shape = 'rounded' | 'square' | 'pill';
 
@@ -118,8 +126,6 @@ export function Container(props: ContainerProps): JSX.Element {
     zIndex,
   } = props;
 
-  const theme = useTheme();
-
   const effectiveWidth = width ?? (expanded ? '100%' : undefined);
   const effectiveHeight = height ?? (expanded ? '100%' : undefined);
 
@@ -130,7 +136,6 @@ export function Container(props: ContainerProps): JSX.Element {
         style={[
           {
             borderWidth,
-            backgroundColor: color ? theme.background[color] : undefined,
             width: effectiveWidth,
             flex,
             maxWidth,
@@ -166,6 +171,7 @@ export function Container(props: ContainerProps): JSX.Element {
             borderLeftWidth ||
             borderRightWidth) &&
             styles.borderColor,
+          color && styles[color],
           shadow && styles.shadow,
           center && styles.center,
           shape && styles[shape],
@@ -177,7 +183,7 @@ export function Container(props: ContainerProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   center: {
     display: 'flex',
     justifyContent: 'center',
@@ -185,13 +191,25 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   square: {},
   rounded: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
   pill: {
     borderRadius: 999,
   },
-  shadow: theme.shadow,
+  default: {
+    backgroundColor: tokens.colors.base.transparent,
+  },
+  content: {
+    backgroundColor: tokens.colors.base.white,
+  },
+  tint: {
+    backgroundColor: tokens.colors.gray[100],
+  },
+  primary: {
+    backgroundColor: tokens.colors.blue[400],
+  },
+  shadow: tokens.shadow.elevation1,
   borderColor: {
-    borderColor: theme.border.default,
+    borderColor: tokens.colors.gray[300],
   },
 }));

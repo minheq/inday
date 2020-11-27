@@ -1,5 +1,4 @@
-import { IconName } from '../components';
-import { palette } from '../components/palette';
+import { IconName, tokens } from '../components';
 import { FieldType } from '../data/fields';
 import { ViewType } from '../data/views';
 
@@ -13,8 +12,8 @@ export function getViewIcon(viewType: ViewType): IconName {
 }
 
 const viewIconColorMap: { [viewType in ViewType]: string } = {
-  list: palette.blue[600],
-  board: palette.red[600],
+  list: tokens.colors.blue[600],
+  board: tokens.colors.red[600],
 };
 
 export function getViewIconColor(viewType: ViewType): string {

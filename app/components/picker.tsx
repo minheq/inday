@@ -173,7 +173,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
           height={height}
           color="content"
           borderWidth={1}
-          borderRadius={tokens.radius}
+          borderRadius={tokens.border.radius.default}
         >
           {searchable === true && (
             <Container height={SEARCH_HEIGHT} padding={8}>
@@ -204,8 +204,8 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       {
                         backgroundColor:
                           active || hovered
-                            ? theme.background.primary
-                            : theme.background.content,
+                            ? tokens.colors.lightBlue[50]
+                            : tokens.colors.base.white,
                       },
                     ]}
                   >
@@ -213,7 +213,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       <Container
                         height={32}
                         paddingHorizontal={8}
-                        borderRadius={tokens.radius}
+                        borderRadius={tokens.border.radius.default}
                       >
                         <Row
                           expanded
@@ -242,11 +242,11 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   button: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     borderWidth: 1,
-    borderColor: theme.border.default,
+    borderColor: tokens.colors.gray[300],
     flexDirection: 'row',
     height: 40,
     alignItems: 'center',
@@ -262,6 +262,6 @@ const styles = DynamicStyleSheet.create((theme) => ({
     width: '100%',
   },
   option: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
 }));

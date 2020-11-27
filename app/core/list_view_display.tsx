@@ -135,7 +135,6 @@ import {
   isNumeric,
 } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
-import { palette } from '../components/palette';
 import { formatDate } from '../../lib/datetime/format';
 import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
@@ -1688,12 +1687,12 @@ function useCellKeyPressHandler(
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   leafRowCell: {
     height: '100%',
     borderBottomWidth: 1,
-    backgroundColor: theme.background.content,
-    borderColor: theme.border.default,
+    backgroundColor: tokens.colors.base.white,
+    borderColor: tokens.colors.gray[300],
     paddingVertical: 4,
     paddingHorizontal: 8,
     overflowY: 'hidden',
@@ -1709,7 +1708,7 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   textCellInput: {
     height: 32,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     ...tokens.text.size.md,
     ...Platform.select({
       web: {
@@ -1720,7 +1719,7 @@ const styles = DynamicStyleSheet.create((theme) => ({
   multilineTextCellInput: {
     paddingTop: FOCUS_BORDER_WIDTH + 1,
     minHeight: 128,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     ...tokens.text.size.md,
     ...Platform.select({
       web: {
@@ -1730,7 +1729,7 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   numberCellInput: {
     height: 32,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     textAlign: 'right',
     ...tokens.text.size.md,
     ...Platform.select({
@@ -1750,14 +1749,14 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   focusedLeafRowCell: {
     height: 'auto',
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     overflowY: 'visible',
     overflowX: 'hidden',
     borderBottomWidth: FOCUS_BORDER_WIDTH,
     borderTopWidth: FOCUS_BORDER_WIDTH,
     borderLeftWidth: FOCUS_BORDER_WIDTH,
     borderRightWidth: FOCUS_BORDER_WIDTH,
-    borderColor: theme.border.focus,
+    borderColor: tokens.colors.lightBlue[700],
   },
   textCellContainer: {
     height: 32,
@@ -1777,26 +1776,20 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   primaryCell: {
     borderRightWidth: 1,
-    shadowColor: palette.gray[700],
-    shadowOffset: {
-      width: 4,
-      height: 0,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    ...tokens.shadow.elevation1,
   },
   headerCell: {
     height: '100%',
     paddingHorizontal: 8,
     justifyContent: 'center',
-    backgroundColor: theme.background.content,
-    borderColor: theme.border.default,
+    backgroundColor: tokens.colors.base.white,
+    borderColor: tokens.colors.gray[300],
     borderBottomWidth: 1,
   },
   focusedCell: {
-    borderColor: theme.border.focus,
+    borderColor: tokens.colors.lightBlue[700],
   },
   hoveredCell: {
-    borderColor: theme.border.default,
+    borderColor: tokens.colors.gray[300],
   },
 }));

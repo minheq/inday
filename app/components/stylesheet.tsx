@@ -7,7 +7,6 @@ import {
   ImageStyle,
 } from 'react-native';
 import { isNullish } from '../../lib/js_utils';
-import { Theme, lightTheme, darkTheme } from './theme';
 
 // From https://gist.github.com/necolas/5b421ca860ed98eabc5fd2b9bc6d1136
 
@@ -17,10 +16,7 @@ export const DynamicStyleSheet = {
   ): T => {
     const cache = new Map<ColorSchemeName, T>();
     const theme = Appearance.getColorScheme();
-    const stylesObject = getStyles(
-      styles,
-      theme === 'dark' ? darkTheme : lightTheme,
-    );
+    const stylesObject = getStyles(styles, theme);
 
     cache.set(theme, stylesObject);
 
@@ -35,10 +31,7 @@ export const DynamicStyleSheet = {
           const _theme = Appearance.getColorScheme();
 
           if (!cache.has(_theme)) {
-            cache.set(
-              _theme,
-              getStyles(styles, _theme === 'dark' ? darkTheme : lightTheme),
-            );
+            cache.set(_theme, getStyles(styles, _theme));
           }
           const styleObject = cache.get(_theme);
 
@@ -61,11 +54,11 @@ type NamedStyles<T> = {
   [P in keyof T]: ViewStyle | TextStyle | ImageStyle;
 };
 
-type Styles<T extends NamedStyles<T>> = ((theme: Theme) => T) | T;
+type Styles<T extends NamedStyles<T>> = ((theme: ColorSchemeName) => T) | T;
 
 function getStyles<T extends NamedStyles<T>>(
   styles: Styles<T>,
-  theme: Theme,
+  theme: ColorSchemeName,
 ): T {
   return StyleSheet.create(
     typeof styles === 'function' ? styles(theme) : styles,

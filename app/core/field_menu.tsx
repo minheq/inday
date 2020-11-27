@@ -61,7 +61,7 @@ function FieldListItem(props: FieldListItemProps) {
   );
 
   return (
-    <Container padding={16} borderRadius={tokens.radius} shadow>
+    <Container padding={16} borderRadius={tokens.border.radius.default} shadow>
       <Row justifyContent="space-between">
         <Text>{field.name}</Text>
         <Switch value={field.config.visible} onChange={handleChange} />

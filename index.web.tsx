@@ -2,7 +2,7 @@ import { AppRegistry } from 'react-native';
 import React, { Suspense } from 'react';
 import { RecoilRoot, useRecoilTransactionObserver_UNSTABLE } from 'recoil';
 
-import { ThemeProvider, Text } from './app/components';
+import { Text } from './app/components';
 import { ErrorBoundary } from './app/core/error_boundary';
 import { SpaceScreen } from './app/screens/space_screen';
 
@@ -46,26 +46,24 @@ export function App(): JSX.Element {
       <ErrorBoundary>
         <Suspense fallback={<Text>Loading...</Text>}>
           <PersistenceObserver />
-          <ThemeProvider>
-            <Router
-              pathMap={{
-                Space: {
-                  path: '/space/:spaceID/:viewID',
-                  component: SpaceScreen,
-                },
-                Playground: {
-                  path: '/playground/:component',
-                  component: Playground,
-                },
-              }}
-              fallback={
-                <SpaceScreen
-                  name={ScreenName.Space}
-                  params={{ viewID: '1', spaceID: '1' }}
-                />
-              }
-            />
-          </ThemeProvider>
+          <Router
+            pathMap={{
+              Space: {
+                path: '/space/:spaceID/:viewID',
+                component: SpaceScreen,
+              },
+              Playground: {
+                path: '/playground/:component',
+                component: Playground,
+              },
+            }}
+            fallback={
+              <SpaceScreen
+                name={ScreenName.Space}
+                params={{ viewID: '1', spaceID: '1' }}
+              />
+            }
+          />
         </Suspense>
       </ErrorBoundary>
     </RecoilRoot>

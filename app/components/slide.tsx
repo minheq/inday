@@ -40,5 +40,5 @@ export function Slide(props: SlideProps): JSX.Element {
     });
   }, [width, opacity, open, intrinsicWidth, onSlide, onCollapsed]);
 
-  return <Animated.View style={[{ width, opacity }]}>{children}</Animated.View>;
+  return <Animated.View style={{ width, opacity }}>{children}</Animated.View>;
 }

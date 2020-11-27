@@ -301,10 +301,10 @@ function MainContent() {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   collectionItem: {
-    borderTopLeftRadius: tokens.radius,
-    borderTopRightRadius: tokens.radius,
+    borderTopLeftRadius: tokens.border.radius.default,
+    borderTopRightRadius: tokens.border.radius.default,
     minWidth: 40,
     height: 32,
     justifyContent: 'center',
@@ -316,10 +316,10 @@ const styles = DynamicStyleSheet.create((theme) => ({
   },
   activeCollectionItem: {
     borderBottomWidth: 2,
-    borderColor: theme.border.focus,
+    borderColor: tokens.colors.lightBlue[700],
   },
   viewMenuButton: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     flexDirection: 'row',
     minWidth: 40,
     height: 40,

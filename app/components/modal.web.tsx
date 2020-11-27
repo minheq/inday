@@ -2,7 +2,7 @@ import React from 'react';
 import RModal from 'react-modal';
 import type { ModalProps } from './modal';
 import { Animated, StyleSheet, useWindowDimensions } from 'react-native';
-import { palette } from './palette';
+import { tokens } from './tokens';
 
 RModal.setAppElement('#root');
 
@@ -121,11 +121,11 @@ const webStyles = {
 
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: palette.base.white,
+    backgroundColor: tokens.colors.base.white,
     height: '100%',
     width: '100%',
   },
   transparent: {
-    backgroundColor: palette.base.transparent,
+    backgroundColor: tokens.colors.base.transparent,
   },
 });

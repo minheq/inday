@@ -202,7 +202,7 @@ export function Dialog(props: DialogProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   base: {
     height: '100%',
     width: '100%',
@@ -212,8 +212,8 @@ const styles = DynamicStyleSheet.create((theme) => ({
   dialog: {
     maxHeight: '80%',
     maxWidth: '90%',
-    borderRadius: tokens.radius,
-    backgroundColor: theme.background.content,
+    borderRadius: tokens.border.radius.default,
+    backgroundColor: tokens.colors.base.white,
   },
   background: {
     position: 'absolute',

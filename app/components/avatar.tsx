@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, Image } from 'react-native';
 import { isNullish, take } from '../../lib/js_utils';
-import { palette } from './palette';
 import { DynamicStyleSheet } from './stylesheet';
-import { Text } from './text';
-import { TextSize } from './tokens';
+import { Text, TextSize } from './text';
+import { tokens } from './tokens';
 
 export type AvatarSize = 'sm' | 'md' | 'lg';
 
@@ -77,7 +76,7 @@ const styles = DynamicStyleSheet.create(() => ({
     alignItems: 'center',
   },
   initials: {
-    backgroundColor: palette.gray[200],
+    backgroundColor: tokens.colors.gray[200],
   },
   sm: {
     width: 24,

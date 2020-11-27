@@ -70,15 +70,15 @@ function SegmentedControlButton<T>(props: SegmentedControlButtonProps<T>) {
   );
 }
 
-const styles = DynamicStyleSheet.create((theme) => ({
+const styles = DynamicStyleSheet.create(() => ({
   control: {
     flex: 1,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
   selected: {
-    backgroundColor: theme.background.tint,
+    backgroundColor: tokens.colors.gray[50],
   },
 }));

@@ -22,7 +22,6 @@ import { isNonNullish } from '../../lib/js_utils';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
-import { palette } from './palette';
 import { Hover } from './hover';
 
 export interface ListPickerOption<T> {
@@ -264,14 +263,14 @@ const styles = DynamicStyleSheet.create(() => ({
     paddingBottom: 16,
   },
   active: {
-    backgroundColor: palette.lightBlue[50],
+    backgroundColor: tokens.colors.lightBlue[50],
   },
   listItemContainer: {
     marginBottom: 4,
   },
   listItem: {
     height: 40,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     paddingHorizontal: 8,
     alignItems: 'center',
     flexDirection: 'row',
