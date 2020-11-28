@@ -1,10 +1,17 @@
-import { isSameDay } from 'date-fns';
+import { isDate, isSameDay } from 'date-fns';
 import { NumberUnit } from '../../lib/i18n/unit';
-import { hasAllOf } from '../../lib/js_utils/array_utils';
-import { CollaboratorID } from './collaborators';
+import { generateID } from '../../lib/id';
+import { hasAllOf } from '../../lib/js_utils';
 import { RecordID } from './records';
+import { UserID } from './user';
 
+export const fieldIDPrefix = 'fld' as const;
 export type FieldID = string;
+// export type FieldID = `${typeof fieldIDPrefix}${string}`;
+
+export const Field = {
+  generateID: (): FieldID => generateID(fieldIDPrefix),
+};
 
 export enum FieldType {
   Checkbox = 'Checkbox',
@@ -197,6 +204,7 @@ export type TextFieldKind =
   | PhoneNumberField
   | SingleLineTextField
   | URLField;
+export type PrimaryField = TextFieldKind;
 
 export type Field =
   | BooleanFieldKind
@@ -210,13 +218,13 @@ export type CheckboxFieldValue = boolean;
 export type CurrencyFieldValue = number | null;
 export type DateFieldValue = Date | null;
 export type EmailFieldValue = string;
-export type MultiCollaboratorFieldValue = CollaboratorID[];
+export type MultiCollaboratorFieldValue = UserID[];
 export type MultiRecordLinkFieldValue = RecordID[];
 export type MultiLineTextFieldValue = string;
 export type MultiOptionFieldValue = string[];
 export type NumberFieldValue = number | null;
 export type PhoneNumberFieldValue = string;
-export type SingleCollaboratorFieldValue = CollaboratorID | null;
+export type SingleCollaboratorFieldValue = UserID | null;
 export type SingleRecordLinkFieldValue = RecordID | null;
 export type SingleLineTextFieldValue = string;
 export type SingleOptionFieldValue = string | null;
@@ -239,6 +247,7 @@ export type TextFieldKindValue =
   | PhoneNumberFieldValue
   | SingleLineTextFieldValue
   | URLFieldValue;
+export type PrimaryFieldValue = TextFieldKindValue;
 
 export type FieldValue =
   | BooleanFieldKindValue
@@ -247,6 +256,24 @@ export type FieldValue =
   | NumberFieldKindValue
   | SingleSelectFieldKindValue
   | TextFieldKindValue;
+
+export interface FieldTypeToField {
+  [FieldType.Checkbox]: CheckboxField;
+  [FieldType.Currency]: CurrencyField;
+  [FieldType.Date]: DateField;
+  [FieldType.Email]: EmailField;
+  [FieldType.MultiCollaborator]: MultiCollaboratorField;
+  [FieldType.MultiLineText]: MultiLineTextField;
+  [FieldType.MultiOption]: MultiOptionField;
+  [FieldType.MultiRecordLink]: MultiRecordLinkField;
+  [FieldType.Number]: NumberField;
+  [FieldType.PhoneNumber]: PhoneNumberField;
+  [FieldType.SingleCollaborator]: SingleCollaboratorField;
+  [FieldType.SingleLineText]: SingleLineTextField;
+  [FieldType.SingleOption]: SingleOptionField;
+  [FieldType.SingleRecordLink]: SingleRecordLinkField;
+  [FieldType.URL]: URLField;
+}
 
 export interface FieldTypeToFieldValue {
   [FieldType.Checkbox]: CheckboxFieldValue;
@@ -266,22 +293,102 @@ export interface FieldTypeToFieldValue {
   [FieldType.URL]: URLFieldValue;
 }
 
-export interface FieldTypeToField {
-  [FieldType.Checkbox]: CheckboxField;
-  [FieldType.Currency]: CurrencyField;
-  [FieldType.Date]: DateField;
-  [FieldType.Email]: EmailField;
-  [FieldType.MultiCollaborator]: MultiCollaboratorField;
-  [FieldType.MultiLineText]: MultiLineTextField;
-  [FieldType.MultiOption]: MultiOptionField;
-  [FieldType.MultiRecordLink]: MultiRecordLinkField;
-  [FieldType.Number]: NumberField;
-  [FieldType.PhoneNumber]: PhoneNumberField;
-  [FieldType.SingleCollaborator]: SingleCollaboratorField;
-  [FieldType.SingleLineText]: SingleLineTextField;
-  [FieldType.SingleOption]: SingleOptionField;
-  [FieldType.SingleRecordLink]: SingleRecordLinkField;
-  [FieldType.URL]: URLField;
+export const FieldValue = {
+  areFieldValuesEqual,
+  areTextFieldKindValueEqual,
+  areNumberFieldKindValueEqual,
+  areSingleSelectFieldKindValueEqual,
+  areMultiSelectFieldKindValueEqual,
+  areBooleanFieldKindValueEqual,
+  areDateFieldKindValueEqual,
+};
+
+function areFieldValuesEqual<T extends FieldType>(
+  fieldType: T,
+  a: FieldTypeToFieldValue[T],
+  b: FieldTypeToFieldValue[T],
+): boolean {
+  switch (fieldType) {
+    case FieldType.SingleLineText:
+    case FieldType.URL:
+    case FieldType.Email:
+      assertTextFieldKindValue(a);
+      assertTextFieldKindValue(b);
+      return areTextFieldKindValueEqual(a, b);
+    case FieldType.Number:
+    case FieldType.Currency:
+      assertNumberFieldKindValue(a);
+      assertNumberFieldKindValue(b);
+      return areNumberFieldKindValueEqual(a, b);
+    case FieldType.MultiCollaborator:
+    case FieldType.MultiOption:
+    case FieldType.MultiRecordLink:
+      assertMultiSelectFieldKindValue(a);
+      assertMultiSelectFieldKindValue(b);
+      return areMultiSelectFieldKindValueEqual(a, b);
+    case FieldType.SingleCollaborator:
+    case FieldType.SingleOption:
+    case FieldType.SingleRecordLink:
+      assertSingleSelectFieldKindValue(a);
+      assertSingleSelectFieldKindValue(b);
+      return areSingleSelectFieldKindValueEqual(a, b);
+    case FieldType.Checkbox:
+      assertBooleanFieldKindValue(a);
+      assertBooleanFieldKindValue(b);
+      return areBooleanFieldKindValueEqual(a, b);
+    case FieldType.Date:
+      assertDateFieldKindValue(a);
+      assertDateFieldKindValue(b);
+      return areDateFieldKindValueEqual(a, b);
+    default:
+      throw new Error(`Unrecognized field type ${JSON.stringify(fieldType)}`);
+  }
+}
+
+function areTextFieldKindValueEqual(
+  a: TextFieldKindValue,
+  b: TextFieldKindValue,
+): boolean {
+  return a === b;
+}
+
+function areNumberFieldKindValueEqual(
+  a: NumberFieldKindValue,
+  b: NumberFieldKindValue,
+): boolean {
+  return a === b;
+}
+
+function areSingleSelectFieldKindValueEqual(
+  a: SingleSelectFieldKindValue,
+  b: SingleSelectFieldKindValue,
+): boolean {
+  return a === b;
+}
+
+function areMultiSelectFieldKindValueEqual(
+  a: MultiSelectFieldKindValue,
+  b: MultiSelectFieldKindValue,
+): boolean {
+  return hasAllOf(a, b);
+}
+
+function areBooleanFieldKindValueEqual(
+  a: BooleanFieldKindValue,
+  b: BooleanFieldKindValue,
+): boolean {
+  return a === b;
+}
+
+function areDateFieldKindValueEqual(
+  a: DateFieldKindValue,
+  b: DateFieldKindValue,
+): boolean {
+  if (a !== null && b !== null) {
+    return isSameDay(a, b);
+  }
+
+  return a === b;
 }
 
 export function assertSingleLineTextField(
@@ -418,12 +525,85 @@ export function assertCheckboxField(
   }
 }
 
+export function assertPrimaryField(
+  field: Field,
+): asserts field is PrimaryField {
+  if (
+    field.type !== FieldType.Email &&
+    field.type !== FieldType.MultiLineText &&
+    field.type !== FieldType.PhoneNumber &&
+    field.type !== FieldType.SingleLineText &&
+    field.type !== FieldType.URL
+  ) {
+    throw new Error(
+      `Expected field to be PrimaryField. Received ${field.type}`,
+    );
+  }
+}
+
+export function assertFieldValueType<T extends FieldType>(
+  fieldType: T,
+  value: FieldTypeToFieldValue[T],
+): asserts value is FieldTypeToFieldValue[T] {
+  switch (fieldType) {
+    case FieldType.Checkbox:
+      assertCheckboxFieldValue(value);
+      break;
+    case FieldType.Currency:
+      assertCurrencyFieldValue(value);
+      break;
+    case FieldType.Date:
+      assertDateFieldValue(value);
+      break;
+    case FieldType.Email:
+      assertEmailFieldValue(value);
+      break;
+    case FieldType.MultiCollaborator:
+      assertMultiCollaboratorFieldValue(value);
+      break;
+    case FieldType.MultiLineText:
+      assertMultiLineTextFieldValue(value);
+      break;
+    case FieldType.MultiOption:
+      assertMultiOptionFieldValue(value);
+      break;
+    case FieldType.MultiRecordLink:
+      assertMultiRecordLinkFieldValue(value);
+      break;
+    case FieldType.Number:
+      assertNumberFieldValue(value);
+      break;
+    case FieldType.PhoneNumber:
+      assertPhoneNumberFieldValue(value);
+      break;
+    case FieldType.SingleCollaborator:
+      assertSingleCollaboratorFieldValue(value);
+      break;
+    case FieldType.SingleLineText:
+      assertSingleLineTextFieldValue(value);
+      break;
+    case FieldType.SingleOption:
+      assertSingleOptionFieldValue(value);
+      break;
+    case FieldType.SingleRecordLink:
+      assertSingleRecordLinkFieldValue(value);
+      break;
+    case FieldType.URL:
+      assertURLFieldValue(value);
+      break;
+    default:
+      throw new Error('Unrecognized field type');
+  }
+}
+
 export function assertCheckboxFieldValue(
   value: FieldValue,
 ): asserts value is CheckboxFieldValue {
   if (typeof value !== 'boolean') {
     throw new Error(
-      `Expected CheckboxFieldValue to be boolean. Received ${value}`,
+      `Expected CheckboxFieldValue to be boolean. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -437,7 +617,9 @@ export function assertCurrencyFieldValue(
 
   if (typeof value !== 'number') {
     throw new Error(
-      `Expected CurrencyFieldValue to be number. Received ${value}`,
+      `Expected CurrencyFieldValue to be number. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -449,8 +631,10 @@ export function assertDateFieldValue(
     return;
   }
 
-  if (!(value instanceof Date)) {
-    throw new Error(`Expected DateFieldValue to be Date. Received ${value}`);
+  if (!isDate(value)) {
+    throw new Error(
+      `Expected DateFieldValue to be Date. Received "${JSON.stringify(value)}"`,
+    );
   }
 }
 
@@ -462,7 +646,11 @@ export function assertEmailFieldValue(
   }
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected EmailFieldValue to be string. Received ${value}`);
+    throw new Error(
+      `Expected EmailFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
+    );
   }
 }
 
@@ -475,7 +663,9 @@ export function assertMultiCollaboratorFieldValue(
 
   if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiCollaboratorFieldValue to be string[]. Received ${value}`,
+      `Expected MultiCollaboratorFieldValue to be string[]. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -489,7 +679,9 @@ export function assertMultiRecordLinkFieldValue(
 
   if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiRecordLinkFieldValue to be string[]. Received ${value}`,
+      `Expected MultiRecordLinkFieldValue to be string[]. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -503,7 +695,9 @@ export function assertMultiLineTextFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected MultiLineTextFieldValue to be string. Received ${value}`,
+      `Expected MultiLineTextFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -517,7 +711,9 @@ export function assertMultiOptionFieldValue(
 
   if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiOptionFieldValue to be string[]. Received ${value}`,
+      `Expected MultiOptionFieldValue to be string[]. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -531,7 +727,9 @@ export function assertNumberFieldValue(
 
   if (typeof value !== 'number') {
     throw new Error(
-      `Expected NumberFieldValue to be number. Received ${value}`,
+      `Expected NumberFieldValue to be number. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -545,7 +743,9 @@ export function assertPhoneNumberFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected PhoneNumberFieldValue to be string. Received ${value}`,
+      `Expected PhoneNumberFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -559,7 +759,9 @@ export function assertSingleCollaboratorFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleCollaboratorFieldValue to be string. Received ${value}`,
+      `Expected SingleCollaboratorFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -572,7 +774,9 @@ export function assertSingleRecordLinkFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleRecordLinkFieldValue to be string. Received ${value}`,
+      `Expected SingleRecordLinkFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -585,7 +789,9 @@ export function assertSingleLineTextFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleLineTextFieldValue to be string. Received ${value}`,
+      `Expected SingleLineTextFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -599,7 +805,9 @@ export function assertSingleOptionFieldValue(
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleOptionFieldValue to be string. Received ${value}`,
+      `Expected SingleOptionFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -612,7 +820,11 @@ export function assertURLFieldValue(
   }
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected URLFieldValue to be string. Received ${value}`);
+    throw new Error(
+      `Expected URLFieldValue to be string. Received "${JSON.stringify(
+        value,
+      )}"`,
+    );
   }
 }
 
@@ -620,7 +832,9 @@ export function assertBooleanFieldKindValue(
   value: FieldValue,
 ): asserts value is BooleanFieldKindValue {
   if (typeof value !== 'boolean') {
-    throw new Error(`Expected BooleanFieldKindValue. Received ${value}`);
+    throw new Error(
+      `Expected BooleanFieldKindValue. Received ${JSON.stringify(value)}`,
+    );
   }
 }
 
@@ -628,7 +842,9 @@ export function assertDateFieldKindValue(
   value: FieldValue,
 ): asserts value is DateFieldKindValue {
   if (value !== null && !(value instanceof Date)) {
-    throw new Error(`Expected DateFieldKindValue. Received ${value}`);
+    throw new Error(
+      `Expected DateFieldKindValue. Received ${JSON.stringify(value)}`,
+    );
   }
 }
 
@@ -636,7 +852,9 @@ export function assertMultiSelectFieldKindValue(
   value: FieldValue,
 ): asserts value is MultiSelectFieldKindValue {
   if (Array.isArray(value) === false) {
-    throw new Error(`Expected MultiSelectFieldKindValue. Received ${value}`);
+    throw new Error(
+      `Expected MultiSelectFieldKindValue. Received ${JSON.stringify(value)}`,
+    );
   }
 }
 
@@ -644,7 +862,9 @@ export function assertNumberFieldKindValue(
   value: FieldValue,
 ): asserts value is NumberFieldKindValue {
   if (value !== null && typeof value !== 'number') {
-    throw new Error(`Expected NumberFieldKindValue. Received ${value}`);
+    throw new Error(
+      `Expected NumberFieldKindValue. Received ${JSON.stringify(value)}`,
+    );
   }
 }
 
@@ -652,7 +872,9 @@ export function assertSingleSelectFieldKindValue(
   value: FieldValue,
 ): asserts value is SingleSelectFieldKindValue {
   if (value !== null && typeof value !== 'string') {
-    throw new Error(`Expected SingleSelectFieldKindValue. Received ${value}`);
+    throw new Error(
+      `Expected SingleSelectFieldKindValue. Received ${JSON.stringify(value)}`,
+    );
   }
 }
 
@@ -660,82 +882,18 @@ export function assertTextFieldKindValue(
   value: FieldValue,
 ): asserts value is TextFieldKindValue {
   if (typeof value !== 'string') {
-    throw new Error(`Expected TextFieldKindValue. Received ${value}`);
+    throw new Error(
+      `Expected TextFieldKindValue. Received ${JSON.stringify(value)}`,
+    );
   }
 }
 
-export function areFieldValuesEqual(
-  fieldType: FieldType,
-  a: FieldValue,
-  b: FieldValue,
-): boolean {
-  const checkEquality = equalityCheckerByFieldType[fieldType];
-
-  return checkEquality(a, b);
-}
-
-const equalityCheckerByFieldType: {
-  [fieldType in FieldType]: (a: FieldValue, b: FieldValue) => boolean;
-} = {
-  [FieldType.Checkbox]: areBooleanFieldKindValueEqual,
-  [FieldType.Currency]: areNumberFieldKindValueEqual,
-  [FieldType.Date]: areDateFieldKindValueEqual,
-  [FieldType.Email]: areTextFieldKindValueEqual,
-  [FieldType.MultiCollaborator]: areMultiSelectFieldKindValueEqual,
-  [FieldType.MultiRecordLink]: areMultiSelectFieldKindValueEqual,
-  [FieldType.MultiLineText]: areTextFieldKindValueEqual,
-  [FieldType.MultiOption]: areMultiSelectFieldKindValueEqual,
-  [FieldType.Number]: areNumberFieldKindValueEqual,
-  [FieldType.PhoneNumber]: areTextFieldKindValueEqual,
-  [FieldType.SingleCollaborator]: areSingleSelectFieldKindValueEqual,
-  [FieldType.SingleRecordLink]: areSingleSelectFieldKindValueEqual,
-  [FieldType.SingleLineText]: areTextFieldKindValueEqual,
-  [FieldType.SingleOption]: areSingleSelectFieldKindValueEqual,
-  [FieldType.URL]: areTextFieldKindValueEqual,
-};
-
-function areTextFieldKindValueEqual(a: FieldValue, b: FieldValue) {
-  assertTextFieldKindValue(a);
-  assertTextFieldKindValue(b);
-
-  return a === b;
-}
-
-function areNumberFieldKindValueEqual(a: FieldValue, b: FieldValue) {
-  assertNumberFieldKindValue(a);
-  assertNumberFieldKindValue(b);
-
-  return a === b;
-}
-
-function areSingleSelectFieldKindValueEqual(a: FieldValue, b: FieldValue) {
-  assertSingleSelectFieldKindValue(a);
-  assertSingleSelectFieldKindValue(b);
-
-  return a === b;
-}
-
-function areMultiSelectFieldKindValueEqual(a: FieldValue, b: FieldValue) {
-  assertMultiSelectFieldKindValue(a);
-  assertMultiSelectFieldKindValue(b);
-
-  return hasAllOf(a, b);
-}
-
-function areBooleanFieldKindValueEqual(a: FieldValue, b: FieldValue) {
-  assertBooleanFieldKindValue(a);
-  assertBooleanFieldKindValue(b);
-
-  return a === b;
-}
-
-function areDateFieldKindValueEqual(a: FieldValue, b: FieldValue) {
-  assertDateFieldValue(a);
-  assertDateFieldValue(b);
-
-  if (a !== null && b !== null) {
-    return isSameDay(a, b);
+export function assertPrimaryFieldValue(
+  value: FieldValue,
+): asserts value is PrimaryFieldValue {
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Expected PrimaryFieldValue. Received ${JSON.stringify(value)}`,
+    );
   }
-
-  return a === b;
 }

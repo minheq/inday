@@ -60,7 +60,7 @@ export function App(): JSX.Element {
             fallback={
               <SpaceScreen
                 name={ScreenName.Space}
-                params={{ viewID: '1', spaceID: '1' }}
+                params={{ viewID: 'viw1', spaceID: 'spc1' }}
               />
             }
           />

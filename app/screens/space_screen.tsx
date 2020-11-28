@@ -26,6 +26,7 @@ import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
 import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
+import { SpaceID } from '../data/spaces';
 
 type SidePanelState = 'views' | 'organize' | null;
 
@@ -34,10 +35,16 @@ const sidePanelState = atom<SidePanelState>({
   default: null,
 });
 
-const SpaceScreenContext = createContext({
-  spaceID: '1',
-  viewID: '1',
-  collectionID: '1',
+interface SpaceScreenContext {
+  spaceID: SpaceID;
+  viewID: ViewID;
+  collectionID: CollectionID;
+}
+
+const SpaceScreenContext = createContext<SpaceScreenContext>({
+  spaceID: SpaceID(),
+  viewID: ViewID(),
+  collectionID: CollectionID(),
 });
 
 export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {

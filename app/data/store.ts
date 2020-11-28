@@ -14,7 +14,6 @@ import {
 } from './views';
 import { Field, FieldConfig, FieldID, FieldValue } from './fields';
 import { Record, RecordID } from './records';
-import { generateID } from '../../lib/id/id';
 import {
   Filter,
   FilterConfig,
@@ -75,7 +74,8 @@ import {
 import { SortConfig, Sort, SortID, deleteSort } from './sorts';
 import { GroupConfig, Group, GroupID, deleteGroup } from './groups';
 import { Workspace } from './workspace';
-import { Collaborator, CollaboratorID } from './collaborators';
+import { Collaborator } from './collaborators';
+import { UserID } from './user';
 
 export function useGetWorkspace(): Workspace {
   const workspace = useRecoilValue(workspaceState);
@@ -154,7 +154,7 @@ export function useCreateSpace(): () => Space {
 
   return useCallback(() => {
     const newSpace: Space = {
-      id: generateID(),
+      id: SpaceID(),
       name: '',
       workspaceID: workspace.id,
       createdAt: new Date(),
@@ -205,7 +205,7 @@ export interface UpdateSpaceNameInput {
   name: string;
 }
 
-export function useUpdateSpaceName() {
+export function useUpdateSpaceName(): (input: UpdateSpaceNameInput) => void {
   const emitEvent = useEmitEvent();
   const getSpace = useGetSpaceCallback();
   const setSpaces = useSetRecoilState(spacesByIDState);
@@ -243,9 +243,7 @@ export function useGetCollaborators(): Collaborator[] {
   return useRecoilValue(collaboratorsQuery);
 }
 
-export function useGetCollaborator(
-  collaboratorID: CollaboratorID,
-): Collaborator {
+export function useGetCollaborator(collaboratorID: UserID): Collaborator {
   return useRecoilValue(collaboratorQuery(collaboratorID));
 }
 
@@ -302,7 +300,7 @@ export function useGetCollectionViews(collectionID: CollectionID): View[] {
   return useRecoilValue(collectionViewsQuery(collectionID));
 }
 
-export function useCreateCollection() {
+export function useCreateCollection(): (spaceID: SpaceID) => Collection {
   const emitEvent = useEmitEvent();
   const setCollections = useSetRecoilState(collectionsByIDState);
   const createView = useCreateView();
@@ -310,10 +308,9 @@ export function useCreateCollection() {
   return useCallback(
     (spaceID: SpaceID) => {
       const newCollection: Collection = {
-        id: generateID(),
+        id: CollectionID(),
         name: '',
-        // TODO: create field
-        primaryFieldID: '',
+        primaryFieldID: Field.generateID(),
         createdAt: new Date(),
         updatedAt: new Date(),
         spaceID,
@@ -549,7 +546,7 @@ export function useCreateFilter() {
   return useCallback(
     (viewID: ViewID, group: number, filterConfig: FilterConfig) => {
       const newFilter: Filter = {
-        id: generateID(),
+        id: FilterID(),
         viewID,
         group,
         ...filterConfig,
@@ -672,7 +669,7 @@ export function useCreateSort() {
   return useCallback(
     (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
       const newSort: Sort = {
-        id: generateID(),
+        id: SortID(),
         viewID,
         sequence,
         ...sortConfig,
@@ -758,14 +755,18 @@ export function useDeleteSort() {
   );
 }
 
-export function useCreateGroup() {
+export function useCreateGroup(): (
+  viewID: ViewID,
+  sequence: number,
+  groupConfig: GroupConfig,
+) => Group {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState(groupsByIDState);
 
   return useCallback(
     (viewID: ViewID, sequence: number, groupConfig: GroupConfig) => {
       const newGroup: Group = {
-        id: generateID(),
+        id: GroupID(),
         viewID,
         sequence,
         ...groupConfig,
@@ -793,7 +794,7 @@ export function useUpdateGroupConfig() {
   const getGroup = useGetGroupCallback();
 
   return useCallback(
-    async (groupID: string, groupConfig: GroupConfig) => {
+    async (groupID: GroupID, groupConfig: GroupConfig) => {
       const prevGroup = await getGroup(groupID);
 
       const nextGroup: Group = {
@@ -938,7 +939,7 @@ export function useCreateView() {
   return useCallback(
     (collectionID: CollectionID) => {
       const newView: View = {
-        id: generateID(),
+        id: ViewID(),
         name: '',
         type: 'list',
         fixedFieldCount: 1,
@@ -1080,7 +1081,7 @@ export function useCreateField() {
       fieldConfig: FieldConfig,
     ) => {
       const newField: Field = {
-        id: generateID(),
+        id: Field.generateID(),
         name,
         description,
         createdAt: new Date(),
@@ -1197,7 +1198,7 @@ export function useCreateRecord() {
   return useCallback(
     (collectionID: CollectionID) => {
       const newRecord: Record = {
-        id: generateID(),
+        id: RecordID(),
         fields: {},
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -1244,7 +1245,7 @@ export function useDeleteRecord() {
 }
 
 export interface UpdateRecordNameInput {
-  recordID: string;
+  recordID: RecordID;
 }
 
 export function useUpdateRecordName() {

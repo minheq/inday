@@ -20,8 +20,14 @@ import {
   TextFieldKindValue,
 } from './fields';
 import { ViewID } from './views';
+import { generateID } from '../../lib/id';
 
+export const filterIDPrefix = `fil` as const;
 export type FilterID = string;
+// export type FilterID = `${typeof filterIDPrefix}${string}`;
+export function FilterID(): FilterID {
+  return generateID(filterIDPrefix);
+}
 
 export interface BaseFilter {
   id: FilterID;
@@ -306,7 +312,9 @@ export function getDefaultFilterConfig(field: Field): FilterConfig {
     case FieldType.SingleCollaborator:
       return { fieldID: field.id, rule: 'is', value: null };
     default:
-      throw new Error(`Expected default filter config for ${field}`);
+      throw new Error(
+        `Expected default filter config for ${JSON.stringify(field)}`,
+      );
   }
 }
 
@@ -365,7 +373,7 @@ export function deleteFilter(
 }
 
 export interface FilterGetters {
-  getField: (fieldID: string) => Field;
+  getField: (fieldID: FieldID) => Field;
 }
 
 export function filterRecords(
@@ -592,7 +600,9 @@ export const dateFieldKindFiltersByRule: {
 
     if (!(filterValue instanceof Date)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${filterValue}`,
+        `Expected filterValue to be Date. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -609,7 +619,9 @@ export const dateFieldKindFiltersByRule: {
 
     if (filterValue instanceof Date) {
       throw new Error(
-        `Expected filterValue to be Interval. Received ${filterValue}`,
+        `Expected filterValue to be Interval. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -622,7 +634,9 @@ export const dateFieldKindFiltersByRule: {
 
     if (!(filterValue instanceof Date)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${filterValue}`,
+        `Expected filterValue to be Date. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -635,7 +649,9 @@ export const dateFieldKindFiltersByRule: {
 
     if (!(filterValue instanceof Date)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${filterValue}`,
+        `Expected filterValue to be Date. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -648,7 +664,9 @@ export const dateFieldKindFiltersByRule: {
 
     if (!(filterValue instanceof Date)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${filterValue}`,
+        `Expected filterValue to be Date. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -661,7 +679,9 @@ export const dateFieldKindFiltersByRule: {
 
     if (!(filterValue instanceof Date)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${filterValue}`,
+        `Expected filterValue to be Date. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -674,7 +694,9 @@ export const dateFieldKindFiltersByRule: {
 
     if (!(filterValue instanceof Date)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${filterValue}`,
+        `Expected filterValue to be Date. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -708,7 +730,9 @@ export const singleSelectFieldKindFiltersByRule: {
 
     if (typeof filterValue !== 'string') {
       throw new Error(
-        `Expected filterValue to be string. Received ${filterValue}`,
+        `Expected filterValue to be string. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -721,7 +745,9 @@ export const singleSelectFieldKindFiltersByRule: {
 
     if (typeof filterValue !== 'string') {
       throw new Error(
-        `Expected filterValue to be string. Received ${filterValue}`,
+        `Expected filterValue to be string. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -738,7 +764,9 @@ export const singleSelectFieldKindFiltersByRule: {
 
     if (typeof filterValue === 'string') {
       throw new Error(
-        `Expected filterValue to be string[]. Received ${filterValue}`,
+        `Expected filterValue to be string[]. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 
@@ -755,7 +783,9 @@ export const singleSelectFieldKindFiltersByRule: {
 
     if (typeof filterValue === 'string') {
       throw new Error(
-        `Expected filterValue to be string[]. Received ${filterValue}`,
+        `Expected filterValue to be string[]. Received ${JSON.stringify(
+          filterValue,
+        )}`,
       );
     }
 

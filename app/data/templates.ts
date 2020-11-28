@@ -1,5 +1,7 @@
+export type TemplateID = string;
+
 export interface Template {
-  id: string;
+  id: TemplateID;
   name: string;
   description: string;
   spaceID: string;

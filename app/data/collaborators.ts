@@ -1,7 +1,7 @@
-export type CollaboratorID = string;
+import { UserID } from './user';
 
 export interface Collaborator {
-  id: CollaboratorID;
+  id: UserID;
   profileImageID: string | null;
   name: string;
   email: string;

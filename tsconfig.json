@@ -13,7 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
     "paths": {
       "react-native": ["./node_modules/react-native-web"]
     }

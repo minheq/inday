@@ -1,11 +1,11 @@
-import { CollaboratorID } from 'app/data/collaborators';
-import { useGetCollaborator } from 'app/data/store';
+import { useGetCollaborator } from '../data/store';
 import React from 'react';
 import { View } from 'react-native';
 import { Avatar, DynamicStyleSheet, Text, tokens } from '../components';
+import { UserID } from '../data/user';
 
 interface CollaboratorBadgeProps {
-  collaboratorID: CollaboratorID;
+  collaboratorID: UserID;
 }
 
 export function CollaboratorBadge(props: CollaboratorBadgeProps): JSX.Element {

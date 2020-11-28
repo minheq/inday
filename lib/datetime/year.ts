@@ -4,7 +4,8 @@ import { Month } from './month';
 
 export const YEAR_FORMAT = 'yyyy';
 
-export type Year = `${typeof YEAR_FORMAT}`;
+/** In `yyyy` format */
+export type Year = string;
 
 export interface YearInterval {
   start: Year;
@@ -43,7 +44,7 @@ export const Year = {
 };
 
 function fromDate(date: Date): Year {
-  return format(date, YEAR_FORMAT) as Year;
+  return format(date, YEAR_FORMAT);
 }
 
 function toDate(year: Year): Date {

@@ -1,6 +1,5 @@
 import { atom } from 'recoil';
 
-import { RecoilKey } from './constants';
 import {
   recordsByIDFixtures,
   collectionsByIDFixtures,
@@ -23,7 +22,7 @@ import { Group } from './groups';
 
 export type WorkspaceState = Workspace | null;
 export const workspaceState = atom<WorkspaceState>({
-  key: RecoilKey.Workspace,
+  key: 'WorkspaceState',
   default: {
     id: '1',
     name: 'My Workspace',
@@ -33,49 +32,49 @@ export const workspaceState = atom<WorkspaceState>({
 
 export type RecordsByIDState = { [recordID: string]: Record | undefined };
 export const recordsByIDState = atom<RecordsByIDState>({
-  key: RecoilKey.RecordsByID,
+  key: 'RecordsByIDState',
   default: recordsByIDFixtures,
 });
 
 export type CollectionsByIDState = { [id: string]: Collection | undefined };
 export const collectionsByIDState = atom<CollectionsByIDState>({
-  key: RecoilKey.CollectionsByID,
+  key: 'CollectionsByIDState',
   default: collectionsByIDFixtures,
 });
 
 export type FieldsByIDState = { [fieldID: string]: Field | undefined };
 export const fieldsByIDState = atom<FieldsByIDState>({
-  key: RecoilKey.FieldsByID,
+  key: 'FieldsByIDState',
   default: fieldsByIDFixtures,
 });
 
 export type FiltersByIDState = { [filterID: string]: Filter | undefined };
 export const filtersByIDState = atom<FiltersByIDState>({
-  key: RecoilKey.FiltersByID,
+  key: 'FiltersByIDState',
   default: {},
 });
 
 export type SortsByIDState = { [sortID: string]: Sort | undefined };
 export const sortsByIDState = atom<SortsByIDState>({
-  key: RecoilKey.SortsByID,
+  key: 'SortsByIDState',
   default: {},
 });
 
 export type GroupsByIDState = { [groupID: string]: Group | undefined };
 export const groupsByIDState = atom<GroupsByIDState>({
-  key: RecoilKey.GroupsByID,
+  key: 'GroupsByIDState',
   default: {},
 });
 
 export type SpacesByIDState = { [spaceID: string]: Space | undefined };
 export const spacesByIDState = atom<SpacesByIDState>({
-  key: RecoilKey.SpacesByID,
+  key: 'SpacesByIDState',
   default: spacesByIDFixtures,
 });
 
 export type ViewsByIDState = { [viewID: string]: View | undefined };
 export const viewsByIDState = atom<ViewsByIDState>({
-  key: RecoilKey.ViewsByID,
+  key: 'ViewsByIDState',
   default: viewsByIDFixtures,
 });
 
@@ -83,12 +82,12 @@ export type CollaboratorsByIDState = {
   [collaboratorID: string]: Collaborator;
 };
 export const collaboratorsByIDState = atom<CollaboratorsByIDState>({
-  key: RecoilKey.CollaboratorsByID,
+  key: 'CollaboratorsByIDState',
   default: collaboratorsByIDFixtures,
 });
 
 export type EventsState = Event[];
 export const eventsState = atom<EventsState>({
-  key: RecoilKey.Events,
+  key: 'EventsState',
   default: [],
 });

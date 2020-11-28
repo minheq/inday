@@ -16,7 +16,7 @@ import {
 import { keyedBy } from '../../lib/js_utils/array_utils';
 
 const space1 = makeSpace({
-  id: '1',
+  id: 'spc1',
 });
 const collaborator1 = makeCollaborator({ spaceID: space1.id });
 const collaborator2 = makeCollaborator({ spaceID: space1.id });
@@ -127,11 +127,11 @@ const col1Fields = [
 const collection1WithFields = addFieldsToCollection(collection1, col1Fields);
 
 const col1View1 = makeView(
-  { id: '1', collectionID: collection1.id },
+  { id: 'viw1', collectionID: collection1.id },
   collection1WithFields,
 );
 const col1View2 = makeView(
-  { id: '2', collectionID: collection1.id },
+  { id: 'viw2', collectionID: collection1.id },
   collection1WithFields,
 );
 

@@ -14,7 +14,7 @@ import {
 } from './fields';
 import { sortRecords, SortGetters } from './sorts';
 import { Record, RecordID } from './records';
-import { CollaboratorID } from './collaborators';
+import { UserID } from './user';
 
 describe('no sort', () => {
   test('all records', () => {
@@ -161,8 +161,8 @@ describe('multi options', () => {
   const opt1 = field.options[0];
   const opt2 = field.options[1];
 
-  const record1 = makeRecord({ fields: { [field.id]: [opt1.value] } });
-  const record2 = makeRecord({ fields: { [field.id]: [opt2.value] } });
+  const record1 = makeRecord({ fields: { [field.id]: [opt1.id] } });
+  const record2 = makeRecord({ fields: { [field.id]: [opt2.id] } });
   const record3 = makeRecord({ fields: { [field.id]: [] } });
   const records = [record1, record2, record3];
 
@@ -191,8 +191,8 @@ describe('single options', () => {
   const opt1 = field.options[0];
   const opt2 = field.options[1];
 
-  const record1 = makeRecord({ fields: { [field.id]: opt1.value } });
-  const record2 = makeRecord({ fields: { [field.id]: opt2.value } });
+  const record1 = makeRecord({ fields: { [field.id]: opt1.id } });
+  const record2 = makeRecord({ fields: { [field.id]: opt2.id } });
   const record3 = makeRecord({ fields: { [field.id]: null } });
   const records = [record1, record2, record3];
 
@@ -219,7 +219,7 @@ describe('collaborator', () => {
   const collaborator1 = makeCollaborator({ name: 'BName' });
   const collaborator2 = makeCollaborator({ name: 'AName' });
 
-  const getCollaborator = (collaboratorID: CollaboratorID) => {
+  const getCollaborator = (collaboratorID: UserID) => {
     if (collaboratorID === collaborator1.id) {
       return collaborator1;
     }

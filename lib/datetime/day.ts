@@ -18,8 +18,8 @@ import { Interval } from './interval';
 
 export const DAY_FORMAT = 'yyyy-MM-dd';
 
-/** Day in `yyyy-MM-dd` format */
-export type Day = `${typeof DAY_FORMAT}`;
+/** In `yyyy-MM-dd` format */
+export type Day = `${string}-${string}-${string}`;
 
 export interface DayInterval {
   start: Day;

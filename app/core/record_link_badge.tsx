@@ -1,7 +1,8 @@
-import { RecordID } from 'app/data/records';
-import { useGetCollection, useGetRecord } from 'app/data/store';
+import { RecordID } from '../data/records';
+import { useGetCollection, useGetRecord } from '../data/store';
 import React from 'react';
 import { Badge, tokens } from '../components';
+import { assertPrimaryFieldValue } from '../data/fields';
 
 interface RecordLinkBadgeProps {
   recordID: RecordID;
@@ -11,11 +12,9 @@ export function RecordLinkBadge(props: RecordLinkBadgeProps): JSX.Element {
   const { recordID } = props;
   const record = useGetRecord(recordID);
   const collection = useGetCollection(record.collectionID);
-  const primaryFieldText = record.fields[collection.primaryFieldID];
+  const primaryFieldValue = record.fields[collection.primaryFieldID];
 
-  if (typeof primaryFieldText !== 'string') {
-    throw new Error('Main field expected to be string');
-  }
+  assertPrimaryFieldValue(primaryFieldValue);
 
-  return <Badge color={tokens.colors.purple[50]} title={primaryFieldText} />;
+  return <Badge color={tokens.colors.purple[50]} title={primaryFieldValue} />;
 }

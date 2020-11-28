@@ -97,8 +97,11 @@ function GroupListItem(props: GroupListItemProps) {
   }, [setGroupEditID]);
 
   const handlePressRemove = useCallback(() => {
-    deleteGroup(group);
-    setGroupEditID('');
+    deleteGroup(group)
+      .then(() => {
+        setGroupEditID('');
+      })
+      .catch((e) => {});
   }, [deleteGroup, setGroupEditID, group]);
 
   const handleSubmit = useCallback(() => {
@@ -208,7 +211,11 @@ function GroupNew() {
 
   if (open) {
     return (
-      <Container padding={16} borderRadius={tokens.radius} shadow>
+      <Container
+        padding={16}
+        borderRadius={tokens.border.radius.default}
+        shadow
+      >
         <Text weight="bold">New group</Text>
         <Spacer size={16} />
         <GroupEdit groupConfig={groupConfig} onChange={setGroupConfig} />

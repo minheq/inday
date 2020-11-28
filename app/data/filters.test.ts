@@ -10,7 +10,7 @@ import {
   filterRecords,
   FilterGetters,
 } from './filters';
-import { parseDay } from '../../lib/datetime/day';
+import { Day } from '../../lib/datetime';
 
 import {
   makeCollection,
@@ -254,13 +254,13 @@ describe('dateFieldKindFiltersByRule', () => {
 
     test('ok', () => {
       expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-03')),
+        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-03')),
       ).toBeTruthy();
     });
 
     test('not ok', () => {
       expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
       ).toBeFalsy();
     });
   });
@@ -270,18 +270,18 @@ describe('dateFieldKindFiltersByRule', () => {
 
     test('ok', () => {
       expect(
-        filter(parseDay('2020-08-03'), {
-          start: parseDay('2020-08-02'),
-          end: parseDay('2020-08-04'),
+        filter(Day.toDate('2020-08-03'), {
+          start: Day.toDate('2020-08-02'),
+          end: Day.toDate('2020-08-04'),
         }),
       ).toBeTruthy();
     });
 
     test('not ok', () => {
       expect(
-        filter(parseDay('2020-08-05'), {
-          start: parseDay('2020-08-02'),
-          end: parseDay('2020-08-04'),
+        filter(Day.toDate('2020-08-05'), {
+          start: Day.toDate('2020-08-02'),
+          end: Day.toDate('2020-08-04'),
         }),
       ).toBeFalsy();
     });
@@ -292,13 +292,13 @@ describe('dateFieldKindFiltersByRule', () => {
 
     test('ok', () => {
       expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
       ).toBeTruthy();
     });
 
     test('not ok', () => {
       expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
       ).toBeFalsy();
     });
   });
@@ -308,13 +308,13 @@ describe('dateFieldKindFiltersByRule', () => {
 
     test('ok', () => {
       expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
       ).toBeTruthy();
     });
 
     test('not ok', () => {
       expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
       ).toBeFalsy();
     });
   });
@@ -324,16 +324,16 @@ describe('dateFieldKindFiltersByRule', () => {
 
     test('ok', () => {
       expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
       ).toBeTruthy();
       expect(
-        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
       ).toBeTruthy();
     });
 
     test('not ok', () => {
       expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
       ).toBeFalsy();
     });
   });
@@ -343,16 +343,16 @@ describe('dateFieldKindFiltersByRule', () => {
 
     test('ok', () => {
       expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
       ).toBeTruthy();
       expect(
-        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
       ).toBeTruthy();
     });
 
     test('not ok', () => {
       expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
       ).toBeFalsy();
     });
   });
@@ -362,13 +362,13 @@ describe('dateFieldKindFiltersByRule', () => {
 
     test('ok', () => {
       expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
       ).toBeTruthy();
     });
 
     test('not ok', () => {
       expect(
-        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
+        filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
       ).toBeFalsy();
     });
   });
@@ -381,7 +381,7 @@ describe('dateFieldKindFiltersByRule', () => {
     });
 
     test('not ok', () => {
-      expect(filter(parseDay('2020-08-04'), new Date())).toBeFalsy();
+      expect(filter(Day.toDate('2020-08-04'), new Date())).toBeFalsy();
     });
   });
 
@@ -389,7 +389,7 @@ describe('dateFieldKindFiltersByRule', () => {
     const filter = dateFieldKindFiltersByRule.isNotEmpty;
 
     test('ok', () => {
-      expect(filter(parseDay('2020-08-04'), new Date())).toBeTruthy();
+      expect(filter(Day.toDate('2020-08-04'), new Date())).toBeTruthy();
     });
 
     test('not ok', () => {

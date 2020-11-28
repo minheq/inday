@@ -1,5 +1,4 @@
 import { selectorFamily, selector } from 'recoil';
-import { RecoilKey } from './constants';
 import {
   recordsByIDState,
   collectionsByIDState,
@@ -26,11 +25,12 @@ import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
 import { last, isEmpty, keyedBy } from '../../lib/js_utils';
 import { Sort, SortID, sortRecords, SortGetters } from './sorts';
-import { CollaboratorID, Collaborator } from './collaborators';
+import { Collaborator } from './collaborators';
 import { Group, GroupID } from './groups';
+import { UserID } from './user';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
-  key: RecoilKey.Space,
+  key: 'SpaceQuery',
   get: (spaceID: SpaceID) => ({ get }) => {
     const spacesByID = get(spacesByIDState);
     const space = spacesByID[spaceID];
@@ -44,7 +44,7 @@ export const spaceQuery = selectorFamily<Space | null, SpaceID>({
 });
 
 export const spaceCollectionsQuery = selectorFamily<Collection[], SpaceID>({
-  key: RecoilKey.Space,
+  key: 'SpaceCollectionsQuery',
   get: (spaceID: SpaceID) => ({ get }) => {
     const collections = get(collectionsQuery);
 
@@ -53,7 +53,7 @@ export const spaceCollectionsQuery = selectorFamily<Collection[], SpaceID>({
 });
 
 export const spacesQuery = selector({
-  key: RecoilKey.Spaces,
+  key: 'SpacesQuery',
   get: ({ get }) => {
     const spacesByID = get(spacesByIDState);
 
@@ -62,7 +62,7 @@ export const spacesQuery = selector({
 });
 
 export const recordsQuery = selector({
-  key: RecoilKey.Records,
+  key: 'RecordsQuery',
   get: ({ get }) => {
     const recordsByID = get(recordsByIDState);
 
@@ -71,7 +71,7 @@ export const recordsQuery = selector({
 });
 
 export const recordQuery = selectorFamily<Record, string>({
-  key: RecoilKey.Record,
+  key: 'RecordQuery',
   get: (recordID: string) => ({ get }) => {
     const recordsByID = get(recordsByIDState);
     const record = recordsByID[recordID];
@@ -85,7 +85,7 @@ export const recordQuery = selectorFamily<Record, string>({
 });
 
 export const collectionRecordsQuery = selectorFamily<Record[], string>({
-  key: RecoilKey.Collection,
+  key: 'CollectionRecordsQuery',
   get: (collectionID: string) => ({ get }) => {
     const records = get(recordsQuery);
 
@@ -94,7 +94,7 @@ export const collectionRecordsQuery = selectorFamily<Record[], string>({
 });
 
 export const collectionsQuery = selector({
-  key: RecoilKey.Collections,
+  key: 'CollectionsQuery',
   get: ({ get }) => {
     const collectionsByID = get(collectionsByIDState);
 
@@ -102,8 +102,8 @@ export const collectionsQuery = selector({
   },
 });
 
-export const collectionQuery = selectorFamily<Collection, string>({
-  key: RecoilKey.Collection,
+export const collectionQuery = selectorFamily<Collection, CollectionID>({
+  key: 'CollectionQuery',
   get: (collectionID: CollectionID) => ({ get }) => {
     const collectionsByID = get(collectionsByIDState);
     const collection = collectionsByID[collectionID];
@@ -117,7 +117,7 @@ export const collectionQuery = selectorFamily<Collection, string>({
 });
 
 export const fieldsQuery = selector({
-  key: RecoilKey.Fields,
+  key: 'FieldsQuery',
   get: ({ get }) => {
     const fieldsByID = get(fieldsByIDState);
 
@@ -125,9 +125,9 @@ export const fieldsQuery = selector({
   },
 });
 
-export const fieldQuery = selectorFamily<Field, string>({
-  key: RecoilKey.Field,
-  get: (fieldID: string) => ({ get }) => {
+export const fieldQuery = selectorFamily<Field, FieldID>({
+  key: 'FieldQuery',
+  get: (fieldID: FieldID) => ({ get }) => {
     const fieldsByID = get(fieldsByIDState);
 
     const field = fieldsByID[fieldID];
@@ -144,7 +144,7 @@ export const collectionFieldsByIDQuery = selectorFamily<
   { [fieldID: string]: Field },
   string
 >({
-  key: RecoilKey.CollectionFieldsByID,
+  key: 'CollectionFieldsByIDQuery',
   get: (collectionID: string) => ({ get }) => {
     const fields = get(fieldsQuery);
 
@@ -161,7 +161,7 @@ export const collectionFieldsByIDQuery = selectorFamily<
 });
 
 export const collectionFieldsQuery = selectorFamily<Field[], string>({
-  key: RecoilKey.CollectionFields,
+  key: 'CollectionFieldsQuery',
   get: (collectionID: string) => ({ get }) => {
     const fields = get(fieldsQuery);
 
@@ -170,7 +170,7 @@ export const collectionFieldsQuery = selectorFamily<Field[], string>({
 });
 
 export const filtersQuery = selector({
-  key: RecoilKey.Filters,
+  key: 'FiltersQuery',
   get: ({ get }) => {
     const filtersByID = get(filtersByIDState);
 
@@ -179,7 +179,7 @@ export const filtersQuery = selector({
 });
 
 export const filterQuery = selectorFamily<Filter, FilterID>({
-  key: RecoilKey.Filter,
+  key: 'FilterQuery',
   get: (filterID: FilterID) => ({ get }) => {
     const filtersByID = get(filtersByIDState);
 
@@ -194,7 +194,7 @@ export const filterQuery = selectorFamily<Filter, FilterID>({
 });
 
 export const sortsQuery = selector({
-  key: RecoilKey.Sorts,
+  key: 'SortsQuery',
   get: ({ get }) => {
     const sortsByID = get(sortsByIDState);
 
@@ -203,7 +203,7 @@ export const sortsQuery = selector({
 });
 
 export const sortQuery = selectorFamily<Sort, SortID>({
-  key: RecoilKey.Sort,
+  key: 'SortQuery',
   get: (sortID: SortID) => ({ get }) => {
     const sortsByID = get(sortsByIDState);
 
@@ -218,17 +218,17 @@ export const sortQuery = selectorFamily<Sort, SortID>({
 });
 
 export const groupsQuery = selector({
-  key: RecoilKey.Groups,
+  key: 'GroupsQuery',
   get: ({ get }) => {
     const groupsByID = get(groupsByIDState);
 
-    return Object.values(groupsByID) as Sort[];
+    return Object.values(groupsByID) as Group[];
   },
 });
 
-export const groupQuery = selectorFamily<Sort, SortID>({
-  key: RecoilKey.Sort,
-  get: (groupID: SortID) => ({ get }) => {
+export const groupQuery = selectorFamily<Group, GroupID>({
+  key: 'GroupQuery',
+  get: (groupID: GroupID) => ({ get }) => {
     const groupsByID = get(groupsByIDState);
 
     const group = groupsByID[groupID];
@@ -242,7 +242,7 @@ export const groupQuery = selectorFamily<Sort, SortID>({
 });
 
 export const viewsQuery = selector({
-  key: RecoilKey.Views,
+  key: 'ViewsQuery',
   get: ({ get }) => {
     const viewsByID = get(viewsByIDState);
 
@@ -251,7 +251,7 @@ export const viewsQuery = selector({
 });
 
 export const viewQuery = selectorFamily<View, ViewID>({
-  key: RecoilKey.View,
+  key: 'ViewQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const viewsByID = get(viewsByIDState);
     const view = viewsByID[viewID];
@@ -265,7 +265,7 @@ export const viewQuery = selectorFamily<View, ViewID>({
 });
 
 export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
-  key: RecoilKey.ViewFilters,
+  key: 'ViewFiltersQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const view = get(viewQuery(viewID));
     const filters = get(filtersQuery);
@@ -278,7 +278,7 @@ export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
 });
 
 export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
-  key: RecoilKey.ViewSorts,
+  key: 'ViewSortsQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const view = get(viewQuery(viewID));
     const sorts = get(sortsQuery);
@@ -290,10 +290,10 @@ export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
   },
 });
 
-export const viewGroupsQuery = selectorFamily<Group[], GroupID>({
-  key: RecoilKey.ViewGroups,
-  get: (groupID: GroupID) => ({ get }) => {
-    const view = get(viewQuery(groupID));
+export const viewGroupsQuery = selectorFamily<Group[], ViewID>({
+  key: 'ViewGroupsQuery',
+  get: (viewID: ViewID) => ({ get }) => {
+    const view = get(viewQuery(viewID));
     const groups = get(groupsQuery);
 
     return groups
@@ -304,7 +304,7 @@ export const viewGroupsQuery = selectorFamily<Group[], GroupID>({
 });
 
 export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], ViewID>({
-  key: RecoilKey.ViewFilterGroups,
+  key: 'ViewFilterGroupsQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const filters = get(viewFiltersQuery(viewID));
 
@@ -326,7 +326,7 @@ export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], ViewID>({
 });
 
 export const viewFiltersGroupMaxQuery = selectorFamily<number, ViewID>({
-  key: RecoilKey.ViewFiltersGroupMax,
+  key: 'ViewFiltersGroupMaxQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const filterGroups = get(viewFilterGroupsQuery(viewID));
 
@@ -341,7 +341,7 @@ export const viewFiltersGroupMaxQuery = selectorFamily<number, ViewID>({
 });
 
 export const viewSortsSequenceMaxQuery = selectorFamily<number, ViewID>({
-  key: RecoilKey.ViewFilters,
+  key: 'ViewSortsSequenceMaxQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const sorts = get(viewSortsQuery(viewID));
 
@@ -354,7 +354,7 @@ export const viewSortsSequenceMaxQuery = selectorFamily<number, ViewID>({
 });
 
 export const viewGroupsSequenceMaxQuery = selectorFamily<number, ViewID>({
-  key: RecoilKey.ViewFilters,
+  key: 'ViewGroupsSequenceMaxQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const group = get(viewGroupsQuery(viewID));
 
@@ -367,7 +367,7 @@ export const viewGroupsSequenceMaxQuery = selectorFamily<number, ViewID>({
 });
 
 export const collectionViewsQuery = selectorFamily<View[], CollectionID>({
-  key: RecoilKey.CollectionViews,
+  key: 'CollectionViewsQuery',
   get: (collectionID: CollectionID) => ({ get }) => {
     const views = get(viewsQuery);
 
@@ -379,7 +379,7 @@ export const collectionRecordsByIDQuery = selectorFamily<
   RecordsByIDState,
   CollectionID
 >({
-  key: RecoilKey.CollectionRecordsByID,
+  key: 'CollectionRecordsByIDQuery',
   get: (collectionID: CollectionID) => ({ get }) => {
     const records = get(recordsQuery);
 
@@ -391,9 +391,9 @@ export const collectionRecordsByIDQuery = selectorFamily<
   },
 });
 
-export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
-  key: RecoilKey.Collaborator,
-  get: (collaboratorID: CollaboratorID) => ({ get }) => {
+export const collaboratorQuery = selectorFamily<Collaborator, UserID>({
+  key: 'CollaboratorQuery',
+  get: (collaboratorID: UserID) => ({ get }) => {
     const collaboratorsByID = get(collaboratorsByIDState);
     const collaborator = collaboratorsByID[collaboratorID];
 
@@ -410,7 +410,7 @@ export const collaboratorsQuery = selector<Collaborator[]>({
   get: ({ get }) => {
     const collaboratorsByID = get(collaboratorsByIDState);
 
-    return Object.values(collaboratorsByID) as Collaborator[];
+    return Object.values(collaboratorsByID);
   },
 });
 
@@ -418,7 +418,7 @@ export const recordFieldValueQuery = selectorFamily<
   FieldValue,
   { recordID: RecordID; fieldID: FieldID }
 >({
-  key: RecoilKey.RecordFieldValue,
+  key: 'RecordFieldValueQuery',
   get: ({ recordID, fieldID }) => ({ get }) => {
     const recordsByID = get(recordsByIDState);
     const record = recordsByID[recordID];
@@ -431,9 +431,9 @@ export const recordFieldValueQuery = selectorFamily<
   },
 });
 
-export const viewRecordsQuery = selectorFamily<Record[], string>({
-  key: RecoilKey.ViewRecords,
-  get: (viewID: string) => ({ get }) => {
+export const viewRecordsQuery = selectorFamily<Record[], ViewID>({
+  key: 'ViewRecordsQuery',
+  get: (viewID: ViewID) => ({ get }) => {
     const view = get(viewQuery(viewID));
     const records = get(collectionRecordsQuery(view.collectionID));
     const filterGroups = get(viewFilterGroupsQuery(viewID));
@@ -441,7 +441,7 @@ export const viewRecordsQuery = selectorFamily<Record[], string>({
 
     const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
     const getRecord = (recordID: RecordID) => get(recordQuery(recordID));
-    const getCollaborator = (collaboratorID: CollaboratorID) =>
+    const getCollaborator = (collaboratorID: UserID) =>
       get(collaboratorQuery(collaboratorID));
     const getCollection = (collectionID: CollectionID) =>
       get(collectionQuery(collectionID));

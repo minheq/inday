@@ -5,10 +5,10 @@ const nanoid = customAlphabet(
   15,
 );
 
-export function generateID(prefix?: string): string {
-  return `${prefix ?? ''}${nanoid()}`;
+export function generateID<T extends string>(prefix: T): `${T}${string}` {
+  return `${prefix}${nanoid()}` as `${T}${string}`;
 }
 
-export function validateID(_id: string): void {
-  // TODO: https://github.com/jquense/yup/issues/986
+export function validateID<T, K>(prefix: T, id: K): void {
+  return;
 }

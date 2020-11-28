@@ -40,7 +40,7 @@ import {
   fakeWord,
   fakeWords,
 } from '../../lib/faker';
-import { tokens } from 'app/components';
+import { tokens } from '../components';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {

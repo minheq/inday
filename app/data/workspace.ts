@@ -1,5 +1,8 @@
+export type WorkspaceID = string;
+// export type WorkspaceID = `wrk${string}`;
+
 export interface Workspace {
-  id: string;
+  id: WorkspaceID;
   name: string;
   ownerID: string;
 }

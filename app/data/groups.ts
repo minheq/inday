@@ -1,7 +1,13 @@
 import { ViewID } from './views';
 import { FieldID } from './fields';
+import { generateID } from '../../lib/id';
 
+export const groupIDPrefix = `grp`;
 export type GroupID = string;
+// export type GroupID = `${typeof groupIDPrefix}${string}`;
+export function GroupID(): GroupID {
+  return generateID(groupIDPrefix);
+}
 
 export type GroupOrder = 'ascending' | 'descending';
 

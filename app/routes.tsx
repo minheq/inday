@@ -1,3 +1,5 @@
+import { SpaceID } from './data/spaces';
+import { ViewID } from './data/views';
 import {
   RouterImplementation,
   useNavigationImplementation,
@@ -9,7 +11,7 @@ export enum ScreenName {
 }
 
 export type RootStackParamsMap = {
-  [ScreenName.Space]: { spaceID: string; viewID: string };
+  [ScreenName.Space]: { spaceID: SpaceID; viewID: ViewID };
   [ScreenName.Playground]: { component: string };
 };
 

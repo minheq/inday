@@ -29,7 +29,8 @@ import {
 
 export const MONTH_FORMAT = 'yyyy-MM';
 
-export type Month = `${typeof MONTH_FORMAT}`;
+/** In `yyyy-MM` format */
+export type Month = `${string}-${string}`;
 
 export interface MonthInterval {
   start: Month;
