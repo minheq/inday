@@ -98,6 +98,7 @@ import {
   assertSingleOptionFieldValue,
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
+  assertPrimaryFieldValue,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView, ViewID } from '../data/views';
@@ -776,7 +777,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   return <Fragment>{child}</Fragment>;
 }
 
-function useGetRecordPrimaryTextField() {
+function useGetRecordPrimaryFieldValue() {
   const getRecord = useGetRecordCallback();
   const getCollection = useGetCollectionCallback();
 
@@ -785,11 +786,10 @@ function useGetRecordPrimaryTextField() {
       const record = getRecord(recordID);
       const collection = getCollection(record.collectionID);
 
-      const primaryFieldText = record.fields[collection.primaryFieldID];
-      if (typeof primaryFieldText !== 'string') {
-        throw new Error('Main field expected to be string');
-      }
-      return primaryFieldText;
+      const primaryFieldValue = record.fields[collection.primaryFieldID];
+      assertPrimaryFieldValue(primaryFieldValue);
+
+      return primaryFieldValue;
     },
     [getRecord, getCollection],
   );
@@ -802,11 +802,11 @@ function useRenderRecordLink() {
 }
 
 function useRecordLinkOptions(records: Record[]): ListPickerOption<RecordID>[] {
-  const getRecordPrimaryFieldText = useGetRecordPrimaryTextField();
+  const getRecordPrimaryFieldValue = useGetRecordPrimaryFieldValue();
 
   return records.map((record) => ({
     value: record.id,
-    label: getRecordPrimaryFieldText(record.id),
+    label: getRecordPrimaryFieldValue(record.id),
   }));
 }
 
