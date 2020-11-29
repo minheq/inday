@@ -3,18 +3,23 @@
   "tasks": [
     {
       "label": "build:server",
-      "type": "npm",
-      "script": "build:server"
+      "command": "node",
+      "args": ["scripts/build_server.js"]
     },
     {
       "label": "build:web",
-      "type": "npm",
-      "script": "build:web"
+      "command": "node",
+      "args": ["scripts/build_web.js"]
+    },
+    {
+      "label": "build:test_file",
+      "command": "node",
+      "args": ["scripts/build_test.js", "${relativeFile}"]
     },
     {
       "label": "build:test",
-      "type": "npm",
-      "script": "build:test"
+      "command": "node",
+      "args": ["scripts/build_test.js"]
     }
   ]
 }

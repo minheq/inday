@@ -1,19 +1,29 @@
 const { build } = require('esbuild');
 const glob = require('./glob');
 
-(async function () {
-  let libEntryPoints = await glob('lib/**/*.test.ts');
-  let appEntryPoints = await glob('app/**/*.test.ts');
-  let apiEntryPoints = await glob('api/**/*.test.ts');
+(async function main() {
+  const file = process.argv[2];
+  let entryPoints = [];
+  let outdir = 'test';
 
-  const entryPoints = libEntryPoints
-    .concat(appEntryPoints)
-    .concat(apiEntryPoints);
+  if (file !== undefined && file.endsWith('test.ts')) {
+    // Single test file location
+    const relativeFileDirName = file.substr(0, file.lastIndexOf('/'));
+    outdir = `test/${relativeFileDirName}`;
+    entryPoints.push(file);
+  } else {
+    // All test file locations
+    let libEntryPoints = await glob('lib/**/*.test.ts');
+    let appEntryPoints = await glob('app/**/*.test.ts');
+    let apiEntryPoints = await glob('api/**/*.test.ts');
+
+    entryPoints = libEntryPoints.concat(appEntryPoints).concat(apiEntryPoints);
+  }
 
   const options = {
     entryPoints,
     bundle: true,
-    outdir: 'test',
+    outdir,
     sourcemap: true,
     resolveExtensions: [
       '.web.tsx',

@@ -26,7 +26,8 @@
       "request": "launch",
       "type": "node",
       "program": "test/${relativeFileDirname}/${fileBasenameNoExtension}.js",
-      "preLaunchTask": "build:test"
+      "preLaunchTask": "build:test_file",
+      "internalConsoleOptions": "openOnFirstSessionStart"
     },
     {
       "name": "Electron: Main",
