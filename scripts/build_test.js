@@ -1,5 +1,6 @@
+const util = require('util');
 const { build } = require('esbuild');
-const glob = require('./glob');
+const glob = util.promisify(require('glob'));
 
 (async function main() {
   const file = process.argv[2];
@@ -44,5 +45,7 @@ const glob = require('./glob');
     },
   };
 
+  console.time('build time');
   await build(options);
+  console.timeEnd('build time');
 })();
