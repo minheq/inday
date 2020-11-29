@@ -66,6 +66,9 @@ meta.json
 temp
 server.js
 
+test/
+**/*.test.js
+
 # Logs
 *.log
 

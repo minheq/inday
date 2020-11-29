@@ -1,3 +1,4 @@
+import { test } from 'zora';
 import {
   addFieldsToCollection,
   makeCollection,
@@ -16,8 +17,8 @@ import { sortRecords, SortGetters } from './sorts';
 import { Record, RecordID } from './records';
 import { CollaboratorID } from './collaborators';
 
-describe('no sort', () => {
-  test('all records', () => {
+test('no sort', (t) => {
+  t.test('all records', () => {
     const values = ['BWord', 'Aword'];
     const { getters, records, getValue } = prepare(
       FieldType.SingleLineText,
@@ -26,13 +27,13 @@ describe('no sort', () => {
 
     const result = sortRecords([], records, getters);
 
-    expect(getValue(result[0])).toBe(values[0]);
-    expect(getValue(result[1])).toBe(values[1]);
+    t.equals(getValue(result[0]), values[0]);
+    t.equals(getValue(result[1]), values[1]);
   });
 });
 
-describe('text sort', () => {
-  test('ascending', () => {
+test('text sort', (t) => {
+  t.test('ascending', () => {
     const values = ['BWord', 'Aword'];
     const { getters, records, field, getValue } = prepare(
       FieldType.SingleLineText,
@@ -42,8 +43,8 @@ describe('text sort', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[1]);
-    expect(getValue(result[1])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[1]);
+    t.equals(getValue(result[1]), values[0]);
   });
 
   test('descending', () => {
@@ -56,12 +57,12 @@ describe('text sort', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[1]);
-    expect(getValue(result[1])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[1]);
+    t.equals(getValue(result[1]), values[0]);
   });
 });
 
-describe('number sort', () => {
+test('number sort', (t) => {
   test('ascending', () => {
     const values = [2, 1, null];
     const { getters, records, field, getValue } = prepare(
@@ -72,9 +73,9 @@ describe('number sort', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('descending', () => {
@@ -87,13 +88,13 @@ describe('number sort', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[1]);
-    expect(getValue(result[1])).toBe(values[0]);
-    expect(getValue(result[2])).toBe(values[2]);
+    t.equals(getValue(result[0]), values[1]);
+    t.equals(getValue(result[1]), values[0]);
+    t.equals(getValue(result[2]), values[2]);
   });
 });
 
-describe('checkbox', () => {
+test('checkbox', (t) => {
   test('ascending', () => {
     const values = [true, false];
     const { getters, records, field, getValue } = prepare(
@@ -104,8 +105,8 @@ describe('checkbox', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[1]);
-    expect(getValue(result[1])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[1]);
+    t.equals(getValue(result[1]), values[0]);
   });
 
   test('descending', () => {
@@ -118,12 +119,12 @@ describe('checkbox', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[1]);
-    expect(getValue(result[1])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[1]);
+    t.equals(getValue(result[1]), values[0]);
   });
 });
 
-describe('date', () => {
+test('date', (t) => {
   test('ascending', () => {
     const values = [new Date(2020, 1, 2), new Date(2020, 1, 1), null];
     const { getters, records, field, getValue } = prepare(
@@ -134,9 +135,9 @@ describe('date', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('descending', () => {
@@ -149,13 +150,13 @@ describe('date', () => {
 
     const result = sortRecords([sort], records, getters);
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 });
 
-describe('multi options', () => {
+test('multi options', (t) => {
   const { getters, field } = prepare(FieldType.MultiOption, []);
   assertMultiOptionField(field);
   const opt1 = field.options[0];
@@ -170,22 +171,22 @@ describe('multi options', () => {
     const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
     const result = sortRecords([sort], records, getters);
 
-    expect(result[0].id).toBe(record3.id);
-    expect(result[1].id).toBe(record2.id);
-    expect(result[2].id).toBe(record1.id);
+    t.equals(result[0].id, record3.id);
+    t.equals(result[1].id, record2.id);
+    t.equals(result[2].id, record1.id);
   });
 
   test('descending', () => {
     const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
     const result = sortRecords([sort], records, getters);
 
-    expect(result[0].id).toBe(record1.id);
-    expect(result[1].id).toBe(record2.id);
-    expect(result[2].id).toBe(record3.id);
+    t.equals(result[0].id, record1.id);
+    t.equals(result[1].id, record2.id);
+    t.equals(result[2].id, record3.id);
   });
 });
 
-describe('single options', () => {
+test('single options', (t) => {
   const { getters, field } = prepare(FieldType.SingleOption, []);
   assertSingleOptionField(field);
   const opt1 = field.options[0];
@@ -200,22 +201,22 @@ describe('single options', () => {
     const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
     const result = sortRecords([sort], records, getters);
 
-    expect(result[0].id).toBe(record3.id);
-    expect(result[1].id).toBe(record2.id);
-    expect(result[2].id).toBe(record1.id);
+    t.equals(result[0].id, record3.id);
+    t.equals(result[1].id, record2.id);
+    t.equals(result[2].id, record1.id);
   });
 
   test('descending', () => {
     const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
     const result = sortRecords([sort], records, getters);
 
-    expect(result[0].id).toBe(record1.id);
-    expect(result[1].id).toBe(record2.id);
-    expect(result[2].id).toBe(record3.id);
+    t.equals(result[0].id, record1.id);
+    t.equals(result[1].id, record2.id);
+    t.equals(result[2].id, record3.id);
   });
 });
 
-describe('collaborator', () => {
+test('collaborator', (t) => {
   const collaborator1 = makeCollaborator({ name: 'BName' });
   const collaborator2 = makeCollaborator({ name: 'AName' });
 
@@ -240,9 +241,9 @@ describe('collaborator', () => {
       getCollaborator,
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('multi descending', () => {
@@ -258,9 +259,9 @@ describe('collaborator', () => {
       getCollaborator,
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('single ascending', () => {
@@ -276,9 +277,9 @@ describe('collaborator', () => {
       getCollaborator,
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('single descending', () => {
@@ -294,13 +295,13 @@ describe('collaborator', () => {
       getCollaborator,
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 });
 
-describe('records', () => {
+test('records', (t) => {
   const otherCollection = makeCollection({
     name: 'other collection',
   });
@@ -354,9 +355,9 @@ describe('records', () => {
       },
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('multi descending', () => {
@@ -380,9 +381,9 @@ describe('records', () => {
       },
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('single ascending', () => {
@@ -406,9 +407,9 @@ describe('records', () => {
       },
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 
   test('single descending', () => {
@@ -432,13 +433,13 @@ describe('records', () => {
       },
     });
 
-    expect(getValue(result[0])).toBe(values[2]);
-    expect(getValue(result[1])).toBe(values[1]);
-    expect(getValue(result[2])).toBe(values[0]);
+    t.equals(getValue(result[0]), values[2]);
+    t.equals(getValue(result[1]), values[1]);
+    t.equals(getValue(result[2]), values[0]);
   });
 });
 
-describe('multiple sorts', () => {
+test('multiple sorts', (t) => {
   const collection = makeCollection({});
   const numberField = makeField({
     type: FieldType.Number,
@@ -509,10 +510,10 @@ describe('multiple sorts', () => {
 
     const result = sortRecords([numberSort, textSort], records, getters);
 
-    expect(result[0].id).toBe(record3.id);
-    expect(result[1].id).toBe(record4.id);
-    expect(result[2].id).toBe(record2.id);
-    expect(result[3].id).toBe(record1.id);
+    t.equals(result[0].id, record3.id);
+    t.equals(result[1].id, record4.id);
+    t.equals(result[2].id, record2.id);
+    t.equals(result[3].id, record1.id);
   });
 });
 

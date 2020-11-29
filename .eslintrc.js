@@ -12,7 +12,6 @@ module.exports = {
         'plugin:react/recommended',
         'plugin:react-native/all',
         'plugin:react-hooks/recommended',
-        'plugin:jest/recommended',
         'prettier',
         'prettier/@typescript-eslint',
         'prettier/react',
@@ -44,7 +43,6 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
         'plugin:sonarjs/recommended',
-        'plugin:jest/recommended',
         'prettier',
         'prettier/@typescript-eslint',
         'prettier/react',
@@ -59,6 +57,7 @@ module.exports = {
       files: ['**/*.test.ts'],
       rules: {
         '@typescript-eslint/require-await': 0,
+        '@typescript-eslint/no-floating-promises': 0,
         'sonarjs/no-duplicate-string': 0,
         'sonarjs/no-identical-functions': 0,
       },

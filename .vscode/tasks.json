@@ -10,6 +10,11 @@
       "label": "build:web",
       "type": "npm",
       "script": "build:web"
+    },
+    {
+      "label": "build:test",
+      "type": "npm",
+      "script": "build:test"
     }
   ]
 }

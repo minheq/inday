@@ -1,3 +1,5 @@
+import { test } from 'zora';
+
 import {
   getVisibleIndexRange,
   getColumns,
@@ -8,7 +10,7 @@ import {
   Column,
 } from './grid.common';
 
-describe('getVisibleIndexRange', () => {
+test('getVisibleIndexRange', (t) => {
   const items = [
     { size: 100, offset: 0 },
     { size: 200, offset: 100 },
@@ -20,25 +22,26 @@ describe('getVisibleIndexRange', () => {
 
   const scrollViewSize = 400;
 
-  test.concurrent.each([
+  const runs = [
     [0, 0, 2],
     [100, 1, 3],
     [350, 2, 5],
     [500, 3, 5],
-  ])(
-    'scrollOffset=%i, startIndex=%i, endIndex=%i',
-    async (scrollOffset, startIndex, endIndex) => {
-      const result = getVisibleIndexRange({
-        items,
-        scrollOffset,
-        scrollViewSize,
-        getItemOffset: (column) => column.offset,
-        getItemSize: (column) => column.size,
-      });
+  ];
 
-      expect(result).toEqual([startIndex, endIndex]);
-    },
-  );
+  for (let i = 0; i < runs.length; i++) {
+    const [scrollOffset, startIndex, endIndex] = runs[i];
+
+    const result = getVisibleIndexRange({
+      items,
+      scrollOffset,
+      scrollViewSize,
+      getItemOffset: (column) => column.offset,
+      getItemSize: (column) => column.size,
+    });
+
+    t.equals(result, [startIndex, endIndex]);
+  }
 });
 
 interface Item {
@@ -50,24 +53,18 @@ interface RecycledItem {
   value: number;
 }
 
-describe('recycleItems', () => {
-  function run(
-    items: Item[],
-    prevItems: RecycledItem[],
-    expected: RecycledItem[],
-  ) {
-    const result = recycleItems({
+test('recycleItems', (t) => {
+  function run(items: Item[], prevItems: RecycledItem[]) {
+    return recycleItems({
       items,
       prevItems,
       toRecycledItem: (item, key) => ({ value: item.value, key }),
       getValue: (item) => item.value,
       getKey: (item) => item.key,
     });
-
-    expect(result).toEqual(expected);
   }
 
-  test.concurrent('with empty previous items', async () => {
+  t.test('with empty previous items', (t) => {
     const items: Item[] = [{ value: 1 }, { value: 2 }, { value: 3 }];
 
     const expected: RecycledItem[] = [
@@ -76,10 +73,10 @@ describe('recycleItems', () => {
       { value: 3, key: 2 },
     ];
 
-    run(items, [], expected);
+    t.equal(run(items, []), expected);
   });
 
-  test.concurrent('with previous items, in middle', async () => {
+  t.test('with previous items, in middle', () => {
     const items: Item[] = [{ value: 2 }, { value: 3 }, { value: 4 }];
 
     const prevItems: RecycledItem[] = [
@@ -94,10 +91,10 @@ describe('recycleItems', () => {
       { value: 4, key: 0 },
     ];
 
-    run(items, prevItems, expected);
+    t.equal(run(items, prevItems), expected);
   });
 
-  test.concurrent('with previous items, at the end', async () => {
+  t.test('with previous items, at the end', () => {
     const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
     const prevItems: RecycledItem[] = [
@@ -112,10 +109,10 @@ describe('recycleItems', () => {
       { value: 5, key: 1 },
     ];
 
-    run(items, prevItems, expected);
+    t.equal(run(items, prevItems), expected);
   });
 
-  test.concurrent('with no matching prev items', async () => {
+  t.test('with no matching prev items', () => {
     const items: Item[] = [{ value: 4 }, { value: 5 }];
 
     const prevItems: RecycledItem[] = [
@@ -129,10 +126,10 @@ describe('recycleItems', () => {
       { value: 5, key: 2 },
     ];
 
-    run(items, prevItems, expected);
+    t.equal(run(items, prevItems), expected);
   });
 
-  test.concurrent('more than previous', async () => {
+  t.test('more than previous', () => {
     const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
     const prevItems: RecycledItem[] = [
@@ -146,27 +143,25 @@ describe('recycleItems', () => {
       { value: 5, key: 3 },
     ];
 
-    run(items, prevItems, expected);
+    t.equal(run(items, prevItems), expected);
   });
 });
 
-describe('getColumns', () => {
-  test.concurrent('happy', async () => {
-    const result = getColumns([100, 200, 100, 200, 100, 200]);
-    const expected: Column[] = [
-      { column: 1, width: 100, x: 0 },
-      { column: 2, width: 200, x: 100 },
-      { column: 3, width: 100, x: 300 },
-      { column: 4, width: 200, x: 400 },
-      { column: 5, width: 100, x: 600 },
-      { column: 6, width: 200, x: 700 },
-    ];
-    expect(result).toEqual(expected);
-  });
+test('getColumns', (t) => {
+  const result = getColumns([100, 200, 100, 200, 100, 200]);
+  const expected: Column[] = [
+    { column: 1, width: 100, x: 0 },
+    { column: 2, width: 200, x: 100 },
+    { column: 3, width: 100, x: 300 },
+    { column: 4, width: 200, x: 400 },
+    { column: 5, width: 100, x: 600 },
+    { column: 6, width: 200, x: 700 },
+  ];
+  t.equals(result, expected);
 });
 
-describe('getRows', () => {
-  test.concurrent('single flat group', async () => {
+test('getRows', (t) => {
+  t.test('single flat group', (t) => {
     const groups: Group[] = [
       {
         type: 'leaf',
@@ -184,10 +179,10 @@ describe('getRows', () => {
       { type: 'spacer', height: 72, y: 80 },
     ];
 
-    expect(rows).toEqual(expected);
+    t.equals(rows, expected);
   });
 
-  test.concurrent('nested with leaf rows', async () => {
+  t.test('nested with leaf rows', (t) => {
     const groups: Group[] = [
       {
         type: 'ancestor',
@@ -236,10 +231,10 @@ describe('getRows', () => {
       { type: 'spacer', height: 72, y: 592 },
     ];
 
-    expect(rows).toEqual(expected);
+    t.equals(rows, expected);
   });
 
-  test.concurrent('nested with empty leaf rows', async () => {
+  t.test('nested with empty leaf rows', (t) => {
     const groups: Group[] = [
       {
         type: 'ancestor',
@@ -262,10 +257,10 @@ describe('getRows', () => {
       { type: 'spacer', height: 72, y: 112 },
     ];
 
-    expect(rows).toEqual(expected);
+    t.equals(rows, expected);
   });
 
-  test.concurrent('nested with collapsed ancestor', async () => {
+  t.test('nested with collapsed ancestor', (t) => {
     const groups: Group[] = [
       {
         type: 'ancestor',
@@ -287,10 +282,10 @@ describe('getRows', () => {
       { type: 'spacer', height: 72, y: 56 },
     ];
 
-    expect(rows).toEqual(expected);
+    t.equals(rows, expected);
   });
 
-  test.concurrent('nested collapsed child', async () => {
+  t.test('nested collapsed child', (t) => {
     const groups: Group[] = [
       {
         type: 'ancestor',
@@ -313,6 +308,6 @@ describe('getRows', () => {
       { type: 'spacer', height: 72, y: 112 },
     ];
 
-    expect(rows).toEqual(expected);
+    t.equals(rows, expected);
   });
 });
