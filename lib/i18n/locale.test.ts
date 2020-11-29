@@ -5,15 +5,23 @@ import { defaultLocale, getSupportedLocale, SupportedLocale } from './locale';
 test('uses default locale', (t) => {
   const locale = getSupportedLocale(['vi vi', 'fun', 'useless']);
 
-  t.equal(locale, defaultLocale);
+  t.deepEqual(locale, defaultLocale);
 });
 
 test('case insensitive', (t) => {
-  t.equal(getSupportedLocale('vi-VN'), SupportedLocale.viVN);
-  t.equal(getSupportedLocale('vi-vn'), SupportedLocale.viVN);
-  t.equal(getSupportedLocale('vi'), SupportedLocale.vi);
-  t.equal(getSupportedLocale('en'), SupportedLocale.en);
-  t.equal(getSupportedLocale('en-US'), SupportedLocale.enUS);
-  t.equal(getSupportedLocale('en-us'), SupportedLocale.enUS);
-  t.equal(getSupportedLocale('en_us'), SupportedLocale.enUS);
+  const table = [
+    [getSupportedLocale('vi-VN'), SupportedLocale.viVN],
+    [getSupportedLocale('vi-vn'), SupportedLocale.viVN],
+    [getSupportedLocale('vi'), SupportedLocale.vi],
+    [getSupportedLocale('en'), SupportedLocale.en],
+    [getSupportedLocale('en-US'), SupportedLocale.enUS],
+    [getSupportedLocale('en-us'), SupportedLocale.enUS],
+    [getSupportedLocale('en_us'), SupportedLocale.enUS],
+  ];
+
+  for (const data of table) {
+    const [locale, want] = data;
+
+    t.deepEqual(locale, want);
+  }
 });

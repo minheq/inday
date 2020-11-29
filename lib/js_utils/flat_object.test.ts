@@ -9,5 +9,5 @@ test('happy', (t) => {
 
   const result = obj.get(['a', 'b', 'c']);
 
-  t.equal(result, 1);
+  t.deepEqual(result, 1);
 });

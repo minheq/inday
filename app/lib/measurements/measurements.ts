@@ -16,7 +16,7 @@ export const Measurements = {
     pageX: 0,
     pageY: 0,
   }),
-  areEqual: (m1: Measurements, m2: Measurements): boolean => {
+  isEqual: (m1: Measurements, m2: Measurements): boolean => {
     return (
       m1.height === m2.height &&
       m1.pageX === m2.pageX &&

@@ -156,7 +156,7 @@ export function hasAnyOf<T>(a: T[], b: T[]): boolean {
   return isNotEmpty(intersect(a, b));
 }
 
-export function hasAllOf<T>(a: T[], b: T[]): boolean {
+export function hasAllOf<T extends string | number>(a: T[], b: T[]): boolean {
   const intersection = intersect(a, b);
 
   return intersection.length === a.length && a.length === b.length;
@@ -246,7 +246,7 @@ export function sample<T>(arr: T[]): T {
  * Compares whether 2 arrays are equal
  * @param order If true, both array items must be in the same order
  */
-export function areArraysEqual<T extends number | string>(
+export function arrayIsEqual<T extends number | string>(
   a: T[],
   b: T[],
   order = false,
@@ -265,4 +265,28 @@ export function areArraysEqual<T extends number | string>(
   }
 
   return hasAllOf(a, b);
+}
+
+export function arrayIsEqualBy<T>(
+  a: T[],
+  b: T[],
+  getValue: (item: T) => string | number,
+  order = false,
+): boolean {
+  if (order === true) {
+    for (let i = 0; i < a.length; i++) {
+      const valA = getValue(a[i]);
+      const valB = getValue(b[i]);
+
+      if (valA !== valB) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  const intersection = intersectBy(a, b, getValue);
+
+  return intersection.length === a.length;
 }

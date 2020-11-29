@@ -26,8 +26,8 @@ test('no sort', (t) => {
 
   const result = sortRecords([], records, getters);
 
-  t.equals(getValue(result[0]), values[0]);
-  t.equals(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[0]), values[0]);
+  t.deepEqual(getValue(result[1]), values[1]);
 });
 
 test('text sort - ascending', (t) => {
@@ -40,8 +40,8 @@ test('text sort - ascending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[1]);
-  t.equals(getValue(result[1]), values[0]);
+  t.deepEqual(getValue(result[0]), values[1]);
+  t.deepEqual(getValue(result[1]), values[0]);
 });
 
 test('text sort - descending', (t) => {
@@ -54,8 +54,8 @@ test('text sort - descending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[1]);
-  t.equals(getValue(result[1]), values[0]);
+  t.deepEqual(getValue(result[0]), values[1]);
+  t.deepEqual(getValue(result[1]), values[0]);
 });
 
 test('number sort - ascending', (t) => {
@@ -68,9 +68,9 @@ test('number sort - ascending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('number sort - descending', (t) => {
@@ -83,9 +83,9 @@ test('number sort - descending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[1]);
-  t.equals(getValue(result[1]), values[0]);
-  t.equals(getValue(result[2]), values[2]);
+  t.deepEqual(getValue(result[0]), values[1]);
+  t.deepEqual(getValue(result[1]), values[0]);
+  t.deepEqual(getValue(result[2]), values[2]);
 });
 
 test('boolean sort - ascending', (t) => {
@@ -98,8 +98,8 @@ test('boolean sort - ascending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[1]);
-  t.equals(getValue(result[1]), values[0]);
+  t.deepEqual(getValue(result[0]), values[1]);
+  t.deepEqual(getValue(result[1]), values[0]);
 });
 
 test('boolean sort - descending', (t) => {
@@ -112,8 +112,8 @@ test('boolean sort - descending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[1]);
-  t.equals(getValue(result[1]), values[0]);
+  t.deepEqual(getValue(result[0]), values[1]);
+  t.deepEqual(getValue(result[1]), values[0]);
 });
 
 test('date sort - ascending', (t) => {
@@ -123,9 +123,9 @@ test('date sort - ascending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('date sort - descending', (t) => {
@@ -135,9 +135,9 @@ test('date sort - descending', (t) => {
 
   const result = sortRecords([sort], records, getters);
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 function prepareMultiOptionsSort() {
@@ -160,9 +160,9 @@ test('multi options sort - ascending', (t) => {
   const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
   const result = sortRecords([sort], records, getters);
 
-  t.equals(result[0].id, record3.id);
-  t.equals(result[1].id, record2.id);
-  t.equals(result[2].id, record1.id);
+  t.deepEqual(result[0].id, record3.id);
+  t.deepEqual(result[1].id, record2.id);
+  t.deepEqual(result[2].id, record1.id);
 });
 
 test('multi options sort - descending', (t) => {
@@ -172,9 +172,9 @@ test('multi options sort - descending', (t) => {
   const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
   const result = sortRecords([sort], records, getters);
 
-  t.equals(result[0].id, record1.id);
-  t.equals(result[1].id, record2.id);
-  t.equals(result[2].id, record3.id);
+  t.deepEqual(result[0].id, record1.id);
+  t.deepEqual(result[1].id, record2.id);
+  t.deepEqual(result[2].id, record3.id);
 });
 
 function prepareSingleOptionsSort() {
@@ -197,9 +197,9 @@ test('single option sort - ascending', (t) => {
   const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
   const result = sortRecords([sort], records, getters);
 
-  t.equals(result[0].id, record3.id);
-  t.equals(result[1].id, record2.id);
-  t.equals(result[2].id, record1.id);
+  t.deepEqual(result[0].id, record3.id);
+  t.deepEqual(result[1].id, record2.id);
+  t.deepEqual(result[2].id, record1.id);
 });
 
 test('single option sort - descending', (t) => {
@@ -209,9 +209,9 @@ test('single option sort - descending', (t) => {
   const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
   const result = sortRecords([sort], records, getters);
 
-  t.equals(result[0].id, record1.id);
-  t.equals(result[1].id, record2.id);
-  t.equals(result[2].id, record3.id);
+  t.deepEqual(result[0].id, record1.id);
+  t.deepEqual(result[1].id, record2.id);
+  t.deepEqual(result[2].id, record3.id);
 });
 
 function prepareCollaboratorSort() {
@@ -247,9 +247,9 @@ test('multi collaborator sort - ascending', (t) => {
     getCollaborator,
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('multi collaborator sort - descending', (t) => {
@@ -268,9 +268,9 @@ test('multi collaborator sort - descending', (t) => {
     getCollaborator,
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('single collaborator sort - ascending', (t) => {
@@ -289,9 +289,9 @@ test('single collaborator sort - ascending', (t) => {
     getCollaborator,
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('single collaborator sort - descending', (t) => {
@@ -310,9 +310,9 @@ test('single collaborator sort - descending', (t) => {
     getCollaborator,
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 function prepareRecordsSort() {
@@ -382,9 +382,9 @@ test('multi record sort - ascending', (t) => {
     },
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('multi record sort - descending', (t) => {
@@ -416,9 +416,9 @@ test('multi record sort - descending', (t) => {
     },
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('single record sort - ascending', (t) => {
@@ -450,9 +450,9 @@ test('single record sort - ascending', (t) => {
     },
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('single record sort - descending', (t) => {
@@ -484,9 +484,9 @@ test('single record sort - descending', (t) => {
     },
   });
 
-  t.equals(getValue(result[0]), values[2]);
-  t.equals(getValue(result[1]), values[1]);
-  t.equals(getValue(result[2]), values[0]);
+  t.deepEqual(getValue(result[0]), values[2]);
+  t.deepEqual(getValue(result[1]), values[1]);
+  t.deepEqual(getValue(result[2]), values[0]);
 });
 
 test('ascending number then descending text sort', (t) => {
@@ -556,10 +556,10 @@ test('ascending number then descending text sort', (t) => {
 
   const result = sortRecords([numberSort, textSort], records, getters);
 
-  t.equals(result[0].id, record3.id);
-  t.equals(result[1].id, record4.id);
-  t.equals(result[2].id, record2.id);
-  t.equals(result[3].id, record1.id);
+  t.deepEqual(result[0].id, record3.id);
+  t.deepEqual(result[1].id, record4.id);
+  t.deepEqual(result[2].id, record2.id);
+  t.deepEqual(result[3].id, record1.id);
 });
 
 function prepare(fieldType: FieldType, values: FieldValue[]) {

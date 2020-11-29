@@ -7,7 +7,7 @@ test('success', (t) => {
   const b = [{ x: 2 }, { x: 3 }, { x: 4 }];
   const result = intersectBy(a, b, (i) => i.x);
 
-  t.equal(result, [{ x: 2 }, { x: 3 }]);
+  t.deepEqual(result, [{ x: 2 }, { x: 3 }]);
 });
 
 test('success', (t) => {
@@ -15,5 +15,5 @@ test('success', (t) => {
   const b = [{ x: 2 }, { x: 3 }, { x: 4 }];
   const result = differenceBy(a, b, (i) => i.x);
 
-  t.equal(result, [{ x: 1 }]);
+  t.deepEqual(result, [{ x: 1 }]);
 });

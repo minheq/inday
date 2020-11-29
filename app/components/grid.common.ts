@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import {
-  areEqual,
+  isEqual,
   differenceBy,
   FlatObject,
   intersectBy,
@@ -665,7 +665,7 @@ function getLeafRowCell(
   }
 
   if (
-    areEqual([...cell.path, cell.row], [...row.path, row.row], true) === false
+    isEqual([...cell.path, cell.row], [...row.path, row.row], true) === false
   ) {
     return null;
   }
@@ -685,7 +685,7 @@ function getGroupRowCell(
     return null;
   }
 
-  if (areEqual(cell.path, row.path, true) === false) {
+  if (isEqual(cell.path, row.path, true) === false) {
     return null;
   }
 

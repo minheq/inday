@@ -22,15 +22,15 @@ test('getVisibleIndexRange', (t) => {
 
   const scrollViewSize = 400;
 
-  const runs = [
+  const table = [
     [0, 0, 2],
     [100, 1, 3],
     [350, 2, 5],
     [500, 3, 5],
   ];
 
-  for (let i = 0; i < runs.length; i++) {
-    const [scrollOffset, startIndex, endIndex] = runs[i];
+  for (let i = 0; i < table.length; i++) {
+    const [scrollOffset, startIndex, endIndex] = table[i];
 
     const result = getVisibleIndexRange({
       items,
@@ -40,7 +40,12 @@ test('getVisibleIndexRange', (t) => {
       getItemSize: (column) => column.size,
     });
 
-    t.equals(result, [startIndex, endIndex]);
+    if (result[0] !== startIndex) {
+      t.fail(`got startIndex=${result[0]}, want ${startIndex}`);
+    }
+    if (result[1] !== endIndex) {
+      t.fail(`got endIndex=${result[1]}, want ${endIndex}`);
+    }
   }
 });
 
@@ -53,7 +58,7 @@ interface RecycledItem {
   value: number;
 }
 
-function run(items: Item[], prevItems: RecycledItem[]) {
+function recycle(items: Item[], prevItems: RecycledItem[]) {
   return recycleItems({
     items,
     prevItems,
@@ -72,10 +77,10 @@ test('recycleItems - with empty previous items', (t) => {
     { value: 3, key: 2 },
   ];
 
-  t.equal(run(items, []), expected);
+  t.deepEqual(recycle(items, []), expected);
 });
 
-test('recycleItems - with previous items, in middle', () => {
+test('recycleItems - with previous items, in middle', (t) => {
   const items: Item[] = [{ value: 2 }, { value: 3 }, { value: 4 }];
 
   const prevItems: RecycledItem[] = [
@@ -90,10 +95,10 @@ test('recycleItems - with previous items, in middle', () => {
     { value: 4, key: 0 },
   ];
 
-  t.equal(run(items, prevItems), expected);
+  t.deepEqual(recycle(items, prevItems), expected);
 });
 
-test('recycleItems - with previous items, at the end', () => {
+test('recycleItems - with previous items, at the end', (t) => {
   const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
   const prevItems: RecycledItem[] = [
@@ -108,10 +113,10 @@ test('recycleItems - with previous items, at the end', () => {
     { value: 5, key: 1 },
   ];
 
-  t.equal(run(items, prevItems), expected);
+  t.deepEqual(recycle(items, prevItems), expected);
 });
 
-test('recycleItems - with no matching prev items', () => {
+test('recycleItems - with no matching prev items', (t) => {
   const items: Item[] = [{ value: 4 }, { value: 5 }];
 
   const prevItems: RecycledItem[] = [
@@ -125,10 +130,10 @@ test('recycleItems - with no matching prev items', () => {
     { value: 5, key: 2 },
   ];
 
-  t.equal(run(items, prevItems), expected);
+  t.deepEqual(recycle(items, prevItems), expected);
 });
 
-test('recycleItems - more than previous', () => {
+test('recycleItems - more than previous', (t) => {
   const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
   const prevItems: RecycledItem[] = [
@@ -142,7 +147,7 @@ test('recycleItems - more than previous', () => {
     { value: 5, key: 3 },
   ];
 
-  t.equal(run(items, prevItems), expected);
+  t.deepEqual(recycle(items, prevItems), expected);
 });
 
 test('getColumns', (t) => {
@@ -157,7 +162,7 @@ test('getColumns', (t) => {
     { column: 6, width: 200, x: 700 },
   ];
 
-  t.equals(result, expected);
+  t.deepEqual(result, expected);
 });
 
 test('getRows - single flat group', (t) => {
@@ -178,7 +183,7 @@ test('getRows - single flat group', (t) => {
     { type: 'spacer', height: 72, y: 80 },
   ];
 
-  t.equals(rows, expected);
+  t.deepEqual(rows, expected);
 });
 
 test('getRows - nested with leaf rows', (t) => {
@@ -230,7 +235,7 @@ test('getRows - nested with leaf rows', (t) => {
     { type: 'spacer', height: 72, y: 592 },
   ];
 
-  t.equals(rows, expected);
+  t.deepEqual(rows, expected);
 });
 
 test('getRows - nested with empty leaf rows', (t) => {
@@ -256,7 +261,7 @@ test('getRows - nested with empty leaf rows', (t) => {
     { type: 'spacer', height: 72, y: 112 },
   ];
 
-  t.equals(rows, expected);
+  t.deepEqual(rows, expected);
 });
 
 test('getRows - nested with collapsed ancestor', (t) => {
@@ -281,7 +286,7 @@ test('getRows - nested with collapsed ancestor', (t) => {
     { type: 'spacer', height: 72, y: 56 },
   ];
 
-  t.equals(rows, expected);
+  t.deepEqual(rows, expected);
 });
 
 test('getRows - nested collapsed child', (t) => {
@@ -307,5 +312,5 @@ test('getRows - nested collapsed child', (t) => {
     { type: 'spacer', height: 72, y: 112 },
   ];
 
-  t.equals(rows, expected);
+  t.deepEqual(rows, expected);
 });
