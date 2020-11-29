@@ -35,17 +35,22 @@ import {
 } from './fields';
 import { Record, RecordID } from './records';
 import { first, isEmpty, keyedBy } from '../../lib/js_utils';
-import { Collaborator } from './collaborators';
+import { Collaborator, CollaboratorID } from './collaborators';
 import { isBefore, isAfter } from 'date-fns';
 import { CollectionID, Collection } from './collections';
-import { generateID } from '../../lib/id';
-import { UserID } from './user';
+import { generateID, validateID } from '../../lib/id';
 
 export const sortIDPrefix = 'srt' as const;
 export type SortID = `${typeof sortIDPrefix}${string}`;
-export function SortID(): SortID {
-  return generateID(sortIDPrefix);
-}
+
+export const Sort = {
+  generateID: (): SortID => {
+    return generateID(sortIDPrefix);
+  },
+  validateID: (id: string): void => {
+    return validateID(sortIDPrefix, id);
+  },
+};
 
 export type SortOrder = 'ascending' | 'descending';
 
@@ -66,7 +71,7 @@ export interface SortGetters {
   getField: (fieldID: FieldID) => Field;
   getRecord: (recordID: RecordID) => Record;
   getCollection: (collectionID: CollectionID) => Collection;
-  getCollaborator: (collaboratorID: UserID) => Collaborator;
+  getCollaborator: (collaboratorID: CollaboratorID) => Collaborator;
 }
 
 export function sortRecords(
@@ -795,7 +800,7 @@ function sortDescendingMultiOption(
 }
 
 function sortAscendingSingleCollaborator(
-  getCollaborator: (collaboratorID: UserID) => Collaborator,
+  getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: SingleCollaboratorFieldValue,
   b: SingleCollaboratorFieldValue,
 ) {
@@ -823,7 +828,7 @@ function sortAscendingSingleCollaborator(
 }
 
 function sortDescendingSingleCollaborator(
-  getCollaborator: (collaboratorID: UserID) => Collaborator,
+  getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: SingleCollaboratorFieldValue,
   b: SingleCollaboratorFieldValue,
 ) {
@@ -851,7 +856,7 @@ function sortDescendingSingleCollaborator(
 }
 
 function sortAscendingMultiCollaborator(
-  getCollaborator: (collaboratorID: UserID) => Collaborator,
+  getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: MultiCollaboratorFieldValue,
   b: MultiCollaboratorFieldValue,
 ) {
@@ -879,7 +884,7 @@ function sortAscendingMultiCollaborator(
 }
 
 function sortDescendingMultiCollaborator(
-  getCollaborator: (collaboratorID: UserID) => Collaborator,
+  getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: MultiCollaboratorFieldValue,
   b: MultiCollaboratorFieldValue,
 ) {

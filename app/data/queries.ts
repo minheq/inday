@@ -25,9 +25,8 @@ import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
 import { last, isEmpty, keyedBy } from '../../lib/js_utils';
 import { Sort, SortID, sortRecords, SortGetters } from './sorts';
-import { Collaborator } from './collaborators';
+import { Collaborator, CollaboratorID } from './collaborators';
 import { Group, GroupID } from './groups';
-import { UserID } from './user';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: 'SpaceQuery',
@@ -391,9 +390,9 @@ export const collectionRecordsByIDQuery = selectorFamily<
   },
 });
 
-export const collaboratorQuery = selectorFamily<Collaborator, UserID>({
+export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
   key: 'CollaboratorQuery',
-  get: (collaboratorID: UserID) => ({ get }) => {
+  get: (collaboratorID: CollaboratorID) => ({ get }) => {
     const collaboratorsByID = get(collaboratorsByIDState);
     const collaborator = collaboratorsByID[collaboratorID];
 
@@ -441,7 +440,7 @@ export const viewRecordsQuery = selectorFamily<Record[], ViewID>({
 
     const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
     const getRecord = (recordID: RecordID) => get(recordQuery(recordID));
-    const getCollaborator = (collaboratorID: UserID) =>
+    const getCollaborator = (collaboratorID: CollaboratorID) =>
       get(collaboratorQuery(collaboratorID));
     const getCollection = (collectionID: CollectionID) =>
       get(collectionQuery(collectionID));

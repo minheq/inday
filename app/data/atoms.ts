@@ -24,7 +24,7 @@ export type WorkspaceState = Workspace | null;
 export const workspaceState = atom<WorkspaceState>({
   key: 'WorkspaceState',
   default: {
-    id: '1',
+    id: 'wrk1',
     name: 'My Workspace',
     ownerID: '1',
   },

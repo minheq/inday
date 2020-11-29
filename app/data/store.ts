@@ -74,8 +74,7 @@ import {
 import { SortConfig, Sort, SortID, deleteSort } from './sorts';
 import { GroupConfig, Group, GroupID, deleteGroup } from './groups';
 import { Workspace } from './workspace';
-import { Collaborator } from './collaborators';
-import { UserID } from './user';
+import { Collaborator, CollaboratorID } from './collaborators';
 
 export function useGetWorkspace(): Workspace {
   const workspace = useRecoilValue(workspaceState);
@@ -154,7 +153,7 @@ export function useCreateSpace(): () => Space {
 
   return useCallback(() => {
     const newSpace: Space = {
-      id: SpaceID(),
+      id: Space.generateID(),
       name: '',
       workspaceID: workspace.id,
       createdAt: new Date(),
@@ -243,7 +242,9 @@ export function useGetCollaborators(): Collaborator[] {
   return useRecoilValue(collaboratorsQuery);
 }
 
-export function useGetCollaborator(collaboratorID: UserID): Collaborator {
+export function useGetCollaborator(
+  collaboratorID: CollaboratorID,
+): Collaborator {
   return useRecoilValue(collaboratorQuery(collaboratorID));
 }
 
@@ -308,7 +309,7 @@ export function useCreateCollection(): (spaceID: SpaceID) => Collection {
   return useCallback(
     (spaceID: SpaceID) => {
       const newCollection: Collection = {
-        id: CollectionID(),
+        id: Collection.generateID(),
         name: '',
         primaryFieldID: Field.generateID(),
         createdAt: new Date(),
@@ -546,7 +547,7 @@ export function useCreateFilter() {
   return useCallback(
     (viewID: ViewID, group: number, filterConfig: FilterConfig) => {
       const newFilter: Filter = {
-        id: FilterID(),
+        id: Filter.generateID(),
         viewID,
         group,
         ...filterConfig,
@@ -669,7 +670,7 @@ export function useCreateSort() {
   return useCallback(
     (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
       const newSort: Sort = {
-        id: SortID(),
+        id: Sort.generateID(),
         viewID,
         sequence,
         ...sortConfig,
@@ -939,7 +940,7 @@ export function useCreateView() {
   return useCallback(
     (collectionID: CollectionID) => {
       const newView: View = {
-        id: ViewID(),
+        id: View.generateID(),
         name: '',
         type: 'list',
         fixedFieldCount: 1,
@@ -1198,7 +1199,7 @@ export function useCreateRecord() {
   return useCallback(
     (collectionID: CollectionID) => {
       const newRecord: Record = {
-        id: RecordID(),
+        id: Record.generateID(),
         fields: {},
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -1,16 +1,21 @@
 import { isDate, isSameDay } from 'date-fns';
 import { NumberUnit } from '../../lib/i18n/unit';
-import { generateID } from '../../lib/id';
+import { generateID, validateID } from '../../lib/id';
 import { hasAllOf } from '../../lib/js_utils';
+import { CollaboratorID } from './collaborators';
+import { CollectionID } from './collections';
 import { RecordID } from './records';
-import { UserID } from './user';
 
 export const fieldIDPrefix = 'fld' as const;
-export type FieldID = string;
-// export type FieldID = `${typeof fieldIDPrefix}${string}`;
+export type FieldID = `${typeof fieldIDPrefix}${string}`;
 
 export const Field = {
-  generateID: (): FieldID => generateID(fieldIDPrefix),
+  generateID: (): FieldID => {
+    return generateID(fieldIDPrefix);
+  },
+  validateID: (id: string): void => {
+    return validateID(fieldIDPrefix, id);
+  },
 };
 
 export enum FieldType {
@@ -56,8 +61,20 @@ export interface MultiLineTextField
   extends BaseField,
     MultiLineTextFieldConfig {}
 
+export const selectOptionIDPrefix = 'opt' as const;
+export type SelectOptionID = `${typeof selectOptionIDPrefix}${string}`;
+
+export const SelectOption = {
+  generateID: (): SelectOptionID => {
+    return generateID(selectOptionIDPrefix);
+  },
+  validateID: (id: string): void => {
+    return validateID(selectOptionIDPrefix, id);
+  },
+};
+
 export interface SelectOption {
-  id: string;
+  id: SelectOptionID;
   label: string;
   color: string;
   order: number;
@@ -91,7 +108,7 @@ export interface MultiCollaboratorField
 
 export interface SingleRecordLinkFieldConfig {
   type: FieldType.SingleRecordLink;
-  recordsFromCollectionID: string;
+  recordsFromCollectionID: CollectionID;
 }
 export interface SingleRecordLinkField
   extends BaseField,
@@ -99,7 +116,7 @@ export interface SingleRecordLinkField
 
 export interface MultiRecordLinkFieldConfig {
   type: FieldType.MultiRecordLink;
-  recordsFromCollectionID: string;
+  recordsFromCollectionID: CollectionID;
 }
 export interface MultiRecordLinkField
   extends BaseField,
@@ -218,16 +235,16 @@ export type CheckboxFieldValue = boolean;
 export type CurrencyFieldValue = number | null;
 export type DateFieldValue = Date | null;
 export type EmailFieldValue = string;
-export type MultiCollaboratorFieldValue = UserID[];
+export type MultiCollaboratorFieldValue = CollaboratorID[];
 export type MultiRecordLinkFieldValue = RecordID[];
 export type MultiLineTextFieldValue = string;
-export type MultiOptionFieldValue = string[];
+export type MultiOptionFieldValue = SelectOptionID[];
 export type NumberFieldValue = number | null;
 export type PhoneNumberFieldValue = string;
-export type SingleCollaboratorFieldValue = UserID | null;
+export type SingleCollaboratorFieldValue = CollaboratorID | null;
 export type SingleRecordLinkFieldValue = RecordID | null;
 export type SingleLineTextFieldValue = string;
-export type SingleOptionFieldValue = string | null;
+export type SingleOptionFieldValue = SelectOptionID | null;
 export type URLFieldValue = string;
 
 export type BooleanFieldKindValue = CheckboxFieldValue;
@@ -366,10 +383,7 @@ function areSingleSelectFieldKindValueEqual(
   return a === b;
 }
 
-function areMultiSelectFieldKindValueEqual(
-  a: MultiSelectFieldKindValue,
-  b: MultiSelectFieldKindValue,
-): boolean {
+function areMultiSelectFieldKindValueEqual(a: string[], b: string[]): boolean {
   return hasAllOf(a, b);
 }
 

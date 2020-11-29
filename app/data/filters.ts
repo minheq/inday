@@ -20,14 +20,19 @@ import {
   TextFieldKindValue,
 } from './fields';
 import { ViewID } from './views';
-import { generateID } from '../../lib/id';
+import { generateID, validateID } from '../../lib/id';
 
 export const filterIDPrefix = `fil` as const;
-export type FilterID = string;
-// export type FilterID = `${typeof filterIDPrefix}${string}`;
-export function FilterID(): FilterID {
-  return generateID(filterIDPrefix);
-}
+export type FilterID = `${typeof filterIDPrefix}${string}`;
+
+export const Filter = {
+  generateID: (): FilterID => {
+    return generateID(filterIDPrefix);
+  },
+  validateID: (id: string): void => {
+    return validateID(filterIDPrefix, id);
+  },
+};
 
 export interface BaseFilter {
   id: FilterID;

@@ -1,9 +1,10 @@
 {
   "jest.pathToJest": "",
   "cSpell.words": [
+    "autosizer",
     "overscan",
-    "sonarjs",
-    "autosizer"
+    "pressable",
+    "sonarjs"
   ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }

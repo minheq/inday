@@ -23,6 +23,7 @@ import {
   SingleLineTextField,
   SingleOptionField,
   URLField,
+  SelectOption,
 } from './fields';
 import { BaseView, View } from './views';
 import { Collection } from './collections';
@@ -41,12 +42,13 @@ import {
   fakeWords,
 } from '../../lib/faker';
 import { tokens } from '../components';
+import { Workspace } from './workspace';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
-    id: space.id ?? generateID(),
+    id: space.id ?? Space.generateID(),
     name: space.name ?? fakeWords(2),
-    workspaceID: space.workspaceID ?? generateID(),
+    workspaceID: space.workspaceID ?? Workspace.generateID(),
     updatedAt: space.updatedAt ?? new Date(),
     createdAt: space.createdAt ?? new Date(),
   };
@@ -56,11 +58,12 @@ export function makeCollaborator(
   collaborator: Partial<Collaborator>,
 ): Collaborator {
   return {
-    id: collaborator.id ?? generateID(),
-    profileImageID: collaborator.profileImageID ?? generateID(),
+    id: collaborator.id ?? Collaborator.generateID(),
+    userID: collaborator.userID ?? Collaborator.generateID(),
+    profileImageID: collaborator.profileImageID ?? 'someID',
     name: collaborator.name ?? fakeWords(2),
     email: collaborator.email ?? fakeEmail(),
-    spaceID: collaborator.spaceID ?? generateID(),
+    spaceID: collaborator.spaceID ?? Space.generateID(),
     updatedAt: collaborator.updatedAt ?? new Date(),
     createdAt: collaborator.createdAt ?? new Date(),
   };
@@ -76,10 +79,10 @@ export function makeField(field: Partial<Field>): Field {
 
 export function makeBaseField(field: Partial<Field>): BaseField {
   return {
-    id: field.id ?? generateID(),
+    id: field.id ?? Field.generateID(),
     name: field.name ?? fakeWord(),
     description: field.description ?? fakeWords(50),
-    collectionID: field.collectionID ?? generateID(),
+    collectionID: field.collectionID ?? Collection.generateID(),
     updatedAt: field.updatedAt ?? new Date(),
     createdAt: field.createdAt ?? new Date(),
   };
@@ -134,7 +137,7 @@ const makeFieldByType: {
       type: FieldType.MultiRecordLink,
       recordsFromCollectionID:
         (field as Partial<MultiRecordLinkField>).recordsFromCollectionID ??
-        generateID(),
+        Collection.generateID(),
       ...base,
     };
   },
@@ -152,19 +155,19 @@ const makeFieldByType: {
       type: FieldType.MultiOption,
       options: [
         {
-          id: generateID(),
+          id: SelectOption.generateID(),
           label: fakeWord(),
           color: tokens.colors.green[100],
           order: 1,
         },
         {
-          id: generateID(),
+          id: SelectOption.generateID(),
           label: fakeWord(),
           color: tokens.colors.blue[100],
           order: 2,
         },
         {
-          id: generateID(),
+          id: SelectOption.generateID(),
           label: fakeWord(),
           color: tokens.colors.red[100],
           order: 3,
@@ -204,7 +207,7 @@ const makeFieldByType: {
       type: FieldType.SingleRecordLink,
       recordsFromCollectionID:
         (field as Partial<MultiRecordLinkField>).recordsFromCollectionID ??
-        generateID(),
+        Collection.generateID(),
       ...base,
     };
   },
@@ -222,19 +225,19 @@ const makeFieldByType: {
       type: FieldType.SingleOption,
       options: [
         {
-          id: generateID(),
+          id: SelectOption.generateID(),
           label: fakeWord(),
           color: tokens.colors.green[100],
           order: 1,
         },
         {
-          id: generateID(),
+          id: SelectOption.generateID(),
           label: fakeWord(),
           color: tokens.colors.blue[100],
           order: 2,
         },
         {
-          id: generateID(),
+          id: SelectOption.generateID(),
           label: fakeWord(),
           color: tokens.colors.red[100],
           order: 3,
@@ -258,12 +261,12 @@ interface CollectionWithFields extends Collection {
 
 export function makeCollection(collection: Partial<Collection>): Collection {
   return {
-    id: collection.id ?? generateID(),
+    id: collection.id ?? Collection.generateID(),
     name: collection.name ?? fakeWords(2),
-    spaceID: collection.spaceID ?? generateID(),
+    spaceID: collection.spaceID ?? Space.generateID(),
     updatedAt: collection.updatedAt ?? new Date(),
     createdAt: collection.createdAt ?? new Date(),
-    primaryFieldID: collection.primaryFieldID ?? generateID(),
+    primaryFieldID: collection.primaryFieldID ?? Field.generateID(),
   };
 }
 
@@ -286,9 +289,9 @@ export function makeView(
   collection: CollectionWithFields,
 ): View {
   const baseView: BaseView = {
-    id: view.id ?? generateID(),
+    id: view.id ?? View.generateID(),
     name: view.name ?? fakeWords(2),
-    collectionID: view.collectionID ?? generateID(),
+    collectionID: view.collectionID ?? Collection.generateID(),
     updatedAt: view.updatedAt ?? new Date(),
     createdAt: view.createdAt ?? new Date(),
   };
@@ -357,9 +360,10 @@ export function makeRecord(
   }
 
   return {
-    id: record.id ?? generateID(),
+    id: record.id ?? Record.generateID(),
     fields,
-    collectionID: record.collectionID ?? collection?.id ?? generateID(),
+    collectionID:
+      record.collectionID ?? collection?.id ?? Collection.generateID(),
     updatedAt: record.updatedAt ?? new Date(),
     createdAt: record.createdAt ?? new Date(),
   };
@@ -466,8 +470,8 @@ export function makeFilter(
   config: FilterConfig,
 ): Filter {
   return {
-    id: filter.id ?? generateID(),
-    viewID: filter.viewID ?? generateID(),
+    id: filter.id ?? Filter.generateID(),
+    viewID: filter.viewID ?? View.generateID(),
     group: filter.group || 1,
     ...config,
   };
@@ -475,8 +479,8 @@ export function makeFilter(
 
 export function makeSort(sort: Partial<Sort>, config: SortConfig): Sort {
   return {
-    id: sort.id ?? generateID(),
-    viewID: sort.viewID ?? generateID(),
+    id: sort.id ?? Sort.generateID(),
+    viewID: sort.viewID ?? View.generateID(),
     sequence: sort.sequence || 1,
     ...config,
   };

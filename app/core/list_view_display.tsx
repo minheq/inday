@@ -99,6 +99,8 @@ import {
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
   assertPrimaryFieldValue,
+  SelectOptionID,
+  assertMultiSelectFieldKindValue,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView, ViewID } from '../data/views';
@@ -129,12 +131,7 @@ import {
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import {
-  InferArrayItemType,
-  isEmpty,
-  isNullish,
-  isNumeric,
-} from '../../lib/js_utils';
+import { isEmpty, isNullish, isNumeric } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { formatDate } from '../../lib/datetime/format';
 import { OptionBadge } from './option_badge';
@@ -143,8 +140,7 @@ import { RecordLinkBadge } from './record_link_badge';
 import { formatUnit } from '../../lib/i18n/unit';
 import { usePrevious } from '../hooks/use_previous';
 import { MultiListPicker } from '../components/multi_list_picker';
-import { Collaborator } from '../data/collaborators';
-import { UserID } from '../data/user';
+import { Collaborator, CollaboratorID } from '../data/collaborators';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -356,7 +352,7 @@ interface LeafRowCellContext {
 
 const LeafRowCellContext = createContext<LeafRowCellContext>({
   state: 'default',
-  recordID: RecordID(),
+  recordID: Record.generateID(),
   fieldID: Field.generateID(),
   onFocus: () => {
     return;
@@ -716,7 +712,7 @@ function EmailCell(props: EmailCellProps) {
 }
 
 function useRenderCollaborator() {
-  return useCallback((collaboratorID: UserID) => {
+  return useCallback((collaboratorID: CollaboratorID) => {
     return (
       <CollaboratorBadge collaboratorID={collaboratorID} key={collaboratorID} />
     );
@@ -725,7 +721,7 @@ function useRenderCollaborator() {
 
 function useGetCollaboratorOptions(
   collaborators: Collaborator[],
-): ListPickerOption<UserID>[] {
+): ListPickerOption<CollaboratorID>[] {
   return useMemo(() => {
     return collaborators.map((collaborator) => ({
       value: collaborator.id,
@@ -931,7 +927,7 @@ function useRenderOption(options: SelectOption[]) {
 
 function useGetOptionOptions(
   options: SelectOption[],
-): ListPickerOption<string>[] {
+): ListPickerOption<SelectOptionID>[] {
   return options.map((option) => ({
     value: option.id,
     label: option.label,
@@ -981,26 +977,26 @@ function MultiOptionCell(props: MultiOptionCellProps) {
   return <Fragment>{child}</Fragment>;
 }
 
-interface MultiSelectFieldKindCellEditingProps<
-  T extends MultiSelectFieldKindValue
-> {
-  value: T;
-  renderLabel: (
-    value: InferArrayItemType<MultiSelectFieldKindValue>,
-  ) => JSX.Element;
-  options: ListPickerOption<InferArrayItemType<MultiSelectFieldKindValue>>[];
+interface MultiSelectFieldKindCellEditingProps<T> {
+  value: T[];
+  renderLabel: (value: NonNullable<T>) => JSX.Element;
+  options: ListPickerOption<NonNullable<T>>[];
 }
 
-function MultiSelectFieldKindCellEditing<T extends MultiSelectFieldKindValue>(
-  props: MultiSelectFieldKindCellEditingProps<T>,
-) {
+function MultiSelectFieldKindCellEditing<
+  T extends CollaboratorID | RecordID | SelectOptionID
+>(props: MultiSelectFieldKindCellEditingProps<T>) {
   const { value, options, renderLabel } = props;
   const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
   const updateRecordFieldValue = useUpdateRecordFieldValue<MultiSelectFieldKindValue>();
 
   const handleChange = useCallback(
-    (nextValue: MultiSelectFieldKindValue) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
+    (nextValue: T[]) => {
+      updateRecordFieldValue(
+        recordID,
+        fieldID,
+        nextValue as MultiSelectFieldKindValue,
+      );
     },
     [updateRecordFieldValue, recordID, fieldID],
   );
@@ -1012,7 +1008,7 @@ function MultiSelectFieldKindCellEditing<T extends MultiSelectFieldKindValue>(
 
   return (
     <View style={styles.selectKindEditingContainer}>
-      <MultiListPicker<InferArrayItemType<MultiSelectFieldKindValue>>
+      <MultiListPicker<T>
         value={value}
         options={options}
         renderLabel={renderLabel}
@@ -1031,8 +1027,8 @@ interface SingleSelectFieldKindCellEditingProps<
   T extends SingleSelectFieldKindValue
 > {
   value: T;
-  renderLabel: (value: NonNullable<SingleSelectFieldKindValue>) => JSX.Element;
-  options: ListPickerOption<NonNullable<SingleSelectFieldKindValue>>[];
+  renderLabel: (value: NonNullable<T>) => JSX.Element;
+  options: ListPickerOption<NonNullable<T>>[];
 }
 
 function SingleSelectFieldKindCellEditing<T extends SingleSelectFieldKindValue>(
@@ -1057,7 +1053,7 @@ function SingleSelectFieldKindCellEditing<T extends SingleSelectFieldKindValue>(
 
   return (
     <View style={styles.selectKindEditingContainer}>
-      <ListPicker<SingleSelectFieldKindValue>
+      <ListPicker<T>
         value={value}
         options={options}
         renderLabel={renderLabel}

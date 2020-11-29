@@ -1,13 +1,18 @@
-import { generateID } from '../../lib/id';
+import { generateID, validateID } from '../../lib/id';
 import { CollectionID } from './collections';
 import { FieldID, Field } from './fields';
 
 export const viewIDPrefix = 'viw' as const;
-export type ViewID = string;
-// export type ViewID = `${typeof viewIDPrefix}${string}`;
-export function ViewID(): ViewID {
-  return generateID(viewIDPrefix);
-}
+export type ViewID = `${typeof viewIDPrefix}${string}`;
+
+export const View = {
+  generateID: (): ViewID => {
+    return generateID(viewIDPrefix);
+  },
+  validateID: (id: string): void => {
+    return validateID(viewIDPrefix, id);
+  },
+};
 
 export interface BaseView {
   id: ViewID;

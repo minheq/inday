@@ -1,13 +1,18 @@
-import { generateID } from '../../lib/id';
+import { generateID, validateID } from '../../lib/id';
 import { FieldID } from './fields';
 import { SpaceID } from './spaces';
 
 export const collectionIDPrefix = `col` as const;
-export type CollectionID = string;
-// export type CollectionID = `${typeof collectionIDPrefix}${string}`;
-export function CollectionID(): CollectionID {
-  return generateID(collectionIDPrefix);
-}
+export type CollectionID = `${typeof collectionIDPrefix}${string}`;
+
+export const Collection = {
+  generateID: (): CollectionID => {
+    return generateID(collectionIDPrefix);
+  },
+  validateID: (id: string): void => {
+    return validateID(collectionIDPrefix, id);
+  },
+};
 
 export interface Collection {
   id: CollectionID;

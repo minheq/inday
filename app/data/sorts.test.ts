@@ -14,7 +14,7 @@ import {
 } from './fields';
 import { sortRecords, SortGetters } from './sorts';
 import { Record, RecordID } from './records';
-import { UserID } from './user';
+import { CollaboratorID } from './collaborators';
 
 describe('no sort', () => {
   test('all records', () => {
@@ -219,7 +219,7 @@ describe('collaborator', () => {
   const collaborator1 = makeCollaborator({ name: 'BName' });
   const collaborator2 = makeCollaborator({ name: 'AName' });
 
-  const getCollaborator = (collaboratorID: UserID) => {
+  const getCollaborator = (collaboratorID: CollaboratorID) => {
     if (collaboratorID === collaborator1.id) {
       return collaborator1;
     }
