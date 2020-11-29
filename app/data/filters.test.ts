@@ -1,4 +1,4 @@
-import { test } from 'zora';
+import { test } from '../../lib/testing';
 import {
   textFieldKindFiltersByRule,
   numberFieldKindFiltersByRule,
@@ -23,645 +23,420 @@ import {
 import { FieldType, FieldValue, FieldID } from './fields';
 
 test('no filter', (t) => {
-  t.test('all records', (t) => {
-    const values = ['AWord', 'BWord'];
-    const { records, getters } = prepare(FieldType.SingleLineText, values);
-    const result = filterRecords([], records, getters);
-
-    t.equals(result.length, values.length);
-  });
-});
-
-test('filtering text', (t) => {
   const values = ['AWord', 'BWord'];
-  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
+  const { records, getters } = prepare(FieldType.SingleLineText, values);
+  const result = filterRecords([], records, getters);
 
-  t.test('contains same case', (t) => {
-    const filter = makeFilter(
-      {},
-      { rule: 'contains', value: 'Word', fieldID: field.id },
-    );
-    const result = filterRecords([[filter]], records, getters);
-
-    t.equals(result.length, values.length);
-  });
-
-  t.test('one word different case', (t) => {
-    const filter = makeFilter(
-      {},
-      { rule: 'contains', value: 'aword', fieldID: field.id },
-    );
-    const result = filterRecords([[filter]], records, getters);
-
-    t.equals(result.length, 1);
-  });
-
-  t.test('2 for one', (t) => {
-    const filter1 = makeFilter(
-      {},
-      { rule: 'contains', value: 'word', fieldID: field.id },
-    );
-    const filter2 = makeFilter(
-      {},
-      { rule: 'contains', value: 'a', fieldID: field.id },
-    );
-    const result = filterRecords([[filter1, filter2]], records, getters);
-
-    t.equals(result.length, 1);
-  });
+  t.equals(result.length, values.length);
 });
 
-test('textFieldKindFiltersByRule', (t) => {
-  t.test('contains', (t) => {
-    const filter = textFieldKindFiltersByRule.contains;
+const values = ['AWord', 'BWord'];
+const { records, getters, field } = prepare(FieldType.SingleLineText, values);
 
-    t.test('ok same case', (t) => {
-      t.equals(filter('abc', 'a'), true);
-    });
+test('filter text - contains same case', (t) => {
+  const filter = makeFilter(
+    {},
+    { rule: 'contains', value: 'Word', fieldID: field.id },
+  );
+  const result = filterRecords([[filter]], records, getters);
 
-    t.test('ok difference case', (t) => {
-      t.equals(filter('abc', 'A'), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('abc', 'd'), false);
-    });
-  });
-
-  t.test('doesNotContain', (t) => {
-    const filter = textFieldKindFiltersByRule.doesNotContain;
-
-    t.test('ok', (t) => {
-      t.equals(filter('abc', 'd'), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('abc', 'a'), false);
-    });
-  });
-
-  t.test('is', (t) => {
-    const filter = textFieldKindFiltersByRule.is;
-
-    t.test('ok', (t) => {
-      t.equals(filter('abc', 'abc'), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('abc', 'b'), false);
-    });
-  });
-
-  t.test('isNot', (t) => {
-    const filter = textFieldKindFiltersByRule.isNot;
-
-    t.test('ok', (t) => {
-      t.equals(filter('abc', 'b'), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('abc', 'abc'), false);
-    });
-  });
-
-  t.test('isEmpty', (t) => {
-    const filter = textFieldKindFiltersByRule.isEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter('', ''), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('abc', ''), false);
-    });
-  });
-
-  t.test('isNotEmpty', (t) => {
-    const filter = textFieldKindFiltersByRule.isNotEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter('abc', ''), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('', ''), false);
-    });
-  });
+  t.equals(result.length, values.length);
 });
 
-test('numberFieldKindFiltersByRule', (t) => {
-  t.test('equal', (t) => {
-    const filter = numberFieldKindFiltersByRule.equal;
+test('filter text - one word different case', (t) => {
+  const filter = makeFilter(
+    {},
+    { rule: 'contains', value: 'aword', fieldID: field.id },
+  );
+  const result = filterRecords([[filter]], records, getters);
 
-    t.test('ok', (t) => {
-      t.equals(filter(1, 1), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(1, 2), false);
-    });
-  });
-
-  t.test('notEqual', (t) => {
-    const filter = numberFieldKindFiltersByRule.notEqual;
-
-    t.test('ok', (t) => {
-      t.equals(filter(1, 2), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(1, 1), false);
-    });
-  });
-
-  t.test('lessThan', (t) => {
-    const filter = numberFieldKindFiltersByRule.lessThan;
-
-    t.test('ok', (t) => {
-      t.equals(filter(1, 2), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(2, 1), false);
-    });
-  });
-
-  t.test('greaterThan', (t) => {
-    const filter = numberFieldKindFiltersByRule.greaterThan;
-
-    t.test('ok', (t) => {
-      t.equals(filter(2, 1), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(1, 2), false);
-    });
-  });
-
-  t.test('lessThanOrEqual', (t) => {
-    const filter = numberFieldKindFiltersByRule.lessThanOrEqual;
-
-    t.test('ok', (t) => {
-      t.equals(filter(1, 2), true);
-      t.equals(filter(2, 2), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(2, 1), false);
-    });
-  });
-
-  t.test('greaterThanOrEqual', (t) => {
-    const filter = numberFieldKindFiltersByRule.greaterThanOrEqual;
-
-    t.test('ok', (t) => {
-      t.equals(filter(2, 1), true);
-      t.equals(filter(2, 2), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(1, 2), false);
-    });
-  });
-
-  t.test('isEmpty', (t) => {
-    const filter = numberFieldKindFiltersByRule.isEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter(null, 0), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(1, 0), false);
-    });
-  });
-
-  t.test('isNotEmpty', (t) => {
-    const filter = numberFieldKindFiltersByRule.isNotEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter(1, 0), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(null, 0), false);
-    });
-  });
+  t.equals(result.length, 1);
 });
 
-test('dateFieldKindFiltersByRule', (t) => {
-  t.test('is', (t) => {
-    const filter = dateFieldKindFiltersByRule.is;
+test('filter text - 2 for one', (t) => {
+  const filter1 = makeFilter(
+    {},
+    { rule: 'contains', value: 'word', fieldID: field.id },
+  );
+  const filter2 = makeFilter(
+    {},
+    { rule: 'contains', value: 'a', fieldID: field.id },
+  );
+  const result = filterRecords([[filter1, filter2]], records, getters);
 
-    t.test('ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-03')),
-        true,
-      );
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
-        false,
-      );
-    });
-  });
-
-  t.test('isWithin', (t) => {
-    const filter = dateFieldKindFiltersByRule.isWithin;
-
-    t.test('ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-03'), {
-          start: Day.toDate('2020-08-02'),
-          end: Day.toDate('2020-08-04'),
-        }),
-        true,
-      );
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-05'), {
-          start: Day.toDate('2020-08-02'),
-          end: Day.toDate('2020-08-04'),
-        }),
-        false,
-      );
-    });
-  });
-
-  t.test('isBefore', (t) => {
-    const filter = dateFieldKindFiltersByRule.isBefore;
-
-    t.test('ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
-        true,
-      );
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
-        false,
-      );
-    });
-  });
-
-  t.test('isAfter', (t) => {
-    const filter = dateFieldKindFiltersByRule.isAfter;
-
-    t.test('ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
-        true,
-      );
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
-        false,
-      );
-    });
-  });
-
-  t.test('isOnOrBefore', (t) => {
-    const filter = dateFieldKindFiltersByRule.isOnOrBefore;
-
-    t.test('ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
-        true,
-      );
-      t.equals(
-        filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
-        true,
-      );
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
-        false,
-      );
-    });
-  });
-
-  t.test('isOnOrAfter', (t) => {
-    const filter = dateFieldKindFiltersByRule.isOnOrAfter;
-
-    t.test('ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
-        true,
-      );
-      t.equals(
-        filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
-        true,
-      );
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
-        false,
-      );
-    });
-  });
-
-  t.test('isNot', (t) => {
-    const filter = dateFieldKindFiltersByRule.isNot;
-
-    t.test('ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
-        true,
-      );
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(
-        filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
-        false,
-      );
-    });
-  });
-
-  t.test('isEmpty', (t) => {
-    const filter = dateFieldKindFiltersByRule.isEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter(null, new Date()), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(Day.toDate('2020-08-04'), new Date()), false);
-    });
-  });
-
-  t.test('isNotEmpty', (t) => {
-    const filter = dateFieldKindFiltersByRule.isNotEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter(Day.toDate('2020-08-04'), new Date()), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(null, new Date()), false);
-    });
-  });
+  t.equals(result.length, 1);
 });
 
-test('singleSelectFieldKindFiltersByRule', (t) => {
-  t.test('is', (t) => {
-    const filter = singleSelectFieldKindFiltersByRule.is;
+test('textFieldKindFiltersByRule - contains', (t) => {
+  const filter = textFieldKindFiltersByRule.contains;
 
-    t.test('ok', (t) => {
-      t.equals(filter('opt1', 'opt1'), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('opt1', 'opt2'), false);
-    });
-  });
-
-  t.test('isNot', (t) => {
-    const filter = singleSelectFieldKindFiltersByRule.isNot;
-
-    t.test('ok', (t) => {
-      t.equals(filter('opt1', 'opt2'), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('opt1', 'opt1'), false);
-    });
-  });
-
-  t.test('isAnyOf', (t) => {
-    const filter = singleSelectFieldKindFiltersByRule.isAnyOf;
-
-    t.test('ok', (t) => {
-      t.equals(filter('a', ['a', 'b']), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('a', ['b', 'c']), false);
-    });
-  });
-
-  t.test('isNoneOf', (t) => {
-    const filter = singleSelectFieldKindFiltersByRule.isNoneOf;
-
-    t.test('ok', (t) => {
-      t.equals(filter('a', ['b', 'c']), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('a', ['a', 'b']), false);
-    });
-  });
-
-  t.test('isEmpty', (t) => {
-    const filter = singleSelectFieldKindFiltersByRule.isEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter(null, ''), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter('abc', ''), false);
-    });
-  });
-
-  t.test('isNotEmpty', (t) => {
-    const filter = singleSelectFieldKindFiltersByRule.isNotEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter('abc', ''), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(null, ''), false);
-    });
-  });
+  t.equals(filter('abc', 'a'), true, 'ok same case');
+  t.equals(filter('abc', 'A'), true);
+  t.equals(filter('abc', 'd'), false);
 });
 
-test('multiSelectFieldKindFiltersByRule', (t) => {
-  t.test('hasAnyOf', (t) => {
-    const filter = multiSelectFieldKindFiltersByRule.hasAnyOf;
+test('textFieldKindFiltersByRule - doesNotContain', (t) => {
+  const filter = textFieldKindFiltersByRule.doesNotContain;
 
-    t.test('ok', (t) => {
-      t.equals(filter(['a'], ['a', 'b']), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(['a'], ['b', 'c']), false);
-    });
-  });
-
-  t.test('hasAllOf', (t) => {
-    const filter = multiSelectFieldKindFiltersByRule.hasAllOf;
-
-    t.test('ok', (t) => {
-      t.equals(filter(['b', 'a'], ['a', 'b']), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(['a'], ['a', 'b']), false);
-    });
-  });
-
-  t.test('hasNoneOf', (t) => {
-    const filter = multiSelectFieldKindFiltersByRule.hasNoneOf;
-
-    t.test('ok', (t) => {
-      t.equals(filter(['a'], ['b', 'c']), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(['a'], ['a', 'b']), false);
-    });
-  });
-
-  t.test('isEmpty', (t) => {
-    const filter = multiSelectFieldKindFiltersByRule.isEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter([], []), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(['a'], []), false);
-    });
-  });
-
-  t.test('isNotEmpty', (t) => {
-    const filter = multiSelectFieldKindFiltersByRule.isNotEmpty;
-
-    t.test('ok', (t) => {
-      t.equals(filter(['a'], []), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter([], []), false);
-    });
-  });
+  t.equals(filter('abc', 'd'), true);
+  t.equals(filter('abc', 'a'), false);
 });
 
-test('booleanFieldKindFiltersByRule', (t) => {
-  t.test('is', (t) => {
-    const filter = booleanFieldKindFiltersByRule.is;
+test('textFieldKindFiltersByRule - is', (t) => {
+  const filter = textFieldKindFiltersByRule.is;
 
-    t.test('ok', (t) => {
-      t.equals(filter(true, true), true);
-    });
-
-    t.test('not ok', (t) => {
-      t.equals(filter(true, false), false);
-    });
-  });
+  t.equals(filter('abc', 'abc'), true);
+  t.equals(filter('abc', 'b'), false);
 });
 
-test('updateFilterGroup', (t) => {
-  t.test('3 "OR" filters', (t) => {
-    const filter1: Filter = {
-      id: '1',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('textFieldKindFiltersByRule - isNot', (t) => {
+  const filter = textFieldKindFiltersByRule.isNot;
 
-    const filter2: Filter = {
-      id: '2',
-      viewID: '1',
-      group: 2,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+  t.equals(filter('abc', 'b'), true);
+  t.equals(filter('abc', 'abc'), false);
+});
 
-    const filter3: Filter = {
-      id: '3',
-      viewID: '1',
-      group: 3,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('textFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = textFieldKindFiltersByRule.isEmpty;
 
-    const filters: Filter[] = [filter1, filter2, filter3];
+  t.equals(filter('', ''), true);
+  t.equals(filter('abc', ''), false);
+});
 
-    t.test('f1 AND f2 OR f3', (t) => {
-      const updatedFilters = updateFilterGroup(filter2, 'and', filters);
+test('textFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = textFieldKindFiltersByRule.isNotEmpty;
 
-      const updatedFilter2 = updatedFilters[filter2.id];
-      const updatedFilter3 = updatedFilters[filter3.id];
+  t.equals(filter('abc', ''), true);
+  t.equals(filter('', ''), false);
+});
 
-      t.equals(updatedFilter2.group, 1);
-      t.equals(updatedFilter3.group, 2);
-    });
+test('numberFieldKindFiltersByRule - equal', (t) => {
+  const filter = numberFieldKindFiltersByRule.equal;
 
-    t.test('f1 OR f2 AND f3', (t) => {
-      const updatedFilters = updateFilterGroup(filter3, 'and', filters);
+  t.equals(filter(1, 1), true);
+  t.equals(filter(1, 2), false);
+});
 
-      const updatedFilter3 = updatedFilters[filter3.id];
+test('numberFieldKindFiltersByRule - notEqual', (t) => {
+  const filter = numberFieldKindFiltersByRule.notEqual;
 
-      t.equals(updatedFilter3.group, 2);
-    });
-  });
+  t.equals(filter(1, 2), true);
+  t.equals(filter(1, 1), false);
+});
 
-  t.test('3 "AND" filters', (t) => {
-    const filter1: Filter = {
-      id: '1',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('numberFieldKindFiltersByRule - lessThan', (t) => {
+  const filter = numberFieldKindFiltersByRule.lessThan;
 
-    const filter2: Filter = {
-      id: '2',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+  t.equals(filter(1, 2), true);
+  t.equals(filter(2, 1), false);
+});
 
-    const filter3: Filter = {
-      id: '3',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('numberFieldKindFiltersByRule - greaterThan', (t) => {
+  const filter = numberFieldKindFiltersByRule.greaterThan;
 
-    const filters: Filter[] = [filter1, filter2, filter3];
+  t.equals(filter(2, 1), true);
+  t.equals(filter(1, 2), false);
+});
 
-    t.test('f1 and f2 or f3', (t) => {
-      const updatedFilters = updateFilterGroup(filter3, 'or', filters);
+test('numberFieldKindFiltersByRule - lessThanOrEqual', (t) => {
+  const filter = numberFieldKindFiltersByRule.lessThanOrEqual;
 
-      const updatedFilter3 = updatedFilters[filter3.id];
+  t.equals(filter(1, 2), true);
+  t.equals(filter(2, 2), true);
+  t.equals(filter(2, 1), false);
+});
 
-      t.equals(updatedFilter3.group, 2);
-    });
+test('numberFieldKindFiltersByRule - greaterThanOrEqual', (t) => {
+  const filter = numberFieldKindFiltersByRule.greaterThanOrEqual;
 
-    t.test('f1 or f2 and f3', (t) => {
-      const updatedFilters = updateFilterGroup(filter2, 'or', filters);
-      const updatedFilter2 = updatedFilters[filter2.id];
-      const updatedFilter3 = updatedFilters[filter3.id];
+  t.equals(filter(2, 1), true);
+  t.equals(filter(2, 2), true);
+  t.equals(filter(1, 2), false);
+});
 
-      t.equals(updatedFilter2.group, 2);
-      t.equals(updatedFilter3.group, 2);
-    });
-  });
+test('numberFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = numberFieldKindFiltersByRule.isEmpty;
+
+  t.equals(filter(null, 0), true);
+  t.equals(filter(1, 0), false);
+});
+
+test('numberFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = numberFieldKindFiltersByRule.isNotEmpty;
+
+  t.equals(filter(1, 0), true);
+  t.equals(filter(null, 0), false);
+});
+
+test('dateFieldKindFiltersByRule - is', (t) => {
+  const filter = dateFieldKindFiltersByRule.is;
+
+  t.equals(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-03')), true);
+  t.equals(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), false);
+});
+
+test('dateFieldKindFiltersByRule - isWithin', (t) => {
+  const filter = dateFieldKindFiltersByRule.isWithin;
+
+  t.equals(
+    filter(Day.toDate('2020-08-03'), {
+      start: Day.toDate('2020-08-02'),
+      end: Day.toDate('2020-08-04'),
+    }),
+    true,
+  );
+
+  t.equals(
+    filter(Day.toDate('2020-08-05'), {
+      start: Day.toDate('2020-08-02'),
+      end: Day.toDate('2020-08-04'),
+    }),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isBefore', (t) => {
+  const filter = dateFieldKindFiltersByRule.isBefore;
+
+  t.equals(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), true);
+  t.equals(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), false);
+});
+
+test('dateFieldKindFiltersByRule - isAfter', (t) => {
+  const filter = dateFieldKindFiltersByRule.isAfter;
+
+  t.equals(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
+  t.equals(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), false);
+});
+
+test('dateFieldKindFiltersByRule - isOnOrBefore', (t) => {
+  const filter = dateFieldKindFiltersByRule.isOnOrBefore;
+
+  t.equals(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), true);
+  t.equals(filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')), true);
+  t.equals(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), false);
+});
+
+test('dateFieldKindFiltersByRule - isOnOrAfter', (t) => {
+  const filter = dateFieldKindFiltersByRule.isOnOrAfter;
+
+  t.equals(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
+  t.equals(filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')), true);
+  t.equals(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), false);
+});
+
+test('dateFieldKindFiltersByRule - isNot', (t) => {
+  const filter = dateFieldKindFiltersByRule.isNot;
+
+  t.equals(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
+  t.equals(filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')), false);
+});
+
+test('dateFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = dateFieldKindFiltersByRule.isEmpty;
+
+  t.equals(filter(null, new Date()), true);
+  t.equals(filter(Day.toDate('2020-08-04'), new Date()), false);
+});
+
+test('dateFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = dateFieldKindFiltersByRule.isNotEmpty;
+
+  t.equals(filter(Day.toDate('2020-08-04'), new Date()), true);
+  t.equals(filter(null, new Date()), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - is', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.is;
+
+  t.equals(filter('opt1', 'opt1'), true);
+  t.equals(filter('opt1', 'opt2'), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isNot', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isNot;
+
+  t.equals(filter('opt1', 'opt2'), true);
+  t.equals(filter('opt1', 'opt1'), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isAnyOf', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isAnyOf;
+
+  t.equals(filter('a', ['a', 'b']), true);
+  t.equals(filter('a', ['b', 'c']), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isNoneOf', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isNoneOf;
+
+  t.equals(filter('a', ['b', 'c']), true);
+  t.equals(filter('a', ['a', 'b']), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isEmpty;
+
+  t.equals(filter(null, ''), true);
+  t.equals(filter('abc', ''), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isNotEmpty;
+
+  t.equals(filter('abc', ''), true);
+  t.equals(filter(null, ''), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - hasAnyOf', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.hasAnyOf;
+
+  t.equals(filter(['a'], ['a', 'b']), true);
+  t.equals(filter(['a'], ['b', 'c']), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - hasAllOf', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.hasAllOf;
+
+  t.equals(filter(['b', 'a'], ['a', 'b']), true);
+  t.equals(filter(['a'], ['a', 'b']), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - hasNoneOf', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.hasNoneOf;
+
+  t.equals(filter(['a'], ['b', 'c']), true);
+  t.equals(filter(['a'], ['a', 'b']), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.isEmpty;
+
+  t.equals(filter([], []), true);
+  t.equals(filter(['a'], []), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.isNotEmpty;
+
+  t.equals(filter(['a'], []), true);
+  t.equals(filter([], []), false);
+});
+
+test('booleanFieldKindFiltersByRule - is', (t) => {
+  const filter = booleanFieldKindFiltersByRule.is;
+
+  t.equals(filter(true, true), true);
+  t.equals(filter(true, false), false);
+});
+
+function getOrFilters() {
+  const filter1: Filter = {
+    id: '1',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter2: Filter = {
+    id: '2',
+    viewID: '1',
+    group: 2,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter3: Filter = {
+    id: '3',
+    viewID: '1',
+    group: 3,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  return [filter1, filter2, filter3];
+}
+
+test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
+  const filters = getOrFilters();
+  const [, filter2, filter3] = filters;
+
+  const updatedFilters = updateFilterGroup(filter2, 'and', filters);
+  // f1 AND f2 OR f3
+
+  const updatedFilter2 = updatedFilters[filter2.id];
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.equals(updatedFilter2.group, 1);
+  t.equals(updatedFilter3.group, 2);
+});
+
+test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
+  const filters = getOrFilters();
+  const [, , filter3] = filters;
+  // f1 OR f2 AND f3
+  const updatedFilters = updateFilterGroup(filter3, 'and', filters);
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.equals(updatedFilter3.group, 2);
+});
+
+function getAndFilters() {
+  const filter1: Filter = {
+    id: '1',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter2: Filter = {
+    id: '2',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter3: Filter = {
+    id: '3',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  return [filter1, filter2, filter3];
+}
+
+test('updateFilterGroup - 3 "AND" filters - f1 and f2 or f3', (t) => {
+  const filters = getAndFilters();
+  const [, , filter3] = filters;
+
+  const updatedFilters = updateFilterGroup(filter3, 'or', filters);
+
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.equals(updatedFilter3.group, 2);
+});
+
+test('updateFilterGroup - 3 "AND" filters - f1 or f2 and f3', (t) => {
+  const filters = getAndFilters();
+  const [, filter2, filter3] = filters;
+
+  const updatedFilters = updateFilterGroup(filter2, 'or', filters);
+  const updatedFilter2 = updatedFilters[filter2.id];
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.equals(updatedFilter2.group, 2);
+  t.equals(updatedFilter3.group, 2);
 });
 
 function prepare(fieldType: FieldType, values: FieldValue[]) {

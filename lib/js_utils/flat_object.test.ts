@@ -1,4 +1,5 @@
-import { test } from 'zora';
+import { test } from '../../lib/testing';
+
 import { FlatObject } from './flat_object';
 
 test('happy', (t) => {

@@ -1,4 +1,4 @@
-import { test } from 'zora';
+import { test } from '../../lib/testing';
 
 import { intersectBy, differenceBy } from './array_utils';
 

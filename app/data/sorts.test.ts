@@ -1,4 +1,4 @@
-import { test } from 'zora';
+import { test } from '../../lib/testing';
 import {
   addFieldsToCollection,
   makeCollection,
@@ -18,145 +18,129 @@ import { Record, RecordID } from './records';
 import { CollaboratorID } from './collaborators';
 
 test('no sort', (t) => {
-  t.test('all records', () => {
-    const values = ['BWord', 'Aword'];
-    const { getters, records, getValue } = prepare(
-      FieldType.SingleLineText,
-      values,
-    );
+  const values = ['BWord', 'Aword'];
+  const { getters, records, getValue } = prepare(
+    FieldType.SingleLineText,
+    values,
+  );
 
-    const result = sortRecords([], records, getters);
+  const result = sortRecords([], records, getters);
 
-    t.equals(getValue(result[0]), values[0]);
-    t.equals(getValue(result[1]), values[1]);
-  });
+  t.equals(getValue(result[0]), values[0]);
+  t.equals(getValue(result[1]), values[1]);
 });
 
-test('text sort', (t) => {
-  t.test('ascending', () => {
-    const values = ['BWord', 'Aword'];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.SingleLineText,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+test('text sort - ascending', (t) => {
+  const values = ['BWord', 'Aword'];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.SingleLineText,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
 
-    const result = sortRecords([sort], records, getters);
+  const result = sortRecords([sort], records, getters);
 
-    t.equals(getValue(result[0]), values[1]);
-    t.equals(getValue(result[1]), values[0]);
-  });
-
-  test('descending', () => {
-    const values = ['AWord', 'Bword'];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.SingleLineText,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, getters);
-
-    t.equals(getValue(result[0]), values[1]);
-    t.equals(getValue(result[1]), values[0]);
-  });
+  t.equals(getValue(result[0]), values[1]);
+  t.equals(getValue(result[1]), values[0]);
 });
 
-test('number sort', (t) => {
-  test('ascending', () => {
-    const values = [2, 1, null];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.Number,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+test('text sort - descending', (t) => {
+  const values = ['AWord', 'Bword'];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.SingleLineText,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
 
-    const result = sortRecords([sort], records, getters);
+  const result = sortRecords([sort], records, getters);
 
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
-
-  test('descending', () => {
-    const values = [1, 2, null];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.Number,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, getters);
-
-    t.equals(getValue(result[0]), values[1]);
-    t.equals(getValue(result[1]), values[0]);
-    t.equals(getValue(result[2]), values[2]);
-  });
+  t.equals(getValue(result[0]), values[1]);
+  t.equals(getValue(result[1]), values[0]);
 });
 
-test('checkbox', (t) => {
-  test('ascending', () => {
-    const values = [true, false];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.Checkbox,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+test('number sort - ascending', (t) => {
+  const values = [2, 1, null];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.Number,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
 
-    const result = sortRecords([sort], records, getters);
+  const result = sortRecords([sort], records, getters);
 
-    t.equals(getValue(result[0]), values[1]);
-    t.equals(getValue(result[1]), values[0]);
-  });
-
-  test('descending', () => {
-    const values = [false, true];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.Checkbox,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, getters);
-
-    t.equals(getValue(result[0]), values[1]);
-    t.equals(getValue(result[1]), values[0]);
-  });
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
 });
 
-test('date', (t) => {
-  test('ascending', () => {
-    const values = [new Date(2020, 1, 2), new Date(2020, 1, 1), null];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.Date,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+test('number sort - descending', (t) => {
+  const values = [1, 2, null];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.Number,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
 
-    const result = sortRecords([sort], records, getters);
+  const result = sortRecords([sort], records, getters);
 
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
-
-  test('descending', () => {
-    const values = [null, new Date(2020, 1, 1), new Date(2020, 1, 2)];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.Date,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, getters);
-
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
+  t.equals(getValue(result[0]), values[1]);
+  t.equals(getValue(result[1]), values[0]);
+  t.equals(getValue(result[2]), values[2]);
 });
 
-test('multi options', (t) => {
+test('boolean sort - ascending', (t) => {
+  const values = [true, false];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.Checkbox,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+  const result = sortRecords([sort], records, getters);
+
+  t.equals(getValue(result[0]), values[1]);
+  t.equals(getValue(result[1]), values[0]);
+});
+
+test('boolean sort - descending', (t) => {
+  const values = [false, true];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.Checkbox,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+  const result = sortRecords([sort], records, getters);
+
+  t.equals(getValue(result[0]), values[1]);
+  t.equals(getValue(result[1]), values[0]);
+});
+
+test('date sort - ascending', (t) => {
+  const values = [new Date(2020, 1, 2), new Date(2020, 1, 1), null];
+  const { getters, records, field, getValue } = prepare(FieldType.Date, values);
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+  const result = sortRecords([sort], records, getters);
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+test('date sort - descending', (t) => {
+  const values = [null, new Date(2020, 1, 1), new Date(2020, 1, 2)];
+  const { getters, records, field, getValue } = prepare(FieldType.Date, values);
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+  const result = sortRecords([sort], records, getters);
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+function prepareMultiOptionsSort() {
   const { getters, field } = prepare(FieldType.MultiOption, []);
   assertMultiOptionField(field);
   const opt1 = field.options[0];
@@ -167,26 +151,33 @@ test('multi options', (t) => {
   const record3 = makeRecord({ fields: { [field.id]: [] } });
   const records = [record1, record2, record3];
 
-  test('ascending', () => {
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
-    const result = sortRecords([sort], records, getters);
+  return { getters, records, field };
+}
 
-    t.equals(result[0].id, record3.id);
-    t.equals(result[1].id, record2.id);
-    t.equals(result[2].id, record1.id);
-  });
+test('multi options sort - ascending', (t) => {
+  const { records, field, getters } = prepareMultiOptionsSort();
+  const [record1, record2, record3] = records;
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const result = sortRecords([sort], records, getters);
 
-  test('descending', () => {
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-    const result = sortRecords([sort], records, getters);
-
-    t.equals(result[0].id, record1.id);
-    t.equals(result[1].id, record2.id);
-    t.equals(result[2].id, record3.id);
-  });
+  t.equals(result[0].id, record3.id);
+  t.equals(result[1].id, record2.id);
+  t.equals(result[2].id, record1.id);
 });
 
-test('single options', (t) => {
+test('multi options sort - descending', (t) => {
+  const { records, field, getters } = prepareMultiOptionsSort();
+  const [record1, record2, record3] = records;
+
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const result = sortRecords([sort], records, getters);
+
+  t.equals(result[0].id, record1.id);
+  t.equals(result[1].id, record2.id);
+  t.equals(result[2].id, record3.id);
+});
+
+function prepareSingleOptionsSort() {
   const { getters, field } = prepare(FieldType.SingleOption, []);
   assertSingleOptionField(field);
   const opt1 = field.options[0];
@@ -197,26 +188,33 @@ test('single options', (t) => {
   const record3 = makeRecord({ fields: { [field.id]: null } });
   const records = [record1, record2, record3];
 
-  test('ascending', () => {
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
-    const result = sortRecords([sort], records, getters);
+  return { records, getters, field };
+}
 
-    t.equals(result[0].id, record3.id);
-    t.equals(result[1].id, record2.id);
-    t.equals(result[2].id, record1.id);
-  });
+test('single option sort - ascending', (t) => {
+  const { records, field, getters } = prepareSingleOptionsSort();
+  const [record1, record2, record3] = records;
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const result = sortRecords([sort], records, getters);
 
-  test('descending', () => {
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-    const result = sortRecords([sort], records, getters);
-
-    t.equals(result[0].id, record1.id);
-    t.equals(result[1].id, record2.id);
-    t.equals(result[2].id, record3.id);
-  });
+  t.equals(result[0].id, record3.id);
+  t.equals(result[1].id, record2.id);
+  t.equals(result[2].id, record1.id);
 });
 
-test('collaborator', (t) => {
+test('single option sort - descending', (t) => {
+  const { records, field, getters } = prepareSingleOptionsSort();
+  const [record1, record2, record3] = records;
+
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const result = sortRecords([sort], records, getters);
+
+  t.equals(result[0].id, record1.id);
+  t.equals(result[1].id, record2.id);
+  t.equals(result[2].id, record3.id);
+});
+
+function prepareCollaboratorSort() {
   const collaborator1 = makeCollaborator({ name: 'BName' });
   const collaborator2 = makeCollaborator({ name: 'AName' });
 
@@ -228,80 +226,96 @@ test('collaborator', (t) => {
     return collaborator2;
   };
 
-  test('multi ascending', () => {
-    const values = [[collaborator1.id], [collaborator2.id], []];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.MultiCollaborator,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const collaborators = [collaborator1, collaborator2];
 
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getCollaborator,
-    });
+  return { collaborators, getCollaborator };
+}
 
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
+test('multi collaborator sort - ascending', (t) => {
+  const { collaborators, getCollaborator } = prepareCollaboratorSort();
+  const [collaborator1, collaborator2] = collaborators;
+
+  const values = [[collaborator1.id], [collaborator2.id], []];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.MultiCollaborator,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getCollaborator,
   });
 
-  test('multi descending', () => {
-    const values = [[], [collaborator2.id], [collaborator1.id]];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.MultiCollaborator,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getCollaborator,
-    });
-
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
-
-  test('single ascending', () => {
-    const values = [collaborator1.id, collaborator2.id, null];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.SingleCollaborator,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
-
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getCollaborator,
-    });
-
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
-
-  test('single descending', () => {
-    const values = [null, collaborator2.id, collaborator1.id];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.SingleCollaborator,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getCollaborator,
-    });
-
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
 });
 
-test('records', (t) => {
+test('multi collaborator sort - descending', (t) => {
+  const { collaborators, getCollaborator } = prepareCollaboratorSort();
+  const [collaborator1, collaborator2] = collaborators;
+
+  const values = [[], [collaborator2.id], [collaborator1.id]];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.MultiCollaborator,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getCollaborator,
+  });
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+test('single collaborator sort - ascending', (t) => {
+  const { collaborators, getCollaborator } = prepareCollaboratorSort();
+  const [collaborator1, collaborator2] = collaborators;
+
+  const values = [collaborator1.id, collaborator2.id, null];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.SingleCollaborator,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getCollaborator,
+  });
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+test('single collaborator sort - descending', (t) => {
+  const { collaborators, getCollaborator } = prepareCollaboratorSort();
+  const [collaborator1, collaborator2] = collaborators;
+
+  const values = [null, collaborator2.id, collaborator1.id];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.SingleCollaborator,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getCollaborator,
+  });
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+function prepareRecordsSort() {
   const otherCollection = makeCollection({
     name: 'other collection',
   });
@@ -334,112 +348,148 @@ test('records', (t) => {
     return otherCollection;
   };
 
-  test('multi ascending', () => {
-    const values = [[record1.id], [record2.id], []];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.MultiRecordLink,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const records = [record1, record2];
 
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getRecord,
-      getCollection,
-      getField: (fieldID) => {
-        if (fieldID === field.id) {
-          return field;
-        }
+  return { records, otherField, getCollection, getRecord };
+}
 
-        return otherField;
-      },
-    });
+test('multi record sort - ascending', (t) => {
+  const {
+    otherField,
+    records: outerRecords,
+    getRecord,
+    getCollection,
+  } = prepareRecordsSort();
+  const [record1, record2] = outerRecords;
 
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
+  const values = [[record1.id], [record2.id], []];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.MultiRecordLink,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getRecord,
+    getCollection,
+    getField: (fieldID) => {
+      if (fieldID === field.id) {
+        return field;
+      }
+
+      return otherField;
+    },
   });
 
-  test('multi descending', () => {
-    const values = [[], [record2.id], [record1.id]];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.MultiRecordLink,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getRecord,
-      getCollection,
-      getField: (fieldID) => {
-        if (fieldID === field.id) {
-          return field;
-        }
-
-        return otherField;
-      },
-    });
-
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
-
-  test('single ascending', () => {
-    const values = [record1.id, record2.id, null];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.SingleRecordLink,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
-
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getRecord,
-      getCollection,
-      getField: (fieldID) => {
-        if (fieldID === field.id) {
-          return field;
-        }
-
-        return otherField;
-      },
-    });
-
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
-
-  test('single descending', () => {
-    const values = [null, record2.id, record1.id];
-    const { getters, records, field, getValue } = prepare(
-      FieldType.SingleRecordLink,
-      values,
-    );
-    const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
-
-    const result = sortRecords([sort], records, {
-      ...getters,
-      getRecord,
-      getCollection,
-      getField: (fieldID) => {
-        if (fieldID === field.id) {
-          return field;
-        }
-
-        return otherField;
-      },
-    });
-
-    t.equals(getValue(result[0]), values[2]);
-    t.equals(getValue(result[1]), values[1]);
-    t.equals(getValue(result[2]), values[0]);
-  });
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
 });
 
-test('multiple sorts', (t) => {
+test('multi record sort - descending', (t) => {
+  const {
+    otherField,
+    records: outerRecords,
+    getRecord,
+    getCollection,
+  } = prepareRecordsSort();
+  const [record1, record2] = outerRecords;
+
+  const values = [[], [record2.id], [record1.id]];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.MultiRecordLink,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getRecord,
+    getCollection,
+    getField: (fieldID) => {
+      if (fieldID === field.id) {
+        return field;
+      }
+
+      return otherField;
+    },
+  });
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+test('single record sort - ascending', (t) => {
+  const {
+    otherField,
+    records: outerRecords,
+    getRecord,
+    getCollection,
+  } = prepareRecordsSort();
+  const [record1, record2] = outerRecords;
+
+  const values = [record1.id, record2.id, null];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.SingleRecordLink,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getRecord,
+    getCollection,
+    getField: (fieldID) => {
+      if (fieldID === field.id) {
+        return field;
+      }
+
+      return otherField;
+    },
+  });
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+test('single record sort - descending', (t) => {
+  const {
+    otherField,
+    records: outerRecords,
+    getRecord,
+    getCollection,
+  } = prepareRecordsSort();
+  const [record1, record2] = outerRecords;
+
+  const values = [null, record2.id, record1.id];
+  const { getters, records, field, getValue } = prepare(
+    FieldType.SingleRecordLink,
+    values,
+  );
+  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+
+  const result = sortRecords([sort], records, {
+    ...getters,
+    getRecord,
+    getCollection,
+    getField: (fieldID) => {
+      if (fieldID === field.id) {
+        return field;
+      }
+
+      return otherField;
+    },
+  });
+
+  t.equals(getValue(result[0]), values[2]);
+  t.equals(getValue(result[1]), values[1]);
+  t.equals(getValue(result[2]), values[0]);
+});
+
+test('ascending number then descending text sort', (t) => {
   const collection = makeCollection({});
   const numberField = makeField({
     type: FieldType.Number,
@@ -498,23 +548,18 @@ test('multiple sorts', (t) => {
     getCollaborator: () => collaborator,
   };
 
-  test('ascending number then descending text sort', () => {
-    const numberSort = makeSort(
-      {},
-      { fieldID: numberField.id, order: 'ascending' },
-    );
-    const textSort = makeSort(
-      {},
-      { fieldID: textField.id, order: 'descending' },
-    );
+  const numberSort = makeSort(
+    {},
+    { fieldID: numberField.id, order: 'ascending' },
+  );
+  const textSort = makeSort({}, { fieldID: textField.id, order: 'descending' });
 
-    const result = sortRecords([numberSort, textSort], records, getters);
+  const result = sortRecords([numberSort, textSort], records, getters);
 
-    t.equals(result[0].id, record3.id);
-    t.equals(result[1].id, record4.id);
-    t.equals(result[2].id, record2.id);
-    t.equals(result[3].id, record1.id);
-  });
+  t.equals(result[0].id, record3.id);
+  t.equals(result[1].id, record4.id);
+  t.equals(result[2].id, record2.id);
+  t.equals(result[3].id, record1.id);
 });
 
 function prepare(fieldType: FieldType, values: FieldValue[]) {

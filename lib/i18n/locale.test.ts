@@ -1,4 +1,5 @@
-import { test } from 'zora';
+import { test } from '../../lib/testing';
+
 import { defaultLocale, getSupportedLocale, SupportedLocale } from './locale';
 
 test('uses default locale', (t) => {
