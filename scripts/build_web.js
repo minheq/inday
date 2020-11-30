@@ -26,7 +26,13 @@ const options = {
   },
 };
 
-build(options).catch((error) => {
-  console.error(`Failed to build: ${error.message}`);
-  process.exit(1);
-});
+console.time('build time');
+build(options)
+  .then(() => {
+    console.timeEnd('build time');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Failed to build: ${error.message}`);
+    process.exit(1);
+  });
