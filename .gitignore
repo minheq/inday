@@ -75,3 +75,5 @@ test/
 # Env
 .env
 .env.*
+.nyc_output
+coverage

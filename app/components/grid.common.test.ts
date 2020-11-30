@@ -40,12 +40,7 @@ test('getVisibleIndexRange', (t) => {
       getItemSize: (column) => column.size,
     });
 
-    if (result[0] !== startIndex) {
-      t.fail(`got startIndex=${result[0]}, want ${startIndex}`);
-    }
-    if (result[1] !== endIndex) {
-      t.fail(`got endIndex=${result[1]}, want ${endIndex}`);
-    }
+    t.deepEqual(result, [startIndex, endIndex]);
   }
 });
 

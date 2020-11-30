@@ -384,7 +384,6 @@ test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
   const [, filter2, filter3] = filters;
 
   const updatedFilters = updateFilterGroup(filter2, 'and', filters);
-  // f1 AND f2 OR f3
 
   const updatedFilter2 = updatedFilters[filter2.id];
   const updatedFilter3 = updatedFilters[filter3.id];
@@ -393,10 +392,10 @@ test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
   t.deepEqual(updatedFilter3.group, 2);
 });
 
-test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
+test('updateFilterGroup - 3 "OR" filters to f1 OR f2 AND f3', (t) => {
   const filters = getOrFilters();
   const [, , filter3] = filters;
-  // f1 OR f2 AND f3
+
   const updatedFilters = updateFilterGroup(filter3, 'and', filters);
   const updatedFilter3 = updatedFilters[filter3.id];
 

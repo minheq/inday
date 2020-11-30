@@ -2,7 +2,7 @@ import { test } from '../../lib/testing';
 
 import { intersectBy, differenceBy } from './array_utils';
 
-test('success', (t) => {
+test('intersectBy', (t) => {
   const a = [{ x: 1 }, { x: 2 }, { x: 3 }];
   const b = [{ x: 2 }, { x: 3 }, { x: 4 }];
   const result = intersectBy(a, b, (i) => i.x);
@@ -10,7 +10,7 @@ test('success', (t) => {
   t.deepEqual(result, [{ x: 2 }, { x: 3 }]);
 });
 
-test('success', (t) => {
+test('differenceBy', (t) => {
   const a = [{ x: 1 }, { x: 2 }, { x: 3 }];
   const b = [{ x: 2 }, { x: 3 }, { x: 4 }];
   const result = differenceBy(a, b, (i) => i.x);
