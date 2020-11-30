@@ -38,7 +38,7 @@ export function getSupportedLocale(
         return normalizedLanguage;
       }
     }
-  } else {
+  } else if (typeof languages === 'string') {
     const normalizedLanguage = normalizeLanguage(languages);
 
     if (isSupportedLocale(normalizedLanguage)) {
