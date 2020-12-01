@@ -34,9 +34,8 @@ import {
   assertPrimaryFieldValue,
 } from './fields';
 import { Record, RecordID } from './records';
-import { first, isEmpty, keyedBy } from '../../lib/js_utils';
+import { isBefore, isAfter, first, isEmpty, keyedBy } from '../../lib/js_utils';
 import { Collaborator, CollaboratorID } from './collaborators';
-import { isBefore, isAfter } from 'date-fns';
 import { CollectionID, Collection } from './collections';
 import { generateID, validateID } from '../../lib/id';
 

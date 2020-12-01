@@ -11,7 +11,6 @@ import {
   TextInputKeyPressEventData,
   View,
 } from 'react-native';
-import Fuse from 'fuse.js';
 
 import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
@@ -23,6 +22,7 @@ import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { Hover } from './hover';
+import { SearchEngine } from '../../lib/search';
 
 export interface ListPickerOption<T> {
   value: T;
@@ -240,17 +240,18 @@ export function useOptionsSearch<T>(
   options: ListPickerOption<T>[],
   searchTerm: string,
 ): ListPickerOption<T>[] {
-  const fuse = useRef(new Fuse(options, { keys: ['label'] })).current;
+  const searchEngine = useRef(new SearchEngine(options, { keys: ['label'] }))
+    .current;
 
   useEffect(() => {
-    fuse.setCollection(options);
-  }, [fuse, options]);
+    searchEngine.setCollection(options);
+  }, [searchEngine, options]);
 
   if (searchTerm === '') {
     return options;
   }
 
-  const result = fuse.search(searchTerm);
+  const result = searchEngine.search(searchTerm);
 
   return result.map((value) => value.item);
 }

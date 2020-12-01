@@ -13,7 +13,7 @@ import {
   isAfter,
   isBefore,
   isSameDay,
-} from 'date-fns';
+} from '../js_utils';
 import { Hours } from './hours';
 import { Minutes } from './minutes';
 

@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { View, Pressable } from 'react-native';
 
@@ -23,6 +22,7 @@ import {
 import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 import { Button } from './button';
+import { format } from '../../lib/js_utils';
 
 interface DayPickerProps {
   value?: Day | null;

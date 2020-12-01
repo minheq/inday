@@ -1,5 +1,5 @@
-import { format } from 'date-fns';
 import { enUS, vi } from 'date-fns/locale';
+import { format } from '../js_utils';
 import { SupportedLocale } from '../i18n';
 
 export function formatDate(

@@ -1,4 +1,4 @@
-import { isDate, isSameDay } from 'date-fns';
+import { isDate, isSameDay } from '../../lib/js_utils';
 import { NumberUnit } from '../../lib/i18n/unit';
 import { generateID, validateID } from '../../lib/id';
 import { hasAllOf } from '../../lib/js_utils';

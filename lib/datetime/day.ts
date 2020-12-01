@@ -13,7 +13,7 @@ import {
   subMonths,
   addYears,
   subYears,
-} from 'date-fns';
+} from '../js_utils';
 import { Interval } from './interval';
 
 export const DAY_FORMAT = 'yyyy-MM-dd';

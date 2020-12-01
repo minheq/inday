@@ -1,3 +1,4 @@
+export * from './date_utils';
 export * from './array_utils';
 export * from './number_utils';
 export * from './object_utils';

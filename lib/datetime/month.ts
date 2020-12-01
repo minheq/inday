@@ -1,4 +1,5 @@
 import {
+  chunk,
   addDays,
   differenceInDays,
   eachDayOfInterval,
@@ -6,7 +7,6 @@ import {
   isAfter,
   isBefore,
   isSameDay,
-  Interval,
   startOfMonth,
   subDays,
   endOfDay,
@@ -15,9 +15,9 @@ import {
   setMonth,
   addMonths,
   subMonths,
-} from 'date-fns';
-import { chunk } from '../js_utils';
+} from '../js_utils';
 import { Day } from './day';
+import { Interval } from './interval';
 
 import {
   FirstDayOfWeek,

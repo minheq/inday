@@ -1,6 +1,14 @@
-import { isSameDay, isWithinInterval, isBefore, isAfter } from 'date-fns';
 import { Record } from './records';
-import { hasAnyOf, hasAllOf, hasNoneOf, isEmpty } from '../../lib/js_utils';
+import {
+  isSameDay,
+  isWithinInterval,
+  isBefore,
+  isAfter,
+  hasAnyOf,
+  hasAllOf,
+  hasNoneOf,
+  isEmpty,
+} from '../../lib/js_utils';
 import {
   assertBooleanFieldKindValue,
   assertDateFieldValue,
@@ -839,10 +847,10 @@ export const multiSelectFieldKindFiltersByRule: {
     return hasNoneOf(value, filterValue);
   },
   isEmpty: (value) => {
-    return isEmpty(value);
+    return isEmpty(value as string[]);
   },
   isNotEmpty: (value) => {
-    return !isEmpty(value);
+    return !isEmpty(value as string[]);
   },
 };
 

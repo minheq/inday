@@ -5,8 +5,7 @@ import {
   subDays,
   startOfDay,
   endOfDay,
-  Interval,
-} from 'date-fns';
+} from '../js_utils';
 import { Day } from './day';
 import { Month } from './month';
 

@@ -30,17 +30,11 @@ import {
   deleteField,
   duplicateField,
 } from './db';
-import {
-  AuthenticationError,
-  UnauthorizedError,
-  ValidationErrorField,
-  ValidationError,
-} from './errors';
+import { AuthenticationError, UnauthorizedError } from './errors';
 import { ViewType } from '../app/data/views';
 import { FieldType } from '../app/data/fields';
 import { validateID } from '../lib/id/id';
 
-//#region Helpers
 type Request = FastifyRequest;
 type Response = FastifyReply;
 
@@ -103,9 +97,6 @@ function getCurrentUserID(ctx: AuthenticatedContext): string {
   return ctx.userID;
 }
 
-//#endregion Helpers
-
-//#region Workspace
 interface WorkspaceIDParams {
   workspaceID: string;
 }
@@ -166,10 +157,6 @@ export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
   res.send({ id: workspaceID, deleted: true });
 };
 
-//#endregion Workspace
-
-//#region Space
-
 interface SpaceIDParams {
   spaceID: string;
 }
@@ -218,9 +205,6 @@ export const handleDeleteSpace: AH = async (ctx, req, res) => {
   res.send({ id: spaceID, deleted: true });
 };
 
-//#endregion Space
-
-//#region Collection
 interface CollectionIDParams {
   collectionID: string;
 }
@@ -274,9 +258,6 @@ export const handleDeleteCollection: AH = async (ctx, req, res) => {
   res.send({ id: collectionID, deleted: true });
 };
 
-//#endregion Collection
-
-//#region Record
 interface RecordIDParams {
   recordID: string;
 }
@@ -331,9 +312,6 @@ export const handleDeleteRecord: AH = async (ctx, req, res) => {
   res.send({ id: recordID, deleted: true });
 };
 
-//#endregion Record
-
-//#region View
 interface ViewIDParams {
   viewID: string;
 }
@@ -384,9 +362,6 @@ export const handleDeleteView: AH = async (ctx, req, res) => {
   res.send({ id: viewID, deleted: true });
 };
 
-//#endregion View
-
-//#region Field
 const fieldTypes: FieldType[] = [
   'singleLineText',
   'multiLineText',
@@ -472,5 +447,3 @@ export const handleDeleteField: AH = async (ctx, req, res) => {
 
   res.send({ id: fieldID, deleted: true });
 };
-
-//#endregion Field
