@@ -4,9 +4,7 @@ export const Pathname = {
     str: string,
   ): T | false => {
     pathname = trimTrailingSlash(pathname);
-    pathname = pathname.toLowerCase();
     str = trimTrailingSlash(str);
-    str = str.toLowerCase();
 
     // From /p/p2/:id/:id2 to ['p', 'p2', ':id', 'id2']
     const paths = pathname.split('/');
@@ -24,7 +22,7 @@ export const Pathname = {
       }
 
       if (p.includes(':') === false) {
-        if (p === s) {
+        if (p.toLowerCase() === s.toLowerCase()) {
           continue;
         }
 
@@ -42,7 +40,6 @@ export const Pathname = {
     params: T,
   ): string => {
     pathname = trimTrailingSlash(pathname);
-    pathname = pathname.toLowerCase();
 
     const paths = pathname.split('/');
     const s: string[] = [];
@@ -63,8 +60,6 @@ export const Pathname = {
 
       s.push(params[param]);
     }
-
-    console.log(s.join('/'));
 
     return '/' + s.join('/');
   },
