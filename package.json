@@ -30,8 +30,7 @@
     "react-native": "0.63.3",
     "react-native-svg": "^12.1.0",
     "react-native-web": "^0.14.8",
-    "recoil": "^0.1.2",
-    "yup": "^0.31.0"
+    "recoil": "^0.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -41,7 +40,6 @@
     "@types/react-dom": "^17.0.0",
     "@types/react-modal": "^3.10.6",
     "@types/react-native": "^0.63.37",
-    "@types/yup": "^0.29.9",
     "@typescript-eslint/eslint-plugin": "^4.8.2",
     "@typescript-eslint/parser": "^4.8.2",
     "electron": "^11.0.3",

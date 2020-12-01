@@ -1,5 +1,4 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import * as yup from 'yup';
 
 import {
   DB,
@@ -84,37 +83,6 @@ export function addContext(handler: H) {
   };
 }
 
-function validateInput<T extends object>(
-  schema: yup.ObjectSchema<T>,
-  input: unknown,
-): asserts input is T {
-  try {
-    schema.validateSync(input, { abortEarly: false });
-  } catch (error) {
-    const fields: ValidationErrorField[] = (error as yup.ValidationError).inner.map(
-      (validationError: yup.ValidationError) => ({
-        field: validationError.path,
-        message: validationError.message,
-      }),
-    );
-
-    throw new ValidationError(fields);
-  }
-}
-
-function validateParams<T extends object>(
-  schema: yup.ObjectSchema<T>,
-  params: unknown,
-): asserts params is T {
-  try {
-    schema.validateSync(params);
-  } catch (error) {
-    throw new Error(
-      `Invalid params. ${(error as yup.ValidationError).message}`,
-    );
-  }
-}
-
 function assertAuthenticated(
   ctx: Context,
 ): asserts ctx is AuthenticatedContext {
@@ -142,25 +110,11 @@ interface WorkspaceIDParams {
   workspaceID: string;
 }
 
-const workspaceIDParamsSchema = yup
-  .object<WorkspaceIDParams>({
-    workspaceID: yup.string().required(),
-  })
-  .required();
-
 export interface CreateWorkspaceInput {
   name: string;
 }
 
-const createWorkspaceInputSchema = yup
-  .object<CreateWorkspaceInput>({
-    name: yup.string().defined(),
-  })
-  .required();
-
 export const handleCreateWorkspace: AH = async (ctx, req, res) => {
-  validateInput(createWorkspaceInputSchema, req.body);
-  validateParams(workspaceIDParamsSchema, req.params);
   validateID(req.params.workspaceID);
 
   const currentUserID = getCurrentUserID(ctx);
@@ -181,16 +135,7 @@ export interface UpdateWorkspaceNameInput {
   name: string;
 }
 
-const updateWorkspaceNameInputSchema = yup
-  .object<UpdateWorkspaceNameInput>({
-    name: yup.string().defined(),
-  })
-  .required();
-
 export const handleUpdateWorkspaceName: AH = async (ctx, req, res) => {
-  validateInput(updateWorkspaceNameInputSchema, req.body);
-  validateParams(workspaceIDParamsSchema, req.params);
-
   const { workspaceID } = req.params;
   const { name } = req.body;
 
@@ -200,8 +145,6 @@ export const handleUpdateWorkspaceName: AH = async (ctx, req, res) => {
 };
 
 export const handleGetWorkspace: AH = async (ctx, req, res) => {
-  validateParams(workspaceIDParamsSchema, req.params);
-
   const { workspaceID } = req.params;
   const workspace = await getWorkspaceByID(ctx.db, workspaceID);
 
@@ -209,8 +152,6 @@ export const handleGetWorkspace: AH = async (ctx, req, res) => {
 };
 
 export const handleDeleteWorkspace: AH = async (ctx, req, res) => {
-  validateParams(workspaceIDParamsSchema, req.params);
-
   const currentUserID = getCurrentUserID(ctx);
   const { workspaceID } = req.params;
 
@@ -233,27 +174,12 @@ interface SpaceIDParams {
   spaceID: string;
 }
 
-const spaceIDParamsSchema = yup
-  .object<SpaceIDParams>({
-    spaceID: yup.string().required(),
-  })
-  .required();
-
 export interface CreateSpaceInput {
   name: string;
   workspaceID: string;
 }
 
-const createSpaceInputSchema = yup
-  .object<CreateSpaceInput>({
-    name: yup.string().defined(),
-    workspaceID: yup.string().required(),
-  })
-  .required();
-
 export const handleCreateSpace: AH = async (ctx, req, res) => {
-  validateInput(createSpaceInputSchema, req.body);
-  validateParams(spaceIDParamsSchema, req.params);
   validateID(req.params.spaceID);
 
   const { spaceID } = req.params;
@@ -268,16 +194,7 @@ export interface UpdateSpaceNameInput {
   name: string;
 }
 
-const updateSpaceNameInputSchema = yup
-  .object<UpdateSpaceNameInput>({
-    name: yup.string().defined(),
-  })
-  .required();
-
 export const handleUpdateSpaceName: AH = async (ctx, req, res) => {
-  validateInput(updateSpaceNameInputSchema, req.body);
-  validateParams(spaceIDParamsSchema, req.params);
-
   const { spaceID } = req.params;
   const { name } = req.body;
 
@@ -287,8 +204,6 @@ export const handleUpdateSpaceName: AH = async (ctx, req, res) => {
 };
 
 export const handleGetSpace: AH = async (ctx, req, res) => {
-  validateParams(spaceIDParamsSchema, req.params);
-
   const { spaceID } = req.params;
   const space = await getSpaceByID(ctx.db, spaceID);
 
@@ -296,8 +211,6 @@ export const handleGetSpace: AH = async (ctx, req, res) => {
 };
 
 export const handleDeleteSpace: AH = async (ctx, req, res) => {
-  validateParams(spaceIDParamsSchema, req.params);
-
   const { spaceID } = req.params;
 
   await deleteSpace(ctx.db, spaceID);
@@ -312,27 +225,12 @@ interface CollectionIDParams {
   collectionID: string;
 }
 
-const collectionIDParamsSchema = yup
-  .object<CollectionIDParams>({
-    collectionID: yup.string().required(),
-  })
-  .required();
-
 export interface CreateCollectionInput {
   name: string;
   spaceID: string;
 }
 
-const createCollectionInputSchema = yup
-  .object<CreateCollectionInput>({
-    name: yup.string().defined(),
-    spaceID: yup.string().required(),
-  })
-  .required();
-
 export const handleCreateCollection: AH = async (ctx, req, res) => {
-  validateInput(createCollectionInputSchema, req.body);
-  validateParams(collectionIDParamsSchema, req.params);
   validateID(req.params.collectionID);
 
   const { collectionID } = req.params;
@@ -352,16 +250,7 @@ export interface UpdateCollectionNameInput {
   name: string;
 }
 
-const updateCollectionNameInputSchema = yup
-  .object<UpdateCollectionNameInput>({
-    name: yup.string().defined(),
-  })
-  .required();
-
 export const handleUpdateCollectionName: AH = async (ctx, req, res) => {
-  validateInput(updateCollectionNameInputSchema, req.body);
-  validateParams(collectionIDParamsSchema, req.params);
-
   const { collectionID } = req.params;
   const { name } = req.body;
 
@@ -371,8 +260,6 @@ export const handleUpdateCollectionName: AH = async (ctx, req, res) => {
 };
 
 export const handleGetCollection: AH = async (ctx, req, res) => {
-  validateParams(collectionIDParamsSchema, req.params);
-
   const { collectionID } = req.params;
   const collection = await getCollectionByID(ctx.db, collectionID);
 
@@ -380,7 +267,6 @@ export const handleGetCollection: AH = async (ctx, req, res) => {
 };
 
 export const handleDeleteCollection: AH = async (ctx, req, res) => {
-  validateParams(collectionIDParamsSchema, req.params);
   const { collectionID } = req.params;
 
   await deleteCollection(ctx.db, collectionID);
@@ -395,25 +281,11 @@ interface RecordIDParams {
   recordID: string;
 }
 
-const recordIDParamsSchema = yup
-  .object<RecordIDParams>({
-    recordID: yup.string().required(),
-  })
-  .required();
-
 export interface CreateRecordInput {
   collectionID: string;
 }
 
-const createRecordInputSchema = yup
-  .object<CreateRecordInput>({
-    collectionID: yup.string().required(),
-  })
-  .required();
-
 export const handleCreateRecord: AH = async (ctx, req, res) => {
-  validateInput(createRecordInputSchema, req.body);
-  validateParams(recordIDParamsSchema, req.params);
   validateID(req.params.recordID);
 
   const { recordID } = req.params;
@@ -426,14 +298,7 @@ export const handleCreateRecord: AH = async (ctx, req, res) => {
 
 export interface FullUpdateRecordInput {}
 
-const fullUpdateRecordInputSchema = yup
-  .object<FullUpdateRecordInput>({})
-  .required();
-
 export const handleFullUpdateRecord: AH = async (ctx, req, res) => {
-  validateInput(fullUpdateRecordInputSchema, req.body);
-  validateParams(recordIDParamsSchema, req.params);
-
   const { recordID } = req.params;
 
   const record = await fullUpdateRecord(ctx.db, recordID);
@@ -443,14 +308,7 @@ export const handleFullUpdateRecord: AH = async (ctx, req, res) => {
 
 export interface PartialUpdateRecordInput {}
 
-const partialUpdateRecordInputSchema = yup
-  .object<PartialUpdateRecordInput>({})
-  .required();
-
 export const handlePartialUpdateRecord: AH = async (ctx, req, res) => {
-  validateInput(partialUpdateRecordInputSchema, req.body);
-  validateParams(recordIDParamsSchema, req.params);
-
   const { recordID } = req.params;
 
   const record = await partialUpdateRecord(ctx.db, recordID);
@@ -459,8 +317,6 @@ export const handlePartialUpdateRecord: AH = async (ctx, req, res) => {
 };
 
 export const handleGetRecord: AH = async (ctx, req, res) => {
-  validateParams(recordIDParamsSchema, req.params);
-
   const { recordID } = req.params;
   const record = await getRecordByID(ctx.db, recordID);
 
@@ -468,8 +324,6 @@ export const handleGetRecord: AH = async (ctx, req, res) => {
 };
 
 export const handleDeleteRecord: AH = async (ctx, req, res) => {
-  validateParams(recordIDParamsSchema, req.params);
-
   const { recordID } = req.params;
 
   await deleteRecord(ctx.db, recordID);
@@ -484,12 +338,6 @@ interface ViewIDParams {
   viewID: string;
 }
 
-const viewIDParamsSchema = yup
-  .object<ViewIDParams>({
-    viewID: yup.string().required(),
-  })
-  .required();
-
 export interface CreateViewInput {
   name: string;
   type: ViewType;
@@ -497,17 +345,8 @@ export interface CreateViewInput {
 }
 
 const viewTypes: ViewType[] = ['list', 'board'];
-const createViewInputSchema = yup
-  .object<CreateViewInput>({
-    name: yup.string().defined(),
-    type: yup.mixed().oneOf(viewTypes).required() as yup.MixedSchema<ViewType>,
-    collectionID: yup.string().required(),
-  })
-  .required();
 
 export const handleCreateView: AH = async (ctx, req, res) => {
-  validateInput(createViewInputSchema, req.body);
-  validateParams(viewIDParamsSchema, req.params);
   validateID(req.params.viewID);
 
   const { viewID } = req.params;
@@ -521,16 +360,7 @@ export interface UpdateViewNameInput {
   name: string;
 }
 
-const updateViewNameInputSchema = yup
-  .object<UpdateViewNameInput>({
-    name: yup.string().defined(),
-  })
-  .required();
-
 export const handleUpdateViewName: AH = async (ctx, req, res) => {
-  validateInput(updateViewNameInputSchema, req.body);
-  validateParams(viewIDParamsSchema, req.params);
-
   const { viewID } = req.params;
   const { name } = req.body;
 
@@ -540,8 +370,6 @@ export const handleUpdateViewName: AH = async (ctx, req, res) => {
 };
 
 export const handleGetView: AH = async (ctx, req, res) => {
-  validateParams(viewIDParamsSchema, req.params);
-
   const { viewID } = req.params;
   const view = await getViewByID(ctx.db, viewID);
 
@@ -549,8 +377,6 @@ export const handleGetView: AH = async (ctx, req, res) => {
 };
 
 export const handleDeleteView: AH = async (ctx, req, res) => {
-  validateParams(viewIDParamsSchema, req.params);
-
   const { viewID } = req.params;
 
   await deleteView(ctx.db, viewID);
@@ -583,31 +409,13 @@ interface FieldIDParams {
   fieldID: string;
 }
 
-const fieldIDParamsSchema = yup
-  .object<FieldIDParams>({
-    fieldID: yup.string().required(),
-  })
-  .required();
-
 export interface CreateFieldInput {
   name: string;
   type: FieldType;
   collectionID: string;
 }
 
-const createFieldInputSchema = yup
-  .object<CreateFieldInput>({
-    name: yup.string().defined(),
-    type: yup.mixed().oneOf(fieldTypes).required() as yup.MixedSchema<
-      FieldType
-    >,
-    collectionID: yup.string().required(),
-  })
-  .required();
-
 export const handleCreateField: AH = async (ctx, req, res) => {
-  validateInput(createFieldInputSchema, req.body);
-  validateParams(fieldIDParamsSchema, req.params);
   validateID(req.params.fieldID);
 
   const { fieldID } = req.params;
@@ -623,17 +431,7 @@ export interface DuplicateFieldInput {
   duplicateRecordFieldValues: boolean;
 }
 
-const duplicateFieldInputSchema = yup
-  .object<DuplicateFieldInput>({
-    fromFieldID: yup.string().defined(),
-    duplicateRecordFieldValues: yup.boolean().defined(),
-  })
-  .required();
-
 export const handleDuplicateField: AH = async (ctx, req, res) => {
-  validateInput(duplicateFieldInputSchema, req.body);
-  validateParams(fieldIDParamsSchema, req.params);
-
   const { fieldID } = req.params;
   const { fromFieldID, duplicateRecordFieldValues } = req.body;
 
@@ -651,16 +449,7 @@ export interface UpdateFieldNameInput {
   name: string;
 }
 
-const updateFieldNameInputSchema = yup
-  .object<UpdateFieldNameInput>({
-    name: yup.string().defined(),
-  })
-  .required();
-
 export const handleUpdateFieldName: AH = async (ctx, req, res) => {
-  validateInput(updateFieldNameInputSchema, req.body);
-  validateParams(fieldIDParamsSchema, req.params);
-
   const { fieldID } = req.params;
   const { name } = req.body;
 
@@ -670,8 +459,6 @@ export const handleUpdateFieldName: AH = async (ctx, req, res) => {
 };
 
 export const handleGetField: AH = async (ctx, req, res) => {
-  validateParams(fieldIDParamsSchema, req.params);
-
   const { fieldID } = req.params;
   const field = await getFieldByID(ctx.db, fieldID);
 
@@ -679,8 +466,6 @@ export const handleGetField: AH = async (ctx, req, res) => {
 };
 
 export const handleDeleteField: AH = async (ctx, req, res) => {
-  validateParams(fieldIDParamsSchema, req.params);
-
   const { fieldID } = req.params;
 
   await deleteField(ctx.db, fieldID);

@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useReducer,
 } from 'react';
-import { match, compile } from 'path-to-regexp';
+import { match, compile } from '../../../lib/pathname';
 import { keysOf } from '../../../lib/js_utils';
 
 interface UseNavigation {
