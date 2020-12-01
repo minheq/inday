@@ -1,8 +1,9 @@
-import { getRandomInteger } from './number_utils';
+import { ArrayNative } from './array_native';
+import { Number } from './number_utils';
 
-export function range(min: number, max: number, step?: number): number[];
-export function range(max: number): number[];
-export function range(arg0: number, arg1?: number, arg2?: number): number[] {
+function range(min: number, max: number, step?: number): number[];
+function range(max: number): number[];
+function range(arg0: number, arg1?: number, arg2?: number): number[] {
   const arr: number[] = [];
 
   if (!arg1) {
@@ -24,7 +25,7 @@ export function range(arg0: number, arg1?: number, arg2?: number): number[] {
  * Get first item in the array.
  * IMPORTANT: Make sure to check that the array is not empty first.
  */
-export function first<T>(arr: T[]): T {
+function first<T>(arr: T[]): T {
   return arr[0];
 }
 
@@ -32,22 +33,19 @@ export function first<T>(arr: T[]): T {
  * Get last item in the array.
  * IMPORTANT: Make sure to check that the array is not empty first.
  */
-export function last<T>(arr: T[]): T {
+function last<T>(arr: T[]): T {
   return arr[arr.length - 1];
 }
 
-export function secondLast<T>(arr: T[]): T {
+function secondLast<T>(arr: T[]): T {
   return arr[arr.length - 2];
 }
 
-export function isNotEmpty<T>(arr: T[]): boolean {
+function isNotEmpty<T>(arr: T[]): boolean {
   return arr.length > 0;
 }
 
-export function uniqueBy<T>(
-  arr: T[],
-  getValue: (item: T) => string | number,
-): T[] {
+function uniqueBy<T>(arr: T[], getValue: (item: T) => string | number): T[] {
   const map: { [key: string]: true } = {};
   const result: T[] = [];
 
@@ -66,38 +64,42 @@ export function uniqueBy<T>(
   return result;
 }
 
-export function unique<T>(arr: T[]): T[] {
-  return Array.from(new Set(arr));
+function unique<T>(arr: T[]): T[] {
+  const set = new Set(arr);
+
+  const result: T[] = [];
+
+  for (const item of set) {
+    result.push(item);
+  }
+
+  return result;
 }
 
-export function take<T>(arr: T[], size: number): T[] {
+function take<T>(arr: T[], size: number): T[] {
   return arr.slice(0, size);
 }
 
-export function remove<T>(arr: T[], size: number): T[] {
+function remove<T>(arr: T[], size: number): T[] {
   return arr.slice(0, arr.length - size);
 }
 
-export function append<T>(arr: T[], item: T): T[] {
+function append<T>(arr: T[], item: T): T[] {
   return arr.concat(item);
 }
 
-export function updateLast<T>(arr: T[], updater: (item: T) => T): T[] {
+function updateLast<T>(arr: T[], updater: (item: T) => T): T[] {
   const nextArr = arr.slice(0);
   nextArr[arr.length - 1] = updater(arr[arr.length - 1]);
   return nextArr;
 }
 
-export function intersect<T>(a: T[], b: T[]): T[] {
-  const setA = new Set(a);
-  const setB = new Set(b);
-  const intersection = new Set(Array.from(setA).filter((x) => setB.has(x)));
-
-  return Array.from(intersection);
+function intersect<T extends number | string>(a: T[], b: T[]): T[] {
+  return intersectBy(a, b, (v) => v);
 }
 
 /** Returns array of values found in left and right array */
-export function intersectBy<T, K>(
+function intersectBy<T, K>(
   a: T[],
   b: K[],
   getValue: (item: T | K) => string | number,
@@ -125,7 +127,7 @@ export function intersectBy<T, K>(
 }
 
 /** Returns array of values in left array that are not in the right array */
-export function differenceBy<T, K>(
+function differenceBy<T, K>(
   a: T[],
   b: K[],
   getValue: (item: T | K) => string | number,
@@ -152,18 +154,18 @@ export function differenceBy<T, K>(
   return result;
 }
 
-export function hasAnyOf<T>(a: T[], b: T[]): boolean {
+function hasAnyOf<T extends string | number>(a: T[], b: T[]): boolean {
   return isNotEmpty(intersect(a, b));
 }
 
-export function hasAllOf<T extends string | number>(a: T[], b: T[]): boolean {
+function hasAllOf<T extends string | number>(a: T[], b: T[]): boolean {
   const intersection = intersect(a, b);
 
   return intersection.length === a.length && a.length === b.length;
 }
 
-export function hasNoneOf<T>(a: T[], b: T[]): boolean {
-  return isEmptyArray(intersect(a, b));
+function hasNoneOf<T extends string | number>(a: T[], b: T[]): boolean {
+  return isEmpty(intersect(a, b));
 }
 
 type KeyedBy<T> = { [key: string]: T };
@@ -172,10 +174,7 @@ type KeyedBy<T> = { [key: string]: T };
  * Returns an object with keys as chosen property of the item,
  * and value as item.
  */
-export function keyedBy<T>(
-  items: T[],
-  getKey: (item: T) => string,
-): KeyedBy<T> {
+function keyedBy<T>(items: T[], getKey: (item: T) => string): KeyedBy<T> {
   const result: KeyedBy<T> = {};
 
   for (const item of items) {
@@ -195,7 +194,7 @@ export function keyedBy<T>(
  * // => [[1, 2], 3]
  * ```
  */
-export function splitLast<T>(items: T[]): [T[], T] {
+function splitLast<T>(items: T[]): [T[], T] {
   return [items.slice(0, items.length - 1), items[items.length - 1]];
 }
 
@@ -203,7 +202,7 @@ export function splitLast<T>(items: T[]): [T[], T] {
  * Returns an object with keys as chosen property of the item,
  * and value as array of item with same key.
  */
-export function groupBy<T>(
+function groupBy<T>(
   items: T[],
   getKey: (item: T) => string,
 ): { [key: string]: T[] } {
@@ -222,11 +221,11 @@ export function groupBy<T>(
   return grouped;
 }
 
-export function isEmptyArray<T>(data: T[]): boolean {
+function isEmpty<T>(data: T[]): boolean {
   return data.length === 0;
 }
 
-export function chunk<T>(arr: T[], size: number): T[][] {
+function chunk<T>(arr: T[], size: number): T[][] {
   const result = [];
 
   for (let i = 0; i < arr.length; i += size) {
@@ -236,8 +235,8 @@ export function chunk<T>(arr: T[], size: number): T[][] {
   return result;
 }
 
-export function sample<T>(arr: T[]): T {
-  const index = getRandomInteger(0, arr.length - 1);
+function sample<T>(arr: T[]): T {
+  const index = Number.sample(0, arr.length - 1);
 
   return arr[index];
 }
@@ -246,7 +245,7 @@ export function sample<T>(arr: T[]): T {
  * Compares whether 2 arrays are equal
  * @param order If true, both array items must be in the same order
  */
-export function arrayIsEqual<T extends number | string>(
+function isEqual<T extends number | string>(
   a: T[],
   b: T[],
   order = false,
@@ -267,7 +266,7 @@ export function arrayIsEqual<T extends number | string>(
   return hasAllOf(a, b);
 }
 
-export function arrayIsEqualBy<T>(
+function isEqualBy<T>(
   a: T[],
   b: T[],
   getValue: (item: T) => string | number,
@@ -290,3 +289,42 @@ export function arrayIsEqualBy<T>(
 
   return intersection.length === a.length;
 }
+
+function isArray<T>(
+  arg: T | any,
+): arg is T extends readonly any[]
+  ? unknown extends T
+    ? never
+    : readonly any[]
+  : any[] {
+  return ArrayNative.isArray(arg);
+}
+
+export const Array = {
+  range,
+  first,
+  last,
+  secondLast,
+  isNotEmpty,
+  uniqueBy,
+  unique,
+  take,
+  remove,
+  append,
+  updateLast,
+  intersect,
+  intersectBy,
+  differenceBy,
+  hasAnyOf,
+  hasAllOf,
+  hasNoneOf,
+  keyedBy,
+  splitLast,
+  groupBy,
+  isEmpty,
+  chunk,
+  sample,
+  isEqual,
+  isEqualBy,
+  isArray,
+};

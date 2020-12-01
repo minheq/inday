@@ -1,22 +1,41 @@
-export function between(num: number, min: number, max: number): number {
-  return Math.max(Math.min(num, max), min);
+import { MathNative } from './math_native';
+import { NumberNative } from './number_native';
+
+function between(num: number, min: number, max: number): number {
+  return MathNative.max(MathNative.min(num, max), min);
 }
 
-export function isNumeric(value: string): boolean {
+function isNumber(value: string): boolean {
   if (value === '') {
     return true;
   }
 
-  if (isNaN(Number(value.replaceAll(' ', '')))) {
+  if (isNaN(NumberNative(value.replaceAll(' ', '')))) {
     return false;
   }
 
   return true;
 }
 
-export function getRandomInteger(min: number, max: number): number {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function isNaN(val: unknown): boolean {
+  return NumberNative.isNaN(val);
 }
+
+function sample(min: number, max: number): number {
+  min = MathNative.ceil(min);
+  max = MathNative.floor(max);
+
+  return MathNative.floor(MathNative.random() * (max - min + 1)) + min;
+}
+
+function toNumber(str: string | number): number {
+  return NumberNative(str);
+}
+
+export const Number = {
+  between,
+  isNumber,
+  toNumber,
+  isNaN,
+  sample,
+};

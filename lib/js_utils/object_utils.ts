@@ -1,11 +1,23 @@
-export function keysOf<T>(obj: T): (keyof T)[] {
-  return Object.keys(obj) as (keyof T)[];
+import { ObjectNative } from './object_native';
+
+function keysOf<T>(obj: T): (keyof T)[] {
+  return ObjectNative.keys(obj) as (keyof T)[];
 }
 
-export function valuesOf<T, K extends keyof T>(obj: T): T[K][] {
-  return Object.values(obj) as T[K][];
+function valuesOf<T, K extends keyof T>(obj: T): T[K][] {
+  return ObjectNative.values(obj) as T[K][];
+}
+
+function isEmpty<T extends Record<string, unknown>>(obj: T): boolean {
+  return ObjectNative.keys(obj).length === 0;
 }
 
 export type EmptyObject = {
   [key: string]: never;
+};
+
+export const Object = {
+  keysOf,
+  valuesOf,
+  isEmpty,
 };

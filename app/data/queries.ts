@@ -23,7 +23,7 @@ import {
 } from './filters';
 import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
-import { last, isEmpty, keyedBy } from '../../lib/js_utils';
+import { Array } from '../../lib/js_utils';
 import { Sort, SortID, sortRecords, SortGetters } from './sorts';
 import { Collaborator, CollaboratorID } from './collaborators';
 import { Group, GroupID } from './groups';
@@ -329,11 +329,11 @@ export const viewFiltersGroupMaxQuery = selectorFamily<number, ViewID>({
   get: (viewID: ViewID) => ({ get }) => {
     const filterGroups = get(viewFilterGroupsQuery(viewID));
 
-    if (isEmpty(filterGroups)) {
+    if (Array.isEmpty(filterGroups)) {
       return 0;
     }
 
-    const lastFilterGroup = last(filterGroups);
+    const lastFilterGroup = Array.last(filterGroups);
 
     return lastFilterGroup[0].group;
   },
@@ -344,7 +344,7 @@ export const viewSortsSequenceMaxQuery = selectorFamily<number, ViewID>({
   get: (viewID: ViewID) => ({ get }) => {
     const sorts = get(viewSortsQuery(viewID));
 
-    if (isEmpty(sorts)) {
+    if (Array.isEmpty(sorts)) {
       return 0;
     }
 
@@ -357,7 +357,7 @@ export const viewGroupsSequenceMaxQuery = selectorFamily<number, ViewID>({
   get: (viewID: ViewID) => ({ get }) => {
     const group = get(viewGroupsQuery(viewID));
 
-    if (isEmpty(group)) {
+    if (Array.isEmpty(group)) {
       return 0;
     }
 
@@ -386,7 +386,7 @@ export const collectionRecordsByIDQuery = selectorFamily<
       (r) => r.collectionID === collectionID,
     );
 
-    return keyedBy(collectionRecords, (r) => r.id);
+    return Array.keyedBy(collectionRecords, (r) => r.id);
   },
 });
 

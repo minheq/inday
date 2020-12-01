@@ -28,7 +28,7 @@ import {
   useCreateSort,
   useGetSortsSequenceMax,
 } from '../data/store';
-import { first, isEmpty } from '../../lib/js_utils';
+import { Array } from '../../lib/js_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { SortID, Sort, SortConfig, SortOrder } from '../data/sorts';
@@ -162,9 +162,9 @@ function SortNew() {
   const fields = useGetCollectionFields(context.collectionID);
 
   const createSort = useCreateSort();
-  const firstField = first(fields);
+  const firstField = Array.first(fields);
 
-  if (isEmpty(fields)) {
+  if (Array.isEmpty(fields)) {
     throw new Error(
       'Fields are empty. They may not have been loaded properly.',
     );

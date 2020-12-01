@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { groupBy, isEmpty } from '../../../lib/js_utils';
+import { Array } from '../../../lib/js_utils';
 import {
   KeyboardKey,
   ModifierKey,
@@ -24,7 +24,7 @@ export function useKeyboard(keyBindings: KeyBinding[]): void {
   const activeKeysRef = useRef<ActiveKeys>({});
 
   const groupedKeyBindingsByKey = useMemo(() => {
-    return groupBy(keyBindings, (keyBinding) => keyBinding.key);
+    return Array.groupBy(keyBindings, (keyBinding) => keyBinding.key);
   }, [keyBindings]);
 
   const handleOnKeyDown = useCallback(
@@ -37,7 +37,10 @@ export function useKeyboard(keyBindings: KeyBinding[]): void {
 
       let matchedKeyBindings = groupedKeyBindingsByKey[key];
 
-      if (matchedKeyBindings === undefined || isEmpty(matchedKeyBindings)) {
+      if (
+        matchedKeyBindings === undefined ||
+        Array.isEmpty(matchedKeyBindings)
+      ) {
         return;
       }
 

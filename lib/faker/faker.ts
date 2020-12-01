@@ -1,4 +1,4 @@
-import { getRandomInteger, sample } from '../js_utils';
+import { Number, Array } from '../js_utils';
 
 const loremIpsum = [
   'Lorem',
@@ -61,15 +61,17 @@ const loremIpsum = [
 ];
 
 export function fakeEmail(): string {
-  return `${sample(loremIpsum)}@${sample(loremIpsum)}.${sample(loremIpsum)}`;
+  return `${Array.sample(loremIpsum)}@${Array.sample(
+    loremIpsum,
+  )}.${Array.sample(loremIpsum)}`;
 }
 
 export function fakeWord(): string {
-  return sample(loremIpsum);
+  return Array.sample(loremIpsum);
 }
 
 export function fakeNumber(): number {
-  return getRandomInteger(0, 1000);
+  return Number.sample(0, 1000);
 }
 
 export function fakeURL(): string {
@@ -78,26 +80,26 @@ export function fakeURL(): string {
 
 export function fakeDate(): Date {
   return new Date(
-    getRandomInteger(2020, 2030),
-    getRandomInteger(0, 11),
-    getRandomInteger(1, 28),
-    getRandomInteger(1, 23),
+    Number.sample(2020, 2030),
+    Number.sample(0, 11),
+    Number.sample(1, 28),
+    Number.sample(1, 23),
   );
 }
 
 export function fakePhoneNumber(): string {
-  return `${getRandomInteger(1000000000, 10000000000)}`;
+  return `${Number.sample(1000000000, 10000000000)}`;
 }
 
 export function fakeBoolean(): boolean {
-  return getRandomInteger(0, 1) === 1 ? true : false;
+  return Number.sample(0, 1) === 1 ? true : false;
 }
 
 export function fakeWords(size = 5): string {
   let result = '';
 
   for (let i = 0; i < size; i++) {
-    result += sample(loremIpsum);
+    result += Array.sample(loremIpsum);
 
     if (i !== size - 1) {
       result += ' ';

@@ -1,14 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
-import {
-  isEqual,
-  differenceBy,
-  FlatObject,
-  intersectBy,
-  isEmpty,
-  maxBy,
-  sum,
-  sumBy,
-} from '../../lib/js_utils';
+import { Array, FlatObject, Math } from '../../lib/js_utils';
 
 interface UseGridTransformerProps {
   groups: Group[];
@@ -79,10 +70,10 @@ export function useGridTransformer(
     columns,
     fixedColumnCount,
   ]);
-  const leftPaneContentWidth = useMemo(() => sum(leftPaneColumnWidths), [
+  const leftPaneContentWidth = useMemo(() => Math.sum(leftPaneColumnWidths), [
     leftPaneColumnWidths,
   ]);
-  const rightPaneContentWidth = useMemo(() => sum(rightPaneColumnWidths), [
+  const rightPaneContentWidth = useMemo(() => Math.sum(rightPaneColumnWidths), [
     rightPaneColumnWidths,
   ]);
   const leftPaneColumns = useMemo(() => getColumns(leftPaneColumnWidths), [
@@ -132,7 +123,7 @@ export function getRows(
   prevPath: number[],
   prevOffset: number,
 ): Row[] {
-  if (isEmpty(groups)) {
+  if (Array.isEmpty(groups)) {
     return [];
   }
 
@@ -218,7 +209,7 @@ function isLeafGroup(group: Group): group is LeafGroup {
 }
 
 export function getRowsHeight(rows: Row[]): number {
-  return sumBy(rows, (row) => row.height);
+  return Math.sumBy(rows, (row) => row.height);
 }
 
 export interface RecycledLeafRow extends LeafRow {
@@ -295,17 +286,17 @@ export function recycleItems<T, K extends T>(
 ): K[] {
   const { items, prevItems, getValue, toRecycledItem, getKey } = params;
 
-  const reusedItems = intersectBy(prevItems, items, getValue);
-  const recycledItems = differenceBy(prevItems, items, getValue);
-  const newItems = differenceBy(items, prevItems, getValue);
+  const reusedItems = Array.intersectBy(prevItems, items, getValue);
+  const recycledItems = Array.differenceBy(prevItems, items, getValue);
+  const newItems = Array.differenceBy(items, prevItems, getValue);
 
-  if (isEmpty(prevItems)) {
+  if (Array.isEmpty(prevItems)) {
     return items.map((item, key) => toRecycledItem(item, key));
   }
 
   const recycledKeys = recycledItems.map((c) => getKey(c));
   if (recycledKeys.length < newItems.length) {
-    let maxKey = maxBy(prevItems, getKey);
+    let maxKey = Math.maxBy(prevItems, getKey);
 
     while (recycledKeys.length !== newItems.length) {
       recycledKeys.push(++maxKey);
@@ -582,7 +573,7 @@ export function useGetStatefulRows(
   const selectedRowsCache = useMemo(() => {
     const cache = FlatObject<boolean>();
 
-    if (selectedRows === null || isEmpty(selectedRows)) {
+    if (selectedRows === null || Array.isEmpty(selectedRows)) {
       return cache;
     }
 
@@ -665,7 +656,8 @@ function getLeafRowCell(
   }
 
   if (
-    isEqual([...cell.path, cell.row], [...row.path, row.row], true) === false
+    Array.isEqual([...cell.path, cell.row], [...row.path, row.row], true) ===
+    false
   ) {
     return null;
   }
@@ -685,7 +677,7 @@ function getGroupRowCell(
     return null;
   }
 
-  if (isEqual(cell.path, row.path, true) === false) {
+  if (Array.isEqual(cell.path, row.path, true) === false) {
     return null;
   }
 
@@ -747,7 +739,7 @@ export function useGridGetScrollToCellOffset(
   const leafRowsCache = useMemo(() => {
     const cache = FlatObject<LeafRow>();
 
-    if (isEmpty(rows)) {
+    if (Array.isEmpty(rows)) {
       return cache;
     }
 

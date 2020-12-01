@@ -1,4 +1,4 @@
-import { addYears, format, isBefore, setYear, subYears } from '../js_utils';
+import { Date } from '../js_utils';
 import { Day } from './day';
 import { Month } from './month';
 
@@ -22,9 +22,9 @@ export const Year = {
     const years: Year[] = [];
     let current = startDate;
 
-    while (isBefore(current, endDate)) {
+    while (Date.isBefore(current, endDate)) {
       years.push(fromDate(current));
-      current = addYears(current, 1);
+      current = Date.addYears(current, 1);
     }
 
     return years;
@@ -36,21 +36,21 @@ export const Year = {
     return fromDate(Month.toDate(month));
   },
   addYears: (year: Year, amount: number): Year => {
-    return fromDate(addYears(toDate(year), amount));
+    return fromDate(Date.addYears(toDate(year), amount));
   },
   subYears: (year: Year, amount: number): Year => {
-    return fromDate(subYears(toDate(year), amount));
+    return fromDate(Date.subYears(toDate(year), amount));
   },
 };
 
 function fromDate(date: Date): Year {
-  return format(date, YEAR_FORMAT);
+  return Date.format(date, YEAR_FORMAT);
 }
 
 function toDate(year: Year): Date {
-  let date = new Date();
+  let date = Date.new();
 
-  date = setYear(date, Number(year));
+  date = Date.setYear(date, Number(year));
 
   return date;
 }

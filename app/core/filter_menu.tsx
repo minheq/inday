@@ -41,7 +41,7 @@ import {
   useGetFiltersGroupMax,
   useUpdateFilterGroup,
 } from '../data/store';
-import { isEmpty, first } from '../../lib/js_utils';
+import { Array } from '../../lib/js_utils';
 import { FieldID, FieldType } from '../data/fields';
 import { FieldPicker } from './field_picker';
 
@@ -207,9 +207,9 @@ function FilterNew() {
   const fields = useGetCollectionFields(context.collectionID);
 
   const createFilter = useCreateFilter();
-  const firstField = first(fields);
+  const firstField = Array.first(fields);
 
-  if (isEmpty(fields)) {
+  if (Array.isEmpty(fields)) {
     throw new Error(
       'Fields are empty. They may not have been loaded properly.',
     );

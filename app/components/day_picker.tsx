@@ -22,7 +22,7 @@ import {
 import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 import { Button } from './button';
-import { format } from '../../lib/js_utils';
+import { Date } from '../../lib/js_utils';
 
 interface DayPickerProps {
   value?: Day | null;
@@ -65,7 +65,7 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
   }, [value]);
 
   const [month, setMonth] = useState(
-    selected ? Month.fromDay(selected.start) : Month.fromDate(new Date()),
+    selected ? Month.fromDay(selected.start) : Month.fromDate(Date.new()),
   );
 
   const handleSelectDay = useCallback(
@@ -100,8 +100,8 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
   return (
     <View style={styles.root}>
       <View style={styles.monthNavigatorWrapper}>
-        <Text align="center">{format(Month.toDate(month), 'MMMM')}</Text>
-        <Text align="center">{format(Month.toDate(month), 'yyyy')}</Text>
+        <Text align="center">{Date.format(Month.toDate(month), 'MMMM')}</Text>
+        <Text align="center">{Date.format(Month.toDate(month), 'yyyy')}</Text>
         <View style={styles.monthArrowsWrapper}>
           <Button style={styles.arrowWrapper} onPress={handlePressPrevious}>
             <Icon name="ChevronLeft" />
@@ -158,7 +158,7 @@ function DayDisplay(props: DayDisplayProps) {
       <View style={styles.dayRoot}>
         <View style={styles.dayWrapper}>
           <Text decoration="line-through" color="muted">
-            {format(Day.toDate(day), 'd')}
+            {Date.format(Day.toDate(day), 'd')}
           </Text>
         </View>
       </View>
@@ -187,7 +187,7 @@ function DayDisplay(props: DayDisplayProps) {
               <Text
                 color={selected ? 'contrast' : today ? 'primary' : 'default'}
               >
-                {format(Day.toDate(day), 'd')}
+                {Date.format(Day.toDate(day), 'd')}
               </Text>
             </View>
           </Fragment>
@@ -213,7 +213,7 @@ function OtherMonthDay(props: OtherMonthDayProps) {
         withinSelected && styles.withinSelected,
       ]}
     >
-      <Text color="muted">{format(Day.toDate(day), 'd')}</Text>
+      <Text color="muted">{Date.format(Day.toDate(day), 'd')}</Text>
     </View>
   );
 }
@@ -230,21 +230,17 @@ function Week(props: WeekProps) {
 
 interface WeekDatesProps {
   firstDayOfWeek?: FirstDayOfWeek;
-  week?: Date;
 }
 
 function WeekDates(props: WeekDatesProps) {
-  const {
-    week = new Date(),
-    firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
-  } = props;
-  const dates = eachDayOfWeek(week, firstDayOfWeek);
+  const { firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK } = props;
+  const dates = eachDayOfWeek(Date.new(), firstDayOfWeek);
 
   return (
     <View style={styles.weekDatesWrapper}>
       {dates.map((d) => (
         <View key={d.toISOString()} style={styles.dateWrapper}>
-          <Text size="sm">{format(d, 'EEEEEE')}</Text>
+          <Text size="sm">{Date.format(d, 'EEEEEE')}</Text>
         </View>
       ))}
     </View>

@@ -100,7 +100,6 @@ import {
   assertPhoneNumberFieldValue,
   assertPrimaryFieldValue,
   SelectOptionID,
-  assertMultiSelectFieldKindValue,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer/autosizer';
 import { ListView, ViewID } from '../data/views';
@@ -131,7 +130,7 @@ import {
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import { isEmpty, isNullish, isNumeric } from '../../lib/js_utils';
+import { Number, Array, isNullish } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { formatDate } from '../../lib/datetime/format';
 import { OptionBadge } from './option_badge';
@@ -753,7 +752,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
     );
   }
 
-  const child = isEmpty(value) ? (
+  const child = Array.isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -829,7 +828,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
     );
   }
 
-  const child = isEmpty(value) ? (
+  const child = Array.isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -951,7 +950,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
     );
   }
 
-  const child = isEmpty(value) ? (
+  const child = Array.isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -1387,11 +1386,11 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
   const handleKeyPress = useCellKeyPressHandler();
   const handleChangeText = useCallback(
     (newValue: string) => {
-      if (isNumeric(newValue) === false) {
+      if (Number.isNumber(newValue) === false) {
         return;
       }
 
-      updateRecordFieldValue(recordID, fieldID, Number(newValue));
+      updateRecordFieldValue(recordID, fieldID, Number.toNumber(newValue));
     },
     [updateRecordFieldValue, recordID, fieldID],
   );

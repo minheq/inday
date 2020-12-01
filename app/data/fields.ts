@@ -1,7 +1,6 @@
-import { isDate, isSameDay } from '../../lib/js_utils';
+import { Array, Date } from '../../lib/js_utils';
 import { NumberUnit } from '../../lib/i18n/unit';
 import { generateID, validateID } from '../../lib/id';
-import { hasAllOf } from '../../lib/js_utils';
 import { CollaboratorID } from './collaborators';
 import { CollectionID } from './collections';
 import { RecordID } from './records';
@@ -384,7 +383,7 @@ function areSingleSelectFieldKindValueEqual(
 }
 
 function areMultiSelectFieldKindValueEqual(a: string[], b: string[]): boolean {
-  return hasAllOf(a, b);
+  return Array.hasAllOf(a, b);
 }
 
 function areBooleanFieldKindValueEqual(
@@ -399,7 +398,7 @@ function areDateFieldKindValueEqual(
   b: DateFieldKindValue,
 ): boolean {
   if (a !== null && b !== null) {
-    return isSameDay(a, b);
+    return Date.isSameDay(a, b);
   }
 
   return a === b;
@@ -645,7 +644,7 @@ export function assertDateFieldValue(
     return;
   }
 
-  if (!isDate(value)) {
+  if (!Date.isDate(value)) {
     throw new Error(
       `Expected DateFieldValue to be Date. Received "${JSON.stringify(value)}"`,
     );
@@ -855,7 +854,7 @@ export function assertBooleanFieldKindValue(
 export function assertDateFieldKindValue(
   value: FieldValue,
 ): asserts value is DateFieldKindValue {
-  if (value !== null && !(value instanceof Date)) {
+  if (value !== null && !Date.isDate(value)) {
     throw new Error(
       `Expected DateFieldKindValue. Received ${JSON.stringify(value)}`,
     );

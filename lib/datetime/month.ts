@@ -1,21 +1,4 @@
-import {
-  chunk,
-  addDays,
-  differenceInDays,
-  eachDayOfInterval,
-  endOfMonth,
-  isAfter,
-  isBefore,
-  isSameDay,
-  startOfMonth,
-  subDays,
-  endOfDay,
-  format,
-  setYear,
-  setMonth,
-  addMonths,
-  subMonths,
-} from '../js_utils';
+import { Date, Array } from '../js_utils';
 import { Day } from './day';
 import { Interval } from './interval';
 
@@ -44,7 +27,7 @@ export const Month = {
   ): Week[] => {
     const dates = getDays(month, firstDayOfWeek);
 
-    return chunk(dates, 7).map((week, index) => ({
+    return Array.chunk(dates, 7).map((week, index) => ({
       month,
       index,
       days: week.map(Day.fromDate),
@@ -58,27 +41,27 @@ export const Month = {
     const months: Month[] = [];
     let current = startDate;
 
-    while (isBefore(current, endDate)) {
+    while (Date.isBefore(current, endDate)) {
       months.push(fromDate(current));
-      current = addMonths(current, 1);
+      current = Date.addMonths(current, 1);
     }
 
     return months;
   },
   startOfMonth: (month: Month): Day => {
-    return Day.fromDate(startOfMonth(toDate(month)));
+    return Day.fromDate(Date.startOfMonth(toDate(month)));
   },
   endOfMonth: (month: Month): Day => {
-    return Day.fromDate(endOfMonth(toDate(month)));
+    return Day.fromDate(Date.endOfMonth(toDate(month)));
   },
   isDayWithinMonth: (month: Month, day: Day): boolean => {
     return isSameMonth(month, getMonthFromDay(day));
   },
   addMonths: (month: Month, amount: number): Month => {
-    return fromDate(addMonths(toDate(month), amount));
+    return fromDate(Date.addMonths(toDate(month), amount));
   },
   subMonths: (month: Month, amount: number): Month => {
-    return fromDate(subMonths(toDate(month), amount));
+    return fromDate(Date.subMonths(toDate(month), amount));
   },
   getMonthFromDay,
   fromDate,
@@ -94,20 +77,20 @@ function isSameMonth(monthLeft: Month, monthRight: Month): boolean {
 }
 
 function getMonthFromDay(day: Day): Month {
-  return format(Day.toDate(day), MONTH_FORMAT) as Month;
+  return Date.format(Day.toDate(day), MONTH_FORMAT) as Month;
 }
 
 function fromDate(date: Date): Month {
-  return format(date, MONTH_FORMAT) as Month;
+  return Date.format(date, MONTH_FORMAT) as Month;
 }
 
 function toDate(month: Month): Date {
-  let date = new Date();
+  let date = Date.new();
   const m = parseInt(month.substring(5), 10) - 1;
   const y = parseInt(month.substring(0, 4), 10);
 
-  date = setYear(date, y);
-  date = setMonth(date, m);
+  date = Date.setYear(date, y);
+  date = Date.setMonth(date, m);
 
   return date;
 }
@@ -118,7 +101,7 @@ function getDays(
 ): Date[] {
   const currentDates = getMonthDatesFromDate(Month.toDate(month));
   const startOfMonthDate = currentDates[0];
-  const endOfMonthDate = endOfDay(currentDates[currentDates.length - 1]);
+  const endOfMonthDate = Date.endOfDay(currentDates[currentDates.length - 1]);
 
   const beforeDates = getDatesBefore(startOfMonthDate, firstDayOfWeek);
   const afterDates = getDatesAfter(endOfMonthDate, firstDayOfWeek);
@@ -128,13 +111,13 @@ function getDays(
 
 function getMonthInterval(date: Date): Interval {
   return {
-    start: startOfMonth(date),
-    end: endOfMonth(date),
+    start: Date.startOfMonth(date),
+    end: Date.endOfMonth(date),
   };
 }
 
 function getMonthDatesFromDate(date: Date): Date[] {
-  return eachDayOfInterval(getMonthInterval(date));
+  return Date.eachDayOfInterval(getMonthInterval(date));
 }
 
 function getDatesBefore(
@@ -147,15 +130,15 @@ function getDatesBefore(
 
   const firstDateOfWeek = getFirstDateOfWeek(from, firstDayOfWeek);
 
-  if (!isSameDay(from, firstDateOfWeek)) {
-    const sub = differenceInDays(from, firstDateOfWeek);
-    from = subDays(from, sub);
+  if (!Date.isSameDay(from, firstDateOfWeek)) {
+    const sub = Date.differenceInDays(from, firstDateOfWeek);
+    from = Date.subDays(from, sub);
   }
 
-  if (isBefore(from, startOfMonthDate)) {
-    beforeDates = eachDayOfInterval({
+  if (Date.isBefore(from, startOfMonthDate)) {
+    beforeDates = Date.eachDayOfInterval({
       start: from,
-      end: subDays(startOfMonthDate, 1),
+      end: Date.subDays(startOfMonthDate, 1),
     });
   }
 
@@ -168,15 +151,15 @@ function getDatesAfter(endOfMonthDate: Date, firstDayOfWeek: FirstDayOfWeek) {
   let to = endOfMonthDate;
 
   const lastDateOfWeek = getLastDateOfWeek(to, firstDayOfWeek);
-  if (!isSameDay(to, lastDateOfWeek)) {
-    const add = differenceInDays(lastDateOfWeek, to);
+  if (!Date.isSameDay(to, lastDateOfWeek)) {
+    const add = Date.differenceInDays(lastDateOfWeek, to);
 
-    to = addDays(to, add);
+    to = Date.addDays(to, add);
   }
 
-  if (isAfter(to, endOfMonthDate)) {
-    afterDates = eachDayOfInterval({
-      start: addDays(endOfMonthDate, 1),
+  if (Date.isAfter(to, endOfMonthDate)) {
+    afterDates = Date.eachDayOfInterval({
+      start: Date.addDays(endOfMonthDate, 1),
       end: to,
     });
   }

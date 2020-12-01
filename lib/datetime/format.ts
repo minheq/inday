@@ -1,5 +1,5 @@
 import { enUS, vi } from 'date-fns/locale';
-import { format } from '../js_utils';
+import { Date } from '../js_utils';
 import { SupportedLocale } from '../i18n';
 
 export function formatDate(
@@ -22,5 +22,5 @@ export function formatDate(
       break;
   }
 
-  return format(date, pattern, { locale: localeModule });
+  return Date.format(date, pattern, { locale: localeModule });
 }

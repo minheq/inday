@@ -1,19 +1,4 @@
-import {
-  setYear,
-  setMonth,
-  setDate,
-  format,
-  parseISO,
-  isWithinInterval,
-  isAfter,
-  isBefore,
-  addDays,
-  subDays,
-  addMonths,
-  subMonths,
-  addYears,
-  subYears,
-} from '../js_utils';
+import { Date } from '../js_utils';
 import { Interval } from './interval';
 
 export const DAY_FORMAT = 'yyyy-MM-dd';
@@ -46,9 +31,9 @@ export const DayInterval = {
     const days: Day[] = [];
     let current = startDate;
 
-    while (isBefore(current, endDate)) {
+    while (Date.isBefore(current, endDate)) {
       days.push(fromDate(current));
-      current = addDays(current, 1);
+      current = Date.addDays(current, 1);
     }
 
     return days;
@@ -73,56 +58,56 @@ export const Day = {
   setSameDay: (day: Day, date: Date): Date => {
     const newDate = toDate(day);
 
-    date = setYear(date, newDate.getFullYear());
-    date = setMonth(date, newDate.getMonth());
-    date = setDate(date, newDate.getDate());
+    date = Date.setYear(date, newDate.getFullYear());
+    date = Date.setMonth(date, newDate.getMonth());
+    date = Date.setDate(date, newDate.getDate());
 
     return date;
   },
   isWithinDayInterval: (day: Day, interval: DayInterval): boolean => {
-    return isWithinInterval(toDate(day), {
+    return Date.isWithinInterval(toDate(day), {
       start: toDate(interval.start),
       end: toDate(interval.end),
     });
   },
   today: (): Day => {
-    return fromDate(new Date());
+    return fromDate(Date.new());
   },
   isSameDay: (dayLeft: Day, dayRight: Day): boolean => {
     return dayLeft === dayRight;
   },
   isAfter: (dayLeft: Day, dayRight: Day): boolean => {
-    return isAfter(toDate(dayLeft), toDate(dayRight));
+    return Date.isAfter(toDate(dayLeft), toDate(dayRight));
   },
   isBefore: (dayLeft: Day, dayRight: Day): boolean => {
-    return isBefore(toDate(dayLeft), toDate(dayRight));
+    return Date.isBefore(toDate(dayLeft), toDate(dayRight));
   },
   addDays: (day: Day, amount: number): Day => {
-    return fromDate(addDays(toDate(day), amount));
+    return fromDate(Date.addDays(toDate(day), amount));
   },
   subDays: (day: Day, amount: number): Day => {
-    return fromDate(subDays(toDate(day), amount));
+    return fromDate(Date.subDays(toDate(day), amount));
   },
   addMonths: (day: Day, amount: number): Day => {
-    return fromDate(addMonths(toDate(day), amount));
+    return fromDate(Date.addMonths(toDate(day), amount));
   },
   subMonths: (day: Day, amount: number): Day => {
-    return fromDate(subMonths(toDate(day), amount));
+    return fromDate(Date.subMonths(toDate(day), amount));
   },
   addYears: (day: Day, amount: number): Day => {
-    return fromDate(addYears(toDate(day), amount));
+    return fromDate(Date.addYears(toDate(day), amount));
   },
   subYears: (day: Day, amount: number): Day => {
-    return fromDate(subYears(toDate(day), amount));
+    return fromDate(Date.subYears(toDate(day), amount));
   },
   fromDate,
   toDate,
 };
 
 function toDate(day: Day): Date {
-  return parseISO(day);
+  return Date.parseISO(day);
 }
 
 function fromDate(date: Date): Day {
-  return format(date, DAY_FORMAT) as Day;
+  return Date.format(date, DAY_FORMAT) as Day;
 }
