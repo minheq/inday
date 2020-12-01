@@ -18,10 +18,8 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
     "date-fns": "^2.16.1",
-    "fastify": "^3.5.1",
     "fuse.js": "^6.4.3",
     "nanoid": "^3.1.18",
-    "path-to-regexp": "^6.2.0",
     "pg": "^8.5.1",
     "postgrator": "^4.0.1",
     "react": "^17.0.1",

@@ -49,7 +49,7 @@ function newDate(...args: any[]): Date {
   return new DateNative(...args);
 }
 
-function isDate(value: any): value is Date {
+function isDate(value: unknown): value is Date {
   return value instanceof DateNative;
 }
 

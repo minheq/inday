@@ -1,3 +1,14 @@
-import { test } from 'zora';
+import { test as zora } from 'zora';
 
-export { test };
+interface Assert {
+  deepEqual: <T>(valA: T, valB: T, description?: string) => void;
+  throws: <T extends () => void>(fn: T, description?: string) => void;
+}
+
+type Spec = (assert: Assert) => Promise<void> | void;
+
+export function test(description: string, spec: Spec): void {
+  void zora(description, async (t) => {
+    await spec(t);
+  });
+}

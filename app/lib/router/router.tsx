@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useReducer,
 } from 'react';
-import { match, compile } from '../../../lib/pathname';
+import { Pathname } from '../../../lib/pathname';
 import { Object } from '../../../lib/js_utils';
 
 interface UseNavigation {
@@ -120,12 +120,11 @@ function getInitialState(pathMap: PathMap): State {
 
   for (const _name of screens) {
     const { path } = pathMap[_name];
-    const matcher = match<Params>(path, { decode: decodeURIComponent });
-    const result = matcher(window.location.pathname);
+    const result = Pathname.match<Params>(path, window.location.pathname);
 
     if (result !== false) {
       name = _name;
-      params = result.params;
+      params = result;
     }
   }
 
@@ -222,26 +221,20 @@ function BrowserHistorySync(): JSX.Element {
 
     const state: HistoryState = { name, params };
 
-    switch (lastAction.type) {
-      case 'PUSH':
-        history.pushState(
-          state,
-          name,
-          compile(pathMap[name].path, { encode: encodeURIComponent })(params),
-        );
-        break;
-      case 'SET_PARAMS':
-        history.replaceState(
-          state,
-          name,
-          compile(pathMap[name].path, { encode: encodeURIComponent })(params),
-        );
-        break;
-      case 'BACK':
-        history.back();
-        break;
-      default:
-        break;
+    if (lastAction.type === 'PUSH') {
+      history.pushState(
+        state,
+        name,
+        Pathname.compile(pathMap[name].path, params),
+      );
+    } else if (lastAction.type === 'SET_PARAMS') {
+      history.replaceState(
+        state,
+        name,
+        Pathname.compile(pathMap[name].path, params),
+      );
+    } else if (lastAction.type === 'BACK') {
+      history.back();
     }
   }, [lastAction, name, params, pathMap]);
 
