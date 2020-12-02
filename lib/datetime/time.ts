@@ -139,7 +139,11 @@ function toDate(time: Time): Date {
 }
 
 function fromDate(date: Date): Time {
-  return Date.format(date, TIME_FORMAT);
+  return Date.format(date, undefined, {
+    minute: 'numeric',
+    hour: 'numeric',
+    hour12: false,
+  });
 }
 
 export function getTime(time: Time): [number, number] {

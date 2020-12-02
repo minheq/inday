@@ -13,6 +13,7 @@ import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
 import { FlatButton, Picker } from '../components';
 import { Group, getRows, LeafRow } from './grid.common';
 import { Array } from '../../lib/js_utils';
+import { Container } from './container';
 
 function renderLeafRowCell(props: RenderLeafRowCellProps) {
   const { row, column } = props;
@@ -56,7 +57,7 @@ function renderFooterCell(props: RenderFooterCellProps) {
   );
 }
 
-export function Flat(): JSX.Element {
+function Flat(): JSX.Element {
   const gridRef = useRef<GridRef>(null);
 
   const handleScrollToCell = useScrollToCell(gridRef);
@@ -123,7 +124,7 @@ export function Flat(): JSX.Element {
   );
 }
 
-export function Grouped(): JSX.Element {
+function Grouped(): JSX.Element {
   const gridRef = useRef<GridRef>(null);
 
   const handleScrollToCell = useScrollToCell(gridRef);
@@ -212,6 +213,14 @@ export function Grouped(): JSX.Element {
         )}
       </AutoSizer>
     </SafeAreaView>
+  );
+}
+
+export function GridStories(): JSX.Element {
+  return (
+    <Container>
+      <Grouped />
+    </Container>
   );
 }
 

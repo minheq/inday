@@ -44,13 +44,9 @@ export const Year = {
 };
 
 function fromDate(date: Date): Year {
-  return Date.format(date, YEAR_FORMAT);
+  return `${date.getFullYear()}`;
 }
 
 function toDate(year: Year): Date {
-  let date = Date.new();
-
-  date = Date.setYear(date, Number(year));
-
-  return date;
+  return Date.new(year);
 }

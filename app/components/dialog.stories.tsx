@@ -29,14 +29,24 @@ function DialogBase(props: DialogBaseProps) {
   );
 }
 
-export function NoAnimation(): JSX.Element {
+function NoAnimation(): JSX.Element {
   return <DialogBase animationType="none" />;
 }
 
-export function Slide(): JSX.Element {
+function Slide(): JSX.Element {
   return <DialogBase animationType="slide" />;
 }
 
-export function Fade(): JSX.Element {
+function Fade(): JSX.Element {
   return <DialogBase animationType="fade" />;
+}
+
+export function DialogStories(): JSX.Element {
+  return (
+    <Container>
+      <NoAnimation />
+      <Slide />
+      <Fade />
+    </Container>
+  );
 }

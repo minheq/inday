@@ -9,7 +9,6 @@ import {
   startOfMonth,
   subDays,
   endOfDay,
-  format,
   setYear,
   setMonth,
   addMonths,
@@ -31,6 +30,7 @@ import {
   setDate,
   parseISO,
   isWithinInterval,
+  getDate,
 } from 'date-fns';
 import { DateNative } from './date_native';
 
@@ -53,6 +53,23 @@ function isDate(value: unknown): value is Date {
   return value instanceof DateNative;
 }
 
+function format(
+  date: Date,
+  locales?: string | string[],
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return new Intl.DateTimeFormat(locales, options).format(date);
+}
+
+function formatRelative(
+  value: number,
+  unit: Intl.RelativeTimeFormatUnit,
+  locales?: string | string[],
+  options?: Intl.RelativeTimeFormatOptions,
+): string {
+  return new Intl.RelativeTimeFormat(locales, options).format(value, unit);
+}
+
 export const Date = {
   new: newDate,
   today: (): Date => {
@@ -70,7 +87,9 @@ export const Date = {
   subDays,
   endOfDay,
   format,
+  formatRelative,
   setYear,
+  getDate,
   setMonth,
   addMonths,
   subMonths,

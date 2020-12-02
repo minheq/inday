@@ -2,13 +2,9 @@ import React from 'react';
 
 import { Picker } from './picker';
 import { Container } from './container';
+import { Spacer } from './spacer';
 
-export default {
-  title: 'Picker',
-  component: Picker,
-};
-
-export function Basic(): JSX.Element {
+function Basic(): JSX.Element {
   const [value, setValue] = React.useState(1);
   return (
     <Container padding={16}>
@@ -25,7 +21,7 @@ export function Basic(): JSX.Element {
   );
 }
 
-export function WithSearch(): JSX.Element {
+function WithSearch(): JSX.Element {
   const [value, setValue] = React.useState(1);
   return (
     <Container padding={16}>
@@ -39,6 +35,16 @@ export function WithSearch(): JSX.Element {
           { value: 3, label: 'Option C' },
         ]}
       />
+    </Container>
+  );
+}
+
+export function PickerStories(): JSX.Element {
+  return (
+    <Container>
+      <Basic />
+      <Spacer size={40} />
+      <WithSearch />
     </Container>
   );
 }

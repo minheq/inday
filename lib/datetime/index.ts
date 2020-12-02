@@ -1,6 +1,5 @@
 export * from './day';
 export * from './duration';
-export * from './format';
 export * from './hours';
 export * from './interval';
 export * from './minutes';

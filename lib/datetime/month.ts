@@ -12,7 +12,7 @@ import {
 
 export const MONTH_FORMAT = 'yyyy-MM';
 
-/** In `yyyy-MM` format */
+/** As `yyyy-MM` */
 export type Month = `${string}-${string}`;
 
 export interface MonthInterval {
@@ -77,22 +77,18 @@ function isSameMonth(monthLeft: Month, monthRight: Month): boolean {
 }
 
 function getMonthFromDay(day: Day): Month {
-  return Date.format(Day.toDate(day), MONTH_FORMAT) as Month;
+  return fromDate(Day.toDate(day));
 }
 
 function fromDate(date: Date): Month {
-  return Date.format(date, MONTH_FORMAT) as Month;
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  return `${year}-${month}` as Month;
 }
 
 function toDate(month: Month): Date {
-  let date = Date.new();
-  const m = parseInt(month.substring(5), 10) - 1;
-  const y = parseInt(month.substring(0, 4), 10);
-
-  date = Date.setYear(date, y);
-  date = Date.setMonth(date, m);
-
-  return date;
+  return Date.new(month);
 }
 
 function getDays(

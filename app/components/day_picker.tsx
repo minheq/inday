@@ -23,6 +23,8 @@ import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 import { Button } from './button';
 import { Date } from '../../lib/js_utils';
+import { Picker, PickerOption } from './picker';
+import { getSystemLocale } from '../lib/locale';
 
 interface DayPickerProps {
   value?: Day | null;
@@ -43,17 +45,27 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
     isDayBlocked,
   } = props;
 
-  const yearsOptions = useMemo(() => {
+  const yearsOptions: PickerOption<Year>[] = useMemo(() => {
     return Year.eachYearOfInterval({
       start: Year.fromDay(minDay),
       end: Year.fromDay(maxDay),
-    });
+    }).map((year) => ({
+      value: year,
+      label: Date.format(Year.toDate(year), getSystemLocale(), {
+        year: 'numeric',
+      }),
+    }));
   }, [minDay, maxDay]);
-  const monthOptions = useMemo(() => {
+  const monthOptions: PickerOption<Month>[] = useMemo(() => {
     return Month.eachMonthOfInterval({
       start: Month.fromDay(minDay),
       end: Month.fromDay(maxDay),
-    });
+    }).map((month) => ({
+      value: month,
+      label: Date.format(Month.toDate(month), getSystemLocale(), {
+        month: 'long',
+      }),
+    }));
   }, [minDay, maxDay]);
 
   const selected = useMemo((): DayInterval | null => {
@@ -100,8 +112,18 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
   return (
     <View style={styles.root}>
       <View style={styles.monthNavigatorWrapper}>
-        <Text align="center">{Date.format(Month.toDate(month), 'MMMM')}</Text>
-        <Text align="center">{Date.format(Month.toDate(month), 'yyyy')}</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            options={yearsOptions}
+            value={value ? Year.fromDay(value) : null}
+          />
+        </View>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            options={monthOptions}
+            value={value ? Month.fromDay(value) : null}
+          />
+        </View>
         <View style={styles.monthArrowsWrapper}>
           <Button style={styles.arrowWrapper} onPress={handlePressPrevious}>
             <Icon name="ChevronLeft" />
@@ -158,7 +180,9 @@ function DayDisplay(props: DayDisplayProps) {
       <View style={styles.dayRoot}>
         <View style={styles.dayWrapper}>
           <Text decoration="line-through" color="muted">
-            {Date.format(Day.toDate(day), 'd')}
+            {Date.format(Day.toDate(day), getSystemLocale(), {
+              day: 'numeric',
+            })}
           </Text>
         </View>
       </View>
@@ -187,7 +211,9 @@ function DayDisplay(props: DayDisplayProps) {
               <Text
                 color={selected ? 'contrast' : today ? 'primary' : 'default'}
               >
-                {Date.format(Day.toDate(day), 'd')}
+                {Date.format(Day.toDate(day), getSystemLocale(), {
+                  day: 'numeric',
+                })}
               </Text>
             </View>
           </Fragment>
@@ -213,7 +239,9 @@ function OtherMonthDay(props: OtherMonthDayProps) {
         withinSelected && styles.withinSelected,
       ]}
     >
-      <Text color="muted">{Date.format(Day.toDate(day), 'd')}</Text>
+      <Text color="muted">
+        {Date.format(Day.toDate(day), getSystemLocale(), { day: 'numeric' })}
+      </Text>
     </View>
   );
 }
@@ -240,7 +268,9 @@ function WeekDates(props: WeekDatesProps) {
     <View style={styles.weekDatesWrapper}>
       {dates.map((d) => (
         <View key={d.toISOString()} style={styles.dateWrapper}>
-          <Text size="sm">{Date.format(d, 'EEEEEE')}</Text>
+          <Text size="sm">
+            {Date.format(d, getSystemLocale(), { weekday: 'narrow' })}
+          </Text>
         </View>
       ))}
     </View>
@@ -348,6 +378,9 @@ const styles = DynamicStyleSheet.create(() => ({
   weekDatesWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  pickerWrapper: {
+    flex: 1,
   },
   monthRoot: {
     width: '100%',

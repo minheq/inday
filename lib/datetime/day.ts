@@ -1,9 +1,9 @@
 import { Date } from '../js_utils';
 import { Interval } from './interval';
 
-export const DAY_FORMAT = 'yyyy-MM-dd';
+export const DAY_FORMAT = 'yyyy-M-dd';
 
-/** In `yyyy-MM-dd` format */
+/** As `yyyy-M-dd` */
 export type Day = `${string}-${string}-${string}`;
 
 export interface DayInterval {
@@ -55,15 +55,6 @@ export const DayInterval = {
 };
 
 export const Day = {
-  setSameDay: (day: Day, date: Date): Date => {
-    const newDate = toDate(day);
-
-    date = Date.setYear(date, newDate.getFullYear());
-    date = Date.setMonth(date, newDate.getMonth());
-    date = Date.setDate(date, newDate.getDate());
-
-    return date;
-  },
   isWithinDayInterval: (day: Day, interval: DayInterval): boolean => {
     return Date.isWithinInterval(toDate(day), {
       start: toDate(interval.start),
@@ -105,9 +96,13 @@ export const Day = {
 };
 
 function toDate(day: Day): Date {
-  return Date.parseISO(day);
+  return Date.new(day);
 }
 
 function fromDate(date: Date): Day {
-  return Date.format(date, DAY_FORMAT) as Day;
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  return `${year}-${month}-${day}` as Day;
 }

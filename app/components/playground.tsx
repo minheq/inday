@@ -1,19 +1,15 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import {
-  NoAnimation as DialogNoAnimation,
-  Slide as DialogSlide,
-  Fade as DialogFade,
-} from './dialog.stories';
-import { Flat, Grouped } from './grid.stories';
-import { Basic as DayPickerBasic } from './day_picker.stories';
+import { DialogStories } from './dialog.stories';
+import { GridStories } from './grid.stories';
+import { DayPickerStories } from './day_picker.stories';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import { Button } from './button';
 import { Container } from './container';
 import { tokens } from './tokens';
-import { Slide } from './slide';
+import { PickerStories } from './picker.stories';
 import { Spacer } from './spacer';
 import { Row } from './row';
 import { FlatButton } from './flat_button';
@@ -55,13 +51,16 @@ export function Playground(
       content = <Intro />;
       break;
     case 'Dialog':
-      content = <Dialog />;
+      content = <DialogStories />;
       break;
     case 'Grid':
-      content = <Grid />;
+      content = <GridStories />;
+      break;
+    case 'Picker':
+      content = <PickerStories />;
       break;
     case 'DayPicker':
-      content = <DayPicker />;
+      content = <DayPickerStories />;
       break;
 
     default:
@@ -126,6 +125,7 @@ function Menu() {
         <MenuSection title="GETTING STARTED" />
         <MenuItem component="Intro" />
         <MenuSection title="COMPONENTS" />
+        <MenuItem component="Picker" />
         <MenuItem component="DayPicker" />
         <MenuItem component="Dialog" />
         <MenuItem component="Grid" />
@@ -189,33 +189,6 @@ function Intro() {
     <View>
       <Text>Playground</Text>
     </View>
-  );
-}
-
-function Dialog() {
-  return (
-    <View>
-      <DialogNoAnimation />
-      <DialogSlide />
-      <DialogFade />
-    </View>
-  );
-}
-
-function Grid() {
-  return (
-    <View>
-      <Flat />
-      <Grouped />
-    </View>
-  );
-}
-
-function DayPicker() {
-  return (
-    <Container>
-      <DayPickerBasic />
-    </Container>
   );
 }
 

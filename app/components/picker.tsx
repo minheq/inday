@@ -58,7 +58,6 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     visible: false,
     buttonWidth: 0,
   });
-  const theme = useTheme();
 
   const selected = options.find((o) => o.value === value);
   const filteredOptions =
@@ -209,7 +208,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       },
                     ]}
                   >
-                    {({ hovered }: any) => (
+                    {() => (
                       <Container
                         height={32}
                         paddingHorizontal={8}
@@ -220,9 +219,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                           alignItems="center"
                           justifyContent="space-between"
                         >
-                          <Text
-                            color={hovered || active ? 'contrast' : 'default'}
-                          >
+                          <Text color={active ? 'contrast' : 'default'}>
                             {o.label}
                           </Text>
                           {selected && selected.value === o.value && (

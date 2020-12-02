@@ -130,9 +130,8 @@ import {
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import { Number, Array, isNullish } from '../../lib/js_utils';
+import { Number, Array, isNullish, Date } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
-import { formatDate } from '../../lib/datetime/format';
 import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
 import { RecordLinkBadge } from './record_link_badge';
@@ -656,16 +655,14 @@ function DateCell(props: DateCellProps) {
   if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>
-          {formatDate(value, field.format, getSystemLocale())}
-        </Text>
+        <Text numberOfLines={1}>{Date.format(value, getSystemLocale())}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.textCellContainer}>
-      <Text>{formatDate(value, field.format, getSystemLocale())}</Text>
+      <Text>{Date.format(value, getSystemLocale())}</Text>
     </View>
   );
 }
