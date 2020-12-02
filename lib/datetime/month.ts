@@ -9,6 +9,7 @@ import {
   DEFAULT_FIRST_DAY_OF_WEEK,
   Week,
 } from './week';
+import { Year } from './year';
 
 export const MONTH_FORMAT = 'yyyy-MM';
 
@@ -21,6 +22,23 @@ export interface MonthInterval {
 }
 
 export const Month = {
+  today: (): Month => {
+    return fromDate(Date.new());
+  },
+  startOfYear: (month?: Month): Month => {
+    if (month !== undefined) {
+      return `${getYear(month)}-1` as Month;
+    }
+
+    return `${getYear(fromDate(Date.new()))}-1` as Month;
+  },
+  endOfYear: (month?: Month): Month => {
+    if (month !== undefined) {
+      return `${getYear(month)}-12` as Month;
+    }
+
+    return `${getYear(fromDate(Date.new()))}-12` as Month;
+  },
   getWeeks: (
     month: Month,
     firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
@@ -47,6 +65,22 @@ export const Month = {
     }
 
     return months;
+  },
+  getMonth: (month: Month): number => {
+    return Month.toDate(month).getMonth();
+  },
+  getYear: (month: Month): number => {
+    return Month.toDate(month).getFullYear();
+  },
+  setMonth: (month: Month, monthNum: number): Month => {
+    const date = Month.toDate(month);
+    date.setMonth(monthNum);
+    return Month.fromDate(date);
+  },
+  setYear: (month: Month, fullYear: number): Month => {
+    const date = Month.toDate(month);
+    date.setFullYear(fullYear);
+    return Month.fromDate(date);
   },
   startOfMonth: (month: Month): Day => {
     return Day.fromDate(Date.startOfMonth(toDate(month)));
@@ -161,4 +195,10 @@ function getDatesAfter(endOfMonthDate: Date, firstDayOfWeek: FirstDayOfWeek) {
   }
 
   return afterDates;
+}
+
+function getYear(month: Month): Year {
+  const date = toDate(month);
+
+  return `${date.getFullYear()}`;
 }

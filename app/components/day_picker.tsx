@@ -29,44 +29,35 @@ import { getSystemLocale } from '../lib/locale';
 interface DayPickerProps {
   value?: Day | null;
   onChange?: (value: Day) => void;
-  maxDay?: Day;
-  minDay?: Day;
   isOutsideRange?: (day: Day) => boolean;
   isDayBlocked?: (day: Day) => boolean;
 }
 
 export function DayPicker(props: DayPickerProps): JSX.Element {
-  const {
-    value,
-    onChange,
-    minDay = Day.subYears(Day.today(), 2),
-    maxDay = Day.addYears(Day.today(), 2),
-    isOutsideRange,
-    isDayBlocked,
-  } = props;
+  const { value, onChange, isOutsideRange, isDayBlocked } = props;
 
-  const yearsOptions: PickerOption<Year>[] = useMemo(() => {
+  const yearsOptions: PickerOption<number>[] = useMemo(() => {
     return Year.eachYearOfInterval({
-      start: Year.fromDay(minDay),
-      end: Year.fromDay(maxDay),
+      start: Year.subYears(Year.today(), 2),
+      end: Year.addYears(Year.today(), 10),
     }).map((year) => ({
-      value: year,
+      value: Year.getYear(year),
       label: Date.format(Year.toDate(year), getSystemLocale(), {
         year: 'numeric',
       }),
     }));
-  }, [minDay, maxDay]);
-  const monthOptions: PickerOption<Month>[] = useMemo(() => {
+  }, []);
+  const monthOptions: PickerOption<number>[] = useMemo(() => {
     return Month.eachMonthOfInterval({
-      start: Month.fromDay(minDay),
-      end: Month.fromDay(maxDay),
+      start: Month.startOfYear(),
+      end: Month.endOfYear(),
     }).map((month) => ({
-      value: month,
+      value: Month.getMonth(month),
       label: Date.format(Month.toDate(month), getSystemLocale(), {
         month: 'long',
       }),
     }));
-  }, [minDay, maxDay]);
+  }, []);
 
   const selected = useMemo((): DayInterval | null => {
     if (value === null || value === undefined) {
@@ -91,6 +82,20 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
     [onChange],
   );
 
+  const handleChangeMonth = useCallback(
+    (monthNum: number) => {
+      setMonth(Month.setMonth(month, monthNum));
+    },
+    [month],
+  );
+
+  const handleChangeYear = useCallback(
+    (year: number) => {
+      setMonth(Month.setYear(month, year));
+    },
+    [month],
+  );
+
   const handlePressNext = useCallback(() => {
     setMonth(Month.addMonths(month, 1));
   }, [month]);
@@ -112,16 +117,18 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
   return (
     <View style={styles.root}>
       <View style={styles.monthNavigatorWrapper}>
-        <View style={styles.pickerWrapper}>
+        <View style={styles.monthPickerWrapper}>
+          <View style={styles.firstMonthPickerWrapper}>
+            <Picker
+              onChange={handleChangeMonth}
+              options={monthOptions}
+              value={Month.getMonth(month)}
+            />
+          </View>
           <Picker
+            onChange={handleChangeYear}
             options={yearsOptions}
-            value={value ? Year.fromDay(value) : null}
-          />
-        </View>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            options={monthOptions}
-            value={value ? Month.fromDay(value) : null}
+            value={Month.getYear(month)}
           />
         </View>
         <View style={styles.monthArrowsWrapper}>
@@ -379,8 +386,13 @@ const styles = DynamicStyleSheet.create(() => ({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  pickerWrapper: {
+  monthPickerWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
+  },
+  firstMonthPickerWrapper: {
+    paddingRight: 8,
   },
   monthRoot: {
     width: '100%',

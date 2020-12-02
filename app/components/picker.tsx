@@ -8,14 +8,10 @@ import {
   ScrollView,
   Pressable,
 } from 'react-native';
-import { useTheme } from './theme';
 import { tokens } from './tokens';
-import { Container } from './container';
-import { Row } from './row';
 import { Text } from './text';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
-import { Checkbox } from './checkbox';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { Measurements } from '../lib/measurements';
 import { isNonNullish } from '../../lib/js_utils';
@@ -37,7 +33,7 @@ export interface PickerOption<T> {
   label: string;
 }
 
-const OPTION_HEIGHT = 40;
+const OPTION_HEIGHT = 32;
 const SEARCH_HEIGHT = 56;
 
 export function Picker<T>(props: PickerProps<T>): JSX.Element {
@@ -68,7 +64,10 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
       : options;
 
   const contentHeight =
-    filteredOptions.length * OPTION_HEIGHT + (searchable ? SEARCH_HEIGHT : 0);
+    filteredOptions.length * OPTION_HEIGHT +
+    (searchable ? SEARCH_HEIGHT : 0) +
+    16 + // vertical padding
+    2; // border;
 
   const [height, setHeight] = useState(contentHeight);
 
@@ -158,7 +157,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         <Pressable onPress={handleOpenPicker} style={styles.button}>
           <Text>{selected ? selected.label : placeholder}</Text>
           <View style={styles.caretWrapper}>
-            <Icon size="lg" name="CaretDown" color="default" />
+            <Icon name="CaretDown" color="default" />
           </View>
         </Pressable>
       </View>
@@ -167,15 +166,17 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         visible={picker.visible}
         onRequestClose={handleClosePicker}
       >
-        <Container
-          width={picker.buttonWidth}
-          height={height}
-          color="content"
-          borderWidth={1}
-          borderRadius={tokens.border.radius.default}
+        <View
+          style={[
+            styles.popover,
+            {
+              width: picker.buttonWidth + 40, // space for check icon
+              height,
+            },
+          ]}
         >
           {searchable === true && (
-            <Container height={SEARCH_HEIGHT} padding={8}>
+            <View style={styles.searchWrapper}>
               <TextInput
                 clearable
                 placeholder="Search option"
@@ -185,10 +186,10 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                 onKeyPress={handleKeyPress}
                 onSubmitEditing={handleSubmitEditing}
               />
-            </Container>
+            </View>
           )}
           <ScrollView>
-            <Container padding={8}>
+            <View style={styles.optionsContainer}>
               {filteredOptions.map((o, i) => {
                 const active = i === activeIndex;
 
@@ -208,32 +209,18 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       },
                     ]}
                   >
-                    {() => (
-                      <Container
-                        height={32}
-                        paddingHorizontal={8}
-                        borderRadius={tokens.border.radius.default}
-                      >
-                        <Row
-                          expanded
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Text color={active ? 'contrast' : 'default'}>
-                            {o.label}
-                          </Text>
-                          {selected && selected.value === o.value && (
-                            <Checkbox value={true} />
-                          )}
-                        </Row>
-                      </Container>
+                    <Text color={active ? 'contrast' : 'default'}>
+                      {o.label}
+                    </Text>
+                    {selected && selected.value === o.value && (
+                      <Icon name="CheckThick" color="primary" />
                     )}
                   </Pressable>
                 );
               })}
-            </Container>
+            </View>
           </ScrollView>
-        </Container>
+        </View>
       </Popover>
     </Fragment>
   );
@@ -247,18 +234,32 @@ const styles = DynamicStyleSheet.create(() => ({
     flexDirection: 'row',
     height: 40,
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingLeft: 8,
+    paddingRight: 24,
+  },
+  popover: {
+    backgroundColor: tokens.colors.base.white,
+    borderWidth: 1,
+    borderColor: tokens.colors.gray[300],
+    borderRadius: tokens.border.radius.default,
+  },
+  searchWrapper: {
+    height: SEARCH_HEIGHT,
+    padding: 8,
   },
   caretWrapper: {
     position: 'absolute',
-    right: 16,
+    right: 0,
   },
   optionsContainer: {
-    position: 'absolute',
-    top: 44,
-    width: '100%',
+    padding: 8,
   },
   option: {
     borderRadius: tokens.border.radius.default,
+    height: OPTION_HEIGHT,
+    paddingHorizontal: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 }));

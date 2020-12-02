@@ -28,7 +28,6 @@ import {
   addYears,
   subYears,
   setDate,
-  parseISO,
   isWithinInterval,
   getDate,
 } from 'date-fns';
@@ -108,6 +107,5 @@ export const Date = {
   addYears,
   subYears,
   setDate,
-  parseISO,
   isWithinInterval,
 };

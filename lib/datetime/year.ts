@@ -13,6 +13,12 @@ export interface YearInterval {
 }
 
 export const Year = {
+  today: (): Year => {
+    return fromDate(Date.new());
+  },
+  getYear: (year: Year): number => {
+    return toDate(year).getFullYear();
+  },
   toDate,
   fromDate,
   eachYearOfInterval: (interval: YearInterval): Year[] => {
