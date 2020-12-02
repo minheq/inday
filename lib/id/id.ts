@@ -1,13 +1,9 @@
-import { customAlphabet } from 'nanoid';
+import { nanoid, defaultAlphabet } from './nanoid';
 
-const idLength = 15;
-const alphabet =
-  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-const nanoid = customAlphabet(alphabet, idLength);
+const idLength = 18;
 
 export function generateID<T extends string>(prefix: T): `${T}${string}` {
-  return `${prefix}${nanoid()}` as `${T}${string}`;
+  return `${prefix}${nanoid(defaultAlphabet, idLength)}` as `${T}${string}`;
 }
 
 export function validateID<T extends string>(prefix: T, id: string): void {
@@ -25,7 +21,7 @@ export function validateID<T extends string>(prefix: T, id: string): void {
   }
 
   const containsInvalidChar = extractedID.split('').some((char) => {
-    return !alphabet.includes(char);
+    return !defaultAlphabet.includes(char);
   });
 
   if (containsInvalidChar) {
