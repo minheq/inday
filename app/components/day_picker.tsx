@@ -21,7 +21,6 @@ import {
 } from './month_template';
 import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
-import { Button } from './button';
 import { Date } from '../../lib/js_utils';
 import { Picker, PickerOption } from './picker';
 import { getSystemLocale } from '../lib/locale';
@@ -132,13 +131,13 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
           />
         </View>
         <View style={styles.monthArrowsWrapper}>
-          <Button style={styles.arrowWrapper} onPress={handlePressPrevious}>
+          <Pressable style={styles.arrowWrapper} onPress={handlePressPrevious}>
             <Icon name="ChevronLeft" />
-          </Button>
+          </Pressable>
           <Spacer direction="row" size={8} />
-          <Button style={styles.arrowWrapper} onPress={handlePressNext}>
+          <Pressable style={styles.arrowWrapper} onPress={handlePressNext}>
             <Icon name="ChevronRight" />
-          </Button>
+          </Pressable>
         </View>
       </View>
       <Spacer size={16} />
@@ -316,10 +315,9 @@ const styles = DynamicStyleSheet.create(() => ({
     borderRadius: tokens.border.radius.default,
     borderColor: tokens.colors.gray[300],
     textAlign: 'center',
-    height: 32,
-    width: 32,
+    height: 40,
+    width: 40,
     borderWidth: 1,
-    ...tokens.shadow.elevation1,
   },
   todayWrapper: {},
   withinSelected: {
