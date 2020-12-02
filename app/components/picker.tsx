@@ -1,4 +1,11 @@
-import React, { useCallback, useState, useRef, Fragment } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 
 import {
   View,
@@ -46,7 +53,8 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     searchable = false,
   } = props;
   const buttonRef = useRef<View>(null);
-  const borderColor = React.useRef(new Animated.Value(0)).current;
+  const popoverContentRef = useRef<View>(null);
+  const borderColor = useRef(new Animated.Value(0)).current;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [picker, setPicker] = useState({
@@ -143,7 +151,11 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     [activeIndex, options, handleClosePicker],
   );
 
-  React.useEffect(() => {
+  const handlePopoverShow = useCallback(() => {
+    popoverContentRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
     Animated.spring(borderColor, {
       toValue: picker.visible ? 1 : 0,
       useNativeDriver: true,
@@ -162,11 +174,14 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         </Pressable>
       </View>
       <Popover
+        onShow={handlePopoverShow}
         anchor={picker.anchor}
         visible={picker.visible}
         onRequestClose={handleClosePicker}
       >
         <View
+          accessible
+          ref={popoverContentRef}
           style={[
             styles.popover,
             {

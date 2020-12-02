@@ -16,12 +16,13 @@ export type PopoverAnchor = { y: number; x: number };
 interface PopoverProps {
   visible: boolean;
   onRequestClose?: () => void;
+  onShow?: () => void;
   children: React.ReactNode;
   anchor: PopoverAnchor;
 }
 
 export function Popover(props: PopoverProps): JSX.Element {
-  const { visible = false, onRequestClose, anchor, children } = props;
+  const { visible = false, onShow, onRequestClose, anchor, children } = props;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export function Popover(props: PopoverProps): JSX.Element {
     <Modal
       visible={visible}
       onRequestClose={onRequestClose}
+      onShow={onShow}
       animationType="none"
       transparent
     >
