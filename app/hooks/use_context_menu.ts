@@ -28,7 +28,7 @@ export function useContextMenu(props: UseContextMenuProps) {
         });
       }
 
-      el.addEventListener('contextmenu', onRightClick);
+      el.addEventListener('contextmenu', onRightClick, { passive: true });
 
       return () => {
         el.removeEventListener('contextmenu', onRightClick);

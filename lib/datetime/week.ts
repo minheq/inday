@@ -1,12 +1,6 @@
-import {
-  addDays,
-  eachDayOfInterval,
-  getDay,
-  subDays,
-  startOfDay,
-  endOfDay,
-  Interval,
-} from 'date-fns';
+import { Date } from '../js_utils';
+import { Day } from './day';
+import { Month } from './month';
 
 export const DEFAULT_FIRST_DAY_OF_WEEK = 1;
 
@@ -20,7 +14,16 @@ export enum WeekDay {
   Sunday = 0,
 }
 
-export function getWeekDaysOptions() {
+export interface Week {
+  month: Month;
+  index: number;
+  days: Day[];
+}
+
+export function getWeekDaysOptions(): {
+  value: WeekDay;
+  label: string;
+}[] {
   return [
     { value: WeekDay.Monday, label: 'Monday' },
     { value: WeekDay.Tuesday, label: 'Tuesday' },
@@ -37,13 +40,13 @@ export type FirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export const getFirstDateOfWeek = (
   date: Date,
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
-) => {
-  const day = getDay(date);
+): Date => {
+  const day = Date.getDay(date);
   const diffDays = day - firstDayOfWeek;
 
   const sub = diffDays < 0 ? 7 + diffDays : diffDays;
 
-  return subDays(date, sub);
+  return Date.subDays(date, sub);
 };
 
 export const getLastDateOfWeek = (
@@ -52,7 +55,7 @@ export const getLastDateOfWeek = (
 ): Date => {
   const firstDateOfTheWeek = getFirstDateOfWeek(date, firstDayOfWeek);
 
-  return addDays(firstDateOfTheWeek, 6);
+  return Date.addDays(firstDateOfTheWeek, 6);
 };
 
 export const getWeekInterval = (
@@ -60,14 +63,14 @@ export const getWeekInterval = (
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
 ): Interval => {
   return {
-    start: startOfDay(getFirstDateOfWeek(date, firstDayOfWeek)),
-    end: endOfDay(getLastDateOfWeek(date, firstDayOfWeek)),
+    start: Date.startOfDay(getFirstDateOfWeek(date, firstDayOfWeek)),
+    end: Date.endOfDay(getLastDateOfWeek(date, firstDayOfWeek)),
   };
 };
 
 export const eachDayOfWeek = (
-  date = new Date(),
+  date = Date.new(),
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
-) => {
-  return eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
+): Date[] => {
+  return Date.eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
 };

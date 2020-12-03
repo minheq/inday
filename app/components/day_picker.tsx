@@ -1,297 +1,353 @@
-import {
-  format,
-  isSameDay,
-  addMonths,
-  subMonths,
-  isBefore,
-  addDays,
-} from 'date-fns';
-import * as React from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { View, Pressable } from 'react-native';
 
 import {
-  validateInterval,
-  datesInInterval,
-  FirstDayOfWeek,
   DEFAULT_FIRST_DAY_OF_WEEK,
   eachDayOfWeek,
-  Interval,
+  FirstDayOfWeek,
+  DayInterval,
+  Day,
+  Month,
+  Year,
 } from '../../lib/datetime';
 import { Text } from './text';
 import { Spacer } from './spacer';
 import { Icon } from './icon';
-import { Month } from './month';
-import { View, StyleSheet } from 'react-native';
-import { Button } from './button';
-import { Container } from './container';
-import { useHoverable } from '../hooks/use_hoverable';
+import {
+  MonthTemplate,
+  RenderDayProps,
+  RenderOtherMonthProps,
+  RenderWeekProps,
+} from './month_template';
+import { DynamicStyleSheet } from './stylesheet';
+import { tokens } from './tokens';
+import { Date } from '../../lib/js_utils';
+import { Picker, PickerOption } from './picker';
+import { getSystemLocale } from '../lib/locale';
 
-interface DayPickerProps<TIsRange extends boolean = false> {
-  /** Selected value */
-  value?: TIsRange extends true ? Interval : Date;
-  onChange?: (value: TIsRange extends true ? Interval : Date) => void;
-  range?: TIsRange;
-  testID?: string;
-
-  numberOfMonths?: number;
-  orientation?: 'vertical' | 'horizontal';
-  isOutsideRange?: (date: Date) => boolean;
-  isBlocked?: (date: Date) => boolean;
+interface DayPickerProps {
+  value?: Day | null;
+  onChange?: (value: Day) => void;
+  isOutsideRange?: (day: Day) => boolean;
+  isDayBlocked?: (day: Day) => boolean;
 }
 
-const VERTICAL_MONTHS_INCREMENT = 2;
+export function DayPicker(props: DayPickerProps): JSX.Element {
+  const { value, onChange, isOutsideRange, isDayBlocked } = props;
 
-function hasBlockedDate(
-  interval: Interval,
-  isBlocked?: (date: Date) => boolean,
-) {
-  if (!isBlocked) {
-    return false;
-  }
+  const yearsOptions: PickerOption<number>[] = useMemo(() => {
+    return Year.eachYearOfInterval({
+      start: Year.subYears(Year.today(), 2),
+      end: Year.addYears(Year.today(), 10),
+    }).map((year) => ({
+      value: Year.getYear(year),
+      label: Date.format(Year.toDate(year), getSystemLocale(), {
+        year: 'numeric',
+      }),
+    }));
+  }, []);
+  const monthOptions: PickerOption<number>[] = useMemo(() => {
+    return Month.eachMonthOfInterval({
+      start: Month.startOfYear(),
+      end: Month.endOfYear(),
+    }).map((month) => ({
+      value: Month.getMonth(month),
+      label: Date.format(Month.toDate(month), getSystemLocale(), {
+        month: 'long',
+      }),
+    }));
+  }, []);
 
-  const dates = datesInInterval(interval, addDays);
+  const selected = useMemo((): DayInterval | null => {
+    if (value === null || value === undefined) {
+      return null;
+    }
 
-  return dates.some(isBlocked);
-}
+    return { start: value, end: value };
+  }, [value]);
 
-export function DayPicker<TIsRange extends boolean = false>(
-  props: DayPickerProps<TIsRange>,
-) {
-  const {
-    range = false,
-    value,
-    onChange = () => {},
-    isOutsideRange,
-    isBlocked,
-    numberOfMonths = 1,
-    orientation = 'horizontal',
-  } = props;
-  const [interval, setInterval] = React.useState<Interval | null>(
-    range ? (value as Interval) : null,
+  const [month, setMonth] = useState(
+    selected ? Month.fromDay(selected.start) : Month.fromDate(Date.new()),
   );
-  const initialNavigationDate = (value
-    ? range
-      ? (value as Interval).start
-      : value
-    : new Date()) as Date;
-  const [navigationDate, setNavigationDate] = React.useState(
-    initialNavigationDate,
-  );
-  const [noOfMonths, setNoOfMonths] = React.useState(numberOfMonths);
 
-  React.useEffect(() => {
-    setInterval(range ? (value as Interval) : null);
-  }, [value, range]);
-
-  const handleSelect = React.useCallback(
-    (date: Date) => {
-      if (range) {
-        if (value) {
-          const val = value as Interval;
-
-          // When only start was selected, it means user just selected end
-          if (isSameDay(val.start, val.end)) {
-            if (isBefore(date, val.start)) {
-              onChange({
-                start: date,
-                end: date,
-              } as any);
-            } else if (
-              hasBlockedDate({ start: val.start, end: date }, isBlocked)
-            ) {
-              onChange({
-                start: date,
-                end: date,
-              } as any);
-            } else {
-              onChange({
-                start: val.start,
-                end: date,
-              } as any);
-            }
-
-            // When there is already an interval, reset to start only
-          } else {
-            onChange({
-              start: date,
-              end: date,
-            } as any);
-          }
-        } else {
-          onChange({
-            start: date,
-            end: date,
-          } as any);
-        }
-      } else {
-        onChange(date as any);
+  const handleSelectDay = useCallback(
+    (day: Day) => {
+      if (onChange === null || onChange === undefined) {
+        return;
       }
+
+      onChange(day);
     },
-    [onChange, range, value, isBlocked],
+    [onChange],
   );
 
-  const handleHoverIn = React.useCallback(
-    (date: Date) => {
-      if (value && interval) {
-        const val = value as Interval;
-
-        if (isSameDay(val.start, val.end)) {
-          if (isBefore(date, val.start)) {
-            setInterval(range ? (value as Interval) : null);
-          } else if (
-            hasBlockedDate({ start: val.start, end: date }, isBlocked)
-          ) {
-            setInterval(range ? (value as Interval) : null);
-          } else {
-            setInterval({
-              start: val.start,
-              end: date,
-            } as any);
-          }
-        }
-      }
+  const handleChangeMonth = useCallback(
+    (monthNum: number) => {
+      setMonth(Month.setMonth(month, monthNum));
     },
-    [interval, range, value, isBlocked],
+    [month],
   );
 
-  const handleHoverOut = React.useCallback(() => {
-    setInterval(range ? (value as Interval) : null);
-  }, [range, value]);
+  const handleChangeYear = useCallback(
+    (year: number) => {
+      setMonth(Month.setYear(month, year));
+    },
+    [month],
+  );
 
-  const handlePressNext = React.useCallback(() => {
-    setNavigationDate(addMonths(navigationDate, 1));
-  }, [navigationDate]);
+  const handlePressNext = useCallback(() => {
+    setMonth(Month.addMonths(month, 1));
+  }, [month]);
 
-  const handlePressPrevious = React.useCallback(() => {
-    setNavigationDate(subMonths(navigationDate, 1));
-  }, [navigationDate]);
+  const handlePressPrevious = useCallback(() => {
+    setMonth(Month.subMonths(month, 1));
+  }, [month]);
 
-  const handlePressMore = React.useCallback(() => {
-    setNoOfMonths(noOfMonths + VERTICAL_MONTHS_INCREMENT);
-  }, [noOfMonths]);
-
-  const months = [];
-
-  for (let index = 0; index < noOfMonths; index++) {
-    months.push(index);
-  }
-
-  const selected = (value
-    ? range
-      ? interval
-      : { start: value, end: value }
-    : undefined) as Interval | undefined;
-
-  const { onHoverIn, onHoverOut } = useHoverable({
-    onHoverOut: handleHoverOut,
-  });
-
-  if (selected) {
-    validateInterval(selected);
-  }
+  const renderDay = useCallback(
+    (p: RenderDayProps) => <DayDisplay {...p} onSelect={handleSelectDay} />,
+    [handleSelectDay],
+  );
+  const renderOtherMonthDay = useCallback(
+    (p: RenderOtherMonthProps) => <OtherMonthDay {...p} />,
+    [],
+  );
+  const renderWeek = useCallback((p: RenderWeekProps) => <Week {...p} />, []);
 
   return (
     <View style={styles.root}>
-      {orientation === 'horizontal' && (
-        <View style={styles.arrowsWrapper}>
-          <Button style={styles.arrow} onPress={handlePressPrevious}>
-            <Icon name="arrow-left" size="lg" />
-          </Button>
-          <Button style={styles.arrow} onPress={handlePressNext}>
-            <Icon name="arrow-right" size="lg" />
-          </Button>
+      <View style={styles.monthNavigatorWrapper}>
+        <View style={styles.monthPickerWrapper}>
+          <View style={styles.firstMonthPickerWrapper}>
+            <Picker
+              onChange={handleChangeMonth}
+              options={monthOptions}
+              value={Month.getMonth(month)}
+            />
+          </View>
+          <Picker
+            onChange={handleChangeYear}
+            options={yearsOptions}
+            value={Month.getYear(month)}
+          />
         </View>
-      )}
-      <View
-        style={
-          orientation === 'horizontal'
-            ? styles.monthsWrapperHorizontal
-            : styles.monthsWrapperVertical
-        }
-      >
-        {months.map((index) => {
-          const month = addMonths(navigationDate, index);
-          const last = index === months.length - 1;
-
-          return (
-            <React.Fragment key={month.getMonth()}>
-              <View style={styles.monthWrapper}>
-                <View
-                  // @ts-ignore
-                  onMouseEnter={onHoverIn}
-                  onMouseLeave={onHoverOut}
-                  style={styles.monthRoot}
-                >
-                  <View style={styles.monthNameWrapper}>
-                    <Text align="center">{format(month, 'MMMM yyyy')}</Text>
-                  </View>
-                  <Spacer size={16} />
-                  <WeekDates />
-                  <Spacer size={16} />
-                  <Month
-                    selected={selected}
-                    date={month}
-                    onSelect={handleSelect}
-                    isOutsideRange={isOutsideRange}
-                    isBlocked={isBlocked}
-                    onHoverIn={handleHoverIn}
-                  />
-                </View>
-              </View>
-              {!last && <Container width={48} height={48} />}
-            </React.Fragment>
-          );
-        })}
+        <View style={styles.monthArrowsWrapper}>
+          <Pressable style={styles.arrowWrapper} onPress={handlePressPrevious}>
+            <Icon name="ChevronLeft" />
+          </Pressable>
+          <Spacer direction="row" size={8} />
+          <Pressable style={styles.arrowWrapper} onPress={handlePressNext}>
+            <Icon name="ChevronRight" />
+          </Pressable>
+        </View>
       </View>
-      {orientation === 'vertical' && (
-        <>
-          <Spacer size={48} />
-          <Button style={styles.moreButton} onPress={handlePressMore}>
-            <Icon name="chevron-down" size="lg" />
-          </Button>
-        </>
-      )}
+      <Spacer size={16} />
+      <WeekDates />
+      <Spacer size={16} />
+      <MonthTemplate
+        selected={selected}
+        month={month}
+        isOutsideRange={isOutsideRange}
+        isDayBlocked={isDayBlocked}
+        renderDay={renderDay}
+        renderOtherMonthDay={renderOtherMonthDay}
+        renderWeek={renderWeek}
+      />
     </View>
   );
+}
+
+interface DayDisplayProps {
+  day: Day;
+  withinSelected: boolean;
+  selected: boolean;
+  selectedStart: boolean;
+  selectedEnd: boolean;
+  today: boolean;
+  outsideRange: boolean;
+  blocked: boolean;
+  onSelect: (day: Day) => void;
+}
+
+function DayDisplay(props: DayDisplayProps) {
+  const {
+    day,
+    withinSelected,
+    selected,
+    selectedStart,
+    selectedEnd,
+    today,
+    outsideRange,
+    blocked,
+    onSelect,
+  } = props;
+
+  if (outsideRange || blocked) {
+    return (
+      <View style={styles.dayRoot}>
+        <View style={styles.dayWrapper}>
+          <Text decoration="line-through" color="muted">
+            {Date.format(Day.toDate(day), getSystemLocale(), {
+              day: 'numeric',
+            })}
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.dayRoot, withinSelected && styles.withinSelected]}>
+      <Pressable onPress={() => onSelect(day)} style={styles.dayButton}>
+        {({ hovered }: { hovered: boolean }) => (
+          <Fragment>
+            {selectedStart && !selectedEnd && (
+              <View style={[styles.selectedEdge, styles.selectedStart]} />
+            )}
+            {selectedEnd && !selectedStart && (
+              <View style={[styles.selectedEdge, styles.selectedEnd]} />
+            )}
+            <View
+              style={[
+                styles.dayWrapper,
+                today && styles.todayWrapper,
+                hovered && styles.hoveredDay,
+                selected && styles.selectedDay,
+              ]}
+            >
+              <Text
+                color={selected ? 'contrast' : today ? 'primary' : 'default'}
+              >
+                {Date.format(Day.toDate(day), getSystemLocale(), {
+                  day: 'numeric',
+                })}
+              </Text>
+            </View>
+          </Fragment>
+        )}
+      </Pressable>
+    </View>
+  );
+}
+
+interface OtherMonthDayProps {
+  withinSelected: boolean;
+  day: Day;
+}
+
+function OtherMonthDay(props: OtherMonthDayProps) {
+  const { withinSelected, day } = props;
+
+  return (
+    <View
+      style={[
+        styles.dayRoot,
+        styles.otherDay,
+        withinSelected && styles.withinSelected,
+      ]}
+    >
+      <Text color="muted">
+        {Date.format(Day.toDate(day), getSystemLocale(), { day: 'numeric' })}
+      </Text>
+    </View>
+  );
+}
+
+interface WeekProps {
+  children: React.ReactNode;
+}
+
+function Week(props: WeekProps) {
+  const { children } = props;
+
+  return <View style={styles.week}>{children}</View>;
 }
 
 interface WeekDatesProps {
   firstDayOfWeek?: FirstDayOfWeek;
-  date?: Date;
 }
 
-const WeekDates = (props: WeekDatesProps) => {
-  const {
-    date = new Date(),
-    firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
-  } = props;
-  const dates = eachDayOfWeek(date, firstDayOfWeek);
+function WeekDates(props: WeekDatesProps) {
+  const { firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK } = props;
+  const dates = eachDayOfWeek(Date.new(), firstDayOfWeek);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.weekDatesWrapper}>
       {dates.map((d) => (
         <View key={d.toISOString()} style={styles.dateWrapper}>
-          <Text size="sm">{format(d, 'EEEEEE')}</Text>
+          <Text size="sm">
+            {Date.format(d, getSystemLocale(), { weekday: 'narrow' })}
+          </Text>
         </View>
       ))}
     </View>
   );
-};
+}
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create(() => ({
   root: {},
-  container: {
+  dayRoot: {
+    flex: 1,
     display: 'flex',
-    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  arrowsWrapper: {
-    display: 'flex',
-    position: 'absolute',
+  dayButton: {
+    alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    zIndex: 1,
+    justifyContent: 'center',
     width: '100%',
+    padding: 0,
+  },
+  dayWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    borderRadius: 999,
+    justifyContent: 'center',
+    textAlign: 'center',
+    height: 40,
+    width: 40,
+  },
+  arrowWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.border.radius.circle,
+    backgroundColor: tokens.colors.gray[100],
+    textAlign: 'center',
+    height: 40,
+    width: 40,
+  },
+  todayWrapper: {},
+  withinSelected: {
+    backgroundColor: tokens.colors.lightBlue[50],
+  },
+  selectedEdge: {
+    backgroundColor: tokens.colors.lightBlue[50],
+    position: 'absolute',
+    zIndex: -1,
+    width: '50%',
+    right: 0,
+    height: '100%',
+  },
+  selectedStart: {
+    right: 0,
+  },
+  selectedEnd: {
     left: 0,
-    top: 0,
+  },
+  monthNavigatorWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  monthArrowsWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  hoveredDay: {
+    backgroundColor: tokens.colors.lightBlue[100],
   },
   monthsWrapperHorizontal: {
     display: 'flex',
@@ -300,9 +356,15 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
   },
-  monthWrapper: {},
+  week: {
+    paddingTop: 2,
+    paddingBottom: 2,
+  },
+  otherDay: {
+    opacity: 0.5,
+  },
   arrow: {
-    size: 40,
+    height: 40,
     width: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -317,14 +379,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     width: '100%',
   },
-  monthNameWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    size: 40,
+  weekDatesWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  monthPickerWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  firstMonthPickerWrapper: {
+    paddingRight: 8,
   },
   monthRoot: {
     width: '100%',
+  },
+  selectedDay: {
+    backgroundColor: tokens.colors.lightBlue[700],
   },
   dateWrapper: {
     display: 'flex',
@@ -334,4 +405,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 1,
   },
-});
+}));

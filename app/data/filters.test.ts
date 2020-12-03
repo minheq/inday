@@ -1,3 +1,4 @@
+import { test } from '../../lib/testing';
 import {
   textFieldKindFiltersByRule,
   numberFieldKindFiltersByRule,
@@ -10,7 +11,7 @@ import {
   filterRecords,
   FilterGetters,
 } from './filters';
-import { parseDay } from '../../lib/datetime/day';
+import { Day } from '../../lib/datetime';
 
 import {
   makeCollection,
@@ -21,630 +22,438 @@ import {
 } from './factory';
 import { FieldType, FieldValue, FieldID } from './fields';
 
-describe('no filter', () => {
-  test('all records', () => {
-    const values = ['AWord', 'BWord'];
-    const { records, getters } = prepare(FieldType.SingleLineText, values);
-    const result = filterRecords([], records, getters);
-
-    expect(result).toHaveLength(values.length);
-  });
-});
-
-describe('filtering text', () => {
+test('no filter', (t) => {
   const values = ['AWord', 'BWord'];
-  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
+  const { records, getters } = prepare(FieldType.SingleLineText, values);
+  const result = filterRecords([], records, getters);
 
-  test('contains same case', () => {
-    const filter = makeFilter(
-      {},
-      { rule: 'contains', value: 'Word', fieldID: field.id },
-    );
-    const result = filterRecords([[filter]], records, getters);
-
-    expect(result).toHaveLength(values.length);
-  });
-
-  test('one word different case', () => {
-    const filter = makeFilter(
-      {},
-      { rule: 'contains', value: 'aword', fieldID: field.id },
-    );
-    const result = filterRecords([[filter]], records, getters);
-
-    expect(result).toHaveLength(1);
-  });
-
-  test('2 for one', () => {
-    const filter1 = makeFilter(
-      {},
-      { rule: 'contains', value: 'word', fieldID: field.id },
-    );
-    const filter2 = makeFilter(
-      {},
-      { rule: 'contains', value: 'a', fieldID: field.id },
-    );
-    const result = filterRecords([[filter1, filter2]], records, getters);
-
-    expect(result).toHaveLength(1);
-  });
+  t.deepEqual(result.length, values.length);
 });
 
-describe('textFieldKindFiltersByRule', () => {
-  describe('contains', () => {
-    const filter = textFieldKindFiltersByRule.contains;
+const values = ['AWord', 'BWord'];
+const { records, getters, field } = prepare(FieldType.SingleLineText, values);
 
-    test('ok same case', () => {
-      expect(filter('abc', 'a')).toBeTruthy();
-    });
+test('filter text - contains same case', (t) => {
+  const filter = makeFilter(
+    {},
+    { rule: 'contains', value: 'Word', fieldID: field.id },
+  );
+  const result = filterRecords([[filter]], records, getters);
 
-    test('ok difference case', () => {
-      expect(filter('abc', 'A')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('abc', 'd')).toBeFalsy();
-    });
-  });
-
-  describe('doesNotContain', () => {
-    const filter = textFieldKindFiltersByRule.doesNotContain;
-
-    test('ok', () => {
-      expect(filter('abc', 'd')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('abc', 'a')).toBeFalsy();
-    });
-  });
-
-  describe('is', () => {
-    const filter = textFieldKindFiltersByRule.is;
-
-    test('ok', () => {
-      expect(filter('abc', 'abc')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('abc', 'b')).toBeFalsy();
-    });
-  });
-
-  describe('isNot', () => {
-    const filter = textFieldKindFiltersByRule.isNot;
-
-    test('ok', () => {
-      expect(filter('abc', 'b')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('abc', 'abc')).toBeFalsy();
-    });
-  });
-
-  describe('isEmpty', () => {
-    const filter = textFieldKindFiltersByRule.isEmpty;
-
-    test('ok', () => {
-      expect(filter('', '')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('abc', '')).toBeFalsy();
-    });
-  });
-
-  describe('isNotEmpty', () => {
-    const filter = textFieldKindFiltersByRule.isNotEmpty;
-
-    test('ok', () => {
-      expect(filter('abc', '')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('', '')).toBeFalsy();
-    });
-  });
+  t.deepEqual(result.length, values.length);
 });
 
-describe('numberFieldKindFiltersByRule', () => {
-  describe('equal', () => {
-    const filter = numberFieldKindFiltersByRule.equal;
+test('filter text - one word different case', (t) => {
+  const filter = makeFilter(
+    {},
+    { rule: 'contains', value: 'aword', fieldID: field.id },
+  );
+  const result = filterRecords([[filter]], records, getters);
 
-    test('ok', () => {
-      expect(filter(1, 1)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(1, 2)).toBeFalsy();
-    });
-  });
-
-  describe('notEqual', () => {
-    const filter = numberFieldKindFiltersByRule.notEqual;
-
-    test('ok', () => {
-      expect(filter(1, 2)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(1, 1)).toBeFalsy();
-    });
-  });
-
-  describe('lessThan', () => {
-    const filter = numberFieldKindFiltersByRule.lessThan;
-
-    test('ok', () => {
-      expect(filter(1, 2)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(2, 1)).toBeFalsy();
-    });
-  });
-
-  describe('greaterThan', () => {
-    const filter = numberFieldKindFiltersByRule.greaterThan;
-
-    test('ok', () => {
-      expect(filter(2, 1)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(1, 2)).toBeFalsy();
-    });
-  });
-
-  describe('lessThanOrEqual', () => {
-    const filter = numberFieldKindFiltersByRule.lessThanOrEqual;
-
-    test('ok', () => {
-      expect(filter(1, 2)).toBeTruthy();
-      expect(filter(2, 2)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(2, 1)).toBeFalsy();
-    });
-  });
-
-  describe('greaterThanOrEqual', () => {
-    const filter = numberFieldKindFiltersByRule.greaterThanOrEqual;
-
-    test('ok', () => {
-      expect(filter(2, 1)).toBeTruthy();
-      expect(filter(2, 2)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(1, 2)).toBeFalsy();
-    });
-  });
-
-  describe('isEmpty', () => {
-    const filter = numberFieldKindFiltersByRule.isEmpty;
-
-    test('ok', () => {
-      expect(filter(null, 0)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(1, 0)).toBeFalsy();
-    });
-  });
-
-  describe('isNotEmpty', () => {
-    const filter = numberFieldKindFiltersByRule.isNotEmpty;
-
-    test('ok', () => {
-      expect(filter(1, 0)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(null, 0)).toBeFalsy();
-    });
-  });
+  t.deepEqual(result.length, 1);
 });
 
-describe('dateFieldKindFiltersByRule', () => {
-  describe('is', () => {
-    const filter = dateFieldKindFiltersByRule.is;
+test('filter text - 2 for one', (t) => {
+  const filter1 = makeFilter(
+    {},
+    { rule: 'contains', value: 'word', fieldID: field.id },
+  );
+  const filter2 = makeFilter(
+    {},
+    { rule: 'contains', value: 'a', fieldID: field.id },
+  );
+  const result = filterRecords([[filter1, filter2]], records, getters);
 
-    test('ok', () => {
-      expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-03')),
-      ).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
-      ).toBeFalsy();
-    });
-  });
-
-  describe('isWithin', () => {
-    const filter = dateFieldKindFiltersByRule.isWithin;
-
-    test('ok', () => {
-      expect(
-        filter(parseDay('2020-08-03'), {
-          start: parseDay('2020-08-02'),
-          end: parseDay('2020-08-04'),
-        }),
-      ).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(
-        filter(parseDay('2020-08-05'), {
-          start: parseDay('2020-08-02'),
-          end: parseDay('2020-08-04'),
-        }),
-      ).toBeFalsy();
-    });
-  });
-
-  describe('isBefore', () => {
-    const filter = dateFieldKindFiltersByRule.isBefore;
-
-    test('ok', () => {
-      expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
-      ).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
-      ).toBeFalsy();
-    });
-  });
-
-  describe('isAfter', () => {
-    const filter = dateFieldKindFiltersByRule.isAfter;
-
-    test('ok', () => {
-      expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
-      ).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
-      ).toBeFalsy();
-    });
-  });
-
-  describe('isOnOrBefore', () => {
-    const filter = dateFieldKindFiltersByRule.isOnOrBefore;
-
-    test('ok', () => {
-      expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
-      ).toBeTruthy();
-      expect(
-        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
-      ).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
-      ).toBeFalsy();
-    });
-  });
-
-  describe('isOnOrAfter', () => {
-    const filter = dateFieldKindFiltersByRule.isOnOrAfter;
-
-    test('ok', () => {
-      expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
-      ).toBeTruthy();
-      expect(
-        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
-      ).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(
-        filter(parseDay('2020-08-03'), parseDay('2020-08-04')),
-      ).toBeFalsy();
-    });
-  });
-
-  describe('isNot', () => {
-    const filter = dateFieldKindFiltersByRule.isNot;
-
-    test('ok', () => {
-      expect(
-        filter(parseDay('2020-08-05'), parseDay('2020-08-04')),
-      ).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(
-        filter(parseDay('2020-08-04'), parseDay('2020-08-04')),
-      ).toBeFalsy();
-    });
-  });
-
-  describe('isEmpty', () => {
-    const filter = dateFieldKindFiltersByRule.isEmpty;
-
-    test('ok', () => {
-      expect(filter(null, new Date())).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(parseDay('2020-08-04'), new Date())).toBeFalsy();
-    });
-  });
-
-  describe('isNotEmpty', () => {
-    const filter = dateFieldKindFiltersByRule.isNotEmpty;
-
-    test('ok', () => {
-      expect(filter(parseDay('2020-08-04'), new Date())).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(null, new Date())).toBeFalsy();
-    });
-  });
+  t.deepEqual(result.length, 1);
 });
 
-describe('singleSelectFieldKindFiltersByRule', () => {
-  describe('is', () => {
-    const filter = singleSelectFieldKindFiltersByRule.is;
+test('textFieldKindFiltersByRule - contains', (t) => {
+  const filter = textFieldKindFiltersByRule.contains;
 
-    test('ok', () => {
-      expect(filter('a', 'a')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('a', 'b')).toBeFalsy();
-    });
-  });
-
-  describe('isNot', () => {
-    const filter = singleSelectFieldKindFiltersByRule.isNot;
-
-    test('ok', () => {
-      expect(filter('ab', 'a')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('a', 'a')).toBeFalsy();
-    });
-  });
-
-  describe('isAnyOf', () => {
-    const filter = singleSelectFieldKindFiltersByRule.isAnyOf;
-
-    test('ok', () => {
-      expect(filter('a', ['a', 'b'])).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('a', ['b', 'c'])).toBeFalsy();
-    });
-  });
-
-  describe('isNoneOf', () => {
-    const filter = singleSelectFieldKindFiltersByRule.isNoneOf;
-
-    test('ok', () => {
-      expect(filter('a', ['b', 'c'])).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('a', ['a', 'b'])).toBeFalsy();
-    });
-  });
-
-  describe('isEmpty', () => {
-    const filter = singleSelectFieldKindFiltersByRule.isEmpty;
-
-    test('ok', () => {
-      expect(filter(null, '')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter('abc', '')).toBeFalsy();
-    });
-  });
-
-  describe('isNotEmpty', () => {
-    const filter = singleSelectFieldKindFiltersByRule.isNotEmpty;
-
-    test('ok', () => {
-      expect(filter('abc', '')).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(null, '')).toBeFalsy();
-    });
-  });
+  t.deepEqual(filter('abc', 'a'), true, 'ok same case');
+  t.deepEqual(filter('abc', 'A'), true);
+  t.deepEqual(filter('abc', 'd'), false);
 });
 
-describe('multiSelectFieldKindFiltersByRule', () => {
-  describe('hasAnyOf', () => {
-    const filter = multiSelectFieldKindFiltersByRule.hasAnyOf;
+test('textFieldKindFiltersByRule - doesNotContain', (t) => {
+  const filter = textFieldKindFiltersByRule.doesNotContain;
 
-    test('ok', () => {
-      expect(filter(['a'], ['a', 'b'])).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(['a'], ['b', 'c'])).toBeFalsy();
-    });
-  });
-
-  describe('hasAllOf', () => {
-    const filter = multiSelectFieldKindFiltersByRule.hasAllOf;
-
-    test('ok', () => {
-      expect(filter(['b', 'a'], ['a', 'b'])).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(['a'], ['a', 'b'])).toBeFalsy();
-    });
-  });
-
-  describe('hasNoneOf', () => {
-    const filter = multiSelectFieldKindFiltersByRule.hasNoneOf;
-
-    test('ok', () => {
-      expect(filter(['a'], ['b', 'c'])).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(['a'], ['a', 'b'])).toBeFalsy();
-    });
-  });
-
-  describe('isEmpty', () => {
-    const filter = multiSelectFieldKindFiltersByRule.isEmpty;
-
-    test('ok', () => {
-      expect(filter([], [])).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(['a'], [])).toBeFalsy();
-    });
-  });
-
-  describe('isNotEmpty', () => {
-    const filter = multiSelectFieldKindFiltersByRule.isNotEmpty;
-
-    test('ok', () => {
-      expect(filter(['a'], [])).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter([], [])).toBeFalsy();
-    });
-  });
+  t.deepEqual(filter('abc', 'd'), true);
+  t.deepEqual(filter('abc', 'a'), false);
 });
 
-describe('booleanFieldKindFiltersByRule', () => {
-  describe('is', () => {
-    const filter = booleanFieldKindFiltersByRule.is;
+test('textFieldKindFiltersByRule - is', (t) => {
+  const filter = textFieldKindFiltersByRule.is;
 
-    test('ok', () => {
-      expect(filter(true, true)).toBeTruthy();
-    });
-
-    test('not ok', () => {
-      expect(filter(true, false)).toBeFalsy();
-    });
-  });
+  t.deepEqual(filter('abc', 'abc'), true);
+  t.deepEqual(filter('abc', 'b'), false);
 });
 
-describe('updateFilterGroup', () => {
-  describe('3 "OR" filters', () => {
-    const filter1: Filter = {
-      id: '1',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('textFieldKindFiltersByRule - isNot', (t) => {
+  const filter = textFieldKindFiltersByRule.isNot;
 
-    const filter2: Filter = {
-      id: '2',
-      viewID: '1',
-      group: 2,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+  t.deepEqual(filter('abc', 'b'), true);
+  t.deepEqual(filter('abc', 'abc'), false);
+});
 
-    const filter3: Filter = {
-      id: '3',
-      viewID: '1',
-      group: 3,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('textFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = textFieldKindFiltersByRule.isEmpty;
 
-    const filters: Filter[] = [filter1, filter2, filter3];
+  t.deepEqual(filter('', ''), true);
+  t.deepEqual(filter('abc', ''), false);
+});
 
-    test('f1 AND f2 OR f3', () => {
-      const updatedFilters = updateFilterGroup(filter2, 'and', filters);
+test('textFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = textFieldKindFiltersByRule.isNotEmpty;
 
-      const updatedFilter2 = updatedFilters[filter2.id];
-      const updatedFilter3 = updatedFilters[filter3.id];
+  t.deepEqual(filter('abc', ''), true);
+  t.deepEqual(filter('', ''), false);
+});
 
-      expect(updatedFilter2.group).toBe(1);
-      expect(updatedFilter3.group).toBe(2);
-    });
+test('numberFieldKindFiltersByRule - equal', (t) => {
+  const filter = numberFieldKindFiltersByRule.equal;
 
-    test('f1 OR f2 AND f3', () => {
-      const updatedFilters = updateFilterGroup(filter3, 'and', filters);
+  t.deepEqual(filter(1, 1), true);
+  t.deepEqual(filter(1, 2), false);
+});
 
-      const updatedFilter3 = updatedFilters[filter3.id];
+test('numberFieldKindFiltersByRule - notEqual', (t) => {
+  const filter = numberFieldKindFiltersByRule.notEqual;
 
-      expect(updatedFilter3.group).toBe(2);
-    });
-  });
+  t.deepEqual(filter(1, 2), true);
+  t.deepEqual(filter(1, 1), false);
+});
 
-  describe('3 "AND" filters', () => {
-    const filter1: Filter = {
-      id: '1',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('numberFieldKindFiltersByRule - lessThan', (t) => {
+  const filter = numberFieldKindFiltersByRule.lessThan;
 
-    const filter2: Filter = {
-      id: '2',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+  t.deepEqual(filter(1, 2), true);
+  t.deepEqual(filter(2, 1), false);
+});
 
-    const filter3: Filter = {
-      id: '3',
-      viewID: '1',
-      group: 1,
-      fieldID: '1',
-      rule: 'contains',
-      value: 's',
-    };
+test('numberFieldKindFiltersByRule - greaterThan', (t) => {
+  const filter = numberFieldKindFiltersByRule.greaterThan;
 
-    const filters: Filter[] = [filter1, filter2, filter3];
+  t.deepEqual(filter(2, 1), true);
+  t.deepEqual(filter(1, 2), false);
+});
 
-    test('f1 and f2 or f3', () => {
-      const updatedFilters = updateFilterGroup(filter3, 'or', filters);
+test('numberFieldKindFiltersByRule - lessThanOrEqual', (t) => {
+  const filter = numberFieldKindFiltersByRule.lessThanOrEqual;
 
-      const updatedFilter3 = updatedFilters[filter3.id];
+  t.deepEqual(filter(1, 2), true);
+  t.deepEqual(filter(2, 2), true);
+  t.deepEqual(filter(2, 1), false);
+});
 
-      expect(updatedFilter3.group).toBe(2);
-    });
+test('numberFieldKindFiltersByRule - greaterThanOrEqual', (t) => {
+  const filter = numberFieldKindFiltersByRule.greaterThanOrEqual;
 
-    test('f1 or f2 and f3', () => {
-      const updatedFilters = updateFilterGroup(filter2, 'or', filters);
-      const updatedFilter2 = updatedFilters[filter2.id];
-      const updatedFilter3 = updatedFilters[filter3.id];
+  t.deepEqual(filter(2, 1), true);
+  t.deepEqual(filter(2, 2), true);
+  t.deepEqual(filter(1, 2), false);
+});
 
-      expect(updatedFilter2.group).toBe(2);
-      expect(updatedFilter3.group).toBe(2);
-    });
-  });
+test('numberFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = numberFieldKindFiltersByRule.isEmpty;
+
+  t.deepEqual(filter(null, 0), true);
+  t.deepEqual(filter(1, 0), false);
+});
+
+test('numberFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = numberFieldKindFiltersByRule.isNotEmpty;
+
+  t.deepEqual(filter(1, 0), true);
+  t.deepEqual(filter(null, 0), false);
+});
+
+test('dateFieldKindFiltersByRule - is', (t) => {
+  const filter = dateFieldKindFiltersByRule.is;
+
+  t.deepEqual(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-03')), true);
+  t.deepEqual(
+    filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isWithin', (t) => {
+  const filter = dateFieldKindFiltersByRule.isWithin;
+
+  t.deepEqual(
+    filter(Day.toDate('2020-08-03'), {
+      start: Day.toDate('2020-08-02'),
+      end: Day.toDate('2020-08-04'),
+    }),
+    true,
+  );
+
+  t.deepEqual(
+    filter(Day.toDate('2020-08-05'), {
+      start: Day.toDate('2020-08-02'),
+      end: Day.toDate('2020-08-04'),
+    }),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isBefore', (t) => {
+  const filter = dateFieldKindFiltersByRule.isBefore;
+
+  t.deepEqual(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), true);
+  t.deepEqual(
+    filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isAfter', (t) => {
+  const filter = dateFieldKindFiltersByRule.isAfter;
+
+  t.deepEqual(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
+  t.deepEqual(
+    filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isOnOrBefore', (t) => {
+  const filter = dateFieldKindFiltersByRule.isOnOrBefore;
+
+  t.deepEqual(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), true);
+  t.deepEqual(filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')), true);
+  t.deepEqual(
+    filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isOnOrAfter', (t) => {
+  const filter = dateFieldKindFiltersByRule.isOnOrAfter;
+
+  t.deepEqual(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
+  t.deepEqual(filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')), true);
+  t.deepEqual(
+    filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isNot', (t) => {
+  const filter = dateFieldKindFiltersByRule.isNot;
+
+  t.deepEqual(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
+  t.deepEqual(
+    filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
+    false,
+  );
+});
+
+test('dateFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = dateFieldKindFiltersByRule.isEmpty;
+
+  t.deepEqual(filter(null, new Date()), true);
+  t.deepEqual(filter(Day.toDate('2020-08-04'), new Date()), false);
+});
+
+test('dateFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = dateFieldKindFiltersByRule.isNotEmpty;
+
+  t.deepEqual(filter(Day.toDate('2020-08-04'), new Date()), true);
+  t.deepEqual(filter(null, new Date()), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - is', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.is;
+
+  t.deepEqual(filter('opt1', 'opt1'), true);
+  t.deepEqual(filter('opt1', 'opt2'), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isNot', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isNot;
+
+  t.deepEqual(filter('opt1', 'opt2'), true);
+  t.deepEqual(filter('opt1', 'opt1'), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isAnyOf', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isAnyOf;
+
+  t.deepEqual(filter('a', ['a', 'b']), true);
+  t.deepEqual(filter('a', ['b', 'c']), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isNoneOf', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isNoneOf;
+
+  t.deepEqual(filter('a', ['b', 'c']), true);
+  t.deepEqual(filter('a', ['a', 'b']), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isEmpty;
+
+  t.deepEqual(filter(null, ''), true);
+  t.deepEqual(filter('abc', ''), false);
+});
+
+test('singleSelectFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = singleSelectFieldKindFiltersByRule.isNotEmpty;
+
+  t.deepEqual(filter('abc', ''), true);
+  t.deepEqual(filter(null, ''), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - hasAnyOf', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.hasAnyOf;
+
+  t.deepEqual(filter(['a'], ['a', 'b']), true);
+  t.deepEqual(filter(['a'], ['b', 'c']), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - hasAllOf', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.hasAllOf;
+
+  t.deepEqual(filter(['b', 'a'], ['a', 'b']), true);
+  t.deepEqual(filter(['a'], ['a', 'b']), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - hasNoneOf', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.hasNoneOf;
+
+  t.deepEqual(filter(['a'], ['b', 'c']), true);
+  t.deepEqual(filter(['a'], ['a', 'b']), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - isEmpty', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.isEmpty;
+
+  t.deepEqual(filter([], []), true);
+  t.deepEqual(filter(['a'], []), false);
+});
+
+test('multiSelectFieldKindFiltersByRule - isNotEmpty', (t) => {
+  const filter = multiSelectFieldKindFiltersByRule.isNotEmpty;
+
+  t.deepEqual(filter(['a'], []), true);
+  t.deepEqual(filter([], []), false);
+});
+
+test('booleanFieldKindFiltersByRule - is', (t) => {
+  const filter = booleanFieldKindFiltersByRule.is;
+
+  t.deepEqual(filter(true, true), true);
+  t.deepEqual(filter(true, false), false);
+});
+
+function getOrFilters() {
+  const filter1: Filter = {
+    id: '1',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter2: Filter = {
+    id: '2',
+    viewID: '1',
+    group: 2,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter3: Filter = {
+    id: '3',
+    viewID: '1',
+    group: 3,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  return [filter1, filter2, filter3];
+}
+
+test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
+  const filters = getOrFilters();
+  const [, filter2, filter3] = filters;
+
+  const updatedFilters = updateFilterGroup(filter2, 'and', filters);
+
+  const updatedFilter2 = updatedFilters[filter2.id];
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.deepEqual(updatedFilter2.group, 1);
+  t.deepEqual(updatedFilter3.group, 2);
+});
+
+test('updateFilterGroup - 3 "OR" filters to f1 OR f2 AND f3', (t) => {
+  const filters = getOrFilters();
+  const [, , filter3] = filters;
+
+  const updatedFilters = updateFilterGroup(filter3, 'and', filters);
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.deepEqual(updatedFilter3.group, 2);
+});
+
+function getAndFilters() {
+  const filter1: Filter = {
+    id: '1',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter2: Filter = {
+    id: '2',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  const filter3: Filter = {
+    id: '3',
+    viewID: '1',
+    group: 1,
+    fieldID: '1',
+    rule: 'contains',
+    value: 's',
+  };
+
+  return [filter1, filter2, filter3];
+}
+
+test('updateFilterGroup - 3 "AND" filters - f1 and f2 or f3', (t) => {
+  const filters = getAndFilters();
+  const [, , filter3] = filters;
+
+  const updatedFilters = updateFilterGroup(filter3, 'or', filters);
+
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.deepEqual(updatedFilter3.group, 2);
+});
+
+test('updateFilterGroup - 3 "AND" filters - f1 or f2 and f3', (t) => {
+  const filters = getAndFilters();
+  const [, filter2, filter3] = filters;
+
+  const updatedFilters = updateFilterGroup(filter2, 'or', filters);
+  const updatedFilter2 = updatedFilters[filter2.id];
+  const updatedFilter3 = updatedFilters[filter3.id];
+
+  t.deepEqual(updatedFilter2.group, 2);
+  t.deepEqual(updatedFilter3.group, 2);
 });
 
 function prepare(fieldType: FieldType, values: FieldValue[]) {

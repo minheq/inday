@@ -1,61 +1,67 @@
-import React, { useCallback, useState, useRef, Fragment } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 
 import {
-  StyleSheet,
   View,
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
   Animated,
-  Dimensions,
   ScrollView,
+  Pressable,
 } from 'react-native';
-import { tokens, useTheme } from './theme';
-import { Container } from './container';
-import { Pressable } from './pressable';
-import { Row } from './row';
+import { tokens } from './tokens';
 import { Text } from './text';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
-import { Option } from './option';
-import { Checkbox } from './checkbox';
-import { Popover, initialPopoverAnchor, PopoverAnchor } from './popover';
-import { measure, initialMeasurements } from '../lib/measurements';
+import { Popover, getPopoverAnchorAndHeight } from './popover';
+import { Measurements } from '../lib/measurements';
+import { isNonNullish } from '../../lib/js_utils';
+import { DynamicStyleSheet } from './stylesheet';
+import { NavigationKey, UIKey } from '../lib/keyboard';
 
-export interface PickerProps<TValue = any> {
-  value?: TValue;
-  options: Option<TValue>[];
-  onChange?: (value: TValue) => void;
-  renderOption?: (option: Option<TValue>, active: boolean) => React.ReactNode;
+export interface PickerProps<T> {
+  value?: T;
+  options: PickerOption<T>[];
+  onChange?: (value: T) => void;
+  renderOption?: (option: PickerOption<T>, active: boolean) => React.ReactNode;
   disabled?: boolean;
   placeholder?: string;
   searchable?: boolean;
 }
 
-const OPTION_HEIGHT = 40;
-const SEARCH_HEIGHT = 56;
-const PICKER_OFFSET = 4;
-const SCREEN_OFFSET = 16;
+export interface PickerOption<T> {
+  value: T;
+  label: string;
+}
 
-export function Picker<TValue = any>(props: PickerProps<TValue>) {
+const OPTION_HEIGHT = 32;
+const SEARCH_HEIGHT = 56;
+
+export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const {
     value,
     placeholder = '',
     options,
     renderOption,
-    onChange = () => {},
+    onChange,
     searchable = false,
   } = props;
   const buttonRef = useRef<View>(null);
-  const borderColor = React.useRef(new Animated.Value(0)).current;
-  const [focused, setFocused] = React.useState(false);
+  const popoverContentRef = useRef<View>(null);
+  const borderColor = useRef(new Animated.Value(0)).current;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [picker, setPicker] = useState({
-    anchor: initialPopoverAnchor,
+    anchor: { x: 0, y: 0 },
     visible: false,
-    button: initialMeasurements,
+    buttonWidth: 0,
   });
-  const theme = useTheme();
 
   const selected = options.find((o) => o.value === value);
   const filteredOptions =
@@ -65,71 +71,45 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
         )
       : options;
 
-  const popoverHeight = filteredOptions.length * OPTION_HEIGHT + SEARCH_HEIGHT;
-  const [height, setHeight] = useState(popoverHeight);
+  const contentHeight =
+    filteredOptions.length * OPTION_HEIGHT +
+    (searchable ? SEARCH_HEIGHT : 0) +
+    16 + // vertical padding
+    2; // border;
+
+  const [height, setHeight] = useState(contentHeight);
 
   const handleClosePicker = useCallback(() => {
     setPicker((prevPicker) => ({ ...prevPicker, visible: false }));
     setSearch('');
   }, []);
 
-  const handleOpenPicker = useCallback(async () => {
-    const button = await measure(buttonRef);
+  const handleOpenPicker = useCallback(() => {
+    if (buttonRef.current !== null) {
+      buttonRef.current.measure((...measurementsArgs) => {
+        const buttonMeasurements = Measurements.fromArray(measurementsArgs);
+        const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
+          buttonMeasurements,
+          contentHeight,
+        );
 
-    const screenSize = Dimensions.get('window');
-
-    const bottomY = button.pageY + button.height + PICKER_OFFSET;
-    const topY = button.pageY - PICKER_OFFSET - popoverHeight;
-
-    const overflowsBottom = bottomY + popoverHeight > screenSize.height;
-
-    let anchor: PopoverAnchor = initialPopoverAnchor;
-
-    if (overflowsBottom) {
-      const heightIfBottomY = screenSize.height - bottomY;
-      const heightIfTopY = button.pageY;
-
-      if (heightIfTopY < heightIfBottomY) {
-        anchor = {
-          x: button.pageX,
-          y: bottomY,
-        };
-
-        if (screenSize.height - bottomY < popoverHeight) {
-          setHeight(screenSize.height - bottomY - SCREEN_OFFSET);
-        }
-      } else {
-        if (topY < 0) {
-          setHeight(button.pageY - SCREEN_OFFSET);
-          anchor = {
-            x: button.pageX,
-            y: SCREEN_OFFSET,
-          };
-        } else {
-          anchor = {
-            x: button.pageX,
-            y: topY,
-          };
-        }
-      }
-    } else {
-      anchor = {
-        x: button.pageX,
-        y: bottomY,
-      };
+        setHeight(popoverHeight);
+        setPicker({
+          visible: true,
+          buttonWidth: buttonMeasurements.width,
+          anchor,
+        });
+      });
     }
-
-    setPicker({
-      visible: true,
-      button,
-      anchor,
-    });
-  }, [buttonRef, popoverHeight]);
+  }, [buttonRef, contentHeight]);
 
   const handleSelectOption = useCallback(
-    (option: Option<TValue>) => {
+    (option: PickerOption<T>) => {
       handleClosePicker();
-      onChange(option.value);
+
+      if (isNonNullish(onChange)) {
+        onChange(option.value);
+      }
     },
     [onChange, handleClosePicker],
   );
@@ -138,23 +118,13 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
     setSearch(text);
   }, []);
 
-  const handleHoverIn = useCallback((index: number) => {
-    setActiveIndex(index);
-  }, []);
-
-  const handleBlur = React.useCallback(() => {
-    setFocused(false);
-  }, []);
-
-  const handleFocus = React.useCallback(() => {
-    setFocused(true);
-  }, []);
-
   const handleSubmitEditing = useCallback(() => {
     if (activeIndex !== null) {
       handleClosePicker();
       const option = options[activeIndex];
-      onChange(option.value);
+      if (isNonNullish(onChange)) {
+        onChange(option.value);
+      }
     }
   }, [activeIndex, options, handleClosePicker, onChange]);
 
@@ -162,76 +132,66 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
       const key = event.nativeEvent.key;
 
-      if (key === 'ArrowDown') {
+      if (key === NavigationKey.ArrowDown) {
         if (activeIndex === null || activeIndex === options.length - 1) {
           setActiveIndex(0);
         } else {
           setActiveIndex(activeIndex + 1);
         }
-      } else if (key === 'ArrowUp') {
+      } else if (key === NavigationKey.ArrowUp) {
         if (activeIndex === null || activeIndex === 0) {
           setActiveIndex(options.length - 1);
         } else {
           setActiveIndex(activeIndex - 1);
         }
-      } else if (key === 'Escape') {
+      } else if (key === UIKey.Escape) {
         handleClosePicker();
       }
     },
     [activeIndex, options, handleClosePicker],
   );
 
-  React.useEffect(() => {
+  const handlePopoverShow = useCallback(() => {
+    popoverContentRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
     Animated.spring(borderColor, {
-      toValue: focused || picker.visible ? 1 : 0,
+      toValue: picker.visible ? 1 : 0,
       useNativeDriver: true,
       bounciness: 0,
     }).start();
-  }, [borderColor, focused, picker]);
+  }, [borderColor, picker]);
 
   return (
     <Fragment>
       <View ref={buttonRef}>
-        <Pressable
-          onPress={handleOpenPicker}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          style={[
-            styles.button,
-            {
-              backgroundColor: theme.container.color.content,
-              borderColor: borderColor.interpolate({
-                inputRange: [0, 1],
-                outputRange: [
-                  theme.border.color.default,
-                  theme.border.color.focus,
-                ],
-              }),
-            },
-          ]}
-        >
-          <Container center height={40} paddingHorizontal={16}>
-            <Row expanded alignItems="center" justifyContent="space-between">
-              <Text>{selected ? selected.label : placeholder}</Text>
-              <Icon size="lg" name="chevron-down" />
-            </Row>
-          </Container>
+        <Pressable onPress={handleOpenPicker} style={styles.button}>
+          <Text>{selected ? selected.label : placeholder}</Text>
+          <View style={styles.caretWrapper}>
+            <Icon name="CaretDown" color="default" />
+          </View>
         </Pressable>
       </View>
       <Popover
+        onShow={handlePopoverShow}
         anchor={picker.anchor}
         visible={picker.visible}
         onRequestClose={handleClosePicker}
       >
-        <Container
-          width={picker.button.width}
-          height={height}
-          color="content"
-          borderWidth={1}
-          borderRadius={tokens.radius}
+        <View
+          accessible
+          ref={popoverContentRef}
+          style={[
+            styles.popover,
+            {
+              width: picker.buttonWidth + 40, // space for check icon
+              height,
+            },
+          ]}
         >
           {searchable === true && (
-            <Container height={SEARCH_HEIGHT} padding={8}>
+            <View style={styles.searchWrapper}>
               <TextInput
                 clearable
                 placeholder="Search option"
@@ -241,10 +201,10 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
                 onKeyPress={handleKeyPress}
                 onSubmitEditing={handleSubmitEditing}
               />
-            </Container>
+            </View>
           )}
           <ScrollView>
-            <Container padding={8}>
+            <View style={styles.optionsContainer}>
               {filteredOptions.map((o, i) => {
                 const active = i === activeIndex;
 
@@ -252,55 +212,69 @@ export function Picker<TValue = any>(props: PickerProps<TValue>) {
                   renderOption(o, active)
                 ) : (
                   <Pressable
-                    onHoverIn={() => handleHoverIn(i)}
+                    key={String(o.value)}
                     onPress={() => handleSelectOption(o)}
-                    style={[
+                    style={({ hovered }: any) => [
                       styles.option,
                       {
-                        backgroundColor: active
-                          ? theme.button.backgroundActive
-                          : theme.button.backgroundDefault,
+                        backgroundColor:
+                          active || hovered
+                            ? tokens.colors.lightBlue[50]
+                            : tokens.colors.base.white,
                       },
                     ]}
                   >
-                    <Container
-                      height={32}
-                      paddingHorizontal={8}
-                      borderRadius={tokens.radius}
-                    >
-                      <Row
-                        expanded
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Text>{o.label}</Text>
-                        {selected && selected.value === o.value && (
-                          <Checkbox value={true} />
-                        )}
-                      </Row>
-                    </Container>
+                    <Text color={active ? 'contrast' : 'default'}>
+                      {o.label}
+                    </Text>
+                    {selected && selected.value === o.value && (
+                      <Icon name="CheckThick" color="primary" />
+                    )}
                   </Pressable>
                 );
               })}
-            </Container>
+            </View>
           </ScrollView>
-        </Container>
+        </View>
       </Popover>
     </Fragment>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create(() => ({
   button: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     borderWidth: 1,
+    borderColor: tokens.colors.gray[300],
+    flexDirection: 'row',
+    height: 40,
+    alignItems: 'center',
+    paddingLeft: 8,
+    paddingRight: 24,
+  },
+  popover: {
+    backgroundColor: tokens.colors.base.white,
+    borderWidth: 1,
+    borderColor: tokens.colors.gray[300],
+    borderRadius: tokens.border.radius.default,
+  },
+  searchWrapper: {
+    height: SEARCH_HEIGHT,
+    padding: 8,
+  },
+  caretWrapper: {
+    position: 'absolute',
+    right: 0,
   },
   optionsContainer: {
-    position: 'absolute',
-    top: 44,
-    width: '100%',
+    padding: 8,
   },
   option: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
+    height: OPTION_HEIGHT,
+    paddingHorizontal: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-});
+}));

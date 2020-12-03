@@ -5,17 +5,17 @@ import React, {
   Fragment,
   useEffect,
   createContext,
+  useMemo,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView } from 'react-native';
+import { ScrollView, Pressable } from 'react-native';
 
 import {
   Container,
   Spacer,
-  Button,
+  FlatButton,
   Text,
   Row,
-  Pressable,
   tokens,
   SegmentedControl,
 } from '../components';
@@ -28,7 +28,7 @@ import {
   useCreateGroup,
   useGetGroupsSequenceMax,
 } from '../data/store';
-import { first, isEmpty } from '../../lib/data_structures';
+import { Array } from '../../lib/js_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { GroupID, Group, GroupConfig, GroupOrder } from '../data/groups';
@@ -97,8 +97,11 @@ function GroupListItem(props: GroupListItemProps) {
   }, [setGroupEditID]);
 
   const handlePressRemove = useCallback(() => {
-    deleteGroup(group);
-    setGroupEditID('');
+    deleteGroup(group)
+      .then(() => {
+        setGroupEditID('');
+      })
+      .catch((e) => {});
   }, [deleteGroup, setGroupEditID, group]);
 
   const handleSubmit = useCallback(() => {
@@ -165,18 +168,20 @@ function GroupNew() {
   const fields = useGetCollectionFields(context.collectionID);
 
   const createGroup = useCreateGroup();
-  const firstField = first(fields);
+  const firstField = Array.first(fields);
 
-  if (isEmpty(fields)) {
+  if (Array.isEmpty(fields)) {
     throw new Error(
       'Fields are empty. They may not have been loaded properly.',
     );
   }
 
-  const defaultGroupConfig: GroupConfig = {
-    fieldID: firstField.id,
-    order: 'ascending',
-  };
+  const defaultGroupConfig: GroupConfig = useMemo(() => {
+    return {
+      fieldID: firstField.id,
+      order: 'ascending',
+    };
+  }, [firstField]);
 
   const [groupConfig, setGroupConfig] = useState<GroupConfig>(
     defaultGroupConfig,
@@ -206,8 +211,12 @@ function GroupNew() {
 
   if (open) {
     return (
-      <Container padding={16} borderRadius={tokens.radius} shadow>
-        <Text bold>New group</Text>
+      <Container
+        padding={16}
+        borderRadius={tokens.border.radius.default}
+        shadow
+      >
+        <Text weight="bold">New group</Text>
         <Spacer size={16} />
         <GroupEdit groupConfig={groupConfig} onChange={setGroupConfig} />
         <Spacer size={16} />
@@ -225,11 +234,7 @@ function GroupNew() {
   }
 
   return (
-    <Button
-      alignTitle="left"
-      onPress={handlePressAddGroup}
-      title="+ Add group"
-    />
+    <FlatButton icon="Plus" onPress={handlePressAddGroup} title="Add group" />
   );
 }
 

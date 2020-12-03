@@ -8,7 +8,7 @@ export default {
   component: SegmentedControl,
 };
 
-export const Default = () => {
+export function Basic(): JSX.Element {
   const [value, setValue] = React.useState(1);
 
   return (
@@ -24,4 +24,4 @@ export const Default = () => {
       />
     </Container>
   );
-};
+}

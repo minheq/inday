@@ -1,5 +1,4 @@
 import { Space } from './spaces';
-import faker from 'faker';
 import { generateID } from '../../lib/id/id';
 import { Collaborator } from './collaborators';
 import {
@@ -12,19 +11,44 @@ import {
   assertMultiOptionField,
   assertSingleOptionField,
   assertMultiCollaboratorField,
+  NumberField,
+  PhoneNumberField,
+  SingleCollaboratorField,
+  MultiOptionField,
+  MultiLineTextField,
+  DateField,
+  CurrencyField,
+  CheckboxField,
+  SingleRecordLinkField,
+  SingleLineTextField,
+  SingleOptionField,
+  URLField,
+  SelectOption,
 } from './fields';
 import { BaseView, View } from './views';
 import { Collection } from './collections';
 import { Record } from './records';
 import { Filter, FilterConfig } from './filters';
-import { keyedBy, range, isEmpty } from '../../lib/data_structures';
+import { Array } from '../../lib/js_utils';
 import { Sort, SortConfig } from './sorts';
+import {
+  fakeBoolean,
+  fakeDate,
+  fakeEmail,
+  fakeNumber,
+  fakePhoneNumber,
+  fakeURL,
+  fakeWord,
+  fakeWords,
+} from '../../lib/faker';
+import { tokens } from '../components';
+import { Workspace } from './workspace';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
-    id: space.id ?? generateID(),
-    name: space.name ?? faker.commerce.department(),
-    workspaceID: space.workspaceID ?? generateID(),
+    id: space.id ?? Space.generateID(),
+    name: space.name ?? fakeWords(2),
+    workspaceID: space.workspaceID ?? Workspace.generateID(),
     updatedAt: space.updatedAt ?? new Date(),
     createdAt: space.createdAt ?? new Date(),
   };
@@ -34,10 +58,12 @@ export function makeCollaborator(
   collaborator: Partial<Collaborator>,
 ): Collaborator {
   return {
-    id: collaborator.id ?? generateID(),
-    name: collaborator.name ?? faker.name.lastName(),
-    email: collaborator.email ?? faker.internet.email(),
-    spaceID: collaborator.spaceID ?? generateID(),
+    id: collaborator.id ?? Collaborator.generateID(),
+    userID: collaborator.userID ?? Collaborator.generateID(),
+    profileImageID: collaborator.profileImageID ?? 'someID',
+    name: collaborator.name ?? fakeWords(2),
+    email: collaborator.email ?? fakeEmail(),
+    spaceID: collaborator.spaceID ?? Space.generateID(),
     updatedAt: collaborator.updatedAt ?? new Date(),
     createdAt: collaborator.createdAt ?? new Date(),
   };
@@ -53,10 +79,10 @@ export function makeField(field: Partial<Field>): Field {
 
 export function makeBaseField(field: Partial<Field>): BaseField {
   return {
-    id: field.id ?? generateID(),
-    name: field.name ?? faker.name.lastName(),
-    description: field.description ?? faker.random.words(),
-    collectionID: field.collectionID ?? generateID(),
+    id: field.id ?? Field.generateID(),
+    name: field.name ?? fakeWord(),
+    description: field.description ?? fakeWords(50),
+    collectionID: field.collectionID ?? Collection.generateID(),
     updatedAt: field.updatedAt ?? new Date(),
     createdAt: field.createdAt ?? new Date(),
   };
@@ -65,31 +91,28 @@ export function makeBaseField(field: Partial<Field>): BaseField {
 const makeFieldByType: {
   [fieldType in FieldType]: (field: Partial<Field>) => Field;
 } = {
-  [FieldType.Checkbox]: (field) => {
+  [FieldType.Checkbox]: (field): CheckboxField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Checkbox,
-      emoji: '',
       ...base,
     };
   },
-  [FieldType.Currency]: (field) => {
+  [FieldType.Currency]: (field): CurrencyField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Currency,
-      currency: '$',
-      precision: 2,
-      allowNegative: false,
+      currency: 'USD',
       ...base,
     };
   },
-  [FieldType.Date]: (field) => {
+  [FieldType.Date]: (field): DateField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Date,
       format: 'yyyy-MM-dd',
-      includeTime: false,
-      timeFormat: '12hour',
+      hourCycle: 'h24',
+      timezone: true,
       ...base,
     };
   },
@@ -114,11 +137,11 @@ const makeFieldByType: {
       type: FieldType.MultiRecordLink,
       recordsFromCollectionID:
         (field as Partial<MultiRecordLinkField>).recordsFromCollectionID ??
-        generateID(),
+        Collection.generateID(),
       ...base,
     };
   },
-  [FieldType.MultiLineText]: (field) => {
+  [FieldType.MultiLineText]: (field): MultiLineTextField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.MultiLineText,
@@ -126,52 +149,69 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.MultiOption]: (field) => {
+  [FieldType.MultiOption]: (field): MultiOptionField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.MultiOption,
       options: [
-        { value: faker.random.word(), color: 'green', order: 1 },
-        { value: faker.random.word(), color: 'blue', order: 2 },
-        { value: faker.random.word(), color: 'red', order: 3 },
+        {
+          id: SelectOption.generateID(),
+          label: fakeWord(),
+          color: tokens.colors.green[100],
+          order: 1,
+        },
+        {
+          id: SelectOption.generateID(),
+          label: fakeWord(),
+          color: tokens.colors.blue[100],
+          order: 2,
+        },
+        {
+          id: SelectOption.generateID(),
+          label: fakeWord(),
+          color: tokens.colors.red[100],
+          order: 3,
+        },
       ],
       ...base,
     };
   },
-  [FieldType.Number]: (field) => {
+  [FieldType.Number]: (field): NumberField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.Number,
+      style: 'decimal',
       default: null,
-      format: 'integer',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
       ...base,
     };
   },
-  [FieldType.PhoneNumber]: (field) => {
+  [FieldType.PhoneNumber]: (field): PhoneNumberField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.PhoneNumber,
       ...base,
     };
   },
-  [FieldType.SingleCollaborator]: (field) => {
+  [FieldType.SingleCollaborator]: (field): SingleCollaboratorField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleCollaborator,
       ...base,
     };
   },
-  [FieldType.SingleRecordLink]: (field) => {
+  [FieldType.SingleRecordLink]: (field): SingleRecordLinkField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleRecordLink,
       recordsFromCollectionID:
         (field as Partial<MultiRecordLinkField>).recordsFromCollectionID ??
-        generateID(),
+        Collection.generateID(),
       ...base,
     };
   },
-  [FieldType.SingleLineText]: (field) => {
+  [FieldType.SingleLineText]: (field): SingleLineTextField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleLineText,
@@ -179,19 +219,34 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.SingleOption]: (field) => {
+  [FieldType.SingleOption]: (field): SingleOptionField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleOption,
       options: [
-        { value: faker.random.word(), color: 'green', order: 1 },
-        { value: faker.random.word(), color: 'blue', order: 2 },
-        { value: faker.random.word(), color: 'red', order: 3 },
+        {
+          id: SelectOption.generateID(),
+          label: fakeWord(),
+          color: tokens.colors.green[100],
+          order: 1,
+        },
+        {
+          id: SelectOption.generateID(),
+          label: fakeWord(),
+          color: tokens.colors.blue[100],
+          order: 2,
+        },
+        {
+          id: SelectOption.generateID(),
+          label: fakeWord(),
+          color: tokens.colors.red[100],
+          order: 3,
+        },
       ],
       ...base,
     };
   },
-  [FieldType.URL]: (field) => {
+  [FieldType.URL]: (field): URLField => {
     const base = makeBaseField(field);
     return {
       type: FieldType.URL,
@@ -206,12 +261,12 @@ interface CollectionWithFields extends Collection {
 
 export function makeCollection(collection: Partial<Collection>): Collection {
   return {
-    id: collection.id ?? generateID(),
-    name: collection.name ?? faker.commerce.department(),
-    spaceID: collection.spaceID ?? generateID(),
+    id: collection.id ?? Collection.generateID(),
+    name: collection.name ?? fakeWords(2),
+    spaceID: collection.spaceID ?? Space.generateID(),
     updatedAt: collection.updatedAt ?? new Date(),
     createdAt: collection.createdAt ?? new Date(),
-    mainFieldID: collection.mainFieldID ?? generateID(),
+    primaryFieldID: collection.primaryFieldID ?? Field.generateID(),
   };
 }
 
@@ -234,9 +289,9 @@ export function makeView(
   collection: CollectionWithFields,
 ): View {
   const baseView: BaseView = {
-    id: view.id ?? generateID(),
-    name: view.name ?? faker.commerce.department(),
-    collectionID: view.collectionID ?? generateID(),
+    id: view.id ?? View.generateID(),
+    name: view.name ?? fakeWords(2),
+    collectionID: view.collectionID ?? Collection.generateID(),
     updatedAt: view.updatedAt ?? new Date(),
     createdAt: view.createdAt ?? new Date(),
   };
@@ -253,14 +308,14 @@ export function makeView(
     ...baseView,
     type: 'list',
     fixedFieldCount: 1,
-    fieldsConfig: keyedBy(
+    fieldsConfig: Array.keyedBy(
       collection.fields.map((f, i) => ({
         id: f.id,
         visible: true,
         width: 180,
         order: i,
       })),
-      'id',
+      (field) => field.id,
     ),
   };
 }
@@ -272,8 +327,8 @@ export function makeManyRecords(
     [fieldID: string]: Record[];
   },
   collaborators?: Collaborator[],
-) {
-  return range(0, count).map(() => {
+): Record[] {
+  return Array.range(0, count).map(() => {
     return makeRecord({}, collection, recordsByFieldID, collaborators);
   });
 }
@@ -305,9 +360,10 @@ export function makeRecord(
   }
 
   return {
-    id: record.id ?? generateID(),
+    id: record.id ?? Record.generateID(),
     fields,
-    collectionID: record.collectionID ?? collection?.id ?? generateID(),
+    collectionID:
+      record.collectionID ?? collection?.id ?? Collection.generateID(),
     updatedAt: record.updatedAt ?? new Date(),
     createdAt: record.createdAt ?? new Date(),
   };
@@ -323,56 +379,54 @@ const fakeFieldValuesByFieldType: {
   ) => FieldValue;
 } = {
   [FieldType.Checkbox]: () => {
-    return faker.random.boolean();
+    return fakeBoolean();
   },
   [FieldType.Currency]: () => {
-    return faker.random.number();
+    return fakeNumber();
   },
   [FieldType.Date]: () => {
-    return faker.date.future();
+    return fakeDate();
   },
   [FieldType.Email]: () => {
-    return faker.internet.email();
+    return fakeEmail();
   },
-  [FieldType.MultiCollaborator]: (field, recordsByFieldID, collaborators) => {
+  [FieldType.MultiCollaborator]: (field, _recordsByFieldID, collaborators) => {
     assertMultiCollaboratorField(field);
 
     if (collaborators === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (isEmpty(collaborators)) {
+    if (Array.isEmpty(collaborators)) {
       return [];
     }
 
-    return [faker.helpers.randomize(collaborators.map((c) => c.id))];
+    return [Array.sample(collaborators).id];
   },
   [FieldType.MultiRecordLink]: (field, recordsByFieldID) => {
     if (recordsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (isEmpty(recordsByFieldID[field.id])) {
+    if (Array.isEmpty(recordsByFieldID[field.id])) {
       return [];
     }
 
-    return [
-      faker.helpers.randomize(recordsByFieldID[field.id].map((d) => d.id)),
-    ];
+    return [Array.sample(recordsByFieldID[field.id]).id];
   },
   [FieldType.MultiLineText]: () => {
-    return faker.random.words();
+    return fakeWords(50);
   },
   [FieldType.MultiOption]: (field) => {
     assertMultiOptionField(field);
 
-    return [faker.helpers.randomize(field.options).value];
+    return [Array.sample(field.options).id];
   },
   [FieldType.Number]: () => {
-    return faker.random.number();
+    return fakeNumber();
   },
   [FieldType.PhoneNumber]: () => {
-    return faker.phone.phoneNumber();
+    return fakePhoneNumber();
   },
   [FieldType.SingleCollaborator]: (field, recordsByFieldID, collaborators) => {
     assertSingleCollaboratorField(field);
@@ -381,33 +435,33 @@ const fakeFieldValuesByFieldType: {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (isEmpty(collaborators)) {
+    if (Array.isEmpty(collaborators)) {
       return null;
     }
 
-    return faker.helpers.randomize(collaborators.map((c) => c.id));
+    return Array.sample(collaborators).id;
   },
   [FieldType.SingleRecordLink]: (field, recordsByFieldID) => {
     if (recordsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (isEmpty(recordsByFieldID[field.id])) {
+    if (Array.isEmpty(recordsByFieldID[field.id])) {
       return null;
     }
 
-    return faker.helpers.randomize(recordsByFieldID[field.id].map((d) => d.id));
+    return Array.sample(recordsByFieldID[field.id]).id;
   },
   [FieldType.SingleLineText]: () => {
-    return faker.random.words();
+    return fakeWords(2);
   },
   [FieldType.SingleOption]: (field) => {
     assertSingleOptionField(field);
 
-    return faker.helpers.randomize(field.options).value;
+    return Array.sample(field.options).id;
   },
   [FieldType.URL]: () => {
-    return faker.internet.url();
+    return fakeURL();
   },
 };
 
@@ -416,8 +470,8 @@ export function makeFilter(
   config: FilterConfig,
 ): Filter {
   return {
-    id: filter.id ?? generateID(),
-    viewID: filter.viewID ?? generateID(),
+    id: filter.id ?? Filter.generateID(),
+    viewID: filter.viewID ?? View.generateID(),
     group: filter.group || 1,
     ...config,
   };
@@ -425,8 +479,8 @@ export function makeFilter(
 
 export function makeSort(sort: Partial<Sort>, config: SortConfig): Sort {
   return {
-    id: sort.id ?? generateID(),
-    viewID: sort.viewID ?? generateID(),
+    id: sort.id ?? Sort.generateID(),
+    viewID: sort.viewID ?? View.generateID(),
     sequence: sort.sequence || 1,
     ...config,
   };

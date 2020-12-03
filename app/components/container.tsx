@@ -1,6 +1,16 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ContainerColor, useTheme, tokens } from './theme';
+import { View } from 'react-native';
+import { DynamicStyleSheet } from './stylesheet';
+import { tokens } from './tokens';
+
+interface BackgroundColors {
+  default: string;
+  content: string;
+  tint: string;
+  primary: string;
+}
+
+export type BackgroundColor = keyof BackgroundColors;
 
 type Shape = 'rounded' | 'square' | 'pill';
 
@@ -18,7 +28,7 @@ interface ContainerProviderProps {
   direction: Direction;
 }
 
-export function ContainerProvider(props: ContainerProviderProps) {
+export function ContainerProvider(props: ContainerProviderProps): JSX.Element {
   const { children, direction } = props;
 
   return (
@@ -28,16 +38,20 @@ export function ContainerProvider(props: ContainerProviderProps) {
   );
 }
 
-export function useParentContainer() {
+export function useParentContainer(): ContainerContext {
   return React.useContext(ContainerContext);
 }
 
 interface ContainerProps {
   children?: React.ReactNode;
-  color?: ContainerColor;
   maxWidth?: number | string;
   minWidth?: number | string;
+  color?: BackgroundColor;
   borderRadius?: number;
+  borderTopRightRadius?: number;
+  borderTopLeftRadius?: number;
+  borderBottomRightRadius?: number;
+  borderBottomLeftRadius?: number;
   flex?: number;
   width?: number | string;
   height?: number | string;
@@ -71,7 +85,7 @@ interface ContainerProps {
 /**
  * Provides padding, background decorations, border decorations, sizing and other box styles.
  */
-export function Container(props: ContainerProps) {
+export function Container(props: ContainerProps): JSX.Element {
   const {
     children,
     expanded,
@@ -87,6 +101,10 @@ export function Container(props: ContainerProps) {
     borderBottomWidth,
     borderColor,
     borderRadius,
+    borderTopRightRadius,
+    borderTopLeftRadius,
+    borderBottomRightRadius,
+    borderBottomLeftRadius,
     paddingRight,
     paddingLeft,
     paddingTop,
@@ -108,8 +126,6 @@ export function Container(props: ContainerProps) {
     zIndex,
   } = props;
 
-  const theme = useTheme();
-
   const effectiveWidth = width ?? (expanded ? '100%' : undefined);
   const effectiveHeight = height ?? (expanded ? '100%' : undefined);
 
@@ -120,11 +136,14 @@ export function Container(props: ContainerProps) {
         style={[
           {
             borderWidth,
-            backgroundColor: theme.container.color[color],
             width: effectiveWidth,
             flex,
             maxWidth,
             minWidth,
+            borderTopRightRadius,
+            borderTopLeftRadius,
+            borderBottomRightRadius,
+            borderBottomLeftRadius,
             borderRadius,
             height: effectiveHeight,
             paddingRight,
@@ -143,11 +162,17 @@ export function Container(props: ContainerProps) {
             borderRightWidth,
             borderLeftWidth,
             borderBottomWidth,
-            borderColor: borderColor ?? theme.border.color.default,
+            borderColor,
             overflow,
             zIndex,
           },
-          shadow && theme.container.shadow,
+          (borderWidth ||
+            borderBottomWidth ||
+            borderLeftWidth ||
+            borderRightWidth) &&
+            styles.borderColor,
+          color && styles[color],
+          shadow && styles.shadow,
           center && styles.center,
           shape && styles[shape],
         ]}
@@ -158,7 +183,7 @@ export function Container(props: ContainerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create(() => ({
   center: {
     display: 'flex',
     justifyContent: 'center',
@@ -166,9 +191,25 @@ const styles = StyleSheet.create({
   },
   square: {},
   rounded: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
   pill: {
     borderRadius: 999,
   },
-});
+  default: {
+    backgroundColor: tokens.colors.base.transparent,
+  },
+  content: {
+    backgroundColor: tokens.colors.base.white,
+  },
+  tint: {
+    backgroundColor: tokens.colors.gray[100],
+  },
+  primary: {
+    backgroundColor: tokens.colors.blue[400],
+  },
+  shadow: tokens.shadow.elevation1,
+  borderColor: {
+    borderColor: tokens.colors.gray[300],
+  },
+}));

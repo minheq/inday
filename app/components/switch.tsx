@@ -1,20 +1,22 @@
 import React from 'react';
-import { StyleSheet, Animated } from 'react-native';
-import { Pressable } from './pressable';
-import { useTheme } from './theme';
+import { Pressable, Animated } from 'react-native';
+import { isNonNullish } from '../../lib/js_utils';
+import { DynamicStyleSheet } from './stylesheet';
+import { tokens } from './tokens';
 
 interface SwitchProps {
   value?: boolean;
   onChange?: (value: boolean) => void;
 }
 
-export function Switch(props: SwitchProps) {
-  const { value, onChange = () => {} } = props;
-  const theme = useTheme();
+export function Switch(props: SwitchProps): JSX.Element {
+  const { value, onChange } = props;
   const checked = React.useRef(new Animated.Value(0)).current;
 
   const handlePress = React.useCallback(() => {
-    onChange(!value);
+    if (isNonNullish(onChange)) {
+      onChange(!value);
+    }
   }, [value, onChange]);
 
   React.useEffect(() => {
@@ -27,50 +29,52 @@ export function Switch(props: SwitchProps) {
   }, [checked, value]);
 
   return (
-    <Pressable
-      onPress={handlePress}
-      style={[
-        styles.root,
-        {
-          borderColor: theme.border.color.default,
-        },
-        {
-          backgroundColor: checked.interpolate({
-            inputRange: [0, 1],
-            outputRange: [
-              theme.container.color.tint,
-              theme.container.color.primary,
-            ],
-          }),
-        },
-      ]}
-    >
+    <Pressable onPress={handlePress} style={styles.root}>
       <Animated.View
         style={[
-          styles.slider,
-          theme.container.shadow,
+          styles.wrapper,
           {
-            transform: [
-              {
-                translateX: checked.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [2, 26],
-                }),
-              },
-            ],
+            backgroundColor: checked.interpolate({
+              inputRange: [0, 1],
+              outputRange: [tokens.colors.blue[50], tokens.colors.blue[500]],
+            }),
           },
         ]}
-      />
+      >
+        <Animated.View
+          style={[
+            styles.slider,
+            tokens.shadow.elevation1,
+            {
+              transform: [
+                {
+                  translateX: checked.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [2, 26],
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
+      </Animated.View>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create(() => ({
   root: {
     borderRadius: 999,
     width: 56,
     height: 32,
     borderWidth: 1,
+    borderColor: tokens.colors.gray[300],
+  },
+  wrapper: {
+    borderRadius: 999,
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
   slider: {
     borderRadius: 999,
@@ -82,4 +86,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
+}));

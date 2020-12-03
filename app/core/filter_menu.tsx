@@ -7,11 +7,11 @@ import React, {
   createContext,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 import {
-  NumberFilterRule,
-  TextFilterRule,
+  NumberFieldKindFilterRule,
+  TextFieldKindFilterRule,
   getDefaultFilterConfig,
   Filter,
   FilterID,
@@ -25,11 +25,10 @@ import {
   Button,
   TextInput,
   Picker,
-  Option,
   Text,
   Row,
-  Pressable,
   tokens,
+  PickerOption,
 } from '../components';
 import {
   useCreateFilter,
@@ -42,10 +41,9 @@ import {
   useGetFiltersGroupMax,
   useUpdateFilterGroup,
 } from '../data/store';
-import { first } from '../../lib/data_structures/arrays';
+import { Array } from '../../lib/js_utils';
 import { FieldID, FieldType } from '../data/fields';
 import { FieldPicker } from './field_picker';
-import { isEmpty } from '../../lib/data_structures/primitive';
 
 const filterEditIDState = atom<FilterID>({
   key: 'FilterMenuFilterEditID',
@@ -209,9 +207,9 @@ function FilterNew() {
   const fields = useGetCollectionFields(context.collectionID);
 
   const createFilter = useCreateFilter();
-  const firstField = first(fields);
+  const firstField = Array.first(fields);
 
-  if (isEmpty(fields)) {
+  if (Array.isEmpty(fields)) {
     throw new Error(
       'Fields are empty. They may not have been loaded properly.',
     );
@@ -354,7 +352,7 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
   const { rule, value, fieldID } = filterConfig;
 
   const handleChangeRule = useCallback(
-    (newRule: TextFilterRule) => {
+    (newRule: TextFieldKindFilterRule) => {
       onChange({
         rule: newRule,
         value: '',
@@ -375,7 +373,7 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
     [onChange, rule, fieldID],
   );
 
-  const options: Option<TextFilterRule>[] = [
+  const options: Option<TextFieldKindFilterRule>[] = [
     { value: 'contains', label: 'contains' },
     { value: 'doesNotContain', label: 'does not contain' },
     { value: 'is', label: 'is' },
@@ -404,7 +402,7 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
   const { rule, value, fieldID } = filterConfig;
 
   const handleChangeRule = useCallback(
-    (newRule: NumberFilterRule) => {
+    (newRule: NumberFieldKindFilterRule) => {
       onChange({
         rule: newRule,
         value: null,
@@ -425,7 +423,7 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
     [onChange, rule, fieldID],
   );
 
-  const options: Option<NumberFilterRule>[] = [
+  const options: PickerOption<NumberFieldKindFilterRule>[] = [
     { value: 'equal', label: 'equal' },
     { value: 'notEqual', label: 'not equal' },
     { value: 'lessThan', label: 'less than' },

@@ -15,7 +15,7 @@ interface OrganizeMenuProps {
   collectionID: CollectionID;
 }
 
-export function OrganizeMenu(props: OrganizeMenuProps) {
+export function OrganizeMenu(props: OrganizeMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
 
   const [tab, setTab] = useState(2);

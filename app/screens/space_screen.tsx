@@ -1,33 +1,55 @@
 import React, { useCallback, createContext, useContext } from 'react';
-import { Screen, Container, Row, BackButton, Button } from '../components';
 import {
-  useRoute,
-  RouteProp,
-  NavigationHelpers,
-} from '@react-navigation/native';
-import { RootStackParamsMap } from '../linking';
+  Screen,
+  Container,
+  Row,
+  BackButton,
+  Text,
+  IconButton,
+  Spacer,
+  FlatButton,
+  Button,
+  DynamicStyleSheet,
+  tokens,
+  Icon,
+} from '../components';
+import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import { useGetSpace, useGetView, useGetSpaceCollections } from '../data/store';
-import { Space } from '../data/spaces';
 import { Slide } from '../components/slide';
 
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer/autosizer';
-import { View, ViewType, assertListView } from '../data/views';
+import { View, ViewID } from '../data/views';
 import { ListViewDisplay } from '../core/list_view_display';
+import { atom, useRecoilState, useRecoilValue } from 'recoil';
+import { RecordID } from '../data/records';
+import { Collection, CollectionID } from '../data/collections';
+import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
+import { Space, SpaceID } from '../data/spaces';
 
-type SpaceScreenParams = RouteProp<RootStackParamsMap, 'Space'>;
+type SidePanelState = 'views' | 'organize' | null;
 
-const SpaceScreenContext = createContext({
-  spaceID: '1',
-  viewID: '1',
-  collectionID: '1',
+const sidePanelState = atom<SidePanelState>({
+  key: 'SpaceScreen_SidePanel',
+  default: null,
 });
 
-export function SpaceScreen() {
-  const route = useRoute<SpaceScreenParams>();
+interface SpaceScreenContext {
+  spaceID: SpaceID;
+  viewID: ViewID;
+  collectionID: CollectionID;
+}
 
-  const { spaceID, viewID } = route.params;
+const SpaceScreenContext = createContext<SpaceScreenContext>({
+  spaceID: Space.generateID(),
+  viewID: View.generateID(),
+  collectionID: Collection.generateID(),
+});
+
+export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
+  const { params } = props;
+  const { spaceID, viewID } = params;
   const view = useGetView(viewID);
 
   return (
@@ -35,71 +57,132 @@ export function SpaceScreen() {
       value={{ spaceID, viewID, collectionID: view.collectionID }}
     >
       <Screen>
-        <CollectionsMenu />
+        <SpaceScreenHeader />
+        <CollectionsList />
+        <ViewSettings />
         <MainContent />
       </Screen>
     </SpaceScreenContext.Provider>
   );
 }
 
-interface SpaceScreenHeaderProps {
-  route: RouteProp<RootStackParamsMap, 'Space'>;
-  navigation: NavigationHelpers<RootStackParamsMap>;
-}
-
-export function SpaceScreenHeader(props: SpaceScreenHeaderProps) {
-  const { route, navigation } = props;
-
-  const space = useGetSpace(route.params.spaceID);
+function SpaceScreenHeader(): JSX.Element {
+  const navigation = useNavigation();
+  const context = useContext(SpaceScreenContext);
+  const space = useGetSpace(context.spaceID);
 
   const handlePressBack = useCallback(() => {
-    navigation.goBack();
+    navigation.back();
   }, [navigation]);
 
-  const canGoBack = navigation.canGoBack();
-
   return (
-    <Row>
-      <Container flex={1}>
-        <Row alignItems="center">
-          {canGoBack && <BackButton onPress={handlePressBack} />}
-        </Row>
-      </Container>
-      <Container flex={1}>
-        <SpaceTitle space={space} />
-      </Container>
-      <Container flex={1}>
-        <TopMenu />
-      </Container>
-    </Row>
-  );
-}
-
-interface SpaceTitleProps {
-  space: Space;
-}
-
-function SpaceTitle(props: SpaceTitleProps) {
-  const { space } = props;
-
-  return (
-    <Row alignItems="center" justifyContent="center" expanded>
-      <Button title={space.name} />
-    </Row>
+    <Container height={56} paddingHorizontal={8} paddingVertical={4}>
+      <Row justifyContent="space-between">
+        <Container>
+          <Row alignItems="center">
+            <BackButton onPress={handlePressBack} />
+            <Spacer size={8} />
+            <Text size="lg" weight="bold">
+              {space.name}
+            </Text>
+          </Row>
+        </Container>
+        <Container>
+          <TopMenu />
+        </Container>
+      </Row>
+    </Container>
   );
 }
 
 function TopMenu() {
   return (
-    <Row expanded alignItems="center" justifyContent="flex-end">
-      <Button onPress={() => {}} title="Collaborator" iconBefore="user" />
-      <Button onPress={() => {}} title="Automation" iconBefore="settings" />
-      <Button onPress={() => {}} title="More" iconBefore="more-horizontal" />
+    <Row>
+      <IconButton icon="Users" title="Share" />
+      <Spacer size={4} />
+      <IconButton icon="Bolt" title="Automate" />
+      <Spacer size={4} />
+      <IconButton icon="Help" title="Help" />
+      <Spacer size={4} />
+      <IconButton icon="DotsInCircle" title="More" />
     </Row>
   );
 }
 
-function CollectionsMenu() {
+function ViewSettings() {
+  const context = useContext(SpaceScreenContext);
+  const view = useGetView(context.viewID);
+  const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
+
+  const handleToggleView = React.useCallback(() => {
+    if (sidePanel !== 'views') {
+      setSidePanel('views');
+    } else {
+      setSidePanel(null);
+    }
+  }, [sidePanel, setSidePanel]);
+
+  const handleToggleOrganize = React.useCallback(() => {
+    if (sidePanel !== 'organize') {
+      setSidePanel('organize');
+    } else {
+      setSidePanel(null);
+    }
+  }, [sidePanel, setSidePanel]);
+
+  return (
+    <Container color="content" shadow zIndex={1}>
+      <Spacer size={4} />
+      <Row justifyContent="space-between">
+        <Row>
+          <Spacer size={8} />
+          <ViewMenuButton view={view} onPress={handleToggleView} />
+        </Row>
+        <Row>
+          <FlatButton title="Search" />
+          <FlatButton onPress={handleToggleOrganize} title="Organize" />
+          <FlatButton title="Select" />
+          <FlatButton
+            weight="bold"
+            color="primary"
+            icon="Plus"
+            title="Add record"
+          />
+          <Spacer size={8} />
+        </Row>
+      </Row>
+      <Spacer size={4} />
+    </Container>
+  );
+}
+
+interface ViewMenuButtonProps {
+  view: View;
+  onPress: (viewID: ViewID) => void;
+}
+
+function ViewMenuButton(props: ViewMenuButtonProps) {
+  const { view, onPress } = props;
+
+  const handlePress = useCallback(() => {
+    onPress(view.id);
+  }, [onPress, view]);
+
+  return (
+    <Button onPress={handlePress} style={styles.viewMenuButton}>
+      <Row>
+        <Icon
+          name={getViewIcon(view.type)}
+          customColor={getViewIconColor(view.type)}
+        />
+        <Spacer size={4} />
+        <Text>{view.name}</Text>
+      </Row>
+    </Button>
+  );
+}
+
+function CollectionsList() {
   const context = useContext(SpaceScreenContext);
   const space = useGetSpace(context.spaceID);
   const view = useGetView(context.viewID);
@@ -113,14 +196,19 @@ function CollectionsMenu() {
   }
 
   return (
-    <Container color="content" borderBottomWidth={1}>
+    <Container color="content" zIndex={2} borderBottomWidth={1}>
       <Row>
+        <Button style={[styles.collectionItem, styles.addCollectionItem]}>
+          <Icon name="Plus" color="muted" />
+        </Button>
         {collections.map((collection) => (
-          <Button
+          <CollectionItem
+            active={collection.id === activeCollection.id}
             key={collection.id}
-            state={activeCollection.id === collection.id ? 'active' : 'default'}
-            radius={0}
-            title={collection.name}
+            collection={collection}
+            onPress={() => {
+              return;
+            }}
           />
         ))}
       </Row>
@@ -128,8 +216,36 @@ function CollectionsMenu() {
   );
 }
 
+interface CollectionItemProps {
+  active: boolean;
+  collection: Collection;
+  onPress: (collectionID: CollectionID) => void;
+}
+
+function CollectionItem(props: CollectionItemProps) {
+  const { active, collection, onPress } = props;
+
+  const handlePress = useCallback(() => {
+    onPress(collection.id);
+  }, [onPress, collection]);
+
+  return (
+    <Button
+      onPress={handlePress}
+      style={[styles.collectionItem, active && styles.activeCollectionItem]}
+    >
+      <Text
+        weight={active ? 'bold' : 'normal'}
+        color={active ? 'primary' : 'muted'}
+      >
+        {collection.name}
+      </Text>
+    </Button>
+  );
+}
+
 function MainContent() {
-  const [slide, setSlide] = React.useState<'views' | 'organize' | null>(null);
+  const sidePanel = useRecoilValue(sidePanelState);
   const context = useContext(SpaceScreenContext);
   const { spaceID, viewID, collectionID } = context;
   const space = useGetSpace(spaceID);
@@ -137,49 +253,45 @@ function MainContent() {
   const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
-  const handleToggleView = React.useCallback(() => {
-    if (slide !== 'views') {
-      setSlide('views');
-    } else {
-      setSlide(null);
-    }
-  }, [slide]);
-
-  const handleToggleOrganize = React.useCallback(() => {
-    if (slide !== 'organize') {
-      setSlide('organize');
-    } else {
-      setSlide(null);
-    }
-  }, [slide]);
-
   if (activeCollection === undefined) {
     throw new Error('Invalid collection');
   }
 
-  const ViewDisplay = displaysByViewType[view.type];
+  const handleOpenRecord = useCallback((recordID: RecordID) => {
+    console.log('Open record', recordID);
+  }, []);
+
+  const renderView = useCallback((): React.ReactNode => {
+    switch (view.type) {
+      case 'list':
+        return <ListViewDisplay view={view} onOpenRecord={handleOpenRecord} />;
+      case 'board':
+        return null;
+      default:
+        throw new Error('View type not supported');
+    }
+  }, [view, handleOpenRecord]);
 
   return (
-    <Container flex={1}>
-      <ViewBar
-        onToggleView={handleToggleView}
-        onToggleOrganize={handleToggleOrganize}
-      />
+    <Container flex={1} color="content">
       <Row expanded flex={1}>
-        <Slide width={240} open={slide === 'views'}>
+        <Slide width={240} open={sidePanel === 'views'}>
           <Container width={240} expanded color="content" borderRightWidth={1}>
-            {slide === 'views' && (
+            {sidePanel === 'views' && (
               <ViewsMenu spaceID={spaceID} viewID={viewID} />
             )}
           </Container>
         </Slide>
-        <ViewDisplay view={view} />
-        <Slide width={360} open={slide === 'organize'}>
+        <Container color="content" flex={1}>
+          <Spacer size={16} />
+          {renderView()}
+        </Container>
+        <Slide width={360} open={sidePanel === 'organize'}>
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
             <AutoSizer>
               {({ height }) => (
                 <Container height={height}>
-                  {slide === 'organize' && (
+                  {sidePanel === 'organize' && (
                     <OrganizeMenu
                       spaceID={spaceID}
                       viewID={viewID}
@@ -196,39 +308,30 @@ function MainContent() {
   );
 }
 
-interface ViewBarProps {
-  onToggleView: () => void;
-  onToggleOrganize: () => void;
-}
-
-function ViewBar(props: ViewBarProps) {
-  const { onToggleView, onToggleOrganize } = props;
-  const context = useContext(SpaceScreenContext);
-  const view = useGetView(context.viewID);
-
-  return (
-    <Container borderBottomWidth={1} color="content" padding={4}>
-      <Row alignItems="center" justifyContent="space-between">
-        <Button onPress={onToggleView} title={view.name} iconBefore="layout" />
-        <Button onPress={onToggleOrganize} title="Organize" />
-      </Row>
-    </Container>
-  );
-}
-
-interface ViewDisplayProps {
-  view: View;
-}
-
-const displaysByViewType: {
-  [viewType in ViewType]: (props: ViewDisplayProps) => JSX.Element;
-} = {
-  list: (props: ViewDisplayProps) => {
-    const { view } = props;
-
-    assertListView(view);
-
-    return <ListViewDisplay view={view} />;
+const styles = DynamicStyleSheet.create(() => ({
+  collectionItem: {
+    borderTopLeftRadius: tokens.border.radius.default,
+    borderTopRightRadius: tokens.border.radius.default,
+    minWidth: 40,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
-  board: () => <></>,
-};
+  addCollectionItem: {
+    paddingHorizontal: 8,
+  },
+  activeCollectionItem: {
+    borderBottomWidth: 2,
+    borderColor: tokens.colors.lightBlue[700],
+  },
+  viewMenuButton: {
+    borderRadius: tokens.border.radius.default,
+    flexDirection: 'row',
+    minWidth: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+}));

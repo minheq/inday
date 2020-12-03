@@ -1,12 +1,7 @@
 import React from 'react';
-import { Container } from './container';
-import { Row } from './row';
-import { Spacer } from './spacer';
-import { Column } from './column';
+import { StyleSheet, Pressable, View } from 'react-native';
 import { Text } from './text';
-import { Pressable } from './pressable';
-import { StyleSheet } from 'react-native';
-import { tokens } from './theme';
+import { tokens } from './tokens';
 
 interface ListItemProps {
   onPress?: () => void;
@@ -16,41 +11,45 @@ interface ListItemProps {
   actions?: React.ReactNode;
 }
 
-export function ListItem(props: ListItemProps) {
+export function ListItem(props: ListItemProps): JSX.Element {
   const { onPress, title, description, leading, actions } = props;
 
   return (
     <Pressable style={styles.base} onPress={onPress}>
-      <Container paddingVertical={8} paddingHorizontal={16}>
-        <Row expanded justifyContent="space-between">
-          <Container flex={1}>
-            <Row expanded>
-              {leading && (
-                <>
-                  {leading}
-                  <Spacer size={8} />
-                </>
-              )}
-              <Column justifyContent="center">
-                {title && <Text bold>{title}</Text>}
-                {description && <Text>{description}</Text>}
-              </Column>
-            </Row>
-          </Container>
-          {actions && (
-            <Row alignItems="center">
-              <Spacer size={8} />
-              {actions}
-            </Row>
-          )}
-        </Row>
-      </Container>
+      <View style={styles.content}>
+        {leading !== null && <View style={styles.leading}>{leading}</View>}
+        <View style={styles.text}>
+          {title && <Text weight="bold">{title}</Text>}
+          {description && <Text>{description}</Text>}
+        </View>
+      </View>
+      {actions && <View style={styles.actions}>{actions}</View>}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  leading: {
+    paddingRight: 8,
+  },
+  content: {
+    flex: 1,
+    height: '100%',
+    flexDirection: 'row',
+  },
+  text: {
+    justifyContent: 'center',
+  },
+  actions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingTop: 8,
   },
 });

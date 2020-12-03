@@ -7,12 +7,11 @@ export default {
   component: ListPicker,
 };
 
-export const Default = () => {
-  const [value, setValue] = React.useState(['January', 'Februrary']);
+export function Basic(): JSX.Element {
+  const [value, setValue] = React.useState('January');
 
   return (
     <ListPicker
-      multi
       value={value}
       options={[
         { label: 'January', value: 'January' },
@@ -31,4 +30,4 @@ export const Default = () => {
       onChange={setValue}
     />
   );
-};
+}

@@ -13,10 +13,10 @@ import {
   addFieldsToCollection,
   makeManyRecords,
 } from './factory';
-import { keyedBy } from '../../lib/data_structures/arrays';
+import { Array } from '../../lib/js_utils/array_utils';
 
 const space1 = makeSpace({
-  id: '1',
+  id: 'spc1',
 });
 const collaborator1 = makeCollaborator({ spaceID: space1.id });
 const collaborator2 = makeCollaborator({ spaceID: space1.id });
@@ -52,6 +52,7 @@ const col1Field5 = makeField({
 const col1Field6 = makeField({
   type: FieldType.MultiRecordLink,
   collectionID: collection1.id,
+  recordsFromCollectionID: collection2.id,
 });
 
 const col1Field7 = makeField({
@@ -82,6 +83,7 @@ const col1Field11 = makeField({
 const col1Field12 = makeField({
   type: FieldType.SingleRecordLink,
   collectionID: collection1.id,
+  recordsFromCollectionID: collection2.id,
 });
 
 const col1Field13 = makeField({
@@ -96,6 +98,11 @@ const col1Field14 = makeField({
 
 const col1Field15 = makeField({
   type: FieldType.URL,
+  collectionID: collection1.id,
+});
+
+const col1Field16 = makeField({
+  type: FieldType.Checkbox,
   collectionID: collection1.id,
 });
 
@@ -115,26 +122,17 @@ const col1Fields = [
   col1Field13,
   col1Field14,
   col1Field15,
+  col1Field16,
 ];
 const collection1WithFields = addFieldsToCollection(collection1, col1Fields);
 
 const col1View1 = makeView(
-  { id: '1', collectionID: collection1.id },
+  { id: 'viw1', collectionID: collection1.id },
   collection1WithFields,
 );
 const col1View2 = makeView(
-  { id: '2', collectionID: collection1.id },
+  { id: 'viw2', collectionID: collection1.id },
   collection1WithFields,
-);
-
-const col1Records = makeManyRecords(
-  500,
-  collection1WithFields,
-  {
-    [col1Field6.id]: [],
-    [col1Field12.id]: [],
-  },
-  [collaborator1, collaborator2],
 );
 
 const col2Field1 = makeField({
@@ -148,9 +146,23 @@ const col2Field2 = makeField({
 });
 
 const col2Fields = [col2Field1, col2Field2];
-const collection2WithFields = addFieldsToCollection(collection1, col2Fields);
+collection2.primaryFieldID = col2Field1.id;
+
+const collection2WithFields = addFieldsToCollection(collection2, col2Fields);
 
 const col2View1 = makeView({}, collection2WithFields);
+
+const col2Records = makeManyRecords(2, collection2WithFields);
+
+const col1Records = makeManyRecords(
+  50,
+  collection1WithFields,
+  {
+    [col1Field6.id]: col2Records,
+    [col1Field12.id]: col2Records,
+  },
+  [collaborator1, collaborator2],
+);
 
 export const spacesByIDFixtures: { [spaceID: string]: Space } = {
   [space1.id]: space1,
@@ -175,10 +187,13 @@ export const viewsByIDFixtures: { [viewID: string]: View } = {
 };
 
 export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
-  ...keyedBy(col1Fields, 'id'),
-  ...keyedBy(col2Fields, 'id'),
+  ...Array.keyedBy(col1Fields, (field) => field.id),
+  ...Array.keyedBy(col2Fields, (field) => field.id),
 };
 
 export const recordsByIDFixtures: {
   [recordID: string]: Record;
-} = keyedBy(col1Records, 'id');
+} = {
+  ...Array.keyedBy(col1Records, (field) => field.id),
+  ...Array.keyedBy(col2Records, (field) => field.id),
+};

@@ -2,32 +2,56 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "name": "Start Web",
       "request": "launch",
-      "name": "Jest single run all tests",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "env": { "CI": "true" },
-      "args": ["-i", "--no-cache"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "type": "node",
+      "program": "${workspaceFolder}/scripts/web.js",
+      "envFile": "${workspaceFolder}/.env.web",
+      "serverReadyAction": {
+        "pattern": "on http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "debugWithChrome"
+      }
     },
     {
-      "type": "node",
+      "name": "Start Server",
       "request": "launch",
-      "name": "Jest watch all tests",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": ["-i", "--no-cache", "--watchAll"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "type": "node",
+      "program": "${workspaceFolder}/server.js",
+      "preLaunchTask": "build:server",
+      "envFile": "${workspaceFolder}/.env.server"
     },
     {
+      "name": "Test: File",
+      "request": "launch",
+      "type": "node",
+      "program": "test/${relativeFileDirname}/${fileBasenameNoExtension}.js",
+      "preLaunchTask": "build:test_file",
+      "internalConsoleOptions": "openOnFirstSessionStart"
+    },
+    {
+      "name": "Electron: Main",
       "type": "node",
       "request": "launch",
-      "name": "Jest watch current file",
-      "program": "${workspaceFolder}/node_modules/jest/bin/jest",
-      "args": ["${fileBasename}", "-i", "--no-cache", "--watchAll"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "protocol": "inspector",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "runtimeArgs": ["--remote-debugging-port=9223", "index.desktop.js"],
+      "preLaunchTask": "build:web",
+      "envFile": "${workspaceFolder}/.env.web"
+    },
+    {
+      "name": "Electron: Renderer",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9223,
+      "webRoot": "${workspaceFolder}",
+      "timeout": 30000
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Start Desktop",
+      "configurations": ["Electron: Main", "Electron: Renderer"]
     }
   ]
 }

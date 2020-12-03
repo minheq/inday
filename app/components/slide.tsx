@@ -1,5 +1,6 @@
 import React from 'react';
 import { Animated } from 'react-native';
+import { isNonNullish } from '../../lib/js_utils';
 
 interface SlideProps {
   width: number;
@@ -9,14 +10,8 @@ interface SlideProps {
   onCollapsed?: () => void;
 }
 
-export function Slide(props: SlideProps) {
-  const {
-    width: intrinsicWidth,
-    open,
-    children,
-    onSlide = () => {},
-    onCollapsed = () => {},
-  } = props;
+export function Slide(props: SlideProps): JSX.Element {
+  const { width: intrinsicWidth, open, children, onSlide, onCollapsed } = props;
   const width = React.useRef(new Animated.Value(0)).current;
   const opacity = React.useRef(new Animated.Value(0)).current;
 
@@ -34,12 +29,16 @@ export function Slide(props: SlideProps) {
       }),
     ]).start(() => {
       if (open) {
-        onSlide();
+        if (isNonNullish(onSlide)) {
+          onSlide();
+        }
       } else {
-        onCollapsed();
+        if (isNonNullish(onCollapsed)) {
+          onCollapsed();
+        }
       }
     });
   }, [width, opacity, open, intrinsicWidth, onSlide, onCollapsed]);
 
-  return <Animated.View style={[{ width, opacity }]}>{children}</Animated.View>;
+  return <Animated.View style={{ width, opacity }}>{children}</Animated.View>;
 }

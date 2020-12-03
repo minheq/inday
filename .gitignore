@@ -59,13 +59,21 @@ buck-out/
 /ios/Pods/
 
 # Web
+public/
 bundle.js
 *.map
-stats.json
+meta.json
 temp
+server.js
+
+test/
+**/*.test.js
 
 # Logs
 *.log
 
-# Storybook
-storybook-static
+# Env
+.env
+.env.*
+.nyc_output
+coverage

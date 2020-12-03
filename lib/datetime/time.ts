@@ -1,117 +1,154 @@
-import {
-  addHours,
-  setHours,
-  setMinutes,
-  startOfDay,
-  addMinutes,
-  Interval,
-  setSeconds,
-  setMilliseconds,
-  isSameHour,
-  isSameMinute,
-  format,
-} from 'date-fns';
-import { datesInInterval } from './interval';
+import { Date } from '../js_utils';
+import { Hours } from './hours';
+import { Minutes } from './minutes';
 
-export const MINUTES_IN_ONE_DAY = 24 * 60;
-export const MINUTES_IN_ONE_HOUR = 60;
+export interface TimeInterval {
+  start: Time;
+  end: Time;
+}
 
 export const TIME_HOUR_FORMAT = 'HH';
 export const TIME_MINUTE_FORMAT = 'mm';
 export const TIME_FORMAT = `${TIME_HOUR_FORMAT}${TIME_MINUTE_FORMAT}`;
 
-/**
- * Creates a new [Date] with the given time
- */
-function newTime(hours: number, minutes: number): Date {
-  let date = new Date();
+/** Time is in `HHmm` format */
+export type Time = typeof TIME_FORMAT;
 
-  date = setHours(date, hours);
-  date = setMinutes(date, minutes);
-  date = setSeconds(date, 0);
-  date = setMilliseconds(date, 0);
+export const Time = {
+  /**
+   * Creates a new Time
+   */
+  new: (hours: number, minutes: number): Time => {
+    let date = Date.new();
 
-  return date;
-}
+    date = Date.setHours(date, hours);
+    date = Date.setMinutes(date, minutes);
+    date = Date.setSeconds(date, 0);
+    date = Date.setMilliseconds(date, 0);
 
-export function setSameTime(date: Date, time: Date) {
-  date = setHours(date, time.getHours());
-  date = setMinutes(date, time.getMinutes());
-  date = setSeconds(date, 0);
-  date = setMilliseconds(date, 0);
+    return fromDate(date);
+  },
+  setSameTime: (date: Date, time: Time): Date => {
+    const [hours, minutes] = getTime(time);
+    date = Date.setHours(date, hours);
+    date = Date.setMinutes(date, minutes);
+    date = Date.setSeconds(date, 0);
+    date = Date.setMilliseconds(date, 0);
 
-  return date;
-}
+    return date;
+  },
+  isSameTime: (timeLeft: Time, timeRight: Time): boolean => {
+    return timeLeft === timeRight;
+  },
+  toDate,
+  fromDate,
+  get: getTime,
+  subMinutes: (time: Time, amount: Minutes, capAtStartOfDay = false): Time => {
+    const date = toDate(time);
+    const newDate = Date.subMinutes(date, amount);
 
-export function isSameTime(dateLeft: Date, dateRight: Date) {
-  return isSameHour(dateLeft, dateRight) && isSameMinute(dateLeft, dateRight);
-}
+    if (Date.isSameDay(date, newDate) === false) {
+      if (capAtStartOfDay === true) {
+        return '0000';
+      }
+      throw new Error('Adding amount moved to previous day');
+    }
 
-export function parseTime(time: string): Date {
+    return fromDate(newDate);
+  },
+  addMinutes: (time: Time, amount: Minutes, capAtEndOfDay = false): Time => {
+    const date = toDate(time);
+    const newDate = Date.addMinutes(date, amount);
+
+    if (Date.isSameDay(date, newDate) === false) {
+      if (capAtEndOfDay === true) {
+        return '2359';
+      }
+      throw new Error('addMinutes moved to next day');
+    }
+
+    return fromDate(newDate);
+  },
+  subHours: (time: Time, amount: Hours, capAtStartOfDay = false): Time => {
+    const date = toDate(time);
+    const newDate = Date.subHours(date, amount);
+
+    if (Date.isSameDay(date, newDate) === false) {
+      if (capAtStartOfDay === true) {
+        return '0000';
+      }
+      throw new Error('subHours moved to previous day');
+    }
+
+    return fromDate(newDate);
+  },
+  addHours: (time: Time, amount: Hours, capAtEndOfDay = false): Time => {
+    const date = toDate(time);
+    const newDate = Date.addHours(date, amount);
+
+    if (Date.isSameDay(date, newDate) === false) {
+      if (capAtEndOfDay === true) {
+        return '2359';
+      }
+      throw new Error('addHours moved to next day');
+    }
+
+    return fromDate(newDate);
+  },
+  differenceInMinutes: (timeLeft: Time, timeRight: Time): Minutes => {
+    const dateLeft = toDate(timeLeft);
+    const dateRight = toDate(timeRight);
+
+    return Math.abs(Date.differenceInMinutes(dateLeft, dateRight));
+  },
+  differenceInHours: (timeLeft: Time, timeRight: Time): Hours => {
+    const dateLeft = toDate(timeLeft);
+    const dateRight = toDate(timeRight);
+
+    return Math.abs(Date.differenceInHours(dateLeft, dateRight));
+  },
+  isBefore: (timeLeft: Time, timeRight: Time): boolean => {
+    const dateLeft = toDate(timeLeft);
+    const dateRight = toDate(timeRight);
+
+    return Date.isBefore(dateLeft, dateRight);
+  },
+  isAfter: (timeLeft: Time, timeRight: Time): boolean => {
+    const dateLeft = toDate(timeLeft);
+    const dateRight = toDate(timeRight);
+
+    return Date.isAfter(dateLeft, dateRight);
+  },
+  startOfDay: (): Time => {
+    return '0000';
+  },
+  endOfDay: (): Time => {
+    return '2359';
+  },
+};
+
+function toDate(time: Time): Date {
   const [hours, minutes] = getTime(time);
 
-  return newTime(Number(hours), Number(minutes));
+  let date = Date.new();
+
+  date = Date.setHours(date, hours);
+  date = Date.setMinutes(date, minutes);
+
+  return date;
 }
 
-export function toTime(date: Date): string {
-  return format(date, TIME_FORMAT);
+function fromDate(date: Date): Time {
+  return Date.format(date, undefined, {
+    minute: 'numeric',
+    hour: 'numeric',
+    hour12: false,
+  });
 }
 
-export function toHours(minutes: number) {
-  return minutes / MINUTES_IN_ONE_HOUR;
-}
-
-export function toMinutes(hours: number) {
-  return hours * MINUTES_IN_ONE_HOUR;
-}
-
-export function getTime(time: string): [string, string] {
+export function getTime(time: Time): [number, number] {
   const hours = time.substring(0, 2);
   const minutes = time.substring(2);
 
-  return [hours, minutes];
+  return [parseInt(hours, 10), parseInt(minutes, 10)];
 }
-
-export function isValidTime(time: string): boolean {
-  const [hours, minutes] = getTime(time);
-  if (isNaN(Number(hours[0]))) return false;
-  if (Number(hours[0]) > 2) return false;
-  if (isNaN(Number(hours[1]))) return false;
-
-  if (isNaN(Number(minutes[0]))) return false;
-  if (Number(minutes[0]) > 6) return false;
-  if (isNaN(Number(minutes[1]))) return false;
-
-  return true;
-}
-
-export const setTime = (
-  date: Date,
-  hours: number,
-  minutes = 0,
-  seconds = 0,
-  ms = 0,
-) => {
-  return setMilliseconds(
-    setSeconds(setMinutes(setHours(date, hours), minutes), seconds),
-    ms,
-  );
-};
-
-export const eachHourOfInterval = (interval: Interval, step = 1) =>
-  datesInInterval(interval, addHours, step);
-
-export const eachMinuteOfInterval = (interval: Interval, step = 5) =>
-  datesInInterval(interval, addMinutes, step);
-
-export const getHoursInDay = (date: Date = new Date()) =>
-  eachHourOfInterval({
-    start: setTime(startOfDay(date), 0),
-    end: setTime(startOfDay(date), 24),
-  });
-
-export const getMinutesInHour = (date: Date = new Date()) =>
-  eachMinuteOfInterval({
-    start: setTime(startOfDay(date), 0),
-    end: setTime(startOfDay(date), 1),
-  });

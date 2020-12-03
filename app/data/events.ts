@@ -2,7 +2,7 @@ import { Workspace } from './workspace';
 import { Space } from './spaces';
 import { Collection } from './collections';
 import { View, ListView } from './views';
-import { Field } from './fields';
+import { Field, FieldID, FieldValue } from './fields';
 import { Record } from './records';
 import { Filter } from './filters';
 import { Sort } from './sorts';
@@ -126,6 +126,16 @@ export interface RecordNameUpdatedEvent
   extends BaseEvent,
     RecordNameUpdatedEventConfig {}
 
+export interface RecordFieldValueUpdatedEventConfig {
+  name: 'RecordFieldValueUpdated';
+  fieldID: FieldID;
+  prevValue: FieldValue;
+  nextValue: FieldValue;
+}
+export interface RecordFieldValueUpdatedEvent
+  extends BaseEvent,
+    RecordFieldValueUpdatedEventConfig {}
+
 export interface RecordDeletedEventConfig {
   name: 'RecordDeleted';
   record: Record;
@@ -238,6 +248,7 @@ export type EventConfig =
   | FieldDeletedEventConfig
   | RecordCreatedEventConfig
   | RecordNameUpdatedEventConfig
+  | RecordFieldValueUpdatedEventConfig
   | RecordDeletedEventConfig
   | FilterCreatedEventConfig
   | FilterConfigUpdatedEventConfig
@@ -267,6 +278,7 @@ export type Event =
   | FieldDeletedEvent
   | RecordCreatedEvent
   | RecordNameUpdatedEvent
+  | RecordFieldValueUpdatedEvent
   | RecordDeletedEvent
   | FilterCreatedEvent
   | FilterConfigUpdatedEvent
@@ -304,6 +316,6 @@ class EventEmitter {
 
 export const eventEmitter = new EventEmitter();
 
-export function useEventEmitter() {
+export function useEventEmitter(): EventEmitter {
   return eventEmitter;
 }

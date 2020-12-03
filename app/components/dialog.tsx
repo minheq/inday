@@ -1,16 +1,15 @@
 import React from 'react';
 import {
   Animated,
-  StyleSheet,
   useWindowDimensions,
-  View,
   ViewStyle,
   StyleProp,
+  Pressable,
 } from 'react-native';
 import { Modal, ModalProps } from './modal';
-import { usePressability } from '../lib/pressability/use_pressability';
-import { useTheme, tokens } from './theme';
-import { PressabilityConfig } from '../lib/pressability/pressability';
+import { tokens } from './tokens';
+import { DynamicStyleSheet } from './stylesheet';
+import { isNonNullish } from '../../lib/js_utils';
 
 const OFFSET_TOP = 64;
 
@@ -18,11 +17,10 @@ interface DialogProps extends ModalProps {
   style?: StyleProp<ViewStyle>;
 }
 
-// TODO: Add 'fade' and 'none' animationType handlers
-export function Dialog(props: DialogProps) {
+export function Dialog(props: DialogProps): JSX.Element {
   const {
     visible,
-    onRequestClose = () => {},
+    onRequestClose,
     onShow,
     onDismiss,
     animationType = 'none',
@@ -30,31 +28,58 @@ export function Dialog(props: DialogProps) {
     children,
   } = props;
   const { height } = useWindowDimensions();
-  const theme = useTheme();
   const [internalVisible, setInternalVisible] = React.useState(visible);
   const slide = React.useRef(
     new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
   ).current;
   const overlayFade = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
-  const fade = React.useRef(
+  const opacity = React.useRef(
     new Animated.Value(animationType === 'fade' ? (visible ? 1 : 0) : 1),
   ).current;
+
+  React.useEffect(() => {
+    if (animationType !== 'none') {
+      return;
+    }
+
+    if (visible) {
+      setInternalVisible(visible);
+
+      opacity.setValue(1);
+      overlayFade.setValue(1);
+    } else {
+      setInternalVisible(false);
+      opacity.setValue(0);
+      overlayFade.setValue(0);
+    }
+  }, [
+    animationType,
+    overlayFade,
+    opacity,
+    visible,
+    internalVisible,
+    slide,
+    height,
+    onRequestClose,
+  ]);
 
   React.useEffect(() => {
     if (animationType !== 'fade') {
       return;
     }
+
     if (visible) {
       setInternalVisible(visible);
+
       Animated.parallel([
-        Animated.spring(fade, {
+        Animated.spring(opacity, {
           toValue: 1,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
         Animated.spring(overlayFade, {
           toValue: 1,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start();
@@ -62,12 +87,12 @@ export function Dialog(props: DialogProps) {
       Animated.parallel([
         Animated.spring(overlayFade, {
           toValue: 0,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
-        Animated.spring(fade, {
+        Animated.spring(opacity, {
           toValue: 0,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -77,7 +102,7 @@ export function Dialog(props: DialogProps) {
   }, [
     animationType,
     overlayFade,
-    fade,
+    opacity,
     visible,
     internalVisible,
     slide,
@@ -94,12 +119,12 @@ export function Dialog(props: DialogProps) {
       Animated.parallel([
         Animated.spring(slide, {
           toValue: OFFSET_TOP,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
         Animated.spring(overlayFade, {
           toValue: 1,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start();
@@ -107,12 +132,12 @@ export function Dialog(props: DialogProps) {
       Animated.parallel([
         Animated.spring(overlayFade, {
           toValue: 0,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
         Animated.spring(slide, {
           toValue: height,
-          bounciness: tokens.animation.spring.bounciness,
+          bounciness: 0,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -130,17 +155,10 @@ export function Dialog(props: DialogProps) {
   ]);
 
   const handlePressBackground = React.useCallback(() => {
-    onRequestClose();
+    if (isNonNullish(onRequestClose)) {
+      onRequestClose();
+    }
   }, [onRequestClose]);
-
-  const config: PressabilityConfig = React.useMemo(
-    () => ({
-      onPress: handlePressBackground,
-    }),
-    [handlePressBackground],
-  );
-
-  const eventHandlers = usePressability(config);
 
   return (
     <Modal
@@ -157,22 +175,22 @@ export function Dialog(props: DialogProps) {
           {
             backgroundColor: overlayFade.interpolate({
               inputRange: [0, 1],
-              outputRange: [
-                theme.container.color.default,
-                'rgba(0, 0, 0, 0.3)',
-              ],
+              outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.3)'],
             }),
           },
         ]}
       >
-        <View style={styles.background} {...eventHandlers} />
+        <Pressable
+          accessible={false}
+          style={styles.background}
+          onPress={handlePressBackground}
+        />
         <Animated.View
           style={[
             styles.dialog,
             style,
             {
-              backgroundColor: theme.container.color.content,
-              opacity: fade,
+              opacity,
               transform: [{ translateY: slide }],
             },
           ]}
@@ -184,7 +202,7 @@ export function Dialog(props: DialogProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create(() => ({
   base: {
     height: '100%',
     width: '100%',
@@ -194,7 +212,8 @@ const styles = StyleSheet.create({
   dialog: {
     maxHeight: '80%',
     maxWidth: '90%',
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
+    backgroundColor: tokens.colors.base.white,
   },
   background: {
     position: 'absolute',
@@ -203,4 +222,4 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-});
+}));

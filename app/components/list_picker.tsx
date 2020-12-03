@@ -1,90 +1,281 @@
-import React from 'react';
-import { Container } from './container';
-import { ListItem } from './list_item';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import {
+  NativeSyntheticEvent,
+  ScrollView,
+  TextInputKeyPressEventData,
+  View,
+} from 'react-native';
+
+import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
-import { Checkbox } from './checkbox';
-import { Spacer } from './spacer';
+import { Button } from './button';
+import { tokens } from './tokens';
 
-type Value<
-  TValue extends any,
-  TMulti extends boolean = false
-> = TMulti extends true ? TValue[] : TValue;
+import { isNonNullish } from '../../lib/js_utils';
+import { Icon } from './icon';
+import { TextInput } from './text_input';
+import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
+import { Hover } from './hover';
+import { SearchEngine } from '../../lib/search';
 
-interface Option<TValue = any> {
-  value: TValue;
+export interface ListPickerOption<T> {
+  value: T;
   label: string;
+  disabled?: boolean;
 }
 
-interface ListPickerProps<TValue = any, TMulti extends boolean = false> {
-  value?: Value<TValue, TMulti> | null;
-  options: Option<TValue>[];
-  onChange?: (value: Value<TValue, TMulti>) => void;
-  label?: string;
-  multi?: TMulti;
+interface ListPickerProps<T> {
+  value?: T | null;
+  options: ListPickerOption<NonNullable<T>>[];
+  onChange?: (value: T) => void;
+  onCreateNewOption?: (searchTerm: string) => void;
+  onRequestClose?: () => void;
+  renderLabel?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
 }
 
-export function ListPicker<TValue = any, TMulti extends boolean = false>(
-  props: ListPickerProps<TValue, TMulti>,
-) {
-  const { value, multi, options, onChange = () => {}, label } = props;
+export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
+  const {
+    value,
+    options: initialOptions,
+    onChange,
+    onRequestClose,
+    renderLabel,
+  } = props;
 
-  const handleSelect = React.useCallback(
-    (itemVal: TValue, selected: boolean) => {
-      if (multi) {
-        if (selected) {
-          onChange(
-            // @ts-ignore: just types
-            value.filter((val) => val !== itemVal),
-          );
-        } else {
-          if (value) {
-            // @ts-ignore: just types
-            onChange(value.concat(itemVal));
-          } else {
-            // @ts-ignore: just types
-            onChange([itemVal]);
-          }
-        }
-      } else {
-        // @ts-ignore: just types
-        onChange(itemVal);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const options = useOptionsSearch(initialOptions, searchTerm);
+  const handleNavigation = useListKeyboardNavigation(
+    activeIndex,
+    setActiveIndex,
+    options,
+  );
+
+  const handleSearchTermChange = useCallback((nextSearchTerm: string) => {
+    setSearchTerm(nextSearchTerm);
+    setActiveIndex(null);
+  }, []);
+
+  const handleSelect = useCallback(
+    (newVal: T) => {
+      if (isNonNullish(onChange)) {
+        onChange(newVal);
       }
     },
-    [value, multi, onChange],
+    [onChange],
+  );
+
+  const handleHoverChange = useCallback(
+    (_value: T, hovered: boolean) => {
+      const index = options.findIndex((option) => option.value === _value);
+
+      if (hovered && index >= 0) {
+        setActiveIndex(index);
+      }
+    },
+    [options],
+  );
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+
+      const handled = handleNavigation(key);
+
+      if (handled === true) {
+        event.preventDefault();
+        return;
+      }
+
+      if (key === WhiteSpaceKey.Enter) {
+        event.preventDefault();
+        if (activeIndex !== null) {
+          const option = options[activeIndex];
+
+          if (onChange !== undefined) {
+            onChange(option.value);
+          }
+
+          if (onRequestClose !== undefined) {
+            onRequestClose();
+          }
+        }
+
+        return;
+      }
+
+      if (key === UIKey.Escape && onRequestClose !== undefined) {
+        onRequestClose();
+      }
+    },
+    [onRequestClose, handleNavigation, activeIndex, onChange, options],
   );
 
   return (
-    <Container>
-      <Container paddingHorizontal={16}>
-        <Text bold size="xs">
-          {label}
-        </Text>
-      </Container>
-      {options.map((o) => {
-        const selected = value
-          ? multi
-            ? //
-              // @ts-ignore: just types
-              value.some((selVal) => selVal === o.value)
-            : value === o.value
-          : false;
-
-        return (
-          <>
-            <ListItem
-              description={o.label}
-              onPress={() => handleSelect(o.value, selected)}
-              actions={
-                <Checkbox
-                  value={selected}
-                  onChange={() => handleSelect(o.value, selected)}
-                />
-              }
-            />
-            <Spacer size={4} />
-          </>
-        );
-      })}
-    </Container>
+    <View style={styles.base}>
+      <View style={styles.searchInputWrapper}>
+        <TextInput
+          autoFocus
+          value={searchTerm}
+          onKeyPress={handleKeyPress}
+          onChange={handleSearchTermChange}
+          clearable
+          placeholder="Search"
+        />
+      </View>
+      <ScrollView>
+        {options.map((option, index) => (
+          <ListPickerItem
+            key={option.label}
+            option={option}
+            onSelect={handleSelect}
+            onHoverChange={handleHoverChange}
+            selected={option.value === value}
+            active={activeIndex === index}
+            renderLabel={renderLabel}
+          />
+        ))}
+      </ScrollView>
+    </View>
   );
 }
+
+export interface ListPickerItemProps<T> {
+  selected: boolean;
+  active?: boolean;
+  option: ListPickerOption<NonNullable<T>>;
+  onSelect: (value: NonNullable<T>, selected: boolean) => void;
+  onHoverChange?: (value: NonNullable<T>, hovered: boolean) => void;
+  renderLabel?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
+  renderCheck?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
+}
+
+export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
+  const {
+    active,
+    selected,
+    option,
+    onSelect,
+    renderLabel,
+    renderCheck,
+    onHoverChange,
+  } = props;
+
+  const handlePress = useCallback(() => {
+    onSelect(option.value, selected);
+  }, [onSelect, option, selected]);
+
+  const handleHoverChange = useCallback(
+    (hovered: boolean) => {
+      if (onHoverChange !== undefined) {
+        onHoverChange(option.value, hovered);
+      }
+    },
+    [onHoverChange, option],
+  );
+
+  return (
+    <Button
+      containerStyle={styles.listItemContainer}
+      style={[styles.listItem, active && styles.active]}
+      onPress={handlePress}
+    >
+      {({ hovered }) => (
+        <Fragment>
+          <Hover hovered={hovered} onHoverChange={handleHoverChange} />
+          {renderLabel ? (
+            renderLabel(option.value, selected)
+          ) : (
+            <Text>{option.label}</Text>
+          )}
+          {renderCheck ? (
+            renderCheck(option.value, selected)
+          ) : selected ? (
+            <Icon name="CheckThick" color="primary" />
+          ) : null}
+        </Fragment>
+      )}
+    </Button>
+  );
+}
+
+export function useListKeyboardNavigation<T>(
+  activeIndex: number | null,
+  setActiveIndex: (index: number) => void,
+  options: ListPickerOption<T>[],
+): (key: string) => boolean {
+  return useCallback(
+    (key: string): boolean => {
+      switch (key) {
+        case NavigationKey.ArrowDown:
+          if (activeIndex === null || activeIndex === options.length - 1) {
+            setActiveIndex(0);
+          } else {
+            setActiveIndex(activeIndex + 1);
+          }
+          return true;
+        case NavigationKey.ArrowUp:
+          if (activeIndex === null || activeIndex === 0) {
+            setActiveIndex(options.length - 1);
+          } else {
+            setActiveIndex(activeIndex - 1);
+          }
+          return true;
+
+        default:
+          return false;
+      }
+    },
+    [activeIndex, setActiveIndex, options],
+  );
+}
+
+export function useOptionsSearch<T>(
+  options: ListPickerOption<T>[],
+  searchTerm: string,
+): ListPickerOption<T>[] {
+  const searchEngine = useRef(
+    new SearchEngine(options, { keys: ['label'], shouldSort: false }),
+  ).current;
+
+  useEffect(() => {
+    searchEngine.setCollection(options);
+  }, [searchEngine, options]);
+
+  if (searchTerm === '') {
+    return options;
+  }
+
+  const result = searchEngine.search(searchTerm);
+
+  return result.map((value) => value.item);
+}
+
+const styles = DynamicStyleSheet.create(() => ({
+  base: {
+    flex: 1,
+  },
+  searchInputWrapper: {
+    paddingBottom: 16,
+  },
+  active: {
+    backgroundColor: tokens.colors.lightBlue[50],
+  },
+  listItemContainer: {
+    marginBottom: 4,
+  },
+  listItem: {
+    height: 40,
+    borderRadius: tokens.border.radius.default,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+}));

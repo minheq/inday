@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
-  StyleSheet,
   TextInput as RNTextInput,
   View,
   Animated,
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
+  Platform,
 } from 'react-native';
+import { isNonNullish } from '../../lib/js_utils';
+import { Button } from './button';
 import { IconName, Icon } from './icon';
-import { tokens, useTheme } from './theme';
-import { Pressable } from './pressable';
+import { DynamicStyleSheet } from './stylesheet';
+import { tokens } from './tokens';
 
 export interface TextInputProps {
   icon?: IconName;
@@ -28,22 +30,21 @@ export interface TextInputProps {
   placeholder?: string;
 }
 
-export function TextInput(props: TextInputProps) {
+export function TextInput(props: TextInputProps): JSX.Element {
   const {
     testID,
     autoFocus,
     icon,
     value,
     clearable,
-    onChange = () => {},
-    onKeyPress = () => {},
-    onSubmitEditing = () => {},
+    onChange,
+    onKeyPress,
+    onSubmitEditing,
     placeholder,
   } = props;
   const [focused, setFocused] = React.useState(false);
-  const theme = useTheme();
   const borderColor = React.useRef(new Animated.Value(0)).current;
-
+  const ref = useRef<RNTextInput>(null);
   const handleBlur = React.useCallback(() => {
     setFocused(false);
   }, []);
@@ -53,7 +54,13 @@ export function TextInput(props: TextInputProps) {
   }, []);
 
   const handleClear = React.useCallback(() => {
-    onChange('');
+    if (ref.current !== null) {
+      ref.current.focus();
+    }
+
+    if (isNonNullish(onChange)) {
+      onChange('');
+    }
   }, [onChange]);
 
   React.useEffect(() => {
@@ -77,10 +84,9 @@ export function TextInput(props: TextInputProps) {
       style={[
         styles.base,
         {
-          backgroundColor: theme.container.color.content,
           borderColor: borderColor.interpolate({
             inputRange: [0, 1],
-            outputRange: [theme.border.color.default, theme.border.color.focus],
+            outputRange: [tokens.colors.gray[300], tokens.colors.gray[600]],
           }),
         },
       ]}
@@ -91,6 +97,7 @@ export function TextInput(props: TextInputProps) {
         </View>
       )}
       <RNTextInput
+        ref={ref}
         testID={testID}
         value={value}
         autoFocus={autoFocus}
@@ -100,32 +107,27 @@ export function TextInput(props: TextInputProps) {
         onBlur={handleBlur}
         onKeyPress={onKeyPress}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.text.color.muted}
-        style={[
-          styles.input,
-          tokens.text.size.md,
-          !!icon && styles.hasIcon,
-          // @ts-ignore
-          webStyle,
-        ]}
+        placeholderTextColor={tokens.colors.gray[700]}
+        style={[styles.input, tokens.text.size.md, !!icon && styles.hasIcon]}
       />
       {clearable && value !== undefined && value !== '' && (
-        <Pressable onPress={handleClear} style={styles.clearButton}>
-          <Icon name="x" size="lg" />
-        </Pressable>
+        <Button
+          onPress={handleClear}
+          style={styles.clearButton}
+          containerStyle={styles.clearButtonContainer}
+        >
+          <Icon name="X" />
+        </Button>
       )}
     </Animated.View>
   );
 }
 
-const webStyle = {
-  outline: 'none',
-};
-
-const styles = StyleSheet.create({
+const styles = DynamicStyleSheet.create({
   base: {
     flexDirection: 'row',
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
+    backgroundColor: tokens.colors.base.white,
     alignItems: 'center',
     borderWidth: 1,
   },
@@ -135,18 +137,27 @@ const styles = StyleSheet.create({
   hasIcon: {
     paddingLeft: 0,
   },
-  clearButton: {
+  clearButtonContainer: {
     width: 24,
     height: 24,
     position: 'absolute',
     right: 8,
-    borderRadius: tokens.radius,
+    top: 8,
+    borderRadius: tokens.border.radius.default,
+  },
+  clearButton: {
+    borderRadius: tokens.border.radius.default,
   },
   input: {
     height: 38,
-    paddingLeft: 16,
+    paddingLeft: 8,
     paddingRight: 40,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
     flex: 1,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
 });

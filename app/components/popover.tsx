@@ -1,29 +1,29 @@
-import React, { useRef, useCallback, useMemo, useEffect } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
-import { useTheme, tokens } from './theme';
+import React, { useRef, useCallback, useEffect } from 'react';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  Pressable,
+  Dimensions,
+} from 'react-native';
+import { tokens } from './tokens';
 import { Modal } from './modal';
-import { usePressability } from '../lib/pressability/use_pressability';
-import { PressabilityConfig } from '../lib/pressability/pressability';
+import { isNonNullish } from '../../lib/js_utils';
+import { Measurements } from '../lib/measurements';
 
-export const initialPopoverAnchor: PopoverAnchor = { y: 0, x: 0 };
 export type PopoverAnchor = { y: number; x: number };
 
 interface PopoverProps {
-  visible?: boolean;
+  visible: boolean;
   onRequestClose?: () => void;
+  onShow?: () => void;
   children: React.ReactNode;
   anchor: PopoverAnchor;
 }
 
-export function Popover(props: PopoverProps) {
-  const {
-    visible = false,
-    onRequestClose = () => {},
-    anchor,
-    children,
-  } = props;
+export function Popover(props: PopoverProps): JSX.Element {
+  const { visible = false, onShow, onRequestClose, anchor, children } = props;
   const opacity = useRef(new Animated.Value(0)).current;
-  const theme = useTheme();
 
   useEffect(() => {
     Animated.spring(opacity, {
@@ -34,31 +34,28 @@ export function Popover(props: PopoverProps) {
   }, [visible, opacity]);
 
   const handlePressBackground = useCallback(() => {
-    onRequestClose();
+    if (isNonNullish(onRequestClose)) {
+      onRequestClose();
+    }
   }, [onRequestClose]);
-
-  const config: PressabilityConfig = useMemo(
-    () => ({
-      onPress: handlePressBackground,
-    }),
-    [handlePressBackground],
-  );
-
-  const eventHandlers = usePressability(config);
 
   return (
     <Modal
       visible={visible}
       onRequestClose={onRequestClose}
+      onShow={onShow}
       animationType="none"
       transparent
     >
       <View style={styles.base}>
-        <View style={styles.background} {...eventHandlers} />
+        <Pressable
+          accessible={false}
+          style={styles.background}
+          onPress={handlePressBackground}
+        />
         <Animated.View
           style={[
             styles.popover,
-            theme.container.shadow,
             {
               top: anchor.y,
               left: anchor.x,
@@ -73,6 +70,60 @@ export function Popover(props: PopoverProps) {
   );
 }
 
+export function getPopoverAnchorAndHeight(
+  openerMeasurements: Measurements,
+  contentHeight: number,
+  pickerOffset = 4,
+  screenOffset = 16,
+): [PopoverAnchor, number] {
+  const screenSize = Dimensions.get('window');
+
+  const bottomY =
+    openerMeasurements.pageY + openerMeasurements.height + pickerOffset;
+  const topY = openerMeasurements.pageY - pickerOffset - contentHeight;
+
+  const overflowsBottom = bottomY + contentHeight > screenSize.height;
+
+  let anchor: PopoverAnchor = { x: 0, y: 0 };
+  let popoverHeight = contentHeight;
+
+  if (overflowsBottom) {
+    const heightIfBottomY = screenSize.height - bottomY;
+    const heightIfTopY = openerMeasurements.pageY;
+
+    if (heightIfTopY < heightIfBottomY) {
+      anchor = {
+        x: openerMeasurements.pageX,
+        y: bottomY,
+      };
+
+      if (screenSize.height - bottomY < contentHeight) {
+        popoverHeight = screenSize.height - bottomY - screenOffset;
+      }
+    } else {
+      if (topY < 0) {
+        popoverHeight = openerMeasurements.pageY - screenOffset;
+        anchor = {
+          x: openerMeasurements.pageX,
+          y: screenOffset,
+        };
+      } else {
+        anchor = {
+          x: openerMeasurements.pageX,
+          y: topY,
+        };
+      }
+    }
+  } else {
+    anchor = {
+      x: openerMeasurements.pageX,
+      y: bottomY,
+    };
+  }
+
+  return [anchor, popoverHeight];
+}
+
 const styles = StyleSheet.create({
   base: {
     height: '100%',
@@ -83,7 +134,7 @@ const styles = StyleSheet.create({
   popover: {
     position: 'absolute',
     zIndex: 1,
-    borderRadius: tokens.radius,
+    borderRadius: tokens.border.radius.default,
   },
   background: {
     position: 'absolute',

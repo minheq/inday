@@ -7,9 +7,8 @@ export default {
   component: Switch,
 };
 
-function StatefulCheckbox() {
+export function Basic(): JSX.Element {
   const [value, setValue] = React.useState(false);
+
   return <Switch value={value} onChange={setValue} />;
 }
-
-export const Default = () => <StatefulCheckbox />;

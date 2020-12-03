@@ -6,7 +6,7 @@ interface HiddenProps {
   children: React.ReactNode;
 }
 
-export function Hidden(props: HiddenProps) {
+export function Hidden(props: HiddenProps): JSX.Element {
   const { hidden, children } = props;
 
   return (

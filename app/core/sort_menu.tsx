@@ -5,19 +5,19 @@ import React, {
   Fragment,
   useEffect,
   createContext,
+  useMemo,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView } from 'react-native';
+import { ScrollView, Pressable } from 'react-native';
 
 import {
   Container,
   Spacer,
-  Button,
   Text,
   Row,
-  Pressable,
   tokens,
   SegmentedControl,
+  FlatButton,
 } from '../components';
 import {
   useGetCollectionFields,
@@ -28,7 +28,7 @@ import {
   useCreateSort,
   useGetSortsSequenceMax,
 } from '../data/store';
-import { first, isEmpty } from '../../lib/data_structures';
+import { Array } from '../../lib/js_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { SortID, Sort, SortConfig, SortOrder } from '../data/sorts';
@@ -48,7 +48,7 @@ interface SortMenuProps {
   collectionID: string;
 }
 
-export function SortMenu(props: SortMenuProps) {
+export function SortMenu(props: SortMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
   const sorts = useGetViewSorts(viewID);
 
@@ -162,18 +162,21 @@ function SortNew() {
   const fields = useGetCollectionFields(context.collectionID);
 
   const createSort = useCreateSort();
-  const firstField = first(fields);
+  const firstField = Array.first(fields);
 
-  if (isEmpty(fields)) {
+  if (Array.isEmpty(fields)) {
     throw new Error(
       'Fields are empty. They may not have been loaded properly.',
     );
   }
 
-  const defaultSortConfig: SortConfig = {
-    fieldID: firstField.id,
-    order: 'ascending',
-  };
+  const defaultSortConfig = useMemo(
+    (): SortConfig => ({
+      fieldID: firstField.id,
+      order: 'ascending',
+    }),
+    [firstField],
+  );
 
   const [sortConfig, setSortConfig] = useState<SortConfig>(defaultSortConfig);
   const sequenceMax = useGetSortsSequenceMax(context.viewID);
@@ -202,7 +205,7 @@ function SortNew() {
   if (open) {
     return (
       <Container padding={16} borderRadius={tokens.radius} shadow>
-        <Text bold>New sort</Text>
+        <Text weight="bold">New sort</Text>
         <Spacer size={16} />
         <SortEdit sortConfig={sortConfig} onChange={setSortConfig} />
         <Spacer size={16} />
@@ -219,9 +222,7 @@ function SortNew() {
     );
   }
 
-  return (
-    <Button alignTitle="left" onPress={handlePressAddSort} title="+ Add sort" />
-  );
+  return <FlatButton onPress={handlePressAddSort} title="+ Add sort" />;
 }
 
 interface SortEditProps {

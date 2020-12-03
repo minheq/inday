@@ -13,7 +13,7 @@ interface ColumnProps {
 /**
  * Displays its children in a vertical array.
  */
-export function Column(props: ColumnProps) {
+export function Column(props: ColumnProps): JSX.Element {
   const { children, flex, justifyContent, alignItems, expanded } = props;
 
   return (

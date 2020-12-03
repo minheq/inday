@@ -6,12 +6,16 @@ export const css = (
 
 css.create = <P extends StyleObject>(styleObject: P) => {
   return (
-    ...keys: (keyof P | false | undefined | null)[]
+    ...keys: (keyof P | false | undefined | null | React.CSSProperties)[]
   ): React.CSSProperties => {
-    let style = {};
+    const style = {};
 
     for (const key of keys) {
       if (key === false || key === undefined || key === null) {
+        continue;
+      }
+      if (typeof key === 'object') {
+        Object.assign(style, key);
         continue;
       }
       Object.assign(style, styleObject[key]);

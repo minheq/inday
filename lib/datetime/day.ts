@@ -1,45 +1,108 @@
-import {
-  setYear,
-  setMonth,
-  setDate,
-  format,
-  parseISO,
-  startOfDay,
-  endOfDay,
-} from 'date-fns';
+import { Date } from '../js_utils';
+import { Interval } from './interval';
 
-export const DAY_FORMAT = 'yyyy-MM-dd';
+export const DAY_FORMAT = 'yyyy-M-dd';
 
-export function setSameDay(date: Date, toDate: Date) {
-  date = setYear(date, toDate.getFullYear());
-  date = setMonth(date, toDate.getMonth());
-  date = setDate(date, toDate.getDate());
+/** As `yyyy-M-dd` */
+export type Day = `${string}-${string}-${string}`;
 
-  return date;
+export interface DayInterval {
+  start: Day;
+  end: Day;
 }
 
-export function parseDay(day: string, timeOfDay?: 'start' | 'end'): Date {
-  const date = parseISO(day);
+export const DayInterval = {
+  toDate: (interval: DayInterval): Interval => {
+    return {
+      start: Day.toDate(interval.start),
+      end: Day.toDate(interval.end),
+    };
+  },
+  fromDate: (interval: Interval): DayInterval => {
+    return {
+      start: Day.fromDate(interval.start),
+      end: Day.fromDate(interval.end),
+    };
+  },
+  eachDayOfInterval: (interval: DayInterval): Day[] => {
+    const startDate = toDate(interval.start);
+    const endDate = toDate(interval.end);
 
-  if (timeOfDay === 'start') {
-    return startOfDay(date);
-  } else if (timeOfDay === 'end') {
-    return endOfDay(date);
-  }
+    const days: Day[] = [];
+    let current = startDate;
 
-  return date;
+    while (Date.isBefore(current, endDate)) {
+      days.push(fromDate(current));
+      current = Date.addDays(current, 1);
+    }
+
+    return days;
+  },
+  getDays: (interval: DayInterval, step = 1): Day[] => {
+    const endDate = interval.end;
+
+    let currentDay = interval.start;
+
+    const days: Day[] = [];
+
+    while (Day.isBefore(currentDay, endDate)) {
+      days.push(currentDay);
+      currentDay = Day.addDays(currentDay, step);
+    }
+
+    return days;
+  },
+};
+
+export const Day = {
+  isWithinDayInterval: (day: Day, interval: DayInterval): boolean => {
+    return Date.isWithinInterval(toDate(day), {
+      start: toDate(interval.start),
+      end: toDate(interval.end),
+    });
+  },
+  today: (): Day => {
+    return fromDate(Date.new());
+  },
+  isSameDay: (dayLeft: Day, dayRight: Day): boolean => {
+    return dayLeft === dayRight;
+  },
+  isAfter: (dayLeft: Day, dayRight: Day): boolean => {
+    return Date.isAfter(toDate(dayLeft), toDate(dayRight));
+  },
+  isBefore: (dayLeft: Day, dayRight: Day): boolean => {
+    return Date.isBefore(toDate(dayLeft), toDate(dayRight));
+  },
+  addDays: (day: Day, amount: number): Day => {
+    return fromDate(Date.addDays(toDate(day), amount));
+  },
+  subDays: (day: Day, amount: number): Day => {
+    return fromDate(Date.subDays(toDate(day), amount));
+  },
+  addMonths: (day: Day, amount: number): Day => {
+    return fromDate(Date.addMonths(toDate(day), amount));
+  },
+  subMonths: (day: Day, amount: number): Day => {
+    return fromDate(Date.subMonths(toDate(day), amount));
+  },
+  addYears: (day: Day, amount: number): Day => {
+    return fromDate(Date.addYears(toDate(day), amount));
+  },
+  subYears: (day: Day, amount: number): Day => {
+    return fromDate(Date.subYears(toDate(day), amount));
+  },
+  fromDate,
+  toDate,
+};
+
+function toDate(day: Day): Date {
+  return Date.new(day);
 }
 
-export function toDay(date: Date): string {
-  return format(date, DAY_FORMAT);
-}
+function fromDate(date: Date): Day {
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
 
-export function isValidDay(day: string): boolean {
-  const ok = parseDay(day);
-
-  if (!ok) {
-    return false;
-  }
-
-  return true;
+  return `${year}-${month}-${day}` as Day;
 }

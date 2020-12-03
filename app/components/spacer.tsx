@@ -4,19 +4,25 @@ import { useParentContainer } from './container';
 
 interface SpacerProps {
   size?: number;
+  direction?: 'column' | 'row';
 }
 
-export function Spacer(props: SpacerProps) {
-  const { size } = props;
+/**
+ * By default, creates vertical space
+ */
+export function Spacer(props: SpacerProps): JSX.Element {
+  const { size, direction: directionOverride } = props;
   const { direction } = useParentContainer();
+
+  const effectiveDirection = directionOverride || direction;
 
   return (
     <View
       style={
         size
-          ? direction === 'column'
-            ? { height: size }
-            : { width: size }
+          ? effectiveDirection === 'row'
+            ? { width: size }
+            : { height: size }
           : styles.base
       }
     />

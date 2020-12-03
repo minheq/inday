@@ -1,13 +1,21 @@
 import React from 'react';
 
-import { action } from '@storybook/addon-actions';
 import { Button } from './button';
+import { Text } from './text';
 
 export default {
   title: 'Button',
   component: Button,
 };
 
-export const Default = () => (
-  <Button onPress={action('clicked')} title="Hello Button" />
-);
+export function Basic(): JSX.Element {
+  return (
+    <Button
+      onPress={() => {
+        return;
+      }}
+    >
+      <Text>Button</Text>
+    </Button>
+  );
+}

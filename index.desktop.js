@@ -1,20 +1,31 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, protocol } = require('electron');
+const path = require('path');
+const url = require('url');
 
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1280,
+    height: 800,
     webPreferences: {
       nodeIntegration: true,
     },
   });
 
-  // and load the index.html of the app.
-  win.loadFile('index.html');
+  // https://stackoverflow.com/questions/38204774/serving-static-files-in-electron-react-app
+  // Makes it behave as if we were serving static content from web server
+  protocol.interceptFileProtocol('file', (request, cb) => {
+    const _url = request.url.substr(7);
+    cb({ path: path.normalize(`${__dirname}/${_url}`) });
+  });
 
-  // Open the DevTools.
-  win.webContents.openDevTools();
+  win.loadURL(
+    url.format({
+      pathname: 'index.html',
+      protocol: 'file',
+      slashes: true,
+    }),
+  );
 }
 
 // This method will be called when Electron has finished
