@@ -44,8 +44,24 @@ function newDate(
   seconds?: number,
   ms?: number,
 ): Date;
-function newDate(...args: any[]): Date {
-  return new DateNative(...args);
+function newDate(
+  year?: number | string,
+  month?: number,
+  date?: number,
+  hours?: number,
+  minutes?: number,
+  seconds?: number,
+  ms?: number,
+): Date {
+  if (year === undefined) {
+    return new DateNative();
+  }
+
+  if (typeof year === 'string' || month === undefined) {
+    return new DateNative(year);
+  }
+
+  return new DateNative(year, month, date, hours, minutes, seconds, ms);
 }
 
 function isDate(value: unknown): value is Date {

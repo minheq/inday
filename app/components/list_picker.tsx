@@ -240,8 +240,9 @@ export function useOptionsSearch<T>(
   options: ListPickerOption<T>[],
   searchTerm: string,
 ): ListPickerOption<T>[] {
-  const searchEngine = useRef(new SearchEngine(options, { keys: ['label'] }))
-    .current;
+  const searchEngine = useRef(
+    new SearchEngine(options, { keys: ['label'], shouldSort: false }),
+  ).current;
 
   useEffect(() => {
     searchEngine.setCollection(options);
