@@ -25,14 +25,14 @@ import { Date } from '../../lib/js_utils';
 import { Picker, PickerOption } from './picker';
 import { getSystemLocale } from '../lib/locale';
 
-interface DayPickerProps {
+interface DatePickerProps {
   value?: Day | null;
   onChange?: (value: Day) => void;
   isOutsideRange?: (day: Day) => boolean;
   isDayBlocked?: (day: Day) => boolean;
 }
 
-export function DayPicker(props: DayPickerProps): JSX.Element {
+export function DatePicker(props: DatePickerProps): JSX.Element {
   const { value, onChange, isOutsideRange, isDayBlocked } = props;
   const [year, setYear] = useState<Year>(Year.today());
   const minYear = useMemo(() => Year.subYears(year, 7), [year]);

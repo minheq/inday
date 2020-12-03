@@ -1,12 +1,16 @@
 import React from 'react';
+import { Container } from './container';
 
 import { TextInput } from './text_input';
 
-export default {
-  title: 'TextInput',
-  component: TextInput,
-};
-
-export function Basic(): JSX.Element {
+function Basic(): JSX.Element {
   return <TextInput />;
+}
+
+export function TextInputStories(): JSX.Element {
+  return (
+    <Container>
+      <Basic />
+    </Container>
+  );
 }

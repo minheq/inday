@@ -19,6 +19,9 @@ export const Year = {
   getYear: (year: Year): number => {
     return toDate(year).getFullYear();
   },
+  isValid: (day: Day): boolean => {
+    return isNaN(Date.parse(day)) === false;
+  },
   toDate,
   fromDate,
   eachYearOfInterval: (interval: YearInterval): Year[] => {

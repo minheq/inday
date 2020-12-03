@@ -64,6 +64,9 @@ export const Day = {
   today: (): Day => {
     return fromDate(Date.new());
   },
+  isValid: (day: Day): boolean => {
+    return isNaN(Date.parse(day)) === false;
+  },
   isSame: (dayLeft: Day, dayRight: Day): boolean => {
     return dayLeft === dayRight;
   },
@@ -90,6 +93,9 @@ export const Day = {
   },
   subYears: (day: Day, amount: number): Day => {
     return fromDate(Date.subYears(toDate(day), amount));
+  },
+  isStartOfMonth: (day: Day): boolean => {
+    return Date.isStartOfMonth(toDate(day));
   },
   fromDate,
   toDate,

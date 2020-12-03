@@ -6,7 +6,6 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
-  Platform,
 } from 'react-native';
 import { isNonNullish } from '../../lib/js_utils';
 import { Button } from './button';
@@ -17,7 +16,7 @@ import { tokens } from './tokens';
 export interface TextInputProps {
   icon?: IconName;
   testID?: string;
-  value?: string;
+  value?: string | null;
   autoFocus?: boolean;
   onChange?: (value: string) => void;
   onKeyPress?: (
@@ -42,16 +41,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
     onSubmitEditing,
     placeholder,
   } = props;
-  const [focused, setFocused] = React.useState(false);
-  const borderColor = React.useRef(new Animated.Value(0)).current;
   const ref = useRef<RNTextInput>(null);
-  const handleBlur = React.useCallback(() => {
-    setFocused(false);
-  }, []);
-
-  const handleFocus = React.useCallback(() => {
-    setFocused(true);
-  }, []);
 
   const handleClear = React.useCallback(() => {
     if (ref.current !== null) {
@@ -63,34 +53,8 @@ export function TextInput(props: TextInputProps): JSX.Element {
     }
   }, [onChange]);
 
-  React.useEffect(() => {
-    if (focused) {
-      Animated.spring(borderColor, {
-        toValue: 1,
-        useNativeDriver: true,
-        bounciness: 0,
-      }).start();
-    } else {
-      Animated.spring(borderColor, {
-        toValue: 0,
-        useNativeDriver: true,
-        bounciness: 0,
-      }).start();
-    }
-  }, [borderColor, focused]);
-
   return (
-    <Animated.View
-      style={[
-        styles.base,
-        {
-          borderColor: borderColor.interpolate({
-            inputRange: [0, 1],
-            outputRange: [tokens.colors.gray[300], tokens.colors.gray[600]],
-          }),
-        },
-      ]}
-    >
+    <Animated.View style={styles.base}>
       {icon && (
         <View style={styles.icon}>
           <Icon name={icon} color="muted" />
@@ -99,18 +63,16 @@ export function TextInput(props: TextInputProps): JSX.Element {
       <RNTextInput
         ref={ref}
         testID={testID}
-        value={value}
+        value={value !== null ? value : undefined}
         autoFocus={autoFocus}
         placeholder={placeholder}
         onChangeText={onChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
         onKeyPress={onKeyPress}
         onSubmitEditing={onSubmitEditing}
         placeholderTextColor={tokens.colors.gray[700]}
         style={[styles.input, tokens.text.size.md, !!icon && styles.hasIcon]}
       />
-      {clearable && value !== undefined && value !== '' && (
+      {clearable && value !== undefined && value !== null && value !== '' && (
         <Button
           onPress={handleClear}
           style={styles.clearButton}
@@ -129,7 +91,6 @@ const styles = DynamicStyleSheet.create({
     borderRadius: tokens.border.radius.default,
     backgroundColor: tokens.colors.base.white,
     alignItems: 'center',
-    borderWidth: 1,
   },
   icon: {
     paddingHorizontal: 8,
@@ -149,15 +110,12 @@ const styles = DynamicStyleSheet.create({
     borderRadius: tokens.border.radius.default,
   },
   input: {
-    height: 38,
+    height: 40,
+    borderWidth: 1,
+    borderColor: tokens.colors.gray[300],
     paddingLeft: 8,
     paddingRight: 40,
     borderRadius: tokens.border.radius.default,
     flex: 1,
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      },
-    }),
   },
 });

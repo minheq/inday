@@ -4,7 +4,6 @@ import React, {
   useRef,
   Fragment,
   useEffect,
-  useLayoutEffect,
 } from 'react';
 
 import {
@@ -169,8 +168,10 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
   );
 
   const handlePopoverShow = useCallback(() => {
-    popoverContentRef.current?.focus?.();
-  }, []);
+    if (searchable === false) {
+      popoverContentRef.current?.focus?.();
+    }
+  }, [searchable]);
 
   useEffect(() => {
     Animated.spring(borderColor, {

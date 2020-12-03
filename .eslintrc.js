@@ -33,8 +33,6 @@ module.exports = {
       rules: {
         'react-native/sort-styles': 0,
         'react/prop-types': 0,
-      },
-      rules: {
         'no-shadow': 2,
       },
     },

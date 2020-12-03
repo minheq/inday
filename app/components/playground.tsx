@@ -2,7 +2,8 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { DialogStories } from './dialog.stories';
 import { GridStories } from './grid.stories';
-import { DayPickerStories } from './day_picker.stories';
+import { DatePickerStories } from './date_picker.stories';
+import { TextInputStories } from './text_input.stories';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
@@ -59,12 +60,17 @@ export function Playground(
     case 'Picker':
       content = <PickerStories />;
       break;
-    case 'DayPicker':
-      content = <DayPickerStories />;
+    case 'TextInput':
+      content = <TextInputStories />;
+      break;
+    case 'DatePicker':
+      content = <DatePickerStories />;
       break;
 
     default:
-      break;
+      content = (
+        <Text>Hmm... This components stories is not implemented yet</Text>
+      );
   }
 
   return (
@@ -126,7 +132,8 @@ function Menu() {
         <MenuItem component="Intro" />
         <MenuSection title="COMPONENTS" />
         <MenuItem component="Picker" />
-        <MenuItem component="DayPicker" />
+        <MenuItem component="DatePicker" />
+        <MenuItem component="TextInput" />
         <MenuItem component="Dialog" />
         <MenuItem component="Grid" />
       </ScrollView>

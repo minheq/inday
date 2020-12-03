@@ -909,7 +909,7 @@ interface MultiOptionCellProps {
 function useRenderOption(options: SelectOption[]) {
   return useCallback(
     (id: string) => {
-      const option = options.find((option) => option.id === id);
+      const option = options.find((_option) => _option.id === id);
 
       if (option === undefined) {
         return <Fragment />;
@@ -1703,33 +1703,18 @@ const styles = DynamicStyleSheet.create(() => ({
     height: 32,
     borderRadius: tokens.border.radius.default,
     ...tokens.text.size.md,
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      },
-    }),
   },
   multilineTextCellInput: {
     paddingTop: FOCUS_BORDER_WIDTH + 1,
     minHeight: 128,
     borderRadius: tokens.border.radius.default,
     ...tokens.text.size.md,
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      },
-    }),
   },
   numberCellInput: {
     height: 32,
     borderRadius: tokens.border.radius.default,
     textAlign: 'right',
     ...tokens.text.size.md,
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      },
-    }),
   },
   selectKindEditingContainer: {
     maxHeight: 480,

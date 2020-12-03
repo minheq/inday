@@ -3,6 +3,7 @@ import { test as zora } from 'zora';
 interface Assert {
   deepEqual: <T>(valA: T, valB: T, description?: string) => void;
   throws: <T extends () => void>(fn: T, description?: string) => void;
+  fail: (description?: string) => void;
 }
 
 type Spec = (assert: Assert) => Promise<void> | void;

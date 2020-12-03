@@ -72,6 +72,9 @@ export const Month = {
   getYear: (month: Month): number => {
     return Month.toDate(month).getFullYear();
   },
+  isValid: (day: Day): boolean => {
+    return isNaN(Date.parse(day)) === false;
+  },
   isSame: (monthLeft: Month, monthRight: Month): boolean => {
     return monthLeft === monthRight;
   },
