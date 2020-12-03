@@ -5,12 +5,15 @@ function between(num: number, min: number, max: number): number {
   return MathNative.max(MathNative.min(num, max), min);
 }
 
-function isNumber(value: string): boolean {
+function isNumber(value: unknown): boolean {
   if (value === '') {
     return true;
   }
 
-  if (isNaN(NumberNative(value.replaceAll(' ', '')))) {
+  if (
+    typeof value === 'string' &&
+    isNaN(NumberNative(value.replaceAll(' ', '')))
+  ) {
     return false;
   }
 
