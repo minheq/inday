@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { G, Path, Defs, ClipPath } from 'react-native-svg';
+import Svg, { G, Path, Defs, ClipPath } from './svg';
 import { fromTextColor, TextColor } from './text';
 
 type IconSize = 'sm' | 'md' | 'lg';
