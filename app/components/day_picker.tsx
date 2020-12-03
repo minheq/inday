@@ -34,25 +34,28 @@ interface DayPickerProps {
 
 export function DayPicker(props: DayPickerProps): JSX.Element {
   const { value, onChange, isOutsideRange, isDayBlocked } = props;
+  const [year, setYear] = useState<Year>(Year.today());
+  const minYear = useMemo(() => Year.subYears(year, 7), [year]);
+  const maxYear = useMemo(() => Year.addYears(year, 7), [year]);
 
   const yearsOptions: PickerOption<number>[] = useMemo(() => {
     return Year.eachYearOfInterval({
-      start: Year.subYears(Year.today(), 2),
-      end: Year.addYears(Year.today(), 10),
-    }).map((year) => ({
-      value: Year.getYear(year),
-      label: Date.format(Year.toDate(year), getSystemLocale(), {
+      start: minYear,
+      end: maxYear,
+    }).map((_year) => ({
+      value: Year.getYear(_year),
+      label: Date.format(Year.toDate(_year), getSystemLocale(), {
         year: 'numeric',
       }),
     }));
-  }, []);
+  }, [minYear, maxYear]);
   const monthOptions: PickerOption<number>[] = useMemo(() => {
     return Month.eachMonthOfInterval({
       start: Month.startOfYear(),
       end: Month.endOfYear(),
-    }).map((month) => ({
-      value: Month.getMonth(month),
-      label: Date.format(Month.toDate(month), getSystemLocale(), {
+    }).map((_month) => ({
+      value: Month.getMonth(_month),
+      label: Date.format(Month.toDate(_month), getSystemLocale(), {
         month: 'long',
       }),
     }));
@@ -89,19 +92,34 @@ export function DayPicker(props: DayPickerProps): JSX.Element {
   );
 
   const handleChangeYear = useCallback(
-    (year: number) => {
-      setMonth(Month.setYear(month, year));
+    (_year: number) => {
+      setYear(Year.fromYear(_year));
+      setMonth(Month.setYear(month, _year));
     },
     [month],
   );
 
   const handlePressNext = useCallback(() => {
-    setMonth(Month.addMonths(month, 1));
-  }, [month]);
+    const nextMonth = Month.addMonths(month, 1);
+    const nextYear = Year.fromMonth(nextMonth);
+
+    if (Year.isAfter(nextYear, maxYear) || Year.isSame(nextYear, maxYear)) {
+      setYear(nextYear);
+    }
+
+    setMonth(nextMonth);
+  }, [month, maxYear]);
 
   const handlePressPrevious = useCallback(() => {
+    const prevMonth = Month.addMonths(month, 1);
+    const prevYear = Year.fromMonth(prevMonth);
+
+    if (Year.isBefore(prevYear, minYear) || Year.isSame(prevYear, minYear)) {
+      setYear(prevYear);
+    }
+
     setMonth(Month.subMonths(month, 1));
-  }, [month]);
+  }, [month, minYear]);
 
   const renderDay = useCallback(
     (p: RenderDayProps) => <DayDisplay {...p} onSelect={handleSelectDay} />,
@@ -315,8 +333,8 @@ const styles = DynamicStyleSheet.create(() => ({
     borderRadius: tokens.border.radius.circle,
     backgroundColor: tokens.colors.gray[100],
     textAlign: 'center',
-    height: 40,
-    width: 40,
+    height: 32,
+    width: 32,
   },
   todayWrapper: {},
   withinSelected: {

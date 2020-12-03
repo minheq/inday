@@ -34,6 +34,9 @@ module.exports = {
         'react-native/sort-styles': 0,
         'react/prop-types': 0,
       },
+      rules: {
+        'no-shadow': 2,
+      },
     },
     {
       files: ['server/**/*.ts', 'lib/**/*.ts'],
@@ -52,6 +55,9 @@ module.exports = {
       },
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint', 'sonarjs'],
+      rules: {
+        'no-shadow': 2,
+      },
     },
     {
       files: ['**/*.test.ts'],

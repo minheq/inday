@@ -38,6 +38,18 @@ export const Year = {
   fromDay: (day: Day): Year => {
     return fromDate(Day.toDate(day));
   },
+  fromYear: (yearNum: number): Year => {
+    return `${yearNum}`;
+  },
+  isSame: (yearLeft: Year, yearRight: Year): boolean => {
+    return yearLeft === yearRight;
+  },
+  isAfter: (yearLeft: Year, yearRight: Year): boolean => {
+    return Date.isAfter(toDate(yearLeft), toDate(yearRight));
+  },
+  isBefore: (yearLeft: Year, yearRight: Year): boolean => {
+    return Date.isBefore(toDate(yearLeft), toDate(yearRight));
+  },
   fromMonth: (month: Month): Year => {
     return fromDate(Month.toDate(month));
   },

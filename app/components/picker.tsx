@@ -23,7 +23,7 @@ import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { Measurements } from '../lib/measurements';
 import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
-import { NavigationKey, UIKey } from '../lib/keyboard';
+import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 
 export interface PickerProps<T> {
   value?: T;
@@ -122,16 +122,17 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     if (activeIndex !== null) {
       handleClosePicker();
       const option = options[activeIndex];
+
       if (isNonNullish(onChange)) {
         onChange(option.value);
       }
     }
+
+    buttonRef.current?.focus?.();
   }, [activeIndex, options, handleClosePicker, onChange]);
 
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-
+  const handleKey = useCallback(
+    (key: string) => {
       if (key === NavigationKey.ArrowDown) {
         if (activeIndex === null || activeIndex === options.length - 1) {
           setActiveIndex(0);
@@ -146,13 +147,29 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         }
       } else if (key === UIKey.Escape) {
         handleClosePicker();
+      } else if (key === WhiteSpaceKey.Enter) {
+        handleSubmitEditing();
       }
     },
-    [activeIndex, options, handleClosePicker],
+    [activeIndex, options, handleClosePicker, handleSubmitEditing],
+  );
+
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      handleKey(event.nativeEvent.key);
+    },
+    [handleKey],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      handleKey(event.nativeEvent.key);
+    },
+    [handleKey],
   );
 
   const handlePopoverShow = useCallback(() => {
-    popoverContentRef.current?.focus();
+    popoverContentRef.current?.focus?.();
   }, []);
 
   useEffect(() => {
@@ -165,14 +182,16 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
 
   return (
     <Fragment>
-      <View ref={buttonRef}>
-        <Pressable onPress={handleOpenPicker} style={styles.button}>
-          <Text>{selected ? selected.label : placeholder}</Text>
-          <View style={styles.caretWrapper}>
-            <Icon name="CaretDown" color="default" />
-          </View>
-        </Pressable>
-      </View>
+      <Pressable
+        ref={buttonRef}
+        onPress={handleOpenPicker}
+        style={styles.button}
+      >
+        <Text>{selected ? selected.label : placeholder}</Text>
+        <View style={styles.caretWrapper}>
+          <Icon name="CaretDown" color="default" />
+        </View>
+      </Pressable>
       <Popover
         onShow={handlePopoverShow}
         anchor={picker.anchor}
@@ -181,6 +200,8 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
       >
         <View
           accessible
+          // @ts-ignore available on the web
+          onKeyDown={handleKeyDown}
           ref={popoverContentRef}
           style={[
             styles.popover,
@@ -224,9 +245,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       },
                     ]}
                   >
-                    <Text color={active ? 'contrast' : 'default'}>
-                      {o.label}
-                    </Text>
+                    <Text color="default">{o.label}</Text>
                     {selected && selected.value === o.value && (
                       <Icon name="CheckThick" color="primary" />
                     )}

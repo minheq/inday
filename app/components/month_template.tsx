@@ -102,10 +102,10 @@ function WeekContainer(props: WeekContainerProps): JSX.Element {
         {week.days.map((day) => {
           const isWithinCurrentMonth = Month.isDayWithinMonth(week.month, day);
           const isSelectedStart = selected
-            ? Day.isSameDay(day, selected.start)
+            ? Day.isSame(day, selected.start)
             : false;
           const isSelectedEnd = selected
-            ? Day.isSameDay(day, selected.end)
+            ? Day.isSame(day, selected.end)
             : false;
           const isSelected = isSelectedStart || isSelectedEnd;
           const withinSelected =
@@ -113,21 +113,21 @@ function WeekContainer(props: WeekContainerProps): JSX.Element {
               ? Day.isWithinDayInterval(day, selected)
               : false;
           const outsideRange = isOutsideRange ? isOutsideRange(day) : false;
-          const today = Day.isSameDay(Day.fromDate(new Date()), day);
+          const today = Day.isSame(Day.fromDate(new Date()), day);
           const blocked = isDayBlocked ? isDayBlocked(day) : false;
 
           if (!isWithinCurrentMonth) {
             const hasSelectionNextMonth = selected
               ? Day.isAfter(day, eom) &&
                 Day.isAfter(selected.end, eom) &&
-                (Day.isSameDay(selected.start, eom) ||
+                (Day.isSame(selected.start, eom) ||
                   Day.isBefore(selected.start, eom))
               : false;
 
             const hasSelectionPreviousMonth = selected
               ? Day.isBefore(day, som) &&
                 Day.isBefore(selected.start, som) &&
-                (Day.isSameDay(selected.end, som) ||
+                (Day.isSame(selected.end, som) ||
                   Day.isAfter(selected.end, som))
               : false;
 

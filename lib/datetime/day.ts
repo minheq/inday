@@ -64,7 +64,7 @@ export const Day = {
   today: (): Day => {
     return fromDate(Date.new());
   },
-  isSameDay: (dayLeft: Day, dayRight: Day): boolean => {
+  isSame: (dayLeft: Day, dayRight: Day): boolean => {
     return dayLeft === dayRight;
   },
   isAfter: (dayLeft: Day, dayRight: Day): boolean => {

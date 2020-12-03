@@ -72,6 +72,15 @@ export const Month = {
   getYear: (month: Month): number => {
     return Month.toDate(month).getFullYear();
   },
+  isSame: (monthLeft: Month, monthRight: Month): boolean => {
+    return monthLeft === monthRight;
+  },
+  isAfter: (monthLeft: Month, monthRight: Month): boolean => {
+    return Date.isAfter(toDate(monthLeft), toDate(monthRight));
+  },
+  isBefore: (monthLeft: Month, monthRight: Month): boolean => {
+    return Date.isBefore(toDate(monthLeft), toDate(monthRight));
+  },
   setMonth: (month: Month, monthNum: number): Month => {
     const date = Month.toDate(month);
     date.setMonth(monthNum);
