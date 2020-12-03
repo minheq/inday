@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { tokens } from './tokens';
 import { Modal } from './modal';
-import { isNonNullish } from '../../lib/js_utils';
 import { Measurements } from '../lib/measurements';
 
 export type PopoverAnchor = { y: number; x: number };
@@ -34,7 +33,7 @@ export function Popover(props: PopoverProps): JSX.Element {
   }, [visible, opacity]);
 
   const handlePressBackground = useCallback(() => {
-    if (isNonNullish(onRequestClose)) {
+    if (onRequestClose !== undefined) {
       onRequestClose();
     }
   }, [onRequestClose]);

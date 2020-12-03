@@ -1,6 +1,6 @@
 // From https://github.com/annexare/Countries/blob/master/dist/countries.json
 
-import { Object } from '../js_utils';
+import { ObjectUtils } from '../js_utils';
 
 export interface Country {
   /**
@@ -1782,4 +1782,6 @@ export const countriesByAlpha2Code: CountriesByAlpha2Code = {
   },
 };
 
-export const countryList: Country[] = Object.valuesOf(countriesByAlpha2Code);
+export const countryList: Country[] = ObjectUtils.valuesOf(
+  countriesByAlpha2Code,
+);

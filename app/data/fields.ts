@@ -1,4 +1,4 @@
-import { Array, Date } from '../../lib/js_utils';
+import { ArrayUtils, DateUtils } from '../../lib/js_utils';
 import { NumberUnit } from '../../lib/i18n/unit';
 import { generateID, validateID } from '../../lib/id';
 import { CollaboratorID } from './collaborators';
@@ -383,7 +383,7 @@ function areSingleSelectFieldKindValueEqual(
 }
 
 function areMultiSelectFieldKindValueEqual(a: string[], b: string[]): boolean {
-  return Array.hasAllOf(a, b);
+  return ArrayUtils.hasAllOf(a, b);
 }
 
 function areBooleanFieldKindValueEqual(
@@ -398,7 +398,7 @@ function areDateFieldKindValueEqual(
   b: DateFieldKindValue,
 ): boolean {
   if (a !== null && b !== null) {
-    return Date.isSameDay(a, b);
+    return DateUtils.isSameDay(a, b);
   }
 
   return a === b;
@@ -644,9 +644,11 @@ export function assertDateFieldValue(
     return;
   }
 
-  if (!Date.isDate(value)) {
+  if (!DateUtils.isDate(value)) {
     throw new Error(
-      `Expected DateFieldValue to be Date. Received "${JSON.stringify(value)}"`,
+      `Expected DateFieldValue to be DateUtils. Received "${JSON.stringify(
+        value,
+      )}"`,
     );
   }
 }
@@ -674,7 +676,7 @@ export function assertMultiCollaboratorFieldValue(
     return;
   }
 
-  if (!Array.isArray(value)) {
+  if (!ArrayUtils.isArray(value)) {
     throw new Error(
       `Expected MultiCollaboratorFieldValue to be string[]. Received "${JSON.stringify(
         value,
@@ -690,7 +692,7 @@ export function assertMultiRecordLinkFieldValue(
     return;
   }
 
-  if (!Array.isArray(value)) {
+  if (!ArrayUtils.isArray(value)) {
     throw new Error(
       `Expected MultiRecordLinkFieldValue to be string[]. Received "${JSON.stringify(
         value,
@@ -722,7 +724,7 @@ export function assertMultiOptionFieldValue(
     return;
   }
 
-  if (!Array.isArray(value)) {
+  if (!ArrayUtils.isArray(value)) {
     throw new Error(
       `Expected MultiOptionFieldValue to be string[]. Received "${JSON.stringify(
         value,
@@ -854,7 +856,7 @@ export function assertBooleanFieldKindValue(
 export function assertDateFieldKindValue(
   value: FieldValue,
 ): asserts value is DateFieldKindValue {
-  if (value !== null && !Date.isDate(value)) {
+  if (value !== null && !DateUtils.isDate(value)) {
     throw new Error(
       `Expected DateFieldKindValue. Received ${JSON.stringify(value)}`,
     );
@@ -864,7 +866,7 @@ export function assertDateFieldKindValue(
 export function assertMultiSelectFieldKindValue(
   value: FieldValue,
 ): asserts value is MultiSelectFieldKindValue {
-  if (Array.isArray(value) === false) {
+  if (ArrayUtils.isArray(value) === false) {
     throw new Error(
       `Expected MultiSelectFieldKindValue. Received ${JSON.stringify(value)}`,
     );

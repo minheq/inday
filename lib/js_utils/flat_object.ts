@@ -1,4 +1,4 @@
-import { Array } from './array_utils';
+import { ArrayUtils } from './array_utils';
 
 export type FlatObject<T> = {
   get: (arr: (string | number)[]) => T | undefined;
@@ -25,7 +25,7 @@ export function FlatObject<T>(init: { [key: string]: T } = {}): FlatObject<T> {
       return obj[makeKey(arr)];
     },
     set: (arr: (string | number)[], value: T) => {
-      if (Array.isEmpty(arr)) {
+      if (ArrayUtils.isEmpty(arr)) {
         console.error(
           '[FlatObject] empty array passed as keys. Nothing will be set. Make sure to pass non-empty array of keys',
         );

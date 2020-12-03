@@ -7,7 +7,6 @@ import {
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
 } from 'react-native';
-import { isNonNullish } from '../../lib/js_utils';
 import { Button } from './button';
 import { IconName, Icon } from './icon';
 import { DynamicStyleSheet } from './stylesheet';
@@ -48,7 +47,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
       ref.current.focus();
     }
 
-    if (isNonNullish(onChange)) {
+    if (onChange !== undefined) {
       onChange('');
     }
   }, [onChange]);

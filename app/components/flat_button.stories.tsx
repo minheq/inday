@@ -1,14 +1,10 @@
 import React from 'react';
+import { Container } from './container';
 
 import { FlatButton } from './flat_button';
 import { Row } from './row';
 
-export default {
-  title: 'FlatButton',
-  component: FlatButton,
-};
-
-export function Basic(): JSX.Element {
+function Basic(): JSX.Element {
   return (
     <Row>
       <FlatButton
@@ -19,5 +15,13 @@ export function Basic(): JSX.Element {
         title="Hello"
       />
     </Row>
+  );
+}
+
+export function FlatButtonStories(): JSX.Element {
+  return (
+    <Container>
+      <Basic />
+    </Container>
   );
 }

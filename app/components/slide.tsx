@@ -1,6 +1,5 @@
 import React from 'react';
 import { Animated } from 'react-native';
-import { isNonNullish } from '../../lib/js_utils';
 
 interface SlideProps {
   width: number;
@@ -29,11 +28,11 @@ export function Slide(props: SlideProps): JSX.Element {
       }),
     ]).start(() => {
       if (open) {
-        if (isNonNullish(onSlide)) {
+        if (onSlide !== undefined) {
           onSlide();
         }
       } else {
-        if (isNonNullish(onCollapsed)) {
+        if (onCollapsed !== undefined) {
           onCollapsed();
         }
       }

@@ -3,12 +3,7 @@ import React from 'react';
 import { SegmentedControl } from './segmented_control';
 import { Container } from './container';
 
-export default {
-  title: 'SegmentedControl',
-  component: SegmentedControl,
-};
-
-export function Basic(): JSX.Element {
+function Basic(): JSX.Element {
   const [value, setValue] = React.useState(1);
 
   return (
@@ -22,6 +17,14 @@ export function Basic(): JSX.Element {
           { value: 3, label: 'Option C' },
         ]}
       />
+    </Container>
+  );
+}
+
+export function SegmentedControlStories(): JSX.Element {
+  return (
+    <Container>
+      <Basic />
     </Container>
   );
 }

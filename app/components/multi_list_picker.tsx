@@ -5,7 +5,6 @@ import {
   TextInputKeyPressEventData,
   View,
 } from 'react-native';
-import { isNonNullish } from '../../lib/js_utils';
 import { UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { Checkbox } from './checkbox';
 import {
@@ -47,9 +46,9 @@ export function MultiListPicker<T>(
 
   const handleSelect = React.useCallback(
     (newVal: T, selected: boolean) => {
-      if (isNonNullish(onChange)) {
+      if (onChange !== undefined) {
         if (selected) {
-          if (isNonNullish(value)) {
+          if (value !== undefined && value !== null) {
             onChange(value.filter((val) => val !== newVal));
           }
         } else {
@@ -101,7 +100,7 @@ export function MultiListPicker<T>(
         if (activeIndex !== null) {
           const option = options[activeIndex];
 
-          if (isNonNullish(value)) {
+          if (value !== undefined && value !== null) {
             const selected = value.some((selVal) => selVal === option.value);
             if (handleSelect !== undefined) {
               handleSelect(option.value, selected);

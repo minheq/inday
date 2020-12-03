@@ -1,5 +1,5 @@
 import { Record } from './records';
-import { Array, Date } from '../../lib/js_utils';
+import { ArrayUtils, DateUtils } from '../../lib/js_utils';
 import {
   assertBooleanFieldKindValue,
   assertDateFieldValue,
@@ -391,7 +391,7 @@ export function filterRecords(
   let filteredRecords = records;
 
   filteredRecords = filteredRecords.filter((record) => {
-    if (Array.isEmpty(filterGroups)) {
+    if (ArrayUtils.isEmpty(filterGroups)) {
       return true;
     }
 
@@ -603,15 +603,15 @@ export const dateFieldKindFiltersByRule: {
       return false;
     }
 
-    if (!Date.isDate(filterValue)) {
+    if (!DateUtils.isDate(filterValue)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${JSON.stringify(
+        `Expected filterValue to be DateUtils. Received ${JSON.stringify(
           filterValue,
         )}`,
       );
     }
 
-    return Date.isSameDay(value, filterValue);
+    return DateUtils.isSameDay(value, filterValue);
   },
   isWithin: (value, filterValue) => {
     if (value === null) {
@@ -622,7 +622,7 @@ export const dateFieldKindFiltersByRule: {
       return true;
     }
 
-    if (Date.isDate(filterValue)) {
+    if (DateUtils.isDate(filterValue)) {
       throw new Error(
         `Expected filterValue to be Interval. Received ${JSON.stringify(
           filterValue,
@@ -630,53 +630,54 @@ export const dateFieldKindFiltersByRule: {
       );
     }
 
-    return Date.isWithinInterval(value, filterValue);
+    return DateUtils.isWithinInterval(value, filterValue);
   },
   isBefore: (value, filterValue) => {
     if (value === null) {
       return false;
     }
 
-    if (!Date.isDate(filterValue)) {
+    if (!DateUtils.isDate(filterValue)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${JSON.stringify(
+        `Expected filterValue to be DateUtils. Received ${JSON.stringify(
           filterValue,
         )}`,
       );
     }
 
-    return Date.isBefore(value, filterValue);
+    return DateUtils.isBefore(value, filterValue);
   },
   isAfter: (value, filterValue) => {
     if (value === null) {
       return false;
     }
 
-    if (!Date.isDate(filterValue)) {
+    if (!DateUtils.isDate(filterValue)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${JSON.stringify(
+        `Expected filterValue to be DateUtils. Received ${JSON.stringify(
           filterValue,
         )}`,
       );
     }
 
-    return Date.isAfter(value, filterValue);
+    return DateUtils.isAfter(value, filterValue);
   },
   isOnOrBefore: (value, filterValue) => {
     if (value === null) {
       return false;
     }
 
-    if (!Date.isDate(filterValue)) {
+    if (!DateUtils.isDate(filterValue)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${JSON.stringify(
+        `Expected filterValue to be DateUtils. Received ${JSON.stringify(
           filterValue,
         )}`,
       );
     }
 
     return (
-      Date.isBefore(value, filterValue) || Date.isSameDay(value, filterValue)
+      DateUtils.isBefore(value, filterValue) ||
+      DateUtils.isSameDay(value, filterValue)
     );
   },
   isOnOrAfter: (value, filterValue) => {
@@ -684,16 +685,17 @@ export const dateFieldKindFiltersByRule: {
       return false;
     }
 
-    if (!Date.isDate(filterValue)) {
+    if (!DateUtils.isDate(filterValue)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${JSON.stringify(
+        `Expected filterValue to be DateUtils. Received ${JSON.stringify(
           filterValue,
         )}`,
       );
     }
 
     return (
-      Date.isAfter(value, filterValue) || Date.isSameDay(value, filterValue)
+      DateUtils.isAfter(value, filterValue) ||
+      DateUtils.isSameDay(value, filterValue)
     );
   },
   isNot: (value, filterValue) => {
@@ -701,15 +703,15 @@ export const dateFieldKindFiltersByRule: {
       return false;
     }
 
-    if (!Date.isDate(filterValue)) {
+    if (!DateUtils.isDate(filterValue)) {
       throw new Error(
-        `Expected filterValue to be Date. Received ${JSON.stringify(
+        `Expected filterValue to be DateUtils. Received ${JSON.stringify(
           filterValue,
         )}`,
       );
     }
 
-    return !Date.isSameDay(value, filterValue);
+    return !DateUtils.isSameDay(value, filterValue);
   },
   isEmpty: (value) => {
     return value === null;
@@ -779,7 +781,7 @@ export const singleSelectFieldKindFiltersByRule: {
       );
     }
 
-    return Array.hasAnyOf([value], filterValue);
+    return ArrayUtils.hasAnyOf([value], filterValue);
   },
   isNoneOf: (value, filterValue) => {
     if (value === null) {
@@ -798,7 +800,7 @@ export const singleSelectFieldKindFiltersByRule: {
       );
     }
 
-    return Array.hasNoneOf([value], filterValue);
+    return ArrayUtils.hasNoneOf([value], filterValue);
   },
   isEmpty: (value) => {
     return value === null;
@@ -826,27 +828,27 @@ export const multiSelectFieldKindFiltersByRule: {
       return false;
     }
 
-    return Array.hasAnyOf(value, filterValue);
+    return ArrayUtils.hasAnyOf(value, filterValue);
   },
   hasAllOf: (value, filterValue) => {
     if (value === null) {
       return false;
     }
 
-    return Array.hasAllOf(value, filterValue);
+    return ArrayUtils.hasAllOf(value, filterValue);
   },
   hasNoneOf: (value, filterValue) => {
     if (value === null) {
       return false;
     }
 
-    return Array.hasNoneOf(value, filterValue);
+    return ArrayUtils.hasNoneOf(value, filterValue);
   },
   isEmpty: (value) => {
-    return Array.isEmpty(value as string[]);
+    return ArrayUtils.isEmpty(value as string[]);
   },
   isNotEmpty: (value) => {
-    return !Array.isEmpty(value as string[]);
+    return !ArrayUtils.isEmpty(value as string[]);
   },
 };
 

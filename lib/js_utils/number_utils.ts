@@ -1,8 +1,5 @@
-import { MathNative } from './math_native';
-import { NumberNative } from './number_native';
-
 function between(num: number, min: number, max: number): number {
-  return MathNative.max(MathNative.min(num, max), min);
+  return Math.max(Math.min(num, max), min);
 }
 
 function isNumber(value: unknown): boolean {
@@ -10,10 +7,7 @@ function isNumber(value: unknown): boolean {
     return true;
   }
 
-  if (
-    typeof value === 'string' &&
-    isNaN(NumberNative(value.replaceAll(' ', '')))
-  ) {
+  if (typeof value === 'string' && isNaN(Number(value.replaceAll(' ', '')))) {
     return false;
   }
 
@@ -21,21 +15,21 @@ function isNumber(value: unknown): boolean {
 }
 
 function isNaN(val: unknown): boolean {
-  return NumberNative.isNaN(val);
+  return Number.isNaN(val);
 }
 
 function sample(min: number, max: number): number {
-  min = MathNative.ceil(min);
-  max = MathNative.floor(max);
+  min = Math.ceil(min);
+  max = Math.floor(max);
 
-  return MathNative.floor(MathNative.random() * (max - min + 1)) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function toNumber(str: string | number): number {
-  return NumberNative(str);
+  return Number(str);
 }
 
-export const Number = {
+export const NumberUtils = {
   between,
   isNumber,
   toNumber,

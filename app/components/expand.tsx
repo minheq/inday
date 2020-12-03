@@ -1,6 +1,5 @@
 import React from 'react';
 import { Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
-import { isNonNullish } from '../../lib/js_utils';
 
 interface ExpandProps {
   open?: boolean;
@@ -33,11 +32,11 @@ export function Expand(props: ExpandProps): JSX.Element {
       }),
     ]).start(() => {
       if (open) {
-        if (isNonNullish(onExpanded)) {
+        if (onExpanded !== undefined) {
           onExpanded();
         }
       } else {
-        if (isNonNullish(onCollapsed)) {
+        if (onCollapsed !== undefined) {
           onCollapsed();
         }
       }

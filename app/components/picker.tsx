@@ -20,7 +20,6 @@ import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { Measurements } from '../lib/measurements';
-import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 
@@ -106,7 +105,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     (option: PickerOption<T>) => {
       handleClosePicker();
 
-      if (isNonNullish(onChange)) {
+      if (onChange !== undefined) {
         onChange(option.value);
       }
     },
@@ -122,7 +121,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
       handleClosePicker();
       const option = options[activeIndex];
 
-      if (isNonNullish(onChange)) {
+      if (onChange !== undefined) {
         onChange(option.value);
       }
     }

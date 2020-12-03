@@ -12,7 +12,7 @@ import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
 import { FlatButton, Picker } from '../components';
 import { Group, getRows, LeafRow } from './grid.common';
-import { Array } from '../../lib/js_utils';
+import { ArrayUtils } from '../../lib/js_utils';
 import { Container } from './container';
 
 function renderLeafRowCell(props: RenderLeafRowCellProps) {
@@ -269,7 +269,7 @@ function ScrollToCell(props: ScrollToCellProps) {
         value={leafRow ? [...leafRow.path, leafRow.row].join(',') : undefined}
         options={rowOptions}
         onChange={(p1) => {
-          const [path, row] = Array.splitLast(
+          const [path, row] = ArrayUtils.splitLast(
             p1.split(',').map((p2) => Number(p2)),
           );
 

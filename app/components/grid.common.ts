@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { Array, FlatObject, Math } from '../../lib/js_utils';
+import { ArrayUtils, FlatObject, MathUtils } from '../../lib/js_utils';
 
 interface UseGridTransformerProps {
   groups: Group[];
@@ -70,12 +70,14 @@ export function useGridTransformer(
     columns,
     fixedColumnCount,
   ]);
-  const leftPaneContentWidth = useMemo(() => Math.sum(leftPaneColumnWidths), [
-    leftPaneColumnWidths,
-  ]);
-  const rightPaneContentWidth = useMemo(() => Math.sum(rightPaneColumnWidths), [
-    rightPaneColumnWidths,
-  ]);
+  const leftPaneContentWidth = useMemo(
+    () => MathUtils.sum(leftPaneColumnWidths),
+    [leftPaneColumnWidths],
+  );
+  const rightPaneContentWidth = useMemo(
+    () => MathUtils.sum(rightPaneColumnWidths),
+    [rightPaneColumnWidths],
+  );
   const leftPaneColumns = useMemo(() => getColumns(leftPaneColumnWidths), [
     leftPaneColumnWidths,
   ]);
@@ -123,7 +125,7 @@ export function getRows(
   prevPath: number[],
   prevOffset: number,
 ): Row[] {
-  if (Array.isEmpty(groups)) {
+  if (ArrayUtils.isEmpty(groups)) {
     return [];
   }
 
@@ -209,7 +211,7 @@ function isLeafGroup(group: Group): group is LeafGroup {
 }
 
 export function getRowsHeight(rows: Row[]): number {
-  return Math.sumBy(rows, (row) => row.height);
+  return MathUtils.sumBy(rows, (row) => row.height);
 }
 
 export interface RecycledLeafRow extends LeafRow {
@@ -286,17 +288,17 @@ export function recycleItems<T, K extends T>(
 ): K[] {
   const { items, prevItems, getValue, toRecycledItem, getKey } = params;
 
-  const reusedItems = Array.intersectBy(prevItems, items, getValue);
-  const recycledItems = Array.differenceBy(prevItems, items, getValue);
-  const newItems = Array.differenceBy(items, prevItems, getValue);
+  const reusedItems = ArrayUtils.intersectBy(prevItems, items, getValue);
+  const recycledItems = ArrayUtils.differenceBy(prevItems, items, getValue);
+  const newItems = ArrayUtils.differenceBy(items, prevItems, getValue);
 
-  if (Array.isEmpty(prevItems)) {
+  if (ArrayUtils.isEmpty(prevItems)) {
     return items.map((item, key) => toRecycledItem(item, key));
   }
 
   const recycledKeys = recycledItems.map((c) => getKey(c));
   if (recycledKeys.length < newItems.length) {
-    let maxKey = Math.maxBy(prevItems, getKey);
+    let maxKey = MathUtils.maxBy(prevItems, getKey);
 
     while (recycledKeys.length !== newItems.length) {
       recycledKeys.push(++maxKey);
@@ -445,8 +447,8 @@ export function getVisibleIndexRange<T>(
     endIndex = items.length - 1;
   }
 
-  startIndex = Math.max(startIndex - overscan, 0);
-  endIndex = Math.min(endIndex + overscan, items.length - 1);
+  startIndex = MathUtils.max(startIndex - overscan, 0);
+  endIndex = MathUtils.min(endIndex + overscan, items.length - 1);
 
   return [startIndex, endIndex];
 }
@@ -573,7 +575,7 @@ export function useGetStatefulRows(
   const selectedRowsCache = useMemo(() => {
     const cache = FlatObject<boolean>();
 
-    if (selectedRows === null || Array.isEmpty(selectedRows)) {
+    if (selectedRows === null || ArrayUtils.isEmpty(selectedRows)) {
       return cache;
     }
 
@@ -656,8 +658,11 @@ function getLeafRowCell(
   }
 
   if (
-    Array.isEqual([...cell.path, cell.row], [...row.path, row.row], true) ===
-    false
+    ArrayUtils.isEqual(
+      [...cell.path, cell.row],
+      [...row.path, row.row],
+      true,
+    ) === false
   ) {
     return null;
   }
@@ -677,7 +682,7 @@ function getGroupRowCell(
     return null;
   }
 
-  if (Array.isEqual(cell.path, row.path, true) === false) {
+  if (ArrayUtils.isEqual(cell.path, row.path, true) === false) {
     return null;
   }
 
@@ -739,7 +744,7 @@ export function useGridGetScrollToCellOffset(
   const leafRowsCache = useMemo(() => {
     const cache = FlatObject<LeafRow>();
 
-    if (Array.isEmpty(rows)) {
+    if (ArrayUtils.isEmpty(rows)) {
       return cache;
     }
 
@@ -784,7 +789,7 @@ export function useGridGetScrollToCellOffset(
       const below = y + height >= scrollY + scrollViewHeight;
 
       if (above) {
-        return Math.max(y - padding, 0);
+        return MathUtils.max(y - padding, 0);
       } else if (below) {
         return y + height - scrollViewHeight + padding;
       }
@@ -808,7 +813,7 @@ export function useGridGetScrollToCellOffset(
       const right = x + width >= scrollX + scrollViewWidth;
 
       if (left) {
-        return Math.max(x - padding, 0);
+        return MathUtils.max(x - padding, 0);
       } else if (right) {
         return x + width - scrollViewWidth + padding;
       }

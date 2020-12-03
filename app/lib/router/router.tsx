@@ -7,7 +7,7 @@ import React, {
   useReducer,
 } from 'react';
 import { Pathname } from '../../../lib/pathname';
-import { Object } from '../../../lib/js_utils';
+import { ObjectUtils } from '../../../lib/js_utils';
 
 interface UseNavigation {
   setParams: (params: Params) => void;
@@ -116,7 +116,7 @@ function getInitialState(pathMap: PathMap): State {
   let name = '';
   let params: Params = {};
 
-  const screens = Object.keysOf(pathMap) as string[];
+  const screens = ObjectUtils.keysOf(pathMap) as string[];
 
   for (const _name of screens) {
     const { path } = pathMap[_name];

@@ -18,14 +18,14 @@ const HOVER_THRESHOLD_MS = 1000;
 
 let lastTouchTimestamp = 0;
 function enableHover() {
-  if (isEnabled || Date.now() - lastTouchTimestamp < HOVER_THRESHOLD_MS) {
+  if (isEnabled || new Date() - lastTouchTimestamp < HOVER_THRESHOLD_MS) {
     return;
   }
   isEnabled = true;
 }
 
 function disableHover() {
-  lastTouchTimestamp = Date.now();
+  lastTouchTimestamp = new Date();
   if (isEnabled) {
     isEnabled = false;
   }

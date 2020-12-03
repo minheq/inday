@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image } from 'react-native';
-import { isNullish, Array } from '../../lib/js_utils';
+import { ArrayUtils } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text, TextSize } from './text';
 import { tokens } from './tokens';
@@ -16,7 +16,7 @@ interface AvatarProps {
 export function Avatar(props: AvatarProps): JSX.Element {
   const { sourceURI, size = 'md', name } = props;
 
-  if (isNullish(sourceURI)) {
+  if (sourceURI === undefined) {
     return (
       <View style={[styles.base, styles.initials, styles[size]]}>
         <Text size={getTextSize(size)}>{getInitials(name, size)}</Text>
@@ -58,7 +58,7 @@ function getInitials(name: string, size: AvatarSize): string {
     initials = 1;
   }
 
-  return Array.take(name.split(' '), initials)
+  return ArrayUtils.take(name.split(' '), initials)
     .map((c) => c.charAt(0).toUpperCase())
     .join('');
 }

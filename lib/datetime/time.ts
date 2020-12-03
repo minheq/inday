@@ -1,4 +1,4 @@
-import { Date } from '../js_utils';
+import { DateUtils } from '../js_utils';
 import { Hours } from './hours';
 import { Minutes } from './minutes';
 
@@ -19,21 +19,21 @@ export const Time = {
    * Creates a new Time
    */
   new: (hours: number, minutes: number): Time => {
-    let date = Date.new();
+    let date = new Date();
 
-    date = Date.setHours(date, hours);
-    date = Date.setMinutes(date, minutes);
-    date = Date.setSeconds(date, 0);
-    date = Date.setMilliseconds(date, 0);
+    date = DateUtils.setHours(date, hours);
+    date = DateUtils.setMinutes(date, minutes);
+    date = DateUtils.setSeconds(date, 0);
+    date = DateUtils.setMilliseconds(date, 0);
 
     return fromDate(date);
   },
   setSameTime: (date: Date, time: Time): Date => {
     const [hours, minutes] = getTime(time);
-    date = Date.setHours(date, hours);
-    date = Date.setMinutes(date, minutes);
-    date = Date.setSeconds(date, 0);
-    date = Date.setMilliseconds(date, 0);
+    date = DateUtils.setHours(date, hours);
+    date = DateUtils.setMinutes(date, minutes);
+    date = DateUtils.setSeconds(date, 0);
+    date = DateUtils.setMilliseconds(date, 0);
 
     return date;
   },
@@ -45,9 +45,9 @@ export const Time = {
   get: getTime,
   subMinutes: (time: Time, amount: Minutes, capAtStartOfDay = false): Time => {
     const date = toDate(time);
-    const newDate = Date.subMinutes(date, amount);
+    const newDate = DateUtils.subMinutes(date, amount);
 
-    if (Date.isSameDay(date, newDate) === false) {
+    if (DateUtils.isSameDay(date, newDate) === false) {
       if (capAtStartOfDay === true) {
         return '0000';
       }
@@ -58,9 +58,9 @@ export const Time = {
   },
   addMinutes: (time: Time, amount: Minutes, capAtEndOfDay = false): Time => {
     const date = toDate(time);
-    const newDate = Date.addMinutes(date, amount);
+    const newDate = DateUtils.addMinutes(date, amount);
 
-    if (Date.isSameDay(date, newDate) === false) {
+    if (DateUtils.isSameDay(date, newDate) === false) {
       if (capAtEndOfDay === true) {
         return '2359';
       }
@@ -71,9 +71,9 @@ export const Time = {
   },
   subHours: (time: Time, amount: Hours, capAtStartOfDay = false): Time => {
     const date = toDate(time);
-    const newDate = Date.subHours(date, amount);
+    const newDate = DateUtils.subHours(date, amount);
 
-    if (Date.isSameDay(date, newDate) === false) {
+    if (DateUtils.isSameDay(date, newDate) === false) {
       if (capAtStartOfDay === true) {
         return '0000';
       }
@@ -84,9 +84,9 @@ export const Time = {
   },
   addHours: (time: Time, amount: Hours, capAtEndOfDay = false): Time => {
     const date = toDate(time);
-    const newDate = Date.addHours(date, amount);
+    const newDate = DateUtils.addHours(date, amount);
 
-    if (Date.isSameDay(date, newDate) === false) {
+    if (DateUtils.isSameDay(date, newDate) === false) {
       if (capAtEndOfDay === true) {
         return '2359';
       }
@@ -99,25 +99,25 @@ export const Time = {
     const dateLeft = toDate(timeLeft);
     const dateRight = toDate(timeRight);
 
-    return Math.abs(Date.differenceInMinutes(dateLeft, dateRight));
+    return Math.abs(DateUtils.differenceInMinutes(dateLeft, dateRight));
   },
   differenceInHours: (timeLeft: Time, timeRight: Time): Hours => {
     const dateLeft = toDate(timeLeft);
     const dateRight = toDate(timeRight);
 
-    return Math.abs(Date.differenceInHours(dateLeft, dateRight));
+    return Math.abs(DateUtils.differenceInHours(dateLeft, dateRight));
   },
   isBefore: (timeLeft: Time, timeRight: Time): boolean => {
     const dateLeft = toDate(timeLeft);
     const dateRight = toDate(timeRight);
 
-    return Date.isBefore(dateLeft, dateRight);
+    return DateUtils.isBefore(dateLeft, dateRight);
   },
   isAfter: (timeLeft: Time, timeRight: Time): boolean => {
     const dateLeft = toDate(timeLeft);
     const dateRight = toDate(timeRight);
 
-    return Date.isAfter(dateLeft, dateRight);
+    return DateUtils.isAfter(dateLeft, dateRight);
   },
   startOfDay: (): Time => {
     return '0000';
@@ -130,16 +130,16 @@ export const Time = {
 function toDate(time: Time): Date {
   const [hours, minutes] = getTime(time);
 
-  let date = Date.new();
+  let date = new Date();
 
-  date = Date.setHours(date, hours);
-  date = Date.setMinutes(date, minutes);
+  date = DateUtils.setHours(date, hours);
+  date = DateUtils.setMinutes(date, minutes);
 
   return date;
 }
 
 function fromDate(date: Date): Time {
-  return Date.format(date, undefined, {
+  return DateUtils.format(date, undefined, {
     minute: 'numeric',
     hour: 'numeric',
     hour12: false,

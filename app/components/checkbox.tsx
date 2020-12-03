@@ -1,7 +1,6 @@
 import React from 'react';
 import { Icon } from './icon';
 import { View, Pressable, Animated } from 'react-native';
-import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 
@@ -14,7 +13,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
   const { value, onChange } = props;
   const checked = React.useRef(new Animated.Value(0)).current;
   const handlePress = React.useCallback(() => {
-    if (isNonNullish(onChange)) {
+    if (onChange !== undefined) {
       onChange(!value);
     }
   }, [value, onChange]);

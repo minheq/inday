@@ -4,7 +4,6 @@ import { Pressable } from 'react-native';
 import { Spacer } from './spacer';
 import { Row } from './row';
 import { Text } from './text';
-import { isNonNullish } from '../../lib/js_utils';
 import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 
@@ -54,7 +53,7 @@ function SegmentedControlButton<T>(props: SegmentedControlButtonProps<T>) {
   const { selected, option, onPress } = props;
 
   const handlePress = useCallback(() => {
-    if (isNonNullish(onPress)) {
+    if (onPress !== undefined) {
       onPress(option.value);
     }
   }, [option, onPress]);

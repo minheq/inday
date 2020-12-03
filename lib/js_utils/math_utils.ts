@@ -1,5 +1,3 @@
-import { MathNative } from './math_native';
-
 function sum(numbers: number[]): number {
   return numbers.reduce(
     (previousValue, currentValue) => previousValue + currentValue,
@@ -8,7 +6,7 @@ function sum(numbers: number[]): number {
 }
 
 function maxBy<T>(a: T[], getValue: (item: T) => number): number {
-  return MathNative.max(...a.map((c) => getValue(c)));
+  return Math.max(...a.map((c) => getValue(c)));
 }
 
 function sumBy<T>(a: T[], getValue: (item: T) => number): number {
@@ -16,14 +14,14 @@ function sumBy<T>(a: T[], getValue: (item: T) => number): number {
 }
 
 function max(...args: number[]): number {
-  return MathNative.max(...args);
+  return Math.max(...args);
 }
 
 function min(...args: number[]): number {
-  return MathNative.min(...args);
+  return Math.min(...args);
 }
 
-export const Math = {
+export const MathUtils = {
   sum,
   maxBy,
   sumBy,

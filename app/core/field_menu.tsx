@@ -18,7 +18,7 @@ interface FieldMenuProps {
   collectionID: string;
 }
 
-export function FieldMenu(props: FieldMenuProps) {
+export function FieldMenu(props: FieldMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
 
   const fields = useGetSortedFieldsWithListViewConfig(viewID);

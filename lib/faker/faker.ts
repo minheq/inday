@@ -1,4 +1,4 @@
-import { Number, Array } from '../js_utils';
+import { NumberUtils, ArrayUtils } from '../js_utils';
 
 const loremIpsum = [
   'Lorem',
@@ -61,17 +61,17 @@ const loremIpsum = [
 ];
 
 export function fakeEmail(): string {
-  return `${Array.sample(loremIpsum)}@${Array.sample(
+  return `${ArrayUtils.sample(loremIpsum)}@${ArrayUtils.sample(
     loremIpsum,
-  )}.${Array.sample(loremIpsum)}`;
+  )}.${ArrayUtils.sample(loremIpsum)}`;
 }
 
 export function fakeWord(): string {
-  return Array.sample(loremIpsum);
+  return ArrayUtils.sample(loremIpsum);
 }
 
 export function fakeNumber(): number {
-  return Number.sample(0, 1000);
+  return NumberUtils.sample(0, 1000);
 }
 
 export function fakeURL(): string {
@@ -80,26 +80,26 @@ export function fakeURL(): string {
 
 export function fakeDate(): Date {
   return new Date(
-    Number.sample(2020, 2030),
-    Number.sample(0, 11),
-    Number.sample(1, 28),
-    Number.sample(1, 23),
+    NumberUtils.sample(2020, 2030),
+    NumberUtils.sample(0, 11),
+    NumberUtils.sample(1, 28),
+    NumberUtils.sample(1, 23),
   );
 }
 
 export function fakePhoneNumber(): string {
-  return `${Number.sample(1000000000, 10000000000)}`;
+  return `${NumberUtils.sample(1000000000, 10000000000)}`;
 }
 
 export function fakeBoolean(): boolean {
-  return Number.sample(0, 1) === 1 ? true : false;
+  return NumberUtils.sample(0, 1) === 1 ? true : false;
 }
 
 export function fakeWords(size = 5): string {
   let result = '';
 
   for (let i = 0; i < size; i++) {
-    result += Array.sample(loremIpsum);
+    result += ArrayUtils.sample(loremIpsum);
 
     if (i !== size - 1) {
       result += ' ';

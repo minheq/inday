@@ -17,7 +17,6 @@ import { Text } from './text';
 import { Button } from './button';
 import { tokens } from './tokens';
 
-import { isNonNullish } from '../../lib/js_utils';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
@@ -64,7 +63,7 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
 
   const handleSelect = useCallback(
     (newVal: T) => {
-      if (isNonNullish(onChange)) {
+      if (onChange !== undefined) {
         onChange(newVal);
       }
     },

@@ -130,7 +130,7 @@ import {
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import { Number, Array, isNullish, Date } from '../../lib/js_utils';
+import { NumberUtils, ArrayUtils, DateUtils } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
@@ -616,7 +616,7 @@ function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
   const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (isNullish(value)) {
+  if (value === null) {
     return null;
   }
 
@@ -648,21 +648,23 @@ function DateCell(props: DateCellProps) {
   const { value, field } = props;
   const { state } = useLeafRowCellContext();
 
-  if (isNullish(value)) {
+  if (value === null) {
     return null;
   }
 
   if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>{Date.format(value, getSystemLocale())}</Text>
+        <Text numberOfLines={1}>
+          {DateUtils.format(value, getSystemLocale())}
+        </Text>
       </View>
     );
   }
 
   return (
     <View style={styles.textCellContainer}>
-      <Text>{Date.format(value, getSystemLocale())}</Text>
+      <Text>{DateUtils.format(value, getSystemLocale())}</Text>
     </View>
   );
 }
@@ -749,7 +751,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
     );
   }
 
-  const child = Array.isEmpty(value) ? (
+  const child = ArrayUtils.isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -825,7 +827,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
     );
   }
 
-  const child = Array.isEmpty(value) ? (
+  const child = ArrayUtils.isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -947,13 +949,13 @@ function MultiOptionCell(props: MultiOptionCellProps) {
     );
   }
 
-  const child = Array.isEmpty(value) ? (
+  const child = ArrayUtils.isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
       {value.map((_value) => {
         const selected = field.options.find((o) => o.id === _value);
-        if (isNullish(selected)) {
+        if (selected === undefined) {
           throw new Error(
             `Expected ${_value} to be within field options ${JSON.stringify(
               field,
@@ -1073,7 +1075,7 @@ function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
   const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (isNullish(value)) {
+  if (value === null) {
     return null;
   }
 
@@ -1383,11 +1385,11 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
   const handleKeyPress = useCellKeyPressHandler();
   const handleChangeText = useCallback(
     (newValue: string) => {
-      if (Number.isNumber(newValue) === false) {
+      if (NumberUtils.isNumber(newValue) === false) {
         return;
       }
 
-      updateRecordFieldValue(recordID, fieldID, Number.toNumber(newValue));
+      updateRecordFieldValue(recordID, fieldID, NumberUtils.toNumber(newValue));
     },
     [updateRecordFieldValue, recordID, fieldID],
   );

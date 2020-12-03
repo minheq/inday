@@ -34,42 +34,10 @@ import {
   getDate,
   isValid,
 } from 'date-fns';
-import { DateNative } from './date_native';
-import { Number } from './number_utils';
-
-function newDate(): Date;
-function newDate(value: number | string): Date;
-function newDate(
-  year: number,
-  month: number,
-  date?: number,
-  hours?: number,
-  minutes?: number,
-  seconds?: number,
-  ms?: number,
-): Date;
-function newDate(
-  year?: number | string,
-  month?: number,
-  date?: number,
-  hours?: number,
-  minutes?: number,
-  seconds?: number,
-  ms?: number,
-): Date {
-  if (year === undefined) {
-    return new DateNative();
-  }
-
-  if (typeof year === 'string' || month === undefined) {
-    return new DateNative(year);
-  }
-
-  return new DateNative(year, month, date, hours, minutes, seconds, ms);
-}
+import { NumberUtils } from './number_utils';
 
 function isDate(value: unknown): value is Date {
-  return value instanceof DateNative;
+  return value instanceof Date;
 }
 
 function format(
@@ -121,13 +89,13 @@ function parseString(str: string, inputFormat: DateInputFormat): Date | Error {
     );
   }
 
-  if (Number.isNumber(day) === false || day < 1) {
+  if (NumberUtils.isNumber(day) === false || day < 1) {
     return new Error('Day is not valid. Ensure only numeric input for day.');
-  } else if (Number.isNumber(month) === false || month < 1) {
+  } else if (NumberUtils.isNumber(month) === false || month < 1) {
     return new Error(
       'Month is not valid. Ensure only numeric input for month.',
     );
-  } else if (Number.isNumber(year) === false || year < 1) {
+  } else if (NumberUtils.isNumber(year) === false || year < 1) {
     return new Error('Year is not valid. Ensure only numeric input for year.');
   }
 
@@ -135,7 +103,7 @@ function parseString(str: string, inputFormat: DateInputFormat): Date | Error {
     year += 2000;
   }
 
-  const date = new DateNative(`${year}-${month}-${day}`);
+  const date = new Date(`${year}-${month}-${day}`);
 
   if (isValid(date) === false) {
     return new Error('Date is not valid.');
@@ -148,13 +116,12 @@ function isStartOfMonth(date: Date): boolean {
   return date.getDate() === 1;
 }
 
-export const Date = {
-  new: newDate,
+export const DateUtils = {
   today: (): Date => {
-    return newDate();
+    return new Date();
   },
   parse: (s: string): number => {
-    return DateNative.parse(s);
+    return Date.parse(s);
   },
   isDate,
   addDays,

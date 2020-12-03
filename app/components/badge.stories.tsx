@@ -1,12 +1,16 @@
 import React from 'react';
 
 import { Badge } from './badge';
+import { Container } from './container';
 
-export default {
-  title: 'Badge',
-  component: Badge,
-};
-
-export function Basic(): JSX.Element {
+function Basic(): JSX.Element {
   return <Badge title="Badge" />;
+}
+
+export function BadgeStories(): JSX.Element {
+  return (
+    <Container>
+      <Basic />
+    </Container>
+  );
 }

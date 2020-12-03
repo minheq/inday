@@ -1,4 +1,4 @@
-import { Date } from '../js_utils';
+import { DateUtils } from '../js_utils';
 import { Day } from './day';
 import { Month } from './month';
 
@@ -41,12 +41,12 @@ export const getFirstDateOfWeek = (
   date: Date,
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
 ): Date => {
-  const day = Date.getDay(date);
+  const day = DateUtils.getDay(date);
   const diffDays = day - firstDayOfWeek;
 
   const sub = diffDays < 0 ? 7 + diffDays : diffDays;
 
-  return Date.subDays(date, sub);
+  return DateUtils.subDays(date, sub);
 };
 
 export const getLastDateOfWeek = (
@@ -55,7 +55,7 @@ export const getLastDateOfWeek = (
 ): Date => {
   const firstDateOfTheWeek = getFirstDateOfWeek(date, firstDayOfWeek);
 
-  return Date.addDays(firstDateOfTheWeek, 6);
+  return DateUtils.addDays(firstDateOfTheWeek, 6);
 };
 
 export const getWeekInterval = (
@@ -63,14 +63,14 @@ export const getWeekInterval = (
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
 ): Interval => {
   return {
-    start: Date.startOfDay(getFirstDateOfWeek(date, firstDayOfWeek)),
-    end: Date.endOfDay(getLastDateOfWeek(date, firstDayOfWeek)),
+    start: DateUtils.startOfDay(getFirstDateOfWeek(date, firstDayOfWeek)),
+    end: DateUtils.endOfDay(getLastDateOfWeek(date, firstDayOfWeek)),
   };
 };
 
 export const eachDayOfWeek = (
-  date = Date.new(),
+  date = new Date(),
   firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
 ): Date[] => {
-  return Date.eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
+  return DateUtils.eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
 };

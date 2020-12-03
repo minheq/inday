@@ -9,7 +9,6 @@ import {
 import { Modal, ModalProps } from './modal';
 import { tokens } from './tokens';
 import { DynamicStyleSheet } from './stylesheet';
-import { isNonNullish } from '../../lib/js_utils';
 
 const OFFSET_TOP = 64;
 
@@ -155,7 +154,7 @@ export function Dialog(props: DialogProps): JSX.Element {
   ]);
 
   const handlePressBackground = React.useCallback(() => {
-    if (isNonNullish(onRequestClose)) {
+    if (onRequestClose !== undefined) {
       onRequestClose();
     }
   }, [onRequestClose]);

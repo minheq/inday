@@ -1,5 +1,4 @@
-import { ArrayNative } from './array_native';
-import { Number } from './number_utils';
+import { NumberUtils } from './number_utils';
 
 function range(min: number, max: number, step?: number): number[];
 function range(max: number): number[];
@@ -236,7 +235,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 function sample<T>(arr: T[]): T {
-  const index = Number.sample(0, arr.length - 1);
+  const index = NumberUtils.sample(0, arr.length - 1);
 
   return arr[index];
 }
@@ -297,10 +296,10 @@ function isArray<T>(
     ? never
     : readonly any[]
   : any[] {
-  return ArrayNative.isArray(arg);
+  return Array.isArray(arg);
 }
 
-export const Array = {
+export const ArrayUtils = {
   range,
   first,
   last,

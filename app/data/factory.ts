@@ -29,7 +29,7 @@ import { BaseView, View } from './views';
 import { Collection } from './collections';
 import { Record } from './records';
 import { Filter, FilterConfig } from './filters';
-import { Array } from '../../lib/js_utils';
+import { ArrayUtils } from '../../lib/js_utils';
 import { Sort, SortConfig } from './sorts';
 import {
   fakeBoolean,
@@ -308,7 +308,7 @@ export function makeView(
     ...baseView,
     type: 'list',
     fixedFieldCount: 1,
-    fieldsConfig: Array.keyedBy(
+    fieldsConfig: ArrayUtils.keyedBy(
       collection.fields.map((f, i) => ({
         id: f.id,
         visible: true,
@@ -328,7 +328,7 @@ export function makeManyRecords(
   },
   collaborators?: Collaborator[],
 ): Record[] {
-  return Array.range(0, count).map(() => {
+  return ArrayUtils.range(0, count).map(() => {
     return makeRecord({}, collection, recordsByFieldID, collaborators);
   });
 }
@@ -397,22 +397,22 @@ const fakeFieldValuesByFieldType: {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (Array.isEmpty(collaborators)) {
+    if (ArrayUtils.isEmpty(collaborators)) {
       return [];
     }
 
-    return [Array.sample(collaborators).id];
+    return [ArrayUtils.sample(collaborators).id];
   },
   [FieldType.MultiRecordLink]: (field, recordsByFieldID) => {
     if (recordsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (Array.isEmpty(recordsByFieldID[field.id])) {
+    if (ArrayUtils.isEmpty(recordsByFieldID[field.id])) {
       return [];
     }
 
-    return [Array.sample(recordsByFieldID[field.id]).id];
+    return [ArrayUtils.sample(recordsByFieldID[field.id]).id];
   },
   [FieldType.MultiLineText]: () => {
     return fakeWords(50);
@@ -420,7 +420,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.MultiOption]: (field) => {
     assertMultiOptionField(field);
 
-    return [Array.sample(field.options).id];
+    return [ArrayUtils.sample(field.options).id];
   },
   [FieldType.Number]: () => {
     return fakeNumber();
@@ -435,22 +435,22 @@ const fakeFieldValuesByFieldType: {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (Array.isEmpty(collaborators)) {
+    if (ArrayUtils.isEmpty(collaborators)) {
       return null;
     }
 
-    return Array.sample(collaborators).id;
+    return ArrayUtils.sample(collaborators).id;
   },
   [FieldType.SingleRecordLink]: (field, recordsByFieldID) => {
     if (recordsByFieldID === undefined) {
       throw new Error('Expected collaborators list to be passed in');
     }
 
-    if (Array.isEmpty(recordsByFieldID[field.id])) {
+    if (ArrayUtils.isEmpty(recordsByFieldID[field.id])) {
       return null;
     }
 
-    return Array.sample(recordsByFieldID[field.id]).id;
+    return ArrayUtils.sample(recordsByFieldID[field.id]).id;
   },
   [FieldType.SingleLineText]: () => {
     return fakeWords(2);
@@ -458,7 +458,7 @@ const fakeFieldValuesByFieldType: {
   [FieldType.SingleOption]: (field) => {
     assertSingleOptionField(field);
 
-    return Array.sample(field.options).id;
+    return ArrayUtils.sample(field.options).id;
   },
   [FieldType.URL]: () => {
     return fakeURL();

@@ -1,4 +1,4 @@
-import { Date } from '../js_utils';
+import { DateUtils } from '../js_utils';
 import { Interval } from './interval';
 
 export const DAY_FORMAT = 'yyyy-M-dd';
@@ -31,9 +31,9 @@ export const DayInterval = {
     const days: Day[] = [];
     let current = startDate;
 
-    while (Date.isBefore(current, endDate)) {
+    while (DateUtils.isBefore(current, endDate)) {
       days.push(fromDate(current));
-      current = Date.addDays(current, 1);
+      current = DateUtils.addDays(current, 1);
     }
 
     return days;
@@ -56,53 +56,53 @@ export const DayInterval = {
 
 export const Day = {
   isWithinDayInterval: (day: Day, interval: DayInterval): boolean => {
-    return Date.isWithinInterval(toDate(day), {
+    return DateUtils.isWithinInterval(toDate(day), {
       start: toDate(interval.start),
       end: toDate(interval.end),
     });
   },
   today: (): Day => {
-    return fromDate(Date.new());
+    return fromDate(new Date());
   },
   isValid: (day: Day): boolean => {
-    return isNaN(Date.parse(day)) === false;
+    return isNaN(DateUtils.parse(day)) === false;
   },
   isSame: (dayLeft: Day, dayRight: Day): boolean => {
     return dayLeft === dayRight;
   },
   isAfter: (dayLeft: Day, dayRight: Day): boolean => {
-    return Date.isAfter(toDate(dayLeft), toDate(dayRight));
+    return DateUtils.isAfter(toDate(dayLeft), toDate(dayRight));
   },
   isBefore: (dayLeft: Day, dayRight: Day): boolean => {
-    return Date.isBefore(toDate(dayLeft), toDate(dayRight));
+    return DateUtils.isBefore(toDate(dayLeft), toDate(dayRight));
   },
   addDays: (day: Day, amount: number): Day => {
-    return fromDate(Date.addDays(toDate(day), amount));
+    return fromDate(DateUtils.addDays(toDate(day), amount));
   },
   subDays: (day: Day, amount: number): Day => {
-    return fromDate(Date.subDays(toDate(day), amount));
+    return fromDate(DateUtils.subDays(toDate(day), amount));
   },
   addMonths: (day: Day, amount: number): Day => {
-    return fromDate(Date.addMonths(toDate(day), amount));
+    return fromDate(DateUtils.addMonths(toDate(day), amount));
   },
   subMonths: (day: Day, amount: number): Day => {
-    return fromDate(Date.subMonths(toDate(day), amount));
+    return fromDate(DateUtils.subMonths(toDate(day), amount));
   },
   addYears: (day: Day, amount: number): Day => {
-    return fromDate(Date.addYears(toDate(day), amount));
+    return fromDate(DateUtils.addYears(toDate(day), amount));
   },
   subYears: (day: Day, amount: number): Day => {
-    return fromDate(Date.subYears(toDate(day), amount));
+    return fromDate(DateUtils.subYears(toDate(day), amount));
   },
   isStartOfMonth: (day: Day): boolean => {
-    return Date.isStartOfMonth(toDate(day));
+    return DateUtils.isStartOfMonth(toDate(day));
   },
   fromDate,
   toDate,
 };
 
 function toDate(day: Day): Date {
-  return Date.new(day);
+  return DateUtils.new(day);
 }
 
 function fromDate(date: Date): Day {

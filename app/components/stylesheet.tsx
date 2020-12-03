@@ -6,7 +6,6 @@ import {
   TextStyle,
   ImageStyle,
 } from 'react-native';
-import { isNullish } from '../../lib/js_utils';
 
 // From https://gist.github.com/necolas/5b421ca860ed98eabc5fd2b9bc6d1136
 
@@ -35,7 +34,7 @@ export const DynamicStyleSheet = {
           }
           const styleObject = cache.get(_theme);
 
-          if (isNullish(styleObject)) {
+          if (styleObject === null || styleObject === undefined) {
             throw new Error(
               `Could not get styleObject from cache ${JSON.stringify(cache)}`,
             );

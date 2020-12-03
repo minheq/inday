@@ -28,7 +28,7 @@ import {
   useCreateGroup,
   useGetGroupsSequenceMax,
 } from '../data/store';
-import { Array } from '../../lib/js_utils';
+import { ArrayUtils } from '../../lib/js_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { GroupID, Group, GroupConfig, GroupOrder } from '../data/groups';
@@ -168,9 +168,9 @@ function GroupNew() {
   const fields = useGetCollectionFields(context.collectionID);
 
   const createGroup = useCreateGroup();
-  const firstField = Array.first(fields);
+  const firstField = ArrayUtils.first(fields);
 
-  if (Array.isEmpty(fields)) {
+  if (ArrayUtils.isEmpty(fields)) {
     throw new Error(
       'Fields are empty. They may not have been loaded properly.',
     );

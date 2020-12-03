@@ -34,7 +34,7 @@ import {
   assertPrimaryFieldValue,
 } from './fields';
 import { Record, RecordID } from './records';
-import { Array, Date } from '../../lib/js_utils';
+import { ArrayUtils, DateUtils } from '../../lib/js_utils';
 import { Collaborator, CollaboratorID } from './collaborators';
 import { CollectionID, Collection } from './collections';
 import { generateID, validateID } from '../../lib/id';
@@ -78,7 +78,7 @@ export function sortRecords(
   records: Record[],
   getters: SortGetters,
 ): Record[] {
-  if (Array.isEmpty(sorts)) {
+  if (ArrayUtils.isEmpty(sorts)) {
     return records;
   }
   const nodes = makeNodes(sorts, records, getters);
@@ -87,15 +87,15 @@ export function sortRecords(
 }
 
 function isLeafNodes(nodes: Node[]): nodes is LeafNode[] {
-  if (Array.isEmpty(nodes)) {
+  if (ArrayUtils.isEmpty(nodes)) {
     throw new Error('Nodes are empty');
   }
 
-  return Array.first(nodes).type === 'leaf';
+  return ArrayUtils.first(nodes).type === 'leaf';
 }
 
 function toRecords(nodes: Node[]): Record[] {
-  if (Array.isEmpty(nodes)) {
+  if (ArrayUtils.isEmpty(nodes)) {
     return [];
   }
 
@@ -143,17 +143,17 @@ function makeNodes(
   records: Record[],
   getters: SortGetters,
 ): Node[] {
-  if (Array.isEmpty(records)) {
+  if (ArrayUtils.isEmpty(records)) {
     return [];
   }
 
-  if (Array.isEmpty(sorts)) {
+  if (ArrayUtils.isEmpty(sorts)) {
     throw new Error(
       'Empty sorts. There should be at least one sort to make a tree',
     );
   }
 
-  const sort = Array.first(sorts);
+  const sort = ArrayUtils.first(sorts);
   const nextSorts = sorts.slice(1);
 
   const leafNodes = makeLeafNodes(sort, records, getters);
@@ -206,7 +206,7 @@ function makeLeafNodes(
   const field = getField(sort.fieldID);
   const sorted = sortBy(field, sort, records, getters);
 
-  const firstRecord = Array.first(sorted);
+  const firstRecord = ArrayUtils.first(sorted);
 
   let currentNode: LeafNode = {
     type: 'leaf',
@@ -367,7 +367,7 @@ export function sortBySingleOptionField(
   const field = getField(sort.fieldID);
   assertSingleOptionField(field);
 
-  const optionsByID = Array.keyedBy(field.options, (item) => item.id);
+  const optionsByID = ArrayUtils.keyedBy(field.options, (item) => item.id);
 
   return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id];
@@ -394,7 +394,7 @@ export function sortByMultiOptionField(
   const field = getField(sort.fieldID);
   assertMultiOptionField(field);
 
-  const optionsByID = Array.keyedBy(field.options, (item) => item.id);
+  const optionsByID = ArrayUtils.keyedBy(field.options, (item) => item.id);
 
   return recordsClone.sort((a, b) => {
     const valA = a.fields[field.id];
@@ -605,9 +605,9 @@ function sortAscendingDateFieldKindValue(
     return 1;
   }
 
-  if (Date.isBefore(a, b)) {
+  if (DateUtils.isBefore(a, b)) {
     return -1;
-  } else if (Date.isAfter(a, b)) {
+  } else if (DateUtils.isAfter(a, b)) {
     return 1;
   }
   return 0;
@@ -678,9 +678,9 @@ function sortDescendingDateFieldKindValue(
     return -1;
   }
 
-  if (Date.isAfter(a, b)) {
+  if (DateUtils.isAfter(a, b)) {
     return -1;
-  } else if (Date.isBefore(a, b)) {
+  } else if (DateUtils.isBefore(a, b)) {
     return 1;
   }
   return 0;
@@ -747,15 +747,15 @@ function sortAscendingMultiOption(
   a: MultiOptionFieldValue,
   b: MultiOptionFieldValue,
 ) {
-  if (Array.isEmpty(a) && Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(a) && ArrayUtils.isEmpty(b)) {
     return 0;
   }
 
-  if (Array.isEmpty(a)) {
+  if (ArrayUtils.isEmpty(a)) {
     return -1;
   }
 
-  if (Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(b)) {
     return 1;
   }
 
@@ -775,15 +775,15 @@ function sortDescendingMultiOption(
   a: MultiOptionFieldValue,
   b: MultiOptionFieldValue,
 ) {
-  if (Array.isEmpty(a) && Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(a) && ArrayUtils.isEmpty(b)) {
     return 0;
   }
 
-  if (Array.isEmpty(a)) {
+  if (ArrayUtils.isEmpty(a)) {
     return 1;
   }
 
-  if (Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(b)) {
     return -1;
   }
 
@@ -859,15 +859,15 @@ function sortAscendingMultiCollaborator(
   a: MultiCollaboratorFieldValue,
   b: MultiCollaboratorFieldValue,
 ) {
-  if (Array.isEmpty(a) && Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(a) && ArrayUtils.isEmpty(b)) {
     return 0;
   }
 
-  if (Array.isEmpty(a)) {
+  if (ArrayUtils.isEmpty(a)) {
     return -1;
   }
 
-  if (Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(b)) {
     return 1;
   }
 
@@ -887,15 +887,15 @@ function sortDescendingMultiCollaborator(
   a: MultiCollaboratorFieldValue,
   b: MultiCollaboratorFieldValue,
 ) {
-  if (Array.isEmpty(a) && Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(a) && ArrayUtils.isEmpty(b)) {
     return 0;
   }
 
-  if (Array.isEmpty(a)) {
+  if (ArrayUtils.isEmpty(a)) {
     return 1;
   }
 
-  if (Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(b)) {
     return -1;
   }
 
@@ -982,15 +982,15 @@ function sortAscendingMultiRecordLink(
   a: MultiRecordLinkFieldValue,
   b: MultiRecordLinkFieldValue,
 ) {
-  if (Array.isEmpty(a) && Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(a) && ArrayUtils.isEmpty(b)) {
     return 0;
   }
 
-  if (Array.isEmpty(a)) {
+  if (ArrayUtils.isEmpty(a)) {
     return -1;
   }
 
-  if (Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(b)) {
     return 1;
   }
 
@@ -1015,15 +1015,15 @@ function sortDescendingMultiRecordLink(
   a: MultiRecordLinkFieldValue,
   b: MultiRecordLinkFieldValue,
 ) {
-  if (Array.isEmpty(a) && Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(a) && ArrayUtils.isEmpty(b)) {
     return 0;
   }
 
-  if (Array.isEmpty(a)) {
+  if (ArrayUtils.isEmpty(a)) {
     return 1;
   }
 
-  if (Array.isEmpty(b)) {
+  if (ArrayUtils.isEmpty(b)) {
     return -1;
   }
 
