@@ -1,4 +1,4 @@
-import { unique } from '../js_utils/array_utils';
+import { unique } from './array_utils';
 import { countryList } from './countries';
 
 export function formatCurrency(

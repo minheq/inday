@@ -38,9 +38,9 @@ import { Record, RecordID } from './records';
 import { Collaborator, CollaboratorID } from './collaborators';
 import { CollectionID, Collection } from './collections';
 import { generateID, validateID } from '../../lib/id';
-import { isEmpty } from '../../lib/js_utils/lang_utils';
-import { first, keyedBy } from '../../lib/js_utils/array_utils';
-import { isBefore, isAfter } from '../../lib/js_utils/date_utils';
+import { isEmpty } from '../../lib/lang_utils';
+import { first, keyedBy } from '../../lib/array_utils';
+import { isBefore, isAfter } from '../../lib/date_utils';
 
 export const sortIDPrefix = 'srt' as const;
 export type SortID = `${typeof sortIDPrefix}${string}`;

@@ -5,7 +5,7 @@ import {
   startOfDay,
   endOfDay,
   eachDayOfInterval,
-} from '../js_utils/date_utils';
+} from '../date_utils';
 import { Day } from './day';
 import { Month } from './month';
 

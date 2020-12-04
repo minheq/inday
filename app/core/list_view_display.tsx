@@ -101,7 +101,7 @@ import {
   assertPrimaryFieldValue,
   SelectOptionID,
 } from '../data/fields';
-import { AutoSizer } from '../lib/autosizer/autosizer';
+import { AutoSizer } from '../lib/autosizer';
 import { ListView, ViewID } from '../data/views';
 import {
   Grid,
@@ -129,18 +129,18 @@ import {
 } from '../components/grid.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
-import { formatCurrency } from '../../lib/i18n';
+import { formatCurrency } from '../../lib/currency';
 import { getSystemLocale } from '../lib/locale';
 import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
 import { RecordLinkBadge } from './record_link_badge';
-import { formatUnit } from '../../lib/i18n/unit';
+import { formatUnit } from '../../lib/unit';
 import { usePrevious } from '../hooks/use_previous';
 import { MultiListPicker } from '../components/multi_list_picker';
 import { Collaborator, CollaboratorID } from '../data/collaborators';
-import { formatDate } from '../../lib/js_utils/date_utils';
-import { isEmpty } from '../../lib/js_utils/lang_utils';
-import { isNumberString, toNumber } from '../../lib/js_utils/number_utils';
+import { formatDate } from '../../lib/date_utils';
+import { isEmpty } from '../../lib/lang_utils';
+import { isNumberString, toNumber } from '../../lib/number_utils';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -1385,7 +1385,7 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
   const handleKeyPress = useCellKeyPressHandler();
   const handleChangeText = useCallback(
     (newValue: string) => {
-      if (isNumberString(newValue) === false) {
+      if (newValue !== '' && isNumberString(newValue) === false) {
         return;
       }
 

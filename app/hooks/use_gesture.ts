@@ -7,7 +7,7 @@ import {
   PanResponder,
   GestureResponderHandlers,
 } from 'react-native';
-import { isHoverEnabled } from '../lib/env/execution_environment';
+import { isHoverEnabled } from '../lib/execution_environment';
 
 export type Rect = {
   bottom?: number;

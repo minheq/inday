@@ -1,4 +1,4 @@
-import { isBefore, isAfter, addYears, subYears } from '../js_utils/date_utils';
+import { isBefore, isAfter, addYears, subYears } from '../date_utils';
 import { Day } from './day';
 import { Month } from './month';
 

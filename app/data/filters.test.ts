@@ -11,7 +11,7 @@ import {
   filterRecords,
   FilterGetters,
 } from './filters';
-import { Day } from '../../lib/datetime';
+import { Day } from '../../lib/datetime/day';
 
 import {
   makeCollection,

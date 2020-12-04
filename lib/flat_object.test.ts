@@ -1,4 +1,4 @@
-import { test } from '../../lib/testing';
+import { test } from './testing';
 
 import { FlatObject } from './flat_object';
 

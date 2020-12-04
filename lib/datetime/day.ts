@@ -9,7 +9,7 @@ import {
   isWithinInterval,
   subDays,
   addDays,
-} from '../js_utils/date_utils';
+} from '../date_utils';
 import { Interval } from './interval';
 
 export const DAY_FORMAT = 'yyyy-M-dd';

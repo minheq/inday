@@ -1,4 +1,4 @@
-import { test } from '../../lib/testing';
+import { test } from './testing';
 
 import { differenceBy, intersectBy } from './array_utils';
 

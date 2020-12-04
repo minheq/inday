@@ -1,4 +1,4 @@
-import { chunk } from '../js_utils/array_utils';
+import { chunk } from '../array_utils';
 import {
   addMonths,
   subMonths,
@@ -12,7 +12,7 @@ import {
   differenceInDays,
   addDays,
   isSameDay,
-} from '../js_utils/date_utils';
+} from '../date_utils';
 import { Day } from './day';
 import { Interval } from './interval';
 

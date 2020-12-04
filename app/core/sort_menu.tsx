@@ -28,8 +28,8 @@ import {
   useCreateSort,
   useGetSortsSequenceMax,
 } from '../data/store';
-import { first } from '../../lib/js_utils/array_utils';
-import { isEmpty } from '../../lib/js_utils/lang_utils';
+import { first } from '../../lib/array_utils';
+import { isEmpty } from '../../lib/lang_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { SortID, Sort, SortConfig, SortOrder } from '../data/sorts';

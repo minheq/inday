@@ -1,7 +1,7 @@
-import { NumberUnit } from '../../lib/i18n/unit';
+import { NumberUnit } from '../../lib/unit';
 import { generateID, validateID } from '../../lib/id';
-import { hasAllOf } from '../../lib/js_utils/array_utils';
-import { isDate, isSameDay } from '../../lib/js_utils/date_utils';
+import { hasAllOf } from '../../lib/array_utils';
+import { isDate, isSameDay } from '../../lib/date_utils';
 import { CollaboratorID } from './collaborators';
 import { CollectionID } from './collections';
 import { RecordID } from './records';

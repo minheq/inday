@@ -33,7 +33,7 @@ import {
 import { AuthenticationError, UnauthorizedError } from './errors';
 import { ViewType } from '../app/data/views';
 import { FieldType } from '../app/data/fields';
-import { validateID } from '../lib/id/id';
+import { validateID } from '../lib/id';
 
 type Request = FastifyRequest;
 type Response = FastifyReply;

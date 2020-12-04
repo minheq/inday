@@ -41,7 +41,7 @@ import {
   useGetFiltersGroupMax,
   useUpdateFilterGroup,
 } from '../data/store';
-import { first } from '../../lib/js_utils/array_utils';
+import { first } from '../../lib/array_utils';
 import { FieldID, FieldType } from '../data/fields';
 import { FieldPicker } from './field_picker';
 

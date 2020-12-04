@@ -3,8 +3,8 @@ import {
   defaultLocale,
   getSupportedLocale,
   SupportedLocale,
-} from '../../../lib/i18n';
-import { canUseDOM } from '../env';
+} from '../../lib/locale';
+import { canUseDOM } from './execution_environment';
 
 export function getSystemLocale(): SupportedLocale {
   // TODO: Remove this

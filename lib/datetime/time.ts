@@ -13,7 +13,7 @@ import {
   isAfter,
   setHours,
   formatDate,
-} from '../js_utils/date_utils';
+} from '../date_utils';
 import { Hours } from './hours';
 import { Minutes } from './minutes';
 

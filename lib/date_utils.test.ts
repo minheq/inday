@@ -1,4 +1,4 @@
-import { test } from '../testing';
+import { test } from './testing';
 import { isDate, formatISO, parseString } from './date_utils';
 import { isError } from './error_utils';
 

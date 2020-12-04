@@ -26,9 +26,9 @@ import {
   isDate,
   isSameDay,
   isWithinInterval,
-} from '../../lib/js_utils/date_utils';
-import { hasAllOf, hasAnyOf, hasNoneOf } from '../../lib/js_utils/array_utils';
-import { isEmpty } from '../../lib/js_utils/lang_utils';
+} from '../../lib/date_utils';
+import { hasAllOf, hasAnyOf, hasNoneOf } from '../../lib/array_utils';
+import { isEmpty } from '../../lib/lang_utils';
 
 export const filterIDPrefix = `fil` as const;
 export type FilterID = `${typeof filterIDPrefix}${string}`;

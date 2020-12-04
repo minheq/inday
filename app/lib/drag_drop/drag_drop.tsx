@@ -1,25 +1,26 @@
+import React, { createContext, useContext, useRef } from 'react';
 import { Draggable, DragState } from './draggable';
 import { DropTarget } from './drop_target';
 
 export interface DragDropHandlers {
-  registerDraggable: (draggable: Draggable) => void;
-  unregisterDraggable: (draggable: Draggable) => void;
+  registerDraggable: <T>(draggable: Draggable<T>) => void;
+  unregisterDraggable: <T>(draggable: Draggable<T>) => void;
   registerDropTarget: (dropTarget: DropTarget) => void;
   unregisterDropTarget: (dropTarget: DropTarget) => void;
 }
 
 export class DragDrop implements DragDropHandlers {
-  _draggables: { [key: string]: Draggable } = {};
+  _draggables: { [key: string]: Draggable<unknown> } = {};
   _dropTargets: { [key: string]: DropTarget } = {};
 
-  _activeDraggable: Draggable | null = null;
+  _activeDraggable: Draggable<unknown> | null = null;
   _activeDropTarget: DropTarget | null = null;
 
   get dropTargets(): DropTarget[] {
     return Object.values(this._dropTargets);
   }
 
-  get draggables(): Draggable[] {
+  get draggables(): Draggable<unknown>[] {
     return Object.values(this._draggables);
   }
 
@@ -48,12 +49,12 @@ export class DragDrop implements DragDropHandlers {
     return null;
   };
 
-  _handleDragStart = async (draggable: Draggable) => {
+  _handleDragStart = (draggable: Draggable<any>): void => {
     draggable.onStart();
     this._activeDraggable = draggable;
   };
 
-  _handleDrag = async (draggable: Draggable, dragState: DragState) => {
+  _handleDrag = (draggable: Draggable<any>, dragState: DragState): void => {
     const dropTarget = this.getDropTarget(dragState);
 
     if (dropTarget) {
@@ -76,7 +77,7 @@ export class DragDrop implements DragDropHandlers {
     }
   };
 
-  _handleDragEnd = async (draggable: Draggable) => {
+  _handleDragEnd = (draggable: Draggable<any>): void => {
     draggable.onEnd();
 
     if (!this._activeDropTarget) {
@@ -94,7 +95,7 @@ export class DragDrop implements DragDropHandlers {
     this._activeDropTarget = null;
   };
 
-  registerDraggable = (draggable: Draggable) => {
+  registerDraggable = (draggable: Draggable<any>): void => {
     this._draggables[draggable.key] = draggable;
 
     draggable.addDragStartListener(() => this._handleDragStart(draggable));
@@ -106,15 +107,73 @@ export class DragDrop implements DragDropHandlers {
     draggable.addDragEndListener(() => this._handleDragEnd(draggable));
   };
 
-  unregisterDraggable = (draggable: Draggable) => {
+  unregisterDraggable = (draggable: Draggable<any>): void => {
     delete this._draggables[draggable.key];
   };
 
-  registerDropTarget = (dropTarget: DropTarget) => {
+  registerDropTarget = (dropTarget: DropTarget): void => {
     this._dropTargets[dropTarget.key] = dropTarget;
   };
 
-  unregisterDropTarget = (dropTarget: DropTarget) => {
+  unregisterDropTarget = (dropTarget: DropTarget): void => {
     delete this._dropTargets[dropTarget.key];
   };
+}
+
+interface DragDropProviderProps {
+  children?: React.ReactNode;
+}
+
+const DragDropContext = createContext<DragDropHandlers>({
+  registerDraggable: () => {
+    return {
+      startDrag: () => {
+        return;
+      },
+      drag: () => {
+        return;
+      },
+      endDrag: () => {
+        return;
+      },
+    };
+  },
+  unregisterDraggable: () => {
+    return;
+  },
+  registerDropTarget: () => {
+    return;
+  },
+  unregisterDropTarget: () => {
+    return;
+  },
+});
+
+export function DragDropProvider(props: DragDropProviderProps): JSX.Element {
+  const { children } = props;
+
+  const dragDrop = useRef(new DragDrop()).current;
+  const {
+    registerDraggable,
+    unregisterDraggable,
+    registerDropTarget,
+    unregisterDropTarget,
+  } = dragDrop;
+
+  return (
+    <DragDropContext.Provider
+      value={{
+        registerDraggable,
+        unregisterDraggable,
+        registerDropTarget,
+        unregisterDropTarget,
+      }}
+    >
+      {children}
+    </DragDropContext.Provider>
+  );
+}
+
+export function useDragDrop(): DragDropHandlers {
+  return useContext(DragDropContext);
 }

@@ -1,5 +1,5 @@
 import { Space } from './spaces';
-import { generateID } from '../../lib/id/id';
+import { generateID } from '../../lib/id';
 import { Collaborator } from './collaborators';
 import {
   FieldType,
@@ -42,8 +42,8 @@ import {
 } from '../../lib/faker';
 import { tokens } from '../components';
 import { Workspace } from './workspace';
-import { keyedBy, range, sample } from '../../lib/js_utils/array_utils';
-import { isEmpty } from '../../lib/js_utils/lang_utils';
+import { keyedBy, range, sample } from '../../lib/array_utils';
+import { isEmpty } from '../../lib/lang_utils';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {

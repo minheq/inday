@@ -1,13 +1,12 @@
 import React, { Fragment, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { Month } from '../../lib/datetime/month';
 import {
   FirstDayOfWeek,
   DEFAULT_FIRST_DAY_OF_WEEK,
   Week,
-  Day,
-  DayInterval,
-  Month,
-} from '../../lib/datetime';
+} from '../../lib/datetime/week';
+import { Day, DayInterval } from '../../lib/datetime/day';
 
 interface MonthTemplateProps {
   /** Date with which we infer the month from */

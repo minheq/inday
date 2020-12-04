@@ -19,7 +19,7 @@ import { Slide } from '../components/slide';
 
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
-import { AutoSizer } from '../lib/autosizer/autosizer';
+import { AutoSizer } from '../lib/autosizer';
 import { View, ViewID } from '../data/views';
 import { ListViewDisplay } from '../core/list_view_display';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';

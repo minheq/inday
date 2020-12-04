@@ -1,15 +1,15 @@
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { View, Pressable } from 'react-native';
 
+import { Year } from '../../lib/datetime/year';
+import { Month } from '../../lib/datetime/month';
 import {
-  DEFAULT_FIRST_DAY_OF_WEEK,
-  eachDayOfWeek,
   FirstDayOfWeek,
-  DayInterval,
-  Day,
-  Month,
-  Year,
-} from '../../lib/datetime';
+  DEFAULT_FIRST_DAY_OF_WEEK,
+  Week,
+  eachDayOfWeek,
+} from '../../lib/datetime/week';
+import { Day, DayInterval } from '../../lib/datetime/day';
 import { Text } from './text';
 import { Spacer } from './spacer';
 import { Icon } from './icon';
@@ -23,7 +23,7 @@ import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 import { Picker, PickerOption } from './picker';
 import { getSystemLocale } from '../lib/locale';
-import { formatDate } from '../../lib/js_utils/date_utils';
+import { formatDate } from '../../lib/date_utils';
 
 interface DatePickerProps {
   value?: Day | null;

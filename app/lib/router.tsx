@@ -6,8 +6,8 @@ import React, {
   useEffect,
   useReducer,
 } from 'react';
-import { Pathname } from '../../../lib/pathname';
-import { keysOf } from '../../../lib/js_utils/object_utils';
+import { Pathname } from '../../lib/pathname';
+import { keysOf } from '../../lib/object_utils';
 
 interface UseNavigation {
   setParams: (params: Params) => void;

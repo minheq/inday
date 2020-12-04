@@ -22,7 +22,7 @@ import {
   deleteFilter,
   FilterGroup,
 } from './filters';
-import { useLogger } from '../../lib/logger/logger';
+import { useLogger } from '../../lib/logger';
 import {
   workspaceState,
   spacesByIDState,

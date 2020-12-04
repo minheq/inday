@@ -1,4 +1,4 @@
-import { test } from '../../lib/testing';
+import { test } from './testing';
 
 import { defaultLocale, getSupportedLocale, SupportedLocale } from './locale';
 

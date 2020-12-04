@@ -1,6 +1,6 @@
 // From https://github.com/annexare/Countries/blob/master/dist/countries.json
 
-import { valuesOf } from '../js_utils/object_utils';
+import { valuesOf } from './object_utils';
 
 export interface Country {
   /**

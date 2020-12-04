@@ -1,5 +1,5 @@
-import { sample } from '../js_utils/array_utils';
-import { random } from '../js_utils/number_utils';
+import { sample } from './array_utils';
+import { random } from './number_utils';
 
 const loremIpsum = [
   'Lorem',

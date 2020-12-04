@@ -20,29 +20,29 @@ class Logger {
     this.level = level;
   }
 
-  private log(level: Level, message: string, data: object = {}) {
+  private log(level: Level, message: string, data: unknown = {}) {
     if (levelValueMap[level] >= levelValueMap[this.level]) {
       console.log(message, JSON.stringify(data));
     }
   }
 
-  public fatal(message: string, data?: object) {
+  public fatal(message: string, data?: unknown) {
     this.log('error', message, data);
   }
 
-  public error(message: string, data?: object) {
+  public error(message: string, data?: unknown) {
     this.log('error', message, data);
   }
 
-  public warn(message: string, data?: object) {
+  public warn(message: string, data?: unknown) {
     this.log('warn', message, data);
   }
 
-  public info(message: string, data?: object) {
+  public info(message: string, data?: unknown) {
     this.log('info', message, data);
   }
 
-  public debug(message: string, data?: object) {
+  public debug(message: string, data?: unknown) {
     this.log('debug', message, data);
   }
 }
@@ -51,6 +51,6 @@ const logger = new Logger({
   level: 'info',
 });
 
-export function useLogger() {
+export function useLogger(): Logger {
   return logger;
 }

@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { intersectBy, differenceBy } from '../../lib/js_utils/array_utils';
-import { isEmpty } from '../../lib/js_utils/lang_utils';
-import { sum, sumBy, maxBy, max, min } from '../../lib/js_utils/math_utils';
-import { isEqual } from '../../lib/js_utils/lang_utils';
-import { FlatObject } from '../../lib/js_utils/flat_object';
+import { intersectBy, differenceBy } from '../../lib/array_utils';
+import { isEmpty } from '../../lib/lang_utils';
+import { sum, sumBy, maxBy, max, min } from '../../lib/math_utils';
+import { isEqual } from '../../lib/lang_utils';
+import { FlatObject } from '../../lib/flat_object';
 
 interface UseGridTransformerProps {
   groups: Group[];

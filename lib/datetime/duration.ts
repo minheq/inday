@@ -1,4 +1,4 @@
-import { differenceInMinutes } from '../js_utils/date_utils';
+import { differenceInMinutes } from '../date_utils';
 import { Hours } from './hours';
 import { MINUTES_IN_ONE_HOUR } from './minutes';
 

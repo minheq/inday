@@ -26,8 +26,8 @@ import { View, ViewID } from './views';
 import { Sort, SortID, sortRecords, SortGetters } from './sorts';
 import { Collaborator, CollaboratorID } from './collaborators';
 import { Group, GroupID } from './groups';
-import { keyedBy, last } from '../../lib/js_utils/array_utils';
-import { isEmpty } from '../../lib/js_utils/lang_utils';
+import { keyedBy, last } from '../../lib/array_utils';
+import { isEmpty } from '../../lib/lang_utils';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: 'SpaceQuery',

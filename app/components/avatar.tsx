@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image } from 'react-native';
-import { take } from '../../lib/js_utils/array_utils';
+import { take } from '../../lib/array_utils';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text, TextSize } from './text';
 import { tokens } from './tokens';

@@ -12,7 +12,7 @@ import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
 import { FlatButton, Picker } from '../components';
 import { Group, getRows, LeafRow } from './grid.common';
-import { splitLast } from '../../lib/js_utils/array_utils';
+import { splitLast } from '../../lib/array_utils';
 import { Container } from './container';
 
 function renderLeafRowCell(props: RenderLeafRowCellProps) {
