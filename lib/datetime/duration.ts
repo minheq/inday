@@ -1,4 +1,4 @@
-import { DateUtils } from '../js_utils';
+import { differenceInMinutes } from '../js_utils/date_utils';
 import { Hours } from './hours';
 import { MINUTES_IN_ONE_HOUR } from './minutes';
 
@@ -7,7 +7,7 @@ export const DURATION_MINUTE_FORMAT = `m'min'`;
 export const DURATION_FORMAT = `${DURATION_HOUR_FORMAT} ${DURATION_MINUTE_FORMAT}`;
 
 export function getDurationInHours(dateLeft: Date, dateRight: Date): Hours {
-  const diff = Math.abs(DateUtils.differenceInMinutes(dateLeft, dateRight));
+  const diff = Math.abs(differenceInMinutes(dateLeft, dateRight));
 
   return diff / MINUTES_IN_ONE_HOUR;
 }

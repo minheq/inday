@@ -130,7 +130,6 @@ import {
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/i18n';
-import { NumberUtils, ArrayUtils, DateUtils } from '../../lib/js_utils';
 import { getSystemLocale } from '../lib/locale';
 import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
@@ -139,6 +138,9 @@ import { formatUnit } from '../../lib/i18n/unit';
 import { usePrevious } from '../hooks/use_previous';
 import { MultiListPicker } from '../components/multi_list_picker';
 import { Collaborator, CollaboratorID } from '../data/collaborators';
+import { formatDate } from '../../lib/js_utils/date_utils';
+import { isEmpty } from '../../lib/js_utils/lang_utils';
+import { isNumberString, toNumber } from '../../lib/js_utils/number_utils';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -655,16 +657,14 @@ function DateCell(props: DateCellProps) {
   if (state === 'default') {
     return (
       <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>
-          {DateUtils.format(value, getSystemLocale())}
-        </Text>
+        <Text numberOfLines={1}>{formatDate(value, getSystemLocale())}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.textCellContainer}>
-      <Text>{DateUtils.format(value, getSystemLocale())}</Text>
+      <Text>{formatDate(value, getSystemLocale())}</Text>
     </View>
   );
 }
@@ -751,7 +751,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
     );
   }
 
-  const child = ArrayUtils.isEmpty(value) ? (
+  const child = isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -827,7 +827,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
     );
   }
 
-  const child = ArrayUtils.isEmpty(value) ? (
+  const child = isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -949,7 +949,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
     );
   }
 
-  const child = ArrayUtils.isEmpty(value) ? (
+  const child = isEmpty(value) ? (
     <View style={styles.badgePlaceholder} />
   ) : (
     <Row spacing={4}>
@@ -1385,11 +1385,11 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
   const handleKeyPress = useCellKeyPressHandler();
   const handleChangeText = useCallback(
     (newValue: string) => {
-      if (NumberUtils.isNumber(newValue) === false) {
+      if (isNumberString(newValue) === false) {
         return;
       }
 
-      updateRecordFieldValue(recordID, fieldID, NumberUtils.toNumber(newValue));
+      updateRecordFieldValue(recordID, fieldID, toNumber(newValue));
     },
     [updateRecordFieldValue, recordID, fieldID],
   );

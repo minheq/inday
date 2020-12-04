@@ -1,4 +1,5 @@
-import {
+import { isValid } from 'date-fns';
+export {
   addDays,
   differenceInDays,
   eachDayOfInterval,
@@ -32,15 +33,13 @@ import {
   setDate,
   isWithinInterval,
   getDate,
-  isValid,
 } from 'date-fns';
-import { NumberUtils } from './number_utils';
 
-function isDate(value: unknown): value is Date {
+export function isDate(value: unknown): value is Date {
   return value instanceof Date;
 }
 
-function format(
+export function formatDate(
   date: Date,
   locales?: string | string[],
   options?: Intl.DateTimeFormatOptions,
@@ -48,7 +47,7 @@ function format(
   return new Intl.DateTimeFormat(locales, options).format(date);
 }
 
-function formatRelative(
+export function formatRelative(
   value: number,
   unit: Intl.RelativeTimeFormatUnit,
   locales?: string | string[],
@@ -59,7 +58,10 @@ function formatRelative(
 
 type DateInputFormat = 'm/d/y' | 'y/m/d' | 'd/m/y';
 
-function parseString(str: string, inputFormat: DateInputFormat): Date | Error {
+export function parseString(
+  str: string,
+  inputFormat: DateInputFormat,
+): Date | Error {
   const params = str.split(/[.\-/]/);
   if (params.length !== 3) {
     return new Error(
@@ -89,13 +91,13 @@ function parseString(str: string, inputFormat: DateInputFormat): Date | Error {
     );
   }
 
-  if (NumberUtils.isNumber(day) === false || day < 1) {
+  if (isNaN(day) || day < 1) {
     return new Error('Day is not valid. Ensure only numeric input for day.');
-  } else if (NumberUtils.isNumber(month) === false || month < 1) {
+  } else if (isNaN(month) || month < 1) {
     return new Error(
       'Month is not valid. Ensure only numeric input for month.',
     );
-  } else if (NumberUtils.isNumber(year) === false || year < 1) {
+  } else if (isNaN(year) || year < 1) {
     return new Error('Year is not valid. Ensure only numeric input for year.');
   }
 
@@ -112,53 +114,6 @@ function parseString(str: string, inputFormat: DateInputFormat): Date | Error {
   return date;
 }
 
-function isStartOfMonth(date: Date): boolean {
+export function isStartOfMonth(date: Date): boolean {
   return date.getDate() === 1;
 }
-
-export const DateUtils = {
-  today: (): Date => {
-    return new Date();
-  },
-  parse: (s: string): number => {
-    return Date.parse(s);
-  },
-  isDate,
-  addDays,
-  parseString,
-  differenceInDays,
-  eachDayOfInterval,
-  formatISO,
-  endOfMonth,
-  isAfter,
-  isBefore,
-  isSameDay,
-  startOfMonth,
-  subDays,
-  endOfDay,
-  isStartOfMonth,
-  format,
-  formatRelative,
-  formatPattern,
-  setYear,
-  getDate,
-  setMonth,
-  addMonths,
-  subMonths,
-  startOfDay,
-  getDay,
-  differenceInMinutes,
-  addHours,
-  setHours,
-  setMinutes,
-  addMinutes,
-  setSeconds,
-  setMilliseconds,
-  subMinutes,
-  subHours,
-  differenceInHours,
-  addYears,
-  subYears,
-  setDate,
-  isWithinInterval,
-};

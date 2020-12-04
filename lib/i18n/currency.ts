@@ -1,4 +1,4 @@
-import { ArrayUtils } from '../js_utils';
+import { unique } from '../js_utils/array_utils';
 import { countryList } from './countries';
 
 export function formatCurrency(
@@ -13,7 +13,7 @@ export function formatCurrency(
 }
 
 export function getCurrencies(): Currency[] {
-  return ArrayUtils.unique(countryList.map((country) => country.currency)).map(
+  return unique(countryList.map((country) => country.currency)).map(
     (currency) => ({
       code: currency,
       symbol: currencySymbols[currency],

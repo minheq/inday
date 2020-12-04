@@ -1,4 +1,18 @@
-import { DateUtils, ArrayUtils } from '../js_utils';
+import { chunk } from '../js_utils/array_utils';
+import {
+  addMonths,
+  subMonths,
+  isBefore,
+  isAfter,
+  endOfDay,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  subDays,
+  differenceInDays,
+  addDays,
+  isSameDay,
+} from '../js_utils/date_utils';
 import { Day } from './day';
 import { Interval } from './interval';
 
@@ -45,7 +59,7 @@ export const Month = {
   ): Week[] => {
     const dates = getDays(month, firstDayOfWeek);
 
-    return ArrayUtils.chunk(dates, 7).map((week, index) => ({
+    return chunk(dates, 7).map((week, index) => ({
       month,
       index,
       days: week.map(Day.fromDate),
@@ -59,9 +73,9 @@ export const Month = {
     const months: Month[] = [];
     let current = startDate;
 
-    while (DateUtils.isBefore(current, endDate)) {
+    while (isBefore(current, endDate)) {
       months.push(fromDate(current));
-      current = DateUtils.addMonths(current, 1);
+      current = addMonths(current, 1);
     }
 
     return months;
@@ -73,16 +87,16 @@ export const Month = {
     return Month.toDate(month).getFullYear();
   },
   isValid: (day: Day): boolean => {
-    return isNaN(DateUtils.parse(day)) === false;
+    return isNaN(Date.parse(day)) === false;
   },
   isSame: (monthLeft: Month, monthRight: Month): boolean => {
     return monthLeft === monthRight;
   },
   isAfter: (monthLeft: Month, monthRight: Month): boolean => {
-    return DateUtils.isAfter(toDate(monthLeft), toDate(monthRight));
+    return isAfter(toDate(monthLeft), toDate(monthRight));
   },
   isBefore: (monthLeft: Month, monthRight: Month): boolean => {
-    return DateUtils.isBefore(toDate(monthLeft), toDate(monthRight));
+    return isBefore(toDate(monthLeft), toDate(monthRight));
   },
   setMonth: (month: Month, monthNum: number): Month => {
     const date = Month.toDate(month);
@@ -95,19 +109,19 @@ export const Month = {
     return Month.fromDate(date);
   },
   startOfMonth: (month: Month): Day => {
-    return Day.fromDate(DateUtils.startOfMonth(toDate(month)));
+    return Day.fromDate(startOfMonth(toDate(month)));
   },
   endOfMonth: (month: Month): Day => {
-    return Day.fromDate(DateUtils.endOfMonth(toDate(month)));
+    return Day.fromDate(endOfMonth(toDate(month)));
   },
   isDayWithinMonth: (month: Month, day: Day): boolean => {
     return isSameMonth(month, getMonthFromDay(day));
   },
   addMonths: (month: Month, amount: number): Month => {
-    return fromDate(DateUtils.addMonths(toDate(month), amount));
+    return fromDate(addMonths(toDate(month), amount));
   },
   subMonths: (month: Month, amount: number): Month => {
-    return fromDate(DateUtils.subMonths(toDate(month), amount));
+    return fromDate(subMonths(toDate(month), amount));
   },
   getMonthFromDay,
   fromDate,
@@ -134,7 +148,7 @@ function fromDate(date: Date): Month {
 }
 
 function toDate(month: Month): Date {
-  return DateUtils.new(month);
+  return new Date(month);
 }
 
 function getDays(
@@ -143,9 +157,7 @@ function getDays(
 ): Date[] {
   const currentDates = getMonthDatesFromDate(Month.toDate(month));
   const startOfMonthDate = currentDates[0];
-  const endOfMonthDate = DateUtils.endOfDay(
-    currentDates[currentDates.length - 1],
-  );
+  const endOfMonthDate = endOfDay(currentDates[currentDates.length - 1]);
 
   const beforeDates = getDatesBefore(startOfMonthDate, firstDayOfWeek);
   const afterDates = getDatesAfter(endOfMonthDate, firstDayOfWeek);
@@ -155,13 +167,13 @@ function getDays(
 
 function getMonthInterval(date: Date): Interval {
   return {
-    start: DateUtils.startOfMonth(date),
-    end: DateUtils.endOfMonth(date),
+    start: startOfMonth(date),
+    end: endOfMonth(date),
   };
 }
 
 function getMonthDatesFromDate(date: Date): Date[] {
-  return DateUtils.eachDayOfInterval(getMonthInterval(date));
+  return eachDayOfInterval(getMonthInterval(date));
 }
 
 function getDatesBefore(
@@ -174,15 +186,15 @@ function getDatesBefore(
 
   const firstDateOfWeek = getFirstDateOfWeek(from, firstDayOfWeek);
 
-  if (!DateUtils.isSameDay(from, firstDateOfWeek)) {
-    const sub = DateUtils.differenceInDays(from, firstDateOfWeek);
-    from = DateUtils.subDays(from, sub);
+  if (!isSameDay(from, firstDateOfWeek)) {
+    const sub = differenceInDays(from, firstDateOfWeek);
+    from = subDays(from, sub);
   }
 
-  if (DateUtils.isBefore(from, startOfMonthDate)) {
-    beforeDates = DateUtils.eachDayOfInterval({
+  if (isBefore(from, startOfMonthDate)) {
+    beforeDates = eachDayOfInterval({
       start: from,
-      end: DateUtils.subDays(startOfMonthDate, 1),
+      end: subDays(startOfMonthDate, 1),
     });
   }
 
@@ -195,15 +207,15 @@ function getDatesAfter(endOfMonthDate: Date, firstDayOfWeek: FirstDayOfWeek) {
   let to = endOfMonthDate;
 
   const lastDateOfWeek = getLastDateOfWeek(to, firstDayOfWeek);
-  if (!DateUtils.isSameDay(to, lastDateOfWeek)) {
-    const add = DateUtils.differenceInDays(lastDateOfWeek, to);
+  if (!isSameDay(to, lastDateOfWeek)) {
+    const add = differenceInDays(lastDateOfWeek, to);
 
-    to = DateUtils.addDays(to, add);
+    to = addDays(to, add);
   }
 
-  if (DateUtils.isAfter(to, endOfMonthDate)) {
-    afterDates = DateUtils.eachDayOfInterval({
-      start: DateUtils.addDays(endOfMonthDate, 1),
+  if (isAfter(to, endOfMonthDate)) {
+    afterDates = eachDayOfInterval({
+      start: addDays(endOfMonthDate, 1),
       end: to,
     });
   }

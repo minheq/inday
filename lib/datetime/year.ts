@@ -1,4 +1,4 @@
-import { DateUtils } from '../js_utils';
+import { isBefore, isAfter, addYears, subYears } from '../js_utils/date_utils';
 import { Day } from './day';
 import { Month } from './month';
 
@@ -20,7 +20,7 @@ export const Year = {
     return toDate(year).getFullYear();
   },
   isValid: (day: Day): boolean => {
-    return isNaN(DateUtils.parse(day)) === false;
+    return isNaN(Date.parse(day)) === false;
   },
   toDate,
   fromDate,
@@ -31,9 +31,9 @@ export const Year = {
     const years: Year[] = [];
     let current = startDate;
 
-    while (DateUtils.isBefore(current, endDate)) {
+    while (isBefore(current, endDate)) {
       years.push(fromDate(current));
-      current = DateUtils.addYears(current, 1);
+      current = addYears(current, 1);
     }
 
     return years;
@@ -48,19 +48,19 @@ export const Year = {
     return yearLeft === yearRight;
   },
   isAfter: (yearLeft: Year, yearRight: Year): boolean => {
-    return DateUtils.isAfter(toDate(yearLeft), toDate(yearRight));
+    return isAfter(toDate(yearLeft), toDate(yearRight));
   },
   isBefore: (yearLeft: Year, yearRight: Year): boolean => {
-    return DateUtils.isBefore(toDate(yearLeft), toDate(yearRight));
+    return isBefore(toDate(yearLeft), toDate(yearRight));
   },
   fromMonth: (month: Month): Year => {
     return fromDate(Month.toDate(month));
   },
   addYears: (year: Year, amount: number): Year => {
-    return fromDate(DateUtils.addYears(toDate(year), amount));
+    return fromDate(addYears(toDate(year), amount));
   },
   subYears: (year: Year, amount: number): Year => {
-    return fromDate(DateUtils.subYears(toDate(year), amount));
+    return fromDate(subYears(toDate(year), amount));
   },
 };
 
@@ -69,5 +69,5 @@ function fromDate(date: Date): Year {
 }
 
 function toDate(year: Year): Date {
-  return DateUtils.new(year);
+  return new Date(year);
 }

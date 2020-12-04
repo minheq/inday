@@ -62,7 +62,7 @@ function openFileBrowser(
         if (multiple) {
           const files = input.files;
 
-          Promise.all(ArrayUtils.from(files).map(toImage)).then((images) =>
+          Promise.all(Array.from(files).map(toImage)).then((images) =>
             resolve(images),
           );
         } else {

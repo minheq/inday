@@ -21,9 +21,9 @@ import {
 } from './month_template';
 import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
-import { DateUtils } from '../../lib/js_utils';
 import { Picker, PickerOption } from './picker';
 import { getSystemLocale } from '../lib/locale';
+import { formatDate } from '../../lib/js_utils/date_utils';
 
 interface DatePickerProps {
   value?: Day | null;
@@ -44,7 +44,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
       end: maxYear,
     }).map((_year) => ({
       value: Year.getYear(_year),
-      label: DateUtils.format(Year.toDate(_year), getSystemLocale(), {
+      label: formatDate(Year.toDate(_year), getSystemLocale(), {
         year: 'numeric',
       }),
     }));
@@ -55,7 +55,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
       end: Month.endOfYear(),
     }).map((_month) => ({
       value: Month.getMonth(_month),
-      label: DateUtils.format(Month.toDate(_month), getSystemLocale(), {
+      label: formatDate(Month.toDate(_month), getSystemLocale(), {
         month: 'long',
       }),
     }));
@@ -204,7 +204,7 @@ function DayDisplay(props: DayDisplayProps) {
       <View style={styles.dayRoot}>
         <View style={styles.dayWrapper}>
           <Text decoration="line-through" color="muted">
-            {DateUtils.format(Day.toDate(day), getSystemLocale(), {
+            {formatDate(Day.toDate(day), getSystemLocale(), {
               day: 'numeric',
             })}
           </Text>
@@ -235,7 +235,7 @@ function DayDisplay(props: DayDisplayProps) {
               <Text
                 color={selected ? 'contrast' : today ? 'primary' : 'default'}
               >
-                {DateUtils.format(Day.toDate(day), getSystemLocale(), {
+                {formatDate(Day.toDate(day), getSystemLocale(), {
                   day: 'numeric',
                 })}
               </Text>
@@ -264,7 +264,7 @@ function OtherMonthDay(props: OtherMonthDayProps) {
       ]}
     >
       <Text color="muted">
-        {DateUtils.format(Day.toDate(day), getSystemLocale(), {
+        {formatDate(Day.toDate(day), getSystemLocale(), {
           day: 'numeric',
         })}
       </Text>
@@ -295,7 +295,7 @@ function WeekDates(props: WeekDatesProps) {
       {dates.map((d) => (
         <View key={d.toISOString()} style={styles.dateWrapper}>
           <Text size="sm">
-            {DateUtils.format(d, getSystemLocale(), { weekday: 'narrow' })}
+            {formatDate(d, getSystemLocale(), { weekday: 'narrow' })}
           </Text>
         </View>
       ))}

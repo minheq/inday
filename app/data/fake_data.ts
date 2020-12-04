@@ -13,7 +13,7 @@ import {
   addFieldsToCollection,
   makeManyRecords,
 } from './factory';
-import { ArrayUtils } from '../../lib/js_utils/array_utils';
+import { keyedBy } from '../../lib/js_utils/array_utils';
 
 const space1 = makeSpace({
   id: 'spc1',
@@ -187,13 +187,13 @@ export const viewsByIDFixtures: { [viewID: string]: View } = {
 };
 
 export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
-  ...ArrayUtils.keyedBy(col1Fields, (field) => field.id),
-  ...ArrayUtils.keyedBy(col2Fields, (field) => field.id),
+  ...keyedBy(col1Fields, (field) => field.id),
+  ...keyedBy(col2Fields, (field) => field.id),
 };
 
 export const recordsByIDFixtures: {
   [recordID: string]: Record;
 } = {
-  ...ArrayUtils.keyedBy(col1Records, (field) => field.id),
-  ...ArrayUtils.keyedBy(col2Records, (field) => field.id),
+  ...keyedBy(col1Records, (field) => field.id),
+  ...keyedBy(col2Records, (field) => field.id),
 };

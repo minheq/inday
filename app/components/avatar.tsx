@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image } from 'react-native';
-import { ArrayUtils } from '../../lib/js_utils';
+import { take } from '../../lib/js_utils/array_utils';
 import { DynamicStyleSheet } from './stylesheet';
 import { Text, TextSize } from './text';
 import { tokens } from './tokens';
@@ -58,7 +58,7 @@ function getInitials(name: string, size: AvatarSize): string {
     initials = 1;
   }
 
-  return ArrayUtils.take(name.split(' '), initials)
+  return take(name.split(' '), initials)
     .map((c) => c.charAt(0).toUpperCase())
     .join('');
 }

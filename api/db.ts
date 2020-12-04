@@ -2,7 +2,7 @@ import { Pool, PoolClient } from 'pg';
 import { env } from './env';
 import { Workspace } from '../app/data/workspace';
 import { NotFoundError } from './errors';
-import { ArrayUtils } from '../lib/js_utils';
+import { first } from '../lib/js_utils';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
 import { Record } from '../app/data/records';
@@ -85,7 +85,7 @@ export async function getWorkspaceByID(
     throw new NotFoundError('workspace', workspaceID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toWorkspace(row);
 }
@@ -101,7 +101,7 @@ export async function createWorkspace(
     [workspaceID, name, userID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toWorkspace(row);
 }
@@ -120,7 +120,7 @@ export async function updateWorkspaceName(
     throw new NotFoundError('workspace', workspaceID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toWorkspace(row);
 }
@@ -167,7 +167,7 @@ export async function getSpaceByID(db: DB, spaceID: string): Promise<Space> {
     throw new NotFoundError('space', spaceID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toSpace(row);
 }
@@ -183,7 +183,7 @@ export async function createSpace(
     [spaceID, name, workspaceID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toSpace(row);
 }
@@ -202,7 +202,7 @@ export async function updateSpaceName(
     throw new NotFoundError('space', spaceID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toSpace(row);
 }
@@ -251,7 +251,7 @@ export async function getCollectionByID(
     throw new NotFoundError('collection', collectionID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toCollection(row);
 }
@@ -267,7 +267,7 @@ export async function createCollection(
     [collectionID, name, spaceID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toCollection(row);
 }
@@ -286,7 +286,7 @@ export async function updateCollectionName(
     throw new NotFoundError('collection', collectionID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toCollection(row);
 }
@@ -350,7 +350,7 @@ export async function getRecordByID(db: DB, recordID: string): Promise<Record> {
     throw new NotFoundError('collection', recordID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toRecord(row);
 }
@@ -365,7 +365,7 @@ export async function createRecord(
     [recordID, collectionID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toRecord(row);
 }
@@ -381,7 +381,7 @@ export async function updateRecordFieldValue(
     [value, recordID, fieldID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toRecord(row);
 }
@@ -399,7 +399,7 @@ export async function fullUpdateRecord(
     throw new NotFoundError('record', recordID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toRecord(row);
 }
@@ -417,7 +417,7 @@ export async function partialUpdateRecord(
     throw new NotFoundError('record', recordID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toRecord(row);
 }
@@ -465,7 +465,7 @@ export async function getViewByID(db: DB, viewID: string): Promise<View> {
     throw new NotFoundError('view', viewID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toView(row);
 }
@@ -482,7 +482,7 @@ export async function createView(
     [viewID, name, type, collectionID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toView(row);
 }
@@ -501,7 +501,7 @@ export async function updateViewName(
     throw new NotFoundError('view', viewID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toView(row);
 }
@@ -550,7 +550,7 @@ export async function getFieldByID(db: DB, fieldID: string): Promise<Field> {
     throw new NotFoundError('field', fieldID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toField(row);
 }
@@ -567,7 +567,7 @@ export async function createField(
     [fieldID, name, type, collectionID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toField(row);
 }
@@ -587,7 +587,7 @@ export async function duplicateField(
     throw new NotFoundError('field', fromFieldID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
   const field = toField(row);
 
   if (duplicateRecordFieldValues === true) {
@@ -614,7 +614,7 @@ export async function updateFieldName(
     throw new NotFoundError('field', fieldID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toField(row);
 }
@@ -665,7 +665,7 @@ export async function getTemplateByID(
     throw new NotFoundError('template', templateID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toTemplate(row);
 }
@@ -681,7 +681,7 @@ export async function createTemplate(
     [templateID, name, collectionID],
   );
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toTemplate(row);
 }
@@ -700,7 +700,7 @@ export async function updateTemplateName(
     throw new NotFoundError('template', templateID);
   }
 
-  const row = ArrayUtils.first(result.rows);
+  const row = first(result.rows);
 
   return toTemplate(row);
 }
