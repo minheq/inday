@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { intersectBy, differenceBy } from '../../lib/array_utils';
-import { isEmpty } from '../../lib/lang_utils';
+import { isEmpty, isEqual } from '../../lib/lang_utils';
 import { sum, sumBy, maxBy, max, min } from '../../lib/math_utils';
-import { isEqual } from '../../lib/lang_utils';
 import { FlatObject } from '../../lib/flat_object';
 
 interface UseGridTransformerProps {
@@ -659,9 +658,7 @@ function getLeafRowCell(
     return null;
   }
 
-  if (
-    isEqual([...cell.path, cell.row], [...row.path, row.row], true) === false
-  ) {
+  if (isEqual([...cell.path, cell.row], [...row.path, row.row]) === false) {
     return null;
   }
 
@@ -680,7 +677,7 @@ function getGroupRowCell(
     return null;
   }
 
-  if (isEqual(cell.path, row.path, true) === false) {
+  if (isEqual(cell.path, row.path) === false) {
     return null;
   }
 

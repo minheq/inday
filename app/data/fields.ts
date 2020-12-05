@@ -18,6 +18,7 @@ export const Field = {
   },
 };
 
+// eslint-disable-next-line
 export enum FieldType {
   Checkbox = 'Checkbox',
   Currency = 'Currency',

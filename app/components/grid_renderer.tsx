@@ -15,7 +15,6 @@ import {
   useGetStatefulRows,
   useGridGetScrollToCellOffset,
   useGridTransformer,
-  useGridRecycler,
   Group,
   StatefulCell,
   LeafRow,
@@ -24,9 +23,9 @@ import {
   LeafRowCellState,
   GroupRowCellState,
   GroupRowState,
-} from './grid.common';
+} from './grid_renderer.common';
 
-export interface GridProps {
+export interface GridRendererProps {
   cell?: StatefulCell | null;
   selectedRows?: LeafRow[] | null;
   height: number;
@@ -79,7 +78,7 @@ export interface ScrollToCellParams extends Partial<LeafRowCell> {
   animated?: boolean;
 }
 
-export interface GridRef {
+export interface GridRendererRef {
   scrollToOffset: (params: ScrollToOffsetParams) => void;
   scrollToCell: (params: ScrollToCellParams) => void;
 }
@@ -87,8 +86,11 @@ export interface GridRef {
 /**
  * To display header, pass `headerHeight`, `renderHeader` and `renderHeaderCell` props
  */
-export const Grid = memo(
-  forwardRef<GridRef, GridProps>(function Grid(props, ref) {
+export const GridRenderer = memo(
+  forwardRef<GridRendererRef, GridRendererProps>(function GridRenderer(
+    props,
+    ref,
+  ) {
     const {
       focusedCell,
       renderRow,

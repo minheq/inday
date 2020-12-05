@@ -1,17 +1,17 @@
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 
 import {
-  Grid,
+  GridRenderer,
   RenderLeafRowCellProps,
   RenderHeaderCellProps,
   RenderGroupRowCellProps,
-  GridRef,
+  GridRendererRef,
   RenderFooterCellProps,
-} from './grid';
+} from './grid_renderer';
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
-import { FlatButton, Picker } from '../components';
-import { Group, getRows, LeafRow } from './grid.common';
+import { FlatButton, Picker } from '.';
+import { Group, getRows, LeafRow } from './grid_renderer.common';
 import { splitLast } from '../../lib/array_utils';
 import { Container } from './container';
 
@@ -58,7 +58,7 @@ function renderFooterCell(props: RenderFooterCellProps) {
 }
 
 function Flat(): JSX.Element {
-  const gridRef = useRef<GridRef>(null);
+  const gridRef = useRef<GridRendererRef>(null);
 
   const handleScrollToCell = useScrollToCell(gridRef);
 
@@ -97,7 +97,7 @@ function Flat(): JSX.Element {
       <AutoSizer>
         {({ height, width }) => (
           <Fragment>
-            <Grid
+            <GridRenderer
               ref={gridRef}
               width={width}
               height={height}
@@ -125,7 +125,7 @@ function Flat(): JSX.Element {
 }
 
 function Grouped(): JSX.Element {
-  const gridRef = useRef<GridRef>(null);
+  const gridRef = useRef<GridRendererRef>(null);
 
   const handleScrollToCell = useScrollToCell(gridRef);
 
@@ -186,7 +186,7 @@ function Grouped(): JSX.Element {
       <AutoSizer>
         {({ height, width }) => (
           <Fragment>
-            <Grid
+            <GridRenderer
               ref={gridRef}
               width={width}
               height={height}
@@ -224,7 +224,7 @@ export function GridStories(): JSX.Element {
   );
 }
 
-function useScrollToCell(gridRef: React.RefObject<GridRef>) {
+function useScrollToCell(gridRef: React.RefObject<GridRendererRef>) {
   return useCallback(
     (path?: number[], row?: number, column?: number) => {
       if (gridRef.current) {

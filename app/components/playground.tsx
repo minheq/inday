@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { DialogStories } from './dialog.stories';
-import { GridStories } from './grid.stories';
+import { GridStories } from './grid_renderer.stories';
 import { DatePickerStories } from './date_picker.stories';
 import { TextInputStories } from './text_input.stories';
 import { DynamicStyleSheet } from './stylesheet';

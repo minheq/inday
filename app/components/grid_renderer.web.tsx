@@ -23,21 +23,24 @@ import {
   GroupRowCellState,
   useRowsRecycler,
   useColumnsRecycler,
-} from './grid.common';
+} from './grid_renderer.common';
 import {
-  GridRef,
-  GridProps,
+  GridRendererRef,
+  GridRendererProps,
   ScrollToOffsetParams,
   RenderLeafRowCellProps,
   RenderHeaderCellProps,
   RenderGroupRowCellProps,
   RenderFooterCellProps,
-} from './grid';
+} from './grid_renderer';
 
 // False positive  https://github.com/yannickcr/eslint-plugin-react/issues/2269
 // eslint-disable-next-line
-export const Grid = memo(
-  forwardRef<GridRef, GridProps>(function Grid(props, ref) {
+export const GridRenderer = memo(
+  forwardRef<GridRendererRef, GridRendererProps>(function GridRenderer(
+    props,
+    ref,
+  ) {
     const {
       cell = null,
       selectedRows = null,

@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { tokens } from './tokens';
 import { Modal } from './modal';
-import { Measurements } from '../lib/measurements';
 
 export type PopoverAnchor = { y: number; x: number };
 
@@ -69,17 +68,23 @@ export function Popover(props: PopoverProps): JSX.Element {
   );
 }
 
+interface OpenerMeasurements {
+  pageY: number;
+  pageX: number;
+  height: number;
+  width: number;
+}
+
 export function getPopoverAnchorAndHeight(
-  openerMeasurements: Measurements,
+  measurements: OpenerMeasurements,
   contentHeight: number,
   pickerOffset = 4,
   screenOffset = 16,
 ): [PopoverAnchor, number] {
   const screenSize = Dimensions.get('window');
 
-  const bottomY =
-    openerMeasurements.pageY + openerMeasurements.height + pickerOffset;
-  const topY = openerMeasurements.pageY - pickerOffset - contentHeight;
+  const bottomY = measurements.pageY + measurements.height + pickerOffset;
+  const topY = measurements.pageY - pickerOffset - contentHeight;
 
   const overflowsBottom = bottomY + contentHeight > screenSize.height;
 
@@ -88,11 +93,11 @@ export function getPopoverAnchorAndHeight(
 
   if (overflowsBottom) {
     const heightIfBottomY = screenSize.height - bottomY;
-    const heightIfTopY = openerMeasurements.pageY;
+    const heightIfTopY = measurements.pageY;
 
     if (heightIfTopY < heightIfBottomY) {
       anchor = {
-        x: openerMeasurements.pageX,
+        x: measurements.pageX,
         y: bottomY,
       };
 
@@ -101,21 +106,21 @@ export function getPopoverAnchorAndHeight(
       }
     } else {
       if (topY < 0) {
-        popoverHeight = openerMeasurements.pageY - screenOffset;
+        popoverHeight = measurements.pageY - screenOffset;
         anchor = {
-          x: openerMeasurements.pageX,
+          x: measurements.pageX,
           y: screenOffset,
         };
       } else {
         anchor = {
-          x: openerMeasurements.pageX,
+          x: measurements.pageX,
           y: topY,
         };
       }
     }
   } else {
     anchor = {
-      x: openerMeasurements.pageX,
+      x: measurements.pageX,
       y: bottomY,
     };
   }

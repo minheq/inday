@@ -1,7 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
-import { Measurements } from '../measurements';
 import { useDragDrop } from './drag_drop';
+
+interface DraggableMeasurements {
+  x: number;
+  y: number;
+  pageY: number;
+  pageX: number;
+  height: number;
+  width: number;
+}
 
 export interface DraggableProps<T> {
   /** The item this draggable corresponds to */
@@ -40,7 +48,7 @@ let keySequence = 1;
 export class Draggable<T> {
   key: string;
   item: T;
-  measurements: Measurements | null = null;
+  measurements: DraggableMeasurements | null = null;
 
   onStart: () => void = () => {
     return;
@@ -134,8 +142,8 @@ export function useDraggable<T, K extends View>(
 
   useEffect(() => {
     if (ref.current !== null) {
-      ref.current.measure((...measurementsArgs) => {
-        draggable.measurements = Measurements.fromArray(measurementsArgs);
+      ref.current.measure((x, y, width, height, pageX, pageY) => {
+        draggable.measurements = { x, y, width, height, pageX, pageY };
       });
     }
   });

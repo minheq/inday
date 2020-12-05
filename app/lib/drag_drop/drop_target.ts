@@ -1,8 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { useDragDrop } from './drag_drop';
 
-import { Measurements } from '../measurements';
 import { Draggable, DragState } from './draggable';
+
+interface DropTargetMeasurements {
+  x: number;
+  y: number;
+  pageY: number;
+  pageX: number;
+  height: number;
+  width: number;
+}
 
 export interface DropTargetProps {
   /** Called when an acceptable draggable was dropped over this drop target. */
@@ -25,13 +33,16 @@ let keySequence = 1;
 
 export class DropTarget {
   key: string;
-  measurements: Measurements | null = null;
+  measurements: DropTargetMeasurements | null = null;
 
-  onAccept: (draggable: Draggable) => void = () => {};
-  onLeave: (draggable: Draggable) => void = () => {};
-  onEnter: (draggable: Draggable) => void = () => {};
-  onHover: (draggable: Draggable, dragState: DragState) => void = () => {};
-  onWillAccept: (draggable: Draggable) => boolean = () => true;
+  onAccept: <T>(draggable: Draggable<T>) => void = () => {};
+  onLeave: <T>(draggable: Draggable<T>) => void = () => {};
+  onEnter: <T>(draggable: Draggable<T>) => void = () => {};
+  onHover: <T>(
+    draggable: Draggable<T>,
+    dragState: DragState,
+  ) => void = () => {};
+  onWillAccept: <T>(draggable: Draggable<T>) => boolean = () => true;
 
   constructor(props: DropTargetProps) {
     const {

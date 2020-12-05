@@ -104,11 +104,11 @@ import {
 import { AutoSizer } from '../lib/autosizer';
 import { ListView, ViewID } from '../data/views';
 import {
-  Grid,
-  GridRef,
+  GridRenderer,
+  GridRendererRef,
   RenderLeafRowCellProps,
   RenderHeaderCellProps,
-} from '../components/grid';
+} from '../components/grid_renderer';
 import { Record, RecordID } from '../data/records';
 import {
   atom,
@@ -126,7 +126,7 @@ import {
 import {
   StatefulLeafRowCell,
   LeafRowCellState,
-} from '../components/grid.common';
+} from '../components/grid_renderer.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/currency';
@@ -205,7 +205,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const cell = useRecoilValue(cellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
-  const gridRef = useRef<GridRef>(null);
+  const gridRef = useRef<GridRendererRef>(null);
   const filters = useGetViewFilters(view.id);
   const sorts = useGetViewSorts(view.id);
   const groups = useGetViewGroups(view.id);
@@ -319,7 +319,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
       <Container flex={1}>
         <AutoSizer>
           {({ height, width }) => (
-            <Grid
+            <GridRenderer
               ref={gridRef}
               width={width}
               height={height}

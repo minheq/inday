@@ -19,7 +19,6 @@ import { Text } from './text';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
-import { Measurements } from '../lib/measurements';
 import { DynamicStyleSheet } from './stylesheet';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 
@@ -84,17 +83,18 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
 
   const handleOpenPicker = useCallback(() => {
     if (buttonRef.current !== null) {
-      buttonRef.current.measure((...measurementsArgs) => {
-        const buttonMeasurements = Measurements.fromArray(measurementsArgs);
+      buttonRef.current.measure((x, y, width, _height, pageX, pageY) => {
+        const measurements = { width, height: _height, pageX, pageY };
+
         const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
-          buttonMeasurements,
+          measurements,
           contentHeight,
         );
 
         setHeight(popoverHeight);
         setPicker({
           visible: true,
-          buttonWidth: buttonMeasurements.width,
+          buttonWidth: measurements.width,
           anchor,
         });
       });

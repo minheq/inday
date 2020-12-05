@@ -8,7 +8,7 @@ import {
   Row,
   recycleItems,
   Column,
-} from './grid.common';
+} from './grid_renderer.common';
 
 test('getVisibleIndexRange', (t) => {
   const items = [
