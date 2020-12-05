@@ -29,6 +29,7 @@ import {
   getFirstDateOfWeek,
   getLastDateOfWeek,
 } from '../../lib/date_utils';
+import { subMonths } from 'date-fns';
 
 interface DatePickerProps {
   value?: Date | null;
@@ -115,22 +116,22 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
   const handlePressNextMonth = useCallback(() => {
     const next = addMonths(date, 1);
 
-    if (next.getFullYear() > maxYear) {
+    if (next.getFullYear() > date.getFullYear()) {
       setYear(next.getFullYear());
     }
 
     setMonth(next.getMonth());
-  }, [date, maxYear]);
+  }, [date]);
 
   const handlePressPreviousMonth = useCallback(() => {
-    const prev = addMonths(date, 1);
+    const prev = subMonths(date, 1);
 
-    if (prev.getFullYear() < minYear) {
+    if (prev.getFullYear() < date.getFullYear()) {
       setYear(prev.getFullYear());
     }
 
     setMonth(prev.getMonth());
-  }, [date, minYear]);
+  }, [date]);
 
   const renderDay = useCallback(
     (p: RenderDayProps) => <DayDisplay {...p} onSelect={handleSelectDay} />,
