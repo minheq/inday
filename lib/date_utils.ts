@@ -1,39 +1,199 @@
-import { isValid } from 'date-fns';
-export {
-  addDays,
-  differenceInDays,
-  eachDayOfInterval,
-  endOfMonth,
-  isAfter,
-  isBefore,
-  format as formatPattern,
-  formatISO,
-  isSameDay,
-  startOfMonth,
-  subDays,
-  endOfDay,
-  setYear,
-  setMonth,
-  addMonths,
-  subMonths,
-  startOfDay,
-  getDay,
-  differenceInMinutes,
-  addHours,
-  setHours,
-  setMinutes,
-  addMinutes,
-  setSeconds,
-  setMilliseconds,
-  subMinutes,
-  subHours,
-  differenceInHours,
-  addYears,
-  subYears,
-  setDate,
-  isWithinInterval,
-  getDate,
+import {
+  isValid as dateFnsIsValid,
+  formatISO as dateFnsFormatISO,
+  addDays as dateFnsAddDays,
+  startOfYear as dateFnsStartOfYear,
+  endOfYear as dateFnsEndOfYear,
+  differenceInDays as dateFnsDifferenceInDays,
+  eachDayOfInterval as dateFnsEachDayOfInterval,
+  eachYearOfInterval as dateFnsEachYearOfInterval,
+  eachMonthOfInterval as dateFnsEachMonthOfInterval,
+  endOfMonth as dateFnsEndOfMonth,
+  isAfter as dateFnsIsAfter,
+  isBefore as dateFnsIsBefore,
+  format as dateFnsFormat,
+  isSameDay as dateFnsIsSameDay,
+  startOfMonth as dateFnsStartOfMonth,
+  subDays as dateFnsSubDays,
+  endOfDay as dateFnsEndOfDay,
+  setYear as dateFnsSetYear,
+  setMonth as dateFnsSetMonth,
+  addMonths as dateFnsAddMonths,
+  subMonths as dateFnsSubMonths,
+  startOfDay as dateFnsStartOfDay,
+  getDay as dateFnsGetDay,
+  differenceInMinutes as dateFnsDifferenceInMinutes,
+  addHours as dateFnsAddHours,
+  setHours as dateFnsSetHours,
+  setMinutes as dateFnsSetMinutes,
+  addMinutes as dateFnsAddMinutes,
+  setSeconds as dateFnsSetSeconds,
+  setMilliseconds as dateFnsSetMilliseconds,
+  subMinutes as dateFnsSubMinutes,
+  subHours as dateFnsSubHours,
+  differenceInHours as dateFnsDifferenceInHours,
+  addYears as dateFnsAddYears,
+  subYears as dateFnsSubYears,
+  setDate as dateFnsSetDate,
+  isWithinInterval as dateFnsIsWithinInterval,
+  getDate as dateFnsGetDate,
 } from 'date-fns';
+
+export function isValidDate(date: unknown): boolean {
+  return dateFnsIsValid(date);
+}
+
+export function addDays(date: Date, amount: number): Date {
+  return dateFnsAddDays(date, amount);
+}
+
+export function startOfYear(date: Date): Date {
+  return dateFnsStartOfYear(date);
+}
+
+export function endOfYear(date: Date): Date {
+  return dateFnsEndOfYear(date);
+}
+
+export function differenceInDays(dateLeft: Date, dateRight: Date): number {
+  return dateFnsDifferenceInDays(dateLeft, dateRight);
+}
+
+export function eachDayOfInterval(interval: DateInterval): Date[] {
+  return dateFnsEachDayOfInterval(interval);
+}
+
+export function eachYearOfInterval(interval: DateInterval): Date[] {
+  return dateFnsEachYearOfInterval(interval);
+}
+
+export function eachMonthOfInterval(interval: DateInterval): Date[] {
+  return dateFnsEachMonthOfInterval(interval);
+}
+
+export function endOfMonth(date: Date): Date {
+  return dateFnsEndOfMonth(date);
+}
+
+export function isAfter(date: Date, dateToCompare: Date): boolean {
+  return dateFnsIsAfter(date, dateToCompare);
+}
+
+export function isBefore(date: Date, dateToCompare: Date): boolean {
+  return dateFnsIsBefore(date, dateToCompare);
+}
+
+export function formatPattern(date: Date, pattern: string): string {
+  return dateFnsFormat(date, pattern);
+}
+
+export function isSameDay(dateLeft: Date, dateRight: Date): boolean {
+  return dateFnsIsSameDay(dateLeft, dateRight);
+}
+
+export function startOfMonth(date: Date): Date {
+  return dateFnsStartOfMonth(date);
+}
+
+export function subDays(date: Date, amount: number): Date {
+  return dateFnsSubDays(date, amount);
+}
+
+export function endOfDay(date: Date): Date {
+  return dateFnsEndOfDay(date);
+}
+
+export function setYear(date: Date, year: number): Date {
+  return dateFnsSetYear(date, year);
+}
+
+export function setMonth(date: Date, month: number): Date {
+  return dateFnsSetMonth(date, month);
+}
+
+export function addMonths(date: Date, amount: number): Date {
+  return dateFnsAddMonths(date, amount);
+}
+
+export function subMonths(date: Date, amount: number): Date {
+  return dateFnsSubMonths(date, amount);
+}
+
+export function startOfDay(date: Date): Date {
+  return dateFnsStartOfDay(date);
+}
+
+export function getDay(date: Date): DayOfWeek {
+  return dateFnsGetDay(date);
+}
+
+export function differenceInMinutes(dateLeft: Date, dateRight: Date): number {
+  return dateFnsDifferenceInMinutes(dateLeft, dateRight);
+}
+
+export function addHours(date: Date, amount: number): Date {
+  return dateFnsAddHours(date, amount);
+}
+
+export function setHours(date: Date, seconds: number): Date {
+  return dateFnsSetHours(date, seconds);
+}
+
+export function setMinutes(date: Date, amount: number): Date {
+  return dateFnsSetMinutes(date, amount);
+}
+
+export function addMinutes(date: Date, amount: number): Date {
+  return dateFnsAddMinutes(date, amount);
+}
+
+export function setSeconds(date: Date, seconds: number): Date {
+  return dateFnsSetSeconds(date, seconds);
+}
+
+export function setMilliseconds(date: Date, milliseconds: number): Date {
+  return dateFnsSetMilliseconds(date, milliseconds);
+}
+
+export function subMinutes(date: Date, amount: number): Date {
+  return dateFnsSubMinutes(date, amount);
+}
+
+export function subHours(date: Date, amount: number): Date {
+  return dateFnsSubHours(date, amount);
+}
+
+export function differenceInHours(dateLeft: Date, dateRight: Date): number {
+  return dateFnsDifferenceInHours(dateLeft, dateRight);
+}
+
+export function addYears(date: Date, amount: number): Date {
+  return dateFnsAddYears(date, amount);
+}
+
+export function subYears(date: Date, amount: number): Date {
+  return dateFnsSubYears(date, amount);
+}
+
+export function setDate(date: Date, dayOfMonth: number): Date {
+  return dateFnsSetDate(date, dayOfMonth);
+}
+
+export function isWithinDateInterval(
+  date: Date,
+  interval: DateInterval,
+): boolean {
+  return dateFnsIsWithinInterval(date, interval);
+}
+
+export function getDate(date: Date): number {
+  return dateFnsGetDate(date);
+}
+
+export type DateInterval = {
+  start: Date;
+  end: Date;
+};
 
 export function isDate(value: unknown): value is Date {
   return value instanceof Date;
@@ -54,6 +214,17 @@ export function formatRelative(
   options?: Intl.RelativeTimeFormatOptions,
 ): string {
   return new Intl.RelativeTimeFormat(locales, options).format(value, unit);
+}
+
+/** As `yyyy-MM-dd` eg. `2020-10-30` */
+export type ISODate = string;
+
+export function formatISODate(date: Date): ISODate {
+  return dateFnsFormatISO(date, { representation: 'date' });
+}
+
+export function parseISODate(isoDate: ISODate): Date {
+  return new Date(isoDate);
 }
 
 type DateInputFormat = 'm/d/y' | 'y/m/d' | 'd/m/y';
@@ -107,7 +278,7 @@ export function parseString(
 
   const date = new Date(`${year}-${month}-${day}`);
 
-  if (isValid(date) === false) {
+  if (isValidDate(date) === false) {
     return new Error('Date is not valid.');
   }
 
@@ -116,4 +287,62 @@ export function parseString(
 
 export function isStartOfMonth(date: Date): boolean {
   return date.getDate() === 1;
+}
+
+export function getFirstDateOfWeek(
+  date: Date,
+  firstDayOfWeek: DayOfWeek,
+): Date {
+  const day = getDay(date);
+  const diffDays = day - firstDayOfWeek;
+
+  const sub = diffDays < 0 ? 7 + diffDays : diffDays;
+
+  return subDays(date, sub);
+}
+
+export function getLastDateOfWeek(date: Date, firstDayOfWeek: DayOfWeek): Date {
+  const firstDateOfTheWeek = getFirstDateOfWeek(date, firstDayOfWeek);
+
+  return addDays(firstDateOfTheWeek, 6);
+}
+
+// eslint-disable-next-line
+export enum WeekDay {
+  Monday = 1,
+  Tuesday = 2,
+  Wednesday = 3,
+  Thursday = 4,
+  Friday = 5,
+  Saturday = 6,
+  Sunday = 0,
+}
+
+export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+// eslint-disable-next-line
+export enum Frequency {
+  Yearly = 'YEARLY',
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY',
+  Daily = 'DAILY',
+}
+
+export interface Recurrence {
+  startDate: Date;
+  frequency: Frequency;
+  interval?: number | null;
+  count?: number | null;
+  weekStart?: WeekDay | null;
+  until?: Date | null;
+  timezoneID?: string | null;
+  bySetPosition?: number[] | null;
+  byMonth?: number[] | null;
+  byMonthDay?: number[] | null;
+  byYearDay?: number[] | null;
+  byWeekNumber?: number[] | null;
+  byWeekDay?: WeekDay[] | null;
+  byHour?: number[] | null;
+  byMinute?: number[] | null;
+  bySecond?: number[] | null;
 }

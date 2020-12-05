@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Day } from '../../lib/datetime';
 import { Container } from './container';
 
 import { DatePicker } from './date_picker';
 
 function Basic(): JSX.Element {
-  const [value, setValue] = useState<Day | null>(null);
+  const [value, setValue] = useState<Date | null>(null);
 
   return (
     <Container width={320}>

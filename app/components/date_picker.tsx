@@ -1,67 +1,55 @@
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { View, Pressable } from 'react-native';
 
-import { Year } from '../../lib/datetime/year';
-import { Month } from '../../lib/datetime/month';
-import {
-  FirstDayOfWeek,
-  DEFAULT_FIRST_DAY_OF_WEEK,
-  Week,
-  eachDayOfWeek,
-} from '../../lib/datetime/week';
-import { Day, DayInterval } from '../../lib/datetime/day';
 import { Text } from './text';
 import { Spacer } from './spacer';
 import { Icon } from './icon';
 import {
-  MonthTemplate,
+  MonthRenderer,
   RenderDayProps,
   RenderOtherMonthProps,
   RenderWeekProps,
-} from './month_template';
+} from './month_renderer';
 import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 import { Picker, PickerOption } from './picker';
 import { getSystemLocale } from '../lib/locale';
-import { formatDate } from '../../lib/date_utils';
+import {
+  DayOfWeek,
+  eachDayOfInterval,
+  formatDate,
+  addMonths,
+  startOfDay,
+  endOfDay,
+  startOfYear,
+  endOfYear,
+  eachMonthOfInterval,
+  eachYearOfInterval,
+  DateInterval,
+  getFirstDateOfWeek,
+  getLastDateOfWeek,
+} from '../../lib/date_utils';
 
 interface DatePickerProps {
-  value?: Day | null;
-  onChange?: (value: Day) => void;
-  isOutsideRange?: (day: Day) => boolean;
-  isDayBlocked?: (day: Day) => boolean;
+  value?: Date | null;
+  onChange?: (value: Date) => void;
+  isOutsideRange?: (day: Date) => boolean;
+  isBlocked?: (day: Date) => boolean;
+  firstDayOfWeek?: DayOfWeek;
 }
 
+const DEFAULT_FIRST_DAY_OF_WEEK = 1;
+
 export function DatePicker(props: DatePickerProps): JSX.Element {
-  const { value, onChange, isOutsideRange, isDayBlocked } = props;
-  const [year, setYear] = useState<Year>(Year.today());
-  const minYear = useMemo(() => Year.subYears(year, 7), [year]);
-  const maxYear = useMemo(() => Year.addYears(year, 7), [year]);
+  const {
+    value,
+    onChange,
+    isOutsideRange,
+    isBlocked,
+    firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
+  } = props;
 
-  const yearsOptions: PickerOption<number>[] = useMemo(() => {
-    return Year.eachYearOfInterval({
-      start: minYear,
-      end: maxYear,
-    }).map((_year) => ({
-      value: Year.getYear(_year),
-      label: formatDate(Year.toDate(_year), getSystemLocale(), {
-        year: 'numeric',
-      }),
-    }));
-  }, [minYear, maxYear]);
-  const monthOptions: PickerOption<number>[] = useMemo(() => {
-    return Month.eachMonthOfInterval({
-      start: Month.startOfYear(),
-      end: Month.endOfYear(),
-    }).map((_month) => ({
-      value: Month.getMonth(_month),
-      label: formatDate(Month.toDate(_month), getSystemLocale(), {
-        month: 'long',
-      }),
-    }));
-  }, []);
-
-  const selected = useMemo((): DayInterval | null => {
+  const selectedInterval = useMemo((): DateInterval | null => {
     if (value === null || value === undefined) {
       return null;
     }
@@ -70,11 +58,41 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
   }, [value]);
 
   const [month, setMonth] = useState(
-    selected ? Month.fromDay(selected.start) : Month.fromDate(new Date()),
+    selectedInterval
+      ? selectedInterval.start.getMonth()
+      : new Date().getMonth(),
   );
 
+  const [year, setYear] = useState(new Date().getFullYear());
+  const minYear = useMemo(() => year - 7, [year]);
+  const maxYear = useMemo(() => year + 7, [year]);
+
+  const yearsOptions: PickerOption<number>[] = useMemo(() => {
+    return eachYearOfInterval({
+      start: new Date(minYear, month),
+      end: new Date(maxYear, month),
+    }).map((_year) => ({
+      value: _year.getFullYear(),
+      label: formatDate(_year, getSystemLocale(), {
+        year: 'numeric',
+      }),
+    }));
+  }, [minYear, maxYear, month]);
+
+  const monthOptions: PickerOption<number>[] = useMemo(() => {
+    return eachMonthOfInterval({
+      start: startOfYear(new Date()),
+      end: endOfYear(new Date()),
+    }).map((_month) => ({
+      value: _month.getMonth(),
+      label: formatDate(_month, getSystemLocale(), {
+        month: 'long',
+      }),
+    }));
+  }, []);
+
   const handleSelectDay = useCallback(
-    (day: Day) => {
+    (day: Date) => {
       if (onChange === null || onChange === undefined) {
         return;
       }
@@ -84,42 +102,35 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
     [onChange],
   );
 
-  const handleChangeMonth = useCallback(
-    (monthNum: number) => {
-      setMonth(Month.setMonth(month, monthNum));
-    },
-    [month],
-  );
+  const handleChangeMonth = useCallback((_month: number) => {
+    setMonth(_month);
+  }, []);
 
-  const handleChangeYear = useCallback(
-    (_year: number) => {
-      setYear(Year.fromYear(_year));
-      setMonth(Month.setYear(month, _year));
-    },
-    [month],
-  );
+  const handleChangeYear = useCallback((_year: number) => {
+    setYear(_year);
+  }, []);
 
-  const handlePressNext = useCallback(() => {
-    const nextMonth = Month.addMonths(month, 1);
-    const nextYear = Year.fromMonth(nextMonth);
+  const date = useMemo(() => new Date(year, month), [year, month]);
 
-    if (Year.isAfter(nextYear, maxYear) || Year.isSame(nextYear, maxYear)) {
-      setYear(nextYear);
+  const handlePressNextMonth = useCallback(() => {
+    const next = addMonths(date, 1);
+
+    if (next.getFullYear() > maxYear) {
+      setYear(next.getFullYear());
     }
 
-    setMonth(nextMonth);
-  }, [month, maxYear]);
+    setMonth(next.getMonth());
+  }, [date, maxYear]);
 
-  const handlePressPrevious = useCallback(() => {
-    const prevMonth = Month.addMonths(month, 1);
-    const prevYear = Year.fromMonth(prevMonth);
+  const handlePressPreviousMonth = useCallback(() => {
+    const prev = addMonths(date, 1);
 
-    if (Year.isBefore(prevYear, minYear) || Year.isSame(prevYear, minYear)) {
-      setYear(prevYear);
+    if (prev.getFullYear() < minYear) {
+      setYear(prev.getFullYear());
     }
 
-    setMonth(Month.subMonths(month, 1));
-  }, [month, minYear]);
+    setMonth(prev.getMonth());
+  }, [date, minYear]);
 
   const renderDay = useCallback(
     (p: RenderDayProps) => <DayDisplay {...p} onSelect={handleSelectDay} />,
@@ -139,33 +150,37 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
             <Picker
               onChange={handleChangeMonth}
               options={monthOptions}
-              value={Month.getMonth(month)}
+              value={month}
             />
           </View>
           <Picker
             onChange={handleChangeYear}
             options={yearsOptions}
-            value={Month.getYear(month)}
+            value={year}
           />
         </View>
         <View style={styles.monthArrowsWrapper}>
-          <Pressable style={styles.arrowWrapper} onPress={handlePressPrevious}>
+          <Pressable
+            style={styles.arrowWrapper}
+            onPress={handlePressPreviousMonth}
+          >
             <Icon name="ChevronLeft" />
           </Pressable>
           <Spacer direction="row" size={8} />
-          <Pressable style={styles.arrowWrapper} onPress={handlePressNext}>
+          <Pressable style={styles.arrowWrapper} onPress={handlePressNextMonth}>
             <Icon name="ChevronRight" />
           </Pressable>
         </View>
       </View>
       <Spacer size={16} />
-      <WeekDates />
+      <WeekDates firstDayOfWeek={firstDayOfWeek} />
       <Spacer size={16} />
-      <MonthTemplate
-        selected={selected}
-        month={month}
+      <MonthRenderer
+        firstDayOfWeek={firstDayOfWeek}
+        selectedInterval={selectedInterval}
+        month={date}
         isOutsideRange={isOutsideRange}
-        isDayBlocked={isDayBlocked}
+        isBlocked={isBlocked}
         renderDay={renderDay}
         renderOtherMonthDay={renderOtherMonthDay}
         renderWeek={renderWeek}
@@ -175,7 +190,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
 }
 
 interface DayDisplayProps {
-  day: Day;
+  day: Date;
   withinSelected: boolean;
   selected: boolean;
   selectedStart: boolean;
@@ -183,7 +198,7 @@ interface DayDisplayProps {
   today: boolean;
   outsideRange: boolean;
   blocked: boolean;
-  onSelect: (day: Day) => void;
+  onSelect: (day: Date) => void;
 }
 
 function DayDisplay(props: DayDisplayProps) {
@@ -204,7 +219,7 @@ function DayDisplay(props: DayDisplayProps) {
       <View style={styles.dayRoot}>
         <View style={styles.dayWrapper}>
           <Text decoration="line-through" color="muted">
-            {formatDate(Day.toDate(day), getSystemLocale(), {
+            {formatDate(day, getSystemLocale(), {
               day: 'numeric',
             })}
           </Text>
@@ -235,7 +250,7 @@ function DayDisplay(props: DayDisplayProps) {
               <Text
                 color={selected ? 'contrast' : today ? 'primary' : 'default'}
               >
-                {formatDate(Day.toDate(day), getSystemLocale(), {
+                {formatDate(day, getSystemLocale(), {
                   day: 'numeric',
                 })}
               </Text>
@@ -249,7 +264,7 @@ function DayDisplay(props: DayDisplayProps) {
 
 interface OtherMonthDayProps {
   withinSelected: boolean;
-  day: Day;
+  day: Date;
 }
 
 function OtherMonthDay(props: OtherMonthDayProps) {
@@ -264,7 +279,7 @@ function OtherMonthDay(props: OtherMonthDayProps) {
       ]}
     >
       <Text color="muted">
-        {formatDate(Day.toDate(day), getSystemLocale(), {
+        {formatDate(day, getSystemLocale(), {
           day: 'numeric',
         })}
       </Text>
@@ -283,12 +298,12 @@ function Week(props: WeekProps) {
 }
 
 interface WeekDatesProps {
-  firstDayOfWeek?: FirstDayOfWeek;
+  firstDayOfWeek: DayOfWeek;
 }
 
 function WeekDates(props: WeekDatesProps) {
-  const { firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK } = props;
-  const dates = eachDayOfWeek(new Date(), firstDayOfWeek);
+  const { firstDayOfWeek } = props;
+  const dates = eachDateOfWeek(new Date(), firstDayOfWeek);
 
   return (
     <View style={styles.weekDatesWrapper}>
@@ -302,6 +317,23 @@ function WeekDates(props: WeekDatesProps) {
     </View>
   );
 }
+
+const getWeekInterval = (
+  date: Date,
+  firstDayOfWeek: DayOfWeek,
+): DateInterval => {
+  return {
+    start: startOfDay(getFirstDateOfWeek(date, firstDayOfWeek)),
+    end: endOfDay(getLastDateOfWeek(date, firstDayOfWeek)),
+  };
+};
+
+const eachDateOfWeek = (
+  date = new Date(),
+  firstDayOfWeek: DayOfWeek,
+): Date[] => {
+  return eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
+};
 
 const styles = DynamicStyleSheet.create(() => ({
   root: {},

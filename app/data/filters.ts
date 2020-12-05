@@ -19,13 +19,13 @@ import {
 } from './fields';
 import { ViewID } from './views';
 import { generateID, validateID } from '../../lib/id';
-import { Interval } from '../../lib/datetime';
+import { DateInterval } from '../../lib/date_utils';
 import {
   isAfter,
   isBefore,
   isDate,
   isSameDay,
-  isWithinInterval,
+  isWithinDateInterval,
 } from '../../lib/date_utils';
 import { hasAllOf, hasAnyOf, hasNoneOf } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
@@ -215,7 +215,7 @@ export type DateFieldKindFilterRule =
   | 'isNot'
   | 'isEmpty'
   | 'isNotEmpty';
-export type DateFieldKindFilterRuleValue = Date | Interval | null;
+export type DateFieldKindFilterRuleValue = Date | DateInterval | null;
 
 export type NumberFieldKindFilterRule =
   | 'equal'
@@ -630,13 +630,13 @@ export const dateFieldKindFiltersByRule: {
 
     if (isDate(filterValue)) {
       throw new Error(
-        `Expected filterValue to be Interval. Received ${JSON.stringify(
+        `Expected filterValue to be DateInterval. Received ${JSON.stringify(
           filterValue,
         )}`,
       );
     }
 
-    return isWithinInterval(value, filterValue);
+    return isWithinDateInterval(value, filterValue);
   },
   isBefore: (value, filterValue) => {
     if (value === null) {

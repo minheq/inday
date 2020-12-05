@@ -11,7 +11,6 @@ import {
   filterRecords,
   FilterGetters,
 } from './filters';
-import { Day } from '../../lib/datetime/day';
 
 import {
   makeCollection,
@@ -21,6 +20,7 @@ import {
   makeFilter,
 } from './factory';
 import { FieldType, FieldValue, FieldID } from './fields';
+import { parseISODate } from '../../lib/date_utils';
 
 test('no filter', (t) => {
   const values = ['AWord', 'BWord'];
@@ -171,9 +171,12 @@ test('numberFieldKindFiltersByRule - isNotEmpty', (t) => {
 test('dateFieldKindFiltersByRule - is', (t) => {
   const filter = dateFieldKindFiltersByRule.is;
 
-  t.deepEqual(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-03')), true);
   t.deepEqual(
-    filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
+    filter(parseISODate('2020-08-03'), parseISODate('2020-08-03')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
     false,
   );
 });
@@ -182,17 +185,17 @@ test('dateFieldKindFiltersByRule - isWithin', (t) => {
   const filter = dateFieldKindFiltersByRule.isWithin;
 
   t.deepEqual(
-    filter(Day.toDate('2020-08-03'), {
-      start: Day.toDate('2020-08-02'),
-      end: Day.toDate('2020-08-04'),
+    filter(parseISODate('2020-08-03'), {
+      start: parseISODate('2020-08-02'),
+      end: parseISODate('2020-08-04'),
     }),
     true,
   );
 
   t.deepEqual(
-    filter(Day.toDate('2020-08-05'), {
-      start: Day.toDate('2020-08-02'),
-      end: Day.toDate('2020-08-04'),
+    filter(parseISODate('2020-08-05'), {
+      start: parseISODate('2020-08-02'),
+      end: parseISODate('2020-08-04'),
     }),
     false,
   );
@@ -201,9 +204,12 @@ test('dateFieldKindFiltersByRule - isWithin', (t) => {
 test('dateFieldKindFiltersByRule - isBefore', (t) => {
   const filter = dateFieldKindFiltersByRule.isBefore;
 
-  t.deepEqual(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), true);
   t.deepEqual(
-    filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
+    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
     false,
   );
 });
@@ -211,9 +217,12 @@ test('dateFieldKindFiltersByRule - isBefore', (t) => {
 test('dateFieldKindFiltersByRule - isAfter', (t) => {
   const filter = dateFieldKindFiltersByRule.isAfter;
 
-  t.deepEqual(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
   t.deepEqual(
-    filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
+    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
     false,
   );
 });
@@ -221,10 +230,16 @@ test('dateFieldKindFiltersByRule - isAfter', (t) => {
 test('dateFieldKindFiltersByRule - isOnOrBefore', (t) => {
   const filter = dateFieldKindFiltersByRule.isOnOrBefore;
 
-  t.deepEqual(filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')), true);
-  t.deepEqual(filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')), true);
   t.deepEqual(
-    filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')),
+    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-04'), parseISODate('2020-08-04')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
     false,
   );
 });
@@ -232,10 +247,16 @@ test('dateFieldKindFiltersByRule - isOnOrBefore', (t) => {
 test('dateFieldKindFiltersByRule - isOnOrAfter', (t) => {
   const filter = dateFieldKindFiltersByRule.isOnOrAfter;
 
-  t.deepEqual(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
-  t.deepEqual(filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')), true);
   t.deepEqual(
-    filter(Day.toDate('2020-08-03'), Day.toDate('2020-08-04')),
+    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-04'), parseISODate('2020-08-04')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
     false,
   );
 });
@@ -243,9 +264,12 @@ test('dateFieldKindFiltersByRule - isOnOrAfter', (t) => {
 test('dateFieldKindFiltersByRule - isNot', (t) => {
   const filter = dateFieldKindFiltersByRule.isNot;
 
-  t.deepEqual(filter(Day.toDate('2020-08-05'), Day.toDate('2020-08-04')), true);
   t.deepEqual(
-    filter(Day.toDate('2020-08-04'), Day.toDate('2020-08-04')),
+    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
+    true,
+  );
+  t.deepEqual(
+    filter(parseISODate('2020-08-04'), parseISODate('2020-08-04')),
     false,
   );
 });
@@ -254,13 +278,13 @@ test('dateFieldKindFiltersByRule - isEmpty', (t) => {
   const filter = dateFieldKindFiltersByRule.isEmpty;
 
   t.deepEqual(filter(null, new Date()), true);
-  t.deepEqual(filter(Day.toDate('2020-08-04'), new Date()), false);
+  t.deepEqual(filter(parseISODate('2020-08-04'), new Date()), false);
 });
 
 test('dateFieldKindFiltersByRule - isNotEmpty', (t) => {
   const filter = dateFieldKindFiltersByRule.isNotEmpty;
 
-  t.deepEqual(filter(Day.toDate('2020-08-04'), new Date()), true);
+  t.deepEqual(filter(parseISODate('2020-08-04'), new Date()), true);
   t.deepEqual(filter(null, new Date()), false);
 });
 
