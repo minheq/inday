@@ -618,21 +618,20 @@ function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
   const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (value === null) {
-    return null;
-  }
-
   if (state === 'editing') {
     return <NumberFieldKindCellEditing<CurrencyFieldValue> value={value} />;
   }
 
-  const child = (
-    <View style={styles.textCellContainer}>
-      <Text numberOfLines={1} align="right">
-        {formatCurrency(value, getSystemLocale(), field.currency)}
-      </Text>
-    </View>
-  );
+  const child =
+    value === null ? (
+      <View style={styles.cellPlaceholder} />
+    ) : (
+      <View style={styles.textCellContainer}>
+        <Text numberOfLines={1} align="right">
+          {formatCurrency(value, getSystemLocale(), field.currency)}
+        </Text>
+      </View>
+    );
 
   if (state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -648,23 +647,54 @@ interface DateCellProps {
 
 function DateCell(props: DateCellProps) {
   const { value, field } = props;
-  const { state } = useLeafRowCellContext();
+  const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (value === null) {
-    return null;
+  if (state === 'editing') {
+    return <DateFieldCellEditing value={value} />;
   }
 
-  if (state === 'default') {
-    return (
+  const child =
+    value === null ? (
+      <View style={styles.cellPlaceholder} />
+    ) : (
       <View style={styles.textCellContainer}>
-        <Text numberOfLines={1}>{formatDate(value, getSystemLocale())}</Text>
+        <Text>{formatDate(value, getSystemLocale())}</Text>
       </View>
     );
+
+  if (state === 'focused') {
+    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
+  return <Fragment>{child}</Fragment>;
+}
+
+interface DateFieldCellEditingProps {
+  value: DateFieldValue;
+}
+function DateFieldCellEditing(props: DateFieldCellEditingProps) {
+  const { value } = props;
+  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<DateFieldValue>();
+
+  const handleChangeText = useCallback(
+    (nextValue: string) => {
+      console.log(nextValue, 'nextValue');
+
+      // updateRecordFieldValue(recordID, fieldID, nextValue);
+    },
+    [updateRecordFieldValue, recordID, fieldID],
+  );
+
   return (
-    <View style={styles.textCellContainer}>
-      <Text>{formatDate(value, getSystemLocale())}</Text>
+    <View style={styles.selectKindEditingContainer}>
+      <TextInput
+        autoFocus
+        style={styles.textCellInput}
+        // value={value}
+        // onKeyPress={handleKeyPress}
+        onChangeText={handleChangeText}
+      />
     </View>
   );
 }
@@ -752,7 +782,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   }
 
   const child = isEmpty(value) ? (
-    <View style={styles.badgePlaceholder} />
+    <View style={styles.cellPlaceholder} />
   ) : (
     <Row spacing={4}>
       {value.map((collaboratorID) => (
@@ -828,7 +858,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
   }
 
   const child = isEmpty(value) ? (
-    <View style={styles.badgePlaceholder} />
+    <View style={styles.cellPlaceholder} />
   ) : (
     <Row spacing={4}>
       {value.map((recordID) => (
@@ -950,7 +980,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
   }
 
   const child = isEmpty(value) ? (
-    <View style={styles.badgePlaceholder} />
+    <View style={styles.cellPlaceholder} />
   ) : (
     <Row spacing={4}>
       {value.map((_value) => {
@@ -1075,50 +1105,48 @@ function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
   const { state, onStartEditing } = useLeafRowCellContext();
 
-  if (value === null) {
-    return null;
-  }
-
   if (state === 'editing') {
     return <NumberFieldKindCellEditing<NumberFieldKindValue> value={value} />;
   }
 
-  let child: React.ReactNode = null;
+  let child: React.ReactNode = <View style={styles.cellPlaceholder} />;
 
-  switch (field.style) {
-    case 'decimal':
-      child = (
-        <View style={styles.textCellContainer}>
-          <Text numberOfLines={1} align="right">
-            {Intl.NumberFormat(getSystemLocale(), {
-              style: 'decimal',
-              minimumFractionDigits: field.minimumFractionDigits,
-              maximumFractionDigits: field.maximumFractionDigits,
-            }).format(value)}
-          </Text>
-        </View>
-      );
-      break;
-    case 'unit':
-      child = (
-        <View style={styles.textCellContainer}>
-          <Text numberOfLines={1} align="right">
-            {formatUnit(value, getSystemLocale(), field.unit)}
-          </Text>
-        </View>
-      );
-      break;
-    case 'integer':
-      child = (
-        <View style={styles.textCellContainer}>
-          <Text numberOfLines={1} align="right">
-            {value}
-          </Text>
-        </View>
-      );
-      break;
-    default:
-      throw new Error('Field style not supported');
+  if (value !== null) {
+    switch (field.style) {
+      case 'decimal':
+        child = (
+          <View style={styles.textCellContainer}>
+            <Text numberOfLines={1} align="right">
+              {Intl.NumberFormat(getSystemLocale(), {
+                style: 'decimal',
+                minimumFractionDigits: field.minimumFractionDigits,
+                maximumFractionDigits: field.maximumFractionDigits,
+              }).format(value)}
+            </Text>
+          </View>
+        );
+        break;
+      case 'unit':
+        child = (
+          <View style={styles.textCellContainer}>
+            <Text numberOfLines={1} align="right">
+              {formatUnit(value, getSystemLocale(), field.unit)}
+            </Text>
+          </View>
+        );
+        break;
+      case 'integer':
+        child = (
+          <View style={styles.textCellContainer}>
+            <Text numberOfLines={1} align="right">
+              {value}
+            </Text>
+          </View>
+        );
+        break;
+      default:
+        throw new Error('Field style not supported');
+    }
   }
 
   if (state === 'focused') {
@@ -1188,7 +1216,7 @@ function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
 
   const child =
     value === null ? (
-      <View style={styles.badgePlaceholder} />
+      <View style={styles.cellPlaceholder} />
     ) : (
       <Row>
         <CollaboratorBadge collaboratorID={value} key={value} />
@@ -1227,7 +1255,7 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
 
   const child =
     value === null ? (
-      <View style={styles.badgePlaceholder} />
+      <View style={styles.cellPlaceholder} />
     ) : (
       <Row>
         <RecordLinkBadge recordID={value} />
@@ -1293,7 +1321,7 @@ function SingleOptionCell(props: SingleOptionCellProps) {
 
   const child =
     value === null || selected === undefined ? (
-      <View style={styles.badgePlaceholder} />
+      <View style={styles.cellPlaceholder} />
     ) : (
       <Row>
         <OptionBadge option={selected} />
@@ -1750,7 +1778,7 @@ const styles = DynamicStyleSheet.create(() => ({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  badgePlaceholder: {
+  cellPlaceholder: {
     height: 32,
     width: '100%',
   },
