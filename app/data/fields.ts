@@ -234,7 +234,7 @@ export type Field =
 
 export type CheckboxFieldValue = boolean;
 export type CurrencyFieldValue = number | null;
-export type DateFieldValue = Date | null;
+export type DateFieldValue = string | null;
 export type EmailFieldValue = string;
 export type MultiCollaboratorFieldValue = CollaboratorID[];
 export type MultiRecordLinkFieldValue = RecordID[];
@@ -399,7 +399,7 @@ function areDateFieldKindValueEqual(
   a: DateFieldKindValue,
   b: DateFieldKindValue,
 ): boolean {
-  if (a !== null && b !== null) {
+  if (isDate(a) && isDate(b)) {
     return isSameDay(a, b);
   }
 
@@ -646,7 +646,7 @@ export function assertDateFieldValue(
     return;
   }
 
-  if (!isDate(value)) {
+  if (!isDate(value) && typeof value !== 'string') {
     throw new Error(
       `Expected DateFieldValue to be  Received "${JSON.stringify(value)}"`,
     );

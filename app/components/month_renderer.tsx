@@ -206,9 +206,11 @@ function getRenderDayState(params: GetRenderDayStateParams) {
     end: eom,
   });
   const selectedStart = selectedInterval
-    ? day === selectedInterval.start
+    ? isSameDay(day, selectedInterval.start)
     : false;
-  const selectedEnd = selectedInterval ? day === selectedInterval.end : false;
+  const selectedEnd = selectedInterval
+    ? isSameDay(day, selectedInterval.end)
+    : false;
   const selected = selectedStart || selectedEnd;
   const withinSelected =
     selectedInterval && !selected

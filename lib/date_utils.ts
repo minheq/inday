@@ -190,10 +190,10 @@ export function getDate(date: Date): number {
   return dateFnsGetDate(date);
 }
 
-export type DateInterval = {
+export interface DateInterval {
   start: Date;
   end: Date;
-};
+}
 
 export function isDate(value: unknown): value is Date {
   return value instanceof Date;
