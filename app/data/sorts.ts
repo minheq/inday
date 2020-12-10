@@ -333,10 +333,10 @@ export function sortByNumberFieldKind(
     assertNumberFieldKindValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingNumberFieldKindValue(valA, valB);
+      return sortByAscendingNumberFieldKindValue(valA, valB);
     }
 
-    return sortDescendingNumberFieldKindValue(valA, valB);
+    return sortByDescendingNumberFieldKindValue(valA, valB);
   });
 }
 
@@ -358,10 +358,10 @@ export function sortByDateFieldKind(
     assertDateFieldKindValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingDateFieldKindValue(valA, valB);
+      return sortByAscendingDateFieldKindValue(valA, valB);
     }
 
-    return sortDescendingDateFieldKindValue(valA, valB);
+    return sortByDescendingDateFieldKindValue(valA, valB);
   });
 }
 
@@ -386,9 +386,9 @@ export function sortBySingleOptionField(
     assertSingleOptionFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingSingleOption(optionsByID, valA, valB);
+      return sortByAscendingSingleOption(optionsByID, valA, valB);
     }
-    return sortDescendingSingleOption(optionsByID, valA, valB);
+    return sortByDescendingSingleOption(optionsByID, valA, valB);
   });
 }
 
@@ -413,10 +413,10 @@ export function sortByMultiOptionField(
     assertMultiOptionFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingMultiOption(optionsByID, valA, valB);
+      return sortByAscendingMultiOption(optionsByID, valA, valB);
     }
 
-    return sortDescendingMultiOption(optionsByID, valA, valB);
+    return sortByDescendingMultiOption(optionsByID, valA, valB);
   });
 }
 
@@ -436,10 +436,10 @@ export function sortBySingleCollaboratorField(
     assertSingleCollaboratorFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingSingleCollaborator(getCollaborator, valA, valB);
+      return sortByAscendingSingleCollaborator(getCollaborator, valA, valB);
     }
 
-    return sortDescendingSingleCollaborator(getCollaborator, valA, valB);
+    return sortByDescendingSingleCollaborator(getCollaborator, valA, valB);
   });
 }
 
@@ -461,10 +461,10 @@ export function sortByMultiCollaboratorField(
     assertMultiCollaboratorFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingMultiCollaborator(getCollaborator, valA, valB);
+      return sortByAscendingMultiCollaborator(getCollaborator, valA, valB);
     }
 
-    return sortDescendingMultiCollaborator(getCollaborator, valA, valB);
+    return sortByDescendingMultiCollaborator(getCollaborator, valA, valB);
   });
 }
 
@@ -492,10 +492,20 @@ export function sortBySingleRecordLinkField(
     assertSingleRecordLinkFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingSingleRecordLink(primaryField, getRecord, valA, valB);
+      return sortByAscendingSingleRecordLink(
+        primaryField,
+        getRecord,
+        valA,
+        valB,
+      );
     }
 
-    return sortDescendingSingleRecordLink(primaryField, getRecord, valA, valB);
+    return sortByDescendingSingleRecordLink(
+      primaryField,
+      getRecord,
+      valA,
+      valB,
+    );
   });
 }
 
@@ -522,10 +532,15 @@ export function sortByMultiRecordLinkField(
     assertMultiRecordLinkFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortAscendingMultiRecordLink(primaryField, getRecord, valA, valB);
+      return sortByAscendingMultiRecordLink(
+        primaryField,
+        getRecord,
+        valA,
+        valB,
+      );
     }
 
-    return sortDescendingMultiRecordLink(primaryField, getRecord, valA, valB);
+    return sortByDescendingMultiRecordLink(primaryField, getRecord, valA, valB);
   });
 }
 
@@ -574,7 +589,7 @@ function ascendingTextFieldKindValueSort(
   return 0;
 }
 
-function sortAscendingNumberFieldKindValue(
+function sortByAscendingNumberFieldKindValue(
   a: NumberFieldKindValue,
   b: NumberFieldKindValue,
 ) {
@@ -598,7 +613,7 @@ function sortAscendingNumberFieldKindValue(
   return 0;
 }
 
-function sortAscendingDateFieldKindValue(
+function sortByAscendingDateFieldKindValue(
   a: DateFieldKindValue,
   b: DateFieldKindValue,
 ) {
@@ -655,7 +670,7 @@ function descendingTextFieldKindValueSort(
   return 0;
 }
 
-function sortDescendingNumberFieldKindValue(
+function sortByDescendingNumberFieldKindValue(
   a: NumberFieldKindValue,
   b: NumberFieldKindValue,
 ) {
@@ -679,7 +694,7 @@ function sortDescendingNumberFieldKindValue(
   return 0;
 }
 
-function sortDescendingDateFieldKindValue(
+function sortByDescendingDateFieldKindValue(
   a: DateFieldKindValue,
   b: DateFieldKindValue,
 ) {
@@ -711,7 +726,7 @@ function sortDescendingDateFieldKindValue(
   return 0;
 }
 
-function sortAscendingSingleOption(
+function sortByAscendingSingleOption(
   optionsByID: { [id: string]: SelectOption },
   a: SingleOptionFieldValue,
   b: SingleOptionFieldValue,
@@ -739,7 +754,7 @@ function sortAscendingSingleOption(
   return 0;
 }
 
-function sortDescendingSingleOption(
+function sortByDescendingSingleOption(
   optionsByID: { [id: string]: SelectOption },
   a: SingleOptionFieldValue,
   b: SingleOptionFieldValue,
@@ -767,7 +782,7 @@ function sortDescendingSingleOption(
   return 0;
 }
 
-function sortAscendingMultiOption(
+function sortByAscendingMultiOption(
   optionsByID: { [id: string]: SelectOption },
   a: MultiOptionFieldValue,
   b: MultiOptionFieldValue,
@@ -795,7 +810,7 @@ function sortAscendingMultiOption(
   return 0;
 }
 
-function sortDescendingMultiOption(
+function sortByDescendingMultiOption(
   optionsByID: { [id: string]: SelectOption },
   a: MultiOptionFieldValue,
   b: MultiOptionFieldValue,
@@ -823,7 +838,7 @@ function sortDescendingMultiOption(
   return 0;
 }
 
-function sortAscendingSingleCollaborator(
+function sortByAscendingSingleCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: SingleCollaboratorFieldValue,
   b: SingleCollaboratorFieldValue,
@@ -851,7 +866,7 @@ function sortAscendingSingleCollaborator(
   return 0;
 }
 
-function sortDescendingSingleCollaborator(
+function sortByDescendingSingleCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: SingleCollaboratorFieldValue,
   b: SingleCollaboratorFieldValue,
@@ -879,7 +894,7 @@ function sortDescendingSingleCollaborator(
   return 0;
 }
 
-function sortAscendingMultiCollaborator(
+function sortByAscendingMultiCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: MultiCollaboratorFieldValue,
   b: MultiCollaboratorFieldValue,
@@ -907,7 +922,7 @@ function sortAscendingMultiCollaborator(
   return 0;
 }
 
-function sortDescendingMultiCollaborator(
+function sortByDescendingMultiCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: MultiCollaboratorFieldValue,
   b: MultiCollaboratorFieldValue,
@@ -935,7 +950,7 @@ function sortDescendingMultiCollaborator(
   return 0;
 }
 
-function sortAscendingSingleRecordLink(
+function sortByAscendingSingleRecordLink(
   primaryField: PrimaryField,
   getRecord: (recordID: RecordID) => Record,
   a: SingleRecordLinkFieldValue,
@@ -968,7 +983,7 @@ function sortAscendingSingleRecordLink(
   );
 }
 
-function sortDescendingSingleRecordLink(
+function sortByDescendingSingleRecordLink(
   primaryField: PrimaryField,
   getRecord: (recordID: RecordID) => Record,
   a: SingleRecordLinkFieldValue,
@@ -1001,7 +1016,7 @@ function sortDescendingSingleRecordLink(
   );
 }
 
-function sortAscendingMultiRecordLink(
+function sortByAscendingMultiRecordLink(
   primaryField: PrimaryField,
   getRecord: (recordID: RecordID) => Record,
   a: MultiRecordLinkFieldValue,
@@ -1034,7 +1049,7 @@ function sortAscendingMultiRecordLink(
   );
 }
 
-function sortDescendingMultiRecordLink(
+function sortByDescendingMultiRecordLink(
   primaryField: PrimaryField,
   getRecord: (recordID: RecordID) => Record,
   a: MultiRecordLinkFieldValue,
