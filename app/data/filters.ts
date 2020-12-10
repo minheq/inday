@@ -1,4 +1,4 @@
-import { Record } from './records';
+import { Record, RecordID } from './records';
 import {
   assertBooleanFieldKindValue,
   assertDateFieldValue,
@@ -14,6 +14,7 @@ import {
   FieldValue,
   MultiSelectFieldKindValue,
   NumberFieldKindValue,
+  SelectOptionID,
   SingleSelectFieldKindValue,
   TextFieldKindValue,
 } from './fields';
@@ -29,6 +30,7 @@ import {
 } from '../../lib/date_utils';
 import { hasAllOf, hasAnyOf, hasNoneOf } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
+import { CollaboratorID } from './collaborators';
 
 export const filterIDPrefix = `fil` as const;
 export type FilterID = `${typeof filterIDPrefix}${string}`;
@@ -85,8 +87,9 @@ export interface EmailFieldFilter extends BaseFilter, EmailFieldFilterConfig {}
 export interface MultiCollaboratorFieldFilterConfig {
   fieldID: FieldID;
   rule: MultiSelectFieldKindFilterRule;
-  value: MultiSelectFieldKindFilterRuleValue;
+  value: MultiCollaboratorFieldFilterValue;
 }
+type MultiCollaboratorFieldFilterValue = CollaboratorID[];
 export interface MultiCollaboratorFieldFilter
   extends BaseFilter,
     MultiCollaboratorFieldFilterConfig {}
@@ -94,8 +97,9 @@ export interface MultiCollaboratorFieldFilter
 export interface MultiRecordLinkFieldFilterConfig {
   fieldID: FieldID;
   rule: MultiSelectFieldKindFilterRule;
-  value: MultiSelectFieldKindFilterRuleValue;
+  value: MultiRecordLinkFieldFilterValue;
 }
+type MultiRecordLinkFieldFilterValue = RecordID[];
 export interface MultiRecordLinkFieldFilter
   extends BaseFilter,
     MultiRecordLinkFieldFilterConfig {}
@@ -112,8 +116,10 @@ export interface MultiLineTextFieldFilter
 export interface MultiOptionFieldFilterConfig {
   fieldID: FieldID;
   rule: MultiSelectFieldKindFilterRule;
-  value: MultiSelectFieldKindFilterRuleValue;
+  value: MultiOptionFieldFilterValue;
 }
+type MultiOptionFieldFilterValue = SelectOptionID[];
+
 export interface MultiOptionFieldFilter
   extends BaseFilter,
     MultiOptionFieldFilterConfig {}
@@ -139,8 +145,13 @@ export interface PhoneNumberFieldFilter
 export interface SingleCollaboratorFieldFilterConfig {
   fieldID: FieldID;
   rule: SingleSelectFieldKindFilterRule;
-  value: SingleSelectFieldKindFilterRuleValue;
+  value: SingleCollaboratorFieldFilterValue;
 }
+type SingleCollaboratorFieldFilterValue =
+  | CollaboratorID
+  | CollaboratorID[]
+  | null;
+
 export interface SingleCollaboratorFieldFilter
   extends BaseFilter,
     SingleCollaboratorFieldFilterConfig {}
@@ -148,8 +159,10 @@ export interface SingleCollaboratorFieldFilter
 export interface SingleRecordLinkFieldFilterConfig {
   fieldID: FieldID;
   rule: SingleSelectFieldKindFilterRule;
-  value: SingleSelectFieldKindFilterRuleValue;
+  value: SingleRecordLinkFieldFilterValue;
 }
+type SingleRecordLinkFieldFilterValue = RecordID | RecordID[] | null;
+
 export interface SingleRecordLinkFieldFilter
   extends BaseFilter,
     SingleRecordLinkFieldFilterConfig {}
@@ -166,8 +179,10 @@ export interface SingleLineTextFieldFilter
 export interface SingleOptionFieldFilterConfig {
   fieldID: FieldID;
   rule: SingleSelectFieldKindFilterRule;
-  value: SingleSelectFieldKindFilterRuleValue;
+  value: SingleOptionFieldFilterValue;
 }
+type SingleOptionFieldFilterValue = SelectOptionID | SelectOptionID[] | null;
+
 export interface SingleOptionFieldFilter
   extends BaseFilter,
     SingleOptionFieldFilterConfig {}
@@ -179,59 +194,79 @@ export interface URLFieldFilterConfig {
 }
 export interface URLFieldFilter extends BaseFilter, URLFieldFilterConfig {}
 
-export type TextFieldKindFilterRule =
-  | 'contains'
-  | 'doesNotContain'
-  | 'is'
-  | 'isNot'
-  | 'isEmpty'
-  | 'isNotEmpty';
+// eslint-disable-next-line
+export enum TextFieldKindFilterRule {
+  Contains = 'Contains',
+  DoesNotContain = 'DoesNotContain',
+  Is = 'Is',
+  IsNot = 'IsNot',
+  IsEmpty = 'IsEmpty',
+  IsNotEmpty = 'IsNotEmpty',
+}
 export type TextFieldKindFilterRuleValue = string;
 
-export type SingleSelectFieldKindFilterRule =
-  | 'is'
-  | 'isNot'
-  | 'isAnyOf'
-  | 'isNoneOf'
-  | 'isEmpty'
-  | 'isNotEmpty';
-export type SingleSelectFieldKindFilterRuleValue = string | string[] | null;
+// eslint-disable-next-line
+export enum SingleSelectFieldKindFilterRule {
+  Is = 'Is',
+  IsNot = 'IsNot',
+  IsAnyOf = 'IsAnyOf',
+  IsNoneOf = 'IsNoneOf',
+  IsEmpty = 'IsEmpty',
+  IsNotEmpty = 'IsNotEmpty',
+}
+export type SingleSelectFieldKindFilterRuleValue =
+  | SingleOptionFieldFilterValue
+  | SingleCollaboratorFieldFilterValue
+  | SingleRecordLinkFieldFilterValue;
 
-export type MultiSelectFieldKindFilterRule =
-  | 'hasAnyOf'
-  | 'hasAllOf'
-  | 'hasNoneOf'
-  | 'isEmpty'
-  | 'isNotEmpty';
-export type MultiSelectFieldKindFilterRuleValue = string[];
+// eslint-disable-next-line
+export enum MultiSelectFieldKindFilterRule {
+  HasAnyOf = 'HasAnyOf',
+  HasAllOf = 'HasAllOf',
+  HasNoneOf = 'HasNoneOf',
+  IsEmpty = 'IsEmpty',
+  IsNotEmpty = 'IsNotEmpty',
+}
+export type MultiSelectFieldKindFilterRuleValue =
+  | MultiOptionFieldFilterValue
+  | MultiCollaboratorFieldFilterValue
+  | MultiRecordLinkFieldFilterValue;
 
-export type DateFieldKindFilterRule =
-  | 'is'
-  | 'isWithin'
-  | 'isBefore'
-  | 'isAfter'
-  | 'isOnOrBefore'
-  | 'isOnOrAfter'
-  | 'isNot'
-  | 'isEmpty'
-  | 'isNotEmpty';
+// eslint-disable-next-line
+export enum DateFieldKindFilterRule {
+  Is = 'Is',
+  IsWithin = 'IsWithin',
+  IsBefore = 'IsBefore',
+  IsAfter = 'IsAfter',
+  IsOnOrBefore = 'IsOnOrBefore',
+  IsOnOrAfter = 'IsOnOrAfter',
+  IsNot = 'IsNot',
+  IsEmpty = 'IsEmpty',
+  IsNotEmpty = 'IsNotEmpty',
+}
 export type DateFieldKindFilterRuleValue = Date | DateInterval | null;
 
-export type NumberFieldKindFilterRule =
-  | 'equal'
-  | 'notEqual'
-  | 'lessThan'
-  | 'greaterThan'
-  | 'lessThanOrEqual'
-  | 'greaterThanOrEqual'
-  | 'isEmpty'
-  | 'isNotEmpty';
+// eslint-disable-next-line
+export enum NumberFieldKindFilterRule {
+  Equal = 'Equal',
+  NotEqual = 'NotEqual',
+  LessThan = 'LessThan',
+  GreaterThan = 'GreaterThan',
+  LessThanOrEqual = 'LessThanOrEqual',
+  GreaterThanOrEqual = 'GreaterThanOrEqual',
+  IsEmpty = 'IsEmpty',
+  IsNotEmpty = 'IsNotEmpty',
+}
 export type NumberFieldKindFilterRuleValue = number | null;
 
-export type BooleanFieldKindFilterRule = 'is';
+// eslint-disable-next-line
+export enum BooleanFieldKindFilterRule {
+  Is = 'Is',
+}
 export type BooleanFieldKindFilterRuleValue = boolean;
 
 export type FilterRule =
+  | BooleanFieldKindFilterRule
   | DateFieldKindFilterRule
   | MultiSelectFieldKindFilterRule
   | NumberFieldKindFilterRule
@@ -239,6 +274,7 @@ export type FilterRule =
   | TextFieldKindFilterRule;
 
 export type FilterRuleValue =
+  | BooleanFieldKindFilterRuleValue
   | DateFieldKindFilterRuleValue
   | MultiSelectFieldKindFilterRuleValue
   | NumberFieldKindFilterRuleValue
@@ -304,26 +340,50 @@ export type TextFieldKindFilterConfig =
 export function getDefaultFilterConfig(field: Field): FilterConfig {
   switch (field.type) {
     case FieldType.Checkbox:
-      return { fieldID: field.id, rule: 'is', value: false };
+      return {
+        fieldID: field.id,
+        rule: BooleanFieldKindFilterRule.Is,
+        value: false,
+      };
     case FieldType.Date:
-      return { fieldID: field.id, rule: 'is', value: null };
+      return {
+        fieldID: field.id,
+        rule: DateFieldKindFilterRule.Is,
+        value: null,
+      };
     case FieldType.SingleLineText:
     case FieldType.MultiLineText:
     case FieldType.URL:
     case FieldType.PhoneNumber:
     case FieldType.Email:
-      return { fieldID: field.id, rule: 'contains', value: '' };
+      return {
+        fieldID: field.id,
+        rule: TextFieldKindFilterRule.Contains,
+        value: '',
+      };
     case FieldType.Number:
     case FieldType.Currency:
-      return { fieldID: field.id, rule: 'equal', value: null };
+      return {
+        fieldID: field.id,
+        rule: NumberFieldKindFilterRule.Equal,
+        value: null,
+      };
     case FieldType.MultiCollaborator:
     case FieldType.MultiRecordLink:
     case FieldType.MultiOption:
-      return { fieldID: field.id, rule: 'hasAnyOf', value: [] };
+      return {
+        fieldID: field.id,
+        rule: MultiSelectFieldKindFilterRule.HasAnyOf,
+        value: [],
+      };
     case FieldType.SingleOption:
     case FieldType.SingleRecordLink:
     case FieldType.SingleCollaborator:
-      return { fieldID: field.id, rule: 'is', value: null };
+      return {
+        fieldID: field.id,
+        rule: SingleSelectFieldKindFilterRule.Is,
+        value: null,
+      };
     default:
       throw new Error(
         `Expected default filter config for ${JSON.stringify(field)}`,
@@ -407,9 +467,7 @@ export function filterRecords(
       return filterGroup.every((filter) => {
         const field = getField(filter.fieldID);
 
-        const applyFilter = filtersByFieldType[field.type];
-
-        return applyFilter(record.fields[filter.fieldID], filter);
+        return filterByFilter(field, record.fields[filter.fieldID], filter);
       });
     });
   });
@@ -417,10 +475,596 @@ export function filterRecords(
   return filteredRecords;
 }
 
+function filterByFilter(field: Field, value: FieldValue, filter: Filter) {
+  switch (field.type) {
+    case FieldType.Checkbox:
+      assertBooleanFieldKindValue(value);
+      assertBooleanFilter(filter);
+
+      return filterByBooleanFieldKindFilter(value, filter);
+    case FieldType.Number:
+    case FieldType.Currency:
+      assertNumberFieldValue(value);
+      assertNumberFilter(filter);
+
+      return filterByNumberFieldKindFilter(value, filter);
+    case FieldType.Date:
+      assertDateFieldValue(value);
+      assertDateFilter(filter);
+
+      return filterByDateFieldKindFilter(value, filter);
+    case FieldType.PhoneNumber:
+    case FieldType.SingleLineText:
+    case FieldType.URL:
+    case FieldType.MultiLineText:
+    case FieldType.Email:
+      assertTextFieldKindValue(value);
+      assertTextFilter(filter);
+
+      return filterByTextFieldKindFilter(value, filter);
+    case FieldType.MultiCollaborator:
+    case FieldType.MultiRecordLink:
+    case FieldType.MultiOption:
+      assertMultiSelectFieldKindValue(value);
+      assertMultiSelectFilter(filter);
+
+      return filterByMultiSelectFieldKindFilter(value, filter);
+    case FieldType.SingleCollaborator:
+    case FieldType.SingleRecordLink:
+    case FieldType.SingleOption:
+      assertSingleSelectFieldKindValue(value);
+      assertSingleSelectFilter(filter);
+      return filterBySingleSelectFieldKindFilter(value, filter);
+    default:
+      throw new Error(`Field type unrecognized ${JSON.stringify(field)}`);
+  }
+}
+
+export function filterByTextFieldKindFilter(
+  value: TextFieldKindValue,
+  filter: TextFieldKindFilter,
+): boolean {
+  switch (filter.rule) {
+    case TextFieldKindFilterRule.Contains:
+      return filterByTextFieldKindFilterRuleContains(value, filter.value);
+    case TextFieldKindFilterRule.DoesNotContain:
+      return filterByTextFieldKindFilterRuleDoesNotContain(value, filter.value);
+    case TextFieldKindFilterRule.Is:
+      return filterByTextFieldKindFilterRuleIs(value, filter.value);
+    case TextFieldKindFilterRule.IsNot:
+      return filterByTextFieldKindFilterRuleIsNot(value, filter.value);
+    case TextFieldKindFilterRule.IsEmpty:
+      return filterByTextFieldKindFilterRuleIsEmpty(value);
+    case TextFieldKindFilterRule.IsNotEmpty:
+      return filterByTextFieldKindFilterRuleIsNotEmpty(value);
+    default:
+      throw new Error(
+        `Unrecognized filter rule. ${JSON.stringify(filter.rule)}`,
+      );
+  }
+}
+
+export function filterByTextFieldKindFilterRuleContains(
+  value: TextFieldKindValue,
+  filterValue: TextFieldKindFilterRuleValue,
+): boolean {
+  return value.toLowerCase().includes(filterValue.toLowerCase());
+}
+export function filterByTextFieldKindFilterRuleDoesNotContain(
+  value: TextFieldKindValue,
+  filterValue: TextFieldKindFilterRuleValue,
+): boolean {
+  return !value.toLowerCase().includes(filterValue.toLowerCase());
+}
+export function filterByTextFieldKindFilterRuleIs(
+  value: TextFieldKindValue,
+  filterValue: TextFieldKindFilterRuleValue,
+): boolean {
+  return value === filterValue;
+}
+export function filterByTextFieldKindFilterRuleIsNot(
+  value: TextFieldKindValue,
+  filterValue: TextFieldKindFilterRuleValue,
+): boolean {
+  return value !== filterValue;
+}
+export function filterByTextFieldKindFilterRuleIsEmpty(
+  value: TextFieldKindValue,
+): boolean {
+  return value === '';
+}
+export function filterByTextFieldKindFilterRuleIsNotEmpty(
+  value: TextFieldKindValue,
+): boolean {
+  return value !== '';
+}
+
+export function filterByNumberFieldKindFilter(
+  value: NumberFieldKindValue,
+  filter: NumberFieldFilter,
+): boolean {
+  switch (filter.rule) {
+    case NumberFieldKindFilterRule.Equal:
+      return filterByNumberFieldKindFilterRuleEqual(value, filter.value);
+    case NumberFieldKindFilterRule.NotEqual:
+      return filterByNumberFieldKindFilterRuleNotEqual(value, filter.value);
+    case NumberFieldKindFilterRule.LessThan:
+      return filterByNumberFieldKindFilterRuleLessThan(value, filter.value);
+    case NumberFieldKindFilterRule.GreaterThan:
+      return filterByNumberFieldKindFilterRuleGreaterThan(value, filter.value);
+    case NumberFieldKindFilterRule.LessThanOrEqual:
+      return filterByNumberFieldKindFilterRuleLessThanOrEqual(
+        value,
+        filter.value,
+      );
+    case NumberFieldKindFilterRule.GreaterThanOrEqual:
+      return filterByNumberFieldKindFilterRuleGreaterThanOrEqual(
+        value,
+        filter.value,
+      );
+    case NumberFieldKindFilterRule.IsEmpty:
+      return filterByNumberFieldKindFilterRuleIsEmpty(value);
+    case NumberFieldKindFilterRule.IsNotEmpty:
+      return filterByNumberFieldKindFilterRuleIsNotEmpty(value);
+    default:
+      throw new Error(`Field type unrecognized ${JSON.stringify(filter.rule)}`);
+  }
+}
+
+export function filterByNumberFieldKindFilterRuleEqual(
+  value: NumberFieldKindValue,
+  filterValue: NumberFieldKindFilterRuleValue,
+): boolean {
+  return value === filterValue;
+}
+
+export function filterByNumberFieldKindFilterRuleNotEqual(
+  value: NumberFieldKindValue,
+  filterValue: NumberFieldKindFilterRuleValue,
+): boolean {
+  return value !== filterValue;
+}
+
+export function filterByNumberFieldKindFilterRuleLessThan(
+  value: NumberFieldKindValue,
+  filterValue: NumberFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (filterValue === null) {
+    return true;
+  }
+
+  return value < filterValue;
+}
+
+export function filterByNumberFieldKindFilterRuleGreaterThan(
+  value: NumberFieldKindValue,
+  filterValue: NumberFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (filterValue === null) {
+    return true;
+  }
+
+  return value > filterValue;
+}
+
+export function filterByNumberFieldKindFilterRuleLessThanOrEqual(
+  value: NumberFieldKindValue,
+  filterValue: NumberFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (filterValue === null) {
+    return true;
+  }
+
+  return value <= filterValue;
+}
+
+export function filterByNumberFieldKindFilterRuleGreaterThanOrEqual(
+  value: NumberFieldKindValue,
+  filterValue: NumberFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (filterValue === null) {
+    return true;
+  }
+
+  return value >= filterValue;
+}
+
+export function filterByNumberFieldKindFilterRuleIsEmpty(
+  value: NumberFieldKindValue,
+): boolean {
+  return value === null;
+}
+
+export function filterByNumberFieldKindFilterRuleIsNotEmpty(
+  value: NumberFieldKindValue,
+): boolean {
+  return value !== null;
+}
+
+export function filterByDateFieldKindFilter(
+  value: DateFieldKindValue,
+  filter: DateFieldFilter,
+): boolean {
+  switch (filter.rule) {
+    case DateFieldKindFilterRule.Is:
+      return filterByDateFieldKindFilterRuleIs(value, filter.value);
+    case DateFieldKindFilterRule.IsWithin:
+      return filterByDateFieldKindFilterRuleIsWithin(value, filter.value);
+    case DateFieldKindFilterRule.IsBefore:
+      return filterByDateFieldKindFilterRuleIsBefore(value, filter.value);
+    case DateFieldKindFilterRule.IsAfter:
+      return filterByDateFieldKindFilterRuleIsAfter(value, filter.value);
+    case DateFieldKindFilterRule.IsOnOrBefore:
+      return filterByDateFieldKindFilterRuleIsOnOrBefore(value, filter.value);
+    case DateFieldKindFilterRule.IsOnOrAfter:
+      return filterByDateFieldKindFilterRuleIsOnOrAfter(value, filter.value);
+    case DateFieldKindFilterRule.IsNot:
+      return filterByDateFieldKindFilterRuleIsNot(value, filter.value);
+    case DateFieldKindFilterRule.IsEmpty:
+      return filterByDateFieldKindFilterRuleIsEmpty(value);
+    case DateFieldKindFilterRule.IsNotEmpty:
+      return filterByDateFieldKindFilterRuleIsNotEmpty(value);
+    default:
+      throw new Error(
+        `Unrecognized filter rule. ${JSON.stringify(filter.rule)}`,
+      );
+  }
+}
+
+export function filterByDateFieldKindFilterRuleIs(
+  value: DateFieldKindValue,
+  filterValue: DateFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (!isDate(filterValue)) {
+    throw new Error(
+      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+    );
+  }
+
+  return isSameDay(value, filterValue);
+}
+
+export function filterByDateFieldKindFilterRuleIsWithin(
+  value: DateFieldKindValue,
+  filterValue: DateFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (isDate(filterValue)) {
+    throw new Error(
+      `Expected filterValue to be DateInterval. Received ${JSON.stringify(
+        filterValue,
+      )}`,
+    );
+  }
+
+  return isWithinDateInterval(value, filterValue);
+}
+
+export function filterByDateFieldKindFilterRuleIsBefore(
+  value: DateFieldKindValue,
+  filterValue: DateFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (!isDate(filterValue)) {
+    throw new Error(
+      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+    );
+  }
+
+  return isBefore(value, filterValue);
+}
+
+export function filterByDateFieldKindFilterRuleIsAfter(
+  value: DateFieldKindValue,
+  filterValue: DateFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (!isDate(filterValue)) {
+    throw new Error(
+      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+    );
+  }
+
+  return isAfter(value, filterValue);
+}
+
+export function filterByDateFieldKindFilterRuleIsOnOrBefore(
+  value: DateFieldKindValue,
+  filterValue: DateFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (!isDate(filterValue)) {
+    throw new Error(
+      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+    );
+  }
+
+  return isBefore(value, filterValue) || isSameDay(value, filterValue);
+}
+
+export function filterByDateFieldKindFilterRuleIsOnOrAfter(
+  value: DateFieldKindValue,
+  filterValue: DateFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (!isDate(filterValue)) {
+    throw new Error(
+      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+    );
+  }
+
+  return isAfter(value, filterValue) || isSameDay(value, filterValue);
+}
+
+export function filterByDateFieldKindFilterRuleIsNot(
+  value: DateFieldKindValue,
+  filterValue: DateFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (!isDate(filterValue)) {
+    throw new Error(
+      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+    );
+  }
+
+  return !isSameDay(value, filterValue);
+}
+
+export function filterBySingleSelectFieldKindFilter(
+  value: SingleSelectFieldKindValue,
+  filter: SingleSelectFieldKindFilter,
+): boolean {
+  switch (filter.rule) {
+    case SingleSelectFieldKindFilterRule.Is:
+      return filterBySinglySelectFieldKindFilterRuleIs(value, filter.value);
+    case SingleSelectFieldKindFilterRule.IsNot:
+      return filterBySinglySelectFieldKindFilterRuleIsNot(value, filter.value);
+    case SingleSelectFieldKindFilterRule.IsAnyOf:
+      return filterBySingleSelectFieldKindFilterRuleIsAnyOf(
+        value,
+        filter.value,
+      );
+    case SingleSelectFieldKindFilterRule.IsNoneOf:
+      return filterBySingleSelectFieldKindFilterRuleIsNoneOf(
+        value,
+        filter.value,
+      );
+    case SingleSelectFieldKindFilterRule.IsEmpty:
+      return filterBySingleSelectFieldKindFilterRuleIsEmpty(value);
+    case SingleSelectFieldKindFilterRule.IsNotEmpty:
+      return filterBySingleSelectFieldKindFilterRuleIsNotEmpty(value);
+
+    default:
+      throw new Error(`Field type unrecognized ${JSON.stringify(filter.rule)}`);
+  }
+}
+
+export function filterByDateFieldKindFilterRuleIsEmpty(
+  value: DateFieldKindValue,
+): boolean {
+  return value === null;
+}
+
+export function filterByDateFieldKindFilterRuleIsNotEmpty(
+  value: DateFieldKindValue,
+): boolean {
+  return value !== null;
+}
+
+export function filterBySinglySelectFieldKindFilterRuleIs(
+  value: SingleSelectFieldKindValue,
+  filterValue: SingleSelectFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (typeof filterValue !== 'string') {
+    throw new Error(
+      `Expected filterValue to be string. Received ${JSON.stringify(
+        filterValue,
+      )}`,
+    );
+  }
+
+  return value === filterValue;
+}
+
+export function filterBySinglySelectFieldKindFilterRuleIsNot(
+  value: SingleSelectFieldKindValue,
+  filterValue: SingleSelectFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (typeof filterValue !== 'string') {
+    throw new Error(
+      `Expected filterValue to be string. Received ${JSON.stringify(
+        filterValue,
+      )}`,
+    );
+  }
+
+  return value !== filterValue;
+}
+
+export function filterBySingleSelectFieldKindFilterRuleIsAnyOf(
+  value: SingleSelectFieldKindValue,
+  filterValue: SingleSelectFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (typeof filterValue === 'string') {
+    throw new Error(
+      `Expected filterValue to be string[]. Received ${JSON.stringify(
+        filterValue,
+      )}`,
+    );
+  }
+
+  return hasAnyOf([value], filterValue);
+}
+
+export function filterBySingleSelectFieldKindFilterRuleIsNoneOf(
+  value: SingleSelectFieldKindValue,
+  filterValue: SingleSelectFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (typeof filterValue === 'string') {
+    throw new Error(
+      `Expected filterValue to be string[]. Received ${JSON.stringify(
+        filterValue,
+      )}`,
+    );
+  }
+
+  return hasNoneOf([value], filterValue);
+}
+
+export function filterBySingleSelectFieldKindFilterRuleIsEmpty(
+  value: SingleSelectFieldKindValue,
+): boolean {
+  return value === null;
+}
+
+export function filterBySingleSelectFieldKindFilterRuleIsNotEmpty(
+  value: SingleSelectFieldKindValue,
+): boolean {
+  return value !== null;
+}
+
+export function filterByMultiSelectFieldKindFilter(
+  value: MultiSelectFieldKindValue,
+  filter: MultiSelectFieldKindFilter,
+): boolean {
+  switch (filter.rule) {
+    case MultiSelectFieldKindFilterRule.HasAnyOf:
+      return filterByMultiSelectFieldKindFilterRuleHasAnyOf(
+        value,
+        filter.value,
+      );
+    case MultiSelectFieldKindFilterRule.HasAllOf:
+      return filterByMultiSelectFieldKindFilterRuleHasAllOf(
+        value,
+        filter.value,
+      );
+    case MultiSelectFieldKindFilterRule.HasNoneOf:
+      return filterByMultiSelectFieldKindFilterRuleHasNoneOf(
+        value,
+        filter.value,
+      );
+    case MultiSelectFieldKindFilterRule.IsEmpty:
+      return filterByMultiSelectFieldKindFilterRuleIsEmpty(value);
+    case MultiSelectFieldKindFilterRule.IsNotEmpty:
+      return filterByMultiSelectFieldKindFilterRuleIsNotEmpty(value);
+    default:
+      throw new Error(
+        `Filter type unrecognized ${JSON.stringify(filter.rule)}`,
+      );
+  }
+}
+
+export function filterByMultiSelectFieldKindFilterRuleHasAnyOf(
+  value: MultiSelectFieldKindValue,
+  filterValue: MultiSelectFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  return hasAnyOf(value, filterValue);
+}
+export function filterByMultiSelectFieldKindFilterRuleHasAllOf(
+  value: MultiSelectFieldKindValue,
+  filterValue: MultiSelectFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  return hasAllOf(value, filterValue);
+}
+export function filterByMultiSelectFieldKindFilterRuleHasNoneOf(
+  value: MultiSelectFieldKindValue,
+  filterValue: MultiSelectFieldKindFilterRuleValue,
+): boolean {
+  if (value === null) {
+    return false;
+  }
+
+  return hasNoneOf(value, filterValue);
+}
+export function filterByMultiSelectFieldKindFilterRuleIsEmpty(
+  value: MultiSelectFieldKindValue,
+): boolean {
+  return isEmpty<CollaboratorID | RecordID | SelectOptionID>(value);
+}
+export function filterByMultiSelectFieldKindFilterRuleIsNotEmpty(
+  value: MultiSelectFieldKindValue,
+): boolean {
+  return !isEmpty<CollaboratorID | RecordID | SelectOptionID>(value);
+}
+
 export function assertNumberFieldKindFilterRule(
   rule: FilterRule,
 ): asserts rule is NumberFieldKindFilterRule {
-  if (rule in numberFieldKindFiltersByRule) {
+  if (rule in NumberFieldKindFilterRule) {
     return;
   }
 
@@ -432,7 +1076,7 @@ export function assertNumberFieldKindFilterRule(
 export function assertTextFieldKindFilterRule(
   rule: FilterRule,
 ): asserts rule is TextFieldKindFilterRule {
-  if (rule in textFieldKindFiltersByRule) {
+  if (rule in TextFieldKindFilterRule) {
     return;
   }
 
@@ -444,7 +1088,7 @@ export function assertTextFieldKindFilterRule(
 export function assertDateFieldKindFilterRule(
   rule: FilterRule,
 ): asserts rule is DateFieldKindFilterRule {
-  if (rule in dateFieldKindFiltersByRule) {
+  if (rule in DateFieldKindFilterRule) {
     return;
   }
 
@@ -456,7 +1100,7 @@ export function assertDateFieldKindFilterRule(
 export function assertMultiSelectFieldKindFilterRule(
   rule: FilterRule,
 ): asserts rule is MultiSelectFieldKindFilterRule {
-  if (rule in multiSelectFieldKindFiltersByRule) {
+  if (rule in MultiSelectFieldKindFilterRule) {
     return;
   }
 
@@ -468,7 +1112,7 @@ export function assertMultiSelectFieldKindFilterRule(
 export function assertSingleSelectFieldKindFilterRule(
   rule: FilterRule,
 ): asserts rule is SingleSelectFieldKindFilterRule {
-  if (rule in singleSelectFieldKindFiltersByRule) {
+  if (rule in SingleSelectFieldKindFilterRule) {
     return;
   }
 
@@ -480,7 +1124,7 @@ export function assertSingleSelectFieldKindFilterRule(
 export function assertBooleanFilterRule(
   rule: FilterRule,
 ): asserts rule is BooleanFieldKindFilterRule {
-  if (rule in booleanFieldKindFiltersByRule) {
+  if (rule in BooleanFieldKindFilterRule) {
     return;
   }
 
@@ -489,376 +1133,19 @@ export function assertBooleanFilterRule(
   );
 }
 
-export function applyTextFieldKindFilter(
-  value: TextFieldKindValue,
-  filter: TextFieldKindFilter,
-): boolean {
-  return textFieldKindFiltersByRule[filter.rule](value, filter.value);
-}
-
-export const textFieldKindFiltersByRule: {
-  [rule in TextFieldKindFilterRule]: (
-    value: TextFieldKindValue,
-    filterValue: TextFieldKindFilterRuleValue,
-  ) => boolean;
-} = {
-  contains: (value, filterValue) => {
-    return value.toLowerCase().includes(filterValue.toLowerCase());
-  },
-  doesNotContain: (value, filterValue) => {
-    return !value.toLowerCase().includes(filterValue.toLowerCase());
-  },
-  is: (value, filterValue) => {
-    return value === filterValue;
-  },
-  isNot: (value, filterValue) => {
-    return value !== filterValue;
-  },
-  isEmpty: (value) => {
-    return value === '';
-  },
-  isNotEmpty: (value) => {
-    return value !== '';
-  },
-};
-
-export function applyNumberFieldKindFilter(
-  value: NumberFieldKindValue,
-  filter: NumberFieldFilter,
-): boolean {
-  return numberFieldKindFiltersByRule[filter.rule](value, filter.value);
-}
-
-export const numberFieldKindFiltersByRule: {
-  [rule in NumberFieldKindFilterRule]: (
-    value: NumberFieldKindValue,
-    filterValue: NumberFieldKindFilterRuleValue,
-  ) => boolean;
-} = {
-  equal: (value, filterValue) => {
-    return value === filterValue;
-  },
-  notEqual: (value, filterValue) => {
-    return value !== filterValue;
-  },
-  lessThan: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (filterValue === null) {
-      return true;
-    }
-
-    return value < filterValue;
-  },
-  greaterThan: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (filterValue === null) {
-      return true;
-    }
-
-    return value > filterValue;
-  },
-  lessThanOrEqual: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (filterValue === null) {
-      return true;
-    }
-
-    return value <= filterValue;
-  },
-  greaterThanOrEqual: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (filterValue === null) {
-      return true;
-    }
-
-    return value >= filterValue;
-  },
-  isEmpty: (value) => {
-    return value === null;
-  },
-  isNotEmpty: (value) => {
-    return value !== null;
-  },
-};
-
-export function applyDateFieldKindFilter(
-  value: DateFieldKindValue,
-  filter: DateFieldFilter,
-): boolean {
-  return dateFieldKindFiltersByRule[filter.rule](value, filter.value);
-}
-
-export const dateFieldKindFiltersByRule: {
-  [rule in DateFieldKindFilterRule]: (
-    value: DateFieldKindValue,
-    filterValue: DateFieldKindFilterRuleValue,
-  ) => boolean;
-} = {
-  is: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (!isDate(filterValue)) {
-      throw new Error(
-        `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
-      );
-    }
-
-    return isSameDay(value, filterValue);
-  },
-  isWithin: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (filterValue === null) {
-      return true;
-    }
-
-    if (isDate(filterValue)) {
-      throw new Error(
-        `Expected filterValue to be DateInterval. Received ${JSON.stringify(
-          filterValue,
-        )}`,
-      );
-    }
-
-    return isWithinDateInterval(value, filterValue);
-  },
-  isBefore: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (!isDate(filterValue)) {
-      throw new Error(
-        `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
-      );
-    }
-
-    return isBefore(value, filterValue);
-  },
-  isAfter: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (!isDate(filterValue)) {
-      throw new Error(
-        `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
-      );
-    }
-
-    return isAfter(value, filterValue);
-  },
-  isOnOrBefore: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (!isDate(filterValue)) {
-      throw new Error(
-        `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
-      );
-    }
-
-    return isBefore(value, filterValue) || isSameDay(value, filterValue);
-  },
-  isOnOrAfter: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (!isDate(filterValue)) {
-      throw new Error(
-        `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
-      );
-    }
-
-    return isAfter(value, filterValue) || isSameDay(value, filterValue);
-  },
-  isNot: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (!isDate(filterValue)) {
-      throw new Error(
-        `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
-      );
-    }
-
-    return !isSameDay(value, filterValue);
-  },
-  isEmpty: (value) => {
-    return value === null;
-  },
-  isNotEmpty: (value) => {
-    return value !== null;
-  },
-};
-
-export function applySingleSelectFieldKindFilter(
-  value: SingleSelectFieldKindValue,
-  filter: SingleSelectFieldKindFilter,
-): boolean {
-  return singleSelectFieldKindFiltersByRule[filter.rule](value, filter.value);
-}
-
-export const singleSelectFieldKindFiltersByRule: {
-  [rule in SingleSelectFieldKindFilterRule]: (
-    value: SingleSelectFieldKindValue,
-    filterValue: SingleSelectFieldKindFilterRuleValue,
-  ) => boolean;
-} = {
-  is: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (typeof filterValue !== 'string') {
-      throw new Error(
-        `Expected filterValue to be string. Received ${JSON.stringify(
-          filterValue,
-        )}`,
-      );
-    }
-
-    return value === filterValue;
-  },
-  isNot: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (typeof filterValue !== 'string') {
-      throw new Error(
-        `Expected filterValue to be string. Received ${JSON.stringify(
-          filterValue,
-        )}`,
-      );
-    }
-
-    return value !== filterValue;
-  },
-  isAnyOf: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (filterValue === null) {
-      return true;
-    }
-
-    if (typeof filterValue === 'string') {
-      throw new Error(
-        `Expected filterValue to be string[]. Received ${JSON.stringify(
-          filterValue,
-        )}`,
-      );
-    }
-
-    return hasAnyOf([value], filterValue);
-  },
-  isNoneOf: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    if (filterValue === null) {
-      return true;
-    }
-
-    if (typeof filterValue === 'string') {
-      throw new Error(
-        `Expected filterValue to be string[]. Received ${JSON.stringify(
-          filterValue,
-        )}`,
-      );
-    }
-
-    return hasNoneOf([value], filterValue);
-  },
-  isEmpty: (value) => {
-    return value === null;
-  },
-  isNotEmpty: (value) => {
-    return value !== null;
-  },
-};
-
-export function applyMultiSelectFieldKindFilter(
-  value: MultiSelectFieldKindValue,
-  filter: MultiSelectFieldKindFilter,
-): boolean {
-  return multiSelectFieldKindFiltersByRule[filter.rule](value, filter.value);
-}
-
-export const multiSelectFieldKindFiltersByRule: {
-  [rule in MultiSelectFieldKindFilterRule]: (
-    value: MultiSelectFieldKindValue,
-    filterValue: MultiSelectFieldKindFilterRuleValue,
-  ) => boolean;
-} = {
-  hasAnyOf: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    return hasAnyOf(value, filterValue);
-  },
-  hasAllOf: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    return hasAllOf(value, filterValue);
-  },
-  hasNoneOf: (value, filterValue) => {
-    if (value === null) {
-      return false;
-    }
-
-    return hasNoneOf(value, filterValue);
-  },
-  isEmpty: (value) => {
-    return isEmpty(value);
-  },
-  isNotEmpty: (value) => {
-    return !isEmpty(value);
-  },
-};
-
-export function applyBooleanFieldKindFilter(
+export function filterByBooleanFieldKindFilter(
   value: BooleanFieldKindValue,
   filter: BooleanFieldKindFilter,
 ): boolean {
-  return booleanFieldKindFiltersByRule[filter.rule](value, filter.value);
+  return filterByBooleanFieldKindFilterRuleIs(value, filter.value);
 }
 
-export const booleanFieldKindFiltersByRule: {
-  [rule in BooleanFieldKindFilterRule]: (
-    value: BooleanFieldKindValue,
-    filterValue: BooleanFieldKindFilterRuleValue,
-  ) => boolean;
-} = {
-  is: (value, filterValue) => {
-    return value === filterValue;
-  },
-};
+export function filterByBooleanFieldKindFilterRuleIs(
+  value: BooleanFieldKindValue,
+  filterValue: BooleanFieldKindFilterRuleValue,
+): boolean {
+  return value === filterValue;
+}
 
 export function assertBooleanFilter(
   filter: Filter,
@@ -930,72 +1217,4 @@ export function assertTextFilterConfig(
   filterConfig: FilterConfig,
 ): asserts filterConfig is TextFieldKindFilterConfig {
   assertTextFieldKindFilterRule(filterConfig.rule);
-}
-
-export const filtersByFieldType: {
-  [fieldType in FieldType]: (value: FieldValue, filter: Filter) => boolean;
-} = {
-  [FieldType.Checkbox]: booleanFieldKindFilter,
-  [FieldType.Currency]: numberFieldKindFilter,
-  [FieldType.Date]: dateFieldKindFilter,
-  [FieldType.Email]: textFieldKindFilter,
-  [FieldType.MultiCollaborator]: multiSelectFieldKindFilter,
-  [FieldType.MultiRecordLink]: multiSelectFieldKindFilter,
-  [FieldType.MultiLineText]: textFieldKindFilter,
-  [FieldType.MultiOption]: multiSelectFieldKindFilter,
-  [FieldType.Number]: numberFieldKindFilter,
-  [FieldType.PhoneNumber]: textFieldKindFilter,
-  [FieldType.SingleCollaborator]: singleSelectFieldKindFilter,
-  [FieldType.SingleRecordLink]: singleSelectFieldKindFilter,
-  [FieldType.SingleLineText]: textFieldKindFilter,
-  [FieldType.SingleOption]: singleSelectFieldKindFilter,
-  [FieldType.URL]: textFieldKindFilter,
-};
-
-function textFieldKindFilter(value: FieldValue, filter: Filter): boolean {
-  assertTextFieldKindValue(value);
-  assertTextFilter(filter);
-
-  return applyTextFieldKindFilter(value, filter);
-}
-
-function numberFieldKindFilter(value: FieldValue, filter: Filter): boolean {
-  assertNumberFieldValue(value);
-  assertNumberFilter(filter);
-
-  return applyNumberFieldKindFilter(value, filter);
-}
-
-function dateFieldKindFilter(value: FieldValue, filter: Filter): boolean {
-  assertDateFieldValue(value);
-  assertDateFilter(filter);
-
-  return applyDateFieldKindFilter(value, filter);
-}
-
-function singleSelectFieldKindFilter(
-  value: FieldValue,
-  filter: Filter,
-): boolean {
-  assertSingleSelectFieldKindValue(value);
-  assertSingleSelectFilter(filter);
-
-  return applySingleSelectFieldKindFilter(value, filter);
-}
-
-function multiSelectFieldKindFilter(
-  value: FieldValue,
-  filter: Filter,
-): boolean {
-  assertMultiSelectFieldKindValue(value);
-  assertMultiSelectFilter(filter);
-
-  return applyMultiSelectFieldKindFilter(value, filter);
-}
-
-function booleanFieldKindFilter(value: FieldValue, filter: Filter): boolean {
-  assertBooleanFieldKindValue(value);
-  assertBooleanFilter(filter);
-
-  return applyBooleanFieldKindFilter(value, filter);
 }

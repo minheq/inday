@@ -138,7 +138,7 @@ import { formatUnit } from '../../lib/unit';
 import { usePrevious } from '../hooks/use_previous';
 import { MultiListPicker } from '../components/multi_list_picker';
 import { Collaborator, CollaboratorID } from '../data/collaborators';
-import { formatDate } from '../../lib/date_utils';
+import { formatDate, isDate } from '../../lib/date_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
 
@@ -658,7 +658,11 @@ function DateCell(props: DateCellProps) {
       <View style={styles.cellPlaceholder} />
     ) : (
       <View style={styles.textCellContainer}>
-        <Text>{formatDate(value, getSystemLocale())}</Text>
+        {isDate(value) ? (
+          <Text>{formatDate(value, getSystemLocale())}</Text>
+        ) : (
+          <Text numberOfLines={1}>{value}</Text>
+        )}
       </View>
     );
 
@@ -672,16 +676,16 @@ function DateCell(props: DateCellProps) {
 interface DateFieldCellEditingProps {
   value: DateFieldValue;
 }
+
 function DateFieldCellEditing(props: DateFieldCellEditingProps) {
   const { value } = props;
-  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
+  const { recordID, fieldID } = useLeafRowCellContext();
   const updateRecordFieldValue = useUpdateRecordFieldValue<DateFieldValue>();
+  const handleKeyPress = useCellKeyPressHandler();
 
   const handleChangeText = useCallback(
     (nextValue: string) => {
-      console.log(nextValue, 'nextValue');
-
-      // updateRecordFieldValue(recordID, fieldID, nextValue);
+      updateRecordFieldValue(recordID, fieldID, nextValue);
     },
     [updateRecordFieldValue, recordID, fieldID],
   );
@@ -691,8 +695,8 @@ function DateFieldCellEditing(props: DateFieldCellEditingProps) {
       <TextInput
         autoFocus
         style={styles.textCellInput}
-        // value={value}
-        // onKeyPress={handleKeyPress}
+        value={value !== null ? value : ''}
+        onKeyPress={handleKeyPress}
         onChangeText={handleChangeText}
       />
     </View>

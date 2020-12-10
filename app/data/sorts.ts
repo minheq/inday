@@ -40,7 +40,7 @@ import { CollectionID, Collection } from './collections';
 import { generateID, validateID } from '../../lib/id';
 import { isEmpty } from '../../lib/lang_utils';
 import { first, keyedBy } from '../../lib/array_utils';
-import { isBefore, isAfter } from '../../lib/date_utils';
+import { isBefore, isAfter, isDate } from '../../lib/date_utils';
 
 export const sortIDPrefix = 'srt' as const;
 export type SortID = `${typeof sortIDPrefix}${string}`;
@@ -610,7 +610,15 @@ function sortAscendingDateFieldKindValue(
     return -1;
   }
 
+  if (!isDate(a)) {
+    return -1;
+  }
+
   if (b === null) {
+    return 1;
+  }
+
+  if (!isDate(b)) {
     return 1;
   }
 
@@ -683,7 +691,15 @@ function sortDescendingDateFieldKindValue(
     return 1;
   }
 
+  if (!isDate(a)) {
+    return 1;
+  }
+
   if (b === null) {
+    return -1;
+  }
+
+  if (!isDate(b)) {
     return -1;
   }
 
