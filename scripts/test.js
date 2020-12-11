@@ -22,7 +22,6 @@ async function main() {
         'PASS',
         '\x1b[0m',
         result.file,
-        `\x1b[2m${result.count}`,
         `\x1b[0m\x1b[33m${result.time}ms`,
       );
     } else {

@@ -106,7 +106,11 @@ test('filter text - 2 for one', (t) => {
   );
   const filter2 = makeFilter(
     {},
-    { rule: TextFieldKindFilterRule.Contains, value: 'a', fieldID: field.id },
+    {
+      rule: TextFieldKindFilterRule.Contains,
+      value: 'a',
+      fieldID: field.id,
+    },
   );
   const result = filterRecords([[filter1, filter2]], records, getters);
 
@@ -309,63 +313,63 @@ test('filterBySingleSelectFieldKindFilterRuleIsNot', (t) => {
 test('filterBySingleSelectFieldKindFilterRuleIsAnyOf', (t) => {
   const filter = filterBySingleSelectFieldKindFilterRuleIsAnyOf;
 
-  t.deepEqual(filter('a', ['a', 'b']), true);
-  t.deepEqual(filter('a', ['b', 'c']), false);
+  t.deepEqual(filter('opta', ['opta', 'optb']), true);
+  t.deepEqual(filter('opta', ['optb', 'opt']), false);
 });
 
 test('filterBySingleSelectFieldKindFilterRuleIsNoneOf', (t) => {
   const filter = filterBySingleSelectFieldKindFilterRuleIsNoneOf;
 
-  t.deepEqual(filter('a', ['b', 'c']), true);
-  t.deepEqual(filter('a', ['a', 'b']), false);
+  t.deepEqual(filter('opta', ['optb', 'opt']), true);
+  t.deepEqual(filter('opta', ['opta', 'optb']), false);
 });
 
 test('filterBySingleSelectFieldKindFilterRuleIsEmpty', (t) => {
   const filter = filterBySingleSelectFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter(null), true);
-  t.deepEqual(filter('abc'), false);
+  t.deepEqual(filter('opta'), false);
 });
 
 test('filterBySingleSelectFieldKindFilterRuleIsNotEmpty', (t) => {
   const filter = filterBySingleSelectFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter('abc'), true);
+  t.deepEqual(filter('opta'), true);
   t.deepEqual(filter(null), false);
 });
 
 test('filterByMultiSelectFieldKindFilterRuleHasAnyOf', (t) => {
   const filter = filterByMultiSelectFieldKindFilterRuleHasAnyOf;
 
-  t.deepEqual(filter(['a'], ['a', 'b']), true);
-  t.deepEqual(filter(['a'], ['b', 'c']), false);
+  t.deepEqual(filter(['opta'], ['opta', 'optb']), true);
+  t.deepEqual(filter(['opta'], ['optb', 'opt']), false);
 });
 
 test('filterByMultiSelectFieldKindFilterRuleHasAllOf', (t) => {
   const filter = filterByMultiSelectFieldKindFilterRuleHasAllOf;
 
-  t.deepEqual(filter(['b', 'a'], ['a', 'b']), true);
-  t.deepEqual(filter(['a'], ['a', 'b']), false);
+  t.deepEqual(filter(['optb', 'opta'], ['opta', 'optb']), true);
+  t.deepEqual(filter(['opta'], ['opta', 'optb']), false);
 });
 
 test('filterByMultiSelectFieldKindFilterRuleHasNoneOf', (t) => {
   const filter = filterByMultiSelectFieldKindFilterRuleHasNoneOf;
 
-  t.deepEqual(filter(['a'], ['b', 'c']), true);
-  t.deepEqual(filter(['a'], ['a', 'b']), false);
+  t.deepEqual(filter(['opta'], ['optb', 'opt']), true);
+  t.deepEqual(filter(['opta'], ['opta', 'optb']), false);
 });
 
 test('filterByMultiSelectFieldKindFilterRuleIsEmpty', (t) => {
   const filter = filterByMultiSelectFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter([]), true);
-  t.deepEqual(filter(['a']), false);
+  t.deepEqual(filter(['opta']), false);
 });
 
 test('filterByMultiSelectFieldKindFilterRuleIsNotEmpty', (t) => {
   const filter = filterByMultiSelectFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter(['a']), true);
+  t.deepEqual(filter(['opta']), true);
   t.deepEqual(filter([]), false);
 });
 
@@ -378,29 +382,29 @@ test('filterByBooleanFieldKindFilterRuleIs', (t) => {
 
 function getOrFilters() {
   const filter1: Filter = {
-    id: '1',
-    viewID: '1',
+    id: 'fil1',
+    viewID: 'viw1',
     group: 1,
-    fieldID: '1',
-    rule: 'contains',
+    fieldID: 'fld1',
+    rule: TextFieldKindFilterRule.Contains,
     value: 's',
   };
 
   const filter2: Filter = {
-    id: '2',
-    viewID: '1',
+    id: 'fil2',
+    viewID: 'viw1',
     group: 2,
-    fieldID: '1',
-    rule: 'contains',
+    fieldID: 'fld1',
+    rule: TextFieldKindFilterRule.Contains,
     value: 's',
   };
 
   const filter3: Filter = {
-    id: '3',
-    viewID: '1',
+    id: 'fil3',
+    viewID: 'viw1',
     group: 3,
-    fieldID: '1',
-    rule: 'contains',
+    fieldID: 'fld1',
+    rule: TextFieldKindFilterRule.Contains,
     value: 's',
   };
 
@@ -432,29 +436,29 @@ test('updateFilterGroup - 3 "OR" filters to f1 OR f2 AND f3', (t) => {
 
 function getAndFilters() {
   const filter1: Filter = {
-    id: '1',
-    viewID: '1',
+    id: 'fil1',
+    viewID: 'viw1',
     group: 1,
-    fieldID: '1',
-    rule: 'contains',
+    fieldID: 'fld1',
+    rule: TextFieldKindFilterRule.Contains,
     value: 's',
   };
 
   const filter2: Filter = {
-    id: '2',
-    viewID: '1',
+    id: 'fil2',
+    viewID: 'viw1',
     group: 1,
-    fieldID: '1',
-    rule: 'contains',
+    fieldID: 'fld1',
+    rule: TextFieldKindFilterRule.Contains,
     value: 's',
   };
 
   const filter3: Filter = {
-    id: '3',
-    viewID: '1',
+    id: 'fil3',
+    viewID: 'viw1',
     group: 1,
-    fieldID: '1',
-    rule: 'contains',
+    fieldID: 'fld1',
+    rule: TextFieldKindFilterRule.Contains,
     value: 's',
   };
 
