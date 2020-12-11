@@ -1,7 +1,13 @@
 import { NumberUnit } from '../../lib/unit';
 import { generateID, validateID } from '../../lib/id';
 import { hasAllOf } from '../../lib/array_utils';
-import { isDate, isSameDay } from '../../lib/date_utils';
+import {
+  DateTimeFormatOptions,
+  isDate,
+  isISODate,
+  ISODate,
+  isSameDay,
+} from '../../lib/date_utils';
 import { CollaboratorID } from './collaborators';
 import { CollectionID } from './collections';
 import { RecordID } from './records';
@@ -125,10 +131,14 @@ export interface MultiRecordLinkField
 
 export interface DateOnlyFieldConfig {
   type: FieldType.Date;
-  format: string;
+  includeTime: false;
+  format: DateTimeFormatOptions;
 }
 
-export interface DateAndTimeFieldConfig extends DateOnlyFieldConfig {
+export interface DateAndTimeFieldConfig {
+  type: FieldType.Date;
+  includeTime: true;
+  format: DateTimeFormatOptions;
   /** Use same time zone for all collaborators */
   timezone: boolean;
 }
@@ -232,7 +242,7 @@ export type Field =
 
 export type CheckboxFieldValue = boolean;
 export type CurrencyFieldValue = number | null;
-export type DateFieldValue = string;
+export type DateFieldValue = ISODate | null;
 export type EmailFieldValue = string;
 export type MultiCollaboratorFieldValue = CollaboratorID[];
 export type MultiRecordLinkFieldValue = RecordID[];
@@ -854,7 +864,7 @@ export function assertBooleanFieldKindValue(
 export function assertDateFieldKindValue(
   value: FieldValue,
 ): asserts value is DateFieldKindValue {
-  if (value !== null && !isDate(value)) {
+  if (value !== null && !isISODate(value)) {
     throw new Error(
       `Expected DateFieldKindValue. Received ${JSON.stringify(value)}`,
     );

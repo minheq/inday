@@ -2,7 +2,6 @@ const util = require('util');
 const child_process = require('child_process');
 const os = require('os');
 const glob = util.promisify(require('glob'));
-const Parser = require('tap-parser');
 const { mapConcurrent } = require('./utils');
 
 const numCPUs = os.cpus().length;
@@ -33,24 +32,8 @@ async function main() {
         'FAIL',
         '\x1b[0m',
         result.file,
-        `\x1b[31m${result.fail} failed`,
-        `\x1b[0m\x1b[2mof ${result.count}`,
         `\x1b[0m\x1b[33m${result.time}ms`,
       );
-
-      for (const failure of result.failures) {
-        console.log(`\x1b[0m\x1b[31m${failure.id} ${failure.name}`);
-        console.log(
-          `\x1b[0mexpected\n${JSON.stringify(
-            failure.diag.expected,
-            null,
-            2,
-          )}\n`,
-        );
-        console.log(`got\n${JSON.stringify(failure.diag.actual, null, 2)}`);
-        console.log('\n');
-        console.log('\n');
-      }
     }
   }
 
@@ -66,18 +49,17 @@ function test(file) {
   return new Promise((resolve) => {
     const start = new Date();
 
-    const p = new Parser((results) => {
+    const child = child_process.fork(file);
+
+    child.on('close', (code) => {
       const end = new Date() - start;
+
       resolve({
-        ...results,
+        ok: code === 0,
         file,
         time: end,
       });
     });
-
-    const child = child_process.fork(file, { stdio: 'pipe' });
-
-    child.stdout.pipe(p);
   });
 }
 

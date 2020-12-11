@@ -199,10 +199,21 @@ export function isDate(value: unknown): value is Date {
   return value instanceof Date;
 }
 
+// https://tc39.es/ecma402/#datetimeformat-objects
+export interface DateTimeFormatOptions {
+  year?: '2-digit' | 'numeric';
+  month?: '2-digit' | 'numeric' | 'narrow' | 'short' | 'long';
+  day?: '2-digit' | 'numeric';
+  hour?: '2-digit' | 'numeric';
+  minute?: '2-digit' | 'numeric';
+  second?: '2-digit' | 'numeric';
+  hourCycle?: HourCycle;
+}
+
 export function formatDate(
   date: Date,
   locales?: string | string[],
-  options?: Intl.DateTimeFormatOptions,
+  options?: DateTimeFormatOptions,
 ): string {
   return new Intl.DateTimeFormat(locales, options).format(date);
 }
@@ -216,29 +227,44 @@ export function formatRelative(
   return new Intl.RelativeTimeFormat(locales, options).format(value, unit);
 }
 
-/** As `yyyy-MM-dd` eg. `2020-10-30` */
 export type ISODate = string;
 
-export function formatISODate(date: Date): ISODate {
-  return dateFnsFormatISO(date, { representation: 'date' });
+export function formatISODate(
+  date: Date,
+  representation: 'complete' | 'date' | 'time' = 'date',
+): ISODate {
+  return dateFnsFormatISO(date, { representation });
 }
 
 export function parseISODate(isoDate: ISODate): Date {
   return new Date(isoDate);
 }
 
+export function parseISODateInterval(
+  isoDateInterval: ISODateInterval,
+): DateInterval {
+  return {
+    start: parseISODate(isoDateInterval.start),
+    end: parseISODate(isoDateInterval.end),
+  };
+}
+
 export type DayInputFormat = 'm/d/y' | 'y/m/d' | 'd/m/y';
 export type HourCycle = 'h12' | 'h24';
+export type DateInputFormat = DayInputFormat | `${DayInputFormat} ${HourCycle}`;
 
 export interface ISODateInterval {
   start: string;
   end: string;
 }
 
-// TODO: add support for time and ms
+/**
+ * Used for parsing text input.
+ * TODO: add support for time and ms
+ */
 export function parseString(
   value: string,
-  inputFormat: DayInputFormat,
+  format: DateInputFormat,
 ): Date | Error {
   const params = value.split(/[.\-/]/);
   if (params.length !== 3) {
@@ -251,15 +277,15 @@ export function parseString(
   let month: number;
   let year: number;
 
-  if (inputFormat === 'd/m/y') {
+  if (format === 'd/m/y') {
     day = parseInt(params[0], 10);
     month = parseInt(params[1], 10);
     year = parseInt(params[2], 10);
-  } else if (inputFormat === 'm/d/y') {
+  } else if (format === 'm/d/y') {
     day = parseInt(params[1], 10);
     month = parseInt(params[0], 10);
     year = parseInt(params[2], 10);
-  } else if (inputFormat === 'y/m/d') {
+  } else if (format === 'y/m/d') {
     day = parseInt(params[2], 10);
     month = parseInt(params[1], 10);
     year = parseInt(params[0], 10);
@@ -292,17 +318,25 @@ export function parseString(
   return date;
 }
 
-export function isISODate(
-  value: unknown,
-  inputFormat: DayInputFormat,
-): value is ISODate {
+export function isISODate(value: unknown): value is ISODate {
   if (typeof value !== 'string') {
     return false;
   }
 
-  const date = parseString(value, inputFormat);
+  const date = new Date(value);
 
   return isDate(date);
+}
+
+export function isISODateInterval(value: unknown): value is ISODateInterval {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const start = new Date((value as Record<string, string>).start);
+  const end = new Date((value as Record<string, string>).end);
+
+  return isDate(start) && isDate(end);
 }
 
 export function isStartOfMonth(date: Date): boolean {

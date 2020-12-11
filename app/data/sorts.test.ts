@@ -117,7 +117,7 @@ test('boolean sort - descending', (t) => {
 });
 
 test('date sort - ascending', (t) => {
-  const values = [new Date(2020, 1, 2), new Date(2020, 1, 1), null];
+  const values = ['2020-1-2', '2020-1-1', null];
   const { getters, records, field, getValue } = prepare(FieldType.Date, values);
   const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
 
@@ -129,7 +129,7 @@ test('date sort - ascending', (t) => {
 });
 
 test('date sort - descending', (t) => {
-  const values = [null, new Date(2020, 1, 1), new Date(2020, 1, 2)];
+  const values = [null, '2020-1-1', '2020-1-2'];
   const { getters, records, field, getValue } = prepare(FieldType.Date, values);
   const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
 

@@ -20,11 +20,17 @@ import {
 } from './fields';
 import { ViewID } from './views';
 import { generateID, validateID } from '../../lib/id';
-import { DateInterval } from '../../lib/date_utils';
+import {
+  isISODate,
+  isISODateInterval,
+  ISODate,
+  ISODateInterval,
+  parseISODate,
+  parseISODateInterval,
+} from '../../lib/date_utils';
 import {
   isAfter,
   isBefore,
-  isDate,
   isSameDay,
   isWithinDateInterval,
 } from '../../lib/date_utils';
@@ -244,7 +250,7 @@ export enum DateFieldKindFilterRule {
   IsEmpty = 'IsEmpty',
   IsNotEmpty = 'IsNotEmpty',
 }
-export type DateFieldKindFilterRuleValue = Date | DateInterval | null;
+export type DateFieldKindFilterRuleValue = ISODate | ISODateInterval | null;
 
 // eslint-disable-next-line
 export enum NumberFieldKindFilterRule {
@@ -735,13 +741,25 @@ export function filterByDateFieldKindFilterRuleIs(
     return false;
   }
 
-  if (!isDate(filterValue)) {
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (!isISODate(filterValue)) {
     throw new Error(
-      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+      `Expected filterValue to be ISODate. Received ${JSON.stringify(
+        filterValue,
+      )}`,
     );
   }
 
-  return isSameDay(value, filterValue);
+  if (!isISODate(value)) {
+    throw new Error(
+      `Expected value to be ISODate. Received ${JSON.stringify(value)}`,
+    );
+  }
+
+  return isSameDay(parseISODate(value), parseISODate(filterValue));
 }
 
 export function filterByDateFieldKindFilterRuleIsWithin(
@@ -756,15 +774,24 @@ export function filterByDateFieldKindFilterRuleIsWithin(
     return true;
   }
 
-  if (isDate(filterValue)) {
+  if (!isISODateInterval(filterValue)) {
     throw new Error(
-      `Expected filterValue to be DateInterval. Received ${JSON.stringify(
+      `Expected filterValue to be ISODate. Received ${JSON.stringify(
         filterValue,
       )}`,
     );
   }
 
-  return isWithinDateInterval(value, filterValue);
+  if (!isISODate(value)) {
+    throw new Error(
+      `Expected value to be ISODate. Received ${JSON.stringify(value)}`,
+    );
+  }
+
+  return isWithinDateInterval(
+    parseISODate(value),
+    parseISODateInterval(filterValue),
+  );
 }
 
 export function filterByDateFieldKindFilterRuleIsBefore(
@@ -775,13 +802,25 @@ export function filterByDateFieldKindFilterRuleIsBefore(
     return false;
   }
 
-  if (!isDate(filterValue)) {
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (!isISODate(filterValue)) {
     throw new Error(
-      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+      `Expected filterValue to be ISODate. Received ${JSON.stringify(
+        filterValue,
+      )}`,
     );
   }
 
-  return isBefore(value, filterValue);
+  if (!isISODate(value)) {
+    throw new Error(
+      `Expected value to be ISODate. Received ${JSON.stringify(value)}`,
+    );
+  }
+
+  return isBefore(parseISODate(value), parseISODate(filterValue));
 }
 
 export function filterByDateFieldKindFilterRuleIsAfter(
@@ -792,13 +831,25 @@ export function filterByDateFieldKindFilterRuleIsAfter(
     return false;
   }
 
-  if (!isDate(filterValue)) {
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (!isISODate(filterValue)) {
     throw new Error(
-      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+      `Expected filterValue to be ISODate. Received ${JSON.stringify(
+        filterValue,
+      )}`,
     );
   }
 
-  return isAfter(value, filterValue);
+  if (!isISODate(value)) {
+    throw new Error(
+      `Expected value to be ISODate. Received ${JSON.stringify(value)}`,
+    );
+  }
+
+  return isAfter(parseISODate(value), parseISODate(filterValue));
 }
 
 export function filterByDateFieldKindFilterRuleIsOnOrBefore(
@@ -809,13 +860,28 @@ export function filterByDateFieldKindFilterRuleIsOnOrBefore(
     return false;
   }
 
-  if (!isDate(filterValue)) {
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (!isISODate(filterValue)) {
     throw new Error(
-      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+      `Expected filterValue to be ISODate. Received ${JSON.stringify(
+        filterValue,
+      )}`,
     );
   }
 
-  return isBefore(value, filterValue) || isSameDay(value, filterValue);
+  if (!isISODate(value)) {
+    throw new Error(
+      `Expected value to be ISODate. Received ${JSON.stringify(value)}`,
+    );
+  }
+
+  return (
+    isBefore(parseISODate(value), parseISODate(filterValue)) ||
+    isSameDay(parseISODate(value), parseISODate(filterValue))
+  );
 }
 
 export function filterByDateFieldKindFilterRuleIsOnOrAfter(
@@ -826,13 +892,28 @@ export function filterByDateFieldKindFilterRuleIsOnOrAfter(
     return false;
   }
 
-  if (!isDate(filterValue)) {
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (!isISODate(filterValue)) {
     throw new Error(
-      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+      `Expected filterValue to be ISODate. Received ${JSON.stringify(
+        filterValue,
+      )}`,
     );
   }
 
-  return isAfter(value, filterValue) || isSameDay(value, filterValue);
+  if (!isISODate(value)) {
+    throw new Error(
+      `Expected value to be ISODate. Received ${JSON.stringify(value)}`,
+    );
+  }
+
+  return (
+    isAfter(parseISODate(value), parseISODate(filterValue)) ||
+    isSameDay(parseISODate(value), parseISODate(filterValue))
+  );
 }
 
 export function filterByDateFieldKindFilterRuleIsNot(
@@ -843,13 +924,25 @@ export function filterByDateFieldKindFilterRuleIsNot(
     return false;
   }
 
-  if (!isDate(filterValue)) {
+  if (filterValue === null) {
+    return true;
+  }
+
+  if (!isISODate(filterValue)) {
     throw new Error(
-      `Expected filterValue to be  Received ${JSON.stringify(filterValue)}`,
+      `Expected filterValue to be ISODate. Received ${JSON.stringify(
+        filterValue,
+      )}`,
     );
   }
 
-  return !isSameDay(value, filterValue);
+  if (!isISODate(value)) {
+    throw new Error(
+      `Expected value to be ISODate. Received ${JSON.stringify(value)}`,
+    );
+  }
+
+  return !isSameDay(parseISODate(value), parseISODate(filterValue));
 }
 
 export function filterBySingleSelectFieldKindFilter(
@@ -858,9 +951,9 @@ export function filterBySingleSelectFieldKindFilter(
 ): boolean {
   switch (filter.rule) {
     case SingleSelectFieldKindFilterRule.Is:
-      return filterBySinglySelectFieldKindFilterRuleIs(value, filter.value);
+      return filterBySingleSelectFieldKindFilterRuleIs(value, filter.value);
     case SingleSelectFieldKindFilterRule.IsNot:
-      return filterBySinglySelectFieldKindFilterRuleIsNot(value, filter.value);
+      return filterBySingleSelectFieldKindFilterRuleIsNot(value, filter.value);
     case SingleSelectFieldKindFilterRule.IsAnyOf:
       return filterBySingleSelectFieldKindFilterRuleIsAnyOf(
         value,
@@ -893,7 +986,7 @@ export function filterByDateFieldKindFilterRuleIsNotEmpty(
   return value !== null;
 }
 
-export function filterBySinglySelectFieldKindFilterRuleIs(
+export function filterBySingleSelectFieldKindFilterRuleIs(
   value: SingleSelectFieldKindValue,
   filterValue: SingleSelectFieldKindFilterRuleValue,
 ): boolean {
@@ -912,7 +1005,7 @@ export function filterBySinglySelectFieldKindFilterRuleIs(
   return value === filterValue;
 }
 
-export function filterBySinglySelectFieldKindFilterRuleIsNot(
+export function filterBySingleSelectFieldKindFilterRuleIsNot(
   value: SingleSelectFieldKindValue,
   filterValue: SingleSelectFieldKindFilterRuleValue,
 ): boolean {
@@ -1028,7 +1121,10 @@ export function filterByMultiSelectFieldKindFilterRuleHasAnyOf(
     return false;
   }
 
-  return hasAnyOf(value, filterValue);
+  return hasAnyOf<CollaboratorID | RecordID | SelectOptionID>(
+    value,
+    filterValue,
+  );
 }
 export function filterByMultiSelectFieldKindFilterRuleHasAllOf(
   value: MultiSelectFieldKindValue,
@@ -1038,7 +1134,10 @@ export function filterByMultiSelectFieldKindFilterRuleHasAllOf(
     return false;
   }
 
-  return hasAllOf(value, filterValue);
+  return hasAllOf<CollaboratorID | RecordID | SelectOptionID>(
+    value,
+    filterValue,
+  );
 }
 export function filterByMultiSelectFieldKindFilterRuleHasNoneOf(
   value: MultiSelectFieldKindValue,
@@ -1048,7 +1147,10 @@ export function filterByMultiSelectFieldKindFilterRuleHasNoneOf(
     return false;
   }
 
-  return hasNoneOf(value, filterValue);
+  return hasNoneOf<CollaboratorID | RecordID | SelectOptionID>(
+    value,
+    filterValue,
+  );
 }
 export function filterByMultiSelectFieldKindFilterRuleIsEmpty(
   value: MultiSelectFieldKindValue,

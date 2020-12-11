@@ -40,7 +40,12 @@ import { CollectionID, Collection } from './collections';
 import { generateID, validateID } from '../../lib/id';
 import { isEmpty } from '../../lib/lang_utils';
 import { first, keyedBy } from '../../lib/array_utils';
-import { isBefore, isAfter, isDate } from '../../lib/date_utils';
+import {
+  isBefore,
+  isAfter,
+  isISODate,
+  parseISODate,
+} from '../../lib/date_utils';
 
 export const sortIDPrefix = 'srt' as const;
 export type SortID = `${typeof sortIDPrefix}${string}`;
@@ -625,7 +630,7 @@ function sortByAscendingDateFieldKindValue(
     return -1;
   }
 
-  if (!isDate(a)) {
+  if (!isISODate(a)) {
     return -1;
   }
 
@@ -633,13 +638,13 @@ function sortByAscendingDateFieldKindValue(
     return 1;
   }
 
-  if (!isDate(b)) {
+  if (!isISODate(b)) {
     return 1;
   }
 
-  if (isBefore(a, b)) {
+  if (isBefore(parseISODate(a), parseISODate(b))) {
     return -1;
-  } else if (isAfter(a, b)) {
+  } else if (isAfter(parseISODate(a), parseISODate(b))) {
     return 1;
   }
   return 0;
@@ -706,7 +711,7 @@ function sortByDescendingDateFieldKindValue(
     return 1;
   }
 
-  if (!isDate(a)) {
+  if (!isISODate(a)) {
     return 1;
   }
 
@@ -714,13 +719,13 @@ function sortByDescendingDateFieldKindValue(
     return -1;
   }
 
-  if (!isDate(b)) {
+  if (!isISODate(b)) {
     return -1;
   }
 
-  if (isAfter(a, b)) {
+  if (isAfter(parseISODate(a), parseISODate(b))) {
     return -1;
-  } else if (isBefore(a, b)) {
+  } else if (isBefore(parseISODate(a), parseISODate(b))) {
     return 1;
   }
   return 0;

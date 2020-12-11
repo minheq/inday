@@ -1,14 +1,30 @@
-import { test as zora } from 'zora';
+import { isEqual } from './lang_utils';
+
+type DeepEqualFn = <T>(valA: T, valB: T, description?: string) => void;
+type FailFn = (description?: string) => void;
 
 interface Assert {
-  deepEqual: <T>(valA: T, valB: T, description?: string) => void;
-  fail: (description?: string) => void;
+  deepEqual: DeepEqualFn;
+  fail: FailFn;
 }
 
 type Spec = (assert: Assert) => Promise<void> | void;
 
 export function test(description: string, spec: Spec): void {
-  void zora(description, async (t) => {
-    await spec(t);
-  });
+  const deepEqual: DeepEqualFn = (valA, valB, d) => {
+    if (isEqual(valA, valB) === false) {
+      throw new Error(`${description}${d ? `- ${d}` : ''}`);
+    }
+  };
+
+  const fail: FailFn = (d) => {
+    throw new Error(`${description}${d ? `- ${d}` : ''}`);
+  };
+
+  const assert: Assert = {
+    deepEqual,
+    fail,
+  };
+
+  void spec(assert);
 }

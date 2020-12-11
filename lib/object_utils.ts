@@ -9,3 +9,16 @@ export function valuesOf<T, K extends keyof T>(obj: T): T[K][] {
 export type EmptyObject = {
   [key: string]: never;
 };
+
+export function isObject(o: unknown): o is Record<string, unknown> {
+  if (typeof o == 'object') {
+    return (
+      (o === null ||
+        Array.isArray(o) ||
+        typeof o == 'function' ||
+        o.constructor === Date) === false
+    );
+  }
+
+  return false;
+}

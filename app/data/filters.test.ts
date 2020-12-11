@@ -49,8 +49,8 @@ import {
   makeRecord,
   makeFilter,
 } from './factory';
-import { FieldType, FieldValue, FieldID } from './fields';
-import { parseISODate } from '../../lib/date_utils';
+import { FieldType, FieldValue } from './fields';
+import {} from '../../lib/date_utils';
 
 test('no filter', (t) => {
   const values = ['AWord', 'BWord'];
@@ -60,10 +60,10 @@ test('no filter', (t) => {
   t.deepEqual(result.length, values.length);
 });
 
-const values = ['AWord', 'BWord'];
-const { records, getters, field } = prepare(FieldType.SingleLineText, values);
-
 test('filter text - contains same case', (t) => {
+  const values = ['AWord', 'BWord'];
+  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
+
   const filter = makeFilter(
     {},
     {
@@ -78,6 +78,8 @@ test('filter text - contains same case', (t) => {
 });
 
 test('filter text - one word different case', (t) => {
+  const values = ['AWord', 'BWord'];
+  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
   const filter = makeFilter(
     {},
     {
@@ -92,6 +94,8 @@ test('filter text - one word different case', (t) => {
 });
 
 test('filter text - 2 for one', (t) => {
+  const values = ['AWord', 'BWord'];
+  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
   const filter1 = makeFilter(
     {},
     {
@@ -213,31 +217,25 @@ test('filterByNumberFieldKindFilterRuleIsNotEmpty', (t) => {
 test('filterByDateFieldKindFilterRuleIs', (t) => {
   const filter = filterByDateFieldKindFilterRuleIs;
 
-  t.deepEqual(
-    filter(parseISODate('2020-08-03'), parseISODate('2020-08-03')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
-    false,
-  );
+  t.deepEqual(filter('2020-08-03', '2020-08-03'), true);
+  t.deepEqual(filter('2020-08-03', '2020-08-04'), false);
 });
 
 test('filterByDateFieldKindFilterRuleIsWithin', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsWithin;
 
   t.deepEqual(
-    filter(parseISODate('2020-08-03'), {
-      start: parseISODate('2020-08-02'),
-      end: parseISODate('2020-08-04'),
+    filter('2020-08-03', {
+      start: '2020-08-02',
+      end: '2020-08-04',
     }),
     true,
   );
 
   t.deepEqual(
-    filter(parseISODate('2020-08-05'), {
-      start: parseISODate('2020-08-02'),
-      end: parseISODate('2020-08-04'),
+    filter('2020-08-05', {
+      start: '2020-08-02',
+      end: '2020-08-04',
     }),
     false,
   );
@@ -246,87 +244,51 @@ test('filterByDateFieldKindFilterRuleIsWithin', (t) => {
 test('filterByDateFieldKindFilterRuleIsBefore', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsBefore;
 
-  t.deepEqual(
-    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
-    false,
-  );
+  t.deepEqual(filter('2020-08-03', '2020-08-04'), true);
+  t.deepEqual(filter('2020-08-05', '2020-08-04'), false);
 });
 
 test('filterByDateFieldKindFilterRuleIsAfter', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsAfter;
 
-  t.deepEqual(
-    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
-    false,
-  );
+  t.deepEqual(filter('2020-08-05', '2020-08-04'), true);
+  t.deepEqual(filter('2020-08-03', '2020-08-04'), false);
 });
 
 test('filterByDateFieldKindFilterRuleIsOnOrBefore', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsOnOrBefore;
 
-  t.deepEqual(
-    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-04'), parseISODate('2020-08-04')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
-    false,
-  );
+  t.deepEqual(filter('2020-08-03', '2020-08-04'), true);
+  t.deepEqual(filter('2020-08-04', '2020-08-04'), true);
+  t.deepEqual(filter('2020-08-05', '2020-08-04'), false);
 });
 
 test('filterByDateFieldKindFilterRuleIsOnOrAfter', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsOnOrAfter;
 
-  t.deepEqual(
-    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-04'), parseISODate('2020-08-04')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-03'), parseISODate('2020-08-04')),
-    false,
-  );
+  t.deepEqual(filter('2020-08-05', '2020-08-04'), true);
+  t.deepEqual(filter('2020-08-04', '2020-08-04'), true);
+  t.deepEqual(filter('2020-08-03', '2020-08-04'), false);
 });
 
 test('filterByDateFieldKindFilterRuleIsNot', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsNot;
 
-  t.deepEqual(
-    filter(parseISODate('2020-08-05'), parseISODate('2020-08-04')),
-    true,
-  );
-  t.deepEqual(
-    filter(parseISODate('2020-08-04'), parseISODate('2020-08-04')),
-    false,
-  );
+  t.deepEqual(filter('2020-08-05', '2020-08-04'), true);
+  t.deepEqual(filter('2020-08-04', '2020-08-04'), false);
 });
 
 test('filterByDateFieldKindFilterRuleIsEmpty', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter(null), true);
-  t.deepEqual(filter(parseISODate('2020-08-04')), false);
+  t.deepEqual(filter('2020-08-04'), false);
 });
 
 test('filterByDateFieldKindFilterRuleIsNotEmpty', (t) => {
   const filter = filterByDateFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter(parseISODate('2020-08-04')), true);
+  t.deepEqual(filter('2020-08-04'), true);
   t.deepEqual(filter(null), false);
 });
 
@@ -531,7 +493,7 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
     return makeRecord({ fields: { [field.id]: value } }, collectionWithFields);
   });
 
-  const getField = (_fieldID: FieldID) => field;
+  const getField = () => field;
 
   const getters: FilterGetters = {
     getField,
