@@ -227,13 +227,20 @@ export function parseISODate(isoDate: ISODate): Date {
   return new Date(isoDate);
 }
 
-type DateInputFormat = 'm/d/y' | 'y/m/d' | 'd/m/y';
+export type DayInputFormat = 'm/d/y' | 'y/m/d' | 'd/m/y';
+export type HourCycle = 'h12' | 'h24';
 
+export interface ISODateInterval {
+  start: string;
+  end: string;
+}
+
+// TODO: add support for time and ms
 export function parseString(
-  str: string,
-  inputFormat: DateInputFormat,
+  value: string,
+  inputFormat: DayInputFormat,
 ): Date | Error {
-  const params = str.split(/[.\-/]/);
+  const params = value.split(/[.\-/]/);
   if (params.length !== 3) {
     return new Error(
       'Invalid date string. There should be 3 delimiters "-", "/" or "."',
@@ -283,6 +290,19 @@ export function parseString(
   }
 
   return date;
+}
+
+export function isISODate(
+  value: unknown,
+  inputFormat: DayInputFormat,
+): value is ISODate {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  const date = parseString(value, inputFormat);
+
+  return isDate(date);
 }
 
 export function isStartOfMonth(date: Date): boolean {

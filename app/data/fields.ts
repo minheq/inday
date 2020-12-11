@@ -127,12 +127,10 @@ export interface DateOnlyFieldConfig {
   type: FieldType.Date;
   format: string;
 }
-export interface DateAndTimeFieldConfig {
-  type: FieldType.Date;
-  format: string;
+
+export interface DateAndTimeFieldConfig extends DateOnlyFieldConfig {
   /** Use same time zone for all collaborators */
   timezone: boolean;
-  hourCycle: 'h12' | 'h24';
 }
 
 export type DateFieldConfig = DateOnlyFieldConfig | DateAndTimeFieldConfig;
@@ -234,7 +232,7 @@ export type Field =
 
 export type CheckboxFieldValue = boolean;
 export type CurrencyFieldValue = number | null;
-export type DateFieldValue = string | null;
+export type DateFieldValue = string;
 export type EmailFieldValue = string;
 export type MultiCollaboratorFieldValue = CollaboratorID[];
 export type MultiRecordLinkFieldValue = RecordID[];
