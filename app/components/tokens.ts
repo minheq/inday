@@ -7,12 +7,11 @@ export const tokens = {
   },
   shadow: {
     elevation1: {
-      shadowColor: 'rgba(63, 63, 70, 1.0)',
+      shadowColor: 'rgba(63, 63, 70, 0.08)',
       shadowOffset: {
         width: 8,
         height: 8,
       },
-      shadowOpacity: 0.08,
       shadowRadius: 24,
     },
   },

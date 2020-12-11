@@ -273,7 +273,6 @@ export const GridRenderer = memo(
           })}
         >
           <div
-            data-testid="leftPaneColumns"
             style={styles('leftPaneColumns', { width: leftPaneContentWidth })}
           >
             {renderHeader(leftPaneColumns, leftPaneContentWidth)}
@@ -282,7 +281,7 @@ export const GridRenderer = memo(
             </div>
             {renderFooter(leftPaneColumns, leftPaneContentWidth)}
           </div>
-          <div data-testid="rightPaneColumn" style={styles('rightPaneColumns')}>
+          <div style={styles('rightPaneColumns')}>
             {renderHeader(rightPaneColumns, rightPaneContentWidth)}
             <div style={styles('rowsWrapper', { top: headerHeight })}>
               {renderRows(recycledRightPaneColumns, rightPaneContentWidth)}

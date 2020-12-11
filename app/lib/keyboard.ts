@@ -81,8 +81,8 @@ export function useKeyboard(keyBindings: KeyBinding[]): void {
   );
 
   useEffect(() => {
-    window.addEventListener('keydown', handleOnKeyDown, { passive: true });
-    window.addEventListener('keyup', handleOnKeyUp, { passive: true });
+    window.addEventListener('keydown', handleOnKeyDown);
+    window.addEventListener('keyup', handleOnKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleOnKeyDown);
@@ -122,6 +122,7 @@ function countModifierKeys(keyBinding: KeyBinding): number {
  * All keys derived from https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
  */
 
+// eslint-disable-next-line
 export enum NavigationKey {
   ArrowDown = 'ArrowDown',
   ArrowLeft = 'ArrowLeft',
@@ -129,12 +130,14 @@ export enum NavigationKey {
   ArrowUp = 'ArrowUp',
 }
 
+// eslint-disable-next-line
 export enum WhiteSpaceKey {
   Enter = 'Enter',
   Space = 'Space',
   Tab = 'Tab',
 }
 
+// eslint-disable-next-line
 export enum ModifierKey {
   Alt = 'Alt',
   /** On MacOS `Command`, on Windows `Control` */
@@ -142,6 +145,7 @@ export enum ModifierKey {
   Shift = 'Shift',
 }
 
+// eslint-disable-next-line
 export enum UIKey {
   Escape = 'Escape',
 }

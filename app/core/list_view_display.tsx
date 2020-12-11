@@ -100,6 +100,7 @@ import {
   assertPhoneNumberFieldValue,
   assertPrimaryFieldValue,
   SelectOptionID,
+  BooleanFieldKindValue,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer';
 import { ListView, ViewID } from '../data/views';
@@ -560,7 +561,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   return (
     <Pressable
       accessible={false}
-      pointerEvents={state === 'default' ? 'box-only' : 'box-none'}
+      pointerEvents={state === 'default' ? 'auto' : 'box-none'}
       style={[
         styles.leafRowCell,
         primary && styles.primaryCell,
@@ -605,10 +606,19 @@ interface CheckboxCellProps {
 
 function CheckboxCell(props: CheckboxCellProps) {
   const { value } = props;
+  const { recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
+
+  const handlePress = useCallback(() => {
+    const checked = !value;
+    updateRecordFieldValue(recordID, fieldID, checked);
+  }, [updateRecordFieldValue, recordID, fieldID, value]);
 
   return (
     <View style={styles.checkboxCell}>
-      {value === true && <Icon name="CheckThick" color="success" />}
+      <Pressable style={styles.checkbox} onPress={handlePress}>
+        {value === true && <Icon name="CheckThick" color="success" />}
+      </Pressable>
     </View>
   );
 }
@@ -1698,8 +1708,15 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
   useKeyboard(focusedCellKeyBindings);
 }
 
+interface KeyPressHandlerConfig {
+  /** When true, pressing Enter key will shift focus on next record */
+  enter?: boolean;
+  /** When true, pressing Escape key will stop editing current cell */
+  escape?: boolean;
+}
+
 function useCellKeyPressHandler(
-  config: { enter?: boolean; escape?: boolean } = {},
+  config: KeyPressHandlerConfig = {},
 ): (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void {
   const { enter = true, escape = true } = config;
   const { onStopEditing, onFocusNextRecord } = useLeafRowCellContext();
@@ -1782,8 +1799,16 @@ const styles = DynamicStyleSheet.create(() => ({
     justifyContent: 'center',
   },
   checkboxCell: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 32,
+    height: 32,
+    borderWidth: 1,
+    borderRadius: tokens.border.radius.default,
+    borderColor: tokens.colors.gray[300],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1792,8 +1817,7 @@ const styles = DynamicStyleSheet.create(() => ({
     width: '100%',
   },
   primaryCell: {
-    borderRightWidth: 1,
-    ...tokens.shadow.elevation1,
+    borderRightWidth: 2,
   },
   headerCell: {
     height: '100%',
