@@ -138,9 +138,10 @@ import { formatUnit } from '../../lib/unit';
 import { usePrevious } from '../hooks/use_previous';
 import { MultiListPicker } from '../components/multi_list_picker';
 import { Collaborator, CollaboratorID } from '../data/collaborators';
-import { formatDate, isDate } from '../../lib/date_utils';
+import { formatDate, formatISODate, parseISODate } from '../../lib/date_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
+import { DatePicker } from '../components/date_picker';
 
 const cellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_Cell',
@@ -548,6 +549,9 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       case FieldType.SingleOption:
         extraWidth = 100;
         break;
+      case FieldType.Date:
+        extraWidth = 200;
+        break;
       default:
         break;
     }
@@ -646,7 +650,7 @@ interface DateCellProps {
 }
 
 function DateCell(props: DateCellProps) {
-  const { value, field } = props;
+  const { value } = props;
   const { state, onStartEditing } = useLeafRowCellContext();
 
   if (state === 'editing') {
@@ -658,11 +662,7 @@ function DateCell(props: DateCellProps) {
       <View style={styles.cellPlaceholder} />
     ) : (
       <View style={styles.textCellContainer}>
-        {isDate(value) ? (
-          <Text>{formatDate(value, getSystemLocale())}</Text>
-        ) : (
-          <Text numberOfLines={1}>{value}</Text>
-        )}
+        <Text>{formatDate(parseISODate(value), getSystemLocale())}</Text>
       </View>
     );
 
@@ -679,26 +679,31 @@ interface DateFieldCellEditingProps {
 
 function DateFieldCellEditing(props: DateFieldCellEditingProps) {
   const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
+  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
   const updateRecordFieldValue = useUpdateRecordFieldValue<DateFieldValue>();
-  const handleKeyPress = useCellKeyPressHandler();
 
-  const handleChangeText = useCallback(
-    (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
+  const handleChangeDate = useCallback(
+    (date: Date) => {
+      updateRecordFieldValue(recordID, fieldID, formatISODate(date));
+      onStopEditing();
     },
-    [updateRecordFieldValue, recordID, fieldID],
+    [updateRecordFieldValue, onStopEditing, recordID, fieldID],
   );
+
+  const handleClear = useCallback(() => {
+    updateRecordFieldValue(recordID, fieldID, null);
+  }, [updateRecordFieldValue, recordID, fieldID]);
 
   return (
     <View style={styles.selectKindEditingContainer}>
-      <TextInput
-        autoFocus
-        style={styles.textCellInput}
-        value={value !== null ? value : ''}
-        onKeyPress={handleKeyPress}
-        onChangeText={handleChangeText}
+      <DatePicker
+        value={value ? parseISODate(value) : null}
+        onChange={handleChangeDate}
       />
+      <View style={styles.actionRow}>
+        <FlatButton onPress={handleClear} title="Clear" />
+        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
+      </View>
     </View>
   );
 }

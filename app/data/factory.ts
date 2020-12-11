@@ -44,6 +44,7 @@ import { tokens } from '../components';
 import { Workspace } from './workspace';
 import { keyedBy, range, sample } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
+import { formatISODate } from '../../lib/date_utils';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -111,9 +112,12 @@ const makeFieldByType: {
     const base = makeBaseField(field);
     return {
       type: FieldType.Date,
-      format: 'yyyy-MM-dd',
-      hourCycle: 'h24',
-      timezone: true,
+      includeTime: false,
+      format: {
+        day: 'numeric',
+        year: 'numeric',
+        month: 'numeric',
+      },
       ...base,
     };
   },
@@ -386,7 +390,7 @@ const fakeFieldValuesByFieldType: {
     return fakeNumber();
   },
   [FieldType.Date]: () => {
-    return fakeDate();
+    return formatISODate(fakeDate());
   },
   [FieldType.Email]: () => {
     return fakeEmail();
