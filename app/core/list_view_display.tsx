@@ -115,9 +115,10 @@ import { atom, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   NavigationKey,
   KeyBinding,
-  useKeyboard,
   WhiteSpaceKey,
+  EditingKey,
   UIKey,
+  useKeyboard,
 } from '../lib/keyboard';
 import { StatefulLeafRowCell } from '../components/grid_renderer.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
@@ -632,9 +633,7 @@ interface CurrencyCellProps {
 
 function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-
-  useCellKeyBindings();
+  const { cell } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return <NumberFieldKindCellEditing<CurrencyFieldValue> value={value} />;
@@ -652,10 +651,38 @@ function CurrencyCell(props: CurrencyCellProps) {
     );
 
   if (cell.state === 'focused') {
-    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+    return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
   }
 
   return <Fragment>{child}</Fragment>;
+}
+
+interface NumberFieldKindCellFocusedProps {
+  children: React.ReactNode;
+}
+
+function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
+  const { children } = props;
+  const { onStartEditing, recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue();
+
+  const handlePrintableKey = useCallback(
+    (key: string) => {
+      if (isNumberString(key) === false) {
+        return;
+      }
+
+      updateRecordFieldValue(recordID, fieldID, toNumber(key));
+      onStartEditing();
+    },
+    [onStartEditing, updateRecordFieldValue, recordID, fieldID],
+  );
+
+  useCellKeyBindings({
+    onPrintableKey: handlePrintableKey,
+  });
+
+  return <Pressable onPress={onStartEditing}>{children}</Pressable>;
 }
 
 interface DateCellProps {
@@ -1482,11 +1509,16 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
 }
 
 interface UseCellKeyBindingsProps {
+  onDelete?: () => void;
+  onPrintableKey?: (key: string) => void;
   onEnter?: () => void;
 }
 
 function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
-  const { onEnter: onEnterOverride } = props;
+  const {
+    onEnter: onEnterOverride,
+    onPrintableKey: onPrintableKeyOverride,
+  } = props;
   const {
     rowToRecordIDCache,
     columnToFieldIDCache,
@@ -1614,6 +1646,19 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
     setActiveCell(null);
   }, [setActiveCell]);
 
+  const onDelete = useCallback(() => {
+    return;
+  }, []);
+
+  const onPrintableKey = useCallback(
+    (key: string) => {
+      if (onPrintableKeyOverride !== undefined) {
+        onPrintableKeyOverride(key);
+      }
+    },
+    [onPrintableKeyOverride],
+  );
+
   const onEnter = useCallback(() => {
     if (onEnterOverride !== undefined) {
       onEnterOverride();
@@ -1683,6 +1728,18 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
         key: WhiteSpaceKey.Space,
         handler: onSpace,
       },
+      {
+        key: EditingKey.Backspace,
+        handler: onDelete,
+      },
+      {
+        key: EditingKey.Delete,
+        handler: onDelete,
+      },
+      {
+        key: 'PrintableKey',
+        handler: onPrintableKey,
+      },
     ];
   }, [
     onArrowDown,
@@ -1696,6 +1753,8 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
     onEscape,
     onEnter,
     onSpace,
+    onDelete,
+    onPrintableKey,
   ]);
 
   useKeyboard(focusedCellKeyBindings, active);
