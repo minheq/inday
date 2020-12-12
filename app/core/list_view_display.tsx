@@ -685,6 +685,30 @@ function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
   return <Pressable onPress={onStartEditing}>{children}</Pressable>;
 }
 
+interface TextFieldKindCellFocusedProps {
+  children: React.ReactNode;
+}
+
+function TextFieldKindCellFocused(props: TextFieldKindCellFocusedProps) {
+  const { children } = props;
+  const { onStartEditing, recordID, fieldID } = useLeafRowCellContext();
+  const updateRecordFieldValue = useUpdateRecordFieldValue();
+
+  const handlePrintableKey = useCallback(
+    (key: string) => {
+      updateRecordFieldValue(recordID, fieldID, key);
+      onStartEditing();
+    },
+    [onStartEditing, updateRecordFieldValue, recordID, fieldID],
+  );
+
+  useCellKeyBindings({
+    onPrintableKey: handlePrintableKey,
+  });
+
+  return <Pressable onPress={onStartEditing}>{children}</Pressable>;
+}
+
 interface DateCellProps {
   value: DateFieldValue;
   field: DateField;
@@ -758,9 +782,7 @@ interface EmailCellProps {
 
 function EmailCell(props: EmailCellProps) {
   const { value } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-
-  useCellKeyBindings();
+  const { cell } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<EmailFieldValue> value={value} />;
@@ -777,7 +799,7 @@ function EmailCell(props: EmailCellProps) {
   if (cell.state === 'focused') {
     return (
       <View>
-        <Pressable onPress={onStartEditing}>{child}</Pressable>
+        <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <Spacer size={8} />
         <Row>
           <Pressable>
@@ -939,9 +961,7 @@ interface MultiLineTextCellProps {
 
 function MultiLineTextCell(props: MultiLineTextCellProps) {
   const { value } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-
-  useCellKeyBindings();
+  const { cell } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return <MultiLineTextCellEditing value={value} />;
@@ -949,12 +969,11 @@ function MultiLineTextCell(props: MultiLineTextCellProps) {
 
   if (cell.state === 'focused') {
     return (
-      <Pressable
-        onPress={onStartEditing}
-        style={styles.focusedMultiLineTextCellContainer}
-      >
-        <Text>{value}</Text>
-      </Pressable>
+      <View style={styles.focusedMultiLineTextCellContainer}>
+        <TextFieldKindCellFocused>
+          <Text>{value}</Text>
+        </TextFieldKindCellFocused>
+      </View>
     );
   }
 
@@ -1165,9 +1184,7 @@ interface NumberCellProps {
 
 function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-
-  useCellKeyBindings();
+  const { cell } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return <NumberFieldKindCellEditing<NumberFieldKindValue> value={value} />;
@@ -1214,7 +1231,7 @@ function NumberCell(props: NumberCellProps) {
   }
 
   if (cell.state === 'focused') {
-    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+    return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
   }
 
   return <Fragment>{child}</Fragment>;
@@ -1227,9 +1244,7 @@ interface PhoneNumberCellProps {
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
   const { value } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-
-  useCellKeyBindings();
+  const { cell } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<PhoneNumberFieldValue> value={value} />;
@@ -1244,7 +1259,7 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
   if (cell.state === 'focused') {
     return (
       <View>
-        <Pressable onPress={onStartEditing}>{child}</Pressable>
+        <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <Spacer size={8} />
         <Text decoration="underline" size="sm" color="primary">
           Call
@@ -1345,9 +1360,7 @@ interface SingleLineTextCellProps {
 
 function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { value } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-
-  useCellKeyBindings();
+  const { cell } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<SingleLineTextFieldValue> value={value} />;
@@ -1360,7 +1373,7 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
   );
 
   if (cell.state === 'focused') {
-    return <Pressable onPress={onStartEditing}>{child}</Pressable>;
+    return <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>;
   }
 
   return <Fragment>{child}</Fragment>;
@@ -1415,9 +1428,7 @@ interface URLCellProps {
 
 function URLCell(props: URLCellProps) {
   const { value } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-
-  useCellKeyBindings();
+  const { cell } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<URLFieldValue> value={value} />;
@@ -1434,7 +1445,7 @@ function URLCell(props: URLCellProps) {
   if (cell.state === 'focused') {
     return (
       <View>
-        <Pressable onPress={onStartEditing}>{child}</Pressable>
+        <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <Spacer size={8} />
         <Text decoration="underline" size="sm" color="primary">
           Open link
