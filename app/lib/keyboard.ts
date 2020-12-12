@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { groupBy } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
+import { useWhatChanged } from '../hooks/use_what_changed';
 
 export interface KeyBinding {
   key: NavigationKey | WhiteSpaceKey | UIKey;
@@ -66,19 +67,16 @@ export function useKeyboard(keyBindings: KeyBinding[], active = true): void {
         }
       }
     },
-    [activeKeysRef, groupedKeyBindingsByKey],
+    [groupedKeyBindingsByKey],
   );
 
-  const handleOnKeyUp = useCallback(
-    (event: KeyboardEvent) => {
-      const activeKeys = activeKeysRef.current;
-      const key = normalize(event.key);
-      const nextActiveKeys = { ...activeKeys, [key]: false };
+  const handleOnKeyUp = useCallback((event: KeyboardEvent) => {
+    const activeKeys = activeKeysRef.current;
+    const key = normalize(event.key);
+    const nextActiveKeys = { ...activeKeys, [key]: false };
 
-      activeKeysRef.current = nextActiveKeys;
-    },
-    [activeKeysRef],
-  );
+    activeKeysRef.current = nextActiveKeys;
+  }, []);
 
   const listen = useCallback(() => {
     window.addEventListener('keydown', handleOnKeyDown);
@@ -96,7 +94,9 @@ export function useKeyboard(keyBindings: KeyBinding[], active = true): void {
     }
 
     return () => {
-      unsubscribe();
+      if (active === true) {
+        unsubscribe();
+      }
     };
   }, [active, listen, unsubscribe]);
 }

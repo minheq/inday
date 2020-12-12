@@ -1487,152 +1487,123 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
     onOpenRecord,
   } = useContext(ListViewDisplayContext);
   const { cell } = useContext(LeafRowCellContext);
+  const { row, column, path } = cell;
   const setActiveCell = useSetRecoilState(activeCellState);
 
+  // Listen for keyboard strokes only when the cell is focused
+  const active = cell !== null && cell.state === 'focused';
+
   const onArrowDown = useCallback(() => {
-    if (cell !== null) {
-      const { row, column, path } = cell;
-
-      const nextRow = row + 1;
-      if (rowToRecordIDCache[nextRow] === undefined) {
-        return;
-      }
-
-      setActiveCell({
-        type: 'leaf',
-        row: nextRow,
-        column,
-        path,
-        state: 'focused',
-      });
+    const nextRow = row + 1;
+    if (rowToRecordIDCache[nextRow] === undefined) {
+      return;
     }
-  }, [cell, setActiveCell, rowToRecordIDCache]);
+
+    setActiveCell({
+      type: 'leaf',
+      row: nextRow,
+      column,
+      path,
+      state: 'focused',
+    });
+  }, [row, column, path, setActiveCell, rowToRecordIDCache]);
 
   const onArrowUp = useCallback(() => {
-    if (cell !== null) {
-      const { row, column, path } = cell;
-
-      const prevRow = row - 1;
-      if (rowToRecordIDCache[prevRow] === undefined) {
-        return;
-      }
-
-      setActiveCell({
-        type: 'leaf',
-        row: prevRow,
-        column,
-        path,
-        state: 'focused',
-      });
+    const prevRow = row - 1;
+    if (rowToRecordIDCache[prevRow] === undefined) {
+      return;
     }
-  }, [cell, setActiveCell, rowToRecordIDCache]);
+
+    setActiveCell({
+      type: 'leaf',
+      row: prevRow,
+      column,
+      path,
+      state: 'focused',
+    });
+  }, [row, column, path, setActiveCell, rowToRecordIDCache]);
 
   const onArrowLeft = useCallback(() => {
-    if (cell !== null) {
-      const { row, column, path } = cell;
-      const prevColumn = column - 1;
-      if (columnToFieldIDCache[prevColumn] === undefined) {
-        return;
-      }
-
-      setActiveCell({
-        type: 'leaf',
-        row,
-        column: prevColumn,
-        path,
-        state: 'focused',
-      });
+    const prevColumn = column - 1;
+    if (columnToFieldIDCache[prevColumn] === undefined) {
+      return;
     }
-  }, [cell, setActiveCell, columnToFieldIDCache]);
+
+    setActiveCell({
+      type: 'leaf',
+      row,
+      column: prevColumn,
+      path,
+      state: 'focused',
+    });
+  }, [row, column, path, setActiveCell, columnToFieldIDCache]);
 
   const onArrowRight = useCallback(() => {
-    if (cell !== null) {
-      const { row, column, path } = cell;
-
-      const nextColumn = column + 1;
-      if (columnToFieldIDCache[nextColumn] === undefined) {
-        return;
-      }
-
-      setActiveCell({
-        type: 'leaf',
-        row,
-        column: nextColumn,
-        path,
-        state: 'focused',
-      });
+    const nextColumn = column + 1;
+    if (columnToFieldIDCache[nextColumn] === undefined) {
+      return;
     }
-  }, [cell, setActiveCell, columnToFieldIDCache]);
+
+    setActiveCell({
+      type: 'leaf',
+      row,
+      column: nextColumn,
+      path,
+      state: 'focused',
+    });
+  }, [row, column, path, setActiveCell, columnToFieldIDCache]);
 
   const onMetaArrowDown = useCallback(() => {
-    if (cell !== null) {
-      const { column, path } = cell;
+    const nextRow = records.length;
 
-      const nextRow = records.length;
-
-      setActiveCell({
-        type: 'leaf',
-        row: nextRow,
-        column,
-        path,
-        state: 'focused',
-      });
-    }
-  }, [cell, setActiveCell, records]);
+    setActiveCell({
+      type: 'leaf',
+      row: nextRow,
+      column,
+      path,
+      state: 'focused',
+    });
+  }, [column, path, setActiveCell, records]);
 
   const onMetaArrowUp = useCallback(() => {
-    if (cell !== null) {
-      const { column, path } = cell;
+    const prevRow = 1;
 
-      const prevRow = 1;
-
-      setActiveCell({
-        type: 'leaf',
-        row: prevRow,
-        column,
-        path,
-        state: 'focused',
-      });
-    }
-  }, [cell, setActiveCell]);
+    setActiveCell({
+      type: 'leaf',
+      row: prevRow,
+      column,
+      path,
+      state: 'focused',
+    });
+  }, [column, path, setActiveCell]);
 
   const onMetaArrowLeft = useCallback(() => {
-    if (cell !== null) {
-      const { row, path } = cell;
+    const prevColumn = 1;
 
-      const prevColumn = 1;
-
-      setActiveCell({
-        type: 'leaf',
-        row,
-        column: prevColumn,
-        path,
-        state: 'focused',
-      });
-    }
-  }, [cell, setActiveCell]);
+    setActiveCell({
+      type: 'leaf',
+      row,
+      column: prevColumn,
+      path,
+      state: 'focused',
+    });
+  }, [row, path, setActiveCell]);
 
   const onMetaArrowRight = useCallback(() => {
-    if (cell !== null) {
-      const { row, path } = cell;
+    const nextColumn = fields.length;
 
-      const nextColumn = fields.length;
-
-      setActiveCell({
-        type: 'leaf',
-        row,
-        column: nextColumn,
-        path,
-        state: 'focused',
-      });
-    }
-  }, [cell, setActiveCell, fields]);
+    setActiveCell({
+      type: 'leaf',
+      row,
+      column: nextColumn,
+      path,
+      state: 'focused',
+    });
+  }, [row, path, setActiveCell, fields]);
 
   const onEscape = useCallback(() => {
-    if (cell !== null) {
-      setActiveCell(null);
-    }
-  }, [cell, setActiveCell]);
+    setActiveCell(null);
+  }, [setActiveCell]);
 
   const onEnter = useCallback(() => {
     if (onEnterOverride !== undefined) {
@@ -1640,30 +1611,20 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       return;
     }
 
-    if (cell !== null) {
-      const { row, column, path } = cell;
-
-      setActiveCell({
-        type: 'leaf',
-        row,
-        column,
-        path,
-        state: 'editing',
-      });
-    }
-  }, [cell, setActiveCell, onEnterOverride]);
+    setActiveCell({
+      type: 'leaf',
+      row,
+      column,
+      path,
+      state: 'editing',
+    });
+  }, [row, column, path, setActiveCell, onEnterOverride]);
 
   const onSpace = useCallback(() => {
-    if (cell !== null) {
-      onOpenRecord(rowToRecordIDCache[cell.row]);
-    }
-  }, [cell, onOpenRecord, rowToRecordIDCache]);
+    onOpenRecord(rowToRecordIDCache[row]);
+  }, [row, onOpenRecord, rowToRecordIDCache]);
 
   const focusedCellKeyBindings = useMemo((): KeyBinding[] => {
-    if (cell === null || cell.state === 'editing') {
-      return [];
-    }
-
     return [
       {
         key: NavigationKey.ArrowDown,
@@ -1715,7 +1676,6 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       },
     ];
   }, [
-    cell,
     onArrowDown,
     onArrowUp,
     onArrowLeft,
@@ -1729,19 +1689,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
     onSpace,
   ]);
 
-  const [listen, unsubscribe] = useKeyboard(focusedCellKeyBindings);
-
-  useEffect(() => {
-    if (cell.state === 'focused') {
-      listen();
-    } else {
-      unsubscribe();
-    }
-
-    return () => {
-      unsubscribe();
-    };
-  }, [cell, listen, unsubscribe]);
+  useKeyboard(focusedCellKeyBindings, active);
 }
 
 interface KeyPressHandlerConfig {
