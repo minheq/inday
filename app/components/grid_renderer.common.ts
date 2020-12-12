@@ -517,7 +517,7 @@ function getVisibleRowsIndexRange(
 
 interface UseGetStatefulRowsProps {
   rows: RecycledRow[];
-  cell: StatefulCell | null;
+  activeCell: StatefulCell | null;
   selectedRows: LeafRow[] | null;
 }
 
@@ -571,7 +571,7 @@ export type StatefulCell = StatefulLeafRowCell | StatefulGroupRowCell;
 export function useGetStatefulRows(
   props: UseGetStatefulRowsProps,
 ): StatefulRow[] {
-  const { rows, cell, selectedRows } = props;
+  const { rows, activeCell, selectedRows } = props;
 
   const selectedRowsCache = useMemo(() => {
     const cache = FlatObject<boolean>();
@@ -600,7 +600,7 @@ export function useGetStatefulRows(
       }
 
       if (isLeafRow(row)) {
-        const leafRowCell = getLeafRowCell(cell, row);
+        const leafRowCell = getLeafRowCell(activeCell, row);
 
         return {
           key: row.key,
@@ -614,7 +614,7 @@ export function useGetStatefulRows(
         };
       }
 
-      const groupRowCell = getGroupRowCell(cell, row);
+      const groupRowCell = getGroupRowCell(activeCell, row);
 
       return {
         key: row.key,
@@ -627,7 +627,7 @@ export function useGetStatefulRows(
         cell: groupRowCell,
       };
     });
-  }, [rows, cell, selectedRowsCache]);
+  }, [rows, activeCell, selectedRowsCache]);
 }
 
 function isLeafRow(row: Row): row is LeafRow {

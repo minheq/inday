@@ -42,7 +42,7 @@ export const GridRenderer = memo(
     ref,
   ) {
     const {
-      cell = null,
+      activeCell = null,
       selectedRows = null,
       columns,
       fixedColumnCount,
@@ -143,7 +143,7 @@ export const GridRenderer = memo(
     });
     const statefulRows = useGetStatefulRows({
       rows: recycledRows,
-      cell,
+      activeCell,
       selectedRows,
     });
     const getScrollToCellOffset = useGridGetScrollToCellOffset({
@@ -517,7 +517,7 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
           'selected',
       )}
     >
-      {renderLeafRowCell({ path, row, column, state })}
+      {renderLeafRowCell({ path, row, column, state, type: 'leaf' })}
     </div>
   );
 });

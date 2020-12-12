@@ -111,12 +111,7 @@ import {
   RenderHeaderCellProps,
 } from '../components/grid_renderer';
 import { Record, RecordID } from '../data/records';
-import {
-  atom,
-  useRecoilState,
-  useRecoilValue,
-  useSetRecoilState,
-} from 'recoil';
+import { atom, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   NavigationKey,
   KeyBinding,
@@ -124,10 +119,7 @@ import {
   WhiteSpaceKey,
   UIKey,
 } from '../lib/keyboard';
-import {
-  StatefulLeafRowCell,
-  LeafRowCellState,
-} from '../components/grid_renderer.common';
+import { StatefulLeafRowCell } from '../components/grid_renderer.common';
 import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/currency';
@@ -144,8 +136,8 @@ import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
 import { DatePicker } from '../components/date_picker';
 
-const cellState = atom<StatefulLeafRowCell | null>({
-  key: 'ListViewDisplay_Cell',
+const activeCellState = atom<StatefulLeafRowCell | null>({
+  key: 'ListViewDisplay_ActiveCell',
   default: null,
 });
 
@@ -192,11 +184,19 @@ function getRowToRecordIDCache(records: Record[]) {
 interface ListViewDisplayContext {
   rowToRecordIDCache: RowToRecordIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
+  records: Record[];
+  fields: Field[];
+  onOpenRecord: (recordID: RecordID) => void;
 }
 
 const ListViewDisplayContext = createContext<ListViewDisplayContext>({
   rowToRecordIDCache: {},
   columnToFieldIDCache: {},
+  records: [],
+  fields: [],
+  onOpenRecord: () => {
+    return;
+  },
 });
 
 // TODO:
@@ -204,7 +204,7 @@ const ListViewDisplayContext = createContext<ListViewDisplayContext>({
 // - Display more information when focusing/editing cell
 export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const { view, onOpenRecord } = props;
-  const cell = useRecoilValue(cellState);
+  const activeCell = useRecoilValue(activeCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
   const gridRef = useRef<GridRendererRef>(null);
@@ -222,11 +222,15 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const prevFilters = usePrevious(filters);
   const prevSorts = usePrevious(sorts);
   const prevGroups = usePrevious(groups);
-  const prevCell = usePrevious(cell);
+  const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
 
-  if (cell !== prevCell && gridRef.current !== null && cell !== null) {
-    gridRef.current.scrollToCell(cell);
+  if (
+    activeCell !== prevActiveCell &&
+    gridRef.current !== null &&
+    activeCell !== null
+  ) {
+    gridRef.current.scrollToCell(activeCell);
   }
 
   const recordsOrderChanged: boolean = useMemo(() => {
@@ -262,38 +266,30 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     }
   }, [fields, fieldsOrderChanged]);
 
-  useCellKeyBindings({
-    columnToFieldIDCache,
-    rowToRecordIDCache,
-    records,
-    fields,
-    onOpenRecord,
-  });
-
-  const contentOffset = useMemo(() => {
-    return { x: 0, y: 0 };
-  }, []);
   const context = useMemo((): ListViewDisplayContext => {
-    return { rowToRecordIDCache, columnToFieldIDCache };
-  }, [rowToRecordIDCache, columnToFieldIDCache]);
+    return {
+      rowToRecordIDCache,
+      columnToFieldIDCache,
+      fields,
+      records,
+      onOpenRecord,
+    };
+  }, [rowToRecordIDCache, columnToFieldIDCache, fields, records, onOpenRecord]);
 
   const renderLeafRowCell = useCallback(
-    ({ row, column, path, state }: RenderLeafRowCellProps) => {
-      const fieldID = columnToFieldIDCache[column];
-      const recordID = rowToRecordIDCache[row];
-      const primary = column === 1;
+    (c: RenderLeafRowCellProps) => {
+      const fieldID = columnToFieldIDCache[c.column];
+      const recordID = rowToRecordIDCache[c.row];
+      const primary = c.column === 1;
       const height = FIELD_ROW_HEIGHT;
 
       return (
         <LeafRowCell
-          state={state}
-          path={path}
+          cell={c}
           recordID={recordID}
           viewID={view.id}
           fieldID={fieldID}
           primary={primary}
-          row={row}
-          column={column}
           height={height}
         />
       );
@@ -325,7 +321,6 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
               ref={gridRef}
               width={width}
               height={height}
-              contentOffset={contentOffset}
               groups={[{ type: 'leaf', rowCount, collapsed: false }]}
               renderLeafRowCell={renderLeafRowCell}
               renderHeaderCell={renderHeaderCell}
@@ -333,7 +328,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
               headerHeight={FIELD_ROW_HEIGHT}
               columns={columns}
               fixedColumnCount={fixedFieldCount}
-              cell={cell}
+              activeCell={activeCell}
             />
           )}
         </AutoSizer>
@@ -343,7 +338,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
 }
 
 interface LeafRowCellContext {
-  state: LeafRowCellState;
+  cell: StatefulLeafRowCell;
   recordID: RecordID;
   fieldID: FieldID;
   onFocus: () => void;
@@ -353,7 +348,13 @@ interface LeafRowCellContext {
 }
 
 const LeafRowCellContext = createContext<LeafRowCellContext>({
-  state: 'default',
+  cell: {
+    type: 'leaf',
+    path: [],
+    row: 0,
+    column: 0,
+    state: 'default',
+  },
   recordID: Record.generateID(),
   fieldID: Field.generateID(),
   onFocus: () => {
@@ -374,7 +375,8 @@ function useLeafRowCellContext(): LeafRowCellContext {
   return useContext(LeafRowCellContext);
 }
 
-interface LeafRowCellProps extends RenderLeafRowCellProps {
+interface LeafRowCellProps {
+  cell: StatefulLeafRowCell;
   primary: boolean;
   height: number;
   viewID: ViewID;
@@ -383,75 +385,63 @@ interface LeafRowCellProps extends RenderLeafRowCellProps {
 }
 
 function LeafRowCell(props: LeafRowCellProps) {
-  const {
-    path,
-    state,
-    row,
-    column,
-    primary,
-    height,
-    viewID,
-    fieldID,
-    recordID,
-  } = props;
+  const { cell, primary, height, viewID, fieldID, recordID } = props;
   const field = useGetField(fieldID);
   const fieldConfig = useGetListViewFieldConfig(viewID, fieldID);
   const value = useGetRecordFieldValue(recordID, fieldID);
   const width = fieldConfig.width;
   const { rowToRecordIDCache } = useContext(ListViewDisplayContext);
-  const setCell = useSetRecoilState(cellState);
+  const setActiveCell = useSetRecoilState(activeCellState);
 
   const handleFocus = useCallback(() => {
-    if (state === 'default') {
-      setCell({ type: 'leaf', row, path, column, state: 'focused' });
+    if (cell.state === 'default') {
+      setActiveCell({ ...cell, state: 'focused' });
     }
-  }, [setCell, state, row, column, path]);
+  }, [setActiveCell, cell]);
 
   const handleStartEditing = useCallback(() => {
-    if (state === 'focused') {
-      setCell({ type: 'leaf', row, path, column, state: 'editing' });
+    if (cell.state === 'focused') {
+      setActiveCell({ ...cell, state: 'editing' });
     }
-  }, [setCell, state, row, column, path]);
+  }, [setActiveCell, cell]);
 
   const handleStopEditing = useCallback(() => {
-    if (state === 'editing') {
-      setCell({ type: 'leaf', row, path, column, state: 'focused' });
+    if (cell.state === 'editing') {
+      setActiveCell({ ...cell, state: 'focused' });
     }
-  }, [setCell, state, row, column, path]);
+  }, [setActiveCell, cell]);
 
-  const handleNextRecord = useCallback(() => {
-    const nextRow = row + 1;
+  const handleFocusNextRecord = useCallback(() => {
+    const nextRow = cell.row + 1;
     if (rowToRecordIDCache[nextRow] === undefined) {
       return;
     }
 
-    setCell({
-      type: 'leaf',
+    setActiveCell({
+      ...cell,
       row: nextRow,
-      column,
-      path,
       state: 'focused',
     });
-  }, [setCell, row, column, path, rowToRecordIDCache]);
+  }, [setActiveCell, cell, rowToRecordIDCache]);
 
   const context: LeafRowCellContext = useMemo(() => {
     return {
-      state,
+      cell,
       recordID,
       fieldID,
       onFocus: handleFocus,
       onStartEditing: handleStartEditing,
       onStopEditing: handleStopEditing,
-      onFocusNextRecord: handleNextRecord,
+      onFocusNextRecord: handleFocusNextRecord,
     };
   }, [
-    state,
+    cell,
     recordID,
     fieldID,
     handleFocus,
     handleStartEditing,
     handleStopEditing,
-    handleNextRecord,
+    handleFocusNextRecord,
   ]);
 
   return useMemo(() => {
@@ -482,7 +472,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
   const { primary, height, field, width, value } = props;
-  const { state, onFocus } = useLeafRowCellContext();
+  const { cell, onFocus } = useLeafRowCellContext();
 
   const renderCell = useCallback(() => {
     switch (field.type) {
@@ -540,7 +530,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   // Helps a bit more with squeezed content
   let extraWidth = 0;
 
-  if (state === 'editing') {
+  if (cell.state === 'editing') {
     switch (field.type) {
       case FieldType.MultiCollaborator:
       case FieldType.SingleCollaborator:
@@ -561,12 +551,12 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   return (
     <Pressable
       accessible={false}
-      pointerEvents={state === 'default' ? 'auto' : 'box-none'}
+      pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
       style={[
         styles.leafRowCell,
         primary && styles.primaryCell,
-        state !== 'default' && styles.focusedLeafRowCell,
-        state !== 'default' && {
+        cell.state !== 'default' && styles.focusedLeafRowCell,
+        cell.state !== 'default' && {
           minHeight: height + FOCUS_BORDER_WIDTH * 2,
           width: width + extraWidth + FOCUS_BORDER_WIDTH * 2,
           top: -FOCUS_BORDER_WIDTH,
@@ -609,14 +599,18 @@ function CheckboxCell(props: CheckboxCellProps) {
   const { recordID, fieldID } = useLeafRowCellContext();
   const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
 
-  const handlePress = useCallback(() => {
+  const handleToggle = useCallback(() => {
     const checked = !value;
     updateRecordFieldValue(recordID, fieldID, checked);
   }, [updateRecordFieldValue, recordID, fieldID, value]);
 
+  useCellKeyBindings({
+    onEnter: handleToggle,
+  });
+
   return (
     <View style={styles.checkboxCell}>
-      <Pressable style={styles.checkbox} onPress={handlePress}>
+      <Pressable style={styles.checkbox} onPress={handleToggle}>
         {value === true && <Icon name="CheckThick" color="success" />}
       </Pressable>
     </View>
@@ -630,9 +624,11 @@ interface CurrencyCellProps {
 
 function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <NumberFieldKindCellEditing<CurrencyFieldValue> value={value} />;
   }
 
@@ -647,7 +643,7 @@ function CurrencyCell(props: CurrencyCellProps) {
       </View>
     );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -661,9 +657,11 @@ interface DateCellProps {
 
 function DateCell(props: DateCellProps) {
   const { value } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <DateFieldCellEditing value={value} />;
   }
 
@@ -676,7 +674,7 @@ function DateCell(props: DateCellProps) {
       </View>
     );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -725,9 +723,11 @@ interface EmailCellProps {
 
 function EmailCell(props: EmailCellProps) {
   const { value } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<EmailFieldValue> value={value} />;
   }
 
@@ -739,7 +739,7 @@ function EmailCell(props: EmailCellProps) {
     </View>
   );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return (
       <View>
         <Pressable onPress={onStartEditing}>{child}</Pressable>
@@ -785,12 +785,14 @@ interface MultiCollaboratorCellProps {
 function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   const { value } = props;
   const collaborators = useGetCollaborators();
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
+
+  useCellKeyBindings();
 
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
 
-  if (state === 'editing') {
+  if (cell.state === 'editing') {
     return (
       <MultiSelectFieldKindCellEditing
         renderLabel={renderCollaborator}
@@ -813,7 +815,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
     </Row>
   );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -860,13 +862,15 @@ interface MultiRecordLinkCellProps {
 
 function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
   const { value, field } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
+
+  useCellKeyBindings();
 
   const records = useGetCollectionRecords(field.recordsFromCollectionID);
   const renderRecordLink = useRenderRecordLink();
   const options = useRecordLinkOptions(records);
 
-  if (state === 'editing') {
+  if (cell.state === 'editing') {
     return (
       <MultiSelectFieldKindCellEditing
         renderLabel={renderRecordLink}
@@ -886,7 +890,7 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
     </Row>
   );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -900,13 +904,15 @@ interface MultiLineTextCellProps {
 
 function MultiLineTextCell(props: MultiLineTextCellProps) {
   const { value } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <MultiLineTextCellEditing value={value} />;
   }
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return (
       <Pressable
         onPress={onStartEditing}
@@ -983,12 +989,14 @@ function useGetOptionOptions(
 
 function MultiOptionCell(props: MultiOptionCellProps) {
   const { value, field } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
+
+  useCellKeyBindings();
 
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
-  if (state === 'editing') {
+  if (cell.state === 'editing') {
     return (
       <MultiSelectFieldKindCellEditing
         renderLabel={renderOption}
@@ -1017,7 +1025,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
     </Row>
   );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -1122,9 +1130,11 @@ interface NumberCellProps {
 
 function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <NumberFieldKindCellEditing<NumberFieldKindValue> value={value} />;
   }
 
@@ -1168,7 +1178,7 @@ function NumberCell(props: NumberCellProps) {
     }
   }
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -1182,9 +1192,11 @@ interface PhoneNumberCellProps {
 
 function PhoneNumberCell(props: PhoneNumberCellProps) {
   const { value } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<PhoneNumberFieldValue> value={value} />;
   }
 
@@ -1194,7 +1206,7 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
     </View>
   );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return (
       <View>
         <Pressable onPress={onStartEditing}>{child}</Pressable>
@@ -1216,14 +1228,15 @@ interface SingleCollaboratorCellProps {
 
 function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   const { value } = props;
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  const { state, onStartEditing } = useLeafRowCellContext();
+  useCellKeyBindings();
 
   const collaborators = useGetCollaborators();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
 
-  if (state === 'editing') {
+  if (cell.state === 'editing') {
     return (
       <SingleSelectFieldKindCellEditing
         renderLabel={renderCollaborator}
@@ -1242,7 +1255,7 @@ function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
       </Row>
     );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -1256,13 +1269,15 @@ interface SingleRecordLinkCellProps {
 
 function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
   const { value, field } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
+
+  useCellKeyBindings();
 
   const renderRecordLink = useRenderRecordLink();
   const records = useGetCollectionRecords(field.recordsFromCollectionID);
   const options = useRecordLinkOptions(records);
 
-  if (state === 'editing') {
+  if (cell.state === 'editing') {
     return (
       <SingleSelectFieldKindCellEditing
         renderLabel={renderRecordLink}
@@ -1281,7 +1296,7 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
       </Row>
     );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -1295,9 +1310,11 @@ interface SingleLineTextCellProps {
 
 function SingleLineTextCell(props: SingleLineTextCellProps) {
   const { value } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<SingleLineTextFieldValue> value={value} />;
   }
 
@@ -1307,7 +1324,7 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
     </View>
   );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -1321,12 +1338,14 @@ interface SingleOptionCellProps {
 
 function SingleOptionCell(props: SingleOptionCellProps) {
   const { value, field } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
+
+  useCellKeyBindings();
 
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
-  if (state === 'editing') {
+  if (cell.state === 'editing') {
     return (
       <SingleSelectFieldKindCellEditing
         renderLabel={renderOption}
@@ -1347,7 +1366,7 @@ function SingleOptionCell(props: SingleOptionCellProps) {
       </Row>
     );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
   }
 
@@ -1361,9 +1380,11 @@ interface URLCellProps {
 
 function URLCell(props: URLCellProps) {
   const { value } = props;
-  const { state, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
-  if (state === 'editing') {
+  useCellKeyBindings();
+
+  if (cell.state === 'editing') {
     return <TextFieldKindCellEditing<URLFieldValue> value={value} />;
   }
 
@@ -1375,7 +1396,7 @@ function URLCell(props: URLCellProps) {
     </View>
   );
 
-  if (state === 'focused') {
+  if (cell.state === 'focused') {
     return (
       <View>
         <Pressable onPress={onStartEditing}>{child}</Pressable>
@@ -1453,22 +1474,20 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
 }
 
 interface UseCellKeyBindingsProps {
-  records: Record[];
-  fields: Field[];
-  onOpenRecord: (recordID: RecordID) => void;
-  rowToRecordIDCache: RowToRecordIDCache;
-  columnToFieldIDCache: ColumnToFieldIDCache;
+  onEnter?: () => void;
 }
 
-function useCellKeyBindings(props: UseCellKeyBindingsProps) {
+function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
+  const { onEnter: onEnterOverride } = props;
   const {
     rowToRecordIDCache,
     columnToFieldIDCache,
     records,
     fields,
     onOpenRecord,
-  } = props;
-  const [cell, setCell] = useRecoilState(cellState);
+  } = useContext(ListViewDisplayContext);
+  const { cell } = useContext(LeafRowCellContext);
+  const setActiveCell = useSetRecoilState(activeCellState);
 
   const onArrowDown = useCallback(() => {
     if (cell !== null) {
@@ -1479,7 +1498,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         return;
       }
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row: nextRow,
         column,
@@ -1487,7 +1506,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell, rowToRecordIDCache]);
+  }, [cell, setActiveCell, rowToRecordIDCache]);
 
   const onArrowUp = useCallback(() => {
     if (cell !== null) {
@@ -1498,7 +1517,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         return;
       }
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row: prevRow,
         column,
@@ -1506,7 +1525,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell, rowToRecordIDCache]);
+  }, [cell, setActiveCell, rowToRecordIDCache]);
 
   const onArrowLeft = useCallback(() => {
     if (cell !== null) {
@@ -1516,7 +1535,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         return;
       }
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row,
         column: prevColumn,
@@ -1524,7 +1543,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell, columnToFieldIDCache]);
+  }, [cell, setActiveCell, columnToFieldIDCache]);
 
   const onArrowRight = useCallback(() => {
     if (cell !== null) {
@@ -1535,7 +1554,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         return;
       }
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row,
         column: nextColumn,
@@ -1543,7 +1562,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell, columnToFieldIDCache]);
+  }, [cell, setActiveCell, columnToFieldIDCache]);
 
   const onMetaArrowDown = useCallback(() => {
     if (cell !== null) {
@@ -1551,7 +1570,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       const nextRow = records.length;
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row: nextRow,
         column,
@@ -1559,7 +1578,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell, records]);
+  }, [cell, setActiveCell, records]);
 
   const onMetaArrowUp = useCallback(() => {
     if (cell !== null) {
@@ -1567,7 +1586,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       const prevRow = 1;
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row: prevRow,
         column,
@@ -1575,7 +1594,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell]);
+  }, [cell, setActiveCell]);
 
   const onMetaArrowLeft = useCallback(() => {
     if (cell !== null) {
@@ -1583,7 +1602,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       const prevColumn = 1;
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row,
         column: prevColumn,
@@ -1591,7 +1610,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell]);
+  }, [cell, setActiveCell]);
 
   const onMetaArrowRight = useCallback(() => {
     if (cell !== null) {
@@ -1599,7 +1618,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
 
       const nextColumn = fields.length;
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row,
         column: nextColumn,
@@ -1607,19 +1626,24 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'focused',
       });
     }
-  }, [cell, setCell, fields]);
+  }, [cell, setActiveCell, fields]);
 
   const onEscape = useCallback(() => {
     if (cell !== null) {
-      setCell(null);
+      setActiveCell(null);
     }
-  }, [cell, setCell]);
+  }, [cell, setActiveCell]);
 
   const onEnter = useCallback(() => {
+    if (onEnterOverride !== undefined) {
+      onEnterOverride();
+      return;
+    }
+
     if (cell !== null) {
       const { row, column, path } = cell;
 
-      setCell({
+      setActiveCell({
         type: 'leaf',
         row,
         column,
@@ -1627,7 +1651,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
         state: 'editing',
       });
     }
-  }, [cell, setCell]);
+  }, [cell, setActiveCell, onEnterOverride]);
 
   const onSpace = useCallback(() => {
     if (cell !== null) {
@@ -1705,7 +1729,19 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps) {
     onSpace,
   ]);
 
-  useKeyboard(focusedCellKeyBindings);
+  const [listen, unsubscribe] = useKeyboard(focusedCellKeyBindings);
+
+  useEffect(() => {
+    if (cell.state === 'focused') {
+      listen();
+    } else {
+      unsubscribe();
+    }
+
+    return () => {
+      unsubscribe();
+    };
+  }, [cell, listen, unsubscribe]);
 }
 
 interface KeyPressHandlerConfig {

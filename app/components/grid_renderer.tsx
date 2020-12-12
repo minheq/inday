@@ -26,7 +26,7 @@ import {
 } from './grid_renderer.common';
 
 export interface GridRendererProps {
-  cell?: StatefulCell | null;
+  activeCell?: StatefulCell | null;
   selectedRows?: LeafRow[] | null;
   height: number;
   width: number;
@@ -64,6 +64,7 @@ export interface RenderFooterCellProps {
 }
 
 export interface RenderLeafRowCellProps {
+  type: 'leaf';
   path: number[];
   row: number;
   column: number;

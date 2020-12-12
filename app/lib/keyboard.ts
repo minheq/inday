@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { groupBy } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 
@@ -14,7 +14,15 @@ interface ActiveKeys {
   [key: string]: boolean | undefined;
 }
 
-export function useKeyboard(keyBindings: KeyBinding[]): void {
+/** Start listening to keyboard events. */
+type ListenFn = () => void;
+
+/** Unsubscribe from listening to keyboard events. */
+type UnsubscribeFn = () => void;
+
+export function useKeyboard(
+  keyBindings: KeyBinding[],
+): [listen: ListenFn, unsubscribe: UnsubscribeFn] {
   const activeKeysRef = useRef<ActiveKeys>({});
 
   const groupedKeyBindingsByKey = useMemo(() => {
@@ -80,15 +88,17 @@ export function useKeyboard(keyBindings: KeyBinding[]): void {
     [activeKeysRef],
   );
 
-  useEffect(() => {
+  const listen = useCallback(() => {
     window.addEventListener('keydown', handleOnKeyDown);
     window.addEventListener('keyup', handleOnKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleOnKeyDown);
-      window.removeEventListener('keyup', handleOnKeyUp);
-    };
   }, [handleOnKeyDown, handleOnKeyUp]);
+
+  const unsubscribe = useCallback(() => {
+    window.removeEventListener('keydown', handleOnKeyDown);
+    window.removeEventListener('keyup', handleOnKeyUp);
+  }, [handleOnKeyDown, handleOnKeyUp]);
+
+  return [listen, unsubscribe];
 }
 
 function normalize(key: string): KeyboardKey {
