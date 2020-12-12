@@ -184,16 +184,16 @@ function getRowToRecordIDCache(records: Record[]) {
 interface ListViewDisplayContext {
   rowToRecordIDCache: RowToRecordIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
-  records: Record[];
-  fields: Field[];
+  recordsCount: number;
+  fieldsCount: number;
   onOpenRecord: (recordID: RecordID) => void;
 }
 
 const ListViewDisplayContext = createContext<ListViewDisplayContext>({
   rowToRecordIDCache: {},
   columnToFieldIDCache: {},
-  records: [],
-  fields: [],
+  recordsCount: 0,
+  fieldsCount: 0,
   onOpenRecord: () => {
     return;
   },
@@ -224,6 +224,8 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const prevGroups = usePrevious(groups);
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
+  const recordsCount = records.length;
+  const fieldsCount = fields.length;
 
   if (
     activeCell !== prevActiveCell &&
@@ -270,11 +272,17 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     return {
       rowToRecordIDCache,
       columnToFieldIDCache,
-      fields,
-      records,
+      recordsCount,
+      fieldsCount,
       onOpenRecord,
     };
-  }, [rowToRecordIDCache, columnToFieldIDCache, fields, records, onOpenRecord]);
+  }, [
+    rowToRecordIDCache,
+    columnToFieldIDCache,
+    recordsCount,
+    fieldsCount,
+    onOpenRecord,
+  ]);
 
   const renderLeafRowCell = useCallback(
     (c: RenderLeafRowCellProps) => {
@@ -1482,10 +1490,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const {
     rowToRecordIDCache,
     columnToFieldIDCache,
-    records,
-    fields,
+    recordsCount,
+    fieldsCount,
     onOpenRecord,
   } = useContext(ListViewDisplayContext);
+
   const { cell } = useContext(LeafRowCellContext);
   const { row, column, path } = cell;
   const setActiveCell = useSetRecoilState(activeCellState);
@@ -1554,7 +1563,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   }, [row, column, path, setActiveCell, columnToFieldIDCache]);
 
   const onMetaArrowDown = useCallback(() => {
-    const nextRow = records.length;
+    const nextRow = recordsCount;
 
     setActiveCell({
       type: 'leaf',
@@ -1563,7 +1572,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [column, path, setActiveCell, records]);
+  }, [column, path, setActiveCell, recordsCount]);
 
   const onMetaArrowUp = useCallback(() => {
     const prevRow = 1;
@@ -1590,7 +1599,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   }, [row, path, setActiveCell]);
 
   const onMetaArrowRight = useCallback(() => {
-    const nextColumn = fields.length;
+    const nextColumn = fieldsCount;
 
     setActiveCell({
       type: 'leaf',
@@ -1599,7 +1608,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [row, path, setActiveCell, fields]);
+  }, [row, path, setActiveCell, fieldsCount]);
 
   const onEscape = useCallback(() => {
     setActiveCell(null);
