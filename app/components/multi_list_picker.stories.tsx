@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { MultiListPicker } from './multi_list_picker';
 
@@ -8,7 +8,7 @@ export default {
 };
 
 export function Basic(): JSX.Element {
-  const [value, setValue] = React.useState(['January']);
+  const [value, setValue] = useState(['January']);
 
   return (
     <MultiListPicker

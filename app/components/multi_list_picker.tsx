@@ -44,7 +44,7 @@ export function MultiListPicker<T>(
     options,
   );
 
-  const handleSelect = React.useCallback(
+  const handleSelect = useCallback(
     (newVal: T, selected: boolean) => {
       if (onChange !== undefined) {
         if (selected) {

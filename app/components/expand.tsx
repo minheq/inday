@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
 
 interface ExpandProps {
@@ -10,15 +10,15 @@ interface ExpandProps {
 
 export function Expand(props: ExpandProps): JSX.Element {
   const { open, children, onExpanded, onCollapsed } = props;
-  const height = React.useRef(new Animated.Value(0)).current;
-  const translateY = React.useRef(new Animated.Value(0)).current;
-  const [intrinsicHeight, setIntrinsicHeight] = React.useState(0);
+  const height = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+  const [intrinsicHeight, setIntrinsicHeight] = useState(0);
 
-  const handleLayout = React.useCallback((event: LayoutChangeEvent) => {
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
     setIntrinsicHeight(event.nativeEvent.layout.height);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.parallel([
       Animated.spring(height, {
         toValue: open ? intrinsicHeight : 0,

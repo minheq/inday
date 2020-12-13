@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Picker } from './picker';
 import { Container } from './container';
 import { Spacer } from './spacer';
 
 function Basic(): JSX.Element {
-  const [value, setValue] = React.useState(1);
+  const [value, setValue] = useState(1);
   return (
     <Container padding={16}>
       <Picker
@@ -22,7 +22,7 @@ function Basic(): JSX.Element {
 }
 
 function WithSearch(): JSX.Element {
-  const [value, setValue] = React.useState(1);
+  const [value, setValue] = useState(1);
   return (
     <Container padding={16}>
       <Picker

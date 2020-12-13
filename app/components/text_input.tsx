@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   TextInput as RNTextInput,
   View,
@@ -42,7 +42,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
   } = props;
   const ref = useRef<RNTextInput>(null);
 
-  const handleClear = React.useCallback(() => {
+  const handleClear = useCallback(() => {
     if (ref.current !== null) {
       ref.current.focus();
     }

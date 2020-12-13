@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Pressable, Animated, StyleSheet } from 'react-native';
 import { tokens } from './tokens';
 
@@ -9,15 +9,15 @@ interface SwitchProps {
 
 export function Switch(props: SwitchProps): JSX.Element {
   const { value, onChange } = props;
-  const checked = React.useRef(new Animated.Value(0)).current;
+  const checked = useRef(new Animated.Value(0)).current;
 
-  const handlePress = React.useCallback(() => {
+  const handlePress = useCallback(() => {
     if (onChange !== undefined) {
       onChange(!value);
     }
   }, [value, onChange]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.spring(checked, {
       toValue: value ? 1 : 0,
       useNativeDriver: false,

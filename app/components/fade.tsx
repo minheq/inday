@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 
 interface FadeProps<T> {
@@ -9,9 +9,9 @@ interface FadeProps<T> {
 
 export function Fade<T>(props: FadeProps<T>): JSX.Element {
   const { open, value, children } = props;
-  const opacity = React.useRef(new Animated.Value(open ? 1 : 0)).current;
+  const opacity = useRef(new Animated.Value(open ? 1 : 0)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.spring(opacity, {
       toValue: open ? 1 : 0,
       bounciness: 0,
@@ -19,7 +19,7 @@ export function Fade<T>(props: FadeProps<T>): JSX.Element {
     }).start();
   }, [open, opacity]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.sequence([
       Animated.spring(opacity, {
         toValue: 0,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   useWindowDimensions,
@@ -27,16 +27,16 @@ export function Dialog(props: DialogProps): JSX.Element {
     children,
   } = props;
   const { height } = useWindowDimensions();
-  const [internalVisible, setInternalVisible] = React.useState(visible);
-  const slide = React.useRef(
+  const [internalVisible, setInternalVisible] = useState(visible);
+  const slide = useRef(
     new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
   ).current;
-  const overlayFade = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
-  const opacity = React.useRef(
+  const overlayFade = useRef(new Animated.Value(visible ? 1 : 0)).current;
+  const opacity = useRef(
     new Animated.Value(animationType === 'fade' ? (visible ? 1 : 0) : 1),
   ).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (animationType !== 'none') {
       return;
     }
@@ -62,7 +62,7 @@ export function Dialog(props: DialogProps): JSX.Element {
     onRequestClose,
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (animationType !== 'fade') {
       return;
     }
@@ -109,7 +109,7 @@ export function Dialog(props: DialogProps): JSX.Element {
     onRequestClose,
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (animationType !== 'slide') {
       return;
     }
@@ -153,7 +153,7 @@ export function Dialog(props: DialogProps): JSX.Element {
     onRequestClose,
   ]);
 
-  const handlePressBackground = React.useCallback(() => {
+  const handlePressBackground = useCallback(() => {
     if (onRequestClose !== undefined) {
       onRequestClose();
     }

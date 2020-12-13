@@ -1,10 +1,10 @@
-import React from 'react';
+import { useEffect, useRef } from 'react';
 
-export function usePrevious<T = any>(value: T): T {
-  const ref = React.useRef(value);
+export function usePrevious<T>(value: T): T {
+  const ref = useRef(value);
 
   // Store current value in ref
-  React.useEffect(() => {
+  useEffect(() => {
     ref.current = value;
   }, [value]); // Only re-run if value changes
 

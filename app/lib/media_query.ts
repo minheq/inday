@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
-import { Dimensions, ScaledSize } from 'react-native';
+import { useMemo } from 'react';
+import { ScaledSize, useWindowDimensions } from 'react-native';
 
 export interface SizeQuery {
   xsAndUp: boolean;
@@ -21,24 +21,7 @@ interface MediaQuery {
 }
 
 export function useMediaQuery(): MediaQuery {
-  const [dimensions, setDimensions] = React.useState<ScaledSize>(
-    Dimensions.get('window'),
-  );
-
-  const handleDimensionsChange = useCallback(
-    ({ window }: { window: ScaledSize; screen: ScaledSize }) => {
-      setDimensions(window);
-    },
-    [],
-  );
-
-  React.useEffect(() => {
-    Dimensions.addEventListener('change', handleDimensionsChange);
-
-    return () => {
-      Dimensions.removeEventListener('change', handleDimensionsChange);
-    };
-  }, [handleDimensionsChange]);
+  const dimensions = useWindowDimensions();
 
   let size: ScreenSize = 'xs';
 

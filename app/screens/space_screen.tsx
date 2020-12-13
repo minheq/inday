@@ -115,7 +115,7 @@ function ViewSettings() {
   const view = useGetView(context.viewID);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
 
-  const handleToggleView = React.useCallback(() => {
+  const handleToggleView = useCallback(() => {
     if (sidePanel !== 'views') {
       setSidePanel('views');
     } else {
@@ -123,7 +123,7 @@ function ViewSettings() {
     }
   }, [sidePanel, setSidePanel]);
 
-  const handleToggleOrganize = React.useCallback(() => {
+  const handleToggleOrganize = useCallback(() => {
     if (sidePanel !== 'organize') {
       setSidePanel('organize');
     } else {

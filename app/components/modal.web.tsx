@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import RModal from 'react-modal';
 import type { ModalProps } from './modal';
 import { Animated, StyleSheet, useWindowDimensions } from 'react-native';
@@ -16,14 +16,14 @@ export function Modal(props: ModalProps): JSX.Element {
     onShow,
     onDismiss,
   } = props;
-  const [internalVisible, setInternalIsOpen] = React.useState(visible);
+  const [internalVisible, setInternalIsOpen] = useState(visible);
   const { height } = useWindowDimensions();
-  const slide = React.useRef(
+  const slide = useRef(
     new Animated.Value(animationType === 'slide' ? height : 0),
   ).current;
-  const fade = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
+  const fade = useRef(new Animated.Value(visible ? 1 : 0)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (animationType !== 'none') {
       return;
     }
@@ -31,7 +31,7 @@ export function Modal(props: ModalProps): JSX.Element {
     setInternalIsOpen(visible);
   }, [visible, internalVisible, fade, height, animationType, onRequestClose]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (animationType !== 'fade') {
       return;
     }
@@ -54,7 +54,7 @@ export function Modal(props: ModalProps): JSX.Element {
     }
   }, [visible, internalVisible, fade, height, animationType, onRequestClose]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (animationType !== 'slide') {
       return;
     }

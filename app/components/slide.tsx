@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 
 interface SlideProps {
@@ -11,10 +11,10 @@ interface SlideProps {
 
 export function Slide(props: SlideProps): JSX.Element {
   const { width: intrinsicWidth, open, children, onSlide, onCollapsed } = props;
-  const width = React.useRef(new Animated.Value(0)).current;
-  const opacity = React.useRef(new Animated.Value(0)).current;
+  const width = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.parallel([
       Animated.spring(width, {
         toValue: open ? intrinsicWidth : 0,

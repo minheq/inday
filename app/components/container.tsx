@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, StyleSheet, ColorSchemeName } from 'react-native';
 import { useTheme } from './theme';
 import { tokens } from './tokens';
@@ -39,7 +39,7 @@ export function ContainerProvider(props: ContainerProviderProps): JSX.Element {
 }
 
 export function useParentContainer(): ContainerContext {
-  return React.useContext(ContainerContext);
+  return useContext(ContainerContext);
 }
 
 interface ContainerProps {

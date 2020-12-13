@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   GestureResponderEvent,
   Platform,
@@ -830,7 +830,7 @@ const getTouchFromGestureResponderEvent = (event: GestureResponderEvent) => {
 };
 
 export function useGesture(config: GestureConfig): EventHandlers {
-  const gestureRef = React.useRef<Gesture | null>(null);
+  const gestureRef = useRef<Gesture | null>(null);
   if (gestureRef.current == null) {
     gestureRef.current = new Gesture(config);
   }
@@ -838,13 +838,13 @@ export function useGesture(config: GestureConfig): EventHandlers {
 
   // On the initial mount, this is a no-op. On updates, `gesture` will be
   // re-configured to use the new configuration.
-  React.useEffect(() => {
+  useEffect(() => {
     gesture.configure(config);
   }, [config, gesture]);
 
   // On unmount, reset pending state and timers inside `gesture`. This is
   // a separate effect because we do not want to reset when `config` changes.
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       gesture.reset();
     };

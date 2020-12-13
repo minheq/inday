@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Checkbox } from './checkbox';
 import { Container } from './container';
 
 function Basic(): JSX.Element {
-  const [value, setValue] = React.useState(false);
+  const [value, setValue] = useState(false);
 
   return <Checkbox value={value} onChange={setValue} />;
 }
