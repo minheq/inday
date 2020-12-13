@@ -269,16 +269,28 @@ function MainContent() {
     console.log('Open record', recordID);
   }, []);
 
+  const handleSelectRecord = useCallback((recordID: RecordID) => {
+    console.log('Open record', recordID);
+  }, []);
+
   const renderView = useCallback((): React.ReactNode => {
     switch (view.type) {
       case 'list':
-        return <ListViewDisplay view={view} onOpenRecord={handleOpenRecord} />;
+        return (
+          <ListViewDisplay
+            mode="select"
+            view={view}
+            onOpenRecord={handleOpenRecord}
+            selectedRecords={[]}
+            onSelectRecord={handleSelectRecord}
+          />
+        );
       case 'board':
         return null;
       default:
         throw new Error('View type not supported');
     }
-  }, [view, handleOpenRecord]);
+  }, [view, handleOpenRecord, handleSelectRecord]);
 
   return (
     <Container flex={1} color="content">

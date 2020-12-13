@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Animated, Pressable, StyleProp, ViewStyle } from 'react-native';
+import { useTheme } from './theme';
 import { tokens } from './tokens';
 
 interface ButtonProps {
@@ -15,6 +16,7 @@ interface ButtonProps {
 export function Button(props: ButtonProps): JSX.Element {
   const { onPress, children, style, containerStyle, disabled = false } = props;
   const state = useRef(new Animated.Value(0)).current;
+  const theme = useTheme();
 
   return (
     <Pressable style={containerStyle} disabled={disabled} onPress={onPress}>
@@ -32,11 +34,18 @@ export function Button(props: ButtonProps): JSX.Element {
               {
                 backgroundColor: state.interpolate({
                   inputRange: [0, 1, 2],
-                  outputRange: [
-                    tokens.colors.base.transparent,
-                    tokens.colors.gray[50],
-                    tokens.colors.gray[100],
-                  ],
+                  outputRange:
+                    theme === 'dark'
+                      ? [
+                          tokens.colors.gray[900],
+                          tokens.colors.gray[800],
+                          tokens.colors.gray[700],
+                        ]
+                      : [
+                          tokens.colors.base.white,
+                          tokens.colors.gray[50],
+                          tokens.colors.gray[100],
+                        ],
                 }),
               },
               style,

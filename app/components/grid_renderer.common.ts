@@ -37,6 +37,11 @@ export interface LeafRow {
   row: number;
 }
 
+export interface SelectedRow {
+  path: number[];
+  row: number;
+}
+
 export interface GroupRow {
   type: 'group';
   height: number;
@@ -518,7 +523,7 @@ function getVisibleRowsIndexRange(
 interface UseGetStatefulRowsProps {
   rows: RecycledRow[];
   activeCell: StatefulCell | null;
-  selectedRows: LeafRow[] | null;
+  selectedRows: SelectedRow[] | null;
 }
 
 export interface GroupRowCell {

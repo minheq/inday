@@ -112,7 +112,7 @@ import {
   RenderHeaderCellProps,
 } from '../components/grid_renderer';
 import { Record, RecordID } from '../data/records';
-import { atom, useRecoilValue, useSetRecoilState } from 'recoil';
+import { atom, useRecoilState, useSetRecoilState } from 'recoil';
 import {
   NavigationKey,
   KeyBinding,
@@ -121,7 +121,10 @@ import {
   UIKey,
   useKeyboard,
 } from '../lib/keyboard';
-import { StatefulLeafRowCell } from '../components/grid_renderer.common';
+import {
+  SelectedRow,
+  StatefulLeafRowCell,
+} from '../components/grid_renderer.common';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/currency';
 import { getSystemLocale } from '../lib/locale';
@@ -143,9 +146,14 @@ const activeCellState = atom<StatefulLeafRowCell | null>({
   default: null,
 });
 
+export type ViewMode = 'edit' | 'select';
+
 interface ListViewDisplayProps {
   view: ListView;
   onOpenRecord: (recordID: RecordID) => void;
+  mode: ViewMode;
+  selectedRecords: Record[];
+  onSelectRecord: (recordID: RecordID) => void;
 }
 
 const FIELD_ROW_HEIGHT = 40;
@@ -188,7 +196,9 @@ interface ListViewDisplayContext {
   columnToFieldIDCache: ColumnToFieldIDCache;
   recordsCount: number;
   fieldsCount: number;
+  mode: ViewMode;
   onOpenRecord: (recordID: RecordID) => void;
+  onSelectRecord: (recordID: RecordID) => void;
 }
 
 const ListViewDisplayContext = createContext<ListViewDisplayContext>({
@@ -196,7 +206,11 @@ const ListViewDisplayContext = createContext<ListViewDisplayContext>({
   columnToFieldIDCache: {},
   recordsCount: 0,
   fieldsCount: 0,
+  mode: 'edit',
   onOpenRecord: () => {
+    return;
+  },
+  onSelectRecord: () => {
     return;
   },
 });
@@ -205,58 +219,23 @@ const ListViewDisplayContext = createContext<ListViewDisplayContext>({
 // - Make it obvious when changing state from editing -> focus (e.g. after pressing ESC)
 // - Display more information when focusing/editing cell
 export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
-  const { view, onOpenRecord } = props;
-  const activeCell = useRecoilValue(activeCellState);
+  const { view, onOpenRecord, mode, selectedRecords, onSelectRecord } = props;
+  const [activeCell, setActiveCell] = useRecoilState(activeCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
   const gridRef = useRef<GridRendererRef>(null);
-  const filters = useGetViewFilters(view.id);
-  const sorts = useGetViewSorts(view.id);
-  const groups = useGetViewGroups(view.id);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
     getColumnToFieldIDCache(fields),
   );
   const [rowToRecordIDCache, setRowToRecordIDCache] = useState(
     getRowToRecordIDCache(records),
   );
-  const prevRecords = usePrevious(records);
-  const prevFields = usePrevious(fields);
-  const prevFilters = usePrevious(filters);
-  const prevSorts = usePrevious(sorts);
-  const prevGroups = usePrevious(groups);
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
   const recordsCount = records.length;
   const fieldsCount = fields.length;
-
-  if (
-    activeCell !== prevActiveCell &&
-    gridRef.current !== null &&
-    activeCell !== null
-  ) {
-    gridRef.current.scrollToCell(activeCell);
-  }
-
-  const recordsOrderChanged: boolean = useMemo(() => {
-    return (
-      records.length !== prevRecords.length ||
-      filters !== prevFilters ||
-      sorts !== prevSorts ||
-      groups !== prevGroups
-    );
-  }, [
-    records,
-    prevRecords,
-    filters,
-    prevFilters,
-    sorts,
-    prevSorts,
-    groups,
-    prevGroups,
-  ]);
-  const fieldsOrderChanged: boolean = useMemo(() => {
-    return fields.length !== prevFields.length;
-  }, [fields, prevFields]);
+  const recordsOrderChanged = useRecordsOrderChanged(view.id, records);
+  const fieldsOrderChanged = useFieldsOrderChanged(view.id, fields);
 
   useEffect(() => {
     if (recordsOrderChanged === true) {
@@ -270,20 +249,30 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     }
   }, [fields, fieldsOrderChanged]);
 
+  useEffect(() => {
+    if (mode === 'select' && activeCell !== null) {
+      setActiveCell(null);
+    }
+  }, [mode, activeCell, setActiveCell]);
+
   const context = useMemo((): ListViewDisplayContext => {
     return {
       rowToRecordIDCache,
       columnToFieldIDCache,
       recordsCount,
       fieldsCount,
+      mode,
       onOpenRecord,
+      onSelectRecord,
     };
   }, [
     rowToRecordIDCache,
     columnToFieldIDCache,
     recordsCount,
     fieldsCount,
+    mode,
     onOpenRecord,
+    onSelectRecord,
   ]);
 
   const renderLeafRowCell = useCallback(
@@ -317,10 +306,28 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     [fields],
   );
 
-  const columns = useMemo(() => fields.map((field) => field.config.width), [
-    fields,
-  ]);
+  const columns = useMemo(
+    (): number[] => fields.map((field) => field.config.width),
+    [fields],
+  );
+  // TODO: Implement this
+  const selectedRows = useMemo(
+    (): SelectedRow[] =>
+      selectedRecords.map(() => ({
+        path: [],
+        row: 0,
+      })),
+    [selectedRecords],
+  );
   const rowCount = records.length;
+
+  if (
+    gridRef.current !== null &&
+    activeCell !== null &&
+    activeCell !== prevActiveCell
+  ) {
+    gridRef.current.scrollToCell(activeCell);
+  }
 
   return (
     <ListViewDisplayContext.Provider value={context}>
@@ -331,6 +338,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
               ref={gridRef}
               width={width}
               height={height}
+              selectedRows={selectedRows}
               groups={[{ type: 'leaf', rowCount, collapsed: false }]}
               renderLeafRowCell={renderLeafRowCell}
               renderHeaderCell={renderHeaderCell}
@@ -345,6 +353,42 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
       </Container>
     </ListViewDisplayContext.Provider>
   );
+}
+
+function useRecordsOrderChanged(viewID: ViewID, records: Record[]): boolean {
+  const filters = useGetViewFilters(viewID);
+  const sorts = useGetViewSorts(viewID);
+  const groups = useGetViewGroups(viewID);
+
+  const prevRecords = usePrevious(records);
+  const prevFilters = usePrevious(filters);
+  const prevSorts = usePrevious(sorts);
+  const prevGroups = usePrevious(groups);
+
+  return useMemo(() => {
+    return (
+      records.length !== prevRecords.length ||
+      filters !== prevFilters ||
+      sorts !== prevSorts ||
+      groups !== prevGroups
+    );
+  }, [
+    records,
+    prevRecords,
+    filters,
+    prevFilters,
+    sorts,
+    prevSorts,
+    groups,
+    prevGroups,
+  ]);
+}
+
+function useFieldsOrderChanged(viewID: ViewID, fields: Field[]): boolean {
+  const prevFields = usePrevious(fields);
+  return useMemo(() => {
+    return fields.length !== prevFields.length;
+  }, [fields, prevFields]);
 }
 
 interface LeafRowCellContext {

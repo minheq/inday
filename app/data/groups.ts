@@ -1,14 +1,13 @@
 import { ViewID } from './views';
 import { FieldID } from './fields';
 import { generateID } from '../../lib/id';
+import { SortOrder } from './sorts';
 
 export const groupIDPrefix = `grp`;
 export type GroupID = `${typeof groupIDPrefix}${string}`;
 export function GroupID(): GroupID {
   return generateID(groupIDPrefix);
 }
-
-export type GroupOrder = 'ascending' | 'descending';
 
 export interface BaseGroup {
   id: GroupID;
@@ -18,7 +17,7 @@ export interface BaseGroup {
 
 export interface GroupConfig {
   fieldID: FieldID;
-  order: GroupOrder;
+  order: SortOrder;
 }
 
 export interface Group extends BaseGroup, GroupConfig {}
