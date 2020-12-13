@@ -1,6 +1,5 @@
 import React from 'react';
-import { Pressable, Animated } from 'react-native';
-import { DynamicStyleSheet } from './stylesheet';
+import { Pressable, Animated, StyleSheet } from 'react-native';
 import { tokens } from './tokens';
 
 interface SwitchProps {
@@ -61,7 +60,7 @@ export function Switch(props: SwitchProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   root: {
     borderRadius: 999,
     width: 56,
@@ -80,9 +79,9 @@ const styles = DynamicStyleSheet.create(() => ({
     top: 2,
     width: 26,
     height: 26,
-    backgroundColor: 'white',
+    backgroundColor: tokens.colors.base.white,
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
   },
-}));
+});

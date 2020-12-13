@@ -1,6 +1,6 @@
 import React from 'react';
-import { View } from 'react-native';
-import { DynamicStyleSheet } from './stylesheet';
+import { View, StyleSheet, ColorSchemeName } from 'react-native';
+import { useTheme } from './theme';
 import { tokens } from './tokens';
 
 interface BackgroundColors {
@@ -125,7 +125,7 @@ export function Container(props: ContainerProps): JSX.Element {
     center,
     zIndex,
   } = props;
-
+  const theme = useTheme();
   const effectiveWidth = width ?? (expanded ? '100%' : undefined);
   const effectiveHeight = height ?? (expanded ? '100%' : undefined);
 
@@ -171,7 +171,7 @@ export function Container(props: ContainerProps): JSX.Element {
             borderLeftWidth ||
             borderRightWidth) &&
             styles.borderColor,
-          color && styles[color],
+          color && resolveColor(color, theme),
           shadow && styles.shadow,
           center && styles.center,
           shape && styles[shape],
@@ -183,7 +183,23 @@ export function Container(props: ContainerProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+function resolveColor(
+  color: BackgroundColor,
+  theme: ColorSchemeName,
+): {
+  backgroundColor: string;
+} {
+  switch (color) {
+    case 'content':
+      return theme === 'dark' ? styles.contentDark : styles.contentLight;
+    case 'default':
+      return styles.default;
+    default:
+      throw new Error('Unrecognized background color');
+  }
+}
+
+const styles = StyleSheet.create({
   center: {
     display: 'flex',
     justifyContent: 'center',
@@ -199,7 +215,10 @@ const styles = DynamicStyleSheet.create(() => ({
   default: {
     backgroundColor: tokens.colors.base.transparent,
   },
-  content: {
+  contentDark: {
+    backgroundColor: tokens.colors.gray[900],
+  },
+  contentLight: {
     backgroundColor: tokens.colors.base.white,
   },
   tint: {
@@ -212,4 +231,4 @@ const styles = DynamicStyleSheet.create(() => ({
   borderColor: {
     borderColor: tokens.colors.gray[300],
   },
-}));
+});

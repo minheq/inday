@@ -1,7 +1,6 @@
 import React from 'react';
 import { Icon } from './icon';
-import { View, Pressable, Animated } from 'react-native';
-import { DynamicStyleSheet } from './stylesheet';
+import { View, Pressable, Animated, StyleSheet } from 'react-native';
 import { tokens } from './tokens';
 
 interface CheckboxProps {
@@ -56,7 +55,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   root: {
     borderRadius: 999,
     width: 24,
@@ -83,4 +82,4 @@ const styles = DynamicStyleSheet.create(() => ({
     justifyContent: 'center',
     alignItems: 'center',
   },
-}));
+});

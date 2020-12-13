@@ -17,6 +17,7 @@ import {
 } from './app/data/atoms';
 import { Playground } from './app/components/playground';
 import { Router, ScreenName } from './app/routes';
+import { ThemeProvider } from './app/components/theme';
 
 declare global {
   interface Window {
@@ -44,27 +45,29 @@ export function App(): JSX.Element {
   return (
     <RecoilRoot>
       <ErrorBoundary>
-        <Suspense fallback={<Text>Loading...</Text>}>
-          <PersistenceObserver />
-          <Router
-            pathMap={{
-              Space: {
-                path: '/space/:spaceID/:viewID',
-                component: SpaceScreen,
-              },
-              Playground: {
-                path: '/playground/:component',
-                component: Playground,
-              },
-            }}
-            fallback={
-              <SpaceScreen
-                name={ScreenName.Space}
-                params={{ viewID: 'viw1', spaceID: 'spc1' }}
-              />
-            }
-          />
-        </Suspense>
+        <ThemeProvider>
+          <Suspense fallback={<Text>Loading...</Text>}>
+            <PersistenceObserver />
+            <Router
+              pathMap={{
+                Space: {
+                  path: '/space/:spaceID/:viewID',
+                  component: SpaceScreen,
+                },
+                Playground: {
+                  path: '/playground/:component',
+                  component: Playground,
+                },
+              }}
+              fallback={
+                <SpaceScreen
+                  name={ScreenName.Space}
+                  params={{ viewID: 'viw1', spaceID: 'spc1' }}
+                />
+              }
+            />
+          </Suspense>
+        </ThemeProvider>
       </ErrorBoundary>
     </RecoilRoot>
   );

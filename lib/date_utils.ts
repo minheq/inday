@@ -201,6 +201,7 @@ export function isDate(value: unknown): value is Date {
 
 // https://tc39.es/ecma402/#datetimeformat-objects
 export interface DateTimeFormatOptions {
+  weekday?: 'narrow' | 'short' | 'long';
   year?: '2-digit' | 'numeric';
   month?: '2-digit' | 'numeric' | 'narrow' | 'short' | 'long';
   day?: '2-digit' | 'numeric';

@@ -13,13 +13,13 @@ import {
   Animated,
   ScrollView,
   Pressable,
+  StyleSheet,
 } from 'react-native';
 import { tokens } from './tokens';
 import { Text } from './text';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
-import { DynamicStyleSheet } from './stylesheet';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 
 export interface PickerProps<T> {
@@ -260,7 +260,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   button: {
     borderRadius: tokens.border.radius.default,
     borderWidth: 1,
@@ -296,4 +296,4 @@ const styles = DynamicStyleSheet.create(() => ({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-}));
+});

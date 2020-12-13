@@ -1,7 +1,7 @@
 import { useGetCollaborator } from '../data/store';
 import React from 'react';
-import { View } from 'react-native';
-import { Avatar, DynamicStyleSheet, Text, tokens } from '../components';
+import { View, StyleSheet } from 'react-native';
+import { Avatar, Text, tokens } from '../components';
 import { CollaboratorID } from '../data/collaborators';
 
 interface CollaboratorBadgeProps {
@@ -22,7 +22,7 @@ export function CollaboratorBadge(props: CollaboratorBadgeProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   base: {
     borderRadius: tokens.border.radius.default,
     height: 32,
@@ -33,4 +33,4 @@ const styles = DynamicStyleSheet.create(() => ({
   avatarWrapper: {
     paddingRight: 4,
   },
-}));
+});

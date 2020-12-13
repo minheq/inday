@@ -1,11 +1,18 @@
 import React from 'react';
-import { Text as RNText, StyleSheet, TextStyle } from 'react-native';
+import {
+  Text as RNText,
+  TextStyle,
+  StyleSheet,
+  ColorSchemeName,
+} from 'react-native';
+import { useTheme } from './theme';
 import { tokens } from './tokens';
 
 export interface TextProps {
   children?: React.ReactNode;
   size?: TextSize;
   color?: TextColor;
+  customColor?: string;
   align?: 'left' | 'right' | 'center';
   weight?: TextWeight;
   selectable?: boolean;
@@ -61,6 +68,7 @@ export function Text(props: TextProps): JSX.Element {
     align = 'left',
     children,
     color = 'default',
+    customColor,
     size = 'md',
     selectable = false,
     testID,
@@ -69,6 +77,7 @@ export function Text(props: TextProps): JSX.Element {
     transform = 'none',
     weight = 'normal',
   } = props;
+  const theme = useTheme();
 
   return (
     <RNText
@@ -76,8 +85,13 @@ export function Text(props: TextProps): JSX.Element {
       style={[
         styles[align],
         styles[size],
-        styles[color],
         {
+          color: fromTextColor(color, theme),
+        },
+        {
+          ...(customColor !== undefined && {
+            color: customColor,
+          }),
           fontWeight: weight,
           textDecorationLine: decoration,
           textTransform: transform,
@@ -91,14 +105,23 @@ export function Text(props: TextProps): JSX.Element {
   );
 }
 
-export function fromTextColor(color: TextColor): string {
+export function fromTextColor(
+  color: TextColor,
+  theme: ColorSchemeName,
+): string {
   switch (color) {
     case 'default':
-      return tokens.colors.gray[900];
+      return theme === 'dark'
+        ? tokens.colors.base.white
+        : tokens.colors.gray[900];
     case 'primary':
-      return tokens.colors.blue[700];
+      return theme === 'dark'
+        ? tokens.colors.blue[400]
+        : tokens.colors.blue[700];
     case 'muted':
-      return tokens.colors.gray[500];
+      return theme === 'dark'
+        ? tokens.colors.coolGray[50]
+        : tokens.colors.gray[500];
     case 'error':
       return tokens.colors.red[700];
     case 'success':
@@ -106,40 +129,16 @@ export function fromTextColor(color: TextColor): string {
     case 'contrast':
       return tokens.colors.base.white;
     default:
-      throw new Error('Not handled');
+      throw new Error('Text color not recognized');
   }
 }
 
 const styles = StyleSheet.create({
-  root: {
-    margin: 0,
-    padding: 0,
-    fontWeight: 'normal',
-    fontFamily: tokens.text.fontFamily,
-  },
   xl: tokens.text.size.xl,
   lg: tokens.text.size.lg,
   md: tokens.text.size.md,
   sm: tokens.text.size.sm,
   xs: tokens.text.size.xs,
-  default: {
-    color: tokens.colors.gray[900],
-  },
-  primary: {
-    color: tokens.colors.blue[700],
-  },
-  muted: {
-    color: tokens.colors.gray[500],
-  },
-  error: {
-    color: tokens.colors.red[700],
-  },
-  success: {
-    color: tokens.colors.green[700],
-  },
-  contrast: {
-    color: tokens.colors.base.white,
-  },
   left: {
     textAlign: 'left',
   },

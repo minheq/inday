@@ -26,7 +26,6 @@ module.exports = {
         react: {
           version: 'detect',
         },
-        'react-native/style-sheet-object-names': ['DynamicStyleSheet'],
       },
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint', 'sonarjs', 'react', 'react-native'],

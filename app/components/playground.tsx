@@ -1,10 +1,9 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, StyleSheet } from 'react-native';
 import { DialogStories } from './dialog.stories';
 import { GridStories } from './grid_renderer.stories';
 import { DatePickerStories } from './date_picker.stories';
 import { TextInputStories } from './text_input.stories';
-import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import { Button } from './button';
@@ -199,7 +198,7 @@ function Intro() {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
     height: '100%',
@@ -212,7 +211,4 @@ const styles = DynamicStyleSheet.create(() => ({
     paddingLeft: 24,
     borderRadius: tokens.border.radius.default,
   },
-  content: {
-    flex: 1,
-  },
-}));
+});

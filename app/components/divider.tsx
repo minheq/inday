@@ -1,6 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
-import { DynamicStyleSheet } from './stylesheet';
+import { View, StyleSheet } from 'react-native';
 import { tokens } from './tokens';
 
 /**
@@ -10,10 +9,10 @@ export function Divider(): JSX.Element {
   return <View style={styles.base} />;
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   base: {
     width: '100%',
     height: 1,
     borderColor: tokens.colors.gray[300],
   },
-}));
+});

@@ -5,10 +5,10 @@ import {
   ViewStyle,
   StyleProp,
   Pressable,
+  StyleSheet,
 } from 'react-native';
 import { Modal, ModalProps } from './modal';
 import { tokens } from './tokens';
-import { DynamicStyleSheet } from './stylesheet';
 
 const OFFSET_TOP = 64;
 
@@ -201,7 +201,7 @@ export function Dialog(props: DialogProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   base: {
     height: '100%',
     width: '100%',
@@ -221,4 +221,4 @@ const styles = DynamicStyleSheet.create(() => ({
     right: 0,
     bottom: 0,
   },
-}));
+});

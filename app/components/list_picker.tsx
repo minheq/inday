@@ -10,9 +10,9 @@ import {
   ScrollView,
   TextInputKeyPressEventData,
   View,
+  StyleSheet,
 } from 'react-native';
 
-import { DynamicStyleSheet } from './stylesheet';
 import { Text } from './text';
 import { Button } from './button';
 import { tokens } from './tokens';
@@ -256,7 +256,7 @@ export function useOptionsSearch<T>(
   return result.map((value) => value.item);
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   base: {
     flex: 1,
   },
@@ -277,4 +277,4 @@ const styles = DynamicStyleSheet.create(() => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-}));
+});

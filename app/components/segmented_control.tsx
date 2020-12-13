@@ -1,10 +1,9 @@
 import React, { Fragment, useCallback } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { Spacer } from './spacer';
 import { Row } from './row';
 import { Text } from './text';
-import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 
 interface Option<T> {
@@ -69,7 +68,7 @@ function SegmentedControlButton<T>(props: SegmentedControlButtonProps<T>) {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   control: {
     flex: 1,
     height: 40,
@@ -80,4 +79,4 @@ const styles = DynamicStyleSheet.create(() => ({
   selected: {
     backgroundColor: tokens.colors.gray[50],
   },
-}));
+});

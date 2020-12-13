@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 
 import { Text } from './text';
 import { Spacer } from './spacer';
@@ -10,7 +10,6 @@ import {
   RenderOtherMonthProps,
   RenderWeekProps,
 } from './month_renderer';
-import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 import { Picker, PickerOption } from './picker';
 import { getSystemLocale } from '../lib/locale';
@@ -336,7 +335,7 @@ const eachDateOfWeek = (
   return eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
 };
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   root: {},
   dayRoot: {
     flex: 1,
@@ -458,4 +457,4 @@ const styles = DynamicStyleSheet.create(() => ({
     alignItems: 'center',
     padding: 1,
   },
-}));
+});

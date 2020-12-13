@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Image } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { take } from '../../lib/array_utils';
-import { DynamicStyleSheet } from './stylesheet';
 import { Text, TextSize } from './text';
 import { tokens } from './tokens';
 
@@ -69,7 +68,7 @@ const sizeMap: { [size in AvatarSize]: number } = {
   lg: 48,
 };
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   base: {
     borderRadius: 999,
     justifyContent: 'center',
@@ -90,4 +89,4 @@ const styles = DynamicStyleSheet.create(() => ({
     width: 56,
     height: 56,
   },
-}));
+});

@@ -6,10 +6,10 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
+  StyleSheet,
 } from 'react-native';
 import { Button } from './button';
 import { IconName, Icon } from './icon';
-import { DynamicStyleSheet } from './stylesheet';
 import { tokens } from './tokens';
 
 export interface TextInputProps {
@@ -84,7 +84,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
   );
 }
 
-const styles = DynamicStyleSheet.create({
+const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
     borderRadius: tokens.border.radius.default,

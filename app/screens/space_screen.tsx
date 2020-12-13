@@ -9,7 +9,6 @@ import {
   Spacer,
   FlatButton,
   Button,
-  DynamicStyleSheet,
   tokens,
   Icon,
 } from '../components';
@@ -27,6 +26,8 @@ import { RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
 import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
 import { Space, SpaceID } from '../data/spaces';
+import { useTheme } from '../components/theme';
+import { StyleSheet } from 'react-native';
 
 type SidePanelState = 'views' | 'organize' | null;
 
@@ -163,7 +164,7 @@ interface ViewMenuButtonProps {
 
 function ViewMenuButton(props: ViewMenuButtonProps) {
   const { view, onPress } = props;
-
+  const theme = useTheme();
   const handlePress = useCallback(() => {
     onPress(view.id);
   }, [onPress, view]);
@@ -173,7 +174,7 @@ function ViewMenuButton(props: ViewMenuButtonProps) {
       <Row>
         <Icon
           name={getViewIcon(view.type)}
-          customColor={getViewIconColor(view.type)}
+          customColor={getViewIconColor(view.type, theme)}
         />
         <Spacer size={4} />
         <Text>{view.name}</Text>
@@ -224,6 +225,7 @@ interface CollectionItemProps {
 
 function CollectionItem(props: CollectionItemProps) {
   const { active, collection, onPress } = props;
+  const theme = useTheme();
 
   const handlePress = useCallback(() => {
     onPress(collection.id);
@@ -232,7 +234,13 @@ function CollectionItem(props: CollectionItemProps) {
   return (
     <Button
       onPress={handlePress}
-      style={[styles.collectionItem, active && styles.activeCollectionItem]}
+      style={[
+        styles.collectionItem,
+        active && styles.activeCollectionItem,
+        theme === 'dark'
+          ? styles.activeCollectionItemDark
+          : styles.activeCollectionItemLight,
+      ]}
     >
       <Text
         weight={active ? 'bold' : 'normal'}
@@ -308,7 +316,7 @@ function MainContent() {
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   collectionItem: {
     borderTopLeftRadius: tokens.border.radius.default,
     borderTopRightRadius: tokens.border.radius.default,
@@ -323,6 +331,11 @@ const styles = DynamicStyleSheet.create(() => ({
   },
   activeCollectionItem: {
     borderBottomWidth: 2,
+  },
+  activeCollectionItemDark: {
+    borderColor: tokens.colors.lightBlue[50],
+  },
+  activeCollectionItemLight: {
     borderColor: tokens.colors.lightBlue[700],
   },
   viewMenuButton: {
@@ -334,4 +347,4 @@ const styles = DynamicStyleSheet.create(() => ({
     alignItems: 'center',
     paddingHorizontal: 8,
   },
-}));
+});

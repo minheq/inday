@@ -4,6 +4,7 @@ import {
   ScrollView,
   TextInputKeyPressEventData,
   View,
+  StyleSheet,
 } from 'react-native';
 import { UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { Checkbox } from './checkbox';
@@ -13,7 +14,6 @@ import {
   useListKeyboardNavigation,
   useOptionsSearch,
 } from './list_picker';
-import { DynamicStyleSheet } from './stylesheet';
 import { TextInput } from './text_input';
 
 interface MultiListPickerProps<T> {
@@ -157,11 +157,11 @@ export function MultiListPicker<T>(
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   base: {
     flex: 1,
   },
   searchInputWrapper: {
     paddingBottom: 16,
   },
-}));
+});

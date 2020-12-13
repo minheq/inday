@@ -16,6 +16,7 @@ import {
   TextInput,
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
+  StyleSheet,
 } from 'react-native';
 import {
   FlatButton,
@@ -121,7 +122,6 @@ import {
   useKeyboard,
 } from '../lib/keyboard';
 import { StatefulLeafRowCell } from '../components/grid_renderer.common';
-import { DynamicStyleSheet } from '../components/stylesheet';
 import { getFieldIcon } from './icon_helpers';
 import { formatCurrency } from '../../lib/currency';
 import { getSystemLocale } from '../lib/locale';
@@ -136,6 +136,7 @@ import { formatDate, formatISODate, parseISODate } from '../../lib/date_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
 import { DatePicker } from '../components/date_picker';
+import { useTheme } from '../components/theme';
 
 const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_ActiveCell',
@@ -482,6 +483,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
 ) {
   const { primary, height, field, width, value } = props;
   const { cell, onFocus } = useLeafRowCellContext();
+  const theme = useTheme();
 
   const renderCell = useCallback(() => {
     switch (field.type) {
@@ -563,6 +565,9 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
       style={[
         styles.leafRowCell,
+        theme === 'dark'
+          ? styles.cellBackgroundDark
+          : styles.cellBackgroundLight,
         primary && styles.primaryCell,
         cell.state !== 'default' && styles.focusedLeafRowCell,
         cell.state !== 'default' && {
@@ -586,9 +591,18 @@ interface HeaderCellProps {
 
 function HeaderCell(props: HeaderCellProps) {
   const { field, primary } = props;
+  const theme = useTheme();
 
   return (
-    <View style={[styles.headerCell, primary && styles.primaryCell]}>
+    <View
+      style={[
+        styles.headerCell,
+        theme === 'dark'
+          ? styles.cellBackgroundDark
+          : styles.cellBackgroundLight,
+        primary && styles.primaryCell,
+      ]}
+    >
       <Row>
         <Icon name={getFieldIcon(field.type)} />
         <Spacer size={4} />
@@ -1799,11 +1813,10 @@ function useCellKeyPressHandler(
   );
 }
 
-const styles = DynamicStyleSheet.create(() => ({
+const styles = StyleSheet.create({
   leafRowCell: {
     height: '100%',
     borderBottomWidth: 1,
-    backgroundColor: tokens.colors.base.white,
     borderColor: tokens.colors.gray[300],
     paddingVertical: 4,
     paddingHorizontal: 8,
@@ -1886,14 +1899,13 @@ const styles = DynamicStyleSheet.create(() => ({
     height: '100%',
     paddingHorizontal: 8,
     justifyContent: 'center',
-    backgroundColor: tokens.colors.base.white,
     borderColor: tokens.colors.gray[300],
     borderBottomWidth: 1,
   },
-  focusedCell: {
-    borderColor: tokens.colors.lightBlue[700],
+  cellBackgroundDark: {
+    backgroundColor: tokens.colors.gray[900],
   },
-  hoveredCell: {
-    borderColor: tokens.colors.gray[300],
+  cellBackgroundLight: {
+    backgroundColor: tokens.colors.base.white,
   },
-}));
+});

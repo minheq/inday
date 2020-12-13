@@ -1,3 +1,4 @@
+import { ColorSchemeName } from 'react-native';
 import { IconName, tokens } from '../components';
 import { FieldType } from '../data/fields';
 import { ViewType } from '../data/views';
@@ -11,13 +12,20 @@ export function getViewIcon(viewType: ViewType): IconName {
   return viewIconMap[viewType];
 }
 
-const viewIconColorMap: { [viewType in ViewType]: string } = {
-  list: tokens.colors.blue[600],
-  board: tokens.colors.red[600],
-};
-
-export function getViewIconColor(viewType: ViewType): string {
-  return viewIconColorMap[viewType];
+export function getViewIconColor(
+  viewType: ViewType,
+  theme: ColorSchemeName,
+): string {
+  switch (viewType) {
+    case 'list':
+      return theme === 'dark'
+        ? tokens.colors.blue[400]
+        : tokens.colors.blue[600];
+    case 'board':
+      return theme === 'dark' ? tokens.colors.red[50] : tokens.colors.red[600];
+    default:
+      throw new Error(`View type not recognized ${JSON.stringify(viewType)}`);
+  }
 }
 
 const fieldIconMap: { [fieldType in FieldType]: IconName } = {
