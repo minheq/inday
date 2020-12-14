@@ -1,53 +1,23 @@
 import { AppRegistry } from 'react-native';
 import React, { Suspense } from 'react';
-import { RecoilRoot, useRecoilTransactionObserver_UNSTABLE } from 'recoil';
+import { RecoilRoot } from 'recoil';
+import RecoilDebugger from 'recoilize';
 
 import { Text } from './app/components';
 import { ErrorBoundary } from './app/core/error_boundary';
 import { SpaceScreen } from './app/screens/space_screen';
 
-import {
-  fieldsByIDState,
-  recordsByIDState,
-  spacesByIDState,
-  filtersByIDState,
-  workspaceState,
-  sortsByIDState,
-  eventsState,
-} from './app/data/atoms';
 import { Playground } from './app/components/playground';
 import { Router, ScreenName } from './app/routes';
 import { ThemeProvider } from './app/components/theme';
 
-declare global {
-  interface Window {
-    debugState: any;
-  }
-}
-
-function PersistenceObserver() {
-  useRecoilTransactionObserver_UNSTABLE(({ snapshot }) => {
-    window.debugState = {
-      spacesByIDState: snapshot.getLoadable(spacesByIDState).contents,
-      recordsByIDState: snapshot.getLoadable(recordsByIDState).contents,
-      fieldsByIDState: snapshot.getLoadable(fieldsByIDState).contents,
-      filtersByIDState: snapshot.getLoadable(filtersByIDState).contents,
-      workspaceState: snapshot.getLoadable(workspaceState).contents,
-      sortsByIDState: snapshot.getLoadable(sortsByIDState).contents,
-      eventsState: snapshot.getLoadable(eventsState).contents,
-    };
-  });
-
-  return null;
-}
-
 export function App(): JSX.Element {
   return (
     <RecoilRoot>
+      <RecoilDebugger />
       <ErrorBoundary>
         <ThemeProvider>
           <Suspense fallback={<Text>Loading...</Text>}>
-            <PersistenceObserver />
             <Router
               pathMap={{
                 Space: {
