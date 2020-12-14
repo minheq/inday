@@ -1,7 +1,6 @@
 import { AppRegistry } from 'react-native';
 import React, { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
-import RecoilDebugger from 'recoilize';
 
 import { Text } from './app/components';
 import { ErrorBoundary } from './app/core/error_boundary';
@@ -14,7 +13,6 @@ import { ThemeProvider } from './app/components/theme';
 export function App(): JSX.Element {
   return (
     <RecoilRoot>
-      <RecoilDebugger />
       <ErrorBoundary>
         <ThemeProvider>
           <Suspense fallback={<Text>Loading...</Text>}>
