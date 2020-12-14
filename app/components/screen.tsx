@@ -31,6 +31,6 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.gray[900],
   },
   rootLight: {
-    backgroundColor: tokens.colors.gray[900],
+    backgroundColor: tokens.colors.base.white,
   },
 });
