@@ -30,7 +30,6 @@ import {
   ListPicker,
 } from '../components';
 import {
-  useGetViewRecords,
   useGetSortedFieldsWithListViewConfig,
   useUpdateRecordFieldValue,
   useGetField,
@@ -43,6 +42,8 @@ import {
   useGetCollectionRecords,
   useGetRecordCallback,
   useGetCollectionCallback,
+  useGetViewRecords,
+  useGetSortGetters,
 } from '../data/store';
 import {
   FieldType,
@@ -122,6 +123,7 @@ import {
   useKeyboard,
 } from '../lib/keyboard';
 import {
+  GridGroup,
   SelectedRow,
   StatefulLeafRowCell,
 } from '../components/grid_renderer.common';
@@ -140,6 +142,10 @@ import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
 import { DatePicker } from '../components/date_picker';
 import { useTheme } from '../components/theme';
+import { FlatObject } from '../../lib/flat_object';
+import { last } from '../../lib/array_utils';
+import { Group } from '../data/groups';
+import { makeRecordNodes, RecordNode, SortGetters } from '../data/sorts';
 
 const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_ActiveCell',
@@ -160,52 +166,25 @@ const FIELD_ROW_HEIGHT = 40;
 const RECORD_ROW_HEIGHT = 40;
 const FOCUS_BORDER_WIDTH = 3;
 
-type ColumnToFieldIDCache = {
-  [column: number]: FieldID;
-};
-
-type RowToRecordIDCache = {
-  [row: number]: RecordID;
-};
-
-function getColumnToFieldIDCache(fields: Field[]) {
-  const cache: ColumnToFieldIDCache = {};
-
-  for (let i = 0; i < fields.length; i++) {
-    const field = fields[i];
-    cache[i + 1] = field.id;
-  }
-
-  return cache;
-}
-
-// TODO: Include path
-function getRowToRecordIDCache(records: Record[]) {
-  const cache: RowToRecordIDCache = {};
-
-  for (let i = 0; i < records.length; i++) {
-    const record = records[i];
-    cache[i + 1] = record.id;
-  }
-
-  return cache;
-}
-
 interface ListViewDisplayContext {
   rowToRecordIDCache: RowToRecordIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
-  recordsCount: number;
-  fieldsCount: number;
+  lastColumn: number;
+  lastRow: RowPath;
   mode: ViewMode;
   onOpenRecord: (recordID: RecordID) => void;
   onSelectRecord: (recordID: RecordID) => void;
 }
 
 const ListViewDisplayContext = createContext<ListViewDisplayContext>({
-  rowToRecordIDCache: {},
+  rowToRecordIDCache: FlatObject(),
   columnToFieldIDCache: {},
-  recordsCount: 0,
-  fieldsCount: 0,
+  lastColumn: 0,
+  lastRow: {
+    recordID: 'rec',
+    row: 1,
+    path: [],
+  },
   mode: 'edit',
   onOpenRecord: () => {
     return;
@@ -223,25 +202,41 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const [activeCell, setActiveCell] = useRecoilState(activeCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
+  const groups = useGetViewGroups(view.id);
+  const sortGetters = useGetSortGetters();
+  const nodes = useMemo(() => getRecordNodes(records, groups, sortGetters), [
+    records,
+    groups,
+    sortGetters,
+  ]);
   const gridRef = useRef<GridRendererRef>(null);
+  const rowPaths = useMemo(() => getRowPaths(nodes, []), [nodes]);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
     getColumnToFieldIDCache(fields),
   );
   const [rowToRecordIDCache, setRowToRecordIDCache] = useState(
-    getRowToRecordIDCache(records),
+    getRowToRecordIDCache(rowPaths),
   );
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
-  const recordsCount = records.length;
-  const fieldsCount = fields.length;
+  const lastColumn = fields.length;
+  const lastRow = useMemo(
+    (): RowPath =>
+      last(rowPaths) || {
+        recordID: 'rec',
+        row: 1,
+        path: [],
+      },
+    [rowPaths],
+  );
   const recordsOrderChanged = useRecordsOrderChanged(view.id, records);
   const fieldsOrderChanged = useFieldsOrderChanged(view.id, fields);
 
   useEffect(() => {
     if (recordsOrderChanged === true) {
-      setRowToRecordIDCache(getRowToRecordIDCache(records));
+      setRowToRecordIDCache(getRowToRecordIDCache(rowPaths));
     }
-  }, [records, recordsOrderChanged]);
+  }, [rowPaths, recordsOrderChanged]);
 
   useEffect(() => {
     if (fieldsOrderChanged === true) {
@@ -259,8 +254,8 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     return {
       rowToRecordIDCache,
       columnToFieldIDCache,
-      recordsCount,
-      fieldsCount,
+      lastColumn,
+      lastRow,
       mode,
       onOpenRecord,
       onSelectRecord,
@@ -268,8 +263,8 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   }, [
     rowToRecordIDCache,
     columnToFieldIDCache,
-    recordsCount,
-    fieldsCount,
+    lastColumn,
+    lastRow,
     mode,
     onOpenRecord,
     onSelectRecord,
@@ -278,9 +273,13 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   const renderLeafRowCell = useCallback(
     (c: RenderLeafRowCellProps) => {
       const fieldID = columnToFieldIDCache[c.column];
-      const recordID = rowToRecordIDCache[c.row];
+      const recordID = rowToRecordIDCache.get([...c.path, c.row]);
       const primary = c.column === 1;
       const height = FIELD_ROW_HEIGHT;
+
+      if (recordID === undefined) {
+        throw new Error('No corresponding recordID found for row path.');
+      }
 
       return (
         <LeafRowCell
@@ -310,6 +309,8 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     (): number[] => fields.map((field) => field.config.width),
     [fields],
   );
+  const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
+
   // TODO: Implement this
   const selectedRows = useMemo(
     (): SelectedRow[] =>
@@ -319,7 +320,6 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
       })),
     [selectedRecords],
   );
-  const rowCount = records.length;
 
   if (
     gridRef.current !== null &&
@@ -339,7 +339,7 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
               width={width}
               height={height}
               selectedRows={selectedRows}
-              groups={[{ type: 'leaf', rowCount, collapsed: false }]}
+              groups={gridGroups}
               renderLeafRowCell={renderLeafRowCell}
               renderHeaderCell={renderHeaderCell}
               leafRowHeight={RECORD_ROW_HEIGHT}
@@ -353,6 +353,162 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
       </Container>
     </ListViewDisplayContext.Provider>
   );
+}
+
+type ColumnToFieldIDCache = {
+  [column: number]: FieldID;
+};
+
+type RowToRecordIDCache = FlatObject<RecordID>;
+
+function getColumnToFieldIDCache(fields: Field[]): ColumnToFieldIDCache {
+  const cache: ColumnToFieldIDCache = {};
+
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i];
+    cache[i + 1] = field.id;
+  }
+
+  return cache;
+}
+
+interface RowPath {
+  recordID: RecordID;
+  path: number[];
+  row: number;
+}
+
+function getRowToRecordIDCache(rows: RowPath[]): RowToRecordIDCache {
+  const cache = FlatObject<RecordID>();
+
+  if (isEmpty(rows)) {
+    return cache;
+  }
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+
+    cache.set([...row.path, row.row], row.recordID);
+  }
+
+  return cache;
+}
+
+interface FlatRecordNode {
+  type: 'leaf';
+  grouped: false;
+  children: Record[];
+}
+
+function getRecordNodes(
+  records: Record[],
+  groups: Group[],
+  sortGetters: SortGetters,
+): FlatRecordNode[] | GroupedRecordNode[] {
+  if (isEmpty(groups)) {
+    return [{ type: 'leaf', children: records, grouped: false }];
+  }
+
+  const nodes = makeRecordNodes(groups, records, sortGetters);
+
+  return toGroupedRecordNode(nodes);
+}
+
+function toGroupedRecordNode(nodes: RecordNode[]): GroupedRecordNode[] {
+  let groups: GroupedRecordNode[] = [];
+
+  for (const node of nodes) {
+    if (node.type === 'leaf') {
+      groups = groups.concat({
+        type: 'leaf',
+        grouped: true,
+        collapsed: false,
+        field: node.field,
+        value: node.value,
+        children: node.children,
+      });
+    } else {
+      groups = groups.concat({
+        type: 'ancestor',
+        collapsed: false,
+        field: node.field,
+        value: node.value,
+        children: toGroupedRecordNode(node.children),
+      });
+    }
+  }
+
+  return groups;
+}
+
+interface LeafGroupedRecordNode {
+  type: 'leaf';
+  grouped: true;
+  collapsed: boolean;
+  field: Field;
+  value: FieldValue;
+  children: Record[];
+}
+
+interface AncestorGroupedRecordNode {
+  type: 'ancestor';
+  collapsed: boolean;
+  field: Field;
+  value: FieldValue;
+  children: GroupedRecordNode[];
+}
+
+type GroupedRecordNode = LeafGroupedRecordNode | AncestorGroupedRecordNode;
+
+function getRowPaths(
+  nodes: GroupedRecordNode[] | FlatRecordNode[],
+  prevPath: number[],
+): RowPath[] {
+  let rows: RowPath[] = [];
+
+  for (let i = 0; i < nodes.length; i++) {
+    const group = nodes[i];
+    const path = [...prevPath, i];
+
+    if (group.type === 'leaf') {
+      for (let j = 0; j < group.children.length; j++) {
+        const record = group.children[j];
+
+        rows = rows.concat({ path, row: j + 1, recordID: record.id });
+      }
+    } else {
+      const { children } = group;
+      const groupRows = getRowPaths(children, path);
+
+      rows = rows.concat(groupRows);
+    }
+  }
+
+  return rows;
+}
+
+function toGridGroups(
+  nodes: GroupedRecordNode[] | FlatRecordNode[],
+): GridGroup[] {
+  let groups: GridGroup[] = [];
+
+  for (const node of nodes) {
+    if (node.type === 'leaf') {
+      groups = groups.concat({
+        type: 'leaf',
+        collapsed: node.grouped === true && node.collapsed === true,
+        rowCount: node.children.length,
+      });
+    } else {
+      groups = groups.concat({
+        type: 'ancestor',
+        collapsed: node.collapsed,
+        children: toGridGroups(node.children),
+      });
+    }
+  }
+
+  return groups;
 }
 
 function useRecordsOrderChanged(viewID: ViewID, records: Record[]): boolean {
@@ -467,7 +623,7 @@ function LeafRowCell(props: LeafRowCellProps) {
 
   const handleFocusNextRecord = useCallback(() => {
     const nextRow = cell.row + 1;
-    if (rowToRecordIDCache[nextRow] === undefined) {
+    if (rowToRecordIDCache.get([...cell.path, nextRow]) === undefined) {
       return;
     }
 
@@ -1591,21 +1747,22 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const {
     rowToRecordIDCache,
     columnToFieldIDCache,
-    recordsCount,
-    fieldsCount,
+    lastRow,
+    lastColumn,
     onOpenRecord,
   } = useContext(ListViewDisplayContext);
-
   const { cell } = useContext(LeafRowCellContext);
-  const { row, column, path } = cell;
   const setActiveCell = useSetRecoilState(activeCellState);
 
   // Listen for keyboard strokes only when the cell is focused
   const active = cell !== null && cell.state === 'focused';
 
   const onArrowDown = useCallback(() => {
+    const { row, column, path } = cell;
     const nextRow = row + 1;
-    if (rowToRecordIDCache[nextRow] === undefined) {
+    const next = rowToRecordIDCache.get([...cell.path, nextRow]);
+
+    if (next === undefined) {
       return;
     }
 
@@ -1616,11 +1773,14 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [row, column, path, setActiveCell, rowToRecordIDCache]);
+  }, [cell, setActiveCell, rowToRecordIDCache]);
 
   const onArrowUp = useCallback(() => {
+    const { row, column, path } = cell;
     const prevRow = row - 1;
-    if (rowToRecordIDCache[prevRow] === undefined) {
+    const prev = rowToRecordIDCache.get([...cell.path, prevRow]);
+
+    if (prev === undefined) {
       return;
     }
 
@@ -1631,9 +1791,10 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [row, column, path, setActiveCell, rowToRecordIDCache]);
+  }, [cell, setActiveCell, rowToRecordIDCache]);
 
   const onArrowLeft = useCallback(() => {
+    const { row, column, path } = cell;
     const prevColumn = column - 1;
     if (columnToFieldIDCache[prevColumn] === undefined) {
       return;
@@ -1646,9 +1807,10 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [row, column, path, setActiveCell, columnToFieldIDCache]);
+  }, [cell, setActiveCell, columnToFieldIDCache]);
 
   const onArrowRight = useCallback(() => {
+    const { row, column, path } = cell;
     const nextColumn = column + 1;
     if (columnToFieldIDCache[nextColumn] === undefined) {
       return;
@@ -1661,33 +1823,34 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [row, column, path, setActiveCell, columnToFieldIDCache]);
+  }, [cell, setActiveCell, columnToFieldIDCache]);
 
   const onMetaArrowDown = useCallback(() => {
-    const nextRow = recordsCount;
+    const { column } = cell;
 
     setActiveCell({
       type: 'leaf',
-      row: nextRow,
+      row: lastRow.row,
       column,
-      path,
+      path: lastRow.path,
       state: 'focused',
     });
-  }, [column, path, setActiveCell, recordsCount]);
+  }, [cell, setActiveCell, lastRow]);
 
   const onMetaArrowUp = useCallback(() => {
-    const prevRow = 1;
+    const { column } = cell;
 
     setActiveCell({
       type: 'leaf',
-      row: prevRow,
+      row: 1,
       column,
-      path,
+      path: [0],
       state: 'focused',
     });
-  }, [column, path, setActiveCell]);
+  }, [cell, setActiveCell]);
 
   const onMetaArrowLeft = useCallback(() => {
+    const { row, path } = cell;
     const prevColumn = 1;
 
     setActiveCell({
@@ -1697,10 +1860,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [row, path, setActiveCell]);
+  }, [cell, setActiveCell]);
 
   const onMetaArrowRight = useCallback(() => {
-    const nextColumn = fieldsCount;
+    const { row, path } = cell;
+    const nextColumn = lastColumn;
 
     setActiveCell({
       type: 'leaf',
@@ -1709,7 +1873,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'focused',
     });
-  }, [row, path, setActiveCell, fieldsCount]);
+  }, [cell, setActiveCell, lastColumn]);
 
   const onEscape = useCallback(() => {
     setActiveCell(null);
@@ -1729,6 +1893,8 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   );
 
   const onEnter = useCallback(() => {
+    const { row, column, path } = cell;
+
     if (onEnterOverride !== undefined) {
       onEnterOverride();
       return;
@@ -1741,11 +1907,18 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       path,
       state: 'editing',
     });
-  }, [row, column, path, setActiveCell, onEnterOverride]);
+  }, [cell, setActiveCell, onEnterOverride]);
 
   const onSpace = useCallback(() => {
-    onOpenRecord(rowToRecordIDCache[row]);
-  }, [row, onOpenRecord, rowToRecordIDCache]);
+    const { row, path } = cell;
+    const recordID = rowToRecordIDCache.get([...path, row]);
+
+    if (recordID === undefined) {
+      throw new Error('onSpace called on faulty row path');
+    }
+
+    onOpenRecord(recordID);
+  }, [cell, onOpenRecord, rowToRecordIDCache]);
 
   const focusedCellKeyBindings = useMemo((): KeyBinding[] => {
     return [

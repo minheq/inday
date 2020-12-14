@@ -1,7 +1,6 @@
 import { ViewID } from './views';
-import { FieldID } from './fields';
 import { generateID } from '../../lib/id';
-import { SortOrder } from './sorts';
+import { SortConfig } from './sorts';
 
 export const groupIDPrefix = `grp`;
 export type GroupID = `${typeof groupIDPrefix}${string}`;
@@ -15,12 +14,7 @@ export interface BaseGroup {
   sequence: number;
 }
 
-export interface GroupConfig {
-  fieldID: FieldID;
-  order: SortOrder;
-}
-
-export interface Group extends BaseGroup, GroupConfig {}
+export interface Group extends BaseGroup, SortConfig {}
 
 export function deleteGroup(
   group: Group,

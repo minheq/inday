@@ -33,7 +33,7 @@ export function first<T>(arr: T[]): T | undefined {
  * Get last item in the array.
  * IMPORTANT: Make sure to check that the array is not empty first.
  */
-export function last<T>(arr: T[]): T {
+export function last<T>(arr: T[]): T | undefined {
   return arr[arr.length - 1];
 }
 

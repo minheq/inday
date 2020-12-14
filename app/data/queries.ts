@@ -330,11 +330,11 @@ export const viewFiltersGroupMaxQuery = selectorFamily<number, ViewID>({
   get: (viewID: ViewID) => ({ get }) => {
     const filterGroups = get(viewFilterGroupsQuery(viewID));
 
-    if (isEmpty(filterGroups)) {
+    const lastFilterGroup = last(filterGroups);
+
+    if (lastFilterGroup === undefined) {
       return 0;
     }
-
-    const lastFilterGroup = last(filterGroups);
 
     return lastFilterGroup[0].group;
   },
@@ -431,14 +431,9 @@ export const recordFieldValueQuery = selectorFamily<
   },
 });
 
-export const viewRecordsQuery = selectorFamily<Record[], ViewID>({
-  key: 'ViewRecordsQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const view = get(viewQuery(viewID));
-    const records = get(collectionRecordsQuery(view.collectionID));
-    const filterGroups = get(viewFilterGroupsQuery(viewID));
-    const sorts = get(viewSortsQuery(viewID));
-
+export const sortGettersQuery = selector<SortGetters>({
+  key: 'SortGettersQuery',
+  get: ({ get }) => {
     const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
     const getRecord = (recordID: RecordID) => get(recordQuery(recordID));
     const getCollaborator = (collaboratorID: CollaboratorID) =>
@@ -446,16 +441,33 @@ export const viewRecordsQuery = selectorFamily<Record[], ViewID>({
     const getCollection = (collectionID: CollectionID) =>
       get(collectionQuery(collectionID));
 
-    const filterGetters: FilterGetters = {
-      getField,
-    };
-
-    const sortGetters: SortGetters = {
+    return {
       getField,
       getRecord,
       getCollaborator,
       getCollection,
     };
+  },
+});
+
+export const filterGettersQuery = selector<FilterGetters>({
+  key: 'FilterGettersQuery',
+  get: ({ get }) => {
+    const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
+
+    return { getField };
+  },
+});
+
+export const viewRecordsQuery = selectorFamily<Record[], ViewID>({
+  key: 'ViewRecordsQuery',
+  get: (viewID: ViewID) => ({ get }) => {
+    const view = get(viewQuery(viewID));
+    const records = get(collectionRecordsQuery(view.collectionID));
+    const filterGroups = get(viewFilterGroupsQuery(viewID));
+    const sorts = get(viewSortsQuery(viewID));
+    const sortGetters = get(sortGettersQuery);
+    const filterGetters = get(filterGettersQuery);
 
     let finalRecords = records;
 

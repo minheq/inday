@@ -15,7 +15,7 @@ import {
   useGetStatefulRows,
   useGridGetScrollToCellOffset,
   useGridTransformer,
-  Group,
+  GridGroup,
   StatefulCell,
   SelectedRow,
   LeafRowCell,
@@ -36,7 +36,7 @@ export interface GridRendererProps {
   headerHeight?: number;
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   leafRowHeight: number;
-  groups: Group[];
+  groups: GridGroup[];
   groupRowHeight?: number;
   spacerHeight?: number;
   renderGroupRowCell?: (props: RenderGroupRowCellProps) => React.ReactNode;

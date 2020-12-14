@@ -278,7 +278,7 @@ function MainContent() {
       case 'list':
         return (
           <ListViewDisplay
-            mode="select"
+            mode="edit"
             view={view}
             onOpenRecord={handleOpenRecord}
             selectedRecords={[]}

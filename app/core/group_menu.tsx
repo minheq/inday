@@ -24,7 +24,7 @@ import {
   useGetField,
   useGetViewGroups,
   useDeleteGroup,
-  useUpdateGroupConfig,
+  useUpdateGroupSortConfig,
   useCreateGroup,
   useGetGroupsSequenceMax,
 } from '../data/store';
@@ -81,7 +81,7 @@ function GroupListItem(props: GroupListItemProps) {
   const [groupEditID, setGroupEditID] = useRecoilState(groupEditIDState);
   const field = useGetField(group.fieldID);
   const deleteGroup = useDeleteGroup();
-  const updateGroupConfig = useUpdateGroupConfig();
+  const updateGroupConfig = useUpdateGroupSortConfig();
   const [groupConfig, setGroupConfig] = useState<GroupConfig>(group);
   const edit = groupEditID === group.id;
 

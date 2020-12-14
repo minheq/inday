@@ -5,7 +5,7 @@ import { sum, sumBy, maxBy, max, min } from '../../lib/math_utils';
 import { FlatObject } from '../../lib/flat_object';
 
 interface UseGridTransformerProps {
-  groups: Group[];
+  groups: GridGroup[];
   leafRowHeight: number;
   groupRowHeight: number;
   spacerHeight: number;
@@ -109,22 +109,22 @@ export function useGridTransformer(
   };
 }
 
-export interface LeafGroup {
+export interface LeafGridGroup {
   type: 'leaf';
   collapsed: boolean;
   rowCount: number;
 }
 
-export interface AncestorGroup {
+export interface AncestorGridGroup {
   type: 'ancestor';
   collapsed: boolean;
-  children: Group[];
+  children: GridGroup[];
 }
 
-export type Group = LeafGroup | AncestorGroup;
+export type GridGroup = LeafGridGroup | AncestorGridGroup;
 
 export function getRows(
-  groups: Group[],
+  groups: GridGroup[],
   groupRowHeight: number,
   leafRowHeight: number,
   spacerHeight: number,
@@ -208,7 +208,7 @@ function getLeafRows(
   return leafRows;
 }
 
-function isLeafGroup(group: Group): group is LeafGroup {
+function isLeafGroup(group: GridGroup): group is LeafGridGroup {
   if (group.type === 'leaf') {
     return true;
   }

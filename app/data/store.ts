@@ -70,9 +70,10 @@ import {
   recordFieldValueQuery,
   collaboratorsQuery,
   collaboratorQuery,
+  sortGettersQuery,
 } from './queries';
-import { SortConfig, Sort, SortID, deleteSort } from './sorts';
-import { GroupConfig, Group, GroupID, deleteGroup } from './groups';
+import { SortConfig, Sort, SortID, deleteSort, SortGetters } from './sorts';
+import { Group, GroupID, deleteGroup } from './groups';
 import { Workspace } from './workspace';
 import { Collaborator, CollaboratorID } from './collaborators';
 
@@ -497,8 +498,12 @@ export function useGetViewSorts(viewID: ViewID): Sort[] {
   return useRecoilValue(viewSortsQuery(viewID));
 }
 
-export function useGetViewGroups(viewID: ViewID) {
+export function useGetViewGroups(viewID: ViewID): Group[] {
   return useRecoilValue(viewGroupsQuery(viewID));
+}
+
+export function useGetSortGetters(): SortGetters {
+  return useRecoilValue(sortGettersQuery);
 }
 
 export function useGetViewFiltersCallback() {
@@ -759,18 +764,18 @@ export function useDeleteSort() {
 export function useCreateGroup(): (
   viewID: ViewID,
   sequence: number,
-  groupConfig: GroupConfig,
+  sortConfig: SortConfig,
 ) => Group {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState(groupsByIDState);
 
   return useCallback(
-    (viewID: ViewID, sequence: number, groupConfig: GroupConfig) => {
+    (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
       const newGroup: Group = {
         id: GroupID(),
         viewID,
         sequence,
-        ...groupConfig,
+        ...sortConfig,
       };
 
       setGroups((previousGroups) => ({
@@ -789,18 +794,18 @@ export function useCreateGroup(): (
   );
 }
 
-export function useUpdateGroupConfig() {
+export function useUpdateGroupSortConfig() {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState(groupsByIDState);
   const getGroup = useGetGroupCallback();
 
   return useCallback(
-    async (groupID: GroupID, groupConfig: GroupConfig) => {
+    async (groupID: GroupID, sortConfig: SortConfig) => {
       const prevGroup = await getGroup(groupID);
 
       const nextGroup: Group = {
         ...prevGroup,
-        ...groupConfig,
+        ...sortConfig,
       };
 
       setGroups((previousGroups) => ({
@@ -933,7 +938,7 @@ export function useUpdateListViewFieldConfig() {
   );
 }
 
-export function useCreateView() {
+export function useCreateView(): (collectionID: CollectionID) => View {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
@@ -944,6 +949,7 @@ export function useCreateView() {
         name: '',
         type: 'list',
         fixedFieldCount: 1,
+        groupsConfig: {},
         fieldsConfig: {},
         createdAt: new Date(),
         updatedAt: new Date(),

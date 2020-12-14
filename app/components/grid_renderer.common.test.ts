@@ -4,7 +4,7 @@ import {
   getVisibleIndexRange,
   getColumns,
   getRows,
-  Group,
+  GridGroup,
   Row,
   recycleItems,
   Column,
@@ -161,7 +161,7 @@ test('getColumns', (t) => {
 });
 
 test('getRows - single flat group', (t) => {
-  const groups: Group[] = [
+  const groups: GridGroup[] = [
     {
       type: 'leaf',
       collapsed: false,
@@ -182,7 +182,7 @@ test('getRows - single flat group', (t) => {
 });
 
 test('getRows - nested with leaf rows', (t) => {
-  const groups: Group[] = [
+  const groups: GridGroup[] = [
     {
       type: 'ancestor',
       collapsed: false,
@@ -234,7 +234,7 @@ test('getRows - nested with leaf rows', (t) => {
 });
 
 test('getRows - nested with empty leaf rows', (t) => {
-  const groups: Group[] = [
+  const groups: GridGroup[] = [
     {
       type: 'ancestor',
       collapsed: false,
@@ -260,7 +260,7 @@ test('getRows - nested with empty leaf rows', (t) => {
 });
 
 test('getRows - nested with collapsed ancestor', (t) => {
-  const groups: Group[] = [
+  const groups: GridGroup[] = [
     {
       type: 'ancestor',
       collapsed: true,
@@ -285,7 +285,7 @@ test('getRows - nested with collapsed ancestor', (t) => {
 });
 
 test('getRows - nested collapsed child', (t) => {
-  const groups: Group[] = [
+  const groups: GridGroup[] = [
     {
       type: 'ancestor',
       collapsed: false,

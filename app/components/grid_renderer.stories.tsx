@@ -11,9 +11,10 @@ import {
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
 import { FlatButton, Picker } from '.';
-import { Group, getRows, LeafRow } from './grid_renderer.common';
+import { GridGroup, getRows, LeafRow } from './grid_renderer.common';
 import { splitLast } from '../../lib/array_utils';
 import { Container } from './container';
+import { tokens } from './tokens';
 
 function renderLeafRowCell(props: RenderLeafRowCellProps) {
   const { row, column } = props;
@@ -62,7 +63,7 @@ function Flat(): JSX.Element {
 
   const handleScrollToCell = useScrollToCell(gridRef);
 
-  const groups: Group[] = [
+  const groups: GridGroup[] = [
     {
       type: 'leaf',
       collapsed: false,
@@ -129,7 +130,7 @@ function Grouped(): JSX.Element {
 
   const handleScrollToCell = useScrollToCell(gridRef);
 
-  const groups: Group[] = [
+  const groups: GridGroup[] = [
     {
       type: 'ancestor',
       collapsed: false,
@@ -240,7 +241,7 @@ function useScrollToCell(gridRef: React.RefObject<GridRendererRef>) {
 }
 
 interface ScrollToCellProps {
-  groups: Group[];
+  groups: GridGroup[];
   columns: number[];
   onScrollToCell: (path?: number[], row?: number, column?: number) => void;
 }
@@ -298,21 +299,21 @@ const styles = StyleSheet.create({
   groupRowCell: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#EAE2F8',
+    backgroundColor: tokens.colors.red[50],
   },
   headerCell: {
     width: '100%',
     height: '100%',
     borderBottomWidth: 1,
-    backgroundColor: '#DCEEFB',
+    backgroundColor: tokens.colors.green[50],
   },
   footerCell: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#F0F4F8',
+    backgroundColor: tokens.colors.blue[50],
   },
   scrollToCell: {
-    backgroundColor: 'white',
+    backgroundColor: tokens.colors.base.white,
     borderRadius: 8,
     width: 200,
     position: 'absolute',

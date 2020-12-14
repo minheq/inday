@@ -59,6 +59,27 @@ export const Sort = {
   },
 };
 
+export function deleteSort(
+  sort: Sort,
+  sorts: Sort[],
+): { [sortID: string]: Sort } {
+  const updatedSorts: { [sortID: string]: Sort } = {};
+  const sortIndex = sorts.findIndex((f) => f.id === sort.id);
+
+  const nextSorts = sorts.slice(sortIndex + 1);
+
+  for (const nextSort of nextSorts) {
+    updatedSorts[nextSort.id] = {
+      ...nextSort,
+      sequence: nextSort.sequence - 1,
+    };
+  }
+
+  delete updatedSorts[sort.id];
+
+  return updatedSorts;
+}
+
 export type SortOrder = 'ascending' | 'descending';
 
 export interface BaseSort {
@@ -82,19 +103,19 @@ export interface SortGetters {
 }
 
 export function sortRecords(
-  sorts: Sort[],
+  sorts: SortConfig[],
   records: Record[],
   getters: SortGetters,
 ): Record[] {
   if (isEmpty(sorts)) {
     return records;
   }
-  const nodes = makeNodes(sorts, records, getters);
+  const nodes = makeRecordNodes(sorts, records, getters);
 
   return toRecords(nodes);
 }
 
-function isLeafNodes(nodes: Node[]): nodes is LeafNode[] {
+function isLeafRecordNode(nodes: RecordNode[]): nodes is LeafRecordNode[] {
   const firstNode = first(nodes);
 
   if (firstNode === undefined) {
@@ -104,25 +125,25 @@ function isLeafNodes(nodes: Node[]): nodes is LeafNode[] {
   return firstNode.type === 'leaf';
 }
 
-function toRecords(nodes: Node[]): Record[] {
+function toRecords(nodes: RecordNode[]): Record[] {
   if (isEmpty(nodes)) {
     return [];
   }
 
-  if (isLeafNodes(nodes)) {
-    return flattenLeafNodes(nodes);
+  if (isLeafRecordNode(nodes)) {
+    return flattenLeafRecordNode(nodes);
   }
 
   let records: Record[] = [];
 
   for (const node of nodes) {
-    records = records.concat(toRecords(node.children as Node[]));
+    records = records.concat(toRecords(node.children as RecordNode[]));
   }
 
   return records;
 }
 
-function flattenLeafNodes(leafNodes: LeafNode[]): Record[] {
+function flattenLeafRecordNode(leafNodes: LeafRecordNode[]): Record[] {
   let records: Record[] = [];
 
   for (const node of leafNodes) {
@@ -132,27 +153,27 @@ function flattenLeafNodes(leafNodes: LeafNode[]): Record[] {
   return records;
 }
 
-interface AncestorNode {
-  type: 'node';
+interface AncestorRecordNode {
+  type: 'ancestor';
   field: Field;
   value: FieldValue;
-  children: Node[];
+  children: RecordNode[];
 }
 
-interface LeafNode {
+interface LeafRecordNode {
   type: 'leaf';
   field: Field;
   value: FieldValue;
   children: Record[];
 }
 
-type Node = AncestorNode | LeafNode;
+export type RecordNode = AncestorRecordNode | LeafRecordNode;
 
-function makeNodes(
-  sorts: Sort[],
+export function makeRecordNodes(
+  sorts: SortConfig[],
   records: Record[],
   getters: SortGetters,
-): Node[] {
+): RecordNode[] {
   if (isEmpty(records)) {
     return [];
   }
@@ -172,46 +193,25 @@ function makeNodes(
     return leafNodes;
   }
 
-  const nodes: AncestorNode[] = [];
+  const nodes: AncestorRecordNode[] = [];
 
   for (const leafNode of leafNodes) {
     nodes.push({
-      type: 'node',
+      type: 'ancestor',
       field: leafNode.field,
       value: leafNode.value,
-      children: makeNodes(nextSorts, leafNode.children, getters),
+      children: makeRecordNodes(nextSorts, leafNode.children, getters),
     });
   }
 
   return nodes;
 }
 
-export function deleteSort(
-  sort: Sort,
-  sorts: Sort[],
-): { [sortID: string]: Sort } {
-  const updatedSorts: { [sortID: string]: Sort } = {};
-  const sortIndex = sorts.findIndex((f) => f.id === sort.id);
-
-  const nextSorts = sorts.slice(sortIndex + 1);
-
-  for (const nextSort of nextSorts) {
-    updatedSorts[nextSort.id] = {
-      ...nextSort,
-      sequence: nextSort.sequence - 1,
-    };
-  }
-
-  delete updatedSorts[sort.id];
-
-  return updatedSorts;
-}
-
 function makeLeafNodes(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
-): LeafNode[] {
+): LeafRecordNode[] {
   const { getField } = getters;
   const field = getField(sort.fieldID);
   const sorted = sortBy(field, sort, records, getters);
@@ -222,14 +222,14 @@ function makeLeafNodes(
     throw new Error('records empty');
   }
 
-  let currentNode: LeafNode = {
+  let currentNode: LeafRecordNode = {
     type: 'leaf',
     field,
     value: firstRecord.fields[field.id],
     children: [firstRecord],
   };
 
-  const nodes: LeafNode[] = [currentNode];
+  const nodes: LeafRecordNode[] = [currentNode];
 
   for (let i = 1; i < sorted.length; i++) {
     const record = sorted[i];
@@ -260,7 +260,7 @@ function makeLeafNodes(
 
 function sortBy(
   field: Field,
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -296,7 +296,7 @@ function sortBy(
 }
 
 export function sortByTextFieldKind(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -321,7 +321,7 @@ export function sortByTextFieldKind(
 }
 
 export function sortByNumberFieldKind(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -346,7 +346,7 @@ export function sortByNumberFieldKind(
 }
 
 export function sortByDateFieldKind(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -371,7 +371,7 @@ export function sortByDateFieldKind(
 }
 
 export function sortBySingleOptionField(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -398,7 +398,7 @@ export function sortBySingleOptionField(
 }
 
 export function sortByMultiOptionField(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -426,7 +426,7 @@ export function sortByMultiOptionField(
 }
 
 export function sortBySingleCollaboratorField(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -449,7 +449,7 @@ export function sortBySingleCollaboratorField(
 }
 
 export function sortByMultiCollaboratorField(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -474,7 +474,7 @@ export function sortByMultiCollaboratorField(
 }
 
 export function sortBySingleRecordLinkField(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -515,7 +515,7 @@ export function sortBySingleRecordLinkField(
 }
 
 export function sortByMultiRecordLinkField(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
@@ -550,7 +550,7 @@ export function sortByMultiRecordLinkField(
 }
 
 export function sortByBooleanFieldKind(
-  sort: Sort,
+  sort: SortConfig,
   records: Record[],
   getters: SortGetters,
 ): Record[] {
