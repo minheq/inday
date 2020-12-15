@@ -155,8 +155,8 @@ interface ListViewDisplayProps {
   view: ListView;
   onOpenRecord: (recordID: RecordID) => void;
   mode: ViewMode;
-  selectedRecords: Record[];
-  onSelectRecord: (recordID: RecordID) => void;
+  selectedRecords: RecordID[];
+  onSelectRecord: (recordID: RecordID, selected: boolean) => void;
 }
 
 const FIELD_ROW_HEIGHT = 40;
@@ -170,7 +170,7 @@ interface ListViewDisplayContext {
   lastRow: RowPath;
   mode: ViewMode;
   onOpenRecord: (recordID: RecordID) => void;
-  onSelectRecord: (recordID: RecordID) => void;
+  onSelectRecord: (recordID: RecordID, selected: boolean) => void;
 }
 
 const ListViewDisplayContext = createContext<ListViewDisplayContext>({
@@ -453,13 +453,13 @@ interface AncestorGroupedRecordNode {
 type GroupedRecordNode = LeafGroupedRecordNode | AncestorGroupedRecordNode;
 
 function getSelectedRows(
-  selectedRecords: Record[],
+  selectedRecords: RecordID[],
   rowPaths: RowPath[],
 ): SelectedRow[] {
   const selectedRows: SelectedRow[] = [];
 
   for (const row of rowPaths) {
-    const found = selectedRecords.find((r) => r.id === row.recordID);
+    const found = selectedRecords.find((recordID) => recordID === row.recordID);
 
     if (found !== undefined) {
       selectedRows.push(row);
@@ -598,6 +598,10 @@ function useLeafRowCellContext(): LeafRowCellContext {
   return useContext(LeafRowCellContext);
 }
 
+function useListViewDisplayContext(): ListViewDisplayContext {
+  return useContext(ListViewDisplayContext);
+}
+
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
   primary: boolean;
@@ -613,7 +617,7 @@ function LeafRowCell(props: LeafRowCellProps) {
   const fieldConfig = useGetListViewFieldConfig(viewID, fieldID);
   const value = useGetRecordFieldValue(recordID, fieldID);
   const width = fieldConfig.width;
-  const { rowToRecordIDCache } = useContext(ListViewDisplayContext);
+  const { rowToRecordIDCache } = useListViewDisplayContext();
   const setActiveCell = useSetRecoilState(activeCellState);
 
   const handleFocus = useCallback(() => {
@@ -695,12 +699,17 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
   const { primary, height, field, width, value } = props;
-  const { cell, onFocus } = useLeafRowCellContext();
+  const { cell, onFocus, recordID } = useLeafRowCellContext();
+  const { mode, onSelectRecord } = useListViewDisplayContext();
   const theme = useTheme();
 
   const handlePress = useCallback(() => {
-    onFocus();
-  }, [onFocus]);
+    if (mode === 'edit') {
+      onFocus();
+    } else {
+      onSelectRecord(recordID);
+    }
+  }, [mode, onFocus, onSelectRecord, recordID]);
 
   const renderCell = useCallback(() => {
     switch (field.type) {
@@ -1767,8 +1776,8 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
     lastRow,
     lastColumn,
     onOpenRecord,
-  } = useContext(ListViewDisplayContext);
-  const { cell } = useContext(LeafRowCellContext);
+  } = useListViewDisplayContext();
+  const { cell } = useLeafRowCellContext();
   const setActiveCell = useSetRecoilState(activeCellState);
 
   // Listen for keyboard strokes only when the cell is focused

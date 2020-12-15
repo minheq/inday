@@ -27,13 +27,6 @@ import { Button } from '../components/button';
 import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
 
-type SidePanelState = 'views' | 'organize' | null;
-
-const sidePanelState = atom<SidePanelState>({
-  key: 'SpaceScreen_SidePanel',
-  default: null,
-});
-
 interface SpaceScreenContext {
   spaceID: SpaceID;
   viewID: ViewID;
@@ -64,6 +57,27 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
     </SpaceScreenContext.Provider>
   );
 }
+
+type SidePanelState = 'views' | 'organize' | null;
+
+const sidePanelState = atom<SidePanelState>({
+  key: 'SpaceScreen_SidePanel',
+  default: null,
+});
+
+type ModeState = 'edit' | 'select';
+
+const modeState = atom<ModeState>({
+  key: 'SpaceScreen_Mode',
+  default: 'select',
+});
+
+type SelectedRecordsState = RecordID[];
+
+const selectedRecordsState = atom<SelectedRecordsState>({
+  key: 'SpaceScreen_SelectedRecords',
+  default: [],
+});
 
 function SpaceScreenHeader(): JSX.Element {
   const navigation = useNavigation();
@@ -112,6 +126,8 @@ function ViewSettings() {
   const context = useContext(SpaceScreenContext);
   const view = useGetView(context.viewID);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
+  const [mode, setMode] = useRecoilState(modeState);
+  const [, setSelectedRecords] = useRecoilState(selectedRecordsState);
 
   const handleToggleView = useCallback(() => {
     if (sidePanel !== 'views') {
@@ -129,6 +145,15 @@ function ViewSettings() {
     }
   }, [sidePanel, setSidePanel]);
 
+  const handleToggleSelect = useCallback(() => {
+    if (mode === 'edit') {
+      setMode('select');
+    } else {
+      setSelectedRecords([]);
+      setMode('edit');
+    }
+  }, [mode, setMode, setSelectedRecords]);
+
   return (
     <Container color="content" shadow zIndex={1}>
       <Spacer size={4} />
@@ -140,7 +165,7 @@ function ViewSettings() {
         <Row>
           <FlatButton title="Search" />
           <FlatButton onPress={handleToggleOrganize} title="Organize" />
-          <FlatButton title="Select" />
+          <FlatButton onPress={handleToggleSelect} title="Select" />
           <FlatButton
             weight="bold"
             color="primary"
@@ -256,6 +281,10 @@ function MainContent() {
   const { spaceID, viewID, collectionID } = context;
   const space = useGetSpace(spaceID);
   const view = useGetView(viewID);
+  const mode = useRecoilValue(modeState);
+  const [selectedRecords, setSelectedRecords] = useRecoilState(
+    selectedRecordsState,
+  );
   const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
@@ -267,16 +296,23 @@ function MainContent() {
     console.log('Open record', recordID);
   }, []);
 
-  const handleSelectRecord = useCallback((recordID: RecordID) => {
-    console.log('Open record', recordID);
-  }, []);
+  const handleSelectRecord = useCallback(
+    (recordID: RecordID, selected: boolean) => {
+      if (selected === true) {
+        setSelectedRecords(selectedRecords.concat(recordID));
+      } else {
+        setSelectedRecords(selectedRecords.filter((id) => id !== recordID));
+      }
+    },
+    [setSelectedRecords, selectedRecords],
+  );
 
   const renderView = useCallback((): React.ReactNode => {
     switch (view.type) {
       case 'list':
         return (
           <ListViewDisplay
-            mode="edit"
+            mode={mode}
             view={view}
             onOpenRecord={handleOpenRecord}
             selectedRecords={[]}
@@ -288,7 +324,7 @@ function MainContent() {
       default:
         throw new Error('View type not supported');
     }
-  }, [view, handleOpenRecord, handleSelectRecord]);
+  }, [mode, view, handleOpenRecord, handleSelectRecord]);
 
   return (
     <Container flex={1} color="content">
