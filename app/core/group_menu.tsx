@@ -10,15 +10,11 @@ import React, {
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { ScrollView, Pressable } from 'react-native';
 
-import {
-  Container,
-  Spacer,
-  FlatButton,
-  Text,
-  Row,
-  tokens,
-  SegmentedControl,
-} from '../components';
+import { Container } from '../components/container';
+import { Row } from '../components/row';
+import { Spacer } from '../components/spacer';
+import { Text } from '../components/text';
+import { tokens } from '../components/tokens';
 import {
   useGetCollectionFields,
   useGetField,
@@ -33,6 +29,7 @@ import { isEmpty } from '../../lib/lang_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { GroupID, Group, GroupConfig, GroupOrder } from '../data/groups';
+import { SegmentedControl } from '../components/segmented_control';
 
 const groupEditIDState = atom<GroupID>({
   key: 'GroupMenuGroupEditID',

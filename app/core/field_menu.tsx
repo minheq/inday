@@ -1,7 +1,12 @@
 import React, { Fragment, createContext, useCallback, useContext } from 'react';
 import { ScrollView } from 'react-native';
+import { Container } from '../components/container';
+import { Row } from '../components/row';
+import { Spacer } from '../components/spacer';
+import { Switch } from '../components/switch';
+import { Text } from '../components/text';
+import { tokens } from '../components/tokens';
 
-import { Container, Spacer, Text, Row, tokens, Switch } from '../components';
 import {
   useGetSortedFieldsWithListViewConfig,
   useUpdateListViewFieldConfig,

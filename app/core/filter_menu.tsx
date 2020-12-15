@@ -19,17 +19,15 @@ import {
   assertNumberFilterConfig,
   assertTextFilterConfig,
 } from '../data/filters';
-import {
-  Container,
-  Spacer,
-  Button,
-  TextInput,
-  Picker,
-  Text,
-  Row,
-  tokens,
-  PickerOption,
-} from '../components';
+import { Container } from '../components/container';
+import { Row } from '../components/row';
+import { Spacer } from '../components/spacer';
+import { Text } from '../components/text';
+import { tokens } from '../components/tokens';
+import { Picker, PickerOption } from '../components/picker';
+import { Button } from '../components/button';
+import { TextInput } from '../components/text_input';
+
 import {
   useCreateFilter,
   useGetCollectionFields,
@@ -44,7 +42,6 @@ import {
 import { first } from '../../lib/array_utils';
 import { FieldID, FieldType } from '../data/fields';
 import { FieldPicker } from './field_picker';
-
 const filterEditIDState = atom<FilterID>({
   key: 'FilterMenuFilterEditID',
   default: '',

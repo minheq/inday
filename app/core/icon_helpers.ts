@@ -1,5 +1,6 @@
 import { ColorSchemeName } from 'react-native';
-import { IconName, tokens } from '../components';
+import { IconName } from '../components/icon';
+import { tokens } from '../components/tokens';
 import { FieldType } from '../data/fields';
 import { ViewType } from '../data/views';
 

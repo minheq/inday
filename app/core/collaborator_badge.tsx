@@ -1,8 +1,11 @@
 import { useGetCollaborator } from '../data/store';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Avatar, Text, tokens } from '../components';
+
 import { CollaboratorID } from '../data/collaborators';
+import { Avatar } from '../components/avatar';
+import { Text } from '../components/text';
+import { tokens } from '../components/tokens';
 
 interface CollaboratorBadgeProps {
   collaboratorID: CollaboratorID;

@@ -31,6 +31,9 @@ export interface ListViewFieldConfig {
 interface ListViewConfig {
   type: 'list';
   fixedFieldCount: number;
+  groupsConfig: {
+    // TODO: collapsed
+  };
   fieldsConfig: {
     [fieldID: string]: ListViewFieldConfig;
   };

@@ -1,21 +1,9 @@
 import React, { useCallback, createContext, useContext } from 'react';
-import {
-  Screen,
-  Container,
-  Row,
-  BackButton,
-  Text,
-  IconButton,
-  Spacer,
-  FlatButton,
-  Button,
-  tokens,
-  Icon,
-} from '../components';
+import { StyleSheet } from 'react-native';
+
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import { useGetSpace, useGetView, useGetSpaceCollections } from '../data/store';
 import { Slide } from '../components/slide';
-
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer';
@@ -27,7 +15,17 @@ import { Collection, CollectionID } from '../data/collections';
 import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
 import { Space, SpaceID } from '../data/spaces';
 import { useTheme } from '../components/theme';
-import { StyleSheet } from 'react-native';
+import { Screen } from '../components/screen';
+import { Container } from '../components/container';
+import { Row } from '../components/row';
+import { BackButton } from '../components/back_button';
+import { Spacer } from '../components/spacer';
+import { Text } from '../components/text';
+import { IconButton } from '../components/icon_button';
+import { FlatButton } from '../components/flat_button';
+import { Button } from '../components/button';
+import { Icon } from '../components/icon';
+import { tokens } from '../components/tokens';
 
 type SidePanelState = 'views' | 'organize' | null;
 

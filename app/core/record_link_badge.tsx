@@ -1,9 +1,10 @@
 import { RecordID } from '../data/records';
 import { useGetCollection, useGetRecord } from '../data/store';
 import React from 'react';
-import { Badge, tokens } from '../components';
+import { Badge } from '../components/badge';
 import { assertPrimaryFieldValue } from '../data/fields';
 import { useTheme } from '../components/theme';
+import { tokens } from '../components/tokens';
 
 interface RecordLinkBadgeProps {
   recordID: RecordID;

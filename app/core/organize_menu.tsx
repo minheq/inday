@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import { Container, SegmentedControl, Spacer } from '../components';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
 import { CollectionID } from '../data/collections';
@@ -8,6 +7,9 @@ import { FilterMenu } from './filter_menu';
 import { SortMenu } from './sort_menu';
 import { GroupMenu } from './group_menu';
 import { FieldMenu } from './field_menu';
+import { Container } from '../components/container';
+import { SegmentedControl } from '../components/segmented_control';
+import { Spacer } from '../components/spacer';
 
 interface OrganizeMenuProps {
   spaceID: SpaceID;

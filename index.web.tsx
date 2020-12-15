@@ -2,7 +2,7 @@ import { AppRegistry } from 'react-native';
 import React, { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 
-import { Text } from './app/components';
+import { Text } from './app/components/text';
 import { ErrorBoundary } from './app/core/error_boundary';
 import { SpaceScreen } from './app/screens/space_screen';
 

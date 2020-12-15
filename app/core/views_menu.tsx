@@ -1,6 +1,9 @@
 import React, { createContext, Fragment, useContext } from 'react';
 import { useGetView, useGetCollectionViews } from '../data/store';
-import { Container, Text, Spacer, FlatButton } from '../components';
+import { FlatButton } from '../components/flat_button';
+import { Container } from '../components/container';
+import { Spacer } from '../components/spacer';
+import { Text } from '../components/text';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
 

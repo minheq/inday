@@ -18,17 +18,14 @@ import {
   TextInputKeyPressEventData,
   StyleSheet,
 } from 'react-native';
-import {
-  FlatButton,
-  Container,
-  Icon,
-  ListPickerOption,
-  Row,
-  Spacer,
-  Text,
-  tokens,
-  ListPicker,
-} from '../components';
+import { FlatButton } from '../components/flat_button';
+import { Container } from '../components/container';
+import { Icon } from '../components/icon';
+import { Row } from '../components/row';
+import { Spacer } from '../components/spacer';
+import { Text } from '../components/text';
+import { tokens } from '../components/tokens';
+import { ListPicker, ListPickerOption } from '../components/list_picker';
 import {
   useGetSortedFieldsWithListViewConfig,
   useUpdateRecordFieldValue,

@@ -10,15 +10,12 @@ import React, {
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { ScrollView, Pressable } from 'react-native';
 
-import {
-  Container,
-  Spacer,
-  Text,
-  Row,
-  tokens,
-  SegmentedControl,
-  FlatButton,
-} from '../components';
+import { FlatButton } from '../components/flat_button';
+import { Container } from '../components/container';
+import { Row } from '../components/row';
+import { Spacer } from '../components/spacer';
+import { Text } from '../components/text';
+import { tokens } from '../components/tokens';
 import {
   useGetCollectionFields,
   useGetField,
@@ -33,6 +30,7 @@ import { isEmpty } from '../../lib/lang_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
 import { SortID, Sort, SortConfig, SortOrder } from '../data/sorts';
+import { SegmentedControl } from '../components/segmented_control';
 
 const sortEditIDState = atom<SortID>({
   key: 'SortMenuSortEditID',

@@ -40,7 +40,7 @@ import {
   fakeWord,
   fakeWords,
 } from '../../lib/faker';
-import { tokens } from '../components';
+import { tokens } from '../components/tokens';
 import { Workspace } from './workspace';
 import { keyedBy, range, sample } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Picker } from '../components';
+import { Picker } from '../components/picker';
 import { Field, FieldID } from '../data/fields';
 
 interface FieldPickerProps {
@@ -8,7 +8,7 @@ interface FieldPickerProps {
   onChange?: (value: FieldID) => void;
 }
 
-export function FieldPicker(props: FieldPickerProps) {
+export function FieldPicker(props: FieldPickerProps): JSX.Element {
   const { fields, onChange, value } = props;
 
   return (
