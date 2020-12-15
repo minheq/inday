@@ -3,7 +3,7 @@ import { Animated, Pressable, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from './theme';
 import { tokens } from './tokens';
 
-interface ButtonProps {
+export interface ButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   children?:

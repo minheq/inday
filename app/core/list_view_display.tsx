@@ -151,6 +151,8 @@ import { Group } from '../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../data/sorts';
 import { Slide } from '../components/slide';
 import { Button } from '../components/button';
+import { ContextMenu } from '../components/context_menu';
+import { ContextMenuButton } from '../components/context_menu_button';
 
 const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_ActiveCell',
@@ -311,10 +313,20 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   );
 
   const renderLeafRow = useCallback(
-    ({ children, state }: RenderLeafRowProps) => {
-      return <LeafRow state={state}>{children}</LeafRow>;
+    ({ children, state, path, row }: RenderLeafRowProps) => {
+      const recordID = rowToRecordIDCache.get([...path, row]);
+
+      if (recordID === undefined) {
+        throw new Error('No corresponding recordID found for row path.');
+      }
+
+      return (
+        <LeafRow recordID={recordID} state={state}>
+          {children}
+        </LeafRow>
+      );
     },
-    [],
+    [rowToRecordIDCache],
   );
 
   const renderGroupRow = useCallback(
@@ -637,6 +649,7 @@ function useListViewDisplayContext(): ListViewDisplayContext {
 }
 
 interface LeafRowProps {
+  recordID: RecordID;
   state: LeafRowState;
   children: React.ReactNode;
 }
@@ -654,8 +667,9 @@ function useLeafRowContext() {
 }
 
 function LeafRow(props: LeafRowProps) {
-  const { children, state } = props;
+  const { children, state, recordID } = props;
   const theme = useTheme();
+  const { onOpenRecord } = useListViewDisplayContext();
 
   const selected = state === 'selected';
 
@@ -664,6 +678,10 @@ function LeafRow(props: LeafRowProps) {
       selected: selected,
     };
   }, [selected]);
+
+  const handleOpen = useCallback(() => {
+    onOpenRecord(recordID);
+  }, [onOpenRecord, recordID]);
 
   return (
     <LeafRowContext.Provider value={value}>
@@ -679,7 +697,18 @@ function LeafRow(props: LeafRowProps) {
               : styles.selectedRowLight),
         ]}
       >
-        {children}
+        <ContextMenu
+          options={[
+            { label: 'Open', icon: 'Archive', onPress: handleOpen },
+            { label: 'Insert record below' },
+            { label: 'Insert record above' },
+            { label: 'Duplicate' },
+            { label: 'Share' },
+            { label: 'Delete', icon: 'Archive' },
+          ]}
+        >
+          {children}
+        </ContextMenu>
       </View>
     </LeafRowContext.Provider>
   );
@@ -950,9 +979,19 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       />
       {renderCell()}
       {mode === 'edit' && primary === true && cell.state !== 'editing' && (
-        <Button style={styles.rowMorebutton}>
+        <ContextMenuButton
+          options={[
+            { label: 'Open', icon: 'Archive' },
+            { label: 'Insert record below' },
+            { label: 'Insert record above' },
+            { label: 'Duplicate' },
+            { label: 'Share' },
+            { label: 'Delete', icon: 'Archive' },
+          ]}
+          style={styles.rowMorebutton}
+        >
           <Icon name="Dots" />
-        </Button>
+        </ContextMenuButton>
       )}
     </Pressable>
   );

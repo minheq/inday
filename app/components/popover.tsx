@@ -9,13 +9,18 @@ import {
 import { tokens } from './tokens';
 import { Modal } from './modal';
 
-export type PopoverAnchor = { y: number; x: number };
-
+export interface PopoverAnchor {
+  y: number;
+  x: number;
+}
+export interface PopoverCallback {
+  onRequestClose?: () => void;
+}
 interface PopoverProps {
   visible: boolean;
   onRequestClose?: () => void;
   onShow?: () => void;
-  children: React.ReactNode;
+  children: React.ReactNode | ((callback: PopoverCallback) => React.ReactNode);
   anchor: PopoverAnchor;
 }
 
@@ -61,7 +66,9 @@ export function Popover(props: PopoverProps): JSX.Element {
             },
           ]}
         >
-          {children}
+          {typeof children === 'function'
+            ? children({ onRequestClose })
+            : children}
         </Animated.View>
       </View>
     </Modal>

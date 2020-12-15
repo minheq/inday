@@ -33,6 +33,7 @@ module.exports = {
         'react-native/sort-styles': 0,
         'react/prop-types': 0,
         'no-shadow': 2,
+        '@typescript-eslint/ban-ts-comment': 1,
       },
     },
     {
@@ -54,6 +55,7 @@ module.exports = {
       plugins: ['@typescript-eslint', 'sonarjs'],
       rules: {
         'no-shadow': 2,
+        '@typescript-eslint/ban-ts-comment': 1,
       },
     },
     {

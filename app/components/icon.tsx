@@ -91,9 +91,9 @@ interface TheIconProps {
 const sizeMap: {
   [name in IconSize]: number;
 } = {
-  sm: 16,
+  sm: 18,
   md: 24,
-  lg: 32,
+  lg: 30,
 };
 
 const iconMap: {

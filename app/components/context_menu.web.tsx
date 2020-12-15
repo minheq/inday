@@ -6,22 +6,19 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button } from './button';
-import { ContextMenuItem, ContextMenuProps } from './context_menu';
+import { View } from 'react-native';
+import { ContextMenuProps } from './context_menu';
+import {
+  ContextMenuContent,
+  CONTEXT_MENU_ITEM_HEIGHT,
+} from './context_menu_content';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
-import { Text } from './text';
-import { useTheme } from './theme';
-import { tokens } from './tokens';
-
-const ITEM_HEIGHT = 32;
 
 export function ContextMenu(props: ContextMenuProps): JSX.Element {
   const { options, children, width = 240 } = props;
   const contentHeight = useMemo((): number => {
-    return options.length * ITEM_HEIGHT;
+    return options.length * CONTEXT_MENU_ITEM_HEIGHT;
   }, [options]);
-  const theme = useTheme();
   const ref = useRef<View>(null);
   const [state, setState] = useState({
     visible: false,
@@ -54,6 +51,7 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
   );
 
   useEffect(() => {
+    // @ts-ignore: View implementation uses `div`
     const node = ref.current as HTMLDivElement;
     if (node !== null) {
       node.addEventListener('contextmenu', handleOpenContextMenu);
@@ -80,68 +78,13 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
         anchor={state.anchor}
         visible={state.visible}
       >
-        <View
-          style={[
-            styles.wrapper,
-            theme === 'dark' ? styles.wrapperDark : styles.wrapperLight,
-            { width },
-          ]}
-        >
-          <ScrollView>
-            {options.map((option) => (
-              <ContextMenuButton
-                onDismiss={handleRequestClose}
-                key={option.label}
-                option={option}
-              />
-            ))}
-          </ScrollView>
-        </View>
+        <ContextMenuContent
+          onPressed={handleRequestClose}
+          width={width}
+          options={options}
+        />
       </Popover>
       <View ref={ref}>{children}</View>
     </Fragment>
   );
 }
-
-interface ContextMenuButtonProps {
-  option: ContextMenuItem;
-  onDismiss: () => void;
-}
-
-function ContextMenuButton(props: ContextMenuButtonProps) {
-  const { option, onDismiss } = props;
-  const { onPress, weight, color, label } = option;
-
-  const handlePress = useCallback(() => {
-    if (onPress !== undefined) {
-      onPress();
-    }
-    onDismiss();
-  }, [onDismiss, onPress]);
-
-  return (
-    <Button key={label} onPress={handlePress} style={styles.button}>
-      <Text size="sm" weight={weight} color={color}>
-        {label}
-      </Text>
-    </Button>
-  );
-}
-
-const styles = StyleSheet.create({
-  wrapper: {
-    borderRadius: tokens.border.radius,
-    overflow: 'hidden',
-    flex: 1,
-    borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
-  },
-  wrapperDark: {},
-  wrapperLight: {},
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: ITEM_HEIGHT,
-    paddingHorizontal: 8,
-  },
-});

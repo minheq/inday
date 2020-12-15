@@ -1,17 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
-import { TextColor, TextWeight } from './text';
+import { ContextMenuContentProps } from './context_menu_content';
 
-export interface ContextMenuItem {
-  color?: TextColor;
-  weight?: TextWeight;
-  onPress?: () => void;
-  label: string;
-}
-
-export interface ContextMenuProps {
-  options: ContextMenuItem[];
-  width?: number;
+export interface ContextMenuProps extends ContextMenuContentProps {
   children: React.ReactNode;
 }
 
