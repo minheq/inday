@@ -544,7 +544,7 @@ export type Cell = GroupRowCell | LeafRowCell;
 export type GroupRowState = 'hovered' | 'default';
 
 interface StatefulGroupRow extends RecycledGroupRow {
-  cell: StatefulGroupRowCell | null;
+  activeCell: StatefulGroupRowCell | null;
   state: GroupRowState;
 }
 
@@ -557,7 +557,7 @@ export interface StatefulGroupRowCell extends GroupRowCell {
 export type LeafRowState = 'selected' | 'hovered' | 'default';
 
 interface StatefulLeafRow extends RecycledLeafRow {
-  cell: StatefulLeafRowCell | null;
+  activeCell: StatefulLeafRowCell | null;
   state: LeafRowState;
 }
 
@@ -615,7 +615,7 @@ export function useGetStatefulRows(
           row: row.row,
           y: row.y,
           state: getLeafRowState(leafRowCell, row, selectedRowsCache),
-          cell: leafRowCell,
+          activeCell: leafRowCell,
         };
       }
 
@@ -629,7 +629,7 @@ export function useGetStatefulRows(
         path: row.path,
         state: 'default',
         collapsed: row.collapsed,
-        cell: groupRowCell,
+        activeCell: groupRowCell,
       };
     });
   }, [rows, activeCell, selectedRowsCache]);
@@ -652,54 +652,57 @@ function isSpacerRow(row: Row): row is SpacerRow {
 }
 
 function getLeafRowCell(
-  cell: StatefulCell | null,
+  activeCell: StatefulCell | null,
   row: RecycledLeafRow,
 ): StatefulLeafRowCell | null {
-  if (cell === null) {
+  if (activeCell === null) {
     return null;
   }
 
-  if (cell.type === 'group') {
+  if (activeCell.type === 'group') {
     return null;
   }
 
-  if (isEqual([...cell.path, cell.row], [...row.path, row.row]) === false) {
+  if (
+    isEqual([...activeCell.path, activeCell.row], [...row.path, row.row]) ===
+    false
+  ) {
     return null;
   }
 
-  return cell;
+  return activeCell;
 }
 
 function getGroupRowCell(
-  cell: StatefulCell | null,
+  activeCell: StatefulCell | null,
   row: RecycledGroupRow,
 ): StatefulGroupRowCell | null {
-  if (cell === null) {
+  if (activeCell === null) {
     return null;
   }
 
-  if (cell.type === 'leaf') {
+  if (activeCell.type === 'leaf') {
     return null;
   }
 
-  if (isEqual(cell.path, row.path) === false) {
+  if (isEqual(activeCell.path, row.path) === false) {
     return null;
   }
 
-  return cell;
+  return activeCell;
 }
 
 function getLeafRowState(
-  cell: StatefulLeafRowCell | null,
+  activeCell: StatefulLeafRowCell | null,
   row: RecycledLeafRow,
   selectedRowsCache: FlatObject<boolean, number>,
 ): LeafRowState {
-  if (cell !== null && cell.type === 'leaf') {
-    if (cell.state === 'hovered') {
-      return 'hovered';
-    } else if (cell.state === 'editing' || cell.state === 'focused') {
-      return 'selected';
-    }
+  if (
+    activeCell !== null &&
+    activeCell.type === 'leaf' &&
+    activeCell.state === 'hovered'
+  ) {
+    return 'hovered';
   }
 
   const selected = selectedRowsCache.get([...row.path, row.row]);

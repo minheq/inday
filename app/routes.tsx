@@ -5,6 +5,7 @@ import {
   useNavigationImplementation,
 } from './lib/router';
 
+// eslint-disable-next-line
 export enum ScreenName {
   Space = 'Space',
   Playground = 'Playground',
