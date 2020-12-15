@@ -12,7 +12,7 @@ interface SlideProps {
 export function Slide(props: SlideProps): JSX.Element {
   const { width: intrinsicWidth, open, children, onSlide, onCollapsed } = props;
   const width = useRef(new Animated.Value(open ? intrinsicWidth : 0)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(open ? 1 : 0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -27,14 +27,10 @@ export function Slide(props: SlideProps): JSX.Element {
         useNativeDriver: false,
       }),
     ]).start(() => {
-      if (open) {
-        if (onSlide !== undefined) {
-          onSlide();
-        }
-      } else {
-        if (onCollapsed !== undefined) {
-          onCollapsed();
-        }
+      if (open === true && onSlide !== undefined) {
+        onSlide();
+      } else if (onCollapsed !== undefined) {
+        onCollapsed();
       }
     });
   }, [width, opacity, open, intrinsicWidth, onSlide, onCollapsed]);

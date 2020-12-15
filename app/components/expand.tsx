@@ -31,14 +31,10 @@ export function Expand(props: ExpandProps): JSX.Element {
         useNativeDriver: false,
       }),
     ]).start(() => {
-      if (open) {
-        if (onExpanded !== undefined) {
-          onExpanded();
-        }
-      } else {
-        if (onCollapsed !== undefined) {
-          onCollapsed();
-        }
+      if (open === true && onExpanded !== undefined) {
+        onExpanded();
+      } else if (onCollapsed !== undefined) {
+        onCollapsed();
       }
     });
   }, [height, translateY, open, intrinsicHeight, onExpanded, onCollapsed]);
