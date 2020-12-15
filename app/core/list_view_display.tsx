@@ -311,14 +311,9 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
   );
   const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
 
-  // TODO: Implement this
   const selectedRows = useMemo(
-    (): SelectedRow[] =>
-      selectedRecords.map(() => ({
-        path: [],
-        row: 0,
-      })),
-    [selectedRecords],
+    (): SelectedRow[] => getSelectedRows(selectedRecords, rowPaths),
+    [selectedRecords, rowPaths],
   );
 
   if (
@@ -359,7 +354,7 @@ type ColumnToFieldIDCache = {
   [column: number]: FieldID;
 };
 
-type RowToRecordIDCache = FlatObject<RecordID>;
+type RowToRecordIDCache = FlatObject<RecordID, number>;
 
 function getColumnToFieldIDCache(fields: Field[]): ColumnToFieldIDCache {
   const cache: ColumnToFieldIDCache = {};
@@ -379,7 +374,7 @@ interface RowPath {
 }
 
 function getRowToRecordIDCache(rows: RowPath[]): RowToRecordIDCache {
-  const cache = FlatObject<RecordID>();
+  const cache = FlatObject<RecordID, number>();
 
   if (isEmpty(rows)) {
     return cache;
@@ -459,6 +454,27 @@ interface AncestorGroupedRecordNode {
 }
 
 type GroupedRecordNode = LeafGroupedRecordNode | AncestorGroupedRecordNode;
+
+function getSelectedRows(
+  selectedRecords: Record[],
+  rowPaths: RowPath[],
+): SelectedRow[] {
+  const selectedRows: SelectedRow[] = [];
+
+  for (const row of rowPaths) {
+    const found = selectedRecords.find((r) => r.id === row.recordID);
+
+    if (found !== undefined) {
+      selectedRows.push(row);
+    }
+
+    if (selectedRecords.length === selectedRows.length) {
+      break;
+    }
+  }
+
+  return selectedRows;
+}
 
 function getRowPaths(
   nodes: GroupedRecordNode[] | FlatRecordNode[],
@@ -685,6 +701,10 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   const { cell, onFocus } = useLeafRowCellContext();
   const theme = useTheme();
 
+  const handlePress = useCallback(() => {
+    onFocus();
+  }, [onFocus]);
+
   const renderCell = useCallback(() => {
     switch (field.type) {
       case FieldType.Checkbox:
@@ -777,7 +797,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
           left: -FOCUS_BORDER_WIDTH,
         },
       ]}
-      onPress={onFocus}
+      onPress={handlePress}
     >
       {renderCell()}
     </Pressable>

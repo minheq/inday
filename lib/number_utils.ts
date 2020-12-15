@@ -3,7 +3,7 @@ export function clamp(num: number, min: number, max: number): number {
 }
 
 export function isNumberString(value: string): boolean {
-  if (isNaN(Number(value.replaceAll(' ', '')))) {
+  if (isNaN(Number(value.trim()))) {
     return false;
   }
 

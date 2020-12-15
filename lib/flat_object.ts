@@ -1,17 +1,21 @@
 import { isEmpty } from './lang_utils';
+import { isNumberString, toNumber } from './number_utils';
 
-export type FlatObject<T> = {
-  get: (arr: (string | number)[]) => T | undefined;
-  set: (arr: (string | number)[], value: T) => void;
+export type FlatObject<T, K extends string | number> = {
+  get: (arr: K[]) => T | undefined;
+  set: (arr: K[], value: T) => void;
+  keysOf: () => K[][];
 };
 
 /**
  * An Object where setters and getters use array of keys
  */
-export function FlatObject<T>(init: { [key: string]: T } = {}): FlatObject<T> {
+export function FlatObject<T, K extends string | number>(
+  init: { [key: string]: T } = {},
+): FlatObject<T, K> {
   const obj: { [key: string]: T } = init;
 
-  function makeKey(arr: (string | number)[]) {
+  function makeKey(arr: K[]) {
     let key = '';
     for (let i = 0; i < arr.length; i++) {
       const nextKey = arr[i];
@@ -21,10 +25,10 @@ export function FlatObject<T>(init: { [key: string]: T } = {}): FlatObject<T> {
   }
 
   return {
-    get: (arr: (string | number)[]) => {
+    get: (arr: K[]) => {
       return obj[makeKey(arr)];
     },
-    set: (arr: (string | number)[], value: T) => {
+    set: (arr: K[], value: T) => {
       if (isEmpty(arr)) {
         console.error(
           '[FlatObject] empty array passed as keys. Nothing will be set. Make sure to pass non-empty array of keys',
@@ -33,6 +37,19 @@ export function FlatObject<T>(init: { [key: string]: T } = {}): FlatObject<T> {
       }
 
       obj[makeKey(arr)] = value;
+    },
+    keysOf: (): K[][] => {
+      const keys = Object.keys(obj);
+
+      return keys.map((arrString) =>
+        arrString.split('.').map((i) => {
+          if (isNumberString(i)) {
+            return toNumber(i) as K;
+          }
+
+          return i as K;
+        }),
+      );
     },
   };
 }
