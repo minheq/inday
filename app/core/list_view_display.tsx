@@ -149,7 +149,6 @@ import { FlatObject } from '../../lib/flat_object';
 import { last } from '../../lib/array_utils';
 import { Group } from '../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../data/sorts';
-import { Checkbox } from '../components/checkbox';
 import { Slide } from '../components/slide';
 
 const activeCellState = atom<StatefulLeafRowCell | null>({
@@ -951,11 +950,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       ]}
       onPress={onPress}
     >
-      <SelectCheckbox
-        open={showCheckbox}
-        selected={selected}
-        onPress={onPress}
-      />
+      <SelectCheckbox open={showCheckbox} selected={selected} />
       {renderCell()}
     </Pressable>
   );
@@ -964,18 +959,19 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
 interface SelectCheckboxProps {
   open: boolean;
   selected: boolean;
-  onPress: () => void;
 }
 
 const SelectCheckbox = memo(function SelectCheckbox(
   props: SelectCheckboxProps,
 ) {
-  const { open, selected, onPress } = props;
+  const { open, selected } = props;
 
   return (
-    <Slide open={open} width={40}>
-      <View style={styles.selectCheckbox}>
-        <Checkbox value={selected} onChange={onPress} />
+    <Slide open={open} width={32}>
+      <View
+        style={[styles.selectCheckbox, selected && styles.selectedCheckbox]}
+      >
+        {selected && <Icon name="Check" color="contrast" />}
       </View>
     </Slide>
   );
@@ -2318,7 +2314,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectCheckbox: {
-    paddingRight: 8,
+    borderRadius: 999,
+    width: 24,
+    height: 24,
+    borderWidth: 1,
+    borderColor: tokens.colors.gray[300],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedCheckbox: {
+    backgroundColor: tokens.colors.lightBlue[700],
+    borderColor: tokens.colors.lightBlue[700],
   },
   checkbox: {
     width: 32,
