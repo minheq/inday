@@ -673,7 +673,10 @@ function LeafRow(props: LeafRowProps) {
           theme === 'dark'
             ? styles.rowBackgroundDark
             : styles.rowBackgroundLight,
-          state === 'selected' && styles.selectedRow,
+          state === 'selected' &&
+            (theme === 'dark'
+              ? styles.selectedRowDark
+              : styles.selectedRowLight),
         ]}
       >
         {children}
@@ -747,9 +750,11 @@ const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
   const field = useGetField(fieldID);
   const fieldConfig = useGetListViewFieldConfig(viewID, fieldID);
   const value = useGetRecordFieldValue(recordID, fieldID);
-  const width = fieldConfig.width;
   const { rowToRecordIDCache } = useListViewDisplayContext();
   const setActiveCell = useSetRecoilState(activeCellState);
+  const { mode, onSelectRecord } = useListViewDisplayContext();
+  const { selected } = useLeafRowContext();
+  const width = fieldConfig.width;
 
   const handleFocus = useCallback(() => {
     if (cell.state === 'default') {
@@ -782,6 +787,14 @@ const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     });
   }, [setActiveCell, cell, rowToRecordIDCache]);
 
+  const handlePress = useCallback(() => {
+    if (mode === 'edit') {
+      handleFocus();
+    } else {
+      onSelectRecord(recordID, !selected);
+    }
+  }, [mode, handleFocus, onSelectRecord, recordID, selected]);
+
   const context: LeafRowCellContext = useMemo(() => {
     return {
       cell,
@@ -806,41 +819,46 @@ const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     return (
       <LeafRowCellContext.Provider value={context}>
         <LeafRowCellRenderer
+          cell={cell}
           field={field}
           width={width}
           height={height}
           value={value}
           primary={primary}
+          onPress={handlePress}
+          showCheckbox={mode === 'select' && primary === true}
         />
       </LeafRowCellContext.Provider>
     );
-  }, [context, field, width, height, value, primary]);
+  }, [context, cell, field, width, height, value, primary, mode, handlePress]);
 });
 
 // This component primarily serves as a optimization
 interface LeafRowCellRendererProps {
+  cell: StatefulLeafRowCell;
   field: Field;
   width: number;
   height: number;
   value: FieldValue;
   primary: boolean;
+  showCheckbox: boolean;
+  onPress: () => void;
 }
 
 const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
-  const { primary, height, field, width, value } = props;
+  const {
+    cell,
+    primary,
+    height,
+    field,
+    width,
+    value,
+    showCheckbox,
+    onPress,
+  } = props;
   const { selected } = useLeafRowContext();
-  const { cell, onFocus, recordID } = useLeafRowCellContext();
-  const { mode, onSelectRecord } = useListViewDisplayContext();
-
-  const handlePress = useCallback(() => {
-    if (mode === 'edit') {
-      onFocus();
-    } else {
-      onSelectRecord(recordID, !selected);
-    }
-  }, [mode, onFocus, onSelectRecord, recordID, selected]);
 
   const renderCell = useCallback(() => {
     switch (field.type) {
@@ -919,7 +937,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   return (
     <Pressable
       accessible={false}
-      pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
+      pointerEvents={cell.state === 'default' ? 'box-only' : 'box-none'}
       style={[
         styles.leafRowCell,
         primary && styles.primaryCell,
@@ -931,12 +949,12 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
           left: -FOCUS_BORDER_WIDTH,
         },
       ]}
-      onPress={handlePress}
+      onPress={onPress}
     >
       <SelectCheckbox
-        open={mode === 'select' && primary === true}
+        open={showCheckbox}
         selected={selected}
-        onPress={handlePress}
+        onPress={onPress}
       />
       {renderCell()}
     </Pressable>
@@ -2265,7 +2283,10 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.base.white,
   },
   row: {},
-  selectedRow: {
+  selectedRowLight: {
+    backgroundColor: tokens.colors.blue[50],
+  },
+  selectedRowDark: {
     backgroundColor: tokens.colors.blue[50],
   },
   actionRow: {
