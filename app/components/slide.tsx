@@ -11,7 +11,7 @@ interface SlideProps {
 
 export function Slide(props: SlideProps): JSX.Element {
   const { width: intrinsicWidth, open, children, onSlide, onCollapsed } = props;
-  const width = useRef(new Animated.Value(0)).current;
+  const width = useRef(new Animated.Value(open ? intrinsicWidth : 0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {

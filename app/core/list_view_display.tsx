@@ -149,6 +149,8 @@ import { FlatObject } from '../../lib/flat_object';
 import { last } from '../../lib/array_utils';
 import { Group } from '../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../data/sorts';
+import { Checkbox } from '../components/checkbox';
+import { Slide } from '../components/slide';
 
 const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_ActiveCell',
@@ -740,7 +742,7 @@ interface LeafRowCellProps {
   recordID: RecordID;
 }
 
-function LeafRowCell(props: LeafRowCellProps) {
+const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
   const { cell, primary, height, viewID, fieldID, recordID } = props;
   const field = useGetField(fieldID);
   const fieldConfig = useGetListViewFieldConfig(viewID, fieldID);
@@ -813,7 +815,7 @@ function LeafRowCell(props: LeafRowCellProps) {
       </LeafRowCellContext.Provider>
     );
   }, [context, field, width, height, value, primary]);
-}
+});
 
 // This component primarily serves as a optimization
 interface LeafRowCellRendererProps {
@@ -828,7 +830,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
   const { primary, height, field, width, value } = props;
-  const { selected } = useLeafRowContext()
+  const { selected } = useLeafRowContext();
   const { cell, onFocus, recordID } = useLeafRowCellContext();
   const { mode, onSelectRecord } = useListViewDisplayContext();
 
@@ -931,8 +933,33 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       ]}
       onPress={handlePress}
     >
+      <SelectCheckbox
+        open={mode === 'select' && primary === true}
+        selected={selected}
+        onPress={handlePress}
+      />
       {renderCell()}
     </Pressable>
+  );
+});
+
+interface SelectCheckboxProps {
+  open: boolean;
+  selected: boolean;
+  onPress: () => void;
+}
+
+const SelectCheckbox = memo(function SelectCheckbox(
+  props: SelectCheckboxProps,
+) {
+  const { open, selected, onPress } = props;
+
+  return (
+    <Slide open={open} width={40}>
+      <View style={styles.selectCheckbox}>
+        <Checkbox value={selected} onChange={onPress} />
+      </View>
+    </Slide>
   );
 });
 
@@ -941,7 +968,7 @@ interface HeaderCellProps {
   primary: boolean;
 }
 
-function HeaderCell(props: HeaderCellProps) {
+const HeaderCell = memo(function HeaderCell(props: HeaderCellProps) {
   const { field, primary } = props;
 
   return (
@@ -953,14 +980,14 @@ function HeaderCell(props: HeaderCellProps) {
       </Row>
     </View>
   );
-}
+});
 
 interface CheckboxCellProps {
   value: CheckboxFieldValue;
   field: CheckboxField;
 }
 
-function CheckboxCell(props: CheckboxCellProps) {
+const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   const { value } = props;
   const { recordID, fieldID } = useLeafRowCellContext();
   const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
@@ -981,14 +1008,14 @@ function CheckboxCell(props: CheckboxCellProps) {
       </Pressable>
     </View>
   );
-}
+});
 
 interface CurrencyCellProps {
   value: CurrencyFieldValue;
   field: CurrencyField;
 }
 
-function CurrencyCell(props: CurrencyCellProps) {
+const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
   const { cell } = useLeafRowCellContext();
 
@@ -1012,7 +1039,7 @@ function CurrencyCell(props: CurrencyCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface NumberFieldKindCellFocusedProps {
   children: React.ReactNode;
@@ -1071,7 +1098,7 @@ interface DateCellProps {
   field: DateField;
 }
 
-function DateCell(props: DateCellProps) {
+const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
@@ -1095,7 +1122,7 @@ function DateCell(props: DateCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface DateFieldCellEditingProps {
   value: DateFieldValue;
@@ -1137,7 +1164,7 @@ interface EmailCellProps {
   field: EmailField;
 }
 
-function EmailCell(props: EmailCellProps) {
+const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value } = props;
   const { cell } = useLeafRowCellContext();
 
@@ -1170,7 +1197,7 @@ function EmailCell(props: EmailCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 function useRenderCollaborator() {
   return useCallback((collaboratorID: CollaboratorID) => {
@@ -1196,7 +1223,9 @@ interface MultiCollaboratorCellProps {
   field: MultiCollaboratorField;
 }
 
-function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
+const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
+  props: MultiCollaboratorCellProps,
+) {
   const { value } = props;
   const collaborators = useGetCollaborators();
   const { cell, onStartEditing } = useLeafRowCellContext();
@@ -1234,7 +1263,7 @@ function MultiCollaboratorCell(props: MultiCollaboratorCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 function useGetRecordPrimaryFieldValue() {
   const getRecord = useGetRecordCallback();
@@ -1274,7 +1303,9 @@ interface MultiRecordLinkCellProps {
   field: MultiRecordLinkField;
 }
 
-function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
+const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
+  props: MultiRecordLinkCellProps,
+) {
   const { value, field } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
@@ -1309,14 +1340,16 @@ function MultiRecordLinkCell(props: MultiRecordLinkCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface MultiLineTextCellProps {
   value: MultiLineTextFieldValue;
   field: MultiLineTextField;
 }
 
-function MultiLineTextCell(props: MultiLineTextCellProps) {
+const MultiLineTextCell = memo(function MultiLineTextCell(
+  props: MultiLineTextCellProps,
+) {
   const { value } = props;
   const { cell } = useLeafRowCellContext();
 
@@ -1339,7 +1372,7 @@ function MultiLineTextCell(props: MultiLineTextCellProps) {
       <Text numberOfLines={1}>{value}</Text>
     </View>
   );
-}
+});
 
 interface MultiLineTextCellEditingProps {
   value: MultiLineTextFieldValue;
@@ -1398,7 +1431,9 @@ function useGetOptionOptions(
   }));
 }
 
-function MultiOptionCell(props: MultiOptionCellProps) {
+const MultiOptionCell = memo(function MultiOptionCell(
+  props: MultiOptionCellProps,
+) {
   const { value, field } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
@@ -1441,7 +1476,7 @@ function MultiOptionCell(props: MultiOptionCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface MultiSelectFieldKindCellEditingProps<T> {
   value: T[];
@@ -1539,7 +1574,7 @@ interface NumberCellProps {
   field: NumberField;
 }
 
-function NumberCell(props: NumberCellProps) {
+const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
   const { cell } = useLeafRowCellContext();
 
@@ -1592,14 +1627,16 @@ function NumberCell(props: NumberCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface PhoneNumberCellProps {
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
 }
 
-function PhoneNumberCell(props: PhoneNumberCellProps) {
+const PhoneNumberCell = memo(function PhoneNumberCell(
+  props: PhoneNumberCellProps,
+) {
   const { value } = props;
   const { cell } = useLeafRowCellContext();
 
@@ -1626,14 +1663,16 @@ function PhoneNumberCell(props: PhoneNumberCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface SingleCollaboratorCellProps {
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
 }
 
-function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
+const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
+  props: SingleCollaboratorCellProps,
+) {
   const { value } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
@@ -1667,14 +1706,16 @@ function SingleCollaboratorCell(props: SingleCollaboratorCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface SingleRecordLinkCellProps {
   value: SingleRecordLinkFieldValue;
   field: SingleRecordLinkField;
 }
 
-function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
+const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
+  props: SingleRecordLinkCellProps,
+) {
   const { value, field } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
@@ -1708,14 +1749,16 @@ function SingleRecordLinkCell(props: SingleRecordLinkCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface SingleLineTextCellProps {
   value: SingleLineTextFieldValue;
   field: SingleLineTextField;
 }
 
-function SingleLineTextCell(props: SingleLineTextCellProps) {
+const SingleLineTextCell = memo(function SingleLineTextCell(
+  props: SingleLineTextCellProps,
+) {
   const { value } = props;
   const { cell } = useLeafRowCellContext();
 
@@ -1734,14 +1777,16 @@ function SingleLineTextCell(props: SingleLineTextCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface SingleOptionCellProps {
   value: SingleOptionFieldValue;
   field: SingleOptionField;
 }
 
-function SingleOptionCell(props: SingleOptionCellProps) {
+const SingleOptionCell = memo(function SingleOptionCell(
+  props: SingleOptionCellProps,
+) {
   const { value, field } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
@@ -1776,14 +1821,14 @@ function SingleOptionCell(props: SingleOptionCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface URLCellProps {
   value: URLFieldValue;
   field: URLField;
 }
 
-function URLCell(props: URLCellProps) {
+const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value } = props;
   const { cell } = useLeafRowCellContext();
 
@@ -1812,7 +1857,7 @@ function URLCell(props: URLCellProps) {
   }
 
   return <Fragment>{child}</Fragment>;
-}
+});
 
 interface TextFieldKindCellEditingProps<T extends TextFieldKindValue> {
   value: T;
@@ -2180,6 +2225,8 @@ const styles = StyleSheet.create({
     borderColor: tokens.colors.gray[300],
     paddingVertical: 4,
     paddingHorizontal: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
     overflowY: 'hidden',
     overflowX: 'hidden',
     ...Platform.select({
@@ -2248,6 +2295,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  selectCheckbox: {
+    paddingRight: 8,
   },
   checkbox: {
     width: 32,

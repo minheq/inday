@@ -10,7 +10,7 @@ interface CheckboxProps {
 
 export function Checkbox(props: CheckboxProps): JSX.Element {
   const { value, onChange } = props;
-  const checked = useRef(new Animated.Value(0)).current;
+  const checked = useRef(new Animated.Value(value ? 1 : 0)).current;
   const handlePress = useCallback(() => {
     if (onChange !== undefined) {
       onChange(!value);
