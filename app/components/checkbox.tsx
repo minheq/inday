@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Icon } from './icon';
 import { View, Pressable, Animated, StyleSheet } from 'react-native';
+
+import { Icon } from './icon';
 import { tokens } from './tokens';
+import { usePrevious } from '../hooks/use_previous';
 
 interface CheckboxProps {
   value?: boolean;
@@ -11,6 +13,7 @@ interface CheckboxProps {
 export function Checkbox(props: CheckboxProps): JSX.Element {
   const { value, onChange } = props;
   const checked = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const prevValue = usePrevious(value);
   const handlePress = useCallback(() => {
     if (onChange !== undefined) {
       onChange(!value);
@@ -18,13 +21,15 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
   }, [value, onChange]);
 
   useEffect(() => {
-    Animated.spring(checked, {
-      toValue: value ? 1 : 0,
-      useNativeDriver: false,
-      bounciness: 0,
-      speed: 40,
-    }).start();
-  }, [checked, value]);
+    if (prevValue !== value) {
+      Animated.spring(checked, {
+        toValue: value ? 1 : 0,
+        useNativeDriver: false,
+        bounciness: 0,
+        speed: 40,
+      }).start();
+    }
+  }, [checked, value, prevValue]);
 
   return (
     <Pressable

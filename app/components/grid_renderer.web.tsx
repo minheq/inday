@@ -345,7 +345,7 @@ const HeaderContainer = memo(function HeaderContainer(
 
   const children = useMemo(
     () => (
-      <div style={styles('header')}>
+      <div style={styles('header', { height })}>
         {columns.map((columnData) => {
           const { width: columnWidth, column } = columnData;
 
@@ -357,7 +357,7 @@ const HeaderContainer = memo(function HeaderContainer(
         })}
       </div>
     ),
-    [columns, renderHeaderCell],
+    [columns, renderHeaderCell, height],
   );
 
   return (
