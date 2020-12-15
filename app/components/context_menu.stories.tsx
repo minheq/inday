@@ -6,14 +6,7 @@ import { Text } from './text';
 
 function Basic(): JSX.Element {
   return (
-    <ContextMenu
-      contentHeight={200}
-      content={
-        <Container color="primary" height={200} width={200}>
-          <Text>Context menu!</Text>
-        </Container>
-      }
-    >
+    <ContextMenu options={[{ label: 'Item 1' }, { label: 'Item 2' }]}>
       <Container>
         <Text>Right click on this</Text>
       </Container>

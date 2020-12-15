@@ -1,12 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
+import { TextColor, TextWeight } from './text';
 
-interface ContextMenuCallback {
-  onDismiss: () => void;
+export interface ContextMenuItem {
+  color?: TextColor;
+  weight?: TextWeight;
+  onPress?: () => void;
+  label: string;
 }
+
 export interface ContextMenuProps {
-  content: React.ReactNode | ((props: ContextMenuCallback) => React.ReactNode);
-  contentHeight: number;
+  options: ContextMenuItem[];
   children: React.ReactNode;
 }
 
