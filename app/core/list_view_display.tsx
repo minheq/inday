@@ -153,6 +153,7 @@ import { Slide } from '../components/slide';
 import { Button } from '../components/button';
 import { ContextMenu } from '../components/context_menu';
 import { ContextMenuButton } from '../components/context_menu_button';
+import { ContextMenuItem } from '../components/context_menu_content';
 
 const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_ActiveCell',
@@ -656,10 +657,12 @@ interface LeafRowProps {
 
 interface LeafRowContext {
   selected: boolean;
+  recordID: RecordID;
 }
 
 const LeafRowContext = createContext<LeafRowContext>({
   selected: false,
+  recordID: 'rec',
 });
 
 function useLeafRowContext() {
@@ -668,49 +671,65 @@ function useLeafRowContext() {
 
 function LeafRow(props: LeafRowProps) {
   const { children, state, recordID } = props;
-  const theme = useTheme();
-  const { onOpenRecord } = useListViewDisplayContext();
 
   const selected = state === 'selected';
 
   const value = useMemo((): LeafRowContext => {
     return {
+      recordID,
       selected: selected,
     };
-  }, [selected]);
+  }, [selected, recordID]);
+
+  return (
+    <LeafRowContext.Provider value={value}>
+      <LeafRowRenderer>{children}</LeafRowRenderer>
+    </LeafRowContext.Provider>
+  );
+}
+
+interface LeafRowRendererProps {
+  children: React.ReactNode;
+}
+
+function LeafRowRenderer(props: LeafRowRendererProps) {
+  const { children } = props;
+  const { selected } = useLeafRowContext();
+  const options = useLeafRowContextMenuOptions();
+  const theme = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.row,
+        theme === 'dark' ? styles.rowBackgroundDark : styles.rowBackgroundLight,
+        selected === true &&
+          (theme === 'dark' ? styles.selectedRowDark : styles.selectedRowLight),
+      ]}
+    >
+      <ContextMenu options={options}>{children}</ContextMenu>
+    </View>
+  );
+}
+
+function useLeafRowContextMenuOptions() {
+  const { onOpenRecord } = useListViewDisplayContext();
+  const { recordID } = useLeafRowContext();
 
   const handleOpen = useCallback(() => {
     onOpenRecord(recordID);
   }, [onOpenRecord, recordID]);
 
-  return (
-    <LeafRowContext.Provider value={value}>
-      <View
-        style={[
-          styles.row,
-          theme === 'dark'
-            ? styles.rowBackgroundDark
-            : styles.rowBackgroundLight,
-          state === 'selected' &&
-            (theme === 'dark'
-              ? styles.selectedRowDark
-              : styles.selectedRowLight),
-        ]}
-      >
-        <ContextMenu
-          options={[
-            { label: 'Open', icon: 'Archive', onPress: handleOpen },
-            { label: 'Insert record below' },
-            { label: 'Insert record above' },
-            { label: 'Duplicate' },
-            { label: 'Share' },
-            { label: 'Delete', icon: 'Archive' },
-          ]}
-        >
-          {children}
-        </ContextMenu>
-      </View>
-    </LeafRowContext.Provider>
+  return useMemo(
+    (): ContextMenuItem[] => [
+      { label: 'Open', icon: 'Archive', onPress: handleOpen },
+      { label: 'Insert record below' },
+      { label: 'Insert record above' },
+      { label: 'Duplicate' },
+      { label: 'Share' },
+      { label: 'Delete', icon: 'Archive' },
+    ],
+    [handleOpen],
   );
 }
 
@@ -880,8 +899,9 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   const { cell, primary, height, field, width, value, mode, onPress } = props;
   const theme = useTheme();
   const { selected } = useLeafRowContext();
+  const options = useLeafRowContextMenuOptions();
 
-  const renderCell = useCallback(() => {
+  const renderCell = useCallback((): JSX.Element => {
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
@@ -979,17 +999,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       />
       {renderCell()}
       {mode === 'edit' && primary === true && cell.state !== 'editing' && (
-        <ContextMenuButton
-          options={[
-            { label: 'Open', icon: 'Archive' },
-            { label: 'Insert record below' },
-            { label: 'Insert record above' },
-            { label: 'Duplicate' },
-            { label: 'Share' },
-            { label: 'Delete', icon: 'Archive' },
-          ]}
-          style={styles.rowMorebutton}
-        >
+        <ContextMenuButton options={options} style={styles.rowMorebutton}>
           <Icon name="Dots" />
         </ContextMenuButton>
       )}
