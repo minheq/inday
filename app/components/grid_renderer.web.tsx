@@ -383,7 +383,7 @@ const FooterContainer = memo(function FooterContainer(
 
   const children = useMemo(
     () => (
-      <div style={styles('footer')}>
+      <div style={styles('footer', { height })}>
         {columns.map((columnData) => {
           const { width: columnWidth, column } = columnData;
 
@@ -395,7 +395,7 @@ const FooterContainer = memo(function FooterContainer(
         })}
       </div>
     ),
-    [columns, renderFooterCell],
+    [columns, renderFooterCell, height],
   );
 
   return (
@@ -436,7 +436,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
 
   const children = useMemo(
     () => (
-      <div style={styles('row')}>
+      <div style={styles('row', { height })}>
         {columns.map((columnData) => {
           const { key, width: columnWidth, column, x } = columnData;
           const cellState =
@@ -505,7 +505,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
 
   const children = useMemo(
     () => (
-      <div style={styles('row')}>
+      <div style={styles('row', { height })}>
         {columns.map((columnData) => {
           const { key, width: columnWidth, column, x } = columnData;
           const cellState =

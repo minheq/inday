@@ -299,12 +299,16 @@ function MainContent() {
   const handleSelectRecord = useCallback(
     (recordID: RecordID, selected: boolean) => {
       if (selected === true) {
-        setSelectedRecords(selectedRecords.concat(recordID));
+        setSelectedRecords((prevSelectedRecords) =>
+          prevSelectedRecords.concat(recordID),
+        );
       } else {
-        setSelectedRecords(selectedRecords.filter((id) => id !== recordID));
+        setSelectedRecords((prevSelectedRecords) =>
+          prevSelectedRecords.filter((id) => id !== recordID),
+        );
       }
     },
-    [setSelectedRecords, selectedRecords],
+    [setSelectedRecords],
   );
 
   const renderView = useCallback((): React.ReactNode => {

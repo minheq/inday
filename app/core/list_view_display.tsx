@@ -2191,9 +2191,7 @@ const styles = StyleSheet.create({
   rowBackgroundLight: {
     backgroundColor: tokens.colors.base.white,
   },
-  row: {
-    height: '100%',
-  },
+  row: {},
   selectedRow: {
     backgroundColor: tokens.colors.blue[50],
   },
