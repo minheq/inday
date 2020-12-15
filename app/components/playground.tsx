@@ -218,6 +218,6 @@ const styles = StyleSheet.create({
   menuButton: {
     padding: 8,
     paddingLeft: 24,
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
 });

@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
   selected: {
     backgroundColor: tokens.colors.gray[50],

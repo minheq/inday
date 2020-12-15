@@ -30,7 +30,7 @@ export function ListItem(props: ListItemProps): JSX.Element {
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     paddingVertical: 8,
     paddingHorizontal: 16,
     flexDirection: 'row',

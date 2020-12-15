@@ -42,7 +42,7 @@ export function FlatButton(props: FlatButtonProps): JSX.Element {
 
 const styles = StyleSheet.create({
   root: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     flexDirection: 'row',
     minWidth: 40,
     height: 40,
@@ -51,6 +51,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   button: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
 });

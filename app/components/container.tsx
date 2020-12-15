@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   square: {},
   rounded: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
   pill: {
     borderRadius: 999,

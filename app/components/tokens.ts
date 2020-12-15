@@ -1,13 +1,20 @@
 export const tokens = {
   border: {
-    radius: {
-      default: 8,
-      circle: 999,
-    },
+    radius: 8,
   },
   shadow: {
     elevation1: {
       shadowColor: 'rgba(63, 63, 70, 0.08)',
+      shadowOffset: {
+        width: 8,
+        height: 8,
+      },
+      shadowRadius: 24,
+    },
+  },
+  shadowDark: {
+    elevation1: {
+      shadowColor: 'rgba(255, 255, 255, 0.08)',
       shadowOffset: {
         width: 8,
         height: 8,

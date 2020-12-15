@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   listItem: {
     height: 40,
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     paddingHorizontal: 8,
     alignItems: 'center',
     flexDirection: 'row',

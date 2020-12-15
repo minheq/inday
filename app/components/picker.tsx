@@ -262,7 +262,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     borderWidth: 1,
     borderColor: tokens.colors.gray[300],
     flexDirection: 'row',
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.base.white,
     borderWidth: 1,
     borderColor: tokens.colors.gray[300],
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
   searchWrapper: {
     height: SEARCH_HEIGHT,
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   option: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     height: OPTION_HEIGHT,
     paddingHorizontal: 8,
     flexDirection: 'row',

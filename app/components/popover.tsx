@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   popover: {
     position: 'absolute',
     zIndex: 1,
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
   background: {
     position: 'absolute',

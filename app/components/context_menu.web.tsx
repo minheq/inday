@@ -11,15 +11,17 @@ import { Button } from './button';
 import { ContextMenuItem, ContextMenuProps } from './context_menu';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { Text } from './text';
+import { useTheme } from './theme';
 import { tokens } from './tokens';
 
 const ITEM_HEIGHT = 32;
 
 export function ContextMenu(props: ContextMenuProps): JSX.Element {
-  const { options, children } = props;
+  const { options, children, width = 240 } = props;
   const contentHeight = useMemo((): number => {
     return options.length * ITEM_HEIGHT;
   }, [options]);
+  const theme = useTheme();
   const ref = useRef<View>(null);
   const [state, setState] = useState({
     visible: false,
@@ -31,7 +33,7 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
     (event: MouseEvent) => {
       event.preventDefault();
       const measurements = {
-        width: 0,
+        width,
         height: 0,
         pageX: event.clientX,
         pageY: event.clientY,
@@ -48,7 +50,7 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
         height: popoverHeight,
       });
     },
-    [contentHeight],
+    [contentHeight, width],
   );
 
   useEffect(() => {
@@ -78,7 +80,13 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
         anchor={state.anchor}
         visible={state.visible}
       >
-        <View style={styles.wrapper}>
+        <View
+          style={[
+            styles.wrapper,
+            theme === 'dark' ? styles.wrapperDark : styles.wrapperLight,
+            { width },
+          ]}
+        >
           <ScrollView>
             {options.map((option) => (
               <ContextMenuButton
@@ -113,7 +121,7 @@ function ContextMenuButton(props: ContextMenuButtonProps) {
 
   return (
     <Button key={label} onPress={handlePress} style={styles.button}>
-      <Text weight={weight} color={color}>
+      <Text size="sm" weight={weight} color={color}>
         {label}
       </Text>
     </Button>
@@ -122,10 +130,14 @@ function ContextMenuButton(props: ContextMenuButtonProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     overflow: 'hidden',
     flex: 1,
+    borderWidth: 1,
+    borderColor: tokens.colors.gray[300],
   },
+  wrapperDark: {},
+  wrapperLight: {},
   button: {
     flexDirection: 'row',
     alignItems: 'center',

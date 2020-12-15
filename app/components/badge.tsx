@@ -31,7 +31,7 @@ export function Badge(props: BadgeProps): JSX.Element {
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     paddingHorizontal: 8,
     height: 32,
     flexDirection: 'row',

@@ -399,8 +399,8 @@ function MainContent() {
 
 const styles = StyleSheet.create({
   collectionItem: {
-    borderTopLeftRadius: tokens.border.radius.default,
-    borderTopRightRadius: tokens.border.radius.default,
+    borderTopLeftRadius: tokens.border.radius,
+    borderTopRightRadius: tokens.border.radius,
     minWidth: 40,
     height: 32,
     justifyContent: 'center',
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     borderColor: tokens.colors.lightBlue[700],
   },
   viewMenuButton: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     flexDirection: 'row',
     minWidth: 40,
     height: 40,

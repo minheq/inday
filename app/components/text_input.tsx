@@ -87,7 +87,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
 const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     backgroundColor: tokens.colors.base.white,
     alignItems: 'center',
   },
@@ -103,10 +103,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 8,
     top: 8,
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
   clearButton: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
   },
   input: {
     height: 40,
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     borderColor: tokens.colors.gray[300],
     paddingLeft: 8,
     paddingRight: 40,
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     flex: 1,
   },
 });

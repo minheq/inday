@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   dialog: {
     maxHeight: '80%',
     maxWidth: '90%',
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     backgroundColor: tokens.colors.base.white,
   },
   background: {

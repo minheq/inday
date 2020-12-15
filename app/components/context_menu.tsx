@@ -11,6 +11,7 @@ export interface ContextMenuItem {
 
 export interface ContextMenuProps {
   options: ContextMenuItem[];
+  width?: number;
   children: React.ReactNode;
 }
 

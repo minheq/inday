@@ -27,7 +27,7 @@ export function CollaboratorBadge(props: CollaboratorBadgeProps): JSX.Element {
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: tokens.border.radius.default,
+    borderRadius: tokens.border.radius,
     height: 32,
     flexDirection: 'row',
     alignItems: 'center',

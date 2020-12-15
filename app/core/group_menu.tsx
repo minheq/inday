@@ -209,11 +209,7 @@ function GroupNew() {
 
   if (open) {
     return (
-      <Container
-        padding={16}
-        borderRadius={tokens.border.radius.default}
-        shadow
-      >
+      <Container padding={16} borderRadius={tokens.border.radius} shadow>
         <Text weight="bold">New group</Text>
         <Spacer size={16} />
         <GroupEdit groupConfig={groupConfig} onChange={setGroupConfig} />
