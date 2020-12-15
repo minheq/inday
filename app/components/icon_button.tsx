@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { tokens } from './tokens';
 import { Icon, IconName } from './icon';
@@ -20,8 +20,12 @@ export function IconButton(props: IconButtonProps): JSX.Element {
     <Button onPress={onPress} disabled={disabled} style={styles.button}>
       <View style={styles.root}>
         {icon && <Icon name={icon} />}
-        <Spacer size={4} />
-        {title && <Text size="xs">{title}</Text>}
+        {title && (
+          <Fragment>
+            <Spacer size={4} />
+            <Text size="xs">{title}</Text>
+          </Fragment>
+        )}
       </View>
     </Button>
   );

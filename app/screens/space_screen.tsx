@@ -26,7 +26,6 @@ import { FlatButton } from '../components/flat_button';
 import { Button } from '../components/button';
 import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
-import { isNotEmpty } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 
 interface SpaceScreenContext {
@@ -71,7 +70,7 @@ type ModeState = 'edit' | 'select';
 
 const modeState = atom<ModeState>({
   key: 'SpaceScreen_Mode',
-  default: 'select',
+  default: 'edit',
 });
 
 type SelectedRecordsState = RecordID[];

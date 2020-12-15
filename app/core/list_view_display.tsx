@@ -150,6 +150,7 @@ import { last } from '../../lib/array_utils';
 import { Group } from '../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../data/sorts';
 import { Slide } from '../components/slide';
+import { Button } from '../components/button';
 
 const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewDisplay_ActiveCell',
@@ -825,7 +826,7 @@ const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
           value={value}
           primary={primary}
           onPress={handlePress}
-          showCheckbox={mode === 'select' && primary === true}
+          mode={mode}
         />
       </LeafRowCellContext.Provider>
     );
@@ -840,23 +841,15 @@ interface LeafRowCellRendererProps {
   height: number;
   value: FieldValue;
   primary: boolean;
-  showCheckbox: boolean;
+  mode: ViewMode;
   onPress: () => void;
 }
 
 const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
-  const {
-    cell,
-    primary,
-    height,
-    field,
-    width,
-    value,
-    showCheckbox,
-    onPress,
-  } = props;
+  const { cell, primary, height, field, width, value, mode, onPress } = props;
+  const theme = useTheme();
   const { selected } = useLeafRowContext();
 
   const renderCell = useCallback(() => {
@@ -936,9 +929,13 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   return (
     <Pressable
       accessible={false}
-      pointerEvents={cell.state === 'default' ? 'box-only' : 'box-none'}
+      pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
       style={[
         styles.leafRowCell,
+        mode === 'edit' &&
+          (theme === 'dark'
+            ? styles.cellBackgroundDark
+            : styles.cellBackgroundLight),
         primary && styles.primaryCell,
         cell.state !== 'default' && styles.focusedLeafRowCell,
         cell.state !== 'default' && {
@@ -950,8 +947,16 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       ]}
       onPress={onPress}
     >
-      <SelectCheckbox open={showCheckbox} selected={selected} />
+      <SelectCheckbox
+        open={mode === 'select' && primary === true}
+        selected={selected}
+      />
       {renderCell()}
+      {mode === 'edit' && primary === true && cell.state !== 'editing' && (
+        <Button style={styles.rowMorebutton}>
+          <Icon name="Dots" />
+        </Button>
+      )}
     </Pressable>
   );
 });
@@ -1039,7 +1044,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
 
   const child =
     value === null ? (
-      <View style={styles.cellPlaceholder} />
+      <View style={styles.cellWrapper} />
     ) : (
       <View style={styles.textCellContainer}>
         <Text numberOfLines={1} align="right">
@@ -1080,7 +1085,11 @@ function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
     onPrintableKey: handlePrintableKey,
   });
 
-  return <Pressable onPress={onStartEditing}>{children}</Pressable>;
+  return (
+    <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      {children}
+    </Pressable>
+  );
 }
 
 interface TextFieldKindCellFocusedProps {
@@ -1104,7 +1113,11 @@ function TextFieldKindCellFocused(props: TextFieldKindCellFocusedProps) {
     onPrintableKey: handlePrintableKey,
   });
 
-  return <Pressable onPress={onStartEditing}>{children}</Pressable>;
+  return (
+    <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      {children}
+    </Pressable>
+  );
 }
 
 interface DateCellProps {
@@ -1124,7 +1137,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   const child =
     value === null ? (
-      <View style={styles.cellPlaceholder} />
+      <View style={styles.cellWrapper} />
     ) : (
       <View style={styles.textCellContainer}>
         <Text>{formatDate(parseISODate(value), getSystemLocale())}</Text>
@@ -1260,7 +1273,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   }
 
   const child = isEmpty(value) ? (
-    <View style={styles.cellPlaceholder} />
+    <View style={styles.cellWrapper} />
   ) : (
     <Row spacing={4}>
       {value.map((collaboratorID) => (
@@ -1340,7 +1353,7 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
   }
 
   const child = isEmpty(value) ? (
-    <View style={styles.cellPlaceholder} />
+    <View style={styles.cellWrapper} />
   ) : (
     <Row spacing={4}>
       {value.map((recordID) => (
@@ -1467,7 +1480,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
   }
 
   const child = isEmpty(value) ? (
-    <View style={styles.cellPlaceholder} />
+    <View style={styles.cellWrapper} />
   ) : (
     <Row spacing={4}>
       {value.map((_value) => {
@@ -1596,7 +1609,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     return <NumberFieldKindCellEditing<NumberFieldKindValue> value={value} />;
   }
 
-  let child: React.ReactNode = <View style={styles.cellPlaceholder} />;
+  let child: React.ReactNode = <View style={styles.cellWrapper} />;
 
   if (value !== null) {
     switch (field.style) {
@@ -1708,7 +1721,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
 
   const child =
     value === null ? (
-      <View style={styles.cellPlaceholder} />
+      <View style={styles.cellWrapper} />
     ) : (
       <Row>
         <CollaboratorBadge collaboratorID={value} key={value} />
@@ -1751,7 +1764,7 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
 
   const child =
     value === null ? (
-      <View style={styles.cellPlaceholder} />
+      <View style={styles.cellWrapper} />
     ) : (
       <Row>
         <RecordLinkBadge recordID={value} />
@@ -1823,7 +1836,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
 
   const child =
     value === null || selected === undefined ? (
-      <View style={styles.cellPlaceholder} />
+      <View style={styles.cellWrapper} />
     ) : (
       <Row>
         <OptionBadge option={selected} />
@@ -2304,7 +2317,7 @@ const styles = StyleSheet.create({
   },
   textCellContainer: {
     height: 32,
-    width: '100%',
+    flex: 1,
     overflow: 'hidden',
     justifyContent: 'center',
   },
@@ -2326,6 +2339,9 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.lightBlue[700],
     borderColor: tokens.colors.lightBlue[700],
   },
+  rowMorebutton: {
+    borderRadius: 999,
+  },
   checkbox: {
     width: 32,
     height: 32,
@@ -2335,9 +2351,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cellPlaceholder: {
+  cellWrapper: {
     height: 32,
-    width: '100%',
+    flex: 1,
+  },
+  cellBackgroundLight: {
+    backgroundColor: tokens.colors.base.white,
+  },
+  cellBackgroundDark: {
+    backgroundColor: tokens.colors.gray[900],
   },
   primaryCell: {
     borderRightWidth: 2,

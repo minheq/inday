@@ -466,7 +466,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
       style={styles(
         'rowWrapper',
         { height, width, top: y },
-        (state === 'hovered' || state === 'selected') && 'selected',
+        activeCell !== null && 'active',
       )}
     >
       {renderLeafRow({ children, path, row, state })}
@@ -534,7 +534,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
       style={styles(
         'rowWrapper',
         { height, width, top: y },
-        state === 'hovered' && 'selected',
+        state === 'hovered' && 'active',
       )}
     >
       {renderGroupRow({ children, path, state })}
@@ -586,7 +586,7 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
         'cell',
         { left: x, width, height },
         (state === 'editing' || state === 'focused' || state === 'hovered') &&
-          'selected',
+          'active',
       )}
     >
       {renderLeafRowCell({
@@ -628,7 +628,7 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
       style={styles(
         'cell',
         { left: x, width, height },
-        (state === 'editing' || state === 'hovered') && 'selected',
+        (state === 'editing' || state === 'hovered') && 'active',
       )}
     >
       {renderGroupRowCell({ path, column, state })}
@@ -698,7 +698,7 @@ const styles = css.create({
     position: 'absolute',
     width: '100%',
   },
-  selected: {
+  active: {
     zIndex: 1,
   },
 });
