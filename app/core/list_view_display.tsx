@@ -639,19 +639,44 @@ interface LeafRowProps {
   children: React.ReactNode;
 }
 
+interface LeafRowContext {
+  selected: boolean;
+}
+
+const LeafRowContext = createContext<LeafRowContext>({
+  selected: false,
+});
+
+function useLeafRowContext() {
+  return useContext(LeafRowContext);
+}
+
 function LeafRow(props: LeafRowProps) {
   const { children, state } = props;
   const theme = useTheme();
+
+  const selected = state === 'selected';
+
+  const value = useMemo((): LeafRowContext => {
+    return {
+      selected: selected,
+    };
+  }, [selected]);
+
   return (
-    <View
-      style={[
-        styles.row,
-        theme === 'dark' ? styles.rowBackgroundDark : styles.rowBackgroundLight,
-        state === 'selected' && styles.selectedRow,
-      ]}
-    >
-      {children}
-    </View>
+    <LeafRowContext.Provider value={value}>
+      <View
+        style={[
+          styles.row,
+          theme === 'dark'
+            ? styles.rowBackgroundDark
+            : styles.rowBackgroundLight,
+          state === 'selected' && styles.selectedRow,
+        ]}
+      >
+        {children}
+      </View>
+    </LeafRowContext.Provider>
   );
 }
 
@@ -803,6 +828,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
   const { primary, height, field, width, value } = props;
+  const { selected } = useLeafRowContext()
   const { cell, onFocus, recordID } = useLeafRowCellContext();
   const { mode, onSelectRecord } = useListViewDisplayContext();
 
@@ -810,9 +836,9 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
     if (mode === 'edit') {
       onFocus();
     } else {
-      onSelectRecord(recordID, true);
+      onSelectRecord(recordID, !selected);
     }
-  }, [mode, onFocus, onSelectRecord, recordID]);
+  }, [mode, onFocus, onSelectRecord, recordID, selected]);
 
   const renderCell = useCallback(() => {
     switch (field.type) {
