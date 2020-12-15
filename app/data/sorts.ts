@@ -290,8 +290,6 @@ function sortBy(
       return sortBySingleOptionField(sort, records, getters);
     case FieldType.SingleRecordLink:
       return sortBySingleRecordLinkField(sort, records, getters);
-    default:
-      throw new Error(`Unrecognized field ${JSON.stringify(field)}`);
   }
 }
 

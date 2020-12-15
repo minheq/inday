@@ -194,8 +194,10 @@ function resolveColor(
       return theme === 'dark' ? styles.contentDark : styles.contentLight;
     case 'default':
       return styles.default;
-    default:
-      throw new Error('Unrecognized background color');
+    case 'tint':
+      return styles.tint;
+    case 'primary':
+      return styles.primary;
   }
 }
 

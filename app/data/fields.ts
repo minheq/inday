@@ -614,8 +614,6 @@ export function assertFieldValueType<T extends FieldType>(
     case FieldType.URL:
       assertURLFieldValue(value);
       break;
-    default:
-      throw new Error('Unrecognized field type');
   }
 }
 

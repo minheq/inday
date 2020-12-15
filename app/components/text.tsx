@@ -128,8 +128,6 @@ export function fromTextColor(
       return tokens.colors.green[700];
     case 'contrast':
       return tokens.colors.base.white;
-    default:
-      throw new Error('Text color not recognized');
   }
 }
 

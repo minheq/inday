@@ -358,8 +358,6 @@ function MainContent() {
         );
       case 'board':
         return null;
-      default:
-        throw new Error('View type not supported');
     }
   }, [mode, view, handleOpenRecord, selectedRecords, handleSelectRecord]);
 

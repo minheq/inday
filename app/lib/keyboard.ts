@@ -123,8 +123,6 @@ function normalize(key: string): KeyboardKey {
       return NavigationKey.ArrowRight;
     case ' ':
       return WhiteSpaceKey.Space;
-    default:
-      break;
   }
 
   return key as KeyboardKey;

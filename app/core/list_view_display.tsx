@@ -899,9 +899,6 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       case FieldType.URL:
         assertURLFieldValue(value);
         return <URLCell field={field} value={value} />;
-
-      default:
-        throw new Error('Unhandled FieldType cell rendering');
     }
   }, [field, value]);
 
@@ -1644,8 +1641,6 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
           </View>
         );
         break;
-      default:
-        throw new Error('Field style not supported');
     }
   }
 

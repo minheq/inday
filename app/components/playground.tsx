@@ -12,6 +12,7 @@ import { tokens } from './tokens';
 import { PickerStories } from './picker.stories';
 import { Spacer } from './spacer';
 import { Row } from './row';
+import { ContextMenuStories } from './context_menu.stories';
 import { FlatButton } from './flat_button';
 import { Content } from './content';
 import { useMediaQuery } from '../lib/media_query';
@@ -65,6 +66,9 @@ export function Playground(
     case 'DatePicker':
       content = <DatePickerStories />;
       break;
+    case 'ContextMenu':
+      content = <ContextMenuStories />;
+      break;
 
     default:
       content = (
@@ -104,15 +108,17 @@ export function Playground(
             </Row>
           </Container>
         )}
-        <Content>
-          <ScrollView>
-            <Text weight="bold" size="xl">
-              {component}
-            </Text>
-            <Spacer size={24} />
-            {content}
-          </ScrollView>
-        </Content>
+        <Container flex={1} color="content">
+          <Content>
+            <ScrollView>
+              <Text weight="bold" size="xl">
+                {component}
+              </Text>
+              <Spacer size={24} />
+              {content}
+            </ScrollView>
+          </Content>
+        </Container>
       </View>
     </PlaygroundContext.Provider>
   );
@@ -120,7 +126,7 @@ export function Playground(
 
 function Menu() {
   return (
-    <View style={styles.menu}>
+    <Container color="content" flex={1}>
       <Container padding={8} paddingTop={16}>
         <Text weight="600" size="lg">
           Inday Playground
@@ -130,13 +136,14 @@ function Menu() {
         <MenuSection title="GETTING STARTED" />
         <MenuItem component="Intro" />
         <MenuSection title="COMPONENTS" />
+        <MenuItem component="ContextMenu" />
         <MenuItem component="Picker" />
         <MenuItem component="DatePicker" />
         <MenuItem component="TextInput" />
         <MenuItem component="Dialog" />
         <MenuItem component="Grid" />
       </ScrollView>
-    </View>
+    </Container>
   );
 }
 
@@ -182,7 +189,12 @@ function MenuSection(props: MenuSectionProps) {
   const { title } = props;
 
   return (
-    <Container paddingLeft={8} paddingTop={16} paddingBottom={8}>
+    <Container
+      color="content"
+      paddingLeft={8}
+      paddingTop={16}
+      paddingBottom={8}
+    >
       <Text color="muted" weight="bold">
         {title}
       </Text>
@@ -202,9 +214,6 @@ const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
     height: '100%',
-  },
-  menu: {
-    flex: 1,
   },
   menuButton: {
     padding: 8,

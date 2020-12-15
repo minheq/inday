@@ -390,10 +390,6 @@ export function getDefaultFilterConfig(field: Field): FilterConfig {
         rule: SingleSelectFieldKindFilterRule.Is,
         value: null,
       };
-    default:
-      throw new Error(
-        `Expected default filter config for ${JSON.stringify(field)}`,
-      );
   }
 }
 
@@ -481,7 +477,11 @@ export function filterRecords(
   return filteredRecords;
 }
 
-function filterByFilter(field: Field, value: FieldValue, filter: Filter) {
+function filterByFilter(
+  field: Field,
+  value: FieldValue,
+  filter: Filter,
+): boolean {
   switch (field.type) {
     case FieldType.Checkbox:
       assertBooleanFieldKindValue(value);
@@ -521,8 +521,6 @@ function filterByFilter(field: Field, value: FieldValue, filter: Filter) {
       assertSingleSelectFieldKindValue(value);
       assertSingleSelectFilter(filter);
       return filterBySingleSelectFieldKindFilter(value, filter);
-    default:
-      throw new Error(`Field type unrecognized ${JSON.stringify(field)}`);
   }
 }
 
@@ -543,10 +541,6 @@ export function filterByTextFieldKindFilter(
       return filterByTextFieldKindFilterRuleIsEmpty(value);
     case TextFieldKindFilterRule.IsNotEmpty:
       return filterByTextFieldKindFilterRuleIsNotEmpty(value);
-    default:
-      throw new Error(
-        `Unrecognized filter rule. ${JSON.stringify(filter.rule)}`,
-      );
   }
 }
 
@@ -612,8 +606,6 @@ export function filterByNumberFieldKindFilter(
       return filterByNumberFieldKindFilterRuleIsEmpty(value);
     case NumberFieldKindFilterRule.IsNotEmpty:
       return filterByNumberFieldKindFilterRuleIsNotEmpty(value);
-    default:
-      throw new Error(`Field type unrecognized ${JSON.stringify(filter.rule)}`);
   }
 }
 
@@ -726,10 +718,6 @@ export function filterByDateFieldKindFilter(
       return filterByDateFieldKindFilterRuleIsEmpty(value);
     case DateFieldKindFilterRule.IsNotEmpty:
       return filterByDateFieldKindFilterRuleIsNotEmpty(value);
-    default:
-      throw new Error(
-        `Unrecognized filter rule. ${JSON.stringify(filter.rule)}`,
-      );
   }
 }
 
@@ -968,9 +956,6 @@ export function filterBySingleSelectFieldKindFilter(
       return filterBySingleSelectFieldKindFilterRuleIsEmpty(value);
     case SingleSelectFieldKindFilterRule.IsNotEmpty:
       return filterBySingleSelectFieldKindFilterRuleIsNotEmpty(value);
-
-    default:
-      throw new Error(`Field type unrecognized ${JSON.stringify(filter.rule)}`);
   }
 }
 
@@ -1106,10 +1091,6 @@ export function filterByMultiSelectFieldKindFilter(
       return filterByMultiSelectFieldKindFilterRuleIsEmpty(value);
     case MultiSelectFieldKindFilterRule.IsNotEmpty:
       return filterByMultiSelectFieldKindFilterRuleIsNotEmpty(value);
-    default:
-      throw new Error(
-        `Filter type unrecognized ${JSON.stringify(filter.rule)}`,
-      );
   }
 }
 

@@ -45,8 +45,6 @@ function getTextSize(size: AvatarSize): TextSize {
       return 'sm';
     case 'sm':
       return 'xs';
-    default:
-      return 'sm';
   }
 }
 

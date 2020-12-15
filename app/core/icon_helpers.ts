@@ -24,8 +24,6 @@ export function getViewIconColor(
         : tokens.colors.blue[600];
     case 'board':
       return theme === 'dark' ? tokens.colors.red[50] : tokens.colors.red[600];
-    default:
-      throw new Error(`View type not recognized ${JSON.stringify(viewType)}`);
   }
 }
 
