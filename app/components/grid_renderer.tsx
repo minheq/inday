@@ -10,7 +10,6 @@ import React, {
 } from 'react';
 import { Animated, ScrollView, StyleSheet, View } from 'react-native';
 import {
-  Cell,
   ContentOffset,
   useGetStatefulRows,
   useGridGetScrollToCellOffset,
@@ -33,6 +32,10 @@ export interface GridRendererProps {
   footerHeight?: number;
   renderFooterCell?: (props: RenderFooterCellProps) => React.ReactNode;
   renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
+  renderLeafRow: (props: RenderLeafRowProps) => React.ReactNode;
+  renderGroupRow?: (props: RenderGroupRowProps) => React.ReactNode;
+  renderHeader?: (props: RenderHeaderProps) => React.ReactNode;
+  renderFooter?: (props: RenderFooterProps) => React.ReactNode;
   headerHeight?: number;
   renderHeaderCell?: (props: RenderHeaderCellProps) => React.ReactNode;
   leafRowHeight: number;
@@ -69,6 +72,27 @@ export interface RenderLeafRowCellProps {
   row: number;
   column: number;
   state: LeafRowCellState;
+}
+
+export interface RenderGroupRowProps {
+  path: number[];
+  state: GroupRowState;
+  children: React.ReactNode;
+}
+
+export interface RenderLeafRowProps {
+  path: number[];
+  row: number;
+  state: LeafRowState;
+  children: React.ReactNode;
+}
+
+export interface RenderHeaderProps {
+  children: React.ReactNode;
+}
+
+export interface RenderFooterProps {
+  children: React.ReactNode;
 }
 
 export interface ScrollToOffsetParams extends Partial<ContentOffset> {

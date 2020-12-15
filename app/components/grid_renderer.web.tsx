@@ -6,6 +6,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useCallback,
+  useMemo,
 } from 'react';
 import { css } from '../lib/css';
 import {
@@ -32,6 +33,10 @@ import {
   RenderHeaderCellProps,
   RenderGroupRowCellProps,
   RenderFooterCellProps,
+  RenderLeafRowProps,
+  RenderGroupRowProps,
+  RenderHeaderProps,
+  RenderFooterProps,
 } from './grid_renderer';
 
 // False positive  https://github.com/yannickcr/eslint-plugin-react/issues/2269
@@ -56,7 +61,11 @@ export const GridRenderer = memo(
       width,
       renderFooterCell,
       renderGroupRowCell,
+      renderGroupRow,
       renderLeafRowCell,
+      renderLeafRow,
+      renderFooter,
+      renderHeader,
       renderHeaderCell,
       contentOffset,
       onContentOffsetLoaded,
@@ -186,12 +195,16 @@ export const GridRenderer = memo(
                   activeCell={row.activeCell}
                   width={_width}
                   columns={_columns}
+                  renderLeafRow={renderLeafRow}
                   renderLeafRowCell={renderLeafRowCell}
                 />,
               );
               break;
             case 'group':
-              if (renderGroupRowCell === undefined) {
+              if (
+                renderGroupRowCell === undefined ||
+                renderGroupRow === undefined
+              ) {
                 break;
               }
 
@@ -206,6 +219,7 @@ export const GridRenderer = memo(
                   activeCell={row.activeCell}
                   width={_width}
                   columns={_columns}
+                  renderGroupRow={renderGroupRow}
                   renderGroupRowCell={renderGroupRowCell}
                 />,
               );
@@ -224,12 +238,22 @@ export const GridRenderer = memo(
 
         return _rows;
       },
-      [renderGroupRowCell, renderLeafRowCell, statefulRows],
+      [
+        renderGroupRowCell,
+        renderLeafRowCell,
+        renderLeafRow,
+        renderGroupRow,
+        statefulRows,
+      ],
     );
 
-    const renderHeader = useCallback(
+    const _renderHeader = useCallback(
       (_columns: Column[], _width: number) => {
-        if (headerHeight === 0 || renderHeaderCell === undefined) {
+        if (
+          headerHeight === 0 ||
+          renderHeaderCell === undefined ||
+          renderHeader === undefined
+        ) {
           return null;
         }
 
@@ -238,16 +262,21 @@ export const GridRenderer = memo(
             height={headerHeight}
             width={_width}
             columns={_columns}
+            renderHeader={renderHeader}
             renderHeaderCell={renderHeaderCell}
           />
         );
       },
-      [headerHeight, renderHeaderCell],
+      [headerHeight, renderHeaderCell, renderHeader],
     );
 
-    const renderFooter = useCallback(
+    const _renderFooter = useCallback(
       (_columns: Column[], _width: number) => {
-        if (footerHeight === 0 || renderFooterCell === undefined) {
+        if (
+          footerHeight === 0 ||
+          renderFooterCell === undefined ||
+          renderFooter === undefined
+        ) {
           return null;
         }
 
@@ -257,11 +286,18 @@ export const GridRenderer = memo(
             height={footerHeight}
             width={_width}
             columns={_columns}
+            renderFooter={renderFooter}
             renderFooterCell={renderFooterCell}
           />
         );
       },
-      [headerHeight, scrollViewHeight, footerHeight, renderFooterCell],
+      [
+        headerHeight,
+        scrollViewHeight,
+        footerHeight,
+        renderFooterCell,
+        renderFooter,
+      ],
     );
 
     return (
@@ -275,18 +311,18 @@ export const GridRenderer = memo(
           <div
             style={styles('leftPaneColumns', { width: leftPaneContentWidth })}
           >
-            {renderHeader(leftPaneColumns, leftPaneContentWidth)}
+            {_renderHeader(leftPaneColumns, leftPaneContentWidth)}
             <div style={styles('rowsWrapper', { top: headerHeight })}>
               {renderRows(recycledLeftPaneColumns, leftPaneContentWidth)}
             </div>
-            {renderFooter(leftPaneColumns, leftPaneContentWidth)}
+            {_renderFooter(leftPaneColumns, leftPaneContentWidth)}
           </div>
           <div style={styles('rightPaneColumns')}>
-            {renderHeader(rightPaneColumns, rightPaneContentWidth)}
+            {_renderHeader(rightPaneColumns, rightPaneContentWidth)}
             <div style={styles('rowsWrapper', { top: headerHeight })}>
               {renderRows(recycledRightPaneColumns, rightPaneContentWidth)}
             </div>
-            {renderFooter(rightPaneColumns, rightPaneContentWidth)}
+            {_renderFooter(rightPaneColumns, rightPaneContentWidth)}
           </div>
         </div>
       </div>
@@ -297,6 +333,7 @@ export const GridRenderer = memo(
 interface HeaderContainerProps {
   height: number;
   width: number;
+  renderHeader: (props: RenderHeaderProps) => React.ReactNode;
   renderHeaderCell: (props: RenderHeaderCellProps) => React.ReactNode;
   columns: Column[];
 }
@@ -304,10 +341,10 @@ interface HeaderContainerProps {
 const HeaderContainer = memo(function HeaderContainer(
   props: HeaderContainerProps,
 ) {
-  const { height, width, columns, renderHeaderCell } = props;
+  const { height, width, columns, renderHeader, renderHeaderCell } = props;
 
-  return (
-    <div style={styles('headerWrapper', { width, height })}>
+  const children = useMemo(
+    () => (
       <div style={styles('header')}>
         {columns.map((columnData) => {
           const { width: columnWidth, column } = columnData;
@@ -319,6 +356,13 @@ const HeaderContainer = memo(function HeaderContainer(
           );
         })}
       </div>
+    ),
+    [columns, renderHeaderCell],
+  );
+
+  return (
+    <div style={styles('headerWrapper', { width, height })}>
+      {renderHeader({ children })}
     </div>
   );
 });
@@ -327,6 +371,7 @@ interface FooterContainerProps {
   height: number;
   width: number;
   y: number;
+  renderFooter: (props: RenderFooterProps) => React.ReactNode;
   renderFooterCell: (props: RenderFooterCellProps) => React.ReactNode;
   columns: Column[];
 }
@@ -334,10 +379,10 @@ interface FooterContainerProps {
 const FooterContainer = memo(function FooterContainer(
   props: FooterContainerProps,
 ) {
-  const { y, height, width, renderFooterCell, columns } = props;
+  const { y, height, width, renderFooterCell, renderFooter, columns } = props;
 
-  return (
-    <div style={styles('footerWrapper', { top: y, width, height })}>
+  const children = useMemo(
+    () => (
       <div style={styles('footer')}>
         {columns.map((columnData) => {
           const { width: columnWidth, column } = columnData;
@@ -349,6 +394,13 @@ const FooterContainer = memo(function FooterContainer(
           );
         })}
       </div>
+    ),
+    [columns, renderFooterCell],
+  );
+
+  return (
+    <div style={styles('footerWrapper', { top: y, width, height })}>
+      {renderFooter({ children })}
     </div>
   );
 });
@@ -360,6 +412,7 @@ interface LeafRowContainerProps {
   path: number[];
   row: number;
   renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
+  renderLeafRow: (props: RenderLeafRowProps) => React.ReactNode;
   columns: RecycledColumn[];
   state: LeafRowState;
   activeCell: StatefulLeafRowCell | null;
@@ -377,17 +430,12 @@ const LeafRowContainer = memo(function LeafRowContainer(
     columns,
     activeCell,
     state,
+    renderLeafRow,
     renderLeafRowCell,
   } = props;
 
-  return (
-    <div
-      style={styles(
-        'rowWrapper',
-        { height, width, top: y },
-        (state === 'hovered' || state === 'selected') && 'selected',
-      )}
-    >
+  const children = useMemo(
+    () => (
       <div style={styles('row')}>
         {columns.map((columnData) => {
           const { key, width: columnWidth, column, x } = columnData;
@@ -409,6 +457,19 @@ const LeafRowContainer = memo(function LeafRowContainer(
           );
         })}
       </div>
+    ),
+    [activeCell, columns, height, path, renderLeafRowCell, row],
+  );
+
+  return (
+    <div
+      style={styles(
+        'rowWrapper',
+        { height, width, top: y },
+        (state === 'hovered' || state === 'selected') && 'selected',
+      )}
+    >
+      {renderLeafRow({ children, path, row, state })}
     </div>
   );
 });
@@ -420,6 +481,7 @@ interface GroupRowContainerProps {
   collapsed: boolean;
   path: number[];
   renderGroupRowCell: (props: RenderGroupRowCellProps) => React.ReactNode;
+  renderGroupRow: (props: RenderGroupRowProps) => React.ReactNode;
   columns: RecycledColumn[];
   state: GroupRowState;
   activeCell: StatefulGroupRowCell | null;
@@ -437,17 +499,12 @@ const GroupRowContainer = memo(function GroupRowContainer(
     columns,
     activeCell,
     state,
+    renderGroupRow,
     renderGroupRowCell,
   } = props;
 
-  return (
-    <div
-      style={styles(
-        'rowWrapper',
-        { height, width, top: y },
-        state === 'hovered' && 'selected',
-      )}
-    >
+  const children = useMemo(
+    () => (
       <div style={styles('row')}>
         {columns.map((columnData) => {
           const { key, width: columnWidth, column, x } = columnData;
@@ -468,6 +525,19 @@ const GroupRowContainer = memo(function GroupRowContainer(
           );
         })}
       </div>
+    ),
+    [activeCell, columns, height, path, renderGroupRowCell],
+  );
+
+  return (
+    <div
+      style={styles(
+        'rowWrapper',
+        { height, width, top: y },
+        state === 'hovered' && 'selected',
+      )}
+    >
+      {renderGroupRow({ children, path, state })}
     </div>
   );
 });
@@ -519,7 +589,13 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
           'selected',
       )}
     >
-      {renderLeafRowCell({ path, row, column, state, type: 'leaf' })}
+      {renderLeafRowCell({
+        path,
+        row,
+        column,
+        state,
+        type: 'leaf',
+      })}
     </div>
   );
 });

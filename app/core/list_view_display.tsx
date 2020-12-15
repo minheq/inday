@@ -108,6 +108,10 @@ import {
   GridRendererRef,
   RenderLeafRowCellProps,
   RenderHeaderCellProps,
+  RenderLeafRowProps,
+  RenderGroupRowProps,
+  RenderHeaderProps,
+  RenderFooterProps,
 } from '../components/grid_renderer';
 import { Record, RecordID } from '../data/records';
 import { atom, useRecoilState, useSetRecoilState } from 'recoil';
@@ -121,6 +125,8 @@ import {
 } from '../lib/keyboard';
 import {
   GridGroup,
+  GroupRowState,
+  LeafRowState,
   SelectedRow,
   StatefulLeafRowCell,
 } from '../components/grid_renderer.common';
@@ -302,6 +308,28 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
     [fields],
   );
 
+  const renderLeafRow = useCallback(
+    ({ children, state }: RenderLeafRowProps) => {
+      return <LeafRow state={state}>{children}</LeafRow>;
+    },
+    [],
+  );
+
+  const renderGroupRow = useCallback(
+    ({ children, state }: RenderGroupRowProps) => {
+      return <GroupRow state={state}>{children}</GroupRow>;
+    },
+    [],
+  );
+
+  const renderHeader = useCallback(({ children }: RenderHeaderProps) => {
+    return <Header>{children}</Header>;
+  }, []);
+
+  const renderFooter = useCallback(({ children }: RenderFooterProps) => {
+    return <Footer>{children}</Footer>;
+  }, []);
+
   const columns = useMemo(
     (): number[] => fields.map((field) => field.config.width),
     [fields],
@@ -332,8 +360,12 @@ export function ListViewDisplay(props: ListViewDisplayProps): JSX.Element {
               height={height}
               selectedRows={selectedRows}
               groups={gridGroups}
+              renderLeafRow={renderLeafRow}
+              renderGroupRow={renderGroupRow}
               renderLeafRowCell={renderLeafRowCell}
               renderHeaderCell={renderHeaderCell}
+              renderHeader={renderHeader}
+              renderFooter={renderFooter}
               leafRowHeight={RECORD_ROW_HEIGHT}
               headerHeight={FIELD_ROW_HEIGHT}
               columns={columns}
@@ -602,6 +634,78 @@ function useListViewDisplayContext(): ListViewDisplayContext {
   return useContext(ListViewDisplayContext);
 }
 
+interface LeafRowProps {
+  state: LeafRowState;
+  children: React.ReactNode;
+}
+
+function LeafRow(props: LeafRowProps) {
+  const { children, state } = props;
+  const theme = useTheme();
+  return (
+    <View
+      style={[
+        styles.row,
+        theme === 'dark' ? styles.rowBackgroundDark : styles.rowBackgroundLight,
+        state === 'selected' && styles.selectedRow,
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+
+interface HeaderProps {
+  children: React.ReactNode;
+}
+
+function Header(props: HeaderProps) {
+  const { children } = props;
+  const theme = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.row,
+        theme === 'dark' ? styles.rowBackgroundDark : styles.rowBackgroundLight,
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+
+interface FooterProps {
+  children: React.ReactNode;
+}
+
+function Footer(props: FooterProps) {
+  const { children } = props;
+  const theme = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.row,
+        theme === 'dark' ? styles.rowBackgroundDark : styles.rowBackgroundLight,
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+
+interface GroupRowProps {
+  state: GroupRowState;
+  children: React.ReactNode;
+}
+
+function GroupRow(props: GroupRowProps) {
+  const { children } = props;
+
+  return <View>{children}</View>;
+}
+
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
   primary: boolean;
@@ -701,13 +805,12 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   const { primary, height, field, width, value } = props;
   const { cell, onFocus, recordID } = useLeafRowCellContext();
   const { mode, onSelectRecord } = useListViewDisplayContext();
-  const theme = useTheme();
 
   const handlePress = useCallback(() => {
     if (mode === 'edit') {
       onFocus();
     } else {
-      onSelectRecord(recordID);
+      onSelectRecord(recordID, true);
     }
   }, [mode, onFocus, onSelectRecord, recordID]);
 
@@ -791,9 +894,6 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
       style={[
         styles.leafRowCell,
-        theme === 'dark'
-          ? styles.cellBackgroundDark
-          : styles.cellBackgroundLight,
         primary && styles.primaryCell,
         cell.state !== 'default' && styles.focusedLeafRowCell,
         cell.state !== 'default' && {
@@ -817,18 +917,9 @@ interface HeaderCellProps {
 
 function HeaderCell(props: HeaderCellProps) {
   const { field, primary } = props;
-  const theme = useTheme();
 
   return (
-    <View
-      style={[
-        styles.headerCell,
-        theme === 'dark'
-          ? styles.cellBackgroundDark
-          : styles.cellBackgroundLight,
-        primary && styles.primaryCell,
-      ]}
-    >
+    <View style={[styles.headerCell, primary && styles.primaryCell]}>
       <Row>
         <Icon name={getFieldIcon(field.type)} />
         <Spacer size={4} />
@@ -2094,6 +2185,18 @@ const styles = StyleSheet.create({
   selectKindEditingContainer: {
     maxHeight: 480,
   },
+  rowBackgroundDark: {
+    backgroundColor: tokens.colors.gray[900],
+  },
+  rowBackgroundLight: {
+    backgroundColor: tokens.colors.base.white,
+  },
+  row: {
+    height: '100%',
+  },
+  selectedRow: {
+    backgroundColor: tokens.colors.blue[50],
+  },
   actionRow: {
     paddingTop: 24,
     paddingBottom: 8,
@@ -2144,11 +2247,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderColor: tokens.colors.gray[300],
     borderBottomWidth: 1,
-  },
-  cellBackgroundDark: {
-    backgroundColor: tokens.colors.gray[900],
-  },
-  cellBackgroundLight: {
-    backgroundColor: tokens.colors.base.white,
   },
 });

@@ -7,6 +7,10 @@ import {
   RenderGroupRowCellProps,
   GridRendererRef,
   RenderFooterCellProps,
+  RenderGroupRowProps,
+  RenderLeafRowProps,
+  RenderHeaderProps,
+  RenderFooterProps,
 } from './grid_renderer';
 import { AutoSizer } from '../lib/autosizer';
 import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
@@ -37,6 +41,30 @@ function renderGroupRowCell(props: RenderGroupRowCellProps) {
       <Text>{column}</Text>
     </View>
   );
+}
+
+function renderGroupRow(props: RenderGroupRowProps) {
+  const { children } = props;
+
+  return <View style={styles.groupRow}>{children}</View>;
+}
+
+function renderLeafRow(props: RenderLeafRowProps) {
+  const { children } = props;
+
+  return <View style={styles.leafRow}>{children}</View>;
+}
+
+function renderHeader(props: RenderHeaderProps) {
+  const { children } = props;
+
+  return <View style={styles.header}>{children}</View>;
+}
+
+function renderFooter(props: RenderFooterProps) {
+  const { children } = props;
+
+  return <View style={styles.footer}>{children}</View>;
 }
 
 function renderHeaderCell(props: RenderHeaderCellProps) {
@@ -110,6 +138,10 @@ function Flat(): JSX.Element {
               renderHeaderCell={renderHeaderCell}
               leafRowHeight={40}
               renderFooterCell={renderFooterCell}
+              renderGroupRow={renderGroupRow}
+              renderLeafRow={renderLeafRow}
+              renderHeader={renderHeader}
+              renderFooter={renderFooter}
               footerHeight={40}
               columns={columns}
               fixedColumnCount={1}
@@ -201,6 +233,10 @@ function Grouped(): JSX.Element {
               renderGroupRowCell={renderGroupRowCell}
               groupRowHeight={56}
               renderFooterCell={renderFooterCell}
+              renderGroupRow={renderGroupRow}
+              renderLeafRow={renderLeafRow}
+              renderHeader={renderHeader}
+              renderFooter={renderFooter}
               footerHeight={40}
               spacerHeight={80}
               columns={columns}
@@ -297,21 +333,30 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  groupRow: {
+    backgroundColor: tokens.colors.red[50],
+  },
+  leafRow: {
+    backgroundColor: tokens.colors.blue[50],
+  },
+  header: {
+    backgroundColor: tokens.colors.green[50],
+  },
+  footer: {
+    backgroundColor: tokens.colors.purple[50],
+  },
   groupRowCell: {
     width: '100%',
     height: '100%',
-    backgroundColor: tokens.colors.red[50],
   },
   headerCell: {
     width: '100%',
     height: '100%',
     borderBottomWidth: 1,
-    backgroundColor: tokens.colors.green[50],
   },
   footerCell: {
     width: '100%',
     height: '100%',
-    backgroundColor: tokens.colors.blue[50],
   },
   scrollToCell: {
     backgroundColor: tokens.colors.base.white,

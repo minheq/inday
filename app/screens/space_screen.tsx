@@ -315,7 +315,7 @@ function MainContent() {
             mode={mode}
             view={view}
             onOpenRecord={handleOpenRecord}
-            selectedRecords={[]}
+            selectedRecords={selectedRecords}
             onSelectRecord={handleSelectRecord}
           />
         );
@@ -324,7 +324,7 @@ function MainContent() {
       default:
         throw new Error('View type not supported');
     }
-  }, [mode, view, handleOpenRecord, handleSelectRecord]);
+  }, [mode, view, handleOpenRecord, selectedRecords, handleSelectRecord]);
 
   return (
     <Container flex={1} color="content">
