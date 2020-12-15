@@ -1,4 +1,4 @@
-import React, { useCallback, createContext, useContext } from 'react';
+import React, { useCallback, createContext, useContext, Fragment } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
@@ -26,6 +26,8 @@ import { FlatButton } from '../components/flat_button';
 import { Button } from '../components/button';
 import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
+import { isNotEmpty } from '../../lib/array_utils';
+import { isEmpty } from '../../lib/lang_utils';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -125,9 +127,8 @@ function TopMenu() {
 function ViewSettings() {
   const context = useContext(SpaceScreenContext);
   const view = useGetView(context.viewID);
-  const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
   const [mode, setMode] = useRecoilState(modeState);
-  const [, setSelectedRecords] = useRecoilState(selectedRecordsState);
+  const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
 
   const handleToggleView = useCallback(() => {
     if (sidePanel !== 'views') {
@@ -135,7 +136,56 @@ function ViewSettings() {
     } else {
       setSidePanel(null);
     }
-  }, [sidePanel, setSidePanel]);
+
+    setMode('edit');
+  }, [sidePanel, setSidePanel, setMode]);
+
+  return (
+    <Container color="content" shadow zIndex={1}>
+      <Spacer size={4} />
+      <Row justifyContent="space-between">
+        <ViewMenuButton view={view} onPress={handleToggleView} />
+        {mode === 'edit' ? <ViewMenu /> : <SelectMenu />}
+      </Row>
+      <Spacer size={4} />
+    </Container>
+  );
+}
+
+function SelectMenu() {
+  const [, setMode] = useRecoilState(modeState);
+  const [selectedRecords, setSelectedRecords] = useRecoilState(
+    selectedRecordsState,
+  );
+
+  const handleToggleSelect = useCallback(() => {
+    setMode('edit');
+    setSelectedRecords([]);
+  }, [setMode, setSelectedRecords]);
+
+  if (isEmpty(selectedRecords)) {
+    return (
+      <Row spacing={4} alignItems="center">
+        <Text color="muted">Press on records to select</Text>
+        <FlatButton onPress={handleToggleSelect} title="Cancel" />
+      </Row>
+    );
+  }
+
+  return (
+    <Row spacing={4} alignItems="center">
+      <Text weight="bold">{selectedRecords.length} Selected</Text>
+      <FlatButton title="Move" />
+      <FlatButton title="Copy" />
+      <FlatButton title="Delete" color="error" />
+      <FlatButton onPress={handleToggleSelect} title="Cancel" />
+    </Row>
+  );
+}
+
+function ViewMenu() {
+  const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
+  const [, setMode] = useRecoilState(modeState);
 
   const handleToggleOrganize = useCallback(() => {
     if (sidePanel !== 'organize') {
@@ -146,37 +196,21 @@ function ViewSettings() {
   }, [sidePanel, setSidePanel]);
 
   const handleToggleSelect = useCallback(() => {
-    if (mode === 'edit') {
-      setMode('select');
-    } else {
-      setSelectedRecords([]);
-      setMode('edit');
-    }
-  }, [mode, setMode, setSelectedRecords]);
+    setMode('select');
+  }, [setMode]);
 
   return (
-    <Container color="content" shadow zIndex={1}>
-      <Spacer size={4} />
-      <Row justifyContent="space-between">
-        <Row>
-          <Spacer size={8} />
-          <ViewMenuButton view={view} onPress={handleToggleView} />
-        </Row>
-        <Row>
-          <FlatButton title="Search" />
-          <FlatButton onPress={handleToggleOrganize} title="Organize" />
-          <FlatButton onPress={handleToggleSelect} title="Select" />
-          <FlatButton
-            weight="bold"
-            color="primary"
-            icon="Plus"
-            title="Add record"
-          />
-          <Spacer size={8} />
-        </Row>
-      </Row>
-      <Spacer size={4} />
-    </Container>
+    <Row>
+      <FlatButton title="Search" />
+      <FlatButton onPress={handleToggleOrganize} title="Organize" />
+      <FlatButton onPress={handleToggleSelect} title="Select" />
+      <FlatButton
+        weight="bold"
+        color="primary"
+        icon="Plus"
+        title="Add record"
+      />
+    </Row>
   );
 }
 

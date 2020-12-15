@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { tokens } from './tokens';
 import { Icon, IconName } from './icon';
 import { Spacer } from './spacer';
-import { Text } from './text';
+import { Text, TextColor } from './text';
 import { Button } from './button';
 
 interface FlatButtonProps {
@@ -11,7 +11,7 @@ interface FlatButtonProps {
   disabled?: boolean;
   title?: string;
   icon?: IconName;
-  color?: 'primary' | 'muted' | 'default';
+  color?: TextColor;
   weight?: 'bold' | 'normal';
 }
 
