@@ -120,10 +120,10 @@ export function fromTextColor(
         : tokens.colors.blue[700];
     case 'muted':
       return theme === 'dark'
-        ? tokens.colors.coolGray[50]
+        ? tokens.colors.gray[400]
         : tokens.colors.gray[500];
     case 'error':
-      return tokens.colors.red[700];
+      return theme === 'dark' ? tokens.colors.red[200] : tokens.colors.red[700];
     case 'success':
       return tokens.colors.green[700];
     case 'contrast':

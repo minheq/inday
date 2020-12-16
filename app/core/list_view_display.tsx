@@ -2324,7 +2324,7 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.blue[50],
   },
   selectedRowDark: {
-    backgroundColor: tokens.colors.blue[50],
+    backgroundColor: tokens.colors.lightBlue[900],
   },
   actionRow: {
     paddingTop: 24,

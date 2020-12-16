@@ -71,6 +71,7 @@ import {
   collaboratorsQuery,
   collaboratorQuery,
   sortGettersQuery,
+  recordFieldsEntriesQuery,
 } from './queries';
 import { SortConfig, Sort, SortID, deleteSort, SortGetters } from './sorts';
 import { Group, GroupID, deleteGroup } from './groups';
@@ -526,6 +527,12 @@ export function useGetRecordPrimaryFieldValue(
 
 export function useGetViewFilters(viewID: ViewID) {
   return useRecoilValue(viewFiltersQuery(viewID));
+}
+
+export function useGetRecordFieldsEntries(
+  recordID: RecordID,
+): [Field, FieldValue][] {
+  return useRecoilValue(recordFieldsEntriesQuery(recordID));
 }
 
 export function useGetViewSorts(viewID: ViewID): Sort[] {

@@ -70,9 +70,9 @@ export const recordsQuery = selector({
   },
 });
 
-export const recordQuery = selectorFamily<Record, string>({
+export const recordQuery = selectorFamily<Record, RecordID>({
   key: 'RecordQuery',
-  get: (recordID: string) => ({ get }) => {
+  get: (recordID: RecordID) => ({ get }) => {
     const recordsByID = get(recordsByIDState);
     const record = recordsByID[recordID];
 
@@ -84,9 +84,9 @@ export const recordQuery = selectorFamily<Record, string>({
   },
 });
 
-export const collectionRecordsQuery = selectorFamily<Record[], string>({
+export const collectionRecordsQuery = selectorFamily<Record[], CollectionID>({
   key: 'CollectionRecordsQuery',
-  get: (collectionID: string) => ({ get }) => {
+  get: (collectionID: CollectionID) => ({ get }) => {
     const records = get(recordsQuery);
 
     return records.filter((record) => record.collectionID === collectionID);
@@ -142,10 +142,10 @@ export const fieldQuery = selectorFamily<Field, FieldID>({
 
 export const collectionFieldsByIDQuery = selectorFamily<
   { [fieldID: string]: Field },
-  string
+  CollectionID
 >({
   key: 'CollectionFieldsByIDQuery',
-  get: (collectionID: string) => ({ get }) => {
+  get: (collectionID: CollectionID) => ({ get }) => {
     const fields = get(fieldsQuery);
 
     const fieldsByID: { [fieldID: string]: Field } = {};
@@ -160,9 +160,9 @@ export const collectionFieldsByIDQuery = selectorFamily<
   },
 });
 
-export const collectionFieldsQuery = selectorFamily<Field[], string>({
+export const collectionFieldsQuery = selectorFamily<Field[], CollectionID>({
   key: 'CollectionFieldsQuery',
-  get: (collectionID: string) => ({ get }) => {
+  get: (collectionID: CollectionID) => ({ get }) => {
     const fields = get(fieldsQuery);
 
     return fields.filter((f) => f.collectionID === collectionID);
@@ -475,5 +475,24 @@ export const viewRecordsQuery = selectorFamily<Record[], ViewID>({
     finalRecords = sortRecords(sorts, finalRecords, sortGetters);
 
     return finalRecords;
+  },
+});
+
+export const recordFieldsEntriesQuery = selectorFamily<
+  [Field, FieldValue][],
+  RecordID
+>({
+  key: 'RecordFieldsEntriesQuery',
+  get: (recordID: RecordID) => ({ get }) => {
+    const record = get(recordQuery(recordID));
+
+    const fieldIDs = Object.keys(record.fields) as FieldID[];
+    const fields = fieldIDs.map((fieldID) => get(fieldQuery(fieldID)));
+
+    return fields.map((field) => {
+      const value = record.fields[field.id];
+
+      return [field, value];
+    });
   },
 });

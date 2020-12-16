@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ContainerProvider } from './container';
+import { Spacer } from './spacer';
 
 interface ColumnProps {
   flex?: number;
@@ -8,13 +9,21 @@ interface ColumnProps {
   justifyContent?: 'flex-start' | 'flex-end' | 'space-between' | 'center';
   alignItems?: 'flex-start' | 'flex-end' | 'center';
   expanded?: boolean;
+  spacing?: number;
 }
 
 /**
  * Displays its children in a vertical array.
  */
 export function Column(props: ColumnProps): JSX.Element {
-  const { children, flex, justifyContent, alignItems, expanded } = props;
+  const {
+    children,
+    flex,
+    justifyContent,
+    alignItems,
+    expanded,
+    spacing,
+  } = props;
 
   return (
     <ContainerProvider direction="column">
@@ -29,7 +38,14 @@ export function Column(props: ColumnProps): JSX.Element {
           },
         ]}
       >
-        {children}
+        {React.Children.map(children, (child) => (
+          <Fragment>
+            {child}
+            {child !== null && spacing !== 0 && spacing !== undefined && (
+              <Spacer size={spacing} />
+            )}
+          </Fragment>
+        ))}
       </View>
     </ContainerProvider>
   );

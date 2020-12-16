@@ -8,6 +8,7 @@ import {
   useGetSpaceCollections,
   useGetRecordPrimaryFieldValue,
   useGetRecord,
+  useGetRecordFieldsEntries,
 } from '../data/store';
 import { Slide } from '../components/slide';
 import { OrganizeMenu } from '../core/organize_menu';
@@ -34,6 +35,8 @@ import { tokens } from '../components/tokens';
 import { isEmpty } from '../../lib/lang_utils';
 import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
 import { CloseButton } from '../components/close_button';
+import { Spacer } from '../components/spacer';
+import { Column } from '../components/column';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -184,7 +187,7 @@ function SelectMenu() {
   return (
     <Row spacing={4} alignItems="center">
       <Text weight="bold">{selectedRecords.length} Selected</Text>
-      <FlatButton title="Move" />
+      <FlatButton title="Share" />
       <FlatButton title="Copy" />
       <FlatButton title="Delete" color="error" />
       <FlatButton onPress={handleToggleSelect} title="Cancel" />
@@ -455,21 +458,32 @@ interface RecordDetailsProps {
 
 function RecordDetails(props: RecordDetailsProps) {
   const { record } = props;
-  const [field, value] = useGetRecordPrimaryFieldValue(record.id);
+  const [primaryField, primaryFieldValue] = useGetRecordPrimaryFieldValue(
+    record.id,
+  );
+  const recordFieldsEntries = useGetRecordFieldsEntries(record.id);
 
   return (
     <Container>
-      <Text size="xl">{stringifyFieldValue(field, value)}</Text>
+      <Text size="xl">
+        {stringifyFieldValue(primaryField, primaryFieldValue)}
+      </Text>
+      <Spacer size={24} />
+      <Column spacing={16}>
+        {recordFieldsEntries.map(([field, value]) => (
+          <FieldInputRenderer key={field.id} field={field} value={value} />
+        ))}
+      </Column>
     </Container>
   );
 }
 
-interface FieldRendererProps {
+interface FieldInputRendererProps {
   field: Field;
   value: FieldValue;
 }
 
-function FieldRenderer(props: FieldRendererProps) {
+function FieldInputRenderer(props: FieldInputRendererProps) {
   return <Text>TODO</Text>;
 }
 
