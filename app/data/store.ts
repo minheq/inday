@@ -490,6 +490,40 @@ export function useGetViewFiltersGroups(viewID: ViewID): FilterGroup[] {
   return useRecoilValue(viewFilterGroupsQuery(viewID));
 }
 
+export function useGetRecordPrimaryFieldValueCallback(): (
+  recordID: RecordID,
+) => [field: Field, value: FieldValue] {
+  const getRecord = useGetRecordCallback();
+  const getCollection = useGetCollectionCallback();
+  const getField = useGetFieldCallback();
+
+  return useCallback(
+    (recordID: RecordID) => {
+      const record = getRecord(recordID);
+      const collection = getCollection(record.collectionID);
+      const field = getField(collection.primaryFieldID);
+
+      return [field, record.fields[collection.primaryFieldID]];
+    },
+    [getRecord, getCollection, getField],
+  );
+}
+
+export function useGetRecordPrimaryFieldValue(
+  recordID: RecordID,
+): [field: Field, value: FieldValue] {
+  const getRecord = useGetRecordCallback();
+  const getCollection = useGetCollectionCallback();
+  const getField = useGetFieldCallback();
+
+  const record = getRecord(recordID);
+  const collection = getCollection(record.collectionID);
+
+  const field = getField(collection.primaryFieldID);
+
+  return [field, record.fields[collection.primaryFieldID]];
+}
+
 export function useGetViewFilters(viewID: ViewID) {
   return useRecoilValue(viewFiltersQuery(viewID));
 }
@@ -1030,7 +1064,7 @@ export function useUpdateViewName() {
   );
 }
 
-export function useGetFieldCallback() {
+export function useGetFieldCallback(): (fieldID: FieldID) => Field {
   const fields = useRecoilValue(fieldsByIDState);
 
   return useCallback(
@@ -1171,7 +1205,7 @@ export function useUpdateFieldName() {
   );
 }
 
-export function useGetRecordCallback() {
+export function useGetRecordCallback(): (recordID: RecordID) => Record {
   const records = useRecoilValue(recordsByIDState);
 
   return useCallback(
@@ -1188,7 +1222,7 @@ export function useGetRecordCallback() {
   );
 }
 
-export function useGetRecord(recordID: RecordID) {
+export function useGetRecord(recordID: RecordID): Record {
   const record = useRecoilValue(recordQuery(recordID));
 
   if (record === null) {

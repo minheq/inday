@@ -2,7 +2,9 @@ import React, { useCallback, useState } from 'react';
 import { canUseDOM } from '../lib/execution_environment';
 
 interface HoverableProps {
-  children: React.ReactElement | ((hovered: boolean) => React.ReactElement);
+  children:
+    | React.ReactElement
+    | ((callback: { hovered: boolean }) => React.ReactElement);
   onHoverIn?: () => void;
   onHoverOut?: () => void;
 }
@@ -46,7 +48,9 @@ export function Hoverable(props: HoverableProps): JSX.Element {
   }, [hovered]);
 
   const child =
-    typeof children === 'function' ? children(showHover && hovered) : children;
+    typeof children === 'function'
+      ? children({ hovered: showHover && hovered })
+      : children;
 
   return React.cloneElement(React.Children.only(child), {
     onMouseEnter: handleMouseEnter,

@@ -24,6 +24,7 @@ import {
   assertMultiRecordLinkField,
   assertSingleRecordLinkField,
   FieldValue,
+  areFieldValuesEqual,
   TextFieldKindValue,
   NumberFieldKindValue,
   DateFieldKindValue,
@@ -235,11 +236,7 @@ function makeLeafNodes(
     const record = sorted[i];
 
     if (
-      FieldValue.areFieldValuesEqual(
-        field.type,
-        record.fields[field.id],
-        currentNode.value,
-      )
+      areFieldValuesEqual(field, record.fields[field.id], currentNode.value)
     ) {
       if (currentNode.type === 'leaf') {
         currentNode.children.push(record);

@@ -37,10 +37,9 @@ import {
   useGetViewGroups,
   useGetCollaborators,
   useGetCollectionRecords,
-  useGetRecordCallback,
-  useGetCollectionCallback,
   useGetViewRecords,
   useGetSortGetters,
+  useGetRecordPrimaryFieldValueCallback,
 } from '../data/store';
 import {
   FieldType,
@@ -97,9 +96,9 @@ import {
   assertSingleOptionFieldValue,
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
-  assertPrimaryFieldValue,
   SelectOptionID,
   BooleanFieldKindValue,
+  stringifyFieldValue,
 } from '../data/fields';
 import { AutoSizer } from '../lib/autosizer';
 import { ListView, ViewID } from '../data/views';
@@ -150,7 +149,6 @@ import { last } from '../../lib/array_utils';
 import { Group } from '../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../data/sorts';
 import { Slide } from '../components/slide';
-import { Button } from '../components/button';
 import { ContextMenu } from '../components/context_menu';
 import { ContextMenuButton } from '../components/context_menu_button';
 import { ContextMenuItem } from '../components/context_menu_content';
@@ -677,7 +675,7 @@ function LeafRow(props: LeafRowProps) {
   const value = useMemo((): LeafRowContext => {
     return {
       recordID,
-      selected: selected,
+      selected,
     };
   }, [selected, recordID]);
 
@@ -1338,24 +1336,6 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   return <Fragment>{child}</Fragment>;
 });
 
-function useGetRecordPrimaryFieldValue() {
-  const getRecord = useGetRecordCallback();
-  const getCollection = useGetCollectionCallback();
-
-  return useCallback(
-    (recordID: RecordID) => {
-      const record = getRecord(recordID);
-      const collection = getCollection(record.collectionID);
-
-      const primaryFieldValue = record.fields[collection.primaryFieldID];
-      assertPrimaryFieldValue(primaryFieldValue);
-
-      return primaryFieldValue;
-    },
-    [getRecord, getCollection],
-  );
-}
-
 function useRenderRecordLink() {
   return useCallback((recordID: RecordID) => {
     return <RecordLinkBadge recordID={recordID} key={recordID} />;
@@ -1363,12 +1343,16 @@ function useRenderRecordLink() {
 }
 
 function useRecordLinkOptions(records: Record[]): ListPickerOption<RecordID>[] {
-  const getRecordPrimaryFieldValue = useGetRecordPrimaryFieldValue();
+  const getRecordPrimaryFieldValue = useGetRecordPrimaryFieldValueCallback();
 
-  return records.map((record) => ({
-    value: record.id,
-    label: getRecordPrimaryFieldValue(record.id),
-  }));
+  return records.map((record) => {
+    const [field, value] = getRecordPrimaryFieldValue(record.id);
+
+    return {
+      value: record.id,
+      label: stringifyFieldValue(field, value),
+    };
+  });
 }
 
 interface MultiRecordLinkCellProps {
@@ -1381,11 +1365,11 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
 ) {
   const { value, field } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
+  const renderRecordLink = useRenderRecordLink();
 
   useCellKeyBindings();
 
   const records = useGetCollectionRecords(field.recordsFromCollectionID);
-  const renderRecordLink = useRenderRecordLink();
   const options = useRecordLinkOptions(records);
 
   if (cell.state === 'editing') {

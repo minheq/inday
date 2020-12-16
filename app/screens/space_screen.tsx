@@ -2,7 +2,13 @@ import React, { useCallback, createContext, useContext, Fragment } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
-import { useGetSpace, useGetView, useGetSpaceCollections } from '../data/store';
+import {
+  useGetSpace,
+  useGetView,
+  useGetSpaceCollections,
+  useGetRecordPrimaryFieldValue,
+  useGetRecord,
+} from '../data/store';
 import { Slide } from '../components/slide';
 import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
@@ -10,7 +16,7 @@ import { AutoSizer } from '../lib/autosizer';
 import { View, ViewID } from '../data/views';
 import { ListViewDisplay } from '../core/list_view_display';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { RecordID } from '../data/records';
+import { Record, RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
 import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
 import { Space, SpaceID } from '../data/spaces';
@@ -19,7 +25,6 @@ import { Screen } from '../components/screen';
 import { Container } from '../components/container';
 import { Row } from '../components/row';
 import { BackButton } from '../components/back_button';
-import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
 import { IconButton } from '../components/icon_button';
 import { FlatButton } from '../components/flat_button';
@@ -27,6 +32,7 @@ import { Button } from '../components/button';
 import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
 import { isEmpty } from '../../lib/lang_utils';
+import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -80,6 +86,13 @@ const selectedRecordsState = atom<SelectedRecordsState>({
   default: [],
 });
 
+type OpenRecordState = RecordID | null;
+
+const openRecordState = atom<OpenRecordState>({
+  key: 'SpaceScreen_OpenRecord',
+  default: null,
+});
+
 function SpaceScreenHeader(): JSX.Element {
   const navigation = useNavigation();
   const context = useContext(SpaceScreenContext);
@@ -93,9 +106,8 @@ function SpaceScreenHeader(): JSX.Element {
     <Container height={56} paddingHorizontal={8} paddingVertical={4}>
       <Row justifyContent="space-between">
         <Container>
-          <Row alignItems="center">
+          <Row spacing={8} alignItems="center">
             <BackButton onPress={handlePressBack} />
-            <Spacer size={8} />
             <Text size="lg" weight="bold">
               {space.name}
             </Text>
@@ -111,13 +123,10 @@ function SpaceScreenHeader(): JSX.Element {
 
 function TopMenu() {
   return (
-    <Row>
+    <Row spacing={4}>
       <IconButton icon="Users" title="Share" />
-      <Spacer size={4} />
       <IconButton icon="Bolt" title="Automate" />
-      <Spacer size={4} />
       <IconButton icon="Help" title="Help" />
-      <Spacer size={4} />
       <IconButton icon="DotsInCircle" title="More" />
     </Row>
   );
@@ -128,6 +137,7 @@ function ViewSettings() {
   const view = useGetView(context.viewID);
   const [mode, setMode] = useRecoilState(modeState);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
+  const [, setOpenRecord] = useRecoilState(openRecordState);
 
   const handleToggleView = useCallback(() => {
     if (sidePanel !== 'views') {
@@ -137,16 +147,15 @@ function ViewSettings() {
     }
 
     setMode('edit');
-  }, [sidePanel, setSidePanel, setMode]);
+    setOpenRecord(null);
+  }, [sidePanel, setSidePanel, setMode, setOpenRecord]);
 
   return (
-    <Container color="content" shadow zIndex={1}>
-      <Spacer size={4} />
+    <Container paddingVertical={4} color="content" shadow zIndex={1}>
       <Row justifyContent="space-between">
         <ViewMenuButton view={view} onPress={handleToggleView} />
         {mode === 'edit' ? <ViewMenu /> : <SelectMenu />}
       </Row>
-      <Spacer size={4} />
     </Container>
   );
 }
@@ -156,11 +165,13 @@ function SelectMenu() {
   const [selectedRecords, setSelectedRecords] = useRecoilState(
     selectedRecordsState,
   );
+  const [, setOpenRecord] = useRecoilState(openRecordState);
 
   const handleToggleSelect = useCallback(() => {
     setMode('edit');
     setSelectedRecords([]);
-  }, [setMode, setSelectedRecords]);
+    setOpenRecord(null);
+  }, [setMode, setSelectedRecords, setOpenRecord]);
 
   if (isEmpty(selectedRecords)) {
     return (
@@ -199,7 +210,7 @@ function ViewMenu() {
   }, [setMode]);
 
   return (
-    <Row>
+    <Row spacing={4}>
       <FlatButton title="Search" />
       <FlatButton onPress={handleToggleOrganize} title="Organize" />
       <FlatButton onPress={handleToggleSelect} title="Select" />
@@ -227,12 +238,11 @@ function ViewMenuButton(props: ViewMenuButtonProps) {
 
   return (
     <Button onPress={handlePress} style={styles.viewMenuButton}>
-      <Row>
+      <Row spacing={4}>
         <Icon
           name={getViewIcon(view.type)}
           customColor={getViewIconColor(view.type, theme)}
         />
-        <Spacer size={4} />
         <Text>{view.name}</Text>
       </Row>
     </Button>
@@ -318,6 +328,7 @@ function MainContent() {
   const [selectedRecords, setSelectedRecords] = useRecoilState(
     selectedRecordsState,
   );
+  const [openRecord, setOpenRecord] = useRecoilState(openRecordState);
   const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
@@ -325,9 +336,12 @@ function MainContent() {
     throw new Error('Invalid collection');
   }
 
-  const handleOpenRecord = useCallback((recordID: RecordID) => {
-    console.log('Open record', recordID);
-  }, []);
+  const handleOpenRecord = useCallback(
+    (recordID: RecordID) => {
+      setOpenRecord(recordID);
+    },
+    [setOpenRecord],
+  );
 
   const handleSelectRecord = useCallback(
     (recordID: RecordID, selected: boolean) => {
@@ -371,11 +385,13 @@ function MainContent() {
             )}
           </Container>
         </Slide>
-        <Container color="content" flex={1}>
-          <Spacer size={16} />
+        <Container paddingTop={16} color="content" flex={1}>
           {renderView()}
         </Container>
-        <Slide width={360} open={sidePanel === 'organize'}>
+        <Slide
+          width={360}
+          open={sidePanel === 'organize' || openRecord !== null}
+        >
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
             <AutoSizer>
               {({ height }) => (
@@ -387,6 +403,9 @@ function MainContent() {
                       collectionID={collectionID}
                     />
                   )}
+                  {openRecord !== null && (
+                    <RecordDetailsContainer recordID={openRecord} />
+                  )}
                 </Container>
               )}
             </AutoSizer>
@@ -395,6 +414,43 @@ function MainContent() {
       </Row>
     </Container>
   );
+}
+
+interface RecordDetailsContainerProps {
+  recordID: RecordID;
+}
+
+function RecordDetailsContainer(
+  props: RecordDetailsContainerProps,
+): JSX.Element {
+  const { recordID } = props;
+  const record = useGetRecord(recordID);
+
+  return <RecordDetails record={record} />;
+}
+
+interface RecordDetailsProps {
+  record: Record;
+}
+
+function RecordDetails(props: RecordDetailsProps) {
+  const { record } = props;
+  const [field, value] = useGetRecordPrimaryFieldValue(record.id);
+
+  return (
+    <Container>
+      <Text>{stringifyFieldValue(field, value)}</Text>
+    </Container>
+  );
+}
+
+interface FieldRendererProps {
+  field: Field;
+  value: FieldValue;
+}
+
+function FieldRenderer(props: FieldRendererProps) {
+  return <Text>TODO</Text>;
 }
 
 const styles = StyleSheet.create({

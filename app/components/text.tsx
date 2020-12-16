@@ -112,7 +112,7 @@ export function fromTextColor(
   switch (color) {
     case 'default':
       return theme === 'dark'
-        ? tokens.colors.base.white
+        ? tokens.colors.gray[100]
         : tokens.colors.gray[900];
     case 'primary':
       return theme === 'dark'

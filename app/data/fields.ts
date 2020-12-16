@@ -3,14 +3,18 @@ import { generateID, validateID } from '../../lib/id';
 import { hasAllOf } from '../../lib/array_utils';
 import {
   DateTimeFormatOptions,
+  formatDate,
   isDate,
   isISODate,
   ISODate,
   isSameDay,
+  parseISODate,
 } from '../../lib/date_utils';
 import { CollaboratorID } from './collaborators';
 import { CollectionID } from './collections';
 import { RecordID } from './records';
+import { assertUnreached } from '../../lib/lang_utils';
+import { getSystemLocale } from '../lib/locale';
 
 export const fieldIDPrefix = 'fld' as const;
 export type FieldID = `${typeof fieldIDPrefix}${string}`;
@@ -319,25 +323,79 @@ export interface FieldTypeToFieldValue {
   [FieldType.URL]: URLFieldValue;
 }
 
-export const FieldValue = {
-  areFieldValuesEqual,
-  areTextFieldKindValueEqual,
-  areNumberFieldKindValueEqual,
-  areSingleSelectFieldKindValueEqual,
-  areMultiSelectFieldKindValueEqual,
-  areBooleanFieldKindValueEqual,
-  areDateFieldKindValueEqual,
-};
-
-function areFieldValuesEqual<T extends FieldType>(
-  fieldType: T,
-  a: FieldTypeToFieldValue[T],
-  b: FieldTypeToFieldValue[T],
-): boolean {
-  switch (fieldType) {
+export function stringifyFieldValue(field: Field, value: FieldValue): string {
+  switch (field.type) {
     case FieldType.SingleLineText:
     case FieldType.URL:
     case FieldType.Email:
+    case FieldType.MultiLineText:
+    case FieldType.PhoneNumber:
+      assertTextFieldKindValue(value);
+      return value;
+    case FieldType.Number:
+    case FieldType.Currency:
+      assertNumberFieldKindValue(value);
+      if (value === null) {
+        return '';
+      }
+
+      return value.toString();
+    case FieldType.MultiOption: {
+      assertMultiOptionFieldValue(value);
+      return value
+        .map((selectOptionID) => {
+          const selected = field.options.find(
+            (opt) => opt.id === selectOptionID,
+          );
+
+          if (selected === undefined) {
+            return '';
+          }
+
+          return selected.label;
+        })
+        .join(', ');
+    }
+    case FieldType.SingleOption: {
+      assertSingleOptionFieldValue(value);
+      const selected = field.options.find((opt) => opt.id === value);
+
+      if (selected === undefined) {
+        return '';
+      }
+
+      return selected.label;
+    }
+    case FieldType.Checkbox:
+      assertBooleanFieldKindValue(value);
+      return value === true ? 'true' : 'false';
+    case FieldType.Date:
+      assertDateFieldKindValue(value);
+      if (value === null) {
+        return '';
+      }
+
+      if (!isISODate(value)) {
+        return value;
+      }
+
+      return formatDate(parseISODate(value), getSystemLocale());
+    default:
+      throw new Error(`Field type ${field.type} cannot be stringified.`);
+  }
+}
+
+export function areFieldValuesEqual(
+  field: Field,
+  a: FieldValue,
+  b: FieldValue,
+): boolean {
+  switch (field.type) {
+    case FieldType.SingleLineText:
+    case FieldType.URL:
+    case FieldType.Email:
+    case FieldType.MultiLineText:
+    case FieldType.PhoneNumber:
       assertTextFieldKindValue(a);
       assertTextFieldKindValue(b);
       return areTextFieldKindValueEqual(a, b);
@@ -367,7 +425,7 @@ function areFieldValuesEqual<T extends FieldType>(
       assertDateFieldKindValue(b);
       return areDateFieldKindValueEqual(a, b);
     default:
-      throw new Error(`Unrecognized field type ${JSON.stringify(fieldType)}`);
+      assertUnreached(field);
   }
 }
 
