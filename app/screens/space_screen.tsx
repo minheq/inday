@@ -341,9 +341,14 @@ function MainContent() {
 
   const handleOpenRecord = useCallback(
     (recordID: RecordID) => {
+      if (openRecord === recordID) {
+        setOpenRecord(null);
+        return;
+      }
+
       setOpenRecord(recordID);
     },
-    [setOpenRecord],
+    [openRecord, setOpenRecord],
   );
 
   const handleSelectRecord = useCallback(
