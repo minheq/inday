@@ -3,6 +3,7 @@ import RModal from 'react-modal';
 import type { ModalProps } from './modal';
 import { Animated, StyleSheet, useWindowDimensions } from 'react-native';
 import { tokens } from './tokens';
+import { usePrevious } from '../hooks/use_previous';
 
 RModal.setAppElement('#root');
 
@@ -16,6 +17,7 @@ export function Modal(props: ModalProps): JSX.Element {
     onShow,
     onDismiss,
   } = props;
+  const prevVisible = usePrevious(visible);
   const [internalVisible, setInternalIsOpen] = useState(visible);
   const { height } = useWindowDimensions();
   const slide = useRef(
@@ -32,18 +34,18 @@ export function Modal(props: ModalProps): JSX.Element {
   }, [visible, internalVisible, fade, height, animationType, onRequestClose]);
 
   useEffect(() => {
-    if (animationType !== 'fade') {
+    if (animationType !== 'fade' || prevVisible === visible) {
       return;
     }
 
-    if (visible) {
-      setInternalIsOpen(visible);
+    if (visible && internalVisible === false) {
+      setInternalIsOpen(true);
       Animated.spring(fade, {
         toValue: 0,
         bounciness: 0,
         useNativeDriver: true,
       }).start();
-    } else {
+    } else if (internalVisible === true) {
       Animated.spring(fade, {
         toValue: 1,
         bounciness: 0,
@@ -52,21 +54,29 @@ export function Modal(props: ModalProps): JSX.Element {
         setInternalIsOpen(false);
       });
     }
-  }, [visible, internalVisible, fade, height, animationType, onRequestClose]);
+  }, [
+    prevVisible,
+    visible,
+    internalVisible,
+    fade,
+    height,
+    animationType,
+    onRequestClose,
+  ]);
 
   useEffect(() => {
-    if (animationType !== 'slide') {
+    if (animationType !== 'slide' || prevVisible === visible) {
       return;
     }
 
-    if (visible) {
-      setInternalIsOpen(visible);
+    if (visible && internalVisible === false) {
+      setInternalIsOpen(true);
       Animated.spring(slide, {
         toValue: 0,
         bounciness: 0,
         useNativeDriver: true,
       }).start();
-    } else {
+    } else if (internalVisible === true) {
       Animated.spring(slide, {
         toValue: height,
         bounciness: 0,
@@ -75,7 +85,15 @@ export function Modal(props: ModalProps): JSX.Element {
         setInternalIsOpen(false);
       });
     }
-  }, [visible, internalVisible, slide, height, animationType, onRequestClose]);
+  }, [
+    prevVisible,
+    visible,
+    internalVisible,
+    slide,
+    height,
+    animationType,
+    onRequestClose,
+  ]);
 
   return (
     <RModal
