@@ -10,7 +10,7 @@ interface AutoSizerProps {
   children: (size: { width: number; height: number }) => React.ReactNode;
 }
 
-export function AutoSizer(props: AutoSizerProps) {
+export function AutoSizer(props: AutoSizerProps): JSX.Element {
   const { children } = props;
   const [ready, setReady] = useState(false);
   const [layout, setLayout] = useState<LayoutRectangle>({

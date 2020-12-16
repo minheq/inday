@@ -132,17 +132,25 @@ export function fromTextColor(
 }
 
 const styles = StyleSheet.create({
+  // eslint-disable-next-line react-native/no-unused-styles
   xl: tokens.text.size.xl,
+  // eslint-disable-next-line react-native/no-unused-styles
   lg: tokens.text.size.lg,
+  // eslint-disable-next-line react-native/no-unused-styles
   md: tokens.text.size.md,
+  // eslint-disable-next-line react-native/no-unused-styles
   sm: tokens.text.size.sm,
+  // eslint-disable-next-line react-native/no-unused-styles
   xs: tokens.text.size.xs,
+  // eslint-disable-next-line react-native/no-unused-styles
   left: {
     textAlign: 'left',
   },
+  // eslint-disable-next-line react-native/no-unused-styles
   right: {
     textAlign: 'right',
   },
+  // eslint-disable-next-line react-native/no-unused-styles
   center: {
     textAlign: 'center',
   },

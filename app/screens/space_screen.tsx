@@ -1,4 +1,4 @@
-import React, { useCallback, createContext, useContext, Fragment } from 'react';
+import React, { useCallback, createContext, useContext } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
@@ -33,6 +33,7 @@ import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
 import { isEmpty } from '../../lib/lang_utils';
 import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
+import { CloseButton } from '../components/close_button';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -165,13 +166,11 @@ function SelectMenu() {
   const [selectedRecords, setSelectedRecords] = useRecoilState(
     selectedRecordsState,
   );
-  const [, setOpenRecord] = useRecoilState(openRecordState);
 
   const handleToggleSelect = useCallback(() => {
     setMode('edit');
     setSelectedRecords([]);
-    setOpenRecord(null);
-  }, [setMode, setSelectedRecords, setOpenRecord]);
+  }, [setMode, setSelectedRecords]);
 
   if (isEmpty(selectedRecords)) {
     return (
@@ -196,6 +195,7 @@ function SelectMenu() {
 function ViewMenu() {
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
   const [, setMode] = useRecoilState(modeState);
+  const [, setOpenRecord] = useRecoilState(openRecordState);
 
   const handleToggleOrganize = useCallback(() => {
     if (sidePanel !== 'organize') {
@@ -203,11 +203,14 @@ function ViewMenu() {
     } else {
       setSidePanel(null);
     }
-  }, [sidePanel, setSidePanel]);
+
+    setOpenRecord(null);
+  }, [sidePanel, setSidePanel, setOpenRecord]);
 
   const handleToggleSelect = useCallback(() => {
     setMode('select');
-  }, [setMode]);
+    setOpenRecord(null);
+  }, [setMode, setOpenRecord]);
 
   return (
     <Row spacing={4}>
@@ -425,8 +428,20 @@ function RecordDetailsContainer(
 ): JSX.Element {
   const { recordID } = props;
   const record = useGetRecord(recordID);
+  const [, setOpenRecord] = useRecoilState(openRecordState);
 
-  return <RecordDetails record={record} />;
+  const handleClose = useCallback(() => {
+    setOpenRecord(null);
+  }, [setOpenRecord]);
+
+  return (
+    <Container paddingHorizontal={8}>
+      <Row>
+        <CloseButton onPress={handleClose} />
+      </Row>
+      <RecordDetails record={record} />
+    </Container>
+  );
 }
 
 interface RecordDetailsProps {
@@ -439,7 +454,7 @@ function RecordDetails(props: RecordDetailsProps) {
 
   return (
     <Container>
-      <Text>{stringifyFieldValue(field, value)}</Text>
+      <Text size="xl">{stringifyFieldValue(field, value)}</Text>
     </Container>
   );
 }

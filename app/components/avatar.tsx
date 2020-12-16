@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { take } from '../../lib/array_utils';
 import { Text, TextSize } from './text';
+import { useTheme } from './theme';
 import { tokens } from './tokens';
 
 export type AvatarSize = 'sm' | 'md' | 'lg';
@@ -14,10 +15,17 @@ interface AvatarProps {
 
 export function Avatar(props: AvatarProps): JSX.Element {
   const { sourceURI, size = 'md', name } = props;
+  const theme = useTheme();
 
   if (sourceURI === undefined) {
     return (
-      <View style={[styles.base, styles.initials, styles[size]]}>
+      <View
+        style={[
+          styles.base,
+          theme === 'dark' ? styles.initialsDark : styles.initialsLight,
+          styles[size],
+        ]}
+      >
         <Text size={getTextSize(size)}>{getInitials(name, size)}</Text>
       </View>
     );
@@ -72,19 +80,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  initials: {
+  initialsDark: {
+    backgroundColor: tokens.colors.gray[700],
+  },
+  initialsLight: {
     backgroundColor: tokens.colors.gray[200],
   },
+  // eslint-disable-next-line react-native/no-unused-styles
   sm: {
-    width: 24,
-    height: 24,
+    width: sizeMap.sm,
+    height: sizeMap.sm,
   },
+  // eslint-disable-next-line react-native/no-unused-styles
   md: {
-    width: 32,
-    height: 32,
+    width: sizeMap.md,
+    height: sizeMap.md,
   },
+  // eslint-disable-next-line react-native/no-unused-styles
   lg: {
-    width: 56,
-    height: 56,
+    width: sizeMap.lg,
+    height: sizeMap.lg,
   },
 });
