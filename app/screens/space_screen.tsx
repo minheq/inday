@@ -15,7 +15,7 @@ import { OrganizeMenu } from '../core/organize_menu';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer';
 import { View, ViewID } from '../data/views';
-import { ListViewDisplay } from '../core/list_view_display';
+import { ListViewView } from '../core/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { Record, RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
@@ -373,7 +373,7 @@ function MainContent() {
     switch (view.type) {
       case 'list':
         return (
-          <ListViewDisplay
+          <ListViewView
             mode={mode}
             view={view}
             onOpenRecord={handleOpenRecord}
