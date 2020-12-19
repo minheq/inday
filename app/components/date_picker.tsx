@@ -133,14 +133,46 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
   }, [date]);
 
   const renderDay = useCallback(
-    (p: RenderDayProps) => <DayDisplay {...p} onSelect={handleSelectDay} />,
+    (p: RenderDayProps) => {
+      const {
+        withinSelected,
+        selected,
+        selectedStart,
+        selectedEnd,
+        today,
+        outsideRange,
+        blocked,
+        day,
+      } = p;
+
+      return (
+        <DayDisplay
+          day={day}
+          withinSelected={withinSelected}
+          selected={selected}
+          selectedStart={selectedStart}
+          selectedEnd={selectedEnd}
+          today={today}
+          outsideRange={outsideRange}
+          blocked={blocked}
+          onSelect={handleSelectDay}
+        />
+      );
+    },
     [handleSelectDay],
   );
-  const renderOtherMonthDay = useCallback(
-    (p: RenderOtherMonthProps) => <OtherMonthDay {...p} />,
-    [],
-  );
-  const renderWeek = useCallback((p: RenderWeekProps) => <Week {...p} />, []);
+
+  const renderOtherMonthDay = useCallback((p: RenderOtherMonthProps) => {
+    const { withinSelected, day } = p;
+
+    return <OtherMonthDay day={day} withinSelected={withinSelected} />;
+  }, []);
+
+  const renderWeek = useCallback((p: RenderWeekProps) => {
+    const { children } = p;
+
+    return <Week>{children}</Week>;
+  }, []);
 
   return (
     <View style={styles.root}>
@@ -364,7 +396,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.border.radius.circle,
+    borderRadius: 999,
     backgroundColor: tokens.colors.gray[100],
     textAlign: 'center',
     height: 32,
@@ -401,35 +433,12 @@ const styles = StyleSheet.create({
   hoveredDay: {
     backgroundColor: tokens.colors.lightBlue[100],
   },
-  monthsWrapperHorizontal: {
-    display: 'flex',
-  },
-  monthsWrapperVertical: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
   week: {
     paddingTop: 2,
     paddingBottom: 2,
   },
   otherDay: {
     opacity: 0.5,
-  },
-  arrow: {
-    height: 40,
-    width: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 999,
-    padding: 8,
-  },
-  moreButton: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 8,
-    backgroundColor: 'white',
-    width: '100%',
   },
   weekDatesWrapper: {
     flexDirection: 'row',
@@ -442,9 +451,6 @@ const styles = StyleSheet.create({
   },
   firstMonthPickerWrapper: {
     paddingRight: 8,
-  },
-  monthRoot: {
-    width: '100%',
   },
   selectedDay: {
     backgroundColor: tokens.colors.lightBlue[700],

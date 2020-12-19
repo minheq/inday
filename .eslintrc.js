@@ -34,6 +34,11 @@ module.exports = {
         'react/prop-types': 0,
         'no-shadow': 2,
         '@typescript-eslint/ban-ts-comment': 1,
+        'react/jsx-props-no-spreading': 2,
+        'react/no-unescaped-entities': 2,
+        'react/destructuring-assignment': 1,
+        'react/jsx-fragments': [1, 'element'],
+        'react/jsx-handler-names': 1,
       },
     },
     {

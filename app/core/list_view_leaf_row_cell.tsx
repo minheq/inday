@@ -1659,11 +1659,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     overflowY: 'hidden',
     overflowX: 'hidden',
-    ...Platform.select({
-      web: {
-        cursor: 'auto',
-      },
-    }),
   },
   focusedMultiLineTextCellContainer: {
     paddingTop: FOCUS_BORDER_WIDTH + 1,
