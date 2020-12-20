@@ -3,11 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { formatUnit } from '../../lib/unit';
 import { Text } from '../components/text';
 import { NumberField, NumberFieldValue } from '../data/fields';
-import { RecordID } from '../data/records';
 import { getSystemLocale } from '../lib/locale';
 
 interface FieldNumberValueViewProps {
-  recordID: RecordID;
   field: NumberField;
   value: NumberFieldValue;
 }

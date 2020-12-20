@@ -14,7 +14,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Icon } from '../components/icon';
-import { Row } from '../components/row';
 import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
 import { tokens } from '../components/tokens';
@@ -89,13 +88,6 @@ import {
   useKeyboard,
 } from '../lib/keyboard';
 import { StatefulLeafRowCell } from '../components/grid_renderer.common';
-import { formatCurrency } from '../../lib/currency';
-import { getSystemLocale } from '../lib/locale';
-import { OptionBadge } from './option_badge';
-import { CollaboratorBadge } from './collaborator_badge';
-import { RecordLinkBadge } from './record_link_badge';
-import { formatDate, parseISODate } from '../../lib/date_utils';
-import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
 import { useTheme } from '../components/theme';
 import { Slide } from '../components/slide';
@@ -121,6 +113,18 @@ import { FieldNumberKindValueEdit } from './field_number_kind_value_edit';
 import { FieldMultiLineTextValueEdit } from './field_multi_line_text_value_edit';
 import { FieldNumberValueView } from './field_number_value_view';
 import { FieldCheckboxValueEdit } from './field_checkbox_value_edit';
+import { FieldSingleOptionValueView } from './field_single_option_value_view';
+import { FieldMultiOptionValueView } from './field_multi_option_value_view';
+import { FieldMultiCollaboratorValueView } from './field_multi_collaborator_value_view';
+import { FieldSingleCollaboratorValueView } from './field_single_collaborator_value_view';
+import { FieldSingleRecordLinkValueView } from './field_single_record_link_value_view';
+import { FieldMultiRecordLinkValueView } from './field_multi_record_link_value_view';
+import { FieldCurrencyValueView } from './field_currency_value_view';
+import { FieldDateValueView } from './field_date_value_view';
+import { FieldEmailValueView } from './field_email_value_view';
+import { FieldEmailValueActions } from './field_email_value_actions';
+import { FieldURLValueActions } from './field_url_value_actions';
+import { FieldPhoneNumberValueActions } from './field_phone_number_value_actions';
 
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
@@ -463,16 +467,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
     );
   }
 
-  const child =
-    value === null ? (
-      <View style={styles.cellWrapper} />
-    ) : (
-      <View style={styles.textCellContainer}>
-        <Text numberOfLines={1} align="right">
-          {formatCurrency(value, getSystemLocale(), field.currency)}
-        </Text>
-      </View>
-    );
+  const child = <FieldCurrencyValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
@@ -568,14 +563,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
     );
   }
 
-  const child =
-    value === null ? (
-      <View style={styles.cellWrapper} />
-    ) : (
-      <View style={styles.textCellContainer}>
-        <Text>{formatDate(parseISODate(value), getSystemLocale())}</Text>
-      </View>
-    );
+  const child = <FieldDateValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -606,26 +594,14 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     );
   }
 
-  const child = (
-    <View style={styles.textCellContainer}>
-      <Text decoration="underline" numberOfLines={1}>
-        {value}
-      </Text>
-    </View>
-  );
+  const child = <FieldEmailValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
       <View>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <Spacer size={8} />
-        <Row>
-          <Pressable>
-            <Text decoration="underline" size="sm" color="primary">
-              Send email
-            </Text>
-          </Pressable>
-        </Row>
+        <FieldEmailValueActions value={value} />
       </View>
     );
   }
@@ -662,18 +638,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
     );
   }
 
-  const child = isEmpty(value) ? (
-    <View style={styles.cellWrapper} />
-  ) : (
-    <Row spacing={4}>
-      {value.map((collaboratorID) => (
-        <CollaboratorBadge
-          collaboratorID={collaboratorID}
-          key={collaboratorID}
-        />
-      ))}
-    </Row>
-  );
+  const child = <FieldMultiCollaboratorValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -711,15 +676,7 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
     );
   }
 
-  const child = isEmpty(value) ? (
-    <View style={styles.cellWrapper} />
-  ) : (
-    <Row spacing={4}>
-      {value.map((_recordID) => (
-        <RecordLinkBadge key={_recordID} recordID={_recordID} />
-      ))}
-    </Row>
-  );
+  const child = <FieldMultiRecordLinkValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -798,25 +755,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
     );
   }
 
-  const child = isEmpty(value) ? (
-    <View style={styles.cellWrapper} />
-  ) : (
-    <Row spacing={4}>
-      {value.map((_value) => {
-        const selected = field.options.find((o) => o.id === _value);
-
-        if (selected === undefined) {
-          throw new Error(
-            `Expected ${_value} to be within field options ${JSON.stringify(
-              field,
-            )}`,
-          );
-        }
-
-        return <OptionBadge key={selected.id} option={selected} />;
-      })}
-    </Row>
-  );
+  const child = <FieldMultiOptionValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -847,9 +786,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     );
   }
 
-  const child = (
-    <FieldNumberValueView recordID={recordID} field={field} value={value} />
-  );
+  const child = <FieldNumberValueView field={field} value={value} />;
 
   if (cell.state === 'focused') {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
@@ -893,9 +830,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
       <View>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <Spacer size={8} />
-        <Text decoration="underline" size="sm" color="primary">
-          Call
-        </Text>
+        <FieldPhoneNumberValueActions value={value} />
       </View>
     );
   }
@@ -932,14 +867,9 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
     );
   }
 
-  const child =
-    value === null ? (
-      <View style={styles.cellWrapper} />
-    ) : (
-      <Row>
-        <CollaboratorBadge collaboratorID={value} key={value} />
-      </Row>
-    );
+  const child = (
+    <FieldSingleCollaboratorValueView value={value} field={field} />
+  );
 
   if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -977,14 +907,7 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
     );
   }
 
-  const child =
-    value === null ? (
-      <View style={styles.cellWrapper} />
-    ) : (
-      <Row>
-        <RecordLinkBadge recordID={value} />
-      </Row>
-    );
+  const child = <FieldSingleRecordLinkValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -1059,16 +982,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
     );
   }
 
-  const selected = field.options.find((o) => o.id === value);
-
-  const child =
-    value === null || selected === undefined ? (
-      <View style={styles.cellWrapper} />
-    ) : (
-      <Row>
-        <OptionBadge option={selected} />
-      </Row>
-    );
+  const child = <FieldSingleOptionValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <Pressable onPress={onStartEditing}>{child}</Pressable>;
@@ -1112,9 +1026,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
       <View>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <Spacer size={8} />
-        <Text decoration="underline" size="sm" color="primary">
-          Open link
-        </Text>
+        <FieldURLValueActions value={value} />
       </View>
     );
   }
