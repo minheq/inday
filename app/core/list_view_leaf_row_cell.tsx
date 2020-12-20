@@ -14,21 +14,16 @@ import {
   TextInputKeyPressEventData,
   StyleSheet,
 } from 'react-native';
-import { FlatButton } from '../components/flat_button';
 import { Icon } from '../components/icon';
 import { Row } from '../components/row';
 import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
 import { tokens } from '../components/tokens';
-import { ListPicker, ListPickerOption } from '../components/list_picker';
 import {
   useUpdateRecordFieldValue,
   useGetField,
   useGetRecordFieldValue,
   useGetListViewFieldConfig,
-  useGetCollaborators,
-  useGetCollectionRecords,
-  useGetRecordPrimaryFieldValueCallback,
 } from '../data/store';
 import {
   FieldType,
@@ -67,9 +62,6 @@ import {
   FieldID,
   TextFieldKindValue,
   NumberFieldKindValue,
-  MultiSelectFieldKindValue,
-  SingleSelectFieldKindValue,
-  SelectOption,
   assertCheckboxFieldValue,
   assertCurrencyFieldValue,
   assertDateFieldValue,
@@ -85,9 +77,7 @@ import {
   assertSingleOptionFieldValue,
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
-  SelectOptionID,
   BooleanFieldKindValue,
-  stringifyFieldValue,
 } from '../data/fields';
 import { ViewID } from '../data/views';
 import { Record, RecordID } from '../data/records';
@@ -107,12 +97,9 @@ import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
 import { RecordLinkBadge } from './record_link_badge';
 import { formatUnit } from '../../lib/unit';
-import { MultiListPicker } from '../components/multi_list_picker';
-import { Collaborator, CollaboratorID } from '../data/collaborators';
-import { formatDate, formatISODate, parseISODate } from '../../lib/date_utils';
+import { formatDate, parseISODate } from '../../lib/date_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
-import { DatePicker } from '../components/date_picker';
 import { useTheme } from '../components/theme';
 import { Slide } from '../components/slide';
 import { ContextMenuButton } from '../components/context_menu_button';
@@ -125,6 +112,13 @@ import {
   useLeafRowContext,
   useLeafRowContextMenuOptions,
 } from './list_view_leaf_row';
+import { FieldDateInput } from './field_date_input';
+import { FieldMultiCollaboratorInput } from './field_multi_collaborator_input';
+import { FieldSingleCollaboratorInput } from './field_single_collaborator_input';
+import { FieldSingleOptionInput } from './field_single_option_input';
+import { FieldMultiOptionInput } from './field_multi_option_input';
+import { FieldMultiRecordLinkInput } from './field_multi_record_link_input';
+import { FieldSingleRecordLinkInput } from './field_single_record_link_input';
 
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
@@ -545,12 +539,25 @@ interface DateCellProps {
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
+  const {
+    recordID,
+    fieldID,
+    cell,
+    onStartEditing,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
   if (cell.state === 'editing') {
-    return <DateFieldCellEditing value={value} />;
+    return (
+      <FieldDateInput
+        recordID={recordID}
+        fieldID={fieldID}
+        value={value}
+        onDone={onStopEditing}
+      />
+    );
   }
 
   const child =
@@ -568,41 +575,6 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   return <Fragment>{child}</Fragment>;
 });
-
-interface DateFieldCellEditingProps {
-  value: DateFieldValue;
-}
-
-function DateFieldCellEditing(props: DateFieldCellEditingProps) {
-  const { value } = props;
-  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<DateFieldValue>();
-
-  const handleChangeDate = useCallback(
-    (date: Date) => {
-      updateRecordFieldValue(recordID, fieldID, formatISODate(date));
-      onStopEditing();
-    },
-    [updateRecordFieldValue, onStopEditing, recordID, fieldID],
-  );
-
-  const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, null);
-  }, [updateRecordFieldValue, recordID, fieldID]);
-
-  return (
-    <View style={styles.selectKindEditingContainer}>
-      <DatePicker
-        value={value ? parseISODate(value) : null}
-        onChange={handleChangeDate}
-      />
-      <View style={styles.actionRow}>
-        <FlatButton onPress={handleClear} title="Clear" />
-        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
-      </View>
-    </View>
-  );
-}
 
 interface EmailCellProps {
   value: EmailFieldValue;
@@ -644,25 +616,6 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   return <Fragment>{child}</Fragment>;
 });
 
-function useRenderCollaborator() {
-  return useCallback((collaboratorID: CollaboratorID) => {
-    return (
-      <CollaboratorBadge collaboratorID={collaboratorID} key={collaboratorID} />
-    );
-  }, []);
-}
-
-function useGetCollaboratorOptions(
-  collaborators: Collaborator[],
-): ListPickerOption<CollaboratorID>[] {
-  return useMemo(() => {
-    return collaborators.map((collaborator) => ({
-      value: collaborator.id,
-      label: collaborator.name,
-    }));
-  }, [collaborators]);
-}
-
 interface MultiCollaboratorCellProps {
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
@@ -672,20 +625,23 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
   const { value } = props;
-  const collaborators = useGetCollaborators();
-  const { cell, onStartEditing } = useLeafRowCellContext();
+  const {
+    recordID,
+    fieldID,
+    cell,
+    onStartEditing,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const renderCollaborator = useRenderCollaborator();
-  const options = useGetCollaboratorOptions(collaborators);
-
   if (cell.state === 'editing') {
     return (
-      <MultiSelectFieldKindCellEditing
-        renderLabel={renderCollaborator}
-        options={options}
+      <FieldMultiCollaboratorInput
+        recordID={recordID}
+        fieldID={fieldID}
         value={value}
+        onDone={onStopEditing}
       />
     );
   }
@@ -710,25 +666,6 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   return <Fragment>{child}</Fragment>;
 });
 
-function useRenderRecordLink() {
-  return useCallback((recordID: RecordID) => {
-    return <RecordLinkBadge recordID={recordID} key={recordID} />;
-  }, []);
-}
-
-function useRecordLinkOptions(records: Record[]): ListPickerOption<RecordID>[] {
-  const getRecordPrimaryFieldValue = useGetRecordPrimaryFieldValueCallback();
-
-  return records.map((record) => {
-    const [field, value] = getRecordPrimaryFieldValue(record.id);
-
-    return {
-      value: record.id,
-      label: stringifyFieldValue(field, value),
-    };
-  });
-}
-
 interface MultiRecordLinkCellProps {
   value: MultiRecordLinkFieldValue;
   field: MultiRecordLinkField;
@@ -737,21 +674,24 @@ interface MultiRecordLinkCellProps {
 const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
   props: MultiRecordLinkCellProps,
 ) {
-  const { value, field } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
-  const renderRecordLink = useRenderRecordLink();
+  const { value } = props;
+  const {
+    recordID,
+    fieldID,
+    cell,
+    onStartEditing,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const records = useGetCollectionRecords(field.recordsFromCollectionID);
-  const options = useRecordLinkOptions(records);
-
   if (cell.state === 'editing') {
     return (
-      <MultiSelectFieldKindCellEditing
-        renderLabel={renderRecordLink}
-        options={options}
+      <FieldMultiRecordLinkInput
+        recordID={recordID}
+        fieldID={fieldID}
         value={value}
+        onDone={onStopEditing}
       />
     );
   }
@@ -760,8 +700,8 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
     <View style={styles.cellWrapper} />
   ) : (
     <Row spacing={4}>
-      {value.map((recordID) => (
-        <RecordLinkBadge key={recordID} recordID={recordID} />
+      {value.map((_recordID) => (
+        <RecordLinkBadge key={_recordID} recordID={_recordID} />
       ))}
     </Row>
   );
@@ -838,47 +778,27 @@ interface MultiOptionCellProps {
   field: MultiOptionField;
 }
 
-function useRenderOption(options: SelectOption[]) {
-  return useCallback(
-    (id: string) => {
-      const option = options.find((_option) => _option.id === id);
-
-      if (option === undefined) {
-        return <Fragment />;
-      }
-
-      return <OptionBadge option={option} key={option.id} />;
-    },
-    [options],
-  );
-}
-
-function useGetOptionOptions(
-  options: SelectOption[],
-): ListPickerOption<SelectOptionID>[] {
-  return options.map((option) => ({
-    value: option.id,
-    label: option.label,
-  }));
-}
-
 const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
   const { value, field } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
+  const {
+    recordID,
+    fieldID,
+    cell,
+    onStartEditing,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const renderOption = useRenderOption(field.options);
-  const options = useGetOptionOptions(field.options);
-
   if (cell.state === 'editing') {
     return (
-      <MultiSelectFieldKindCellEditing
-        renderLabel={renderOption}
-        options={options}
+      <FieldMultiOptionInput
+        recordID={recordID}
+        fieldID={fieldID}
         value={value}
+        onDone={onStopEditing}
       />
     );
   }
@@ -909,97 +829,6 @@ const MultiOptionCell = memo(function MultiOptionCell(
 
   return <Fragment>{child}</Fragment>;
 });
-
-interface MultiSelectFieldKindCellEditingProps<T> {
-  value: T[];
-  renderLabel: (value: NonNullable<T>) => JSX.Element;
-  options: ListPickerOption<NonNullable<T>>[];
-}
-
-function MultiSelectFieldKindCellEditing<
-  T extends CollaboratorID | RecordID | SelectOptionID
->(props: MultiSelectFieldKindCellEditingProps<T>) {
-  const { value, options, renderLabel } = props;
-  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<MultiSelectFieldKindValue>();
-
-  const handleChange = useCallback(
-    (nextValue: T[]) => {
-      updateRecordFieldValue(
-        recordID,
-        fieldID,
-        nextValue as MultiSelectFieldKindValue,
-      );
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, []);
-    onStopEditing();
-  }, [updateRecordFieldValue, recordID, fieldID, onStopEditing]);
-
-  return (
-    <View style={styles.selectKindEditingContainer}>
-      <MultiListPicker<T>
-        value={value}
-        options={options}
-        renderLabel={renderLabel}
-        onChange={handleChange}
-        onRequestClose={onStopEditing}
-      />
-      <View style={styles.actionRow}>
-        <FlatButton onPress={handleClear} title="Clear all" />
-        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
-      </View>
-    </View>
-  );
-}
-
-interface SingleSelectFieldKindCellEditingProps<
-  T extends SingleSelectFieldKindValue
-> {
-  value: T;
-  renderLabel: (value: NonNullable<T>) => JSX.Element;
-  options: ListPickerOption<NonNullable<T>>[];
-}
-
-function SingleSelectFieldKindCellEditing<T extends SingleSelectFieldKindValue>(
-  props: SingleSelectFieldKindCellEditingProps<T>,
-) {
-  const { value, options, renderLabel } = props;
-  const { recordID, fieldID, onStopEditing } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<SingleSelectFieldKindValue>();
-
-  const handleChange = useCallback(
-    (nextValue: SingleSelectFieldKindValue) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
-      onStopEditing();
-    },
-    [updateRecordFieldValue, recordID, fieldID, onStopEditing],
-  );
-
-  const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, null);
-    onStopEditing();
-  }, [updateRecordFieldValue, recordID, fieldID, onStopEditing]);
-
-  return (
-    <View style={styles.selectKindEditingContainer}>
-      <ListPicker<T>
-        value={value}
-        options={options}
-        renderLabel={renderLabel}
-        onChange={handleChange}
-        onRequestClose={onStopEditing}
-      />
-      <View style={styles.actionRow}>
-        <FlatButton onPress={handleClear} title="Clear" />
-        <FlatButton onPress={onStopEditing} color="primary" title="Done" />
-      </View>
-    </View>
-  );
-}
 
 interface NumberCellProps {
   value: NumberFieldValue;
@@ -1104,20 +933,23 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
   const { value } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
+  const {
+    fieldID,
+    recordID,
+    cell,
+    onStartEditing,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const collaborators = useGetCollaborators();
-  const renderCollaborator = useRenderCollaborator();
-  const options = useGetCollaboratorOptions(collaborators);
-
   if (cell.state === 'editing') {
     return (
-      <SingleSelectFieldKindCellEditing
-        renderLabel={renderCollaborator}
-        options={options}
+      <FieldSingleCollaboratorInput
+        recordID={recordID}
+        fieldID={fieldID}
         value={value}
+        onDone={onStopEditing}
       />
     );
   }
@@ -1146,21 +978,24 @@ interface SingleRecordLinkCellProps {
 const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
   props: SingleRecordLinkCellProps,
 ) {
-  const { value, field } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
+  const { value } = props;
+  const {
+    fieldID,
+    recordID,
+    cell,
+    onStartEditing,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const renderRecordLink = useRenderRecordLink();
-  const records = useGetCollectionRecords(field.recordsFromCollectionID);
-  const options = useRecordLinkOptions(records);
-
   if (cell.state === 'editing') {
     return (
-      <SingleSelectFieldKindCellEditing
-        renderLabel={renderRecordLink}
-        options={options}
+      <FieldSingleRecordLinkInput
+        recordID={recordID}
+        fieldID={fieldID}
         value={value}
+        onDone={onStopEditing}
       />
     );
   }
@@ -1218,19 +1053,23 @@ const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
   const { value, field } = props;
-  const { cell, onStartEditing } = useLeafRowCellContext();
+  const {
+    recordID,
+    fieldID,
+    cell,
+    onStartEditing,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const renderOption = useRenderOption(field.options);
-  const options = useGetOptionOptions(field.options);
-
   if (cell.state === 'editing') {
     return (
-      <SingleSelectFieldKindCellEditing
-        renderLabel={renderOption}
-        options={options}
+      <FieldSingleOptionInput
+        recordID={recordID}
+        fieldID={fieldID}
         value={value}
+        onDone={onStopEditing}
       />
     );
   }
@@ -1681,15 +1520,6 @@ const styles = StyleSheet.create({
     borderRadius: tokens.border.radius,
     textAlign: 'right',
     ...tokens.text.size.md,
-  },
-  selectKindEditingContainer: {
-    maxHeight: 480,
-  },
-  actionRow: {
-    paddingTop: 24,
-    paddingBottom: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   focusedLeafRowCell: {
     height: 'auto',

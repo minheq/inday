@@ -1,11 +1,8 @@
 import React from 'react';
 import { CollaboratorID } from '../data/collaborators';
 
-import {
-  MultiCollaboratorField,
-  MultiCollaboratorFieldValue,
-} from '../data/fields';
-import { Record } from '../data/records';
+import { FieldID, MultiCollaboratorFieldValue } from '../data/fields';
+import { RecordID } from '../data/records';
 import { useGetCollaborators } from '../data/store';
 import { FieldMultiSelectKindInput } from './field_multi_select_kind_input';
 import {
@@ -14,8 +11,8 @@ import {
 } from './field_single_collaborator_input';
 
 interface FieldMultiCollaboratorInputProps {
-  record: Record;
-  field: MultiCollaboratorField;
+  recordID: RecordID;
+  fieldID: FieldID;
   value: MultiCollaboratorFieldValue;
   onDone: () => void;
 }
@@ -23,15 +20,15 @@ interface FieldMultiCollaboratorInputProps {
 export function FieldMultiCollaboratorInput(
   props: FieldMultiCollaboratorInputProps,
 ): JSX.Element {
-  const { record, field, value, onDone } = props;
+  const { recordID, fieldID, value, onDone } = props;
   const collaborators = useGetCollaborators();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
 
   return (
     <FieldMultiSelectKindInput<CollaboratorID>
-      recordID={record.id}
-      fieldID={field.id}
+      recordID={recordID}
+      fieldID={fieldID}
       renderLabel={renderCollaborator}
       options={options}
       value={value}

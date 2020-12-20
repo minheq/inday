@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 import { ListPickerOption } from '../components/list_picker';
 
 import {
-  SingleRecordLinkField,
+  assertSingleRecordLinkField,
+  FieldID,
   SingleRecordLinkFieldValue,
   stringifyFieldValue,
 } from '../data/fields';
@@ -10,13 +11,14 @@ import { Record, RecordID } from '../data/records';
 import { FieldSingleSelectKindInput } from './field_single_select_kind_input';
 import {
   useGetCollectionRecords,
+  useGetField,
   useGetRecordPrimaryFieldValueCallback,
 } from '../data/store';
 import { RecordLinkBadge } from './record_link_badge';
 
 interface FieldSingleRecordLinkInputProps {
-  record: Record;
-  field: SingleRecordLinkField;
+  recordID: RecordID;
+  fieldID: FieldID;
   value: SingleRecordLinkFieldValue;
   onDone: () => void;
 }
@@ -24,15 +26,17 @@ interface FieldSingleRecordLinkInputProps {
 export function FieldSingleRecordLinkInput(
   props: FieldSingleRecordLinkInputProps,
 ): JSX.Element {
-  const { record, field, value, onDone } = props;
+  const { recordID, fieldID, value, onDone } = props;
   const renderRecordLink = useRenderRecordLink();
+  const field = useGetField(fieldID);
+  assertSingleRecordLinkField(field);
   const records = useGetCollectionRecords(field.recordsFromCollectionID);
   const options = useRecordLinkOptions(records);
 
   return (
     <FieldSingleSelectKindInput<SingleRecordLinkFieldValue>
-      recordID={record.id}
-      fieldID={field.id}
+      recordID={recordID}
+      fieldID={fieldID}
       renderLabel={renderRecordLink}
       options={options}
       value={value}

@@ -2,10 +2,12 @@ import React from 'react';
 
 import {
   SelectOptionID,
-  MultiOptionField,
   MultiOptionFieldValue,
+  FieldID,
+  assertMultiOptionField,
 } from '../data/fields';
-import { Record } from '../data/records';
+import { RecordID } from '../data/records';
+import { useGetField } from '../data/store';
 import { FieldMultiSelectKindInput } from './field_multi_select_kind_input';
 import {
   useGetOptionOptions,
@@ -13,8 +15,8 @@ import {
 } from './field_single_option_input';
 
 interface FieldMultiOptionInputProps {
-  record: Record;
-  field: MultiOptionField;
+  recordID: RecordID;
+  fieldID: FieldID;
   value: MultiOptionFieldValue;
   onDone: () => void;
 }
@@ -22,14 +24,16 @@ interface FieldMultiOptionInputProps {
 export function FieldMultiOptionInput(
   props: FieldMultiOptionInputProps,
 ): JSX.Element {
-  const { record, field, value, onDone } = props;
+  const { recordID, fieldID, value, onDone } = props;
+  const field = useGetField(fieldID);
+  assertMultiOptionField(field);
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
   return (
     <FieldMultiSelectKindInput<SelectOptionID>
-      recordID={record.id}
-      fieldID={field.id}
+      recordID={recordID}
+      fieldID={fieldID}
       renderLabel={renderOption}
       options={options}
       value={value}
