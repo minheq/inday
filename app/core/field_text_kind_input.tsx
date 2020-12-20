@@ -1,19 +1,27 @@
 import React, { useCallback } from 'react';
-import { TextInput } from '../components/text_input';
+import {
+  NativeSyntheticEvent,
+  StyleSheet,
+  TextInputKeyPressEventData,
+  TextInput,
+} from 'react-native';
+import { tokens } from '../components/tokens';
 import { FieldID, TextFieldKindValue } from '../data/fields';
 import { RecordID } from '../data/records';
 import { useUpdateRecordFieldValue } from '../data/store';
 
-interface FieldTextKindInputProps {
+interface FieldTextKindInputProps<T extends TextFieldKindValue> {
+  autoFocus: boolean;
   recordID: RecordID;
   fieldID: FieldID;
-  value: TextFieldKindValue;
+  value: T;
+  onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
 }
 
-export function FieldTextKindInput(
-  props: FieldTextKindInputProps,
+export function FieldTextKindInput<T extends TextFieldKindValue>(
+  props: FieldTextKindInputProps<T>,
 ): JSX.Element {
-  const { recordID, fieldID, value } = props;
+  const { autoFocus, recordID, fieldID, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
 
   const handleChange = useCallback(
@@ -23,5 +31,21 @@ export function FieldTextKindInput(
     [updateRecordFieldValue, recordID, fieldID],
   );
 
-  return <TextInput onChange={handleChange} value={value} />;
+  return (
+    <TextInput
+      autoFocus={autoFocus}
+      onKeyPress={onKeyPress}
+      onChangeText={handleChange}
+      value={value}
+      style={styles.textCellInput}
+    />
+  );
 }
+
+const styles = StyleSheet.create({
+  textCellInput: {
+    height: 32,
+    borderRadius: tokens.border.radius,
+    ...tokens.text.size.md,
+  },
+});

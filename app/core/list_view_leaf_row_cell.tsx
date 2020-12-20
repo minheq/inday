@@ -60,7 +60,6 @@ import {
   URLFieldValue,
   FieldValue,
   FieldID,
-  TextFieldKindValue,
   NumberFieldKindValue,
   assertCheckboxFieldValue,
   assertCurrencyFieldValue,
@@ -119,6 +118,9 @@ import { FieldSingleOptionInput } from './field_single_option_input';
 import { FieldMultiOptionInput } from './field_multi_option_input';
 import { FieldMultiRecordLinkInput } from './field_multi_record_link_input';
 import { FieldSingleRecordLinkInput } from './field_single_record_link_input';
+import { FieldTextKindInput } from './field_text_kind_input';
+import { FieldNumberKindInput } from './field_number_kind_input';
+import { FieldMultiLineTextInput } from './field_multi_line_text';
 
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
@@ -448,10 +450,19 @@ interface CurrencyCellProps {
 
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const { cell } = useLeafRowCellContext();
+  const { cell, recordID, fieldID } = useLeafRowCellContext();
+  const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
-    return <NumberFieldKindCellEditing<CurrencyFieldValue> value={value} />;
+    return (
+      <FieldNumberKindInput<CurrencyFieldValue>
+        autoFocus
+        value={value}
+        recordID={recordID}
+        fieldID={fieldID}
+        onKeyPress={handleKeyPress}
+      />
+    );
   }
 
   const child =
@@ -583,10 +594,19 @@ interface EmailCellProps {
 
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value } = props;
-  const { cell } = useLeafRowCellContext();
+  const { cell, recordID, fieldID } = useLeafRowCellContext();
+  const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
-    return <TextFieldKindCellEditing<EmailFieldValue> value={value} />;
+    return (
+      <FieldTextKindInput<EmailFieldValue>
+        autoFocus
+        fieldID={fieldID}
+        recordID={recordID}
+        value={value}
+        onKeyPress={handleKeyPress}
+      />
+    );
   }
 
   const child = (
@@ -722,10 +742,19 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   props: MultiLineTextCellProps,
 ) {
   const { value } = props;
-  const { cell } = useLeafRowCellContext();
+  const { cell, fieldID, recordID } = useLeafRowCellContext();
+  const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
-    return <MultiLineTextCellEditing value={value} />;
+    return (
+      <FieldMultiLineTextInput
+        autoFocus
+        recordID={recordID}
+        fieldID={fieldID}
+        value={value}
+        onKeyPress={handleKeyPress}
+      />
+    );
   }
 
   if (cell.state === 'focused') {
@@ -744,34 +773,6 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
     </View>
   );
 });
-
-interface MultiLineTextCellEditingProps {
-  value: MultiLineTextFieldValue;
-}
-
-function MultiLineTextCellEditing(props: MultiLineTextCellEditingProps) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue();
-  const handleKeyPress = useCellKeyPressHandler({ enter: false });
-  const handleChangeText = useCallback(
-    (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.multilineTextCellInput}
-      value={value}
-      multiline
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
-}
 
 interface MultiOptionCellProps {
   value: MultiOptionFieldValue;
@@ -837,10 +838,19 @@ interface NumberCellProps {
 
 const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { cell } = useLeafRowCellContext();
+  const { recordID, fieldID, cell } = useLeafRowCellContext();
+  const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
-    return <NumberFieldKindCellEditing<NumberFieldKindValue> value={value} />;
+    return (
+      <FieldNumberKindInput<NumberFieldKindValue>
+        autoFocus
+        value={value}
+        recordID={recordID}
+        fieldID={fieldID}
+        onKeyPress={handleKeyPress}
+      />
+    );
   }
 
   let child: React.ReactNode = <View style={styles.cellWrapper} />;
@@ -897,10 +907,19 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   props: PhoneNumberCellProps,
 ) {
   const { value } = props;
-  const { cell } = useLeafRowCellContext();
+  const { recordID, fieldID, cell } = useLeafRowCellContext();
+  const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
-    return <TextFieldKindCellEditing<PhoneNumberFieldValue> value={value} />;
+    return (
+      <FieldTextKindInput<PhoneNumberFieldValue>
+        autoFocus
+        fieldID={fieldID}
+        recordID={recordID}
+        value={value}
+        onKeyPress={handleKeyPress}
+      />
+    );
   }
 
   const child = (
@@ -1025,10 +1044,19 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   props: SingleLineTextCellProps,
 ) {
   const { value } = props;
-  const { cell } = useLeafRowCellContext();
+  const { cell, fieldID, recordID } = useLeafRowCellContext();
+  const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
-    return <TextFieldKindCellEditing<SingleLineTextFieldValue> value={value} />;
+    return (
+      <FieldTextKindInput<SingleLineTextFieldValue>
+        autoFocus
+        fieldID={fieldID}
+        recordID={recordID}
+        value={value}
+        onKeyPress={handleKeyPress}
+      />
+    );
   }
 
   const child = (
@@ -1099,10 +1127,19 @@ interface URLCellProps {
 
 const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value } = props;
-  const { cell } = useLeafRowCellContext();
+  const { cell, fieldID, recordID } = useLeafRowCellContext();
+  const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
-    return <TextFieldKindCellEditing<URLFieldValue> value={value} />;
+    return (
+      <FieldTextKindInput<URLFieldValue>
+        autoFocus
+        fieldID={fieldID}
+        recordID={recordID}
+        value={value}
+        onKeyPress={handleKeyPress}
+      />
+    );
   }
 
   const child = (
@@ -1127,68 +1164,6 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   return <Fragment>{child}</Fragment>;
 });
-
-interface TextFieldKindCellEditingProps<T extends TextFieldKindValue> {
-  value: T;
-}
-
-function TextFieldKindCellEditing<T extends TextFieldKindValue>(
-  props: TextFieldKindCellEditingProps<T>,
-) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
-  const handleKeyPress = useCellKeyPressHandler();
-  const handleChangeText = useCallback(
-    (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.textCellInput}
-      value={value}
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
-}
-
-interface NumberFieldKindCellEditingProps<T extends NumberFieldKindValue> {
-  value: T;
-}
-
-function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
-  props: NumberFieldKindCellEditingProps<T>,
-) {
-  const { value } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue();
-  const handleKeyPress = useCellKeyPressHandler();
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      if (newValue !== '' && isNumberString(newValue) === false) {
-        return;
-      }
-
-      updateRecordFieldValue(recordID, fieldID, toNumber(newValue));
-    },
-    [updateRecordFieldValue, recordID, fieldID],
-  );
-
-  return (
-    <TextInput
-      autoFocus
-      style={styles.numberCellInput}
-      value={value ? value.toString() : ''}
-      onKeyPress={handleKeyPress}
-      onChangeText={handleChangeText}
-    />
-  );
-}
 
 interface UseCellKeyBindingsProps {
   onDelete?: () => void;
@@ -1503,23 +1478,6 @@ const styles = StyleSheet.create({
   },
   focusedMultiLineTextCellContainer: {
     paddingTop: FOCUS_BORDER_WIDTH + 1,
-  },
-  textCellInput: {
-    height: 32,
-    borderRadius: tokens.border.radius,
-    ...tokens.text.size.md,
-  },
-  multilineTextCellInput: {
-    paddingTop: FOCUS_BORDER_WIDTH + 1,
-    minHeight: 128,
-    borderRadius: tokens.border.radius,
-    ...tokens.text.size.md,
-  },
-  numberCellInput: {
-    height: 32,
-    borderRadius: tokens.border.radius,
-    textAlign: 'right',
-    ...tokens.text.size.md,
   },
   focusedLeafRowCell: {
     height: 'auto',

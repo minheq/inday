@@ -1,52 +1,57 @@
 import React, { useCallback } from 'react';
 import {
   NativeSyntheticEvent,
+  StyleSheet,
   TextInputKeyPressEventData,
   TextInput,
-  StyleSheet,
 } from 'react-native';
-import { toNumber } from '../../lib/number_utils';
 import { tokens } from '../components/tokens';
-import { FieldID, NumberFieldKindValue } from '../data/fields';
+import {
+  FieldID,
+  MultiLineTextFieldValue,
+  TextFieldKindValue,
+} from '../data/fields';
 import { RecordID } from '../data/records';
 import { useUpdateRecordFieldValue } from '../data/store';
 
-interface FieldNumberKindInputProps<T extends NumberFieldKindValue> {
+interface FieldMultiLineTextInputProps {
   autoFocus: boolean;
   recordID: RecordID;
   fieldID: FieldID;
-  value: T;
+  value: MultiLineTextFieldValue;
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
 }
 
-export function FieldNumberKindInput<T extends NumberFieldKindValue>(
-  props: FieldNumberKindInputProps<T>,
+export function FieldMultiLineTextInput(
+  props: FieldMultiLineTextInputProps,
 ): JSX.Element {
-  const { recordID, fieldID, value, onKeyPress } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<NumberFieldKindValue>();
+  const { autoFocus, recordID, fieldID, value, onKeyPress } = props;
+  const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
 
   const handleChange = useCallback(
     (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, toNumber(nextValue));
+      updateRecordFieldValue(recordID, fieldID, nextValue);
     },
     [updateRecordFieldValue, recordID, fieldID],
   );
 
   return (
     <TextInput
+      multiline
+      autoFocus={autoFocus}
       onKeyPress={onKeyPress}
       onChangeText={handleChange}
-      value={value ? value.toString() : ''}
-      style={styles.numberCellInput}
+      value={value}
+      style={styles.multilineTextCellInput}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  numberCellInput: {
-    height: 32,
+  multilineTextCellInput: {
+    paddingTop: 3 + 1,
+    minHeight: 128,
     borderRadius: tokens.border.radius,
-    textAlign: 'right',
     ...tokens.text.size.md,
   },
 });
