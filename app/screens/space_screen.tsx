@@ -452,7 +452,7 @@ function RecordDetailsContainer(
 
   return (
     <ScrollView>
-      <Container paddingHorizontal={8}>
+      <Container padding={8}>
         <Row>
           <CloseButton onPress={handleClose} />
         </Row>

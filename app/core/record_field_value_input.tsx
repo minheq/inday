@@ -36,6 +36,8 @@ import { OptionBadge } from './option_badge';
 import { RecordLinkBadge } from './record_link_badge';
 import { formatDate, parseISODate } from '../../lib/date_utils';
 import { getSystemLocale } from '../lib/locale';
+import { tokens } from '../components/tokens';
+import { useTheme } from '../components/theme';
 
 interface RecordFieldValueInputProps {
   record: Record;
@@ -257,15 +259,30 @@ export function RecordFieldValueInput(
 
 interface PopoverWrapperProps {
   children: React.ReactNode;
-  content: React.ReactNode | ((callbacks: PopoverCallback) => React.ReactNode);
+  content: (callbacks: PopoverCallback) => React.ReactNode;
   contentHeight: number;
 }
 
 function PopoverWrapper(props: PopoverWrapperProps) {
   const { children, content, contentHeight } = props;
+  const theme = useTheme();
 
   return (
-    <PopoverButton contentHeight={contentHeight} content={content}>
+    <PopoverButton
+      contentHeight={contentHeight}
+      content={({ onRequestClose }) => (
+        <View
+          style={[
+            styles.popoverContainer,
+            theme === 'dark'
+              ? styles.popoverContainerDark
+              : styles.popoverContainerLight,
+          ]}
+        >
+          {content({ onRequestClose })}
+        </View>
+      )}
+    >
       {children}
     </PopoverButton>
   );
@@ -289,4 +306,14 @@ function FieldWrapper(props: FieldWrapperProps) {
 
 const styles = StyleSheet.create({
   fieldWrapper: {},
+  popoverContainer: {
+    padding: 8,
+    borderRadius: tokens.border.radius,
+  },
+  popoverContainerLight: {
+    backgroundColor: tokens.colors.base.white,
+  },
+  popoverContainerDark: {
+    backgroundColor: tokens.colors.gray[800],
+  },
 });
