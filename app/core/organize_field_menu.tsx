@@ -6,21 +6,27 @@ import { Spacer } from '../components/spacer';
 import { Switch } from '../components/switch';
 import { Text } from '../components/text';
 import { tokens } from '../components/tokens';
+import { CollectionID } from '../data/collections';
 
 import {
   useGetSortedFieldsWithListViewConfig,
   useUpdateListViewFieldConfig,
 } from '../data/store';
-import { FieldWithListViewConfig } from '../data/views';
+import { FieldWithListViewConfig, ViewID } from '../data/views';
 
-const FieldMenuContext = createContext({
-  viewID: '',
-  collectionID: '',
+interface FieldMenuContext {
+  viewID: ViewID;
+  collectionID: CollectionID;
+}
+
+const FieldMenuContext = createContext<FieldMenuContext>({
+  viewID: 'viw',
+  collectionID: 'col',
 });
 
 interface FieldMenuProps {
-  viewID: string;
-  collectionID: string;
+  viewID: ViewID;
+  collectionID: CollectionID;
 }
 
 export function FieldMenu(props: FieldMenuProps): JSX.Element {
@@ -52,17 +58,17 @@ interface FieldListItemProps {
 
 function FieldListItem(props: FieldListItemProps) {
   const { field } = props;
-  const context = useContext(FieldMenuContext);
+  const { viewID } = useContext(FieldMenuContext);
   const updateListViewFieldConfig = useUpdateListViewFieldConfig();
 
   const handleChange = useCallback(
     (value: boolean) => {
-      updateListViewFieldConfig(context.viewID, field.id, {
+      updateListViewFieldConfig(viewID, field.id, {
         ...field.config,
         visible: value,
       });
     },
-    [updateListViewFieldConfig, context, field],
+    [updateListViewFieldConfig, viewID, field],
   );
 
   return (

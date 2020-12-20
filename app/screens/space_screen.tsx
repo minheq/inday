@@ -1,5 +1,5 @@
 import React, { useCallback, createContext, useContext } from 'react';
-import { StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import {
@@ -11,7 +11,7 @@ import {
   useGetRecordFieldsEntries,
 } from '../data/store';
 import { Slide } from '../components/slide';
-import { OrganizeMenu } from '../core/organize_menu';
+import { OrganizeView } from '../core/organize_view';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer';
 import { View, ViewID } from '../data/views';
@@ -400,21 +400,28 @@ function MainContent() {
         <Container paddingTop={16} color="content" flex={1}>
           {renderView()}
         </Container>
-        <Slide
-          width={360}
-          open={sidePanel === 'organize' || openRecord !== null}
-        >
+        <Slide width={360} open={sidePanel === 'organize'}>
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
             <AutoSizer>
               {({ height }) => (
                 <Container width={360} height={height}>
-                  {sidePanel === 'organize' && (
-                    <OrganizeMenu
+                  <ScrollView>
+                    <OrganizeView
                       spaceID={spaceID}
                       viewID={viewID}
                       collectionID={collectionID}
                     />
-                  )}
+                  </ScrollView>
+                </Container>
+              )}
+            </AutoSizer>
+          </Container>
+        </Slide>
+        <Slide width={640} open={openRecord !== null}>
+          <Container flex={1} width={640} color="content" borderLeftWidth={1}>
+            <AutoSizer>
+              {({ height }) => (
+                <Container width={640} height={height}>
                   {openRecord !== null && (
                     <RecordDetailsContainer recordID={openRecord} />
                   )}
@@ -444,12 +451,14 @@ function RecordDetailsContainer(
   }, [setOpenRecord]);
 
   return (
-    <Container paddingHorizontal={8}>
-      <Row>
-        <CloseButton onPress={handleClose} />
-      </Row>
-      <RecordDetails record={record} />
-    </Container>
+    <ScrollView>
+      <Container paddingHorizontal={8}>
+        <Row>
+          <CloseButton onPress={handleClose} />
+        </Row>
+        <RecordDetails record={record} />
+      </Container>
+    </ScrollView>
   );
 }
 

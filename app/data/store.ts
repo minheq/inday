@@ -435,8 +435,8 @@ export function useUpdateCollectionName() {
 
 export function useGetViewCallback() {
   return useRecoilCallback(
-    ({ snapshot }) => async (viewID: ViewID) => {
-      return snapshot.getPromise(viewQuery(viewID));
+    ({ snapshot }) => (viewID: ViewID) => {
+      return snapshot.getLoadable(viewQuery(viewID));
     },
     [],
   );
@@ -951,8 +951,8 @@ export function useUpdateListViewFieldConfig() {
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
   return useCallback(
-    async (viewID: ViewID, fieldID: FieldID, config: ListViewFieldConfig) => {
-      const prevView = await getView(viewID);
+    (viewID: ViewID, fieldID: FieldID, config: ListViewFieldConfig) => {
+      const prevView = getView(viewID).getValue();
 
       assertListView(prevView);
 

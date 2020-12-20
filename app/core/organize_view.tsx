@@ -11,13 +11,13 @@ import { Container } from '../components/container';
 import { SegmentedControl } from '../components/segmented_control';
 import { Spacer } from '../components/spacer';
 
-interface OrganizeMenuProps {
+interface OrganizeViewProps {
   spaceID: SpaceID;
   viewID: ViewID;
   collectionID: CollectionID;
 }
 
-export function OrganizeMenu(props: OrganizeMenuProps): JSX.Element {
+export function OrganizeView(props: OrganizeViewProps): JSX.Element {
   const { viewID, collectionID } = props;
 
   const [tab, setTab] = useState(2);

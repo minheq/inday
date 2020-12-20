@@ -28,8 +28,10 @@ import { first } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { FieldID } from '../data/fields';
 import { FieldPicker } from './field_picker';
-import { GroupID, Group, GroupConfig, GroupOrder } from '../data/groups';
+import { GroupID, Group } from '../data/groups';
 import { SegmentedControl } from '../components/segmented_control';
+import { ViewID } from '../data/views';
+import { SortConfig, SortOrder } from '../data/sorts';
 
 const groupEditIDState = atom<GroupID>({
   key: 'GroupMenuGroupEditID',
@@ -42,11 +44,11 @@ const GroupMenuContext = createContext({
 });
 
 interface GroupMenuProps {
-  viewID: string;
+  viewID: ViewID;
   collectionID: string;
 }
 
-export function GroupMenu(props: GroupMenuProps) {
+export function GroupMenu(props: GroupMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
   const groups = useGetViewGroups(viewID);
 
@@ -78,12 +80,12 @@ function GroupListItem(props: GroupListItemProps) {
   const [groupEditID, setGroupEditID] = useRecoilState(groupEditIDState);
   const field = useGetField(group.fieldID);
   const deleteGroup = useDeleteGroup();
-  const updateGroupConfig = useUpdateGroupSortConfig();
-  const [groupConfig, setGroupConfig] = useState<GroupConfig>(group);
+  const updateSortConfig = useUpdateGroupSortConfig();
+  const [groupConfig, setSortConfig] = useState<SortConfig>(group);
   const edit = groupEditID === group.id;
 
-  const handleChangeGroupConfig = useCallback((config: GroupConfig) => {
-    setGroupConfig(config);
+  const handleChangeSortConfig = useCallback((config: SortConfig) => {
+    setSortConfig(config);
   }, []);
 
   const handlePressEdit = useCallback(() => {
@@ -103,12 +105,12 @@ function GroupListItem(props: GroupListItemProps) {
   }, [deleteGroup, setGroupEditID, group]);
 
   const handleSubmit = useCallback(() => {
-    updateGroupConfig(group.id, groupConfig);
+    updateSortConfig(group.id, groupConfig);
     setGroupEditID('');
-  }, [updateGroupConfig, setGroupEditID, group, groupConfig]);
+  }, [updateSortConfig, setGroupEditID, group, groupConfig]);
 
   useEffect(() => {
-    setGroupConfig(group);
+    setSortConfig(group);
   }, [groupEditID, group]);
 
   let content: JSX.Element = <Fragment />;
@@ -130,7 +132,7 @@ function GroupListItem(props: GroupListItemProps) {
       <Fragment>
         <GroupEdit
           groupConfig={groupConfig}
-          onChange={handleChangeGroupConfig}
+          onChange={handleChangeSortConfig}
         />
         <Spacer size={16} />
         <Row justifyContent="space-between">
@@ -174,22 +176,20 @@ function GroupNew() {
     );
   }
 
-  const defaultGroupConfig: GroupConfig = useMemo(() => {
+  const defaultSortConfig: SortConfig = useMemo(() => {
     return {
       fieldID: firstField.id,
       order: 'ascending',
     };
   }, [firstField]);
 
-  const [groupConfig, setGroupConfig] = useState<GroupConfig>(
-    defaultGroupConfig,
-  );
+  const [groupConfig, setSortConfig] = useState<SortConfig>(defaultSortConfig);
   const sequenceMax = useGetGroupsSequenceMax(context.viewID);
 
   const handleClose = useCallback(() => {
     setOpen(false);
-    setGroupConfig(defaultGroupConfig);
-  }, [defaultGroupConfig]);
+    setSortConfig(defaultSortConfig);
+  }, [defaultSortConfig]);
 
   const handlePressAddGroup = useCallback(() => {
     setOpen(true);
@@ -212,7 +212,7 @@ function GroupNew() {
       <Container padding={16} borderRadius={tokens.border.radius} shadow>
         <Text weight="bold">New group</Text>
         <Spacer size={16} />
-        <GroupEdit groupConfig={groupConfig} onChange={setGroupConfig} />
+        <GroupEdit groupConfig={groupConfig} onChange={setSortConfig} />
         <Spacer size={16} />
         <Row justifyContent="flex-end">
           <Pressable onPress={handleClose}>
@@ -233,8 +233,8 @@ function GroupNew() {
 }
 
 interface GroupEditProps {
-  groupConfig: GroupConfig;
-  onChange: (groupConfig: GroupConfig) => void;
+  groupConfig: SortConfig;
+  onChange: (groupConfig: SortConfig) => void;
 }
 
 function GroupEdit(props: GroupEditProps) {
@@ -254,7 +254,7 @@ function GroupEdit(props: GroupEditProps) {
   );
 
   const handleChangeOrder = useCallback(
-    (order: GroupOrder) => {
+    (order: SortOrder) => {
       onChange({
         order,
         fieldID: field.id,
@@ -271,7 +271,7 @@ function GroupEdit(props: GroupEditProps) {
         fields={fields}
       />
       <Spacer size={4} />
-      <SegmentedControl<GroupOrder>
+      <SegmentedControl<SortOrder>
         value={groupConfig.order}
         onChange={handleChangeOrder}
         options={[
