@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
-import { View, StyleSheet, ColorSchemeName } from 'react-native';
+import { View, StyleSheet, ColorSchemeName, ViewStyle } from 'react-native';
+import { assertUnreached } from '../../lib/lang_utils';
 import { useTheme } from './theme';
 import { tokens } from './tokens';
 
@@ -15,6 +16,7 @@ export type BackgroundColor = keyof BackgroundColors;
 type Shape = 'rounded' | 'square' | 'pill';
 
 type Direction = 'column' | 'row';
+
 interface ContainerContext {
   direction: Direction;
 }
@@ -166,15 +168,15 @@ export function Container(props: ContainerProps): JSX.Element {
             overflow,
             zIndex,
           },
-          (borderWidth ||
-            borderBottomWidth ||
-            borderLeftWidth ||
-            borderRightWidth) &&
+          (borderWidth !== undefined ||
+            borderBottomWidth !== undefined ||
+            borderLeftWidth !== undefined ||
+            borderRightWidth !== undefined) &&
             styles.borderColor,
           color && resolveColor(color, theme),
+          shape && resolveShape(shape),
           shadow && styles.shadow,
           center && styles.center,
-          shape && styles[shape],
         ]}
       >
         {children}
@@ -186,9 +188,7 @@ export function Container(props: ContainerProps): JSX.Element {
 function resolveColor(
   color: BackgroundColor,
   theme: ColorSchemeName,
-): {
-  backgroundColor: string;
-} {
+): ViewStyle {
   switch (color) {
     case 'content':
       return theme === 'dark' ? styles.contentDark : styles.contentLight;
@@ -198,6 +198,21 @@ function resolveColor(
       return styles.tint;
     case 'primary':
       return styles.primary;
+    default:
+      assertUnreached(color);
+  }
+}
+
+function resolveShape(shape: Shape): ViewStyle {
+  switch (shape) {
+    case 'square':
+      return styles.square;
+    case 'pill':
+      return styles.pill;
+    case 'rounded':
+      return styles.rounded;
+    default:
+      assertUnreached(shape);
   }
 }
 

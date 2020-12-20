@@ -25,7 +25,5 @@ const styles = StyleSheet.create({
   textCellContainer: {
     height: 32,
     flex: 1,
-    overflow: 'hidden',
-    justifyContent: 'center',
   },
 });
