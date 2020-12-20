@@ -77,11 +77,9 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const records = useGetViewRecords(view.id);
   const groups = useGetViewGroups(view.id);
   const sortGetters = useGetSortGetters();
-  const nodes = useMemo(() => getRecordNodes(records, groups, sortGetters), [
-    records,
-    groups,
-    sortGetters,
-  ]);
+  const [nodes, setNodes] = useState(
+    getRecordNodes(records, groups, sortGetters),
+  );
   const gridRef = useRef<GridRendererRef>(null);
   const rowPaths = useMemo(() => getRowPaths(nodes, []), [nodes]);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
@@ -93,23 +91,18 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
   const lastColumn = fields.length;
-  const lastRow = useMemo(
-    (): RowPath =>
-      last(rowPaths) || {
-        recordID: 'rec',
-        row: 1,
-        path: [],
-      },
-    [rowPaths],
-  );
+  const lastRow = useMemo((): RowPath | undefined => last(rowPaths), [
+    rowPaths,
+  ]);
   const recordsOrderChanged = useRecordsOrderChanged(view.id, records);
   const fieldsOrderChanged = useFieldsOrderChanged(view.id, fields);
 
   useEffect(() => {
     if (recordsOrderChanged === true) {
+      setNodes(getRecordNodes(records, groups, sortGetters));
       setRowToRecordIDCache(getRowToRecordIDCache(rowPaths));
     }
-  }, [rowPaths, recordsOrderChanged]);
+  }, [rowPaths, recordsOrderChanged, records, groups, sortGetters]);
 
   useEffect(() => {
     if (fieldsOrderChanged === true) {
@@ -438,7 +431,7 @@ interface ListViewViewContext {
   rowToRecordIDCache: RowToRecordIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
   lastColumn: number;
-  lastRow: RowPath;
+  lastRow: RowPath | undefined;
   mode: ViewMode;
   onOpenRecord: (recordID: RecordID) => void;
   onSelectRecord: (recordID: RecordID, selected: boolean) => void;

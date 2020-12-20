@@ -1446,13 +1446,15 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const onMetaArrowDown = useCallback(() => {
     const { column } = cell;
 
-    setActiveCell({
-      type: 'leaf',
-      row: lastRow.row,
-      column,
-      path: lastRow.path,
-      state: 'focused',
-    });
+    if (lastRow !== undefined) {
+      setActiveCell({
+        type: 'leaf',
+        row: lastRow.row,
+        column,
+        path: lastRow.path,
+        state: 'focused',
+      });
+    }
   }, [cell, setActiveCell, lastRow]);
 
   const onMetaArrowUp = useCallback(() => {
