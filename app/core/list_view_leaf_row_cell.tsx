@@ -125,6 +125,10 @@ import { FieldEmailValueView } from './field_email_value_view';
 import { FieldEmailValueActions } from './field_email_value_actions';
 import { FieldURLValueActions } from './field_url_value_actions';
 import { FieldPhoneNumberValueActions } from './field_phone_number_value_actions';
+import { FieldSingleLineTextValueView } from './field_single_line_text_value_view';
+import { FieldURLValueView } from './field_url_value_view';
+import { FieldPhoneNumberValueView } from './field_phone_number_value_view';
+import { assertUnreached } from '../../lib/lang_utils';
 
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
@@ -413,6 +417,8 @@ function ListViewCell(props: ListViewCellProps): JSX.Element {
       case FieldType.URL:
         assertURLFieldValue(value);
         return <URLCell field={field} value={value} />;
+      default:
+        assertUnreached(field);
     }
   }, [field, value]);
 
@@ -693,8 +699,8 @@ interface MultiLineTextCellProps {
 const MultiLineTextCell = memo(function MultiLineTextCell(
   props: MultiLineTextCellProps,
 ) {
-  const { value } = props;
-  const { cell, fieldID, recordID } = useLeafRowCellContext();
+  const { value, field } = props;
+  const { cell, recordID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -702,7 +708,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
       <FieldMultiLineTextValueEdit
         autoFocus
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onKeyPress={handleKeyPress}
       />
@@ -819,11 +825,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
     );
   }
 
-  const child = (
-    <View style={styles.textCellContainer}>
-      <Text numberOfLines={1}>{value}</Text>
-    </View>
-  );
+  const child = <FieldPhoneNumberValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
@@ -940,11 +942,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
     );
   }
 
-  const child = (
-    <View style={styles.textCellContainer}>
-      <Text numberOfLines={1}>{value}</Text>
-    </View>
-  );
+  const child = <FieldSingleLineTextValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>;
@@ -1013,13 +1011,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
     );
   }
 
-  const child = (
-    <View style={styles.textCellContainer}>
-      <Text decoration="underline" numberOfLines={1}>
-        {value}
-      </Text>
-    </View>
-  );
+  const child = <FieldURLValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (

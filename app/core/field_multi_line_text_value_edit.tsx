@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { tokens } from '../components/tokens';
 import {
-  FieldID,
+  MultiLineTextField,
   MultiLineTextFieldValue,
   TextFieldKindValue,
 } from '../data/fields';
@@ -17,7 +17,7 @@ import { useUpdateRecordFieldValue } from '../data/store';
 interface FieldMultiLineTextValueEditProps {
   autoFocus: boolean;
   recordID: RecordID;
-  fieldID: FieldID;
+  field: MultiLineTextField;
   value: MultiLineTextFieldValue;
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
 }
@@ -25,14 +25,14 @@ interface FieldMultiLineTextValueEditProps {
 export function FieldMultiLineTextValueEdit(
   props: FieldMultiLineTextValueEditProps,
 ): JSX.Element {
-  const { autoFocus, recordID, fieldID, value, onKeyPress } = props;
+  const { autoFocus, recordID, field, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
 
   const handleChange = useCallback(
     (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
+      updateRecordFieldValue(recordID, field.id, nextValue);
     },
-    [updateRecordFieldValue, recordID, fieldID],
+    [updateRecordFieldValue, recordID, field],
   );
 
   return (
