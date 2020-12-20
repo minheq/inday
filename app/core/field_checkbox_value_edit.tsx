@@ -3,26 +3,30 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
-import { BooleanFieldKindValue, FieldID } from '../data/fields';
+import {
+  BooleanFieldKindValue,
+  CheckboxField,
+  CheckboxFieldValue,
+} from '../data/fields';
 import { RecordID } from '../data/records';
 import { useUpdateRecordFieldValue } from '../data/store';
 
-interface FieldBooleanKindInputProps {
+interface FieldCheckboxValueEditProps {
   recordID: RecordID;
-  fieldID: FieldID;
-  value: BooleanFieldKindValue;
+  field: CheckboxField;
+  value: CheckboxFieldValue;
 }
 
-export function FieldBooleanKindInput(
-  props: FieldBooleanKindInputProps,
+export function FieldCheckboxValueEdit(
+  props: FieldCheckboxValueEditProps,
 ): JSX.Element {
-  const { recordID, value, fieldID } = props;
+  const { recordID, value, field } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
 
   const handleToggle = useCallback(() => {
     const checked = !value;
-    updateRecordFieldValue(recordID, fieldID, checked);
-  }, [updateRecordFieldValue, recordID, fieldID, value]);
+    updateRecordFieldValue(recordID, field.id, checked);
+  }, [updateRecordFieldValue, recordID, field, value]);
 
   return <Checkbox value={value} onChange={handleToggle} />;
 }

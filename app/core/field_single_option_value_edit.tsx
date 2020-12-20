@@ -2,37 +2,34 @@ import React, { Fragment, useCallback } from 'react';
 import { ListPickerOption } from '../components/list_picker';
 
 import {
-  assertSingleOptionField,
-  FieldID,
   SelectOption,
   SelectOptionID,
+  SingleOptionField,
   SingleOptionFieldValue,
 } from '../data/fields';
 import { RecordID } from '../data/records';
 import { OptionBadge } from './option_badge';
-import { FieldSingleSelectKindInput } from './field_single_select_kind_input';
-import { useGetField } from '../data/store';
+import { FieldSingleSelectKindValueEdit } from './field_single_select_kind_value_edit';
 
-interface FieldSingleOptionInputProps {
+interface FieldSingleOptionValueEditProps {
   recordID: RecordID;
-  fieldID: FieldID;
+  field: SingleOptionField;
   value: SingleOptionFieldValue;
   onDone: () => void;
 }
 
-export function FieldSingleOptionInput(
-  props: FieldSingleOptionInputProps,
+export function FieldSingleOptionValueEdit(
+  props: FieldSingleOptionValueEditProps,
 ): JSX.Element {
-  const { recordID, fieldID, value, onDone } = props;
-  const field = useGetField(fieldID);
-  assertSingleOptionField(field);
+  const { recordID, field, value, onDone } = props;
+
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
   return (
-    <FieldSingleSelectKindInput<SingleOptionFieldValue>
+    <FieldSingleSelectKindValueEdit<SingleOptionFieldValue>
       recordID={recordID}
-      fieldID={fieldID}
+      fieldID={field.id}
       renderLabel={renderOption}
       options={options}
       value={value}

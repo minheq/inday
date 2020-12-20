@@ -9,7 +9,6 @@ import React, {
 import {
   View,
   Pressable,
-  TextInput,
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   StyleSheet,
@@ -95,7 +94,6 @@ import { getSystemLocale } from '../lib/locale';
 import { OptionBadge } from './option_badge';
 import { CollaboratorBadge } from './collaborator_badge';
 import { RecordLinkBadge } from './record_link_badge';
-import { formatUnit } from '../../lib/unit';
 import { formatDate, parseISODate } from '../../lib/date_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { isNumberString, toNumber } from '../../lib/number_utils';
@@ -111,16 +109,18 @@ import {
   useLeafRowContext,
   useLeafRowContextMenuOptions,
 } from './list_view_leaf_row';
-import { FieldDateInput } from './field_date_input';
-import { FieldMultiCollaboratorInput } from './field_multi_collaborator_input';
-import { FieldSingleCollaboratorInput } from './field_single_collaborator_input';
-import { FieldSingleOptionInput } from './field_single_option_input';
-import { FieldMultiOptionInput } from './field_multi_option_input';
-import { FieldMultiRecordLinkInput } from './field_multi_record_link_input';
-import { FieldSingleRecordLinkInput } from './field_single_record_link_input';
-import { FieldTextKindInput } from './field_text_kind_input';
-import { FieldNumberKindInput } from './field_number_kind_input';
-import { FieldMultiLineTextInput } from './field_multi_line_text';
+import { FieldDateValueEdit } from './field_date_value_edit';
+import { FieldMultiCollaboratorValueEdit } from './field_multi_collaborator_value_edit';
+import { FieldSingleCollaboratorValueEdit } from './field_single_collaborator_value_edit';
+import { FieldSingleOptionValueEdit } from './field_single_option_value_edit';
+import { FieldMultiOptionValueEdit } from './field_multi_option_value_edit';
+import { FieldMultiRecordLinkValueEdit } from './field_multi_record_link_value_edit';
+import { FieldSingleRecordLinkValueEdit } from './field_single_record_link_value_edit';
+import { FieldTextKindValueEdit } from './field_text_kind_value_edit';
+import { FieldNumberKindValueEdit } from './field_number_kind_value_edit';
+import { FieldMultiLineTextValueEdit } from './field_multi_line_text_value_edit';
+import { FieldNumberValueView } from './field_number_value_view';
+import { FieldCheckboxValueEdit } from './field_checkbox_value_edit';
 
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
@@ -421,7 +421,7 @@ interface CheckboxCellProps {
 }
 
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
-  const { value } = props;
+  const { value, field } = props;
   const { recordID, fieldID } = useLeafRowCellContext();
   const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
 
@@ -436,9 +436,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={styles.checkboxCell}>
-      <Pressable style={styles.checkbox} onPress={handleToggle}>
-        {value === true && <Icon name="CheckThick" color="success" />}
-      </Pressable>
+      <FieldCheckboxValueEdit recordID={recordID} field={field} value={value} />
     </View>
   );
 });
@@ -450,16 +448,16 @@ interface CurrencyCellProps {
 
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const { cell, recordID, fieldID } = useLeafRowCellContext();
+  const { cell, recordID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
     return (
-      <FieldNumberKindInput<CurrencyFieldValue>
+      <FieldNumberKindValueEdit<CurrencyFieldValue>
         autoFocus
         value={value}
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         onKeyPress={handleKeyPress}
       />
     );
@@ -549,10 +547,9 @@ interface DateCellProps {
 }
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
-  const { value } = props;
+  const { value, field } = props;
   const {
     recordID,
-    fieldID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -562,9 +559,9 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <FieldDateInput
+      <FieldDateValueEdit
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onDone={onStopEditing}
       />
@@ -593,15 +590,15 @@ interface EmailCellProps {
 }
 
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
-  const { value } = props;
-  const { cell, recordID, fieldID } = useLeafRowCellContext();
+  const { value, field } = props;
+  const { cell, recordID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindInput<EmailFieldValue>
+      <FieldTextKindValueEdit<EmailFieldValue>
         autoFocus
-        fieldID={fieldID}
+        field={field}
         recordID={recordID}
         value={value}
         onKeyPress={handleKeyPress}
@@ -644,10 +641,9 @@ interface MultiCollaboratorCellProps {
 const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
-  const { value } = props;
+  const { value, field } = props;
   const {
     recordID,
-    fieldID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -657,9 +653,9 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldMultiCollaboratorInput
+      <FieldMultiCollaboratorValueEdit
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onDone={onStopEditing}
       />
@@ -694,10 +690,9 @@ interface MultiRecordLinkCellProps {
 const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
   props: MultiRecordLinkCellProps,
 ) {
-  const { value } = props;
+  const { value, field } = props;
   const {
     recordID,
-    fieldID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -707,9 +702,9 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldMultiRecordLinkInput
+      <FieldMultiRecordLinkValueEdit
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onDone={onStopEditing}
       />
@@ -747,7 +742,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldMultiLineTextInput
+      <FieldMultiLineTextValueEdit
         autoFocus
         recordID={recordID}
         fieldID={fieldID}
@@ -785,7 +780,6 @@ const MultiOptionCell = memo(function MultiOptionCell(
   const { value, field } = props;
   const {
     recordID,
-    fieldID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -795,9 +789,9 @@ const MultiOptionCell = memo(function MultiOptionCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldMultiOptionInput
+      <FieldMultiOptionValueEdit
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onDone={onStopEditing}
       />
@@ -838,58 +832,24 @@ interface NumberCellProps {
 
 const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { recordID, fieldID, cell } = useLeafRowCellContext();
+  const { recordID, cell } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
     return (
-      <FieldNumberKindInput<NumberFieldKindValue>
+      <FieldNumberKindValueEdit<NumberFieldKindValue>
         autoFocus
         value={value}
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         onKeyPress={handleKeyPress}
       />
     );
   }
 
-  let child: React.ReactNode = <View style={styles.cellWrapper} />;
-
-  if (value !== null) {
-    switch (field.style) {
-      case 'decimal':
-        child = (
-          <View style={styles.textCellContainer}>
-            <Text numberOfLines={1} align="right">
-              {Intl.NumberFormat(getSystemLocale(), {
-                style: 'decimal',
-                minimumFractionDigits: field.minimumFractionDigits,
-                maximumFractionDigits: field.maximumFractionDigits,
-              }).format(value)}
-            </Text>
-          </View>
-        );
-        break;
-      case 'unit':
-        child = (
-          <View style={styles.textCellContainer}>
-            <Text numberOfLines={1} align="right">
-              {formatUnit(value, getSystemLocale(), field.unit)}
-            </Text>
-          </View>
-        );
-        break;
-      case 'integer':
-        child = (
-          <View style={styles.textCellContainer}>
-            <Text numberOfLines={1} align="right">
-              {value}
-            </Text>
-          </View>
-        );
-        break;
-    }
-  }
+  const child = (
+    <FieldNumberValueView recordID={recordID} field={field} value={value} />
+  );
 
   if (cell.state === 'focused') {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
@@ -906,15 +866,15 @@ interface PhoneNumberCellProps {
 const PhoneNumberCell = memo(function PhoneNumberCell(
   props: PhoneNumberCellProps,
 ) {
-  const { value } = props;
-  const { recordID, fieldID, cell } = useLeafRowCellContext();
+  const { value, field } = props;
+  const { recordID, cell } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindInput<PhoneNumberFieldValue>
+      <FieldTextKindValueEdit<PhoneNumberFieldValue>
         autoFocus
-        fieldID={fieldID}
+        field={field}
         recordID={recordID}
         value={value}
         onKeyPress={handleKeyPress}
@@ -951,9 +911,8 @@ interface SingleCollaboratorCellProps {
 const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
-  const { value } = props;
+  const { value, field } = props;
   const {
-    fieldID,
     recordID,
     cell,
     onStartEditing,
@@ -964,9 +923,9 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldSingleCollaboratorInput
+      <FieldSingleCollaboratorValueEdit
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onDone={onStopEditing}
       />
@@ -997,9 +956,8 @@ interface SingleRecordLinkCellProps {
 const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
   props: SingleRecordLinkCellProps,
 ) {
-  const { value } = props;
+  const { value, field } = props;
   const {
-    fieldID,
     recordID,
     cell,
     onStartEditing,
@@ -1010,9 +968,9 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldSingleRecordLinkInput
+      <FieldSingleRecordLinkValueEdit
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onDone={onStopEditing}
       />
@@ -1043,15 +1001,15 @@ interface SingleLineTextCellProps {
 const SingleLineTextCell = memo(function SingleLineTextCell(
   props: SingleLineTextCellProps,
 ) {
-  const { value } = props;
-  const { cell, fieldID, recordID } = useLeafRowCellContext();
+  const { value, field } = props;
+  const { cell, recordID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindInput<SingleLineTextFieldValue>
+      <FieldTextKindValueEdit<SingleLineTextFieldValue>
         autoFocus
-        fieldID={fieldID}
+        field={field}
         recordID={recordID}
         value={value}
         onKeyPress={handleKeyPress}
@@ -1083,7 +1041,6 @@ const SingleOptionCell = memo(function SingleOptionCell(
   const { value, field } = props;
   const {
     recordID,
-    fieldID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -1093,9 +1050,9 @@ const SingleOptionCell = memo(function SingleOptionCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldSingleOptionInput
+      <FieldSingleOptionValueEdit
         recordID={recordID}
-        fieldID={fieldID}
+        field={field}
         value={value}
         onDone={onStopEditing}
       />
@@ -1126,15 +1083,15 @@ interface URLCellProps {
 }
 
 const URLCell = memo(function URLCell(props: URLCellProps) {
-  const { value } = props;
-  const { cell, fieldID, recordID } = useLeafRowCellContext();
+  const { value, field } = props;
+  const { cell, recordID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindInput<URLFieldValue>
+      <FieldTextKindValueEdit<URLFieldValue>
         autoFocus
-        fieldID={fieldID}
+        field={field}
         recordID={recordID}
         value={value}
         onKeyPress={handleKeyPress}
@@ -1516,15 +1473,6 @@ const styles = StyleSheet.create({
   },
   rowMoreButton: {
     borderRadius: 999,
-  },
-  checkbox: {
-    width: 32,
-    height: 32,
-    borderWidth: 1,
-    borderRadius: tokens.border.radius,
-    borderColor: tokens.colors.gray[300],
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   cellWrapper: {
     height: 32,

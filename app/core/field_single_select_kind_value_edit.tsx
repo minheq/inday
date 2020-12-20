@@ -1,51 +1,45 @@
 import React, { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
+
 import { FlatButton } from '../components/flat_button';
-import { ListPickerOption } from '../components/list_picker';
-import { MultiListPicker } from '../components/multi_list_picker';
-import { CollaboratorID } from '../data/collaborators';
-import {
-  FieldID,
-  MultiSelectFieldKindValue,
-  SelectOptionID,
-} from '../data/fields';
+import { ListPicker, ListPickerOption } from '../components/list_picker';
+import { FieldID, SingleSelectFieldKindValue } from '../data/fields';
 import { RecordID } from '../data/records';
 import { useUpdateRecordFieldValue } from '../data/store';
 
-interface FieldMultiSelectKindInputProps<T> {
+interface FieldSingleSelectKindValueEditProps<
+  T extends SingleSelectFieldKindValue
+> {
   recordID: RecordID;
   fieldID: FieldID;
-  value: T[];
+  value: T;
   renderLabel: (value: NonNullable<T>) => JSX.Element;
   options: ListPickerOption<NonNullable<T>>[];
   onDone: () => void;
 }
 
-export function FieldMultiSelectKindInput<
-  T extends CollaboratorID | RecordID | SelectOptionID
->(props: FieldMultiSelectKindInputProps<T>): JSX.Element {
+export function FieldSingleSelectKindValueEdit<
+  T extends SingleSelectFieldKindValue
+>(props: FieldSingleSelectKindValueEditProps<T>): JSX.Element {
   const { onDone, value, options, renderLabel, recordID, fieldID } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<MultiSelectFieldKindValue>();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<SingleSelectFieldKindValue>();
 
   const handleChange = useCallback(
-    (nextValue: T[]) => {
-      updateRecordFieldValue(
-        recordID,
-        fieldID,
-        nextValue as MultiSelectFieldKindValue,
-      );
+    (nextValue: SingleSelectFieldKindValue) => {
+      updateRecordFieldValue(recordID, fieldID, nextValue);
+      onDone();
     },
-    [updateRecordFieldValue, recordID, fieldID],
+    [updateRecordFieldValue, recordID, fieldID, onDone],
   );
 
   const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, []);
+    updateRecordFieldValue(recordID, fieldID, null);
     onDone();
   }, [updateRecordFieldValue, recordID, fieldID, onDone]);
 
   return (
     <View>
-      <MultiListPicker<T>
+      <ListPicker<T>
         value={value}
         options={options}
         renderLabel={renderLabel}
@@ -53,7 +47,7 @@ export function FieldMultiSelectKindInput<
         onRequestClose={onDone}
       />
       <View style={styles.actionRow}>
-        <FlatButton onPress={handleClear} title="Clear all" />
+        <FlatButton onPress={handleClear} title="Clear" />
         <FlatButton onPress={onDone} color="primary" title="Done" />
       </View>
     </View>

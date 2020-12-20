@@ -7,29 +7,29 @@ import {
 } from 'react-native';
 import { toNumber } from '../../lib/number_utils';
 import { tokens } from '../components/tokens';
-import { FieldID, NumberFieldKindValue } from '../data/fields';
+import { NumberFieldKind, NumberFieldKindValue } from '../data/fields';
 import { RecordID } from '../data/records';
 import { useUpdateRecordFieldValue } from '../data/store';
 
-interface FieldNumberKindInputProps<T extends NumberFieldKindValue> {
+interface FieldNumberKindValueEditProps<T extends NumberFieldKindValue> {
   autoFocus: boolean;
   recordID: RecordID;
-  fieldID: FieldID;
+  field: NumberFieldKind;
   value: T;
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
 }
 
-export function FieldNumberKindInput<T extends NumberFieldKindValue>(
-  props: FieldNumberKindInputProps<T>,
+export function FieldNumberKindValueEdit<T extends NumberFieldKindValue>(
+  props: FieldNumberKindValueEditProps<T>,
 ): JSX.Element {
-  const { recordID, fieldID, value, onKeyPress } = props;
+  const { recordID, field, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<NumberFieldKindValue>();
 
   const handleChange = useCallback(
     (nextValue: string) => {
-      updateRecordFieldValue(recordID, fieldID, toNumber(nextValue));
+      updateRecordFieldValue(recordID, field.id, toNumber(nextValue));
     },
-    [updateRecordFieldValue, recordID, fieldID],
+    [updateRecordFieldValue, recordID, field],
   );
 
   return (

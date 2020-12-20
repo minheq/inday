@@ -19,16 +19,16 @@ import {
   FieldValue,
 } from '../data/fields';
 import { Record } from '../data/records';
-import { FieldTextKindInput } from './field_text_kind_input';
-import { FieldNumberKindInput } from './field_number_kind_input';
-import { FieldBooleanKindInput } from './field_boolean_kind_input';
-import { FieldMultiCollaboratorInput } from './field_multi_collaborator_input';
-import { FieldMultiOptionInput } from './field_multi_option_input';
-import { FieldMultiRecordLinkInput } from './field_multi_record_link_input';
-import { FieldSingleCollaboratorInput } from './field_single_collaborator_input';
-import { FieldSingleOptionInput } from './field_single_option_input';
-import { FieldSingleRecordLinkInput } from './field_single_record_link_input';
-import { FieldDateInput } from './field_date_input';
+import { FieldTextKindValueEdit } from './field_text_kind_value_edit';
+import { FieldNumberKindValueEdit } from './field_number_kind_value_edit';
+import { FieldCheckboxValueEdit } from './field_checkbox_value_edit';
+import { FieldMultiCollaboratorValueEdit } from './field_multi_collaborator_value_edit';
+import { FieldMultiOptionValueEdit } from './field_multi_option_value_edit';
+import { FieldMultiRecordLinkValueEdit } from './field_multi_record_link_value_edit';
+import { FieldSingleCollaboratorValueEdit } from './field_single_collaborator_value_edit';
+import { FieldSingleOptionValueEdit } from './field_single_option_value_edit';
+import { FieldSingleRecordLinkValueEdit } from './field_single_record_link_value_edit';
+import { FieldDateValueEdit } from './field_date_value_edit';
 import { PopoverButton } from '../components/popover_button';
 import { PopoverCallback } from '../components/popover';
 import { CollaboratorBadge } from './collaborator_badge';
@@ -39,14 +39,14 @@ import { getSystemLocale } from '../lib/locale';
 import { tokens } from '../components/tokens';
 import { useTheme } from '../components/theme';
 
-interface RecordFieldValueInputProps {
+interface RecordFieldValueEditProps {
   record: Record;
   field: Field;
   value: FieldValue;
 }
 
-export function RecordFieldValueInput(
-  props: RecordFieldValueInputProps,
+export function RecordFieldValueEdit(
+  props: RecordFieldValueEditProps,
 ): JSX.Element {
   const { record, field, value } = props;
 
@@ -59,9 +59,10 @@ export function RecordFieldValueInput(
       assertTextFieldKindValue(value);
       return (
         <FieldWrapper field={field}>
-          <FieldTextKindInput
+          <FieldTextKindValueEdit
+            autoFocus
             recordID={record.id}
-            fieldID={field.id}
+            field={field}
             value={value}
           />
         </FieldWrapper>
@@ -71,9 +72,10 @@ export function RecordFieldValueInput(
       assertNumberFieldKindValue(value);
       return (
         <FieldWrapper field={field}>
-          <FieldNumberKindInput
+          <FieldNumberKindValueEdit
+            autoFocus
             recordID={record.id}
-            fieldID={field.id}
+            field={field}
             value={value}
           />
         </FieldWrapper>
@@ -85,8 +87,8 @@ export function RecordFieldValueInput(
           <PopoverWrapper
             contentHeight={400}
             content={({ onRequestClose }) => (
-              <FieldMultiCollaboratorInput
-                record={record}
+              <FieldMultiCollaboratorValueEdit
+                recordID={record.id}
                 field={field}
                 value={value}
                 onDone={onRequestClose}
@@ -109,8 +111,8 @@ export function RecordFieldValueInput(
           <PopoverWrapper
             contentHeight={400}
             content={({ onRequestClose }) => (
-              <FieldMultiOptionInput
-                record={record}
+              <FieldMultiOptionValueEdit
+                recordID={record.id}
                 field={field}
                 value={value}
                 onDone={onRequestClose}
@@ -140,8 +142,8 @@ export function RecordFieldValueInput(
           <PopoverWrapper
             contentHeight={400}
             content={({ onRequestClose }) => (
-              <FieldMultiRecordLinkInput
-                record={record}
+              <FieldMultiRecordLinkValueEdit
+                recordID={record.id}
                 field={field}
                 value={value}
                 onDone={onRequestClose}
@@ -161,8 +163,8 @@ export function RecordFieldValueInput(
           <PopoverWrapper
             contentHeight={400}
             content={({ onRequestClose }) => (
-              <FieldSingleCollaboratorInput
-                record={record}
+              <FieldSingleCollaboratorValueEdit
+                recordID={record.id}
                 field={field}
                 value={value}
                 onDone={onRequestClose}
@@ -186,8 +188,8 @@ export function RecordFieldValueInput(
           <PopoverWrapper
             contentHeight={400}
             content={({ onRequestClose }) => (
-              <FieldSingleOptionInput
-                record={record}
+              <FieldSingleOptionValueEdit
+                recordID={record.id}
                 field={field}
                 value={value}
                 onDone={onRequestClose}
@@ -206,8 +208,8 @@ export function RecordFieldValueInput(
           <PopoverWrapper
             contentHeight={400}
             content={({ onRequestClose }) => (
-              <FieldSingleRecordLinkInput
-                record={record}
+              <FieldSingleRecordLinkValueEdit
+                recordID={record.id}
                 field={field}
                 value={value}
                 onDone={onRequestClose}
@@ -222,9 +224,9 @@ export function RecordFieldValueInput(
       assertBooleanFieldKindValue(value);
       return (
         <FieldWrapper field={field}>
-          <FieldBooleanKindInput
+          <FieldCheckboxValueEdit
             recordID={record.id}
-            fieldID={field.id}
+            field={field}
             value={value}
           />
         </FieldWrapper>
@@ -236,9 +238,9 @@ export function RecordFieldValueInput(
           <PopoverWrapper
             contentHeight={400}
             content={({ onRequestClose }) => (
-              <FieldDateInput
+              <FieldDateValueEdit
                 recordID={record.id}
-                fieldID={field.id}
+                field={field}
                 value={value}
                 onDone={onRequestClose}
               />

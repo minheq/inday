@@ -3,37 +3,33 @@ import React from 'react';
 import {
   SelectOptionID,
   MultiOptionFieldValue,
-  FieldID,
-  assertMultiOptionField,
+  MultiOptionField,
 } from '../data/fields';
 import { RecordID } from '../data/records';
-import { useGetField } from '../data/store';
-import { FieldMultiSelectKindInput } from './field_multi_select_kind_input';
+import { FieldMultiSelectKindValueEdit } from './field_multi_select_kind_value_edit';
 import {
   useGetOptionOptions,
   useRenderOption,
-} from './field_single_option_input';
+} from './field_single_option_value_edit';
 
-interface FieldMultiOptionInputProps {
+interface FieldMultiOptionValueEditProps {
   recordID: RecordID;
-  fieldID: FieldID;
+  field: MultiOptionField;
   value: MultiOptionFieldValue;
   onDone: () => void;
 }
 
-export function FieldMultiOptionInput(
-  props: FieldMultiOptionInputProps,
+export function FieldMultiOptionValueEdit(
+  props: FieldMultiOptionValueEditProps,
 ): JSX.Element {
-  const { recordID, fieldID, value, onDone } = props;
-  const field = useGetField(fieldID);
-  assertMultiOptionField(field);
+  const { recordID, field, value, onDone } = props;
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
   return (
-    <FieldMultiSelectKindInput<SelectOptionID>
+    <FieldMultiSelectKindValueEdit<SelectOptionID>
       recordID={recordID}
-      fieldID={fieldID}
+      fieldID={field.id}
       renderLabel={renderOption}
       options={options}
       value={value}

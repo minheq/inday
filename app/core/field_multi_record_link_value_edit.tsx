@@ -1,39 +1,37 @@
 import React from 'react';
 
 import {
-  assertMultiRecordLinkField,
-  FieldID,
+  MultiRecordLinkField,
   MultiRecordLinkFieldValue,
 } from '../data/fields';
 import { RecordID } from '../data/records';
-import { FieldMultiSelectKindInput } from './field_multi_select_kind_input';
-import { useGetCollectionRecords, useGetField } from '../data/store';
+import { FieldMultiSelectKindValueEdit } from './field_multi_select_kind_value_edit';
+import { useGetCollectionRecords } from '../data/store';
 import {
   useRecordLinkOptions,
   useRenderRecordLink,
-} from './field_single_record_link_input';
+} from './field_single_record_link_value_edit';
 
-interface FieldMultiRecordLinkInputProps {
+interface FieldMultiRecordLinkValueEditProps {
   recordID: RecordID;
-  fieldID: FieldID;
+  field: MultiRecordLinkField;
   value: MultiRecordLinkFieldValue;
   onDone: () => void;
 }
 
-export function FieldMultiRecordLinkInput(
-  props: FieldMultiRecordLinkInputProps,
+export function FieldMultiRecordLinkValueEdit(
+  props: FieldMultiRecordLinkValueEditProps,
 ): JSX.Element {
-  const { recordID, fieldID, value, onDone } = props;
+  const { recordID, field, value, onDone } = props;
   const renderRecordLink = useRenderRecordLink();
-  const field = useGetField(fieldID);
-  assertMultiRecordLinkField(field);
+
   const records = useGetCollectionRecords(field.recordsFromCollectionID);
   const options = useRecordLinkOptions(records);
 
   return (
-    <FieldMultiSelectKindInput<RecordID>
+    <FieldMultiSelectKindValueEdit<RecordID>
       recordID={recordID}
-      fieldID={fieldID}
+      fieldID={field.id}
       renderLabel={renderRecordLink}
       options={options}
       value={value}

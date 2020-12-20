@@ -6,20 +6,24 @@ import {
   TextInput,
 } from 'react-native';
 import { tokens } from '../components/tokens';
-import { FieldID, TextFieldKindValue } from '../data/fields';
+import {
+  FieldID,
+  MultiLineTextFieldValue,
+  TextFieldKindValue,
+} from '../data/fields';
 import { RecordID } from '../data/records';
 import { useUpdateRecordFieldValue } from '../data/store';
 
-interface FieldTextKindInputProps<T extends TextFieldKindValue> {
+interface FieldMultiLineTextValueEditProps {
   autoFocus: boolean;
   recordID: RecordID;
   fieldID: FieldID;
-  value: T;
+  value: MultiLineTextFieldValue;
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
 }
 
-export function FieldTextKindInput<T extends TextFieldKindValue>(
-  props: FieldTextKindInputProps<T>,
+export function FieldMultiLineTextValueEdit(
+  props: FieldMultiLineTextValueEditProps,
 ): JSX.Element {
   const { autoFocus, recordID, fieldID, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
@@ -33,18 +37,20 @@ export function FieldTextKindInput<T extends TextFieldKindValue>(
 
   return (
     <TextInput
+      multiline
       autoFocus={autoFocus}
       onKeyPress={onKeyPress}
       onChangeText={handleChange}
       value={value}
-      style={styles.textCellInput}
+      style={styles.multilineTextCellInput}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  textCellInput: {
-    height: 32,
+  multilineTextCellInput: {
+    paddingTop: 3 + 1,
+    minHeight: 128,
     borderRadius: tokens.border.radius,
     ...tokens.text.size.md,
   },

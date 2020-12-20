@@ -3,32 +3,34 @@ import { StyleSheet, View } from 'react-native';
 import { formatISODate, parseISODate } from '../../lib/date_utils';
 import { DatePicker } from '../components/date_picker';
 import { FlatButton } from '../components/flat_button';
-import { DateFieldValue, FieldID } from '../data/fields';
+import { DateField, DateFieldValue } from '../data/fields';
 import { RecordID } from '../data/records';
 import { useUpdateRecordFieldValue } from '../data/store';
 
-interface FieldDateInputProps {
+interface FieldDateValueEditProps {
   recordID: RecordID;
-  fieldID: FieldID;
+  field: DateField;
   value: DateFieldValue;
   onDone: () => void;
 }
 
-export function FieldDateInput(props: FieldDateInputProps): JSX.Element {
-  const { value, recordID, fieldID, onDone } = props;
+export function FieldDateValueEdit(
+  props: FieldDateValueEditProps,
+): JSX.Element {
+  const { value, recordID, field, onDone } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<DateFieldValue>();
 
   const handleChangeDate = useCallback(
     (date: Date) => {
-      updateRecordFieldValue(recordID, fieldID, formatISODate(date));
+      updateRecordFieldValue(recordID, field.id, formatISODate(date));
       onDone();
     },
-    [updateRecordFieldValue, onDone, recordID, fieldID],
+    [updateRecordFieldValue, onDone, recordID, field],
   );
 
   const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, null);
-  }, [updateRecordFieldValue, recordID, fieldID]);
+    updateRecordFieldValue(recordID, field.id, null);
+  }, [updateRecordFieldValue, recordID, field]);
 
   return (
     <View>

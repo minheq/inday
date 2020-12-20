@@ -1,32 +1,35 @@
 import React, { useCallback, useMemo } from 'react';
 import { ListPickerOption } from '../components/list_picker';
 
-import { FieldID, SingleCollaboratorFieldValue } from '../data/fields';
+import {
+  SingleCollaboratorField,
+  SingleCollaboratorFieldValue,
+} from '../data/fields';
 import { RecordID } from '../data/records';
-import { FieldSingleSelectKindInput } from './field_single_select_kind_input';
+import { FieldSingleSelectKindValueEdit } from './field_single_select_kind_value_edit';
 import { useGetCollaborators } from '../data/store';
 import { CollaboratorBadge } from './collaborator_badge';
 import { Collaborator, CollaboratorID } from '../data/collaborators';
 
-interface FieldSingleCollaboratorInputProps {
+interface FieldSingleCollaboratorValueEditProps {
   recordID: RecordID;
-  fieldID: FieldID;
+  field: SingleCollaboratorField;
   value: SingleCollaboratorFieldValue;
   onDone: () => void;
 }
 
-export function FieldSingleCollaboratorInput(
-  props: FieldSingleCollaboratorInputProps,
+export function FieldSingleCollaboratorValueEdit(
+  props: FieldSingleCollaboratorValueEditProps,
 ): JSX.Element {
-  const { recordID, fieldID, value, onDone } = props;
+  const { recordID, field, value, onDone } = props;
   const collaborators = useGetCollaborators();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
 
   return (
-    <FieldSingleSelectKindInput<SingleCollaboratorFieldValue>
+    <FieldSingleSelectKindValueEdit<SingleCollaboratorFieldValue>
       recordID={recordID}
-      fieldID={fieldID}
+      fieldID={field.id}
       renderLabel={renderCollaborator}
       options={options}
       value={value}

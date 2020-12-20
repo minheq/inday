@@ -37,7 +37,7 @@ import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
 import { CloseButton } from '../components/close_button';
 import { Spacer } from '../components/spacer';
 import { Column } from '../components/column';
-import { RecordFieldValueInput } from '../core/record_field_value_input';
+import { RecordFieldValueEdit } from '../core/record_field_value_input';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -502,7 +502,7 @@ interface FieldInputRendererProps {
 function FieldInputRenderer(props: FieldInputRendererProps) {
   const { record, field, value } = props;
 
-  return <RecordFieldValueInput record={record} field={field} value={value} />;
+  return <RecordFieldValueEdit record={record} field={field} value={value} />;
 }
 
 const styles = StyleSheet.create({
