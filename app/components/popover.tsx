@@ -14,11 +14,11 @@ export interface PopoverAnchor {
   x: number;
 }
 export interface PopoverCallback {
-  onRequestClose?: () => void;
+  onRequestClose: () => void;
 }
 interface PopoverProps {
   visible: boolean;
-  onRequestClose?: () => void;
+  onRequestClose: () => void;
   onShow?: () => void;
   children: React.ReactNode | ((callback: PopoverCallback) => React.ReactNode);
   anchor: PopoverAnchor;

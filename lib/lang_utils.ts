@@ -85,7 +85,11 @@ export function isEmpty(data: unknown[] | Record<string, unknown>): boolean {
   return Object.keys(data).length === 0;
 }
 
-export function assertUnreached(p: never): never;
-export function assertUnreached(p: unknown): never {
-  throw new Error('Unknown value ' + JSON.stringify(p));
+export function assertUnreached(p: never, message?: string): never;
+export function assertUnreached(p: unknown, message?: string): never {
+  if (message !== undefined) {
+    throw new Error(message);
+  } else {
+    throw new Error('Unknown value' + JSON.stringify(p));
+  }
 }

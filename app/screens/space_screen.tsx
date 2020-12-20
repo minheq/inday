@@ -37,6 +37,7 @@ import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
 import { CloseButton } from '../components/close_button';
 import { Spacer } from '../components/spacer';
 import { Column } from '../components/column';
+import { RecordFieldValueInput } from '../core/record_field_value_input';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -99,8 +100,8 @@ const openRecordState = atom<OpenRecordState>({
 
 function SpaceScreenHeader(): JSX.Element {
   const navigation = useNavigation();
-  const context = useContext(SpaceScreenContext);
-  const space = useGetSpace(context.spaceID);
+  const { spaceID } = useContext(SpaceScreenContext);
+  const space = useGetSpace(spaceID);
 
   const handlePressBack = useCallback(() => {
     navigation.back();
@@ -137,8 +138,8 @@ function TopMenu() {
 }
 
 function ViewSettings() {
-  const context = useContext(SpaceScreenContext);
-  const view = useGetView(context.viewID);
+  const { viewID } = useContext(SpaceScreenContext);
+  const view = useGetView(viewID);
   const [mode, setMode] = useRecoilState(modeState);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
   const [, setOpenRecord] = useRecoilState(openRecordState);
@@ -256,9 +257,9 @@ function ViewMenuButton(props: ViewMenuButtonProps) {
 }
 
 function CollectionsList() {
-  const context = useContext(SpaceScreenContext);
-  const space = useGetSpace(context.spaceID);
-  const view = useGetView(context.viewID);
+  const { spaceID, viewID } = useContext(SpaceScreenContext);
+  const space = useGetSpace(spaceID);
+  const view = useGetView(viewID);
   const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
@@ -406,7 +407,7 @@ function MainContent() {
           <Container flex={1} width={360} color="content" borderLeftWidth={1}>
             <AutoSizer>
               {({ height }) => (
-                <Container height={height}>
+                <Container width={360} height={height}>
                   {sidePanel === 'organize' && (
                     <OrganizeMenu
                       spaceID={spaceID}
@@ -471,7 +472,12 @@ function RecordDetails(props: RecordDetailsProps) {
       <Spacer size={24} />
       <Column spacing={16}>
         {recordFieldsEntries.map(([field, value]) => (
-          <FieldInputRenderer key={field.id} field={field} value={value} />
+          <FieldInputRenderer
+            record={record}
+            key={field.id}
+            field={field}
+            value={value}
+          />
         ))}
       </Column>
     </Container>
@@ -479,12 +485,15 @@ function RecordDetails(props: RecordDetailsProps) {
 }
 
 interface FieldInputRendererProps {
+  record: Record;
   field: Field;
   value: FieldValue;
 }
 
 function FieldInputRenderer(props: FieldInputRendererProps) {
-  return <Text>TODO</Text>;
+  const { record, field, value } = props;
+
+  return <RecordFieldValueInput record={record} field={field} value={value} />;
 }
 
 const styles = StyleSheet.create({

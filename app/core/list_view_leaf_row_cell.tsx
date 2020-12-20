@@ -9,7 +9,6 @@ import React, {
 import {
   View,
   Pressable,
-  Platform,
   TextInput,
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
@@ -890,6 +889,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
     <Row spacing={4}>
       {value.map((_value) => {
         const selected = field.options.find((o) => o.id === _value);
+
         if (selected === undefined) {
           throw new Error(
             `Expected ${_value} to be within field options ${JSON.stringify(
@@ -1298,7 +1298,7 @@ function TextFieldKindCellEditing<T extends TextFieldKindValue>(
 ) {
   const { value } = props;
   const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue();
+  const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
   const handleKeyPress = useCellKeyPressHandler();
   const handleChangeText = useCallback(
     (nextValue: string) => {
@@ -1344,7 +1344,7 @@ function NumberFieldKindCellEditing<T extends NumberFieldKindValue>(
     <TextInput
       autoFocus
       style={styles.numberCellInput}
-      value={String(value)}
+      value={value ? value.toString() : ''}
       onKeyPress={handleKeyPress}
       onChangeText={handleChangeText}
     />

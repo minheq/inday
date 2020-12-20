@@ -118,7 +118,7 @@ async function toImage(file: File): Promise<Image> {
 //     body: data
 // }).then((response) => response.json())
 //     .then((responseJson) => {
-//         ........................
+//
 //     });
 
 // https://stackoverflow.com/questions/37457128/react-open-file-browser-on-click-a-div
