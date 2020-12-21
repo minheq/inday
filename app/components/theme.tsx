@@ -85,9 +85,9 @@ const darkTheme: Theme = {
     primaryDefault: palette.blue[50],
     primaryHovered: palette.blue[100],
     primaryPressed: palette.blue[200],
-    flatDefault: palette.gray[700],
-    flatHovered: palette.gray[800],
-    flatPressed: palette.gray[900],
+    flatDefault: palette.gray[900],
+    flatHovered: palette.gray[700],
+    flatPressed: palette.gray[600],
   },
   background: {
     content: palette.gray[900],
