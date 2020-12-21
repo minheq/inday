@@ -91,9 +91,9 @@ const darkTheme: Theme = {
   },
   background: {
     content: palette.gray[900],
-    tint: palette.gray[700],
+    tint: palette.gray[600],
     primary: palette.blue[500],
-    lightPrimary: palette.blue[50],
+    lightPrimary: palette.blue[800],
   },
   text: {
     default: palette.gray[100],
