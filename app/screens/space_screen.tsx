@@ -264,6 +264,7 @@ function MainContent() {
   const space = useGetSpace(spaceID);
   const view = useGetView(viewID);
   const mode = useRecoilValue(modeState);
+  const themeStyles = useThemeStyles();
   const [selectedRecords, setSelectedRecords] = useRecoilState(
     selectedRecordsState,
   );
@@ -322,7 +323,7 @@ function MainContent() {
   return (
     <View style={styles.mainContentRoot}>
       <Slide width={VIEWS_MENU_WIDTH} open={sidePanel === 'views'}>
-        <View style={styles.viewsMenuRoot}>
+        <View style={styles.leftPanel}>
           {sidePanel === 'views' && (
             <ViewsMenu spaceID={spaceID} viewID={viewID} />
           )}
@@ -330,7 +331,13 @@ function MainContent() {
       </Slide>
       <View style={styles.viewContainer}>{renderView()}</View>
       <Slide width={ORGANIZE_VIEW_WIDTH} open={sidePanel === 'organize'}>
-        <View style={styles.organizeViewContainer}>
+        <View
+          style={[
+            styles.rightPanel,
+            themeStyles.background.content,
+            themeStyles.border.default,
+          ]}
+        >
           <AutoSizer>
             {({ height }) => (
               <View style={{ width: ORGANIZE_VIEW_WIDTH, height }}>
@@ -347,7 +354,13 @@ function MainContent() {
         </View>
       </Slide>
       <Slide width={RECORD_VIEW_WIDTH} open={openRecord !== null}>
-        <View style={styles.recordViewContainer}>
+        <View
+          style={[
+            styles.rightPanel,
+            themeStyles.background.content,
+            themeStyles.border.default,
+          ]}
+        >
           <AutoSizer>
             {({ height }) => (
               <View style={{ width: RECORD_VIEW_WIDTH, height }}>
@@ -440,9 +453,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
-  viewsMenuRoot: {
+  leftPanel: {
     flex: 1,
-    width: VIEWS_MENU_WIDTH,
     height: '100%',
     borderRightWidth: 1,
   },
@@ -453,17 +465,10 @@ const styles = StyleSheet.create({
   recordDetailsContainer: {
     padding: 8,
   },
-  organizeViewContainer: {
+  rightPanel: {
     flex: 1,
-    width: ORGANIZE_VIEW_WIDTH,
     height: '100%',
-    borderRightWidth: 1,
-  },
-  recordViewContainer: {
-    flex: 1,
-    width: RECORD_VIEW_WIDTH,
-    height: '100%',
-    borderRightWidth: 1,
+    borderLeftWidth: 1,
   },
   viewMenuButton: {
     borderRadius: tokens.border.radius,
