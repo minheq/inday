@@ -327,10 +327,9 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       ]}
       onPress={onPress}
     >
-      <SelectCheckbox
-        open={mode === 'select' && primary === true}
-        selected={selected}
-      />
+      {primary === true && (
+        <SelectCheckbox open={mode === 'select'} selected={selected} />
+      )}
       <ListViewCell field={field} value={value} />
       {mode === 'edit' && primary === true && cell.state !== 'editing' && (
         <ContextMenuButton options={options} style={styles.rowMoreButton}>
@@ -357,7 +356,7 @@ const SelectCheckbox = memo(function SelectCheckbox(
       <View
         style={[
           styles.selectCheckbox,
-          selected && themeStyles.border.default,
+          themeStyles.border.default,
           selected && themeStyles.background.primary,
           selected && themeStyles.border.primary,
         ]}
