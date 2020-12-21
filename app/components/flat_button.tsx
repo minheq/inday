@@ -31,9 +31,9 @@ export function FlatButton(props: FlatButtonProps): JSX.Element {
         {icon && (
           <Fragment>
             <Icon color={color} name={icon} />
-            <Spacer size={4} />
           </Fragment>
         )}
+        {icon && title && <Spacer size={4} />}
         {title && (
           <Text weight={weight} color={color}>
             {title}
