@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { toNumber } from '../../lib/number_utils';
+import { useThemeStyles } from '../components/theme';
 import { tokens } from '../components/tokens';
 import { NumberFieldKind, NumberFieldKindValue } from '../data/fields';
 import { RecordID } from '../data/records';
@@ -24,6 +25,7 @@ export function FieldNumberKindValueEdit<T extends NumberFieldKindValue>(
 ): JSX.Element {
   const { recordID, field, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<NumberFieldKindValue>();
+  const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
     (nextValue: string) => {
@@ -37,7 +39,7 @@ export function FieldNumberKindValueEdit<T extends NumberFieldKindValue>(
       onKeyPress={onKeyPress}
       onChangeText={handleChange}
       value={value ? value.toString() : ''}
-      style={styles.numberCellInput}
+      style={[styles.numberCellInput, themeStyles.text.default]}
     />
   );
 }

@@ -5,6 +5,7 @@ import {
   TextInputKeyPressEventData,
   TextInput,
 } from 'react-native';
+import { useThemeStyles } from '../components/theme';
 import { tokens } from '../components/tokens';
 import { TextFieldKind, TextFieldKindValue } from '../data/fields';
 import { RecordID } from '../data/records';
@@ -23,6 +24,7 @@ export function FieldTextKindValueEdit<T extends TextFieldKindValue>(
 ): JSX.Element {
   const { autoFocus, recordID, field, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
+  const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
     (nextValue: string) => {
@@ -37,7 +39,7 @@ export function FieldTextKindValueEdit<T extends TextFieldKindValue>(
       onKeyPress={onKeyPress}
       onChangeText={handleChange}
       value={value}
-      style={styles.textCellInput}
+      style={[styles.textCellInput, themeStyles.text.default]}
     />
   );
 }
