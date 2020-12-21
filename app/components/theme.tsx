@@ -48,9 +48,9 @@ export interface Theme {
 const lightTheme: Theme = {
   colorScheme: 'light',
   button: {
-    primaryDefault: palette.lightBlue[700],
-    primaryHovered: palette.lightBlue[800],
-    primaryPressed: palette.lightBlue[900],
+    primaryDefault: palette.blue[700],
+    primaryHovered: palette.blue[800],
+    primaryPressed: palette.blue[900],
     flatDefault: palette.base.white,
     flatHovered: palette.gray[50],
     flatPressed: palette.gray[100],
@@ -58,21 +58,21 @@ const lightTheme: Theme = {
   background: {
     content: palette.base.white,
     tint: palette.gray[200],
-    primary: palette.lightBlue[500],
-    lightPrimary: palette.lightBlue[50],
+    primary: palette.blue[500],
+    lightPrimary: palette.blue[50],
   },
   text: {
     default: palette.gray[900],
     contrast: palette.gray[50],
     success: palette.emerald[900],
-    primary: palette.lightBlue[900],
+    primary: palette.blue[800],
     muted: palette.gray[700],
     error: palette.red[900],
   },
   border: {
     default: palette.gray[300],
-    primary: palette.lightBlue[700],
-    focused: palette.lightBlue[800],
+    primary: palette.blue[700],
+    focused: palette.blue[800],
   },
   elevation: {
     level1: 'rgba(63, 63, 70, 0.08)',
@@ -82,9 +82,9 @@ const lightTheme: Theme = {
 const darkTheme: Theme = {
   colorScheme: 'dark',
   button: {
-    primaryDefault: palette.lightBlue[50],
-    primaryHovered: palette.lightBlue[100],
-    primaryPressed: palette.lightBlue[200],
+    primaryDefault: palette.blue[50],
+    primaryHovered: palette.blue[100],
+    primaryPressed: palette.blue[200],
     flatDefault: palette.gray[700],
     flatHovered: palette.gray[800],
     flatPressed: palette.gray[900],
@@ -92,21 +92,21 @@ const darkTheme: Theme = {
   background: {
     content: palette.gray[900],
     tint: palette.gray[700],
-    primary: palette.lightBlue[500],
-    lightPrimary: palette.lightBlue[50],
+    primary: palette.blue[500],
+    lightPrimary: palette.blue[50],
   },
   text: {
     default: palette.gray[100],
     contrast: palette.gray[800],
     success: palette.emerald[400],
-    primary: palette.lightBlue[400],
+    primary: palette.blue[400],
     muted: palette.gray[400],
     error: palette.red[400],
   },
   border: {
     default: palette.gray[300],
-    primary: palette.lightBlue[800],
-    focused: palette.lightBlue[600],
+    primary: palette.blue[800],
+    focused: palette.blue[600],
   },
   elevation: {
     level1: 'rgba(255, 255, 255, 0.08)',

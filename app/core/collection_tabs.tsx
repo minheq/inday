@@ -22,6 +22,7 @@ export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
   const space = useGetSpace(spaceID);
   const view = useGetView(viewID);
   const collections = useGetSpaceCollections(space.id);
+  const themeStyles = useThemeStyles();
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   if (activeCollection === undefined) {
@@ -31,7 +32,7 @@ export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
   }
 
   return (
-    <View style={styles.collectionTabsRoot}>
+    <View style={[styles.collectionTabsRoot, themeStyles.border.default]}>
       <Row>
         <Button style={[styles.collectionItem, styles.addCollectionItem]}>
           <Icon name="Plus" color="muted" />

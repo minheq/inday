@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as RNText, TextStyle, StyleSheet } from 'react-native';
-import { useTheme } from './theme';
+import { useThemeStyles } from './theme';
 import { tokens } from './tokens';
 
 export interface TextProps {
@@ -72,7 +72,7 @@ export function Text(props: TextProps): JSX.Element {
     transform = 'none',
     weight = 'normal',
   } = props;
-  const theme = useTheme();
+  const themeStyles = useThemeStyles();
 
   return (
     <RNText
@@ -80,9 +80,7 @@ export function Text(props: TextProps): JSX.Element {
       style={[
         styles[align],
         styles[size],
-        {
-          color: theme.text[color],
-        },
+        themeStyles.text[color],
         {
           ...(customColor !== undefined && {
             color: customColor,
