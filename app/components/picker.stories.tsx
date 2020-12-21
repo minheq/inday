@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 
 import { Picker } from './picker';
-import { Container } from './container';
 import { Spacer } from './spacer';
 
 function Basic(): JSX.Element {
   const [value, setValue] = useState(1);
   return (
-    <Container padding={16}>
+    <View>
       <Picker
         value={value}
         onChange={setValue}
@@ -17,14 +17,14 @@ function Basic(): JSX.Element {
           { value: 3, label: 'Option C' },
         ]}
       />
-    </Container>
+    </View>
   );
 }
 
 function WithSearch(): JSX.Element {
   const [value, setValue] = useState(1);
   return (
-    <Container padding={16}>
+    <View>
       <Picker
         searchable
         value={value}
@@ -35,16 +35,16 @@ function WithSearch(): JSX.Element {
           { value: 3, label: 'Option C' },
         ]}
       />
-    </Container>
+    </View>
   );
 }
 
 export function PickerStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
       <Spacer size={40} />
       <WithSearch />
-    </Container>
+    </View>
   );
 }

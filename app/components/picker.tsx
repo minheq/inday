@@ -21,6 +21,7 @@ import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
+import { useTheme } from './theme';
 
 export interface PickerProps<T> {
   value?: T;
@@ -49,6 +50,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     onChange,
     searchable = false,
   } = props;
+  const theme = useTheme();
   const buttonRef = useRef<View>(null);
   const popoverContentRef = useRef<View>(null);
   const borderColor = useRef(new Animated.Value(0)).current;
@@ -185,7 +187,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
       <Pressable
         ref={buttonRef}
         onPress={handleOpenPicker}
-        style={styles.button}
+        style={[styles.button, { borderColor: theme.border.default }]}
       >
         <Text>{selected ? selected.label : placeholder}</Text>
         <View style={styles.caretWrapper}>
@@ -206,6 +208,8 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
           style={[
             styles.popover,
             {
+              backgroundColor: theme.background.content,
+              borderColor: theme.border.default,
               width: picker.buttonWidth + 40, // space for check icon
               height,
             },
@@ -240,8 +244,8 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       {
                         backgroundColor:
                           active || hovered
-                            ? tokens.colors.lightBlue[50]
-                            : tokens.colors.base.white,
+                            ? theme.background.lightPrimary
+                            : theme.background.content,
                       },
                     ]}
                   >
@@ -264,7 +268,6 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: tokens.border.radius,
     borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
     flexDirection: 'row',
     height: 40,
     alignItems: 'center',
@@ -272,9 +275,7 @@ const styles = StyleSheet.create({
     paddingRight: 24,
   },
   popover: {
-    backgroundColor: tokens.colors.base.white,
     borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
     borderRadius: tokens.border.radius,
   },
   searchWrapper: {

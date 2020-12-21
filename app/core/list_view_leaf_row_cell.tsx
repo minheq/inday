@@ -89,7 +89,7 @@ import {
 } from '../lib/keyboard';
 import { StatefulLeafRowCell } from '../components/grid_renderer.common';
 import { isNumberString, toNumber } from '../../lib/number_utils';
-import { useTheme } from '../components/theme';
+import { useThemeStyles } from '../components/theme';
 import { Slide } from '../components/slide';
 import { ContextMenuButton } from '../components/context_menu_button';
 import {
@@ -282,7 +282,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
   const { cell, primary, height, field, width, value, mode, onPress } = props;
-  const theme = useTheme();
+  const themeStyles = useThemeStyles();
   const { selected } = useLeafRowContext();
   const options = useLeafRowContextMenuOptions();
 
@@ -313,12 +313,11 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
       style={[
         styles.leafRowCell,
-        mode === 'edit' &&
-          (theme === 'dark'
-            ? styles.cellBackgroundDark
-            : styles.cellBackgroundLight),
+        themeStyles.border.default,
+        mode === 'edit' && themeStyles.background.content,
         primary && styles.primaryCell,
         cell.state !== 'default' && styles.focusedLeafRowCell,
+        cell.state !== 'default' && themeStyles.border.focused,
         cell.state !== 'default' && {
           minHeight: height + FOCUS_BORDER_WIDTH * 2,
           width: width + extraWidth + FOCUS_BORDER_WIDTH * 2,
@@ -351,11 +350,17 @@ const SelectCheckbox = memo(function SelectCheckbox(
   props: SelectCheckboxProps,
 ) {
   const { open, selected } = props;
+  const themeStyles = useThemeStyles();
 
   return (
     <Slide open={open} width={32}>
       <View
-        style={[styles.selectCheckbox, selected && styles.selectedCheckbox]}
+        style={[
+          styles.selectCheckbox,
+          selected && themeStyles.border.default,
+          selected && themeStyles.background.primary,
+          selected && themeStyles.border.primary,
+        ]}
       >
         {selected && <Icon name="Check" color="contrast" />}
       </View>
@@ -1329,7 +1334,6 @@ const styles = StyleSheet.create({
   leafRowCell: {
     height: '100%',
     borderBottomWidth: 1,
-    borderColor: tokens.colors.gray[300],
     paddingVertical: 4,
     paddingHorizontal: 8,
     flexDirection: 'row',
@@ -1349,7 +1353,6 @@ const styles = StyleSheet.create({
     borderTopWidth: FOCUS_BORDER_WIDTH,
     borderLeftWidth: FOCUS_BORDER_WIDTH,
     borderRightWidth: FOCUS_BORDER_WIDTH,
-    borderColor: tokens.colors.lightBlue[700],
   },
   textCellContainer: {
     height: 32,
@@ -1367,13 +1370,8 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  selectedCheckbox: {
-    backgroundColor: tokens.colors.lightBlue[700],
-    borderColor: tokens.colors.lightBlue[700],
   },
   rowMoreButton: {
     borderRadius: 999,
@@ -1381,12 +1379,6 @@ const styles = StyleSheet.create({
   cellWrapper: {
     height: 32,
     flex: 1,
-  },
-  cellBackgroundLight: {
-    backgroundColor: tokens.colors.base.white,
-  },
-  cellBackgroundDark: {
-    backgroundColor: tokens.colors.gray[900],
   },
   primaryCell: {
     borderRightWidth: 2,

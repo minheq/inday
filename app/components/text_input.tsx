@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Button } from './button';
 import { IconName, Icon } from './icon';
+import { useTheme, useThemeStyles } from './theme';
 import { tokens } from './tokens';
 
 export interface TextInputProps {
@@ -41,6 +42,8 @@ export function TextInput(props: TextInputProps): JSX.Element {
     placeholder,
   } = props;
   const ref = useRef<RNTextInput>(null);
+  const theme = useTheme();
+  const themeStyles = useThemeStyles();
 
   const handleClear = useCallback(() => {
     if (ref.current !== null) {
@@ -53,7 +56,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
   }, [onChange]);
 
   return (
-    <Animated.View style={styles.base}>
+    <Animated.View style={[styles.base, themeStyles.background.content]}>
       {icon && (
         <View style={styles.icon}>
           <Icon name={icon} color="muted" />
@@ -68,8 +71,13 @@ export function TextInput(props: TextInputProps): JSX.Element {
         onChangeText={onChange}
         onKeyPress={onKeyPress}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={tokens.colors.gray[700]}
-        style={[styles.input, tokens.text.size.md, !!icon && styles.hasIcon]}
+        placeholderTextColor={theme.text.muted}
+        style={[
+          styles.input,
+          themeStyles.border.default,
+          tokens.text.size.md,
+          !!icon && styles.hasIcon,
+        ]}
       />
       {clearable && value !== undefined && value !== null && value !== '' && (
         <Button
@@ -88,7 +96,6 @@ const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
     borderRadius: tokens.border.radius,
-    backgroundColor: tokens.colors.base.white,
     alignItems: 'center',
   },
   icon: {
@@ -111,7 +118,6 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
     paddingLeft: 8,
     paddingRight: 40,
     borderRadius: tokens.border.radius,

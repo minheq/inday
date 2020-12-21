@@ -70,7 +70,7 @@ import { FieldDateValueEdit } from './field_date_value_edit';
 import { PopoverButton } from '../components/popover_button';
 import { PopoverCallback } from '../components/popover';
 import { tokens } from '../components/tokens';
-import { useTheme } from '../components/theme';
+import { useThemeStyles } from '../components/theme';
 import { FieldSingleLineTextValueView } from './field_single_line_text_value_view';
 import { FieldURLValueView } from './field_url_value_view';
 import { UIKey, WhiteSpaceKey } from '../lib/keyboard';
@@ -89,7 +89,6 @@ import { FieldSingleRecordLinkValueView } from './field_single_record_link_value
 import { FieldDateValueView } from './field_date_value_view';
 
 interface RecordFieldValueEditProps {
-  record: Record;
   field: Field;
   recordID: RecordID;
   value: FieldValue;
@@ -98,31 +97,27 @@ interface RecordFieldValueEditProps {
 export function RecordFieldValueEdit(
   props: RecordFieldValueEditProps,
 ): JSX.Element {
-  const { record, field, value } = props;
+  const { recordID, field, value } = props;
 
   const renderCell = useCallback((): JSX.Element => {
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
-        return (
-          <CheckboxCell recordID={record.id} field={field} value={value} />
-        );
+        return <CheckboxCell recordID={recordID} field={field} value={value} />;
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
-        return (
-          <CurrencyCell recordID={record.id} field={field} value={value} />
-        );
+        return <CurrencyCell recordID={recordID} field={field} value={value} />;
       case FieldType.Date:
         assertDateFieldValue(value);
-        return <DateCell recordID={record.id} field={field} value={value} />;
+        return <DateCell recordID={recordID} field={field} value={value} />;
       case FieldType.Email:
         assertEmailFieldValue(value);
-        return <EmailCell recordID={record.id} field={field} value={value} />;
+        return <EmailCell recordID={recordID} field={field} value={value} />;
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
         return (
           <MultiCollaboratorCell
-            recordID={record.id}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -131,7 +126,7 @@ export function RecordFieldValueEdit(
         assertMultiRecordLinkFieldValue(value);
         return (
           <MultiRecordLinkCell
-            recordID={record.id}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -139,26 +134,26 @@ export function RecordFieldValueEdit(
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return (
-          <MultiLineTextCell recordID={record.id} field={field} value={value} />
+          <MultiLineTextCell recordID={recordID} field={field} value={value} />
         );
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
         return (
-          <MultiOptionCell recordID={record.id} field={field} value={value} />
+          <MultiOptionCell recordID={recordID} field={field} value={value} />
         );
       case FieldType.Number:
         assertNumberFieldValue(value);
-        return <NumberCell recordID={record.id} field={field} value={value} />;
+        return <NumberCell recordID={recordID} field={field} value={value} />;
       case FieldType.PhoneNumber:
         assertPhoneNumberFieldValue(value);
         return (
-          <PhoneNumberCell recordID={record.id} field={field} value={value} />
+          <PhoneNumberCell recordID={recordID} field={field} value={value} />
         );
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
         return (
           <SingleCollaboratorCell
-            recordID={record.id}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -167,7 +162,7 @@ export function RecordFieldValueEdit(
         assertSingleRecordLinkFieldValue(value);
         return (
           <SingleRecordLinkCell
-            recordID={record.id}
+            recordID={recordID}
             field={field}
             value={value}
           />
@@ -175,22 +170,18 @@ export function RecordFieldValueEdit(
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return (
-          <SingleLineTextCell
-            recordID={record.id}
-            field={field}
-            value={value}
-          />
+          <SingleLineTextCell recordID={recordID} field={field} value={value} />
         );
       case FieldType.SingleOption:
         assertSingleOptionFieldValue(value);
         return (
-          <SingleOptionCell recordID={record.id} field={field} value={value} />
+          <SingleOptionCell recordID={recordID} field={field} value={value} />
         );
       case FieldType.URL:
         assertURLFieldValue(value);
-        return <URLCell recordID={record.id} field={field} value={value} />;
+        return <URLCell recordID={recordID} field={field} value={value} />;
     }
-  }, [field, value, record]);
+  }, [field, value, recordID]);
 
   return <FieldWrapper field={field}>{renderCell()}</FieldWrapper>;
 }
@@ -600,20 +591,13 @@ interface PopoverWrapperProps {
 
 function PopoverWrapper(props: PopoverWrapperProps) {
   const { children, content, contentHeight } = props;
-  const theme = useTheme();
+  const themeStyles = useThemeStyles();
 
   return (
     <PopoverButton
       contentHeight={contentHeight}
       content={({ onRequestClose }) => (
-        <View
-          style={[
-            styles.popoverContainer,
-            theme === 'dark'
-              ? styles.popoverContainerDark
-              : styles.popoverContainerLight,
-          ]}
-        >
+        <View style={[styles.popoverContainer, themeStyles.background.content]}>
           {content({ onRequestClose })}
         </View>
       )}
@@ -662,11 +646,5 @@ const styles = StyleSheet.create({
   popoverContainer: {
     padding: 8,
     borderRadius: tokens.border.radius,
-  },
-  popoverContainerLight: {
-    backgroundColor: tokens.colors.base.white,
-  },
-  popoverContainerDark: {
-    backgroundColor: tokens.colors.gray[800],
   },
 });

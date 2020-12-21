@@ -4,7 +4,7 @@ import React from 'react';
 import { Badge } from '../components/badge';
 import { assertPrimaryFieldValue } from '../data/fields';
 import { useTheme } from '../components/theme';
-import { tokens } from '../components/tokens';
+import { palette } from '../components/palette';
 
 interface RecordLinkBadgeProps {
   recordID: RecordID;
@@ -22,7 +22,7 @@ export function RecordLinkBadge(props: RecordLinkBadgeProps): JSX.Element {
   return (
     <Badge
       color={
-        theme === 'dark' ? tokens.colors.purple[900] : tokens.colors.purple[50]
+        theme.colorScheme === 'dark' ? palette.purple[900] : palette.purple[50]
       }
       title={primaryFieldValue}
     />

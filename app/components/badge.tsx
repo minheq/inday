@@ -16,11 +16,7 @@ export function Badge(props: BadgeProps): JSX.Element {
 
   return (
     <View
-      style={[
-        styles.base,
-        theme === 'dark' ? styles.baseDark : styles.baseLight,
-        { backgroundColor: color },
-      ]}
+      style={[styles.base, { backgroundColor: color ?? theme.background.tint }]}
     >
       <Text customColor={textColor} numberOfLines={1}>
         {title}
@@ -37,11 +33,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     maxWidth: '100%',
-  },
-  baseDark: {
-    backgroundColor: tokens.colors.coolGray[50],
-  },
-  baseLight: {
-    backgroundColor: tokens.colors.gray[100],
   },
 });

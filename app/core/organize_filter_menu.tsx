@@ -7,7 +7,7 @@ import React, {
   createContext,
 } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import {
   NumberFieldKindFilterRule,
@@ -19,7 +19,6 @@ import {
   assertNumberFilterConfig,
   assertTextFilterConfig,
 } from '../data/filters';
-import { Container } from '../components/container';
 import { Row } from '../components/row';
 import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
@@ -63,9 +62,9 @@ export function FilterMenu(props: FilterMenuProps) {
 
   return (
     <FilterMenuContext.Provider value={{ viewID, collectionID }}>
-      <Container flex={1}>
+      <View flex={1}>
         <ScrollView>
-          <Container paddingHorizontal={16}>
+          <View paddingHorizontal={16}>
             {filters.map((filter, index) => (
               <Fragment key={filter.id}>
                 <FilterListItem
@@ -76,9 +75,9 @@ export function FilterMenu(props: FilterMenuProps) {
               </Fragment>
             ))}
             <FilterNew />
-          </Container>
+          </View>
         </ScrollView>
-      </Container>
+      </View>
     </FilterMenuContext.Provider>
   );
 }
@@ -174,7 +173,7 @@ function FilterListItem(props: FilterListItemProps) {
   }
 
   return (
-    <Container>
+    <View>
       {prevFilter !== null && (
         <Fragment>
           <Spacer size={16} />
@@ -189,10 +188,10 @@ function FilterListItem(props: FilterListItemProps) {
           <Spacer size={16} />
         </Fragment>
       )}
-      <Container padding={16} borderRadius={tokens.radius} shadow>
+      <View padding={16} borderRadius={tokens.radius} shadow>
         {content}
-      </Container>
-    </Container>
+      </View>
+    </View>
   );
 }
 
@@ -239,7 +238,7 @@ function FilterNew() {
 
   if (open) {
     return (
-      <Container padding={16} borderRadius={tokens.radius} shadow>
+      <View padding={16} borderRadius={tokens.radius} shadow>
         <Text bold>New filter</Text>
         <Spacer size={16} />
         <FilterEdit
@@ -257,7 +256,7 @@ function FilterNew() {
             <Text color="primary">Save</Text>
           </Pressable>
         </Row>
-      </Container>
+      </View>
     );
   }
 
@@ -380,7 +379,7 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
   ];
 
   return (
-    <Container>
+    <View>
       <Picker value={rule} onChange={handleChangeRule} options={options} />
       <Spacer size={4} />
       <TextInput
@@ -388,7 +387,7 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
         value={value}
         onChange={handleChangeValue}
       />
-    </Container>
+    </View>
   );
 }
 
@@ -432,7 +431,7 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
   ];
 
   return (
-    <Container>
+    <View>
       <Picker value={rule} onChange={handleChangeRule} options={options} />
       <Spacer size={4} />
       <TextInput
@@ -440,6 +439,6 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
         value={value ? `${value}` : ''}
         onChange={handleChangeValue}
       />
-    </Container>
+    </View>
   );
 }

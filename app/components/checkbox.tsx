@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Pressable, Animated, StyleSheet } from 'react-native';
 
 import { Icon } from './icon';
-import { tokens } from './tokens';
 import { usePrevious } from '../hooks/use_previous';
+import { useTheme } from './theme';
 
 interface CheckboxProps {
   value?: boolean;
@@ -12,6 +12,7 @@ interface CheckboxProps {
 
 export function Checkbox(props: CheckboxProps): JSX.Element {
   const { value, onChange } = props;
+  const theme = useTheme();
   const checked = useRef(new Animated.Value(value ? 1 : 0)).current;
   const prevValue = usePrevious(value);
   const handlePress = useCallback(() => {
@@ -34,7 +35,10 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
   return (
     <Pressable
       onPress={handlePress}
-      style={[styles.root, value && styles.checkedRoot]}
+      style={[
+        styles.root,
+        { borderColor: value ? theme.border.primary : theme.border.default },
+      ]}
     >
       <Animated.View
         style={[
@@ -42,10 +46,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
           {
             backgroundColor: checked.interpolate({
               inputRange: [0, 1],
-              outputRange: [
-                tokens.colors.gray[50],
-                tokens.colors.lightBlue[700],
-              ],
+              outputRange: [theme.background.tint, theme.background.primary],
             }),
           },
         ]}
@@ -66,10 +67,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
-  },
-  checkedRoot: {
-    borderColor: tokens.colors.lightBlue[700],
   },
   wrapper: {
     borderRadius: 999,

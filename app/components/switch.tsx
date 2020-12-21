@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Pressable, Animated, StyleSheet } from 'react-native';
-import { tokens } from './tokens';
+import { useTheme, useThemeStyles } from './theme';
 
 interface SwitchProps {
   value?: boolean;
@@ -10,6 +10,8 @@ interface SwitchProps {
 export function Switch(props: SwitchProps): JSX.Element {
   const { value, onChange } = props;
   const checked = useRef(new Animated.Value(0)).current;
+  const theme = useTheme();
+  const themeStyles = useThemeStyles();
 
   const handlePress = useCallback(() => {
     if (onChange !== undefined) {
@@ -31,10 +33,11 @@ export function Switch(props: SwitchProps): JSX.Element {
       <Animated.View
         style={[
           styles.wrapper,
+          themeStyles.border.default,
           {
             backgroundColor: checked.interpolate({
               inputRange: [0, 1],
-              outputRange: [tokens.colors.blue[50], tokens.colors.blue[500]],
+              outputRange: [theme.background.tint, theme.background.primary],
             }),
           },
         ]}
@@ -42,7 +45,8 @@ export function Switch(props: SwitchProps): JSX.Element {
         <Animated.View
           style={[
             styles.slider,
-            tokens.shadow.elevation1,
+            themeStyles.elevation.level1,
+            themeStyles.background.content,
             {
               transform: [
                 {
@@ -66,7 +70,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 32,
     borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
   },
   wrapper: {
     borderRadius: 999,
@@ -79,7 +82,6 @@ const styles = StyleSheet.create({
     top: 2,
     width: 26,
     height: 26,
-    backgroundColor: tokens.colors.base.white,
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',

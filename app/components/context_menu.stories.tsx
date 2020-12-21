@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { View } from 'react-native';
 
 import { ContextMenu } from './context_menu';
-import { Container } from './container';
 import { Text } from './text';
 
 function Basic(): JSX.Element {
   return (
     <ContextMenu options={[{ label: 'Item 1' }, { label: 'Item 2' }]}>
-      <Container>
+      <View>
         <Text>Right click on this</Text>
-      </Container>
+      </View>
     </ContextMenu>
   );
 }
 
 export function ContextMenuStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

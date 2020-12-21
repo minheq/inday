@@ -3,7 +3,6 @@ import { View, Image, StyleSheet } from 'react-native';
 import { take } from '../../lib/array_utils';
 import { Text, TextSize } from './text';
 import { useTheme } from './theme';
-import { tokens } from './tokens';
 
 export type AvatarSize = 'sm' | 'md' | 'lg';
 
@@ -21,8 +20,8 @@ export function Avatar(props: AvatarProps): JSX.Element {
     return (
       <View
         style={[
+          { backgroundColor: theme.background.tint },
           styles.base,
-          theme === 'dark' ? styles.initialsDark : styles.initialsLight,
           styles[size],
         ]}
       >
@@ -79,12 +78,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  initialsDark: {
-    backgroundColor: tokens.colors.gray[700],
-  },
-  initialsLight: {
-    backgroundColor: tokens.colors.gray[200],
   },
   // eslint-disable-next-line react-native/no-unused-styles
   sm: {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container } from './container';
+import { View } from 'react-native';
 
 import { Switch } from './switch';
 
@@ -11,8 +11,8 @@ function Basic(): JSX.Element {
 
 export function SwitchStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

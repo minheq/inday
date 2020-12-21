@@ -1,11 +1,11 @@
 import React, { createContext, Fragment, useContext } from 'react';
 import { useGetView, useGetCollectionViews } from '../data/store';
 import { FlatButton } from '../components/flat_button';
-import { Container } from '../components/container';
 import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
 import { SpaceID } from '../data/spaces';
 import { ViewID } from '../data/views';
+import { View } from 'react-native';
 
 const ViewsMenuContext = createContext({
   spaceID: '1',
@@ -28,12 +28,12 @@ export function ViewsMenu(props: ViewsMenuProps): JSX.Element {
 }
 
 function Views() {
-  const context = useContext(ViewsMenuContext);
-  const activeView = useGetView(context.viewID);
+  const { viewID } = useContext(ViewsMenuContext);
+  const activeView = useGetView(viewID);
   const views = useGetCollectionViews(activeView.collectionID);
 
   return (
-    <Container flex={1} padding={8} color="content" borderRightWidth={1}>
+    <View flex={1} padding={8} color="content" borderRightWidth={1}>
       <Text color="muted" size="sm" weight="bold">
         TEAM VIEWS
       </Text>
@@ -48,6 +48,6 @@ function Views() {
       <Text color="muted" size="sm" weight="bold">
         PERSONAL VIEWS
       </Text>
-    </Container>
+    </View>
   );
 }

@@ -18,8 +18,6 @@ import { FlatButton } from './flat_button';
 import { Picker } from './picker';
 import { GridGroup, getRows, LeafRow } from './grid_renderer.common';
 import { splitLast } from '../../lib/array_utils';
-import { Container } from './container';
-import { tokens } from './tokens';
 
 function renderLeafRowCell(props: RenderLeafRowCellProps) {
   const { row, column } = props;
@@ -256,9 +254,9 @@ function Grouped(): JSX.Element {
 
 export function GridStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Grouped />
-    </Container>
+    </View>
   );
 }
 
@@ -333,18 +331,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  groupRow: {
-    backgroundColor: tokens.colors.red[50],
-  },
-  leafRow: {
-    backgroundColor: tokens.colors.blue[50],
-  },
-  header: {
-    backgroundColor: tokens.colors.green[50],
-  },
-  footer: {
-    backgroundColor: tokens.colors.purple[50],
-  },
+  groupRow: {},
+  leafRow: {},
+  header: {},
+  footer: {},
   groupRowCell: {
     width: '100%',
     height: '100%',
@@ -359,7 +349,6 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   scrollToCell: {
-    backgroundColor: tokens.colors.base.white,
     borderRadius: 8,
     width: 200,
     position: 'absolute',

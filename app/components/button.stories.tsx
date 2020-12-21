@@ -1,7 +1,7 @@
 import React from 'react';
+import { View } from 'react-native';
 
 import { Button } from './button';
-import { Container } from './container';
 import { Text } from './text';
 
 function Basic(): JSX.Element {
@@ -18,8 +18,8 @@ function Basic(): JSX.Element {
 
 export function ButtonStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  Text as RNText,
-  TextStyle,
-  StyleSheet,
-  ColorSchemeName,
-} from 'react-native';
+import { Text as RNText, TextStyle, StyleSheet } from 'react-native';
 import { useTheme } from './theme';
 import { tokens } from './tokens';
 
@@ -86,7 +81,7 @@ export function Text(props: TextProps): JSX.Element {
         styles[align],
         styles[size],
         {
-          color: fromTextColor(color, theme),
+          color: theme.text[color],
         },
         {
           ...(customColor !== undefined && {
@@ -103,32 +98,6 @@ export function Text(props: TextProps): JSX.Element {
       {children}
     </RNText>
   );
-}
-
-export function fromTextColor(
-  color: TextColor,
-  theme: ColorSchemeName,
-): string {
-  switch (color) {
-    case 'default':
-      return theme === 'dark'
-        ? tokens.colors.gray[100]
-        : tokens.colors.gray[900];
-    case 'primary':
-      return theme === 'dark'
-        ? tokens.colors.blue[400]
-        : tokens.colors.blue[700];
-    case 'muted':
-      return theme === 'dark'
-        ? tokens.colors.gray[400]
-        : tokens.colors.gray[500];
-    case 'error':
-      return theme === 'dark' ? tokens.colors.red[200] : tokens.colors.red[700];
-    case 'success':
-      return tokens.colors.green[700];
-    case 'contrast':
-      return tokens.colors.base.white;
-  }
 }
 
 const styles = StyleSheet.create({

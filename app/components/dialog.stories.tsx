@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Dialog } from './dialog';
-import { Container } from './container';
 import { FlatButton } from './flat_button';
 
 interface DialogBaseProps {
@@ -20,9 +19,7 @@ function DialogBase(props: DialogBaseProps) {
         visible={visible}
         onRequestClose={() => setVisible(false)}
       >
-        <Container padding={40}>
-          <Container height={300} width={400} color="primary" />
-        </Container>
+        <View style={styles.dialogContent} />
       </Dialog>
       <FlatButton onPress={() => setVisible(true)} title="Open dialog" />
     </View>
@@ -43,10 +40,18 @@ function Fade(): JSX.Element {
 
 export function DialogStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <NoAnimation />
       <Slide />
       <Fade />
-    </Container>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  dialogContent: {
+    padding: 40,
+    height: 300,
+    width: 300,
+  },
+});

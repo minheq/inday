@@ -8,7 +8,6 @@ interface RowProps {
   children?: React.ReactNode;
   justifyContent?: 'flex-start' | 'flex-end' | 'space-between' | 'center';
   alignItems?: 'flex-start' | 'flex-end' | 'center';
-  expanded?: boolean;
   spacing?: number;
 }
 
@@ -16,21 +15,13 @@ interface RowProps {
  * Displays its children in a horizontal array.
  */
 export function Row(props: RowProps): JSX.Element {
-  const {
-    children,
-    flex,
-    justifyContent,
-    alignItems,
-    expanded,
-    spacing,
-  } = props;
+  const { children, flex, justifyContent, alignItems, spacing } = props;
 
   return (
     <ContainerProvider direction="row">
       <View
         style={[
           styles.root,
-          expanded && styles.expanded,
           {
             justifyContent,
             alignItems,
@@ -55,9 +46,5 @@ const styles = StyleSheet.create({
   root: {
     display: 'flex',
     flexDirection: 'row',
-  },
-  expanded: {
-    width: '100%',
-    height: '100%',
   },
 });

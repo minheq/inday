@@ -7,7 +7,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Container } from '../components/container';
 import {
   useGetSortedFieldsWithListViewConfig,
   useGetViewFilters,
@@ -48,6 +47,7 @@ import { ListViewFooter } from './list_view_footer';
 import { GroupRow } from './list_view_group_row';
 import { FlatObject } from '../../lib/flat_object';
 import { LeafRow } from './list_view_leaf_row';
+import { StyleSheet, View } from 'react-native';
 
 export type ViewMode = 'edit' | 'select';
 
@@ -224,7 +224,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
   return (
     <ListViewViewContext.Provider value={context}>
-      <Container flex={1}>
+      <View style={styles.root}>
         <AutoSizer>
           {({ height, width }) => (
             <GridRenderer
@@ -247,7 +247,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
             />
           )}
         </AutoSizer>
-      </Container>
+      </View>
     </ListViewViewContext.Provider>
   );
 }
@@ -497,3 +497,9 @@ function getRowToRecordIDCache(rows: RowPath[]): RowToRecordIDCache {
 
   return cache;
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 
 import { Checkbox } from './checkbox';
-import { Container } from './container';
 
 function Basic(): JSX.Element {
   const [value, setValue] = useState(false);
@@ -11,8 +11,8 @@ function Basic(): JSX.Element {
 
 export function CheckboxStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

@@ -10,7 +10,6 @@ import React, {
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { ScrollView, Pressable } from 'react-native';
 
-import { Container } from '../components/container';
 import { Row } from '../components/row';
 import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
@@ -54,9 +53,9 @@ export function GroupMenu(props: GroupMenuProps): JSX.Element {
 
   return (
     <GroupMenuContext.Provider value={{ viewID, collectionID }}>
-      <Container flex={1}>
+      <View flex={1}>
         <ScrollView>
-          <Container paddingHorizontal={16}>
+          <View paddingHorizontal={16}>
             {groups.map((group) => (
               <Fragment key={group.id}>
                 <GroupListItem group={group} />
@@ -64,9 +63,9 @@ export function GroupMenu(props: GroupMenuProps): JSX.Element {
               </Fragment>
             ))}
             <GroupNew />
-          </Container>
+          </View>
         </ScrollView>
-      </Container>
+      </View>
     </GroupMenuContext.Provider>
   );
 }
@@ -154,9 +153,9 @@ function GroupListItem(props: GroupListItemProps) {
   }
 
   return (
-    <Container padding={16} borderRadius={tokens.radius} shadow>
+    <View padding={16} borderRadius={tokens.radius} shadow>
       {content}
-    </Container>
+    </View>
   );
 }
 
@@ -209,7 +208,7 @@ function GroupNew() {
 
   if (open) {
     return (
-      <Container padding={16} borderRadius={tokens.border.radius} shadow>
+      <View padding={16} borderRadius={tokens.border.radius} shadow>
         <Text weight="bold">New group</Text>
         <Spacer size={16} />
         <GroupEdit groupConfig={groupConfig} onChange={setSortConfig} />
@@ -223,7 +222,7 @@ function GroupNew() {
             <Text color="primary">Save</Text>
           </Pressable>
         </Row>
-      </Container>
+      </View>
     );
   }
 

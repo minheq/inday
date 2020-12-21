@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 
 import { SegmentedControl } from './segmented_control';
-import { Container } from './container';
 
 function Basic(): JSX.Element {
   const [value, setValue] = useState(1);
 
   return (
-    <Container padding={16}>
+    <View>
       <SegmentedControl
         value={value}
         onChange={setValue}
@@ -17,14 +17,14 @@ function Basic(): JSX.Element {
           { value: 3, label: 'Option C' },
         ]}
       />
-    </Container>
+    </View>
   );
 }
 
 export function SegmentedControlStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

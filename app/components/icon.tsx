@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { G, Path, Defs, ClipPath } from './svg';
-import { fromTextColor, TextColor } from './text';
+import { TextColor } from './text';
 import { useTheme } from './theme';
 
 type IconSize = 'sm' | 'md' | 'lg';
@@ -21,10 +21,7 @@ export function Icon(props: IconProps): JSX.Element {
   const TheIcon = iconMap[name];
 
   return (
-    <TheIcon
-      size={sizeMap[size]}
-      color={customColor ?? fromTextColor(color, theme)}
-    />
+    <TheIcon size={sizeMap[size]} color={customColor ?? theme.text[color]} />
   );
 }
 

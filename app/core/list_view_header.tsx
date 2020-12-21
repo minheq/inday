@@ -6,8 +6,7 @@ import { Row } from '../components/row';
 import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
 
-import { useTheme } from '../components/theme';
-import { tokens } from '../components/tokens';
+import { useThemeStyles } from '../components/theme';
 import { Field } from '../data/fields';
 import { getFieldIcon } from './icon_helpers';
 
@@ -17,17 +16,10 @@ interface ListViewHeaderProps {
 
 export function ListViewHeader(props: ListViewHeaderProps): JSX.Element {
   const { children } = props;
-  const theme = useTheme();
+  const themeStyles = useThemeStyles();
 
   return (
-    <View
-      style={[
-        styles.row,
-        theme === 'dark' ? styles.rowBackgroundDark : styles.rowBackgroundLight,
-      ]}
-    >
-      {children}
-    </View>
+    <View style={[styles.row, themeStyles.background.content]}>{children}</View>
   );
 }
 
@@ -40,9 +32,16 @@ export const ListViewHeaderCell = memo(function ListViewHeaderCell(
   props: ListViewHeaderCellProps,
 ): JSX.Element {
   const { field, primary } = props;
+  const themeStyles = useThemeStyles();
 
   return (
-    <View style={[styles.headerCell, primary && styles.primaryCell]}>
+    <View
+      style={[
+        styles.headerCell,
+        themeStyles.border.default,
+        primary && styles.primaryCell,
+      ]}
+    >
       <Row>
         <Icon name={getFieldIcon(field.type)} />
         <Spacer size={4} />
@@ -53,19 +52,12 @@ export const ListViewHeaderCell = memo(function ListViewHeaderCell(
 });
 
 const styles = StyleSheet.create({
-  rowBackgroundDark: {
-    backgroundColor: tokens.colors.gray[900],
-  },
-  rowBackgroundLight: {
-    backgroundColor: tokens.colors.base.white,
-  },
   row: {},
 
   headerCell: {
     height: '100%',
     paddingHorizontal: 8,
     justifyContent: 'center',
-    borderColor: tokens.colors.gray[300],
     borderBottomWidth: 1,
   },
   primaryCell: {

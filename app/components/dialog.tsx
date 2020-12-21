@@ -212,7 +212,6 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
     maxWidth: '90%',
     borderRadius: tokens.border.radius,
-    backgroundColor: tokens.colors.base.white,
   },
   background: {
     position: 'absolute',

@@ -1,5 +1,5 @@
 import React, { useCallback, createContext, useContext } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import {
@@ -14,16 +14,15 @@ import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize_view';
 import { ViewsMenu } from '../core/views_menu';
 import { AutoSizer } from '../lib/autosizer';
-import { View, ViewID } from '../data/views';
+import { View as CollectionView, ViewID } from '../data/views';
 import { ListViewView } from '../core/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { Record, RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
 import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
 import { Space, SpaceID } from '../data/spaces';
-import { useTheme } from '../components/theme';
+import { useTheme, useThemeStyles } from '../components/theme';
 import { Screen } from '../components/screen';
-import { Container } from '../components/container';
 import { Row } from '../components/row';
 import { BackButton } from '../components/back_button';
 import { Text } from '../components/text';
@@ -38,6 +37,7 @@ import { CloseButton } from '../components/close_button';
 import { Spacer } from '../components/spacer';
 import { Column } from '../components/column';
 import { RecordFieldValueEdit } from '../core/record_field_value_input';
+import { CollectionsTabs } from '../core/collection_tabs';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -45,9 +45,13 @@ interface SpaceScreenContext {
   collectionID: CollectionID;
 }
 
+const VIEWS_MENU_WIDTH = 240;
+const RECORD_VIEW_WIDTH = 640;
+const ORGANIZE_VIEW_WIDTH = 360;
+
 const SpaceScreenContext = createContext<SpaceScreenContext>({
   spaceID: Space.generateID(),
-  viewID: View.generateID(),
+  viewID: CollectionView.generateID(),
   collectionID: Collection.generateID(),
 });
 
@@ -62,7 +66,7 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
     >
       <Screen>
         <SpaceScreenHeader />
-        <CollectionsList />
+        <CollectionsTabs viewID={viewID} spaceID={spaceID} />
         <ViewSettings />
         <MainContent />
       </Screen>
@@ -108,21 +112,17 @@ function SpaceScreenHeader(): JSX.Element {
   }, [navigation]);
 
   return (
-    <Container height={56} paddingHorizontal={8} paddingVertical={4}>
+    <View style={styles.header}>
       <Row justifyContent="space-between">
-        <Container>
-          <Row spacing={8} alignItems="center">
-            <BackButton onPress={handlePressBack} />
-            <Text size="lg" weight="bold">
-              {space.name}
-            </Text>
-          </Row>
-        </Container>
-        <Container>
-          <TopMenu />
-        </Container>
+        <Row spacing={8} alignItems="center">
+          <BackButton onPress={handlePressBack} />
+          <Text size="lg" weight="bold">
+            {space.name}
+          </Text>
+        </Row>
+        <TopMenu />
       </Row>
-    </Container>
+    </View>
   );
 }
 
@@ -143,6 +143,7 @@ function ViewSettings() {
   const [mode, setMode] = useRecoilState(modeState);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
   const [, setOpenRecord] = useRecoilState(openRecordState);
+  const themeStyles = useThemeStyles();
 
   const handleToggleView = useCallback(() => {
     if (sidePanel !== 'views') {
@@ -156,12 +157,12 @@ function ViewSettings() {
   }, [sidePanel, setSidePanel, setMode, setOpenRecord]);
 
   return (
-    <Container paddingVertical={4} color="content" shadow zIndex={1}>
+    <View style={[styles.viewSettingsRoot, themeStyles.elevation.level1]}>
       <Row justifyContent="space-between">
         <ViewMenuButton view={view} onPress={handleToggleView} />
         {mode === 'edit' ? <ViewMenu /> : <SelectMenu />}
       </Row>
-    </Container>
+    </View>
   );
 }
 
@@ -232,7 +233,7 @@ function ViewMenu() {
 }
 
 interface ViewMenuButtonProps {
-  view: View;
+  view: CollectionView;
   onPress: (viewID: ViewID) => void;
 }
 
@@ -248,79 +249,10 @@ function ViewMenuButton(props: ViewMenuButtonProps) {
       <Row spacing={4}>
         <Icon
           name={getViewIcon(view.type)}
-          customColor={getViewIconColor(view.type, theme)}
+          customColor={getViewIconColor(view.type, theme.colorScheme)}
         />
         <Text>{view.name}</Text>
       </Row>
-    </Button>
-  );
-}
-
-function CollectionsList() {
-  const { spaceID, viewID } = useContext(SpaceScreenContext);
-  const space = useGetSpace(spaceID);
-  const view = useGetView(viewID);
-  const collections = useGetSpaceCollections(space.id);
-  const activeCollection = collections.find((c) => c.id === view.collectionID);
-
-  if (activeCollection === undefined) {
-    throw new Error(
-      `Active collection not found. Expected to find collectionID=${view.collectionID} in viewID=${view.id}`,
-    );
-  }
-
-  return (
-    <Container color="content" zIndex={2} borderBottomWidth={1}>
-      <Row>
-        <Button style={[styles.collectionItem, styles.addCollectionItem]}>
-          <Icon name="Plus" color="muted" />
-        </Button>
-        {collections.map((collection) => (
-          <CollectionItem
-            active={collection.id === activeCollection.id}
-            key={collection.id}
-            collection={collection}
-            onPress={() => {
-              return;
-            }}
-          />
-        ))}
-      </Row>
-    </Container>
-  );
-}
-
-interface CollectionItemProps {
-  active: boolean;
-  collection: Collection;
-  onPress: (collectionID: CollectionID) => void;
-}
-
-function CollectionItem(props: CollectionItemProps) {
-  const { active, collection, onPress } = props;
-  const theme = useTheme();
-
-  const handlePress = useCallback(() => {
-    onPress(collection.id);
-  }, [onPress, collection]);
-
-  return (
-    <Button
-      onPress={handlePress}
-      style={[
-        styles.collectionItem,
-        active && styles.activeCollectionItem,
-        theme === 'dark'
-          ? styles.activeCollectionItemDark
-          : styles.activeCollectionItemLight,
-      ]}
-    >
-      <Text
-        weight={active ? 'bold' : 'normal'}
-        color={active ? 'primary' : 'muted'}
-      >
-        {collection.name}
-      </Text>
     </Button>
   );
 }
@@ -388,50 +320,46 @@ function MainContent() {
   }, [mode, view, handleOpenRecord, selectedRecords, handleSelectRecord]);
 
   return (
-    <Container flex={1} color="content">
-      <Row expanded flex={1}>
-        <Slide width={240} open={sidePanel === 'views'}>
-          <Container width={240} expanded color="content" borderRightWidth={1}>
-            {sidePanel === 'views' && (
-              <ViewsMenu spaceID={spaceID} viewID={viewID} />
+    <View style={styles.mainContentRoot}>
+      <Slide width={VIEWS_MENU_WIDTH} open={sidePanel === 'views'}>
+        <View style={styles.viewsMenuRoot}>
+          {sidePanel === 'views' && (
+            <ViewsMenu spaceID={spaceID} viewID={viewID} />
+          )}
+        </View>
+      </Slide>
+      <View style={styles.viewContainer}>{renderView()}</View>
+      <Slide width={ORGANIZE_VIEW_WIDTH} open={sidePanel === 'organize'}>
+        <View style={styles.organizeViewContainer}>
+          <AutoSizer>
+            {({ height }) => (
+              <View style={{ width: ORGANIZE_VIEW_WIDTH, height }}>
+                <ScrollView>
+                  <OrganizeView
+                    spaceID={spaceID}
+                    viewID={viewID}
+                    collectionID={collectionID}
+                  />
+                </ScrollView>
+              </View>
             )}
-          </Container>
-        </Slide>
-        <Container paddingTop={16} color="content" flex={1}>
-          {renderView()}
-        </Container>
-        <Slide width={360} open={sidePanel === 'organize'}>
-          <Container flex={1} width={360} color="content" borderLeftWidth={1}>
-            <AutoSizer>
-              {({ height }) => (
-                <Container width={360} height={height}>
-                  <ScrollView>
-                    <OrganizeView
-                      spaceID={spaceID}
-                      viewID={viewID}
-                      collectionID={collectionID}
-                    />
-                  </ScrollView>
-                </Container>
-              )}
-            </AutoSizer>
-          </Container>
-        </Slide>
-        <Slide width={640} open={openRecord !== null}>
-          <Container flex={1} width={640} color="content" borderLeftWidth={1}>
-            <AutoSizer>
-              {({ height }) => (
-                <Container width={640} height={height}>
-                  {openRecord !== null && (
-                    <RecordDetailsContainer recordID={openRecord} />
-                  )}
-                </Container>
-              )}
-            </AutoSizer>
-          </Container>
-        </Slide>
-      </Row>
-    </Container>
+          </AutoSizer>
+        </View>
+      </Slide>
+      <Slide width={RECORD_VIEW_WIDTH} open={openRecord !== null}>
+        <View style={styles.recordViewContainer}>
+          <AutoSizer>
+            {({ height }) => (
+              <View style={{ width: RECORD_VIEW_WIDTH, height }}>
+                {openRecord !== null && (
+                  <RecordDetailsContainer recordID={openRecord} />
+                )}
+              </View>
+            )}
+          </AutoSizer>
+        </View>
+      </Slide>
+    </View>
   );
 }
 
@@ -452,12 +380,12 @@ function RecordDetailsContainer(
 
   return (
     <ScrollView>
-      <Container padding={8}>
+      <View style={styles.recordDetailsContainer}>
         <Row>
           <CloseButton onPress={handleClose} />
         </Row>
         <RecordDetails record={record} />
-      </Container>
+      </View>
     </ScrollView>
   );
 }
@@ -474,7 +402,7 @@ function RecordDetails(props: RecordDetailsProps) {
   const recordFieldsEntries = useGetRecordFieldsEntries(record.id);
 
   return (
-    <Container>
+    <View>
       <Text size="xl">
         {stringifyFieldValue(primaryField, primaryFieldValue)}
       </Text>
@@ -489,7 +417,7 @@ function RecordDetails(props: RecordDetailsProps) {
           />
         ))}
       </Column>
-    </Container>
+    </View>
   );
 }
 
@@ -502,30 +430,40 @@ interface FieldInputRendererProps {
 function FieldInputRenderer(props: FieldInputRendererProps) {
   const { record, field, value } = props;
 
-  return <RecordFieldValueEdit record={record} field={field} value={value} />;
+  return (
+    <RecordFieldValueEdit recordID={record.id} field={field} value={value} />
+  );
 }
 
 const styles = StyleSheet.create({
-  collectionItem: {
-    borderTopLeftRadius: tokens.border.radius,
-    borderTopRightRadius: tokens.border.radius,
-    minWidth: 40,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
+  mainContentRoot: {
+    flex: 1,
+    flexDirection: 'row',
   },
-  addCollectionItem: {
-    paddingHorizontal: 8,
+  viewsMenuRoot: {
+    flex: 1,
+    width: VIEWS_MENU_WIDTH,
+    height: '100%',
+    borderRightWidth: 1,
   },
-  activeCollectionItem: {
-    borderBottomWidth: 2,
+  viewContainer: {
+    paddingTop: 16,
+    flex: 1,
   },
-  activeCollectionItemDark: {
-    borderColor: tokens.colors.lightBlue[50],
+  recordDetailsContainer: {
+    padding: 8,
   },
-  activeCollectionItemLight: {
-    borderColor: tokens.colors.lightBlue[700],
+  organizeViewContainer: {
+    flex: 1,
+    width: ORGANIZE_VIEW_WIDTH,
+    height: '100%',
+    borderRightWidth: 1,
+  },
+  recordViewContainer: {
+    flex: 1,
+    width: RECORD_VIEW_WIDTH,
+    height: '100%',
+    borderRightWidth: 1,
   },
   viewMenuButton: {
     borderRadius: tokens.border.radius,
@@ -535,5 +473,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 8,
+  },
+  header: {
+    height: 56,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  viewSettingsRoot: {
+    paddingVertical: 4,
+    zIndex: 1,
   },
 });

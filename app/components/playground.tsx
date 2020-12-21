@@ -7,7 +7,6 @@ import { TextInputStories } from './text_input.stories';
 import { Text } from './text';
 import { ScreenName, ScreenProps, useNavigation } from '../routes';
 import { Button } from './button';
-import { Container } from './container';
 import { tokens } from './tokens';
 import { PickerStories } from './picker.stories';
 import { Spacer } from './spacer';
@@ -18,6 +17,7 @@ import { Content } from './content';
 import { useMediaQuery } from '../lib/media_query';
 import { Modal } from './modal';
 import { CloseButton } from './close_button';
+import { useThemeStyles } from './theme';
 
 const MENU_WIDTH = 280;
 
@@ -40,6 +40,7 @@ export function Playground(
     params: { component },
   } = props;
   const mq = useMediaQuery();
+  const themeStyles = useThemeStyles();
   const [open, setOpen] = useState(false);
 
   const handleCloseMenu = useCallback(() => {
@@ -82,9 +83,9 @@ export function Playground(
     >
       <View style={styles.base}>
         {mq.sizeQuery.lgAndUp ? (
-          <Container width={MENU_WIDTH} shadow>
+          <View style={[{ width: MENU_WIDTH }, themeStyles.elevation.level1]}>
             <Menu />
-          </Container>
+          </View>
         ) : (
           <Modal
             animationType="slide"
@@ -98,17 +99,15 @@ export function Playground(
           </Modal>
         )}
         {mq.sizeQuery.lgAndDown && (
-          <Container zIndex={1} right={16} bottom={16} position="absolute">
-            <Row>
-              <FlatButton
-                color="primary"
-                title="MENU"
-                onPress={() => setOpen(!open)}
-              />
-            </Row>
-          </Container>
+          <View style={styles.mobileMenuButton}>
+            <FlatButton
+              color="primary"
+              title="MENU"
+              onPress={() => setOpen(!open)}
+            />
+          </View>
         )}
-        <Container flex={1} color="content">
+        <View style={[styles.contentWrapper, themeStyles.background.content]}>
           <Content>
             <ScrollView>
               <Text weight="bold" size="xl">
@@ -118,20 +117,22 @@ export function Playground(
               {content}
             </ScrollView>
           </Content>
-        </Container>
+        </View>
       </View>
     </PlaygroundContext.Provider>
   );
 }
 
 function Menu() {
+  const themeStyles = useThemeStyles();
+
   return (
-    <Container color="content" flex={1}>
-      <Container padding={8} paddingTop={16}>
+    <View style={[styles.menu, themeStyles.background.content]}>
+      <View style={styles.menuTitleWrapper}>
         <Text weight="600" size="lg">
           Inday Playground
         </Text>
-      </Container>
+      </View>
       <ScrollView>
         <MenuSection title="GETTING STARTED" />
         <MenuItem component="Intro" />
@@ -143,7 +144,7 @@ function Menu() {
         <MenuItem component="Dialog" />
         <MenuItem component="Grid" />
       </ScrollView>
-    </Container>
+    </View>
   );
 }
 
@@ -168,7 +169,7 @@ function MenuItem(props: MenuItemProps) {
   }, [active, push, component, onCloseMenu]);
 
   return (
-    <Container paddingHorizontal={8}>
+    <View style={styles.menuItem}>
       <Button style={styles.menuButton} onPress={handlePress}>
         <Text
           weight={active ? 'bold' : 'normal'}
@@ -177,7 +178,7 @@ function MenuItem(props: MenuItemProps) {
           {component}
         </Text>
       </Button>
-    </Container>
+    </View>
   );
 }
 
@@ -187,18 +188,14 @@ interface MenuSectionProps {
 
 function MenuSection(props: MenuSectionProps) {
   const { title } = props;
+  const themeStyles = useThemeStyles();
 
   return (
-    <Container
-      color="content"
-      paddingLeft={8}
-      paddingTop={16}
-      paddingBottom={8}
-    >
+    <View style={[styles.menuSection, themeStyles.background.content]}>
       <Text color="muted" weight="bold">
         {title}
       </Text>
-    </Container>
+    </View>
   );
 }
 
@@ -219,5 +216,29 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingLeft: 24,
     borderRadius: tokens.border.radius,
+  },
+  menuSection: {
+    paddingLeft: 8,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  menuItem: {
+    paddingHorizontal: 8,
+  },
+  menu: {
+    flex: 1,
+  },
+  menuTitleWrapper: {
+    padding: 8,
+    paddingTop: 16,
+  },
+  mobileMenuButton: {
+    zIndex: 1,
+    right: 16,
+    bottom: 16,
+    position: 'absolute',
+  },
+  contentWrapper: {
+    flex: 1,
   },
 });

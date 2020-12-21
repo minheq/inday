@@ -7,9 +7,9 @@ import { FilterMenu } from './organize_filter_menu';
 import { SortMenu } from './organize_sort_menu';
 import { GroupMenu } from './organize_group_menu';
 import { FieldMenu } from './organize_field_menu';
-import { Container } from '../components/container';
 import { SegmentedControl } from '../components/segmented_control';
 import { Spacer } from '../components/spacer';
+import { View } from 'react-native';
 
 interface OrganizeViewProps {
   spaceID: SpaceID;
@@ -23,8 +23,8 @@ export function OrganizeView(props: OrganizeViewProps): JSX.Element {
   const [tab, setTab] = useState(2);
 
   return (
-    <Container flex={1}>
-      <Container padding={16}>
+    <View>
+      <View>
         <SegmentedControl
           onChange={setTab}
           value={tab}
@@ -35,12 +35,12 @@ export function OrganizeView(props: OrganizeViewProps): JSX.Element {
             { label: 'Group', value: 4 },
           ]}
         />
-      </Container>
+      </View>
       <Spacer size={16} />
       {tab === 1 && <FieldMenu viewID={viewID} collectionID={collectionID} />}
       {tab === 2 && <FilterMenu viewID={viewID} collectionID={collectionID} />}
       {tab === 3 && <SortMenu viewID={viewID} collectionID={collectionID} />}
       {tab === 4 && <GroupMenu viewID={viewID} collectionID={collectionID} />}
-    </Container>
+    </View>
   );
 }

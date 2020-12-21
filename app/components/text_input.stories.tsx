@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container } from './container';
+import { View } from 'react-native';
 
 import { TextInput } from './text_input';
 
@@ -9,8 +9,8 @@ function Basic(): JSX.Element {
 
 export function TextInputStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

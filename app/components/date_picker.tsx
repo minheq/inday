@@ -10,7 +10,6 @@ import {
   RenderOtherMonthProps,
   RenderWeekProps,
 } from './month_renderer';
-import { tokens } from './tokens';
 import { Picker, PickerOption } from './picker';
 import { getSystemLocale } from '../lib/locale';
 import {
@@ -29,6 +28,7 @@ import {
   getLastDateOfWeek,
 } from '../../lib/date_utils';
 import { subMonths } from 'date-fns';
+import { useThemeStyles } from './theme';
 
 interface DatePickerProps {
   value?: Date | null;
@@ -48,7 +48,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
     isBlocked,
     firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
   } = props;
-
+  const themeStyles = useThemeStyles();
   const selectedInterval = useMemo((): DateInterval | null => {
     if (value === null || value === undefined) {
       return null;
@@ -193,13 +193,16 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
         </View>
         <View style={styles.monthArrowsWrapper}>
           <Pressable
-            style={styles.arrowWrapper}
+            style={[styles.arrowWrapper, themeStyles.background.tint]}
             onPress={handlePressPreviousMonth}
           >
             <Icon name="ChevronLeft" />
           </Pressable>
           <Spacer direction="row" size={8} />
-          <Pressable style={styles.arrowWrapper} onPress={handlePressNextMonth}>
+          <Pressable
+            style={[styles.arrowWrapper, themeStyles.background.tint]}
+            onPress={handlePressNextMonth}
+          >
             <Icon name="ChevronRight" />
           </Pressable>
         </View>
@@ -245,7 +248,7 @@ function DayDisplay(props: DayDisplayProps) {
     blocked,
     onSelect,
   } = props;
-
+  const themeStyles = useThemeStyles();
   if (outsideRange || blocked) {
     return (
       <View style={styles.dayRoot}>
@@ -261,21 +264,38 @@ function DayDisplay(props: DayDisplayProps) {
   }
 
   return (
-    <View style={[styles.dayRoot, withinSelected && styles.withinSelected]}>
+    <View
+      style={[
+        styles.dayRoot,
+        withinSelected && themeStyles.background.lightPrimary,
+      ]}
+    >
       <Pressable onPress={() => onSelect(day)} style={styles.dayButton}>
         {({ hovered }: { hovered: boolean }) => (
           <Fragment>
             {selectedStart && !selectedEnd && (
-              <View style={[styles.selectedEdge, styles.selectedStart]} />
+              <View
+                style={[
+                  styles.selectedEdge,
+                  themeStyles.background.lightPrimary,
+                  styles.selectedStart,
+                ]}
+              />
             )}
             {selectedEnd && !selectedStart && (
-              <View style={[styles.selectedEdge, styles.selectedEnd]} />
+              <View
+                style={[
+                  styles.selectedEdge,
+                  themeStyles.background.lightPrimary,
+                  styles.selectedEnd,
+                ]}
+              />
             )}
             <View
               style={[
                 styles.dayWrapper,
                 today && styles.todayWrapper,
-                hovered && styles.hoveredDay,
+                hovered && themeStyles.background.lightPrimary,
                 selected && styles.selectedDay,
               ]}
             >
@@ -301,13 +321,14 @@ interface OtherMonthDayProps {
 
 function OtherMonthDay(props: OtherMonthDayProps) {
   const { withinSelected, day } = props;
+  const themeStyles = useThemeStyles();
 
   return (
     <View
       style={[
         styles.dayRoot,
         styles.otherDay,
-        withinSelected && styles.withinSelected,
+        withinSelected && themeStyles.background.lightPrimary,
       ]}
     >
       <Text color="muted">
@@ -397,17 +418,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 999,
-    backgroundColor: tokens.colors.gray[100],
     textAlign: 'center',
     height: 32,
     width: 32,
   },
   todayWrapper: {},
-  withinSelected: {
-    backgroundColor: tokens.colors.lightBlue[50],
-  },
   selectedEdge: {
-    backgroundColor: tokens.colors.lightBlue[50],
     position: 'absolute',
     zIndex: -1,
     width: '50%',
@@ -430,9 +446,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  hoveredDay: {
-    backgroundColor: tokens.colors.lightBlue[100],
-  },
   week: {
     paddingTop: 2,
     paddingBottom: 2,
@@ -452,9 +465,7 @@ const styles = StyleSheet.create({
   firstMonthPickerWrapper: {
     paddingRight: 8,
   },
-  selectedDay: {
-    backgroundColor: tokens.colors.lightBlue[700],
-  },
+  selectedDay: {},
   dateWrapper: {
     display: 'flex',
     flexDirection: 'column',

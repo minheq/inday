@@ -1,7 +1,7 @@
 import React from 'react';
+import { View } from 'react-native';
 
 import { Badge } from './badge';
-import { Container } from './container';
 
 function Basic(): JSX.Element {
   return <Badge title="Badge" />;
@@ -9,8 +9,8 @@ function Basic(): JSX.Element {
 
 export function BadgeStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import RModal from 'react-modal';
 import type { ModalProps } from './modal';
 import { Animated, StyleSheet, useWindowDimensions } from 'react-native';
-import { tokens } from './tokens';
 import { usePrevious } from '../hooks/use_previous';
 
 RModal.setAppElement('#root');
@@ -139,11 +138,8 @@ const webStyles = {
 
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: tokens.colors.base.white,
     height: '100%',
     width: '100%',
   },
-  transparent: {
-    backgroundColor: tokens.colors.base.transparent,
-  },
+  transparent: {},
 });

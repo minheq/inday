@@ -1,8 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { useTheme } from '../components/theme';
-import { tokens } from '../components/tokens';
+import { useThemeStyles } from '../components/theme';
 
 interface ListViewFooterProps {
   children: React.ReactNode;
@@ -10,26 +9,13 @@ interface ListViewFooterProps {
 
 export function ListViewFooter(props: ListViewFooterProps): JSX.Element {
   const { children } = props;
-  const theme = useTheme();
+  const themeStyles = useThemeStyles();
 
   return (
-    <View
-      style={[
-        styles.row,
-        theme === 'dark' ? styles.rowBackgroundDark : styles.rowBackgroundLight,
-      ]}
-    >
-      {children}
-    </View>
+    <View style={[styles.row, themeStyles.background.content]}>{children}</View>
   );
 }
 
 const styles = StyleSheet.create({
-  rowBackgroundDark: {
-    backgroundColor: tokens.colors.gray[900],
-  },
-  rowBackgroundLight: {
-    backgroundColor: tokens.colors.base.white,
-  },
   row: {},
 });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container } from './container';
+import { StyleSheet, View } from 'react-native';
 
 import { DatePicker } from './date_picker';
 
@@ -7,16 +7,22 @@ function Basic(): JSX.Element {
   const [value, setValue] = useState<Date | null>(null);
 
   return (
-    <Container width={320}>
+    <View style={styles.container}>
       <DatePicker value={value} onChange={setValue} />
-    </Container>
+    </View>
   );
 }
 
 export function DatePickerStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: 320,
+  },
+});

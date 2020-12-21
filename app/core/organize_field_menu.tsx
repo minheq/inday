@@ -1,6 +1,5 @@
 import React, { Fragment, createContext, useCallback, useContext } from 'react';
-import { ScrollView } from 'react-native';
-import { Container } from '../components/container';
+import { ScrollView, View } from 'react-native';
 import { Row } from '../components/row';
 import { Spacer } from '../components/spacer';
 import { Switch } from '../components/switch';
@@ -36,18 +35,18 @@ export function FieldMenu(props: FieldMenuProps): JSX.Element {
 
   return (
     <FieldMenuContext.Provider value={{ viewID, collectionID }}>
-      <Container flex={1}>
+      <View flex={1}>
         <ScrollView>
-          <Container paddingHorizontal={16}>
+          <View paddingHorizontal={16}>
             {fields.map((field) => (
               <Fragment key={field.id}>
                 <FieldListItem field={field} />
                 <Spacer size={8} />
               </Fragment>
             ))}
-          </Container>
+          </View>
         </ScrollView>
-      </Container>
+      </View>
     </FieldMenuContext.Provider>
   );
 }
@@ -72,11 +71,11 @@ function FieldListItem(props: FieldListItemProps) {
   );
 
   return (
-    <Container padding={16} borderRadius={tokens.border.radius} shadow>
+    <View padding={16} borderRadius={tokens.border.radius} shadow>
       <Row justifyContent="space-between">
         <Text>{field.name}</Text>
         <Switch value={field.config.visible} onChange={handleChange} />
       </Row>
-    </Container>
+    </View>
   );
 }

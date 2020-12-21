@@ -1,6 +1,6 @@
 import { ColorSchemeName } from 'react-native';
 import { IconName } from '../components/icon';
-import { tokens } from '../components/tokens';
+import { palette } from '../components/palette';
 import { FieldType } from '../data/fields';
 import { ViewType } from '../data/views';
 
@@ -15,15 +15,13 @@ export function getViewIcon(viewType: ViewType): IconName {
 
 export function getViewIconColor(
   viewType: ViewType,
-  theme: ColorSchemeName,
+  colorScheme: ColorSchemeName,
 ): string {
   switch (viewType) {
     case 'list':
-      return theme === 'dark'
-        ? tokens.colors.blue[400]
-        : tokens.colors.blue[600];
+      return colorScheme === 'dark' ? palette.blue[400] : palette.blue[600];
     case 'board':
-      return theme === 'dark' ? tokens.colors.red[50] : tokens.colors.red[600];
+      return colorScheme === 'dark' ? palette.red[50] : palette.red[600];
   }
 }
 

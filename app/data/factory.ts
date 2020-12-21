@@ -1,5 +1,4 @@
 import { Space } from './spaces';
-import { generateID } from '../../lib/id';
 import { Collaborator } from './collaborators';
 import {
   FieldType,
@@ -45,6 +44,7 @@ import { Workspace } from './workspace';
 import { keyedBy, range, sample } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { formatISODate } from '../../lib/date_utils';
+import { palette } from '../components/palette';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -162,19 +162,19 @@ const makeFieldByType: {
         {
           id: SelectOption.generateID(),
           label: fakeWord(),
-          color: tokens.colors.green[100],
+          color: palette.green[100],
           order: 1,
         },
         {
           id: SelectOption.generateID(),
           label: fakeWord(),
-          color: tokens.colors.blue[100],
+          color: palette.blue[100],
           order: 2,
         },
         {
           id: SelectOption.generateID(),
           label: fakeWord(),
-          color: tokens.colors.red[100],
+          color: palette.red[100],
           order: 3,
         },
       ],
@@ -232,19 +232,19 @@ const makeFieldByType: {
         {
           id: SelectOption.generateID(),
           label: fakeWord(),
-          color: tokens.colors.green[100],
+          color: palette.green[100],
           order: 1,
         },
         {
           id: SelectOption.generateID(),
           label: fakeWord(),
-          color: tokens.colors.blue[100],
+          color: palette.blue[100],
           order: 2,
         },
         {
           id: SelectOption.generateID(),
           label: fakeWord(),
-          color: tokens.colors.red[100],
+          color: palette.red[100],
           order: 3,
         },
       ],

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container } from './container';
+import { View } from 'react-native';
 
 import { FlatButton } from './flat_button';
 import { Row } from './row';
@@ -20,8 +20,8 @@ function Basic(): JSX.Element {
 
 export function FlatButtonStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

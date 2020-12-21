@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container } from './container';
+import { View } from 'react-native';
 
 import { IconButton } from './icon_button';
 import { Row } from './row';
@@ -14,8 +14,8 @@ function Basic(): JSX.Element {
 
 export function IconButtonStories(): JSX.Element {
   return (
-    <Container>
+    <View>
       <Basic />
-    </Container>
+    </View>
   );
 }

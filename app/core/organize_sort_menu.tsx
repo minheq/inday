@@ -11,7 +11,6 @@ import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { ScrollView, Pressable } from 'react-native';
 
 import { FlatButton } from '../components/flat_button';
-import { Container } from '../components/container';
 import { Row } from '../components/row';
 import { Spacer } from '../components/spacer';
 import { Text } from '../components/text';
@@ -53,9 +52,9 @@ export function SortMenu(props: SortMenuProps): JSX.Element {
 
   return (
     <SortMenuContext.Provider value={{ viewID, collectionID }}>
-      <Container flex={1}>
+      <View flex={1}>
         <ScrollView>
-          <Container paddingHorizontal={16}>
+          <View paddingHorizontal={16}>
             {sorts.map((sort) => (
               <Fragment key={sort.id}>
                 <SortListItem sort={sort} />
@@ -63,9 +62,9 @@ export function SortMenu(props: SortMenuProps): JSX.Element {
               </Fragment>
             ))}
             <SortNew />
-          </Container>
+          </View>
         </ScrollView>
-      </Container>
+      </View>
     </SortMenuContext.Provider>
   );
 }
@@ -147,9 +146,9 @@ function SortListItem(props: SortListItemProps) {
   }
 
   return (
-    <Container padding={16} borderRadius={tokens.radius} shadow>
+    <View padding={16} borderRadius={tokens.radius} shadow>
       {content}
-    </Container>
+    </View>
   );
 }
 
@@ -203,7 +202,7 @@ function SortNew() {
 
   if (open) {
     return (
-      <Container padding={16} borderRadius={tokens.radius} shadow>
+      <View padding={16} borderRadius={tokens.radius} shadow>
         <Text weight="bold">New sort</Text>
         <Spacer size={16} />
         <SortEdit sortConfig={sortConfig} onChange={setSortConfig} />
@@ -217,7 +216,7 @@ function SortNew() {
             <Text color="primary">Save</Text>
           </Pressable>
         </Row>
-      </Container>
+      </View>
     );
   }
 

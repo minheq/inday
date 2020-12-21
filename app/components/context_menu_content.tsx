@@ -32,8 +32,11 @@ export function ContextMenuContent(
     <View
       style={[
         styles.wrapper,
-        theme === 'dark' ? styles.wrapperDark : styles.wrapperLight,
-        { width },
+        {
+          width,
+          backgroundColor: theme.background.content,
+          borderColor: theme.border.default,
+        },
       ]}
     >
       <ScrollView>
@@ -85,13 +88,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     flex: 1,
     borderWidth: 1,
-    borderColor: tokens.colors.gray[300],
-  },
-  wrapperDark: {
-    backgroundColor: tokens.colors.gray[900],
-  },
-  wrapperLight: {
-    backgroundColor: tokens.colors.base.white,
   },
   iconWrapper: {
     height: CONTEXT_MENU_ITEM_HEIGHT,

@@ -22,6 +22,7 @@ import { TextInput } from './text_input';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { Hover } from './hover';
 import { SearchEngine } from '../../lib/search';
+import { useTheme } from './theme';
 
 export interface ListPickerOption<T> {
   value: T;
@@ -165,6 +166,7 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
     renderCheck,
     onHoverChange,
   } = props;
+  const theme = useTheme();
 
   const handlePress = useCallback(() => {
     onSelect(option.value, selected);
@@ -182,7 +184,10 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
   return (
     <Button
       containerStyle={styles.listItemContainer}
-      style={[styles.listItem, active && styles.active]}
+      style={[
+        styles.listItem,
+        active && { backgroundColor: theme.background.lightPrimary },
+      ]}
       onPress={handlePress}
     >
       {({ hovered }) => (
@@ -262,9 +267,6 @@ const styles = StyleSheet.create({
   },
   searchInputWrapper: {
     paddingBottom: 16,
-  },
-  active: {
-    backgroundColor: tokens.colors.lightBlue[50],
   },
   listItemContainer: {
     marginBottom: 4,

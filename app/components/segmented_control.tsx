@@ -5,6 +5,7 @@ import { Spacer } from './spacer';
 import { Row } from './row';
 import { Text } from './text';
 import { tokens } from './tokens';
+import { useThemeStyles } from './theme';
 
 interface Option<T> {
   label: string;
@@ -50,7 +51,7 @@ interface SegmentedControlButtonProps<T> {
 
 function SegmentedControlButton<T>(props: SegmentedControlButtonProps<T>) {
   const { selected, option, onPress } = props;
-
+  const themeStyles = useThemeStyles();
   const handlePress = useCallback(() => {
     if (onPress !== undefined) {
       onPress(option.value);
@@ -60,7 +61,7 @@ function SegmentedControlButton<T>(props: SegmentedControlButtonProps<T>) {
   return (
     <Pressable
       key={option.label}
-      style={[styles.control, selected && styles.selected]}
+      style={[styles.control, selected && themeStyles.background.lightPrimary]}
       onPress={handlePress}
     >
       <Text>{option.label}</Text>
@@ -75,8 +76,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: tokens.border.radius,
-  },
-  selected: {
-    backgroundColor: tokens.colors.gray[50],
   },
 });
