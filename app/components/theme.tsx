@@ -104,9 +104,9 @@ const darkTheme: Theme = {
     error: palette.red[400],
   },
   border: {
-    default: palette.gray[300],
+    default: palette.gray[500],
     primary: palette.blue[800],
-    focused: palette.blue[600],
+    focused: palette.blue[500],
   },
   elevation: {
     level1: 'rgba(255, 255, 255, 0.08)',

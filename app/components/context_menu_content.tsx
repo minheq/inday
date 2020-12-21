@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from './button';
 import { Icon, IconName } from './icon';
 import { Text, TextColor, TextWeight } from './text';
-import { useTheme } from './theme';
+import { useTheme, useThemeStyles } from './theme';
 import { tokens } from './tokens';
 
 export interface ContextMenuItem {
@@ -26,17 +26,16 @@ export function ContextMenuContent(
   props: ContextMenuContentProps,
 ): JSX.Element {
   const { options, onPressed, width = 240 } = props;
-  const theme = useTheme();
+  const themeStyles = useThemeStyles();
 
   return (
     <View
       style={[
         styles.wrapper,
-        {
-          width,
-          backgroundColor: theme.background.content,
-          borderColor: theme.border.default,
-        },
+        themeStyles.background.content,
+        themeStyles.border.default,
+        themeStyles.elevation.level1,
+        { width },
       ]}
     >
       <ScrollView>
