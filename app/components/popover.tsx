@@ -115,6 +115,13 @@ export function getPopoverAnchorAndHeight(
 
   x = tm.pageX;
 
+  const overflowsWindowRight =
+    windowSize.width - windowOffset - tm.pageX < cm.width;
+
+  if (overflowsWindowRight) {
+    x = windowSize.width - cm.width - windowOffset;
+  }
+
   return [{ x, y }, height];
 }
 
