@@ -41,12 +41,12 @@ import { isEmpty } from '../../../lib/lang_utils';
 import { last } from '../../../lib/array_utils';
 import { Group } from '../../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../../data/sorts';
-import { LeafRowCell, LEAF_ROW_HEIGHT } from './list_view_leaf_row_cell';
-import { ListViewHeader, ListViewHeaderCell } from './list_view_header';
-import { ListViewFooter } from './list_view_footer';
-import { GroupRow } from './list_view_group_row';
+import { LeafRowCell, LEAF_ROW_HEIGHT } from './leaf_row_cell';
+import { Header, HeaderCell } from './header';
+import { Footer } from './footer';
+import { GroupRow } from './group_row';
 import { FlatObject } from '../../../lib/flat_object';
-import { LeafRow } from './list_view_leaf_row';
+import { LeafRow } from './leaf_row';
 import { StyleSheet, View } from 'react-native';
 
 export type ViewMode = 'edit' | 'select';
@@ -163,7 +163,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const field = fields[column - 1];
       const primary = column === 1;
 
-      return <ListViewHeaderCell field={field} primary={primary} />;
+      return <HeaderCell field={field} primary={primary} />;
     },
     [fields],
   );
@@ -193,11 +193,11 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   );
 
   const renderHeader = useCallback(({ children }: RenderHeaderProps) => {
-    return <ListViewHeader>{children}</ListViewHeader>;
+    return <Header>{children}</Header>;
   }, []);
 
   const renderFooter = useCallback(({ children }: RenderFooterProps) => {
-    return <ListViewFooter>{children}</ListViewFooter>;
+    return <Footer>{children}</Footer>;
   }, []);
 
   const columns = useMemo(

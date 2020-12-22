@@ -3,11 +3,11 @@ import { StyleSheet, View } from 'react-native';
 
 import { useThemeStyles } from '../../components/theme';
 
-interface ListViewFooterProps {
+interface FooterProps {
   children: React.ReactNode;
 }
 
-export function ListViewFooter(props: ListViewFooterProps): JSX.Element {
+export function Footer(props: FooterProps): JSX.Element {
   const { children } = props;
   const themeStyles = useThemeStyles();
 

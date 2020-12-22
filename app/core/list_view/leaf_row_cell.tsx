@@ -94,10 +94,7 @@ import {
   useListViewViewContext,
   ViewMode,
 } from './list_view_view';
-import {
-  useLeafRowContext,
-  useLeafRowContextMenuOptions,
-} from './list_view_leaf_row';
+import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
 import { FieldDateValueEdit } from '../fields/date_value_edit';
 import { FieldMultiCollaboratorValueEdit } from '../fields/multi_collaborator_value_edit';
 import { FieldSingleCollaboratorValueEdit } from '../fields/single_collaborator_value_edit';

@@ -10,11 +10,11 @@ import { useThemeStyles } from '../../components/theme';
 import { Field } from '../../data/fields';
 import { getFieldIcon } from '../views/icon_helpers';
 
-interface ListViewHeaderProps {
+interface HeaderProps {
   children: React.ReactNode;
 }
 
-export function ListViewHeader(props: ListViewHeaderProps): JSX.Element {
+export function Header(props: HeaderProps): JSX.Element {
   const { children } = props;
   const themeStyles = useThemeStyles();
 
@@ -23,13 +23,13 @@ export function ListViewHeader(props: ListViewHeaderProps): JSX.Element {
   );
 }
 
-interface ListViewHeaderCellProps {
+interface HeaderCellProps {
   field: Field;
   primary: boolean;
 }
 
-export const ListViewHeaderCell = memo(function ListViewHeaderCell(
-  props: ListViewHeaderCellProps,
+export const HeaderCell = memo(function HeaderCell(
+  props: HeaderCellProps,
 ): JSX.Element {
   const { field, primary } = props;
   const themeStyles = useThemeStyles();
