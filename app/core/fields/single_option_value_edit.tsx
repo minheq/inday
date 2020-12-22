@@ -9,17 +9,17 @@ import {
 } from '../../data/fields';
 import { RecordID } from '../../data/records';
 import { OptionBadge } from './option_badge';
-import { FieldSingleSelectKindValueEdit } from './single_select_kind_value_edit';
+import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 
-interface FieldSingleOptionValueEditProps {
+interface SingleOptionValueEditProps {
   recordID: RecordID;
   field: SingleOptionField;
   value: SingleOptionFieldValue;
   onDone: () => void;
 }
 
-export function FieldSingleOptionValueEdit(
-  props: FieldSingleOptionValueEditProps,
+export function SingleOptionValueEdit(
+  props: SingleOptionValueEditProps,
 ): JSX.Element {
   const { recordID, field, value, onDone } = props;
 
@@ -27,7 +27,7 @@ export function FieldSingleOptionValueEdit(
   const options = useGetOptionOptions(field.options);
 
   return (
-    <FieldSingleSelectKindValueEdit<SingleOptionFieldValue>
+    <SingleSelectKindValueEdit<SingleOptionFieldValue>
       recordID={recordID}
       fieldID={field.id}
       renderLabel={renderOption}

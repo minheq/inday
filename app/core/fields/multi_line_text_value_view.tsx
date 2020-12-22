@@ -3,13 +3,13 @@ import React from 'react';
 import { Text } from '../../components/text';
 import { MultiLineTextField, MultiLineTextFieldValue } from '../../data/fields';
 
-interface FieldMultiLineTextValueViewProps {
+interface MultiLineTextValueViewProps {
   field: MultiLineTextField;
   value: MultiLineTextFieldValue;
 }
 
-export function FieldMultiLineTextValueView(
-  props: FieldMultiLineTextValueViewProps,
+export function MultiLineTextValueView(
+  props: MultiLineTextValueViewProps,
 ): JSX.Element {
   const { value } = props;
 

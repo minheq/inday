@@ -9,13 +9,13 @@ import {
 } from '../../data/fields';
 import { RecordLinkBadge } from './record_link_badge';
 
-interface FieldMultiRecordLinkValueViewProps {
+interface MultiRecordLinkValueViewProps {
   field: MultiRecordLinkField;
   value: MultiRecordLinkFieldValue;
 }
 
-export function FieldMultiRecordLinkValueView(
-  props: FieldMultiRecordLinkValueViewProps,
+export function MultiRecordLinkValueView(
+  props: MultiRecordLinkValueViewProps,
 ): JSX.Element {
   const { value } = props;
 

@@ -15,7 +15,7 @@ import {
 import { RecordID } from '../../data/records';
 import { useUpdateRecordFieldValue } from '../../data/store';
 
-interface FieldMultiLineTextValueEditProps {
+interface MultiLineTextValueEditProps {
   autoFocus: boolean;
   recordID: RecordID;
   field: MultiLineTextField;
@@ -23,8 +23,8 @@ interface FieldMultiLineTextValueEditProps {
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
 }
 
-export function FieldMultiLineTextValueEdit(
-  props: FieldMultiLineTextValueEditProps,
+export function MultiLineTextValueEdit(
+  props: MultiLineTextValueEditProps,
 ): JSX.Element {
   const { autoFocus, recordID, field, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();

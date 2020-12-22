@@ -57,36 +57,36 @@ import {
   URLFieldValue,
 } from '../../data/fields';
 import { RecordID } from '../../data/records';
-import { FieldTextKindValueEdit } from './text_kind_value_edit';
-import { FieldNumberKindValueEdit } from './number_kind_value_edit';
-import { FieldCheckboxValueEdit } from './checkbox_value_edit';
-import { FieldMultiCollaboratorValueEdit } from './multi_collaborator_value_edit';
-import { FieldMultiOptionValueEdit } from './multi_option_value_edit';
-import { FieldMultiRecordLinkValueEdit } from './multi_record_link_value_edit';
-import { FieldSingleCollaboratorValueEdit } from './single_collaborator_value_edit';
-import { FieldSingleOptionValueEdit } from './single_option_value_edit';
-import { FieldSingleRecordLinkValueEdit } from './single_record_link_value_edit';
-import { FieldDateValueEdit } from './date_value_edit';
+import { TextKindValueEdit } from './text_kind_value_edit';
+import { NumberKindValueEdit } from './number_kind_value_edit';
+import { CheckboxValueEdit } from './checkbox_value_edit';
+import { MultiCollaboratorValueEdit } from './multi_collaborator_value_edit';
+import { MultiOptionValueEdit } from './multi_option_value_edit';
+import { MultiRecordLinkValueEdit } from './multi_record_link_value_edit';
+import { SingleCollaboratorValueEdit } from './single_collaborator_value_edit';
+import { SingleOptionValueEdit } from './single_option_value_edit';
+import { SingleRecordLinkValueEdit } from './single_record_link_value_edit';
+import { DateValueEdit } from './date_value_edit';
 import { PopoverButton } from '../../components/popover_button';
 import { PopoverCallback } from '../../components/popover';
 import { tokens } from '../../components/tokens';
 import { useThemeStyles } from '../../components/theme';
-import { FieldSingleLineTextValueView } from './single_line_text_value_view';
-import { FieldURLValueView } from './url_value_view';
+import { SingleLineTextValueView } from './single_line_text_value_view';
+import { URLValueView } from './url_value_view';
 import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
-import { FieldMultiLineTextValueEdit } from './multi_line_text_value_edit';
-import { FieldPhoneNumberValueView } from './phone_number_value_view';
-import { FieldMultiLineTextValueView } from './multi_line_text_value_view';
-import { FieldEmailValueView } from './email_value_view';
-import { FieldNumberValueView } from './number_value_view';
-import { FieldCurrencyValueView } from './currency_value_view';
-import { FieldMultiCollaboratorValueView } from './multi_collaborator_value_view';
-import { FieldMultiOptionValueView } from './multi_option_value_view';
-import { FieldMultiRecordLinkValueView } from './multi_record_link_value_view';
-import { FieldSingleCollaboratorValueView } from './single_collaborator_value_view';
-import { FieldSingleOptionValueView } from './single_option_value_view';
-import { FieldSingleRecordLinkValueView } from './single_record_link_value_view';
-import { FieldDateValueView } from './date_value_view';
+import { MultiLineTextValueEdit } from './multi_line_text_value_edit';
+import { PhoneNumberValueView } from './phone_number_value_view';
+import { MultiLineTextValueView } from './multi_line_text_value_view';
+import { EmailValueView } from './email_value_view';
+import { NumberValueView } from './number_value_view';
+import { CurrencyValueView } from './currency_value_view';
+import { MultiCollaboratorValueView } from './multi_collaborator_value_view';
+import { MultiOptionValueView } from './multi_option_value_view';
+import { MultiRecordLinkValueView } from './multi_record_link_value_view';
+import { SingleCollaboratorValueView } from './single_collaborator_value_view';
+import { SingleOptionValueView } from './single_option_value_view';
+import { SingleRecordLinkValueView } from './single_record_link_value_view';
+import { DateValueView } from './date_value_view';
 import { Button } from '../../components/button';
 import { Spacer } from '../../components/spacer';
 import { FlatButton } from '../../components/flat_button';
@@ -212,7 +212,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   if (editing === true) {
     return (
       <FieldEditWrapper onDone={handleDone}>
-        <FieldTextKindValueEdit
+        <TextKindValueEdit
           recordID={recordID}
           autoFocus
           value={value}
@@ -225,7 +225,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
 
   return (
     <FieldButton onPress={handlePress}>
-      <FieldSingleLineTextValueView value={value} field={field} />
+      <SingleLineTextValueView value={value} field={field} />
     </FieldButton>
   );
 });
@@ -243,7 +243,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   if (editing === true) {
     return (
-      <FieldTextKindValueEdit
+      <TextKindValueEdit
         recordID={recordID}
         autoFocus
         value={value}
@@ -252,7 +252,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
       />
     );
   }
-  return <FieldURLValueView value={value} field={field} />;
+  return <URLValueView value={value} field={field} />;
 });
 
 interface EmailCellProps {
@@ -269,7 +269,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
 
   if (editing === true) {
     return (
-      <FieldTextKindValueEdit
+      <TextKindValueEdit
         recordID={recordID}
         autoFocus
         value={value}
@@ -279,7 +279,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     );
   }
 
-  return <FieldEmailValueView value={value} field={field} />;
+  return <EmailValueView value={value} field={field} />;
 });
 
 interface MultiLineTextCellProps {
@@ -297,7 +297,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (editing === true) {
     return (
-      <FieldMultiLineTextValueEdit
+      <MultiLineTextValueEdit
         recordID={recordID}
         autoFocus
         value={value}
@@ -307,7 +307,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
     );
   }
 
-  return <FieldMultiLineTextValueView value={value} field={field} />;
+  return <MultiLineTextValueView value={value} field={field} />;
 });
 
 interface PhoneNumberCellProps {
@@ -325,7 +325,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
 
   if (editing === true) {
     return (
-      <FieldTextKindValueEdit
+      <TextKindValueEdit
         recordID={recordID}
         autoFocus
         value={value}
@@ -335,7 +335,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
     );
   }
 
-  return <FieldPhoneNumberValueView value={value} field={field} />;
+  return <PhoneNumberValueView value={value} field={field} />;
 });
 
 interface NumberCellProps {
@@ -351,7 +351,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
 
   if (editing === true) {
     return (
-      <FieldNumberKindValueEdit
+      <NumberKindValueEdit
         recordID={recordID}
         autoFocus
         value={value}
@@ -361,7 +361,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     );
   }
 
-  return <FieldNumberValueView value={value} field={field} />;
+  return <NumberValueView value={value} field={field} />;
 });
 
 interface CurrencyCellProps {
@@ -378,7 +378,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
 
   if (editing === true) {
     return (
-      <FieldNumberKindValueEdit
+      <NumberKindValueEdit
         recordID={recordID}
         autoFocus
         value={value}
@@ -388,7 +388,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
     );
   }
 
-  return <FieldCurrencyValueView value={value} field={field} />;
+  return <CurrencyValueView value={value} field={field} />;
 });
 
 interface MultiCollaboratorCellProps {
@@ -406,7 +406,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
     <PopoverWrapper
       contentHeight={400}
       content={({ onRequestClose }) => (
-        <FieldMultiCollaboratorValueEdit
+        <MultiCollaboratorValueEdit
           recordID={recordID}
           field={field}
           value={value}
@@ -414,7 +414,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
         />
       )}
     >
-      <FieldMultiCollaboratorValueView value={value} field={field} />
+      <MultiCollaboratorValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
@@ -434,7 +434,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
     <PopoverWrapper
       contentHeight={400}
       content={({ onRequestClose }) => (
-        <FieldMultiOptionValueEdit
+        <MultiOptionValueEdit
           recordID={recordID}
           field={field}
           value={value}
@@ -442,7 +442,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
         />
       )}
     >
-      <FieldMultiOptionValueView value={value} field={field} />
+      <MultiOptionValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
@@ -462,7 +462,7 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
     <PopoverWrapper
       contentHeight={400}
       content={({ onRequestClose }) => (
-        <FieldMultiRecordLinkValueEdit
+        <MultiRecordLinkValueEdit
           recordID={recordID}
           field={field}
           value={value}
@@ -470,7 +470,7 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
         />
       )}
     >
-      <FieldMultiRecordLinkValueView value={value} field={field} />
+      <MultiRecordLinkValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
@@ -490,7 +490,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
     <PopoverWrapper
       contentHeight={400}
       content={({ onRequestClose }) => (
-        <FieldSingleCollaboratorValueEdit
+        <SingleCollaboratorValueEdit
           recordID={recordID}
           field={field}
           value={value}
@@ -498,7 +498,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
         />
       )}
     >
-      <FieldSingleCollaboratorValueView value={value} field={field} />
+      <SingleCollaboratorValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
@@ -518,7 +518,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
     <PopoverWrapper
       contentHeight={400}
       content={({ onRequestClose }) => (
-        <FieldSingleOptionValueEdit
+        <SingleOptionValueEdit
           recordID={recordID}
           field={field}
           value={value}
@@ -526,7 +526,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
         />
       )}
     >
-      <FieldSingleOptionValueView value={value} field={field} />
+      <SingleOptionValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
@@ -546,7 +546,7 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
     <PopoverWrapper
       contentHeight={400}
       content={({ onRequestClose }) => (
-        <FieldSingleRecordLinkValueEdit
+        <SingleRecordLinkValueEdit
           recordID={recordID}
           field={field}
           value={value}
@@ -554,7 +554,7 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
         />
       )}
     >
-      <FieldSingleRecordLinkValueView value={value} field={field} />
+      <SingleRecordLinkValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
@@ -568,9 +568,7 @@ interface CheckboxCellProps {
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   const { value, field, recordID } = props;
 
-  return (
-    <FieldCheckboxValueEdit recordID={recordID} value={value} field={field} />
-  );
+  return <CheckboxValueEdit recordID={recordID} value={value} field={field} />;
 });
 
 interface DateCellProps {
@@ -586,7 +584,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
     <PopoverWrapper
       contentHeight={400}
       content={({ onRequestClose }) => (
-        <FieldDateValueEdit
+        <DateValueEdit
           recordID={recordID}
           field={field}
           value={value}
@@ -594,7 +592,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
         />
       )}
     >
-      <FieldDateValueView value={value} field={field} />
+      <DateValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });

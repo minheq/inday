@@ -6,20 +6,20 @@ import {
   SingleCollaboratorFieldValue,
 } from '../../data/fields';
 import { RecordID } from '../../data/records';
-import { FieldSingleSelectKindValueEdit } from './single_select_kind_value_edit';
+import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 import { useGetCollaborators } from '../../data/store';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { Collaborator, CollaboratorID } from '../../data/collaborators';
 
-interface FieldSingleCollaboratorValueEditProps {
+interface SingleCollaboratorValueEditProps {
   recordID: RecordID;
   field: SingleCollaboratorField;
   value: SingleCollaboratorFieldValue;
   onDone: () => void;
 }
 
-export function FieldSingleCollaboratorValueEdit(
-  props: FieldSingleCollaboratorValueEditProps,
+export function SingleCollaboratorValueEdit(
+  props: SingleCollaboratorValueEditProps,
 ): JSX.Element {
   const { recordID, field, value, onDone } = props;
   const collaborators = useGetCollaborators();
@@ -27,7 +27,7 @@ export function FieldSingleCollaboratorValueEdit(
   const options = useGetCollaboratorOptions(collaborators);
 
   return (
-    <FieldSingleSelectKindValueEdit<SingleCollaboratorFieldValue>
+    <SingleSelectKindValueEdit<SingleCollaboratorFieldValue>
       recordID={recordID}
       fieldID={field.id}
       renderLabel={renderCollaborator}

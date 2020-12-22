@@ -6,13 +6,13 @@ import {
   SingleLineTextFieldValue,
 } from '../../data/fields';
 
-interface FieldSingleLineTextValueViewProps {
+interface SingleLineTextValueViewProps {
   field: SingleLineTextField;
   value: SingleLineTextFieldValue;
 }
 
-export function FieldSingleLineTextValueView(
-  props: FieldSingleLineTextValueViewProps,
+export function SingleLineTextValueView(
+  props: SingleLineTextValueViewProps,
 ): JSX.Element {
   const { value } = props;
 

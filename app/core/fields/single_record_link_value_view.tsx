@@ -6,13 +6,13 @@ import {
 } from '../../data/fields';
 import { RecordLinkBadge } from './record_link_badge';
 
-interface FieldSingleRecordLinkValueViewProps {
+interface SingleRecordLinkValueViewProps {
   field: SingleRecordLinkField;
   value: SingleRecordLinkFieldValue;
 }
 
-export function FieldSingleRecordLinkValueView(
-  props: FieldSingleRecordLinkValueViewProps,
+export function SingleRecordLinkValueView(
+  props: SingleRecordLinkValueViewProps,
 ): JSX.Element {
   const { value } = props;
 

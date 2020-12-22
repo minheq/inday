@@ -7,13 +7,13 @@ import {
 } from '../../data/fields';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 
-interface FieldSingleCollaboratorValueViewProps {
+interface SingleCollaboratorValueViewProps {
   field: SingleCollaboratorField;
   value: SingleCollaboratorFieldValue;
 }
 
-export function FieldSingleCollaboratorValueView(
-  props: FieldSingleCollaboratorValueViewProps,
+export function SingleCollaboratorValueView(
+  props: SingleCollaboratorValueViewProps,
 ): JSX.Element {
   const { value } = props;
 

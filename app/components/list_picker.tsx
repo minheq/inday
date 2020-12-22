@@ -196,13 +196,17 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
           {renderLabel ? (
             renderLabel(option.value, selected)
           ) : (
-            <Text>{option.label}</Text>
+            <View style={styles.labelWrapper}>
+              <Text>{option.label}</Text>
+            </View>
           )}
-          {renderCheck ? (
-            renderCheck(option.value, selected)
-          ) : selected ? (
-            <Icon name="CheckThick" color="primary" />
-          ) : null}
+          <View style={styles.checkWrapper}>
+            {renderCheck ? (
+              renderCheck(option.value, selected)
+            ) : selected ? (
+              <Icon name="CheckThick" color="primary" />
+            ) : null}
+          </View>
         </Fragment>
       )}
     </Button>
@@ -270,6 +274,12 @@ const styles = StyleSheet.create({
   },
   listItemContainer: {
     marginBottom: 4,
+  },
+  checkWrapper: {
+    paddingLeft: 16,
+  },
+  labelWrapper: {
+    flex: 1,
   },
   listItem: {
     height: 40,

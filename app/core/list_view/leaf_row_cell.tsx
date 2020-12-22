@@ -95,33 +95,33 @@ import {
   ViewMode,
 } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
-import { FieldDateValueEdit } from '../fields/date_value_edit';
-import { FieldMultiCollaboratorValueEdit } from '../fields/multi_collaborator_value_edit';
-import { FieldSingleCollaboratorValueEdit } from '../fields/single_collaborator_value_edit';
-import { FieldSingleOptionValueEdit } from '../fields/single_option_value_edit';
-import { FieldMultiOptionValueEdit } from '../fields/multi_option_value_edit';
-import { FieldMultiRecordLinkValueEdit } from '../fields/multi_record_link_value_edit';
-import { FieldSingleRecordLinkValueEdit } from '../fields/single_record_link_value_edit';
-import { FieldTextKindValueEdit } from '../fields/text_kind_value_edit';
-import { FieldNumberKindValueEdit } from '../fields/number_kind_value_edit';
-import { FieldMultiLineTextValueEdit } from '../fields/multi_line_text_value_edit';
-import { FieldNumberValueView } from '../fields/number_value_view';
-import { FieldCheckboxValueEdit } from '../fields/checkbox_value_edit';
-import { FieldSingleOptionValueView } from '../fields/single_option_value_view';
-import { FieldMultiOptionValueView } from '../fields/multi_option_value_view';
-import { FieldMultiCollaboratorValueView } from '../fields/multi_collaborator_value_view';
-import { FieldSingleCollaboratorValueView } from '../fields/single_collaborator_value_view';
-import { FieldSingleRecordLinkValueView } from '../fields/single_record_link_value_view';
-import { FieldMultiRecordLinkValueView } from '../fields/multi_record_link_value_view';
-import { FieldCurrencyValueView } from '../fields/currency_value_view';
-import { FieldDateValueView } from '../fields/date_value_view';
-import { FieldEmailValueView } from '../fields/email_value_view';
-import { FieldEmailValueActions } from '../fields/email_value_actions';
-import { FieldURLValueActions } from '../fields/url_value_actions';
-import { FieldPhoneNumberValueActions } from '../fields/phone_number_value_actions';
-import { FieldSingleLineTextValueView } from '../fields/single_line_text_value_view';
-import { FieldURLValueView } from '../fields/url_value_view';
-import { FieldPhoneNumberValueView } from '../fields/phone_number_value_view';
+import { DateValueEdit } from '../fields/date_value_edit';
+import { MultiCollaboratorValueEdit } from '../fields/multi_collaborator_value_edit';
+import { SingleCollaboratorValueEdit } from '../fields/single_collaborator_value_edit';
+import { SingleOptionValueEdit } from '../fields/single_option_value_edit';
+import { MultiOptionValueEdit } from '../fields/multi_option_value_edit';
+import { MultiRecordLinkValueEdit } from '../fields/multi_record_link_value_edit';
+import { SingleRecordLinkValueEdit } from '../fields/single_record_link_value_edit';
+import { TextKindValueEdit } from '../fields/text_kind_value_edit';
+import { NumberKindValueEdit } from '../fields/number_kind_value_edit';
+import { MultiLineTextValueEdit } from '../fields/multi_line_text_value_edit';
+import { NumberValueView } from '../fields/number_value_view';
+import { CheckboxValueEdit } from '../fields/checkbox_value_edit';
+import { SingleOptionValueView } from '../fields/single_option_value_view';
+import { MultiOptionValueView } from '../fields/multi_option_value_view';
+import { MultiCollaboratorValueView } from '../fields/multi_collaborator_value_view';
+import { SingleCollaboratorValueView } from '../fields/single_collaborator_value_view';
+import { SingleRecordLinkValueView } from '../fields/single_record_link_value_view';
+import { MultiRecordLinkValueView } from '../fields/multi_record_link_value_view';
+import { CurrencyValueView } from '../fields/currency_value_view';
+import { DateValueView } from '../fields/date_value_view';
+import { EmailValueView } from '../fields/email_value_view';
+import { EmailValueActions } from '../fields/email_value_actions';
+import { URLValueActions } from '../fields/url_value_actions';
+import { PhoneNumberValueActions } from '../fields/phone_number_value_actions';
+import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
+import { URLValueView } from '../fields/url_value_view';
+import { PhoneNumberValueView } from '../fields/phone_number_value_view';
 import { assertUnreached } from '../../../lib/lang_utils';
 import { PopoverButton } from '../../components/popover_button';
 import { Slide } from '../../components/slide';
@@ -411,7 +411,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={styles.checkboxCellRoot}>
-      <FieldCheckboxValueEdit recordID={recordID} field={field} value={value} />
+      <CheckboxValueEdit recordID={recordID} field={field} value={value} />
     </View>
   );
 });
@@ -428,7 +428,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <FieldNumberKindValueEdit<CurrencyFieldValue>
+      <NumberKindValueEdit<CurrencyFieldValue>
         autoFocus
         value={value}
         recordID={recordID}
@@ -438,7 +438,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
     );
   }
 
-  const child = <FieldCurrencyValueView value={value} field={field} />;
+  const child = <CurrencyValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
@@ -518,14 +518,14 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   useCellKeyBindings();
 
-  const child = <FieldDateValueView value={value} field={field} />;
+  const child = <DateValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
       <PopoverButton
         contentHeight={400}
         content={({ onRequestClose }) => (
-          <FieldDateValueEdit
+          <DateValueEdit
             recordID={recordID}
             field={field}
             value={value}
@@ -555,7 +555,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindValueEdit<EmailFieldValue>
+      <TextKindValueEdit<EmailFieldValue>
         autoFocus
         field={field}
         recordID={recordID}
@@ -565,14 +565,14 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     );
   }
 
-  const child = <FieldEmailValueView value={value} field={field} />;
+  const child = <EmailValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
       <View style={styles.focusedCellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
-          <FieldEmailValueActions value={value} />
+          <EmailValueActions value={value} />
         </View>
       </View>
     );
@@ -590,33 +590,29 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const {
-    recordID,
-    cell,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { recordID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  if (cell.state === 'editing') {
-    return (
-      <FieldMultiCollaboratorValueEdit
-        recordID={recordID}
-        field={field}
-        value={value}
-        onDone={onStopEditing}
-      />
-    );
-  }
-
-  const child = <FieldMultiCollaboratorValueView value={value} field={field} />;
+  const child = <MultiCollaboratorValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+      <PopoverButton
+        contentHeight={400}
+        content={({ onRequestClose }) => (
+          <MultiCollaboratorValueEdit
+            recordID={recordID}
+            field={field}
+            value={value}
+            onDone={onRequestClose}
+          />
+        )}
+        containerStyle={styles.cellContainerButton}
+        style={styles.cellButton}
+      >
         {child}
-      </Pressable>
+      </PopoverButton>
     );
   }
 
@@ -643,7 +639,7 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldMultiRecordLinkValueEdit
+      <MultiRecordLinkValueEdit
         recordID={recordID}
         field={field}
         value={value}
@@ -652,7 +648,7 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
     );
   }
 
-  const child = <FieldMultiRecordLinkValueView value={value} field={field} />;
+  const child = <MultiRecordLinkValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
@@ -679,7 +675,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldMultiLineTextValueEdit
+      <MultiLineTextValueEdit
         autoFocus
         recordID={recordID}
         field={field}
@@ -715,33 +711,29 @@ const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
   const { value, field } = props;
-  const {
-    recordID,
-    cell,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { recordID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  if (cell.state === 'editing') {
-    return (
-      <FieldMultiOptionValueEdit
-        recordID={recordID}
-        field={field}
-        value={value}
-        onDone={onStopEditing}
-      />
-    );
-  }
-
-  const child = <FieldMultiOptionValueView value={value} field={field} />;
+  const child = <MultiOptionValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+      <PopoverButton
+        contentHeight={400}
+        content={({ onRequestClose }) => (
+          <MultiOptionValueEdit
+            recordID={recordID}
+            field={field}
+            value={value}
+            onDone={onRequestClose}
+          />
+        )}
+        containerStyle={styles.cellContainerButton}
+        style={styles.cellButton}
+      >
         {child}
-      </Pressable>
+      </PopoverButton>
     );
   }
 
@@ -760,7 +752,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <FieldNumberKindValueEdit<NumberFieldKindValue>
+      <NumberKindValueEdit<NumberFieldKindValue>
         autoFocus
         value={value}
         recordID={recordID}
@@ -770,7 +762,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     );
   }
 
-  const child = <FieldNumberValueView field={field} value={value} />;
+  const child = <NumberValueView field={field} value={value} />;
 
   if (cell.state === 'focused') {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
@@ -793,7 +785,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindValueEdit<PhoneNumberFieldValue>
+      <TextKindValueEdit<PhoneNumberFieldValue>
         autoFocus
         field={field}
         recordID={recordID}
@@ -803,14 +795,14 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
     );
   }
 
-  const child = <FieldPhoneNumberValueView value={value} field={field} />;
+  const child = <PhoneNumberValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
       <View style={styles.focusedCellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
-          <FieldPhoneNumberValueActions value={value} />
+          <PhoneNumberValueActions value={value} />
         </View>
       </View>
     );
@@ -828,35 +820,29 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const {
-    recordID,
-    cell,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { recordID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  if (cell.state === 'editing') {
-    return (
-      <FieldSingleCollaboratorValueEdit
-        recordID={recordID}
-        field={field}
-        value={value}
-        onDone={onStopEditing}
-      />
-    );
-  }
-
-  const child = (
-    <FieldSingleCollaboratorValueView value={value} field={field} />
-  );
+  const child = <SingleCollaboratorValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+      <PopoverButton
+        contentHeight={400}
+        content={({ onRequestClose }) => (
+          <SingleCollaboratorValueEdit
+            recordID={recordID}
+            field={field}
+            value={value}
+            onDone={onRequestClose}
+          />
+        )}
+        containerStyle={styles.cellContainerButton}
+        style={styles.cellButton}
+      >
         {child}
-      </Pressable>
+      </PopoverButton>
     );
   }
 
@@ -883,7 +869,7 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldSingleRecordLinkValueEdit
+      <SingleRecordLinkValueEdit
         recordID={recordID}
         field={field}
         value={value}
@@ -892,7 +878,7 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
     );
   }
 
-  const child = <FieldSingleRecordLinkValueView value={value} field={field} />;
+  const child = <SingleRecordLinkValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
@@ -919,7 +905,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindValueEdit<SingleLineTextFieldValue>
+      <TextKindValueEdit<SingleLineTextFieldValue>
         autoFocus
         field={field}
         recordID={recordID}
@@ -929,7 +915,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
     );
   }
 
-  const child = <FieldSingleLineTextValueView value={value} field={field} />;
+  const child = <SingleLineTextValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>;
@@ -947,33 +933,29 @@ const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
   const { value, field } = props;
-  const {
-    recordID,
-    cell,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { recordID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  if (cell.state === 'editing') {
-    return (
-      <FieldSingleOptionValueEdit
-        recordID={recordID}
-        field={field}
-        value={value}
-        onDone={onStopEditing}
-      />
-    );
-  }
-
-  const child = <FieldSingleOptionValueView value={value} field={field} />;
+  const child = <SingleOptionValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+      <PopoverButton
+        contentHeight={400}
+        content={({ onRequestClose }) => (
+          <SingleOptionValueEdit
+            recordID={recordID}
+            field={field}
+            value={value}
+            onDone={onRequestClose}
+          />
+        )}
+        containerStyle={styles.cellContainerButton}
+        style={styles.cellButton}
+      >
         {child}
-      </Pressable>
+      </PopoverButton>
     );
   }
 
@@ -992,7 +974,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <FieldTextKindValueEdit<URLFieldValue>
+      <TextKindValueEdit<URLFieldValue>
         autoFocus
         field={field}
         recordID={recordID}
@@ -1002,14 +984,14 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
     );
   }
 
-  const child = <FieldURLValueView value={value} field={field} />;
+  const child = <URLValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
       <View style={styles.focusedCellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
-          <FieldURLValueActions value={value} />
+          <URLValueActions value={value} />
         </View>
       </View>
     );

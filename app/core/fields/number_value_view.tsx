@@ -4,14 +4,12 @@ import { Text } from '../../components/text';
 import { NumberField, NumberFieldValue } from '../../data/fields';
 import { getSystemLocale } from '../../lib/locale';
 
-interface FieldNumberValueViewProps {
+interface NumberValueViewProps {
   field: NumberField;
   value: NumberFieldValue;
 }
 
-export function FieldNumberValueView(
-  props: FieldNumberValueViewProps,
-): JSX.Element {
+export function NumberValueView(props: NumberValueViewProps): JSX.Element {
   const { value, field } = props;
 
   if (value !== null) {

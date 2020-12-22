@@ -4,12 +4,10 @@ import { Row } from '../../components/row';
 import { Text } from '../../components/text';
 import { URLFieldValue } from '../../data/fields';
 
-interface FieldURLValueActionsProps {
+interface URLValueActionsProps {
   value: URLFieldValue;
 }
-export function FieldURLValueActions(
-  props: FieldURLValueActionsProps,
-): JSX.Element {
+export function URLValueActions(props: URLValueActionsProps): JSX.Element {
   const { value } = props;
 
   const handlePress = useCallback(() => {

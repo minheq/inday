@@ -20,7 +20,6 @@ export interface PopoverTriggerProps {
 export function PopoverTrigger(props: PopoverTriggerProps): JSX.Element {
   const { contentHeight, content, popoverContainerStyle, children } = props;
   const ref = useRef<View>(null);
-  const themeStyles = useThemeStyles();
 
   const [state, setState] = useState({
     anchor: { x: 0, y: 0 },
@@ -63,7 +62,7 @@ export function PopoverTrigger(props: PopoverTriggerProps): JSX.Element {
         onRequestClose={handleRequestClose}
       >
         {({ onRequestClose }) => (
-          <PopoverContainer>
+          <PopoverContainer popoverContainerStyle={popoverContainerStyle}>
             {typeof content === 'function'
               ? content({ onRequestClose })
               : content}

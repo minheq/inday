@@ -3,12 +3,10 @@ import { Pressable } from 'react-native';
 import { Text } from '../../components/text';
 import { EmailFieldValue } from '../../data/fields';
 
-interface FieldEmailValueActionsProps {
+interface EmailValueActionsProps {
   value: EmailFieldValue;
 }
-export function FieldEmailValueActions(
-  props: FieldEmailValueActionsProps,
-): JSX.Element {
+export function EmailValueActions(props: EmailValueActionsProps): JSX.Element {
   const { value } = props;
 
   const handlePress = useCallback(() => {

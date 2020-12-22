@@ -3,14 +3,12 @@ import React from 'react';
 import { Text } from '../../components/text';
 import { EmailField, EmailFieldValue } from '../../data/fields';
 
-interface FieldEmailValueViewProps {
+interface EmailValueViewProps {
   field: EmailField;
   value: EmailFieldValue;
 }
 
-export function FieldEmailValueView(
-  props: FieldEmailValueViewProps,
-): JSX.Element {
+export function EmailValueView(props: EmailValueViewProps): JSX.Element {
   const { value } = props;
 
   return (

@@ -5,14 +5,12 @@ import { Text } from '../../components/text';
 import { DateField, DateFieldValue } from '../../data/fields';
 import { getSystemLocale } from '../../lib/locale';
 
-interface FieldDateValueViewProps {
+interface DateValueViewProps {
   field: DateField;
   value: DateFieldValue;
 }
 
-export function FieldDateValueView(
-  props: FieldDateValueViewProps,
-): JSX.Element {
+export function DateValueView(props: DateValueViewProps): JSX.Element {
   const { value } = props;
 
   if (value === null) {

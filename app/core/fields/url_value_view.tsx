@@ -3,12 +3,12 @@ import React from 'react';
 import { Text } from '../../components/text';
 import { URLField, URLFieldValue } from '../../data/fields';
 
-interface FieldURLValueViewProps {
+interface URLValueViewProps {
   field: URLField;
   value: URLFieldValue;
 }
 
-export function FieldURLValueView(props: FieldURLValueViewProps): JSX.Element {
+export function URLValueView(props: URLValueViewProps): JSX.Element {
   const { value } = props;
 
   return (

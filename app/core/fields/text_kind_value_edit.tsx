@@ -12,7 +12,7 @@ import { TextFieldKind, TextFieldKindValue } from '../../data/fields';
 import { RecordID } from '../../data/records';
 import { useUpdateRecordFieldValue } from '../../data/store';
 
-interface FieldTextKindValueEditProps<T extends TextFieldKindValue> {
+interface TextKindValueEditProps<T extends TextFieldKindValue> {
   autoFocus: boolean;
   recordID: RecordID;
   field: TextFieldKind;
@@ -20,8 +20,8 @@ interface FieldTextKindValueEditProps<T extends TextFieldKindValue> {
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
 }
 
-export function FieldTextKindValueEdit<T extends TextFieldKindValue>(
-  props: FieldTextKindValueEditProps<T>,
+export function TextKindValueEdit<T extends TextFieldKindValue>(
+  props: TextKindValueEditProps<T>,
 ): JSX.Element {
   const { autoFocus, recordID, field, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();

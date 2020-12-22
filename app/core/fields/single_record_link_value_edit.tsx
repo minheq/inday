@@ -7,22 +7,22 @@ import {
   stringifyFieldValue,
 } from '../../data/fields';
 import { Record, RecordID } from '../../data/records';
-import { FieldSingleSelectKindValueEdit } from './single_select_kind_value_edit';
+import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 import {
   useGetCollectionRecords,
   useGetRecordPrimaryFieldValueCallback,
 } from '../../data/store';
 import { RecordLinkBadge } from './record_link_badge';
 
-interface FieldSingleRecordLinkValueEditProps {
+interface SingleRecordLinkValueEditProps {
   recordID: RecordID;
   field: SingleRecordLinkField;
   value: SingleRecordLinkFieldValue;
   onDone: () => void;
 }
 
-export function FieldSingleRecordLinkValueEdit(
-  props: FieldSingleRecordLinkValueEditProps,
+export function SingleRecordLinkValueEdit(
+  props: SingleRecordLinkValueEditProps,
 ): JSX.Element {
   const { recordID, field, value, onDone } = props;
   const renderRecordLink = useRenderRecordLink();
@@ -30,7 +30,7 @@ export function FieldSingleRecordLinkValueEdit(
   const options = useRecordLinkOptions(records);
 
   return (
-    <FieldSingleSelectKindValueEdit<SingleRecordLinkFieldValue>
+    <SingleSelectKindValueEdit<SingleRecordLinkFieldValue>
       recordID={recordID}
       fieldID={field.id}
       renderLabel={renderRecordLink}

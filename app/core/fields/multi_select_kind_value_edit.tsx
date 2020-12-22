@@ -12,7 +12,7 @@ import {
 import { RecordID } from '../../data/records';
 import { useUpdateRecordFieldValue } from '../../data/store';
 
-interface FieldMultiSelectKindValueEditProps<T> {
+interface MultiSelectKindValueEditProps<T> {
   recordID: RecordID;
   fieldID: FieldID;
   value: T[];
@@ -21,9 +21,9 @@ interface FieldMultiSelectKindValueEditProps<T> {
   onDone: () => void;
 }
 
-export function FieldMultiSelectKindValueEdit<
+export function MultiSelectKindValueEdit<
   T extends CollaboratorID | RecordID | SelectOptionID
->(props: FieldMultiSelectKindValueEditProps<T>): JSX.Element {
+>(props: MultiSelectKindValueEditProps<T>): JSX.Element {
   const { onDone, value, options, renderLabel, recordID, fieldID } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<MultiSelectFieldKindValue>();
 

@@ -12,15 +12,13 @@ import {
 import { RecordID } from '../../data/records';
 import { useUpdateRecordFieldValue } from '../../data/store';
 
-interface FieldCheckboxValueEditProps {
+interface CheckboxValueEditProps {
   recordID: RecordID;
   field: CheckboxField;
   value: CheckboxFieldValue;
 }
 
-export function FieldCheckboxValueEdit(
-  props: FieldCheckboxValueEditProps,
-): JSX.Element {
+export function CheckboxValueEdit(props: CheckboxValueEditProps): JSX.Element {
   const { recordID, value, field } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
 

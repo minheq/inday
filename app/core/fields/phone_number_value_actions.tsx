@@ -4,11 +4,11 @@ import { Row } from '../../components/row';
 import { Text } from '../../components/text';
 import { PhoneNumberFieldValue } from '../../data/fields';
 
-interface FieldPhoneNumberValueActionsProps {
+interface PhoneNumberValueActionsProps {
   value: PhoneNumberFieldValue;
 }
-export function FieldPhoneNumberValueActions(
-  props: FieldPhoneNumberValueActionsProps,
+export function PhoneNumberValueActions(
+  props: PhoneNumberValueActionsProps,
 ): JSX.Element {
   const { value } = props;
 

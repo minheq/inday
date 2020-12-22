@@ -4,13 +4,13 @@ import { Row } from '../../components/row';
 import { SingleOptionFieldValue, SingleOptionField } from '../../data/fields';
 import { OptionBadge } from './option_badge';
 
-interface FieldSingleOptionValueViewProps {
+interface SingleOptionValueViewProps {
   field: SingleOptionField;
   value: SingleOptionFieldValue;
 }
 
-export function FieldSingleOptionValueView(
-  props: FieldSingleOptionValueViewProps,
+export function SingleOptionValueView(
+  props: SingleOptionValueViewProps,
 ): JSX.Element {
   const { value, field } = props;
 

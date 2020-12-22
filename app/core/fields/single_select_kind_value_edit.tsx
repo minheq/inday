@@ -7,9 +7,7 @@ import { FieldID, SingleSelectFieldKindValue } from '../../data/fields';
 import { RecordID } from '../../data/records';
 import { useUpdateRecordFieldValue } from '../../data/store';
 
-interface FieldSingleSelectKindValueEditProps<
-  T extends SingleSelectFieldKindValue
-> {
+interface SingleSelectKindValueEditProps<T extends SingleSelectFieldKindValue> {
   recordID: RecordID;
   fieldID: FieldID;
   value: T;
@@ -18,9 +16,9 @@ interface FieldSingleSelectKindValueEditProps<
   onDone: () => void;
 }
 
-export function FieldSingleSelectKindValueEdit<
-  T extends SingleSelectFieldKindValue
->(props: FieldSingleSelectKindValueEditProps<T>): JSX.Element {
+export function SingleSelectKindValueEdit<T extends SingleSelectFieldKindValue>(
+  props: SingleSelectKindValueEditProps<T>,
+): JSX.Element {
   const { onDone, value, options, renderLabel, recordID, fieldID } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<SingleSelectFieldKindValue>();
 

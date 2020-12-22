@@ -4,14 +4,12 @@ import { Text } from '../../components/text';
 import { CurrencyField, CurrencyFieldValue } from '../../data/fields';
 import { getSystemLocale } from '../../lib/locale';
 
-interface FieldCurrencyValueViewProps {
+interface CurrencyValueViewProps {
   field: CurrencyField;
   value: CurrencyFieldValue;
 }
 
-export function FieldCurrencyValueView(
-  props: FieldCurrencyValueViewProps,
-): JSX.Element {
+export function CurrencyValueView(props: CurrencyValueViewProps): JSX.Element {
   const { value, field } = props;
 
   if (value === null) {

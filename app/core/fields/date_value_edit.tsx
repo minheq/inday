@@ -7,16 +7,14 @@ import { DateField, DateFieldValue } from '../../data/fields';
 import { RecordID } from '../../data/records';
 import { useUpdateRecordFieldValue } from '../../data/store';
 
-interface FieldDateValueEditProps {
+interface DateValueEditProps {
   recordID: RecordID;
   field: DateField;
   value: DateFieldValue;
   onDone: () => void;
 }
 
-export function FieldDateValueEdit(
-  props: FieldDateValueEditProps,
-): JSX.Element {
+export function DateValueEdit(props: DateValueEditProps): JSX.Element {
   const { value, recordID, field, onDone } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<DateFieldValue>();
 

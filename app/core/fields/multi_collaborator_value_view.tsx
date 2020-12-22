@@ -8,13 +8,13 @@ import {
 } from '../../data/fields';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 
-interface FieldMultiCollaboratorValueViewProps {
+interface MultiCollaboratorValueViewProps {
   field: MultiCollaboratorField;
   value: MultiCollaboratorFieldValue;
 }
 
-export function FieldMultiCollaboratorValueView(
-  props: FieldMultiCollaboratorValueViewProps,
+export function MultiCollaboratorValueView(
+  props: MultiCollaboratorValueViewProps,
 ): JSX.Element {
   const { value } = props;
 

@@ -5,13 +5,13 @@ import { Row } from '../../components/row';
 import { MultiOptionFieldValue, MultiOptionField } from '../../data/fields';
 import { OptionBadge } from './option_badge';
 
-interface FieldMultiOptionValueViewProps {
+interface MultiOptionValueViewProps {
   field: MultiOptionField;
   value: MultiOptionFieldValue;
 }
 
-export function FieldMultiOptionValueView(
-  props: FieldMultiOptionValueViewProps,
+export function MultiOptionValueView(
+  props: MultiOptionValueViewProps,
 ): JSX.Element {
   const { value, field } = props;
 
