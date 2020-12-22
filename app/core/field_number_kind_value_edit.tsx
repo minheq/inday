@@ -4,6 +4,7 @@ import {
   TextInputKeyPressEventData,
   TextInput,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { toNumber } from '../../lib/number_utils';
 import { useThemeStyles } from '../components/theme';
@@ -23,7 +24,7 @@ interface FieldNumberKindValueEditProps<T extends NumberFieldKindValue> {
 export function FieldNumberKindValueEdit<T extends NumberFieldKindValue>(
   props: FieldNumberKindValueEditProps<T>,
 ): JSX.Element {
-  const { recordID, field, value, onKeyPress } = props;
+  const { autoFocus, recordID, field, value, onKeyPress } = props;
   const updateRecordFieldValue = useUpdateRecordFieldValue<NumberFieldKindValue>();
   const themeStyles = useThemeStyles();
 
@@ -36,6 +37,7 @@ export function FieldNumberKindValueEdit<T extends NumberFieldKindValue>(
 
   return (
     <TextInput
+      autoFocus={autoFocus}
       onKeyPress={onKeyPress}
       onChangeText={handleChange}
       value={value ? value.toString() : ''}
@@ -46,9 +48,15 @@ export function FieldNumberKindValueEdit<T extends NumberFieldKindValue>(
 
 const styles = StyleSheet.create({
   numberCellInput: {
-    height: 32,
-    borderRadius: tokens.border.radius,
+    width: '100%',
+    height: '100%',
+    paddingHorizontal: 8,
     textAlign: 'right',
     ...tokens.text.size.md,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
 });

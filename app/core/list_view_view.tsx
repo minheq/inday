@@ -41,7 +41,7 @@ import { isEmpty } from '../../lib/lang_utils';
 import { last } from '../../lib/array_utils';
 import { Group } from '../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../data/sorts';
-import { LeafRowCell } from './list_view_leaf_row_cell';
+import { LeafRowCell, LEAF_ROW_HEIGHT } from './list_view_leaf_row_cell';
 import { ListViewHeader, ListViewHeaderCell } from './list_view_header';
 import { ListViewFooter } from './list_view_footer';
 import { GroupRow } from './list_view_group_row';
@@ -60,7 +60,6 @@ interface ListViewViewProps {
 }
 
 const FIELD_ROW_HEIGHT = 40;
-const RECORD_ROW_HEIGHT = 40;
 
 export const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewView_ActiveCell',
@@ -141,7 +140,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const fieldID = columnToFieldIDCache[c.column];
       const recordID = rowToRecordIDCache.get([...c.path, c.row]);
       const primary = c.column === 1;
-      const height = FIELD_ROW_HEIGHT;
 
       if (recordID === undefined) {
         throw new Error('No corresponding recordID found for row path.');
@@ -154,7 +152,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           viewID={view.id}
           fieldID={fieldID}
           primary={primary}
-          height={height}
         />
       );
     },
@@ -239,7 +236,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
               renderHeaderCell={renderHeaderCell}
               renderHeader={renderHeader}
               renderFooter={renderFooter}
-              leafRowHeight={RECORD_ROW_HEIGHT}
+              leafRowHeight={LEAF_ROW_HEIGHT}
               headerHeight={FIELD_ROW_HEIGHT}
               columns={columns}
               fixedColumnCount={fixedFieldCount}

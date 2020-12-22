@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TextInputKeyPressEventData,
   TextInput,
+  Platform,
 } from 'react-native';
 import { useThemeStyles } from '../components/theme';
 import { tokens } from '../components/tokens';
@@ -46,8 +47,14 @@ export function FieldTextKindValueEdit<T extends TextFieldKindValue>(
 
 const styles = StyleSheet.create({
   textCellInput: {
-    height: 32,
-    borderRadius: tokens.border.radius,
+    width: '100%',
+    height: '100%',
+    paddingHorizontal: 8,
     ...tokens.text.size.md,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
 });
