@@ -366,7 +366,9 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       onPress={onPress}
     >
       {primary === true && (
-        <SelectCheckbox open={mode === 'select'} selected={selected} />
+        <View style={mode === 'select' && styles.selectCheckboxWrapper}>
+          <SelectCheckbox open={mode === 'select'} selected={selected} />
+        </View>
       )}
       {renderCell()}
       {primary === true && mode === 'edit' && cell.state !== 'editing' && (
@@ -1379,6 +1381,9 @@ const styles = StyleSheet.create({
   },
   rowMoreButton: {
     borderRadius: 999,
+  },
+  selectCheckboxWrapper: {
+    paddingLeft: 8,
   },
   rowMoreButtonWrapper: {
     paddingRight: 8,
