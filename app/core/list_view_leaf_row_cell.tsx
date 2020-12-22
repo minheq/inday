@@ -14,7 +14,6 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import { Icon } from '../components/icon';
 import { Text } from '../components/text';
 import { tokens } from '../components/tokens';
 import {
@@ -90,8 +89,6 @@ import {
 import { StatefulLeafRowCell } from '../components/grid_renderer.common';
 import { isNumberString, toNumber } from '../../lib/number_utils';
 import { useThemeStyles } from '../components/theme';
-import { Slide } from '../components/slide';
-import { ContextMenuButton } from '../components/context_menu_button';
 import {
   activeCellState,
   useListViewViewContext,
@@ -129,6 +126,11 @@ import { FieldSingleLineTextValueView } from './field_single_line_text_value_vie
 import { FieldURLValueView } from './field_url_value_view';
 import { FieldPhoneNumberValueView } from './field_phone_number_value_view';
 import { assertUnreached } from '../../lib/lang_utils';
+import { PopoverButton } from '../components/popover_button';
+import { Slide } from '../components/slide';
+import { ContextMenuButton } from '../components/context_menu_button';
+import { Icon } from '../components/icon';
+import { CheckboxStatic } from '../components/checkbox_static';
 
 export const LEAF_ROW_HEIGHT = 40;
 
@@ -285,7 +287,6 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   const { cell, primary, height, field, width, value, mode, onPress } = props;
   const themeStyles = useThemeStyles();
   const { selected } = useLeafRowContext();
-  const options = useLeafRowContextMenuOptions();
 
   const renderCell = useCallback((): JSX.Element => {
     switch (field.type) {
@@ -345,7 +346,7 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       themeStyles.border.default,
       mode === 'edit' && themeStyles.background.content,
       primary && styles.primaryCell,
-      primary && cell.state !== 'default' && styles.focusedPrimaryLeafRowCell,
+      primary && cell.state !== 'default' && styles.focusedPrimaryCell,
       cell.state !== 'default' && styles.focusedLeafRowCell,
       cell.state !== 'default' && themeStyles.border.focused,
       cell.state !== 'default' && {
@@ -366,48 +367,31 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       onPress={onPress}
     >
       {primary === true && (
-        <View style={mode === 'select' && styles.selectCheckboxWrapper}>
-          <SelectCheckbox open={mode === 'select'} selected={selected} />
+        <View style={styles.selectCheckboxWrapper}>
+          <Slide open={mode === 'select'} width={32}>
+            <CheckboxStatic value={selected} />
+          </Slide>
         </View>
       )}
       {renderCell()}
       {primary === true && mode === 'edit' && cell.state !== 'editing' && (
-        <View style={styles.rowMoreButtonWrapper}>
-          <ContextMenuButton options={options} style={styles.rowMoreButton}>
-            <Icon name="Dots" />
-          </ContextMenuButton>
+        <View style={styles.dotsMenuWrapper}>
+          <DotsMenu />
         </View>
       )}
     </Pressable>
   );
 });
 
-interface SelectCheckboxProps {
-  open: boolean;
-  selected: boolean;
-}
-
-const SelectCheckbox = memo(function SelectCheckbox(
-  props: SelectCheckboxProps,
-) {
-  const { open, selected } = props;
-  const themeStyles = useThemeStyles();
+export function DotsMenu(): JSX.Element {
+  const options = useLeafRowContextMenuOptions();
 
   return (
-    <Slide open={open} width={32}>
-      <View
-        style={[
-          styles.selectCheckbox,
-          themeStyles.border.default,
-          selected && themeStyles.background.primary,
-          selected && themeStyles.border.primary,
-        ]}
-      >
-        {selected && <Icon name="Check" color="contrast" />}
-      </View>
-    </Slide>
+    <ContextMenuButton options={options} style={styles.dotsMenuButton}>
+      <Icon name="Dots" />
+    </ContextMenuButton>
   );
-});
+}
 
 interface CheckboxCellProps {
   value: CheckboxFieldValue;
@@ -429,7 +413,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   });
 
   return (
-    <View style={styles.checkboxCell}>
+    <View style={styles.checkboxCellRoot}>
       <FieldCheckboxValueEdit recordID={recordID} field={field} value={value} />
     </View>
   );
@@ -463,7 +447,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface NumberFieldKindCellFocusedProps {
@@ -492,7 +476,7 @@ function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
   });
 
   return (
-    <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+    <Pressable style={styles.focusedCellContainer} onPress={onStartEditing}>
       {children}
     </Pressable>
   );
@@ -520,7 +504,7 @@ function TextFieldKindCellFocused(props: TextFieldKindCellFocusedProps) {
   });
 
   return (
-    <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+    <Pressable style={styles.focusedCellContainer} onPress={onStartEditing}>
       {children}
     </Pressable>
   );
@@ -533,37 +517,33 @@ interface DateCellProps {
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value, field } = props;
-  const {
-    recordID,
-    cell,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { recordID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
-
-  if (cell.state === 'editing') {
-    return (
-      <FieldDateValueEdit
-        recordID={recordID}
-        field={field}
-        value={value}
-        onDone={onStopEditing}
-      />
-    );
-  }
 
   const child = <FieldDateValueView value={value} field={field} />;
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      <PopoverButton
+        contentHeight={400}
+        content={({ onRequestClose }) => (
+          <FieldDateValueEdit
+            recordID={recordID}
+            field={field}
+            value={value}
+            onDone={onRequestClose}
+          />
+        )}
+        containerStyle={styles.cellContainerButton}
+        style={styles.cellButton}
+      >
         {child}
-      </Pressable>
+      </PopoverButton>
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface EmailCellProps {
@@ -592,7 +572,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.focusWrapper}>
+      <View style={styles.focusedCellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
           <FieldEmailValueActions value={value} />
@@ -601,7 +581,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface MultiCollaboratorCellProps {
@@ -637,13 +617,13 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
       </Pressable>
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface MultiRecordLinkCellProps {
@@ -679,13 +659,13 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
       </Pressable>
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface MultiLineTextCellProps {
@@ -714,7 +694,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.focusedMultiLineTextCellContainer}>
+      <View>
         <TextFieldKindCellFocused>
           <Text>{value}</Text>
         </TextFieldKindCellFocused>
@@ -723,7 +703,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   }
 
   return (
-    <View style={styles.textCellContainer}>
+    <View style={styles.cellRoot}>
       <Text numberOfLines={1}>{value}</Text>
     </View>
   );
@@ -762,13 +742,13 @@ const MultiOptionCell = memo(function MultiOptionCell(
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
       </Pressable>
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface NumberCellProps {
@@ -799,7 +779,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface PhoneNumberCellProps {
@@ -830,7 +810,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.focusWrapper}>
+      <View style={styles.focusedCellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
           <FieldPhoneNumberValueActions value={value} />
@@ -839,7 +819,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface SingleCollaboratorCellProps {
@@ -877,13 +857,13 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
       </Pressable>
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface SingleRecordLinkCellProps {
@@ -919,13 +899,13 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
       </Pressable>
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface SingleLineTextCellProps {
@@ -958,7 +938,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
     return <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>;
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface SingleOptionCellProps {
@@ -994,13 +974,13 @@ const SingleOptionCell = memo(function SingleOptionCell(
 
   if (cell.state === 'focused') {
     return (
-      <Pressable style={styles.cellWrapper} onPress={onStartEditing}>
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
       </Pressable>
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface URLCellProps {
@@ -1029,7 +1009,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.focusWrapper}>
+      <View style={styles.focusedCellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
           <FieldURLValueActions value={value} />
@@ -1038,7 +1018,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
     );
   }
 
-  return <View style={styles.cellWrapper}>{child}</View>;
+  return <View style={styles.cellRoot}>{child}</View>;
 });
 
 interface UseCellKeyBindingsProps {
@@ -1349,7 +1329,6 @@ const styles = StyleSheet.create({
     overflowY: 'hidden',
     overflowX: 'hidden',
   },
-  focusedMultiLineTextCellContainer: {},
   focusedLeafRowCell: {
     height: 'auto',
     borderRadius: tokens.border.radius,
@@ -1360,42 +1339,35 @@ const styles = StyleSheet.create({
     borderLeftWidth: FOCUS_BORDER_WIDTH,
     borderRightWidth: FOCUS_BORDER_WIDTH,
   },
-  textCellContainer: {
-    height: 32,
-    flex: 1,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-  checkboxCell: {
+  checkboxCellRoot: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  selectCheckbox: {
-    borderRadius: 999,
-    width: 24,
-    height: 24,
-    borderWidth: 1,
+  cellRoot: {
+    flex: 1,
+    height: LEAF_ROW_HEIGHT,
+    paddingHorizontal: 8,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  rowMoreButton: {
-    borderRadius: 999,
+  focusedCellRoot: {
+    flex: 1,
+    justifyContent: 'center',
   },
-  selectCheckboxWrapper: {
-    paddingLeft: 8,
-  },
-  rowMoreButtonWrapper: {
-    paddingRight: 8,
-  },
-  cellWrapper: {
+  focusedCellContainer: {
     width: '100%',
     height: LEAF_ROW_HEIGHT,
     paddingHorizontal: 8,
     justifyContent: 'center',
   },
-  focusWrapper: {
+  cellContainerButton: {
+    height: LEAF_ROW_HEIGHT,
     flex: 1,
+  },
+  cellButton: {
+    flex: 1,
+    paddingHorizontal: 8,
+    justifyContent: 'center',
   },
   actionsWrapper: {
     paddingHorizontal: 8,
@@ -1405,7 +1377,16 @@ const styles = StyleSheet.create({
   primaryCell: {
     borderRightWidth: 2,
   },
-  focusedPrimaryLeafRowCell: {
+  focusedPrimaryCell: {
     paddingRight: 2,
+  },
+  dotsMenuWrapper: {
+    paddingRight: 8,
+  },
+  dotsMenuButton: {
+    borderRadius: 999,
+  },
+  selectCheckboxWrapper: {
+    paddingLeft: 8,
   },
 });
