@@ -71,57 +71,51 @@ export interface PopoverContentMeasurements {
   width: number;
 }
 
+/**
+ * Gets the anchor and height of the popover.
+ *
+ * TODO: Should convert this into test...
+ * If the content overflows the whole height of the window, cap the height to window size
+ * If the content overflows bottom of window from the bottom of the trigger, try to display content above the trigger
+ * If the content still overflow top of window, try to display the content
+ */
 export function getPopoverAnchorAndHeight(
   tm: PopoverTriggerMeasurements,
   cm: PopoverContentMeasurements,
   triggerOffset = 4,
   windowOffset = 16,
 ): [PopoverAnchor, number] {
-  const scaledSize = Dimensions.get('window');
+  const windowSize = Dimensions.get('window');
+  const triggerBottomY = tm.pageY + tm.height + triggerOffset;
+  const triggerTopY = tm.pageY - triggerOffset;
 
-  const bottomY = tm.pageY + tm.height + triggerOffset;
-  const topY = tm.pageY - triggerOffset - cm.height;
+  let height = cm.height;
+  let y = 0;
+  let x = 0;
 
-  const overflowsBottom = bottomY + cm.height > scaledSize.height;
+  const overflowsWindowHeight =
+    cm.height > windowSize.height - windowOffset * 2;
+  const overflowsWindowBottom = triggerBottomY + cm.height > windowSize.height;
 
-  let anchor: PopoverAnchor = { x: 0, y: 0 };
-  let popoverHeight = cm.height;
+  if (overflowsWindowHeight) {
+    y = windowOffset;
+    height = windowSize.height - windowOffset * 2;
+    // Overflow bottom from trigger's triggerBottomY
+  } else if (overflowsWindowBottom) {
+    const overflowsWindowTop = triggerTopY < cm.height;
 
-  if (overflowsBottom) {
-    const heightIfBottomY = scaledSize.height - bottomY;
-    const heightIfTopY = tm.pageY;
-
-    if (heightIfTopY < heightIfBottomY) {
-      anchor = {
-        x: tm.pageX,
-        y: bottomY,
-      };
-
-      if (scaledSize.height - bottomY < cm.height) {
-        popoverHeight = scaledSize.height - bottomY - windowOffset;
-      }
+    if (overflowsWindowTop) {
+      y = windowSize.height - windowOffset - cm.height;
     } else {
-      if (topY < 0) {
-        popoverHeight = tm.pageY - windowOffset;
-        anchor = {
-          x: tm.pageX,
-          y: windowOffset,
-        };
-      } else {
-        anchor = {
-          x: tm.pageX,
-          y: topY,
-        };
-      }
+      y = triggerTopY - triggerOffset - cm.height;
     }
   } else {
-    anchor = {
-      x: tm.pageX,
-      y: bottomY,
-    };
+    y = triggerBottomY;
   }
 
-  return [anchor, popoverHeight];
+  x = tm.pageX;
+
+  return [{ x, y }, height];
 }
 
 const styles = StyleSheet.create({

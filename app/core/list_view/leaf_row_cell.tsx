@@ -523,7 +523,6 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
   if (cell.state === 'focused') {
     return (
       <PopoverButton
-        contentHeight={400}
         content={({ onRequestClose }) => (
           <DateValueEdit
             recordID={recordID}
@@ -599,7 +598,6 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   if (cell.state === 'focused') {
     return (
       <PopoverButton
-        contentHeight={400}
         content={({ onRequestClose }) => (
           <MultiCollaboratorValueEdit
             recordID={recordID}
@@ -720,7 +718,6 @@ const MultiOptionCell = memo(function MultiOptionCell(
   if (cell.state === 'focused') {
     return (
       <PopoverButton
-        contentHeight={400}
         content={({ onRequestClose }) => (
           <MultiOptionValueEdit
             recordID={recordID}
@@ -829,7 +826,6 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   if (cell.state === 'focused') {
     return (
       <PopoverButton
-        contentHeight={400}
         content={({ onRequestClose }) => (
           <SingleCollaboratorValueEdit
             recordID={recordID}
@@ -942,7 +938,6 @@ const SingleOptionCell = memo(function SingleOptionCell(
   if (cell.state === 'focused') {
     return (
       <PopoverButton
-        contentHeight={400}
         content={({ onRequestClose }) => (
           <SingleOptionValueEdit
             recordID={recordID}

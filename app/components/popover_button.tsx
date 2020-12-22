@@ -7,13 +7,11 @@ import { StyleProp, ViewStyle } from 'react-native';
 
 export interface PopoverButtonProps extends ButtonProps {
   content: React.ReactNode | ((callbacks: PopoverCallback) => React.ReactNode);
-  contentHeight: number;
   popoverContainerStyle?: StyleProp<ViewStyle>;
 }
 
 export function PopoverButton(props: PopoverButtonProps): JSX.Element {
   const {
-    contentHeight,
     content,
     onPress,
     disabled,
@@ -26,7 +24,6 @@ export function PopoverButton(props: PopoverButtonProps): JSX.Element {
   return (
     <PopoverTrigger
       content={content}
-      contentHeight={contentHeight}
       popoverContainerStyle={popoverContainerStyle}
     >
       {({ ref, onOpen }) => (
