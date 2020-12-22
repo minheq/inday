@@ -1,5 +1,4 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { Fragment } from 'react';
 import { formatDate, parseISODate } from '../../lib/date_utils';
 
 import { Text } from '../components/text';
@@ -17,27 +16,12 @@ export function FieldDateValueView(
   const { value } = props;
 
   if (value === null) {
-    return <View style={styles.cellWrapper} />;
+    return <Fragment />;
   }
 
   return (
-    <View style={styles.textCellContainer}>
-      <Text numberOfLines={1} align="right">
-        <Text>{formatDate(parseISODate(value), getSystemLocale())}</Text>
-      </Text>
-    </View>
+    <Text numberOfLines={1} align="right">
+      <Text>{formatDate(parseISODate(value), getSystemLocale())}</Text>
+    </Text>
   );
 }
-
-const styles = StyleSheet.create({
-  cellWrapper: {
-    height: 32,
-    flex: 1,
-  },
-  textCellContainer: {
-    height: 32,
-    flex: 1,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-});

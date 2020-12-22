@@ -1,5 +1,4 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { Fragment } from 'react';
 import { formatCurrency } from '../../lib/currency';
 import { Text } from '../components/text';
 import { CurrencyField, CurrencyFieldValue } from '../data/fields';
@@ -16,27 +15,12 @@ export function FieldCurrencyValueView(
   const { value, field } = props;
 
   if (value === null) {
-    return <View style={styles.cellWrapper} />;
+    return <Fragment />;
   }
 
   return (
-    <View style={styles.textCellContainer}>
-      <Text numberOfLines={1} align="right">
-        {formatCurrency(value, getSystemLocale(), field.currency)}
-      </Text>
-    </View>
+    <Text numberOfLines={1} align="right">
+      {formatCurrency(value, getSystemLocale(), field.currency)}
+    </Text>
   );
 }
-
-const styles = StyleSheet.create({
-  cellWrapper: {
-    height: 32,
-    flex: 1,
-  },
-  textCellContainer: {
-    height: 32,
-    flex: 1,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-});

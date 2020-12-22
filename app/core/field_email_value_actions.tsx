@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import { Pressable } from 'react-native';
-import { Row } from '../components/row';
 import { Text } from '../components/text';
 import { EmailFieldValue } from '../data/fields';
 
@@ -17,12 +16,10 @@ export function FieldEmailValueActions(
   }, [value]);
 
   return (
-    <Row>
-      <Pressable onPress={handlePress}>
-        <Text decoration="underline" size="sm" color="primary">
-          Send email
-        </Text>
-      </Pressable>
-    </Row>
+    <Pressable onPress={handlePress}>
+      <Text decoration="underline" size="sm" color="primary">
+        Send email
+      </Text>
+    </Pressable>
   );
 }
