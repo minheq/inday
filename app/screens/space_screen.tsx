@@ -385,6 +385,9 @@ function RecordDetailsContainer(
 ): JSX.Element {
   const { recordID } = props;
   const record = useGetRecord(recordID);
+  const [primaryField, primaryFieldValue] = useGetRecordPrimaryFieldValue(
+    record.id,
+  );
   const [, setOpenRecord] = useRecoilState(openRecordState);
 
   const handleClose = useCallback(() => {
@@ -392,14 +395,20 @@ function RecordDetailsContainer(
   }, [setOpenRecord]);
 
   return (
-    <ScrollView>
-      <View style={styles.recordDetailsContainer}>
-        <Row>
-          <CloseButton onPress={handleClose} />
-        </Row>
-        <RecordDetails record={record} />
+    <View style={styles.recordDetailsWrapper}>
+      <View style={styles.recordDetailsHeader}>
+        <CloseButton onPress={handleClose} />
+        <Spacer direction="row" size={16} />
+        <Text size="xl">
+          {stringifyFieldValue(primaryField, primaryFieldValue)}
+        </Text>
       </View>
-    </ScrollView>
+      <ScrollView>
+        <View style={styles.recordDetailsContainer}>
+          <RecordDetails record={record} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -409,16 +418,10 @@ interface RecordDetailsProps {
 
 function RecordDetails(props: RecordDetailsProps) {
   const { record } = props;
-  const [primaryField, primaryFieldValue] = useGetRecordPrimaryFieldValue(
-    record.id,
-  );
   const recordFieldsEntries = useGetRecordFieldsEntries(record.id);
 
   return (
     <View>
-      <Text size="xl">
-        {stringifyFieldValue(primaryField, primaryFieldValue)}
-      </Text>
       <Spacer size={24} />
       <Column spacing={16}>
         {recordFieldsEntries.map(([field, value]) => (
@@ -455,7 +458,6 @@ const styles = StyleSheet.create({
   },
   leftPanel: {
     flex: 1,
-    height: '100%',
     borderRightWidth: 1,
   },
   viewContainer: {
@@ -467,8 +469,16 @@ const styles = StyleSheet.create({
   },
   rightPanel: {
     flex: 1,
-    height: '100%',
     borderLeftWidth: 1,
+  },
+  recordDetailsWrapper: {
+    flex: 1,
+  },
+  recordDetailsHeader: {
+    paddingHorizontal: 8,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   viewMenuButton: {
     borderRadius: tokens.border.radius,
