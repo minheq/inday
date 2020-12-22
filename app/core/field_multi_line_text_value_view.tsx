@@ -1,5 +1,4 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
 
 import { Text } from '../components/text';
 import { MultiLineTextField, MultiLineTextFieldValue } from '../data/fields';
@@ -14,18 +13,5 @@ export function FieldMultiLineTextValueView(
 ): JSX.Element {
   const { value } = props;
 
-  return (
-    <View style={styles.textCellContainer}>
-      <Text>{value}</Text>
-    </View>
-  );
+  return <Text>{value}</Text>;
 }
-
-const styles = StyleSheet.create({
-  textCellContainer: {
-    height: 32,
-    flex: 1,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-});

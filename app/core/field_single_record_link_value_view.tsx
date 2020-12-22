@@ -1,6 +1,4 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Row } from '../components/row';
+import React, { Fragment } from 'react';
 
 import {
   SingleRecordLinkFieldValue,
@@ -19,19 +17,8 @@ export function FieldSingleRecordLinkValueView(
   const { value } = props;
 
   if (value === null) {
-    return <View style={styles.cellWrapper} />;
+    return <Fragment />;
   }
 
-  return (
-    <Row>
-      <RecordLinkBadge recordID={value} />
-    </Row>
-  );
+  return <RecordLinkBadge recordID={value} />;
 }
-
-const styles = StyleSheet.create({
-  cellWrapper: {
-    height: 32,
-    flex: 1,
-  },
-});

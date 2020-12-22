@@ -1,5 +1,4 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { Fragment } from 'react';
 import { isEmpty } from '../../lib/lang_utils';
 import { Row } from '../components/row';
 
@@ -17,7 +16,7 @@ export function FieldMultiOptionValueView(
   const { value, field } = props;
 
   if (isEmpty(value)) {
-    return <View style={styles.cellWrapper} />;
+    return <Fragment />;
   }
 
   return (
@@ -38,10 +37,3 @@ export function FieldMultiOptionValueView(
     </Row>
   );
 }
-
-const styles = StyleSheet.create({
-  cellWrapper: {
-    height: 32,
-    flex: 1,
-  },
-});

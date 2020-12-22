@@ -1,5 +1,4 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
 
 import { Text } from '../components/text';
 import { PhoneNumberField, PhoneNumberFieldValue } from '../data/fields';
@@ -14,16 +13,5 @@ export function FieldPhoneNumberValueView(
 ): JSX.Element {
   const { value } = props;
 
-  return (
-    <View style={styles.textCellContainer}>
-      <Text numberOfLines={1}>{value}</Text>
-    </View>
-  );
+  return <Text numberOfLines={1}>{value}</Text>;
 }
-
-const styles = StyleSheet.create({
-  textCellContainer: {
-    height: 32,
-    flex: 1,
-  },
-});

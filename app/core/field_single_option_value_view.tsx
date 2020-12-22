@@ -1,5 +1,4 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { Fragment } from 'react';
 import { Row } from '../components/row';
 
 import { SingleOptionFieldValue, SingleOptionField } from '../data/fields';
@@ -18,7 +17,7 @@ export function FieldSingleOptionValueView(
   const selected = field.options.find((o) => o.id === value);
 
   if (value === null || selected === undefined) {
-    return <View style={styles.cellWrapper} />;
+    return <Fragment />;
   }
 
   return (
@@ -27,10 +26,3 @@ export function FieldSingleOptionValueView(
     </Row>
   );
 }
-
-const styles = StyleSheet.create({
-  cellWrapper: {
-    height: 32,
-    flex: 1,
-  },
-});
