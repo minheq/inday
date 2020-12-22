@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { Animated, Pressable, StyleProp, ViewStyle } from 'react-native';
+import React, { forwardRef, useRef } from 'react';
+import { Animated, Pressable, StyleProp, View, ViewStyle } from 'react-native';
 import { useTheme } from './theme';
 
 export interface ButtonProps {
@@ -12,11 +12,19 @@ export interface ButtonProps {
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-export function Button(props: ButtonProps): JSX.Element {
+export const Button = forwardRef<View, ButtonProps>(function Button(
+  props,
+  ref,
+): JSX.Element {
   const { onPress, children, style, containerStyle, disabled = false } = props;
 
   return (
-    <Pressable style={containerStyle} disabled={disabled} onPress={onPress}>
+    <Pressable
+      ref={ref}
+      style={containerStyle}
+      disabled={disabled}
+      onPress={onPress}
+    >
       {({ hovered, pressed }: { hovered: boolean; pressed: boolean }) => (
         <PressableStyledState hovered={hovered} pressed={pressed} style={style}>
           {children}
@@ -24,7 +32,7 @@ export function Button(props: ButtonProps): JSX.Element {
       )}
     </Pressable>
   );
-}
+});
 
 interface PressableStyledStateProps {
   hovered: boolean;

@@ -13,6 +13,7 @@ import {
   CONTEXT_MENU_ITEM_HEIGHT,
 } from './context_menu_content';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
+import { PopoverContainer } from './popover_trigger';
 
 export function ContextMenu(props: ContextMenuProps): JSX.Element {
   const { options, children, width = 240 } = props;
@@ -78,11 +79,13 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
         anchor={state.anchor}
         visible={state.visible}
       >
-        <ContextMenuContent
-          onPressed={handleRequestClose}
-          width={width}
-          options={options}
-        />
+        <PopoverContainer>
+          <ContextMenuContent
+            onPressed={handleRequestClose}
+            width={width}
+            options={options}
+          />
+        </PopoverContainer>
       </Popover>
       <View ref={ref}>{children}</View>
     </Fragment>

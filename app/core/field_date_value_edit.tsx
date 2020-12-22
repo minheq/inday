@@ -33,7 +33,7 @@ export function FieldDateValueEdit(
   }, [updateRecordFieldValue, recordID, field]);
 
   return (
-    <View>
+    <View style={styles.root}>
       <DatePicker
         value={value ? parseISODate(value) : null}
         onChange={handleChangeDate}
@@ -47,6 +47,9 @@ export function FieldDateValueEdit(
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   actionRow: {
     paddingTop: 24,
     paddingBottom: 8,

@@ -3,8 +3,6 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from './button';
 import { Icon, IconName } from './icon';
 import { Text, TextColor, TextWeight } from './text';
-import { useTheme, useThemeStyles } from './theme';
-import { tokens } from './tokens';
 
 export interface ContextMenuItem {
   color?: TextColor;
@@ -26,18 +24,9 @@ export function ContextMenuContent(
   props: ContextMenuContentProps,
 ): JSX.Element {
   const { options, onPressed, width = 240 } = props;
-  const themeStyles = useThemeStyles();
 
   return (
-    <View
-      style={[
-        styles.wrapper,
-        themeStyles.background.content,
-        themeStyles.border.default,
-        themeStyles.elevation.level1,
-        { width },
-      ]}
-    >
+    <View style={[styles.wrapper, { width }]}>
       <ScrollView>
         {options.map((option) => (
           <ContextMenuButton
@@ -82,11 +71,7 @@ function ContextMenuButton(props: ContextMenuButtonProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    paddingVertical: 4,
-    borderRadius: tokens.border.radius,
-    overflow: 'hidden',
     flex: 1,
-    borderWidth: 1,
   },
   iconWrapper: {
     height: CONTEXT_MENU_ITEM_HEIGHT,
