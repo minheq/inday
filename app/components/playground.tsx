@@ -5,7 +5,7 @@ import { GridStories } from './grid_renderer.stories';
 import { DatePickerStories } from './date_picker.stories';
 import { TextInputStories } from './text_input.stories';
 import { Text } from './text';
-import { ScreenName, ScreenProps, useNavigation } from '../routes';
+import { ScreenName, ScreenProps, useNavigation } from '../core/other/routes';
 import { Button } from './button';
 import { tokens } from './tokens';
 import { PickerStories } from './picker.stories';

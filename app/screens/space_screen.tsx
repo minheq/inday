@@ -1,7 +1,7 @@
 import React, { useCallback, createContext, useContext } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { ScreenName, ScreenProps, useNavigation } from '../routes';
+import { ScreenName, ScreenProps, useNavigation } from '../core/other/routes';
 import {
   useGetSpace,
   useGetView,
@@ -11,15 +11,15 @@ import {
   useGetRecordFieldsEntries,
 } from '../data/store';
 import { Slide } from '../components/slide';
-import { OrganizeView } from '../core/organize_view';
-import { ViewsMenu } from '../core/views_menu';
+import { OrganizeView } from '../core/organize/organize_view';
+import { ViewsMenu } from '../core/views/views_menu';
 import { AutoSizer } from '../lib/autosizer';
 import { View as CollectionView, ViewID } from '../data/views';
-import { ListViewView } from '../core/list_view_view';
+import { ListViewView } from '../core/list_view/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { Record, RecordID } from '../data/records';
 import { Collection, CollectionID } from '../data/collections';
-import { getViewIcon, getViewIconColor } from '../core/icon_helpers';
+import { getViewIcon, getViewIconColor } from '../core/views/icon_helpers';
 import { Space, SpaceID } from '../data/spaces';
 import { useTheme, useThemeStyles } from '../components/theme';
 import { Screen } from '../components/screen';
@@ -36,8 +36,8 @@ import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
 import { CloseButton } from '../components/close_button';
 import { Spacer } from '../components/spacer';
 import { Column } from '../components/column';
-import { RecordFieldValueEdit } from '../core/record_field_value_input';
-import { CollectionsTabs } from '../core/collection_tabs';
+import { RecordFieldValueEdit } from '../core/fields/field_value_input';
+import { CollectionsTabs } from '../core/collections/collection_tabs';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
