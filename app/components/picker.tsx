@@ -90,7 +90,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
 
         const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
           measurements,
-          contentHeight,
+          { width, height: contentHeight },
         );
 
         setHeight(popoverHeight);

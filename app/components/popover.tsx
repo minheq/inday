@@ -1,11 +1,5 @@
-import React, { useRef, useCallback, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  Animated,
-  Pressable,
-  Dimensions,
-} from 'react-native';
+import React, { useCallback } from 'react';
+import { View, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { tokens } from './tokens';
 import { Modal } from './modal';
 
@@ -26,15 +20,6 @@ interface PopoverProps {
 
 export function Popover(props: PopoverProps): JSX.Element {
   const { visible = false, onShow, onRequestClose, anchor, children } = props;
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.spring(opacity, {
-      toValue: visible ? 1 : 0,
-      bounciness: 0,
-      useNativeDriver: true,
-    }).start();
-  }, [visible, opacity]);
 
   const handlePressBackground = useCallback(() => {
     if (onRequestClose !== undefined) {
@@ -56,78 +41,82 @@ export function Popover(props: PopoverProps): JSX.Element {
           style={styles.background}
           onPress={handlePressBackground}
         />
-        <Animated.View
+        <View
           style={[
             styles.popover,
             {
               top: anchor.y,
               left: anchor.x,
-              opacity,
             },
           ]}
         >
           {typeof children === 'function'
             ? children({ onRequestClose })
             : children}
-        </Animated.View>
+        </View>
       </View>
     </Modal>
   );
 }
 
-interface OpenerMeasurements {
+export interface PopoverTriggerMeasurements {
   pageY: number;
   pageX: number;
   height: number;
   width: number;
 }
 
+export interface PopoverContentMeasurements {
+  height: number;
+  width: number;
+}
+
 export function getPopoverAnchorAndHeight(
-  measurements: OpenerMeasurements,
-  contentHeight: number,
-  pickerOffset = 4,
-  screenOffset = 16,
+  tm: PopoverTriggerMeasurements,
+  cm: PopoverContentMeasurements,
+  triggerOffset = 4,
+  windowOffset = 16,
 ): [PopoverAnchor, number] {
-  const screenSize = Dimensions.get('window');
+  const scaledSize = Dimensions.get('window');
 
-  const bottomY = measurements.pageY + measurements.height + pickerOffset;
-  const topY = measurements.pageY - pickerOffset - contentHeight;
+  const bottomY = tm.pageY + tm.height + triggerOffset;
+  const topY = tm.pageY - triggerOffset - cm.height;
 
-  const overflowsBottom = bottomY + contentHeight > screenSize.height;
+  const overflowsBottom = bottomY + cm.height > scaledSize.height;
 
   let anchor: PopoverAnchor = { x: 0, y: 0 };
-  let popoverHeight = contentHeight;
+  let popoverHeight = cm.height;
 
   if (overflowsBottom) {
-    const heightIfBottomY = screenSize.height - bottomY;
-    const heightIfTopY = measurements.pageY;
+    const heightIfBottomY = scaledSize.height - bottomY;
+    const heightIfTopY = tm.pageY;
 
     if (heightIfTopY < heightIfBottomY) {
       anchor = {
-        x: measurements.pageX,
+        x: tm.pageX,
         y: bottomY,
       };
 
-      if (screenSize.height - bottomY < contentHeight) {
-        popoverHeight = screenSize.height - bottomY - screenOffset;
+      if (scaledSize.height - bottomY < cm.height) {
+        popoverHeight = scaledSize.height - bottomY - windowOffset;
       }
     } else {
       if (topY < 0) {
-        popoverHeight = measurements.pageY - screenOffset;
+        popoverHeight = tm.pageY - windowOffset;
         anchor = {
-          x: measurements.pageX,
-          y: screenOffset,
+          x: tm.pageX,
+          y: windowOffset,
         };
       } else {
         anchor = {
-          x: measurements.pageX,
+          x: tm.pageX,
           y: topY,
         };
       }
     }
   } else {
     anchor = {
-      x: measurements.pageX,
+      x: tm.pageX,
       y: bottomY,
     };
   }
