@@ -37,10 +37,10 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
         pageY: event.clientY,
       };
 
-      const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
-        measurements,
-        contentHeight,
-      );
+      const [anchor, popoverHeight] = getPopoverAnchorAndHeight(measurements, {
+        width,
+        height: contentHeight,
+      });
 
       setState({
         visible: true,

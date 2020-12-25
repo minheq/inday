@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from './button';
 import { Icon, IconName } from './icon';
 import { Text, TextColor, TextWeight } from './text';
+import { tokens } from './tokens';
 
 export interface ContextMenuItem {
   color?: TextColor;
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
+    borderRadius: tokens.border.radius,
     flexDirection: 'row',
     alignItems: 'center',
     height: CONTEXT_MENU_ITEM_HEIGHT,
