@@ -39,7 +39,7 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
 
       const [anchor, popoverHeight] = getPopoverAnchorAndHeight(measurements, {
         width,
-        height: contentHeight,
+        height: contentHeight + 16, // padding
       });
 
       setState({
