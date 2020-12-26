@@ -128,6 +128,7 @@ import { Slide } from '../../components/slide';
 import { ContextMenuButton } from '../../components/context_menu_button';
 import { Icon } from '../../components/icon';
 import { CheckboxStatic } from '../../components/checkbox_static';
+import { FlatButton } from '../../components/flat_button';
 
 export const LEAF_ROW_HEIGHT = 40;
 
@@ -428,17 +429,23 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <NumberKindValueEdit<CurrencyFieldValue>
-        autoFocus
-        value={value}
-        recordID={recordID}
-        field={field}
-        onKeyPress={handleKeyPress}
-      />
+      <FieldEditWrapper>
+        <NumberKindValueEdit<CurrencyFieldValue>
+          autoFocus
+          value={value}
+          recordID={recordID}
+          field={field}
+          onKeyPress={handleKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  const child = <CurrencyValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <CurrencyValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
@@ -473,7 +480,7 @@ function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
   });
 
   return (
-    <Pressable style={styles.focusedCellContainer} onPress={onStartEditing}>
+    <Pressable style={styles.cellRoot} onPress={onStartEditing}>
       {children}
     </Pressable>
   );
@@ -501,7 +508,7 @@ function TextFieldKindCellFocused(props: TextFieldKindCellFocusedProps) {
   });
 
   return (
-    <Pressable style={styles.focusedCellContainer} onPress={onStartEditing}>
+    <Pressable style={styles.cellRoot} onPress={onStartEditing}>
       {children}
     </Pressable>
   );
@@ -518,7 +525,11 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   useCellKeyBindings();
 
-  const child = <DateValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <DateValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -531,8 +542,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellContainerButton}
-        style={styles.cellButton}
+        containerStyle={styles.cellRoot}
       >
         {child}
       </PopoverButton>
@@ -554,21 +564,27 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit<EmailFieldValue>
-        autoFocus
-        field={field}
-        recordID={recordID}
-        value={value}
-        onKeyPress={handleKeyPress}
-      />
+      <FieldEditWrapper>
+        <TextKindValueEdit<EmailFieldValue>
+          autoFocus
+          field={field}
+          recordID={recordID}
+          value={value}
+          onKeyPress={handleKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  const child = <EmailValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <EmailValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.focusedCellRoot}>
+      <View style={styles.cellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
           <EmailValueActions value={value} />
@@ -593,7 +609,11 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
 
   useCellKeyBindings();
 
-  const child = <MultiCollaboratorValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <MultiCollaboratorValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -606,8 +626,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellContainerButton}
-        style={styles.cellButton}
+        containerStyle={styles.cellRoot}
       >
         {child}
       </PopoverButton>
@@ -646,7 +665,11 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
     );
   }
 
-  const child = <MultiRecordLinkValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <MultiRecordLinkValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -673,29 +696,33 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (cell.state === 'editing') {
     return (
-      <MultiLineTextValueEdit
-        autoFocus
-        recordID={recordID}
-        field={field}
-        value={value}
-        onKeyPress={handleKeyPress}
-      />
+      <FieldEditActions>
+        <MultiLineTextValueEdit
+          autoFocus
+          recordID={recordID}
+          field={field}
+          value={value}
+          onKeyPress={handleKeyPress}
+        />
+      </FieldEditActions>
     );
   }
 
   if (cell.state === 'focused') {
     return (
-      <View>
-        <TextFieldKindCellFocused>
+      <TextFieldKindCellFocused>
+        <View style={styles.multiLineTextFocused}>
           <Text>{value}</Text>
-        </TextFieldKindCellFocused>
-      </View>
+        </View>
+      </TextFieldKindCellFocused>
     );
   }
 
   return (
     <View style={styles.cellRoot}>
-      <Text numberOfLines={1}>{value}</Text>
+      <View style={styles.cellValueContainer}>
+        <Text numberOfLines={1}>{value}</Text>
+      </View>
     </View>
   );
 });
@@ -713,7 +740,11 @@ const MultiOptionCell = memo(function MultiOptionCell(
 
   useCellKeyBindings();
 
-  const child = <MultiOptionValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <MultiOptionValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -726,8 +757,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellContainerButton}
-        style={styles.cellButton}
+        containerStyle={styles.cellRoot}
       >
         {child}
       </PopoverButton>
@@ -749,17 +779,23 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <NumberKindValueEdit<NumberFieldKindValue>
-        autoFocus
-        value={value}
-        recordID={recordID}
-        field={field}
-        onKeyPress={handleKeyPress}
-      />
+      <FieldEditWrapper>
+        <NumberKindValueEdit<NumberFieldKindValue>
+          autoFocus
+          value={value}
+          recordID={recordID}
+          field={field}
+          onKeyPress={handleKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  const child = <NumberValueView field={field} value={value} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <NumberValueView field={field} value={value} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
@@ -782,21 +818,27 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit<PhoneNumberFieldValue>
-        autoFocus
-        field={field}
-        recordID={recordID}
-        value={value}
-        onKeyPress={handleKeyPress}
-      />
+      <FieldEditWrapper>
+        <TextKindValueEdit<PhoneNumberFieldValue>
+          autoFocus
+          field={field}
+          recordID={recordID}
+          value={value}
+          onKeyPress={handleKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  const child = <PhoneNumberValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <PhoneNumberValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.focusedCellRoot}>
+      <View style={styles.cellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
           <PhoneNumberValueActions value={value} />
@@ -821,7 +863,11 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
 
   useCellKeyBindings();
 
-  const child = <SingleCollaboratorValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <SingleCollaboratorValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -834,8 +880,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellContainerButton}
-        style={styles.cellButton}
+        containerStyle={styles.cellRoot}
       >
         {child}
       </PopoverButton>
@@ -874,7 +919,11 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
     );
   }
 
-  const child = <SingleRecordLinkValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <SingleRecordLinkValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -901,17 +950,23 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit<SingleLineTextFieldValue>
-        autoFocus
-        field={field}
-        recordID={recordID}
-        value={value}
-        onKeyPress={handleKeyPress}
-      />
+      <FieldEditWrapper>
+        <TextKindValueEdit<SingleLineTextFieldValue>
+          autoFocus
+          field={field}
+          recordID={recordID}
+          value={value}
+          onKeyPress={handleKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  const child = <SingleLineTextValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <SingleLineTextValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>;
@@ -933,7 +988,11 @@ const SingleOptionCell = memo(function SingleOptionCell(
 
   useCellKeyBindings();
 
-  const child = <SingleOptionValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <SingleOptionValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -946,8 +1005,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellContainerButton}
-        style={styles.cellButton}
+        containerStyle={styles.cellRoot}
       >
         {child}
       </PopoverButton>
@@ -969,21 +1027,27 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit<URLFieldValue>
-        autoFocus
-        field={field}
-        recordID={recordID}
-        value={value}
-        onKeyPress={handleKeyPress}
-      />
+      <FieldEditWrapper>
+        <TextKindValueEdit<URLFieldValue>
+          autoFocus
+          field={field}
+          recordID={recordID}
+          value={value}
+          onKeyPress={handleKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  const child = <URLValueView value={value} field={field} />;
+  const child = (
+    <View style={styles.cellValueContainer}>
+      <URLValueView value={value} field={field} />
+    </View>
+  );
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.focusedCellRoot}>
+      <View style={styles.cellRoot}>
         <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
         <View style={styles.actionsWrapper}>
           <URLValueActions value={value} />
@@ -994,6 +1058,38 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   return <View style={styles.cellRoot}>{child}</View>;
 });
+
+interface FieldEditWrapperProps {
+  children: React.ReactNode;
+}
+
+function FieldEditWrapper(props: FieldEditWrapperProps) {
+  const { children } = props;
+
+  return (
+    <FieldEditActions>
+      <View style={styles.editCellValueContainer}>{children}</View>
+    </FieldEditActions>
+  );
+}
+
+interface FieldEditActionsProps {
+  children: React.ReactNode;
+}
+
+function FieldEditActions(props: FieldEditActionsProps) {
+  const { children } = props;
+  const { onStopEditing } = useLeafRowCellContext();
+
+  return (
+    <View style={styles.cellRoot}>
+      {children}
+      <View style={styles.cellEditActionsWrapper}>
+        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
+      </View>
+    </View>
+  );
+}
 
 interface UseCellKeyBindingsProps {
   onDelete?: () => void;
@@ -1313,46 +1409,43 @@ const styles = StyleSheet.create({
     borderLeftWidth: FOCUS_BORDER_WIDTH,
     borderRightWidth: FOCUS_BORDER_WIDTH,
   },
-  checkboxCellRoot: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cellRoot: {
-    flex: 1,
-    height: LEAF_ROW_HEIGHT,
-    paddingHorizontal: 8,
-    justifyContent: 'center',
-  },
-  focusedCellRoot: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  focusedCellContainer: {
-    width: '100%',
-    height: LEAF_ROW_HEIGHT,
-    paddingHorizontal: 8,
-    justifyContent: 'center',
-  },
-  cellContainerButton: {
-    height: LEAF_ROW_HEIGHT,
-    flex: 1,
-  },
-  cellButton: {
-    flex: 1,
-    paddingHorizontal: 8,
-    justifyContent: 'center',
-  },
-  actionsWrapper: {
-    paddingHorizontal: 8,
-    paddingBottom: 8,
-    flexDirection: 'row',
-  },
   primaryCell: {
     borderRightWidth: 2,
   },
   focusedPrimaryCell: {
     paddingRight: 2,
+  },
+
+  checkboxCellRoot: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  multiLineTextFocused: {
+    padding: 8,
+    maxHeight: 400,
+  },
+  cellRoot: {
+    flex: 1,
+  },
+  cellValueContainer: {
+    height: LEAF_ROW_HEIGHT,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  editCellValueContainer: {
+    height: LEAF_ROW_HEIGHT,
+    justifyContent: 'center',
+  },
+  cellEditActionsWrapper: {
+    padding: 8,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+
+  actionsWrapper: {
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+    flexDirection: 'row',
   },
   dotsMenuWrapper: {
     paddingRight: 8,

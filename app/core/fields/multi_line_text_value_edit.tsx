@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TextInputKeyPressEventData,
   TextInput,
+  Platform,
 } from 'react-native';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
@@ -57,5 +58,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: tokens.border.radius,
     ...tokens.text.size.md,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
 });
