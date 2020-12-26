@@ -46,7 +46,7 @@ interface SpaceScreenContext {
 }
 
 const VIEWS_MENU_WIDTH = 240;
-const RECORD_VIEW_WIDTH = 640;
+const RECORD_VIEW_WIDTH = 360;
 const ORGANIZE_VIEW_WIDTH = 360;
 
 const SpaceScreenContext = createContext<SpaceScreenContext>({

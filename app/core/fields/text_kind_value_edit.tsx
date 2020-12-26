@@ -17,7 +17,9 @@ interface TextKindValueEditProps<T extends TextFieldKindValue> {
   recordID: RecordID;
   field: TextFieldKind;
   value: T;
-  onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
+  onKeyPress?: (
+    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
+  ) => void;
 }
 
 export function TextKindValueEdit<T extends TextFieldKindValue>(

@@ -68,7 +68,6 @@ import { SingleOptionValueEdit } from './single_option_value_edit';
 import { SingleRecordLinkValueEdit } from './single_record_link_value_edit';
 import { DateValueEdit } from './date_value_edit';
 import { PopoverButton } from '../../components/popover_button';
-import { PopoverCallback } from '../../components/popover';
 import { tokens } from '../../components/tokens';
 import { useThemeStyles } from '../../components/theme';
 import { SingleLineTextValueView } from './single_line_text_value_view';
@@ -91,6 +90,12 @@ import { Button } from '../../components/button';
 import { Spacer } from '../../components/spacer';
 import { FlatButton } from '../../components/flat_button';
 import { Row } from '../../components/row';
+import { PopoverCallback } from '../../components/popover';
+import { EmailValueActions } from './email_value_actions';
+import { PhoneNumberValueActions } from './phone_number_value_actions';
+import { URLValueActions } from './url_value_actions';
+import { Icon } from '../../components/icon';
+import { getFieldIcon } from '../views/icon_helpers';
 
 interface RecordFieldValueEditProps {
   field: Field;
@@ -240,19 +245,35 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value, field, recordID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
+  const handlePress = useCallback(() => {
+    setEditing(true);
+  }, []);
+  const handleDone = useCallback(() => {
+    setEditing(false);
+  }, []);
 
   if (editing === true) {
     return (
-      <TextKindValueEdit
-        recordID={recordID}
-        autoFocus
-        value={value}
-        field={field}
-        onKeyPress={onKeyPress}
-      />
+      <FieldEditWrapper onDone={handleDone}>
+        <TextKindValueEdit
+          recordID={recordID}
+          autoFocus
+          value={value}
+          field={field}
+          onKeyPress={onKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
-  return <URLValueView value={value} field={field} />;
+  return (
+    <View>
+      <FieldButton onPress={handlePress}>
+        <URLValueView value={value} field={field} />
+      </FieldButton>
+      <Spacer size={8} />
+      <URLValueActions value={value} />
+    </View>
+  );
 });
 
 interface EmailCellProps {
@@ -264,22 +285,37 @@ interface EmailCellProps {
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value, field, recordID } = props;
   const [editing, setEditing] = useState(false);
-
   const onKeyPress = useCellKeyPressHandler(setEditing);
+  const handlePress = useCallback(() => {
+    setEditing(true);
+  }, []);
+  const handleDone = useCallback(() => {
+    setEditing(false);
+  }, []);
 
   if (editing === true) {
     return (
-      <TextKindValueEdit
-        recordID={recordID}
-        autoFocus
-        value={value}
-        field={field}
-        onKeyPress={onKeyPress}
-      />
+      <FieldEditWrapper onDone={handleDone}>
+        <TextKindValueEdit
+          recordID={recordID}
+          autoFocus
+          value={value}
+          field={field}
+          onKeyPress={onKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  return <EmailValueView value={value} field={field} />;
+  return (
+    <View>
+      <FieldButton onPress={handlePress}>
+        <EmailValueView value={value} field={field} />
+      </FieldButton>
+      <Spacer size={8} />
+      <EmailValueActions value={value} />
+    </View>
+  );
 });
 
 interface MultiLineTextCellProps {
@@ -322,20 +358,36 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   const { value, field, recordID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
+  const handlePress = useCallback(() => {
+    setEditing(true);
+  }, []);
+  const handleDone = useCallback(() => {
+    setEditing(false);
+  }, []);
 
   if (editing === true) {
     return (
-      <TextKindValueEdit
-        recordID={recordID}
-        autoFocus
-        value={value}
-        field={field}
-        onKeyPress={onKeyPress}
-      />
+      <FieldEditWrapper onDone={handleDone}>
+        <TextKindValueEdit
+          recordID={recordID}
+          autoFocus
+          value={value}
+          field={field}
+          onKeyPress={onKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  return <PhoneNumberValueView value={value} field={field} />;
+  return (
+    <View>
+      <FieldButton onPress={handlePress}>
+        <PhoneNumberValueView value={value} field={field} />
+      </FieldButton>
+      <Spacer size={8} />
+      <PhoneNumberValueActions value={value} />
+    </View>
+  );
 });
 
 interface NumberCellProps {
@@ -348,20 +400,32 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field, recordID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
+  const handlePress = useCallback(() => {
+    setEditing(true);
+  }, []);
+  const handleDone = useCallback(() => {
+    setEditing(false);
+  }, []);
 
   if (editing === true) {
     return (
-      <NumberKindValueEdit
-        recordID={recordID}
-        autoFocus
-        value={value}
-        field={field}
-        onKeyPress={onKeyPress}
-      />
+      <FieldEditWrapper onDone={handleDone}>
+        <NumberKindValueEdit
+          recordID={recordID}
+          autoFocus
+          value={value}
+          field={field}
+          onKeyPress={onKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  return <NumberValueView value={value} field={field} />;
+  return (
+    <FieldButton onPress={handlePress}>
+      <NumberValueView value={value} field={field} />
+    </FieldButton>
+  );
 });
 
 interface CurrencyCellProps {
@@ -373,22 +437,33 @@ interface CurrencyCellProps {
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field, recordID } = props;
   const [editing, setEditing] = useState(false);
-
   const onKeyPress = useCellKeyPressHandler(setEditing);
+  const handlePress = useCallback(() => {
+    setEditing(true);
+  }, []);
+  const handleDone = useCallback(() => {
+    setEditing(false);
+  }, []);
 
   if (editing === true) {
     return (
-      <NumberKindValueEdit
-        recordID={recordID}
-        autoFocus
-        value={value}
-        field={field}
-        onKeyPress={onKeyPress}
-      />
+      <FieldEditWrapper onDone={handleDone}>
+        <NumberKindValueEdit
+          recordID={recordID}
+          autoFocus
+          value={value}
+          field={field}
+          onKeyPress={onKeyPress}
+        />
+      </FieldEditWrapper>
     );
   }
 
-  return <CurrencyValueView value={value} field={field} />;
+  return (
+    <FieldButton onPress={handlePress}>
+      <CurrencyValueView value={value} field={field} />
+    </FieldButton>
+  );
 });
 
 interface MultiCollaboratorCellProps {
@@ -404,7 +479,6 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
 
   return (
     <PopoverWrapper
-      contentHeight={400}
       content={({ onRequestClose }) => (
         <MultiCollaboratorValueEdit
           recordID={recordID}
@@ -432,7 +506,6 @@ const MultiOptionCell = memo(function MultiOptionCell(
 
   return (
     <PopoverWrapper
-      contentHeight={400}
       content={({ onRequestClose }) => (
         <MultiOptionValueEdit
           recordID={recordID}
@@ -460,7 +533,6 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
 
   return (
     <PopoverWrapper
-      contentHeight={400}
       content={({ onRequestClose }) => (
         <MultiRecordLinkValueEdit
           recordID={recordID}
@@ -488,7 +560,6 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
 
   return (
     <PopoverWrapper
-      contentHeight={400}
       content={({ onRequestClose }) => (
         <SingleCollaboratorValueEdit
           recordID={recordID}
@@ -516,7 +587,6 @@ const SingleOptionCell = memo(function SingleOptionCell(
 
   return (
     <PopoverWrapper
-      contentHeight={400}
       content={({ onRequestClose }) => (
         <SingleOptionValueEdit
           recordID={recordID}
@@ -544,7 +614,6 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
 
   return (
     <PopoverWrapper
-      contentHeight={400}
       content={({ onRequestClose }) => (
         <SingleRecordLinkValueEdit
           recordID={recordID}
@@ -582,7 +651,6 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   return (
     <PopoverWrapper
-      contentHeight={400}
       content={({ onRequestClose }) => (
         <DateValueEdit
           recordID={recordID}
@@ -600,20 +668,18 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 interface PopoverWrapperProps {
   children: React.ReactNode;
   content: (callbacks: PopoverCallback) => React.ReactNode;
-  contentHeight: number;
 }
 
 function PopoverWrapper(props: PopoverWrapperProps) {
-  const { children, content, contentHeight } = props;
+  const { children, content } = props;
   const themeStyles = useThemeStyles();
 
   return (
     <PopoverButton
-      contentHeight={contentHeight}
+      containerStyle={styles.popoverContainter}
+      style={[styles.popoverButton, themeStyles.border.default]}
       content={({ onRequestClose }) => (
-        <View style={[styles.popoverContainer, themeStyles.background.content]}>
-          {content({ onRequestClose })}
-        </View>
+        <View>{content({ onRequestClose })}</View>
       )}
     >
       {children}
@@ -631,7 +697,10 @@ function FieldWrapper(props: FieldWrapperProps) {
 
   return (
     <View style={styles.fieldWrapper}>
-      <Text size="xs">{field.name.toUpperCase()}</Text>
+      <Row alignItems="center" spacing={4}>
+        <Icon name={getFieldIcon(field.type)} size="sm" />
+        <Text size="xs">{field.name.toUpperCase()}</Text>
+      </Row>
       <Spacer size={4} />
       {children}
     </View>
@@ -668,11 +737,11 @@ function FieldEditWrapper(props: FieldEditWrapperProps) {
 
   return (
     <View style={styles.fieldEditWrapperBase}>
-      <View style={[styles.fieldEditWrapper, themeStyles.border.default]}>
+      <View style={[styles.fieldEditWrapper, themeStyles.border.focused]}>
         {children}
       </View>
       <Spacer size={8} />
-      <Row>
+      <Row justifyContent="flex-end">
         <FlatButton onPress={onDone} title="Done" color="primary" />
       </Row>
     </View>
@@ -704,18 +773,24 @@ const styles = StyleSheet.create({
   fieldEditWrapperBase: {},
   fieldEditWrapper: {
     height: 40,
+    borderWidth: 2,
+    borderRadius: tokens.border.radius,
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  fieldButton: {
+    height: 40,
+    paddingHorizontal: 9,
     borderWidth: 1,
     borderRadius: tokens.border.radius,
     justifyContent: 'center',
   },
-  fieldButton: {
+  popoverContainter: {},
+  popoverButton: {
     height: 40,
-    padding: 8,
+    paddingHorizontal: 4,
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-  },
-  popoverContainer: {
-    padding: 8,
-    borderRadius: tokens.border.radius,
+    justifyContent: 'center',
   },
 });

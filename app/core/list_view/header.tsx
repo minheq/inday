@@ -42,9 +42,8 @@ export const HeaderCell = memo(function HeaderCell(
         primary && styles.primaryCell,
       ]}
     >
-      <Row>
+      <Row spacing={4}>
         <Icon name={getFieldIcon(field.type)} />
-        <Spacer size={4} />
         <Text weight="bold">{field.name}</Text>
       </Row>
     </View>
