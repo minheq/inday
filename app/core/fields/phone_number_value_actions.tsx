@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
-import { Pressable } from 'react-native';
 import { Row } from '../../components/row';
-import { Text } from '../../components/text';
+import { TextLink } from '../../components/text_link';
 import { PhoneNumberFieldValue } from '../../data/fields';
 
 interface PhoneNumberValueActionsProps {
@@ -18,11 +17,7 @@ export function PhoneNumberValueActions(
 
   return (
     <Row>
-      <Pressable onPress={handlePress}>
-        <Text decoration="underline" size="sm" color="primary">
-          Call
-        </Text>
-      </Pressable>
+      <TextLink onPress={handlePress}>Call</TextLink>
     </Row>
   );
 }

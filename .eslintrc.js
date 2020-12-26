@@ -31,6 +31,7 @@ module.exports = {
       plugins: ['@typescript-eslint', 'sonarjs', 'react', 'react-native'],
       rules: {
         'react-native/sort-styles': 0,
+        'react-native/no-raw-text': 1,
         'react/prop-types': 0,
         'no-shadow': 2,
         '@typescript-eslint/ban-ts-comment': 1,

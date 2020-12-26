@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
-import { Pressable } from 'react-native';
 import { Row } from '../../components/row';
-import { Text } from '../../components/text';
+import { TextLink } from '../../components/text_link';
 import { URLFieldValue } from '../../data/fields';
 
 interface URLValueActionsProps {
@@ -16,11 +15,7 @@ export function URLValueActions(props: URLValueActionsProps): JSX.Element {
 
   return (
     <Row>
-      <Pressable onPress={handlePress}>
-        <Text decoration="underline" size="sm" color="primary">
-          Open link
-        </Text>
-      </Pressable>
+      <TextLink onPress={handlePress}>Open link</TextLink>
     </Row>
   );
 }

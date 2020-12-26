@@ -4,7 +4,7 @@ import { useThemeStyles } from './theme';
 import { tokens } from './tokens';
 
 export interface TextProps {
-  children?: React.ReactNode;
+  children?: React.ReactText;
   size?: TextSize;
   color?: TextColor;
   customColor?: string;
