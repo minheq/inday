@@ -23,7 +23,7 @@ export function MultiCollaboratorValueView(
   }
 
   return (
-    <Row spacing={4}>
+    <Row spacing={8}>
       {value.map((collaboratorID) => (
         <CollaboratorBadge
           collaboratorID={collaboratorID}

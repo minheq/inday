@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useState } from 'react';
 import {
   NativeSyntheticEvent,
+  Pressable,
   StyleSheet,
   TextInputKeyPressEventData,
   View,
@@ -328,22 +329,38 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   props: MultiLineTextCellProps,
 ) {
   const { value, field, recordID } = props;
+  const themeStyles = useThemeStyles();
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
+  const handlePress = useCallback(() => {
+    setEditing(true);
+  }, []);
+  const handleDone = useCallback(() => {
+    setEditing(false);
+  }, []);
 
   if (editing === true) {
     return (
-      <MultiLineTextValueEdit
-        recordID={recordID}
-        autoFocus
-        value={value}
-        field={field}
-        onKeyPress={onKeyPress}
-      />
+      <FieldEditActions onDone={handleDone}>
+        <MultiLineTextValueEdit
+          recordID={recordID}
+          autoFocus
+          value={value}
+          field={field}
+          onKeyPress={onKeyPress}
+        />
+      </FieldEditActions>
     );
   }
 
-  return <MultiLineTextValueView value={value} field={field} />;
+  return (
+    <Button
+      style={[styles.multiLineTextButton, themeStyles.border.default]}
+      onPress={handlePress}
+    >
+      <MultiLineTextValueView value={value} field={field} />
+    </Button>
+  );
 });
 
 interface PhoneNumberCellProps {
@@ -676,7 +693,6 @@ function PopoverWrapper(props: PopoverWrapperProps) {
 
   return (
     <PopoverButton
-      containerStyle={styles.popoverContainter}
       style={[styles.popoverButton, themeStyles.border.default]}
       content={({ onRequestClose }) => (
         <View>{content({ onRequestClose })}</View>
@@ -736,10 +752,25 @@ function FieldEditWrapper(props: FieldEditWrapperProps) {
   const themeStyles = useThemeStyles();
 
   return (
-    <View style={styles.fieldEditWrapperBase}>
+    <FieldEditActions onDone={onDone}>
       <View style={[styles.fieldEditWrapper, themeStyles.border.focused]}>
         {children}
       </View>
+    </FieldEditActions>
+  );
+}
+
+interface FieldEditActionsProps {
+  onDone: () => void;
+  children: React.ReactNode;
+}
+
+function FieldEditActions(props: FieldEditActionsProps) {
+  const { children, onDone } = props;
+
+  return (
+    <View>
+      {children}
       <Spacer size={8} />
       <Row justifyContent="flex-end">
         <FlatButton onPress={onDone} title="Done" color="primary" />
@@ -770,13 +801,18 @@ const styles = StyleSheet.create({
   fieldWrapper: {
     paddingBottom: 32,
   },
-  fieldEditWrapperBase: {},
   fieldEditWrapper: {
     height: 40,
     borderWidth: 2,
     borderRadius: tokens.border.radius,
     alignItems: 'center',
     flexDirection: 'row',
+  },
+  multiLineTextButton: {
+    paddingVertical: 7,
+    paddingHorizontal: 7,
+    borderWidth: 1,
+    borderRadius: tokens.border.radius,
   },
   fieldButton: {
     height: 40,
@@ -785,7 +821,6 @@ const styles = StyleSheet.create({
     borderRadius: tokens.border.radius,
     justifyContent: 'center',
   },
-  popoverContainter: {},
   popoverButton: {
     height: 40,
     paddingHorizontal: 4,

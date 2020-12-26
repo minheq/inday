@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import { Icon } from '../../components/icon';
 
 import { Row } from '../../components/row';
-import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
 
 import { useThemeStyles } from '../../components/theme';

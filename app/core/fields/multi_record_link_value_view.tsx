@@ -24,7 +24,7 @@ export function MultiRecordLinkValueView(
   }
 
   return (
-    <Row spacing={4}>
+    <Row spacing={8}>
       {value.map((recordID) => (
         <RecordLinkBadge recordID={recordID} key={recordID} />
       ))}

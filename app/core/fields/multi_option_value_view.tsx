@@ -20,7 +20,7 @@ export function MultiOptionValueView(
   }
 
   return (
-    <Row spacing={4}>
+    <Row spacing={8}>
       {value.map((_value) => {
         const selected = field.options.find((o) => o.id === _value);
 

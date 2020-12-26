@@ -58,16 +58,16 @@ const lightTheme: Theme = {
   background: {
     content: palette.base.white,
     tint: palette.gray[200],
-    primary: palette.blue[500],
+    primary: palette.blue[600],
     lightPrimary: palette.blue[50],
   },
   text: {
     default: palette.gray[900],
     contrast: palette.gray[50],
-    success: palette.emerald[900],
+    success: palette.green[700],
     primary: palette.blue[800],
-    muted: palette.gray[700],
-    error: palette.red[900],
+    muted: palette.gray[600],
+    error: palette.red[800],
   },
   border: {
     default: palette.gray[300],
@@ -92,7 +92,7 @@ const darkTheme: Theme = {
   background: {
     content: palette.gray[900],
     tint: palette.gray[600],
-    primary: palette.blue[500],
+    primary: palette.blue[600],
     lightPrimary: palette.blue[800],
   },
   text: {
