@@ -55,7 +55,6 @@ export function SingleSelectKindValueEdit<T extends SingleSelectFieldKindValue>(
 const styles = StyleSheet.create({
   actionRow: {
     paddingTop: 24,
-    paddingBottom: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

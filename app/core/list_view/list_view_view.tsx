@@ -67,7 +67,6 @@ export const activeCellState = atom<StatefulLeafRowCell | null>({
 });
 
 // TODO:
-// - Make it obvious when changing state from editing -> focus (e.g. after pressing ESC)
 // - Display more information when focusing/editing cell
 export function ListViewView(props: ListViewViewProps): JSX.Element {
   const { view, onOpenRecord, mode, selectedRecords, onSelectRecord } = props;

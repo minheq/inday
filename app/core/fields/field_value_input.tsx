@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useState } from 'react';
 import {
   NativeSyntheticEvent,
-  Pressable,
   StyleSheet,
   TextInputKeyPressEventData,
   View,

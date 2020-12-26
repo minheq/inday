@@ -62,8 +62,7 @@ export function MultiSelectKindValueEdit<
 
 const styles = StyleSheet.create({
   actionRow: {
-    paddingTop: 24,
-    paddingBottom: 8,
+    paddingTop: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
