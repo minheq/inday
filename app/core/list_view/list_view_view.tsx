@@ -7,6 +7,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { atom, useRecoilState } from 'recoil';
+
 import {
   useGetSortedFieldsWithListViewConfig,
   useGetViewFilters,
@@ -29,8 +32,6 @@ import {
   RenderFooterProps,
 } from '../../components/grid_renderer';
 import { Record, RecordID } from '../../data/records';
-import { atom, useRecoilState } from 'recoil';
-
 import {
   GridGroup,
   SelectedRow,
@@ -41,13 +42,12 @@ import { isEmpty } from '../../../lib/lang_utils';
 import { last } from '../../../lib/array_utils';
 import { Group } from '../../data/groups';
 import { makeRecordNodes, RecordNode, SortGetters } from '../../data/sorts';
-import { LeafRowCell, LEAF_ROW_HEIGHT } from './leaf_row_cell';
-import { Header, HeaderCell } from './header';
+import { LastLeafRowCell, LeafRowCell, LEAF_ROW_HEIGHT } from './leaf_row_cell';
+import { Header, HeaderCell, LastHeaderCell } from './header';
 import { Footer } from './footer';
 import { GroupRow } from './group_row';
 import { FlatObject } from '../../../lib/flat_object';
-import { LeafRow } from './leaf_row';
-import { StyleSheet, View } from 'react-native';
+import { LastLeafRow, LeafRow } from './leaf_row';
 
 export type ViewMode = 'edit' | 'select';
 
@@ -60,6 +60,7 @@ interface ListViewViewProps {
 }
 
 const FIELD_ROW_HEIGHT = 40;
+const ADD_FIELD_COLUMN_WIDTH = 100;
 
 export const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewView_ActiveCell',
@@ -88,10 +89,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   );
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
-  const lastColumn = fields.length;
-  const lastRow = useMemo((): RowPath | undefined => last(rowPaths), [
-    rowPaths,
-  ]);
   const recordsOrderChanged = useRecordsOrderChanged(view.id, records);
   const fieldsOrderChanged = useFieldsOrderChanged(view.id, fields);
 
@@ -114,12 +111,27 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     }
   }, [mode, activeCell, setActiveCell]);
 
+  const columns = useMemo(
+    (): number[] =>
+      fields.map((field) => field.config.width).concat(ADD_FIELD_COLUMN_WIDTH),
+    [fields],
+  );
+  const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
+  const selectedRows = useMemo(
+    (): SelectedRow[] => getSelectedRows(selectedRecords, rowPaths),
+    [selectedRecords, rowPaths],
+  );
+  const lastFocusableColumn = useMemo(() => fields.length, [fields]);
+  const lastFocusableRow = useMemo((): RowPath | undefined => last(rowPaths), [
+    rowPaths,
+  ]);
+
   const context = useMemo((): ListViewViewContext => {
     return {
       rowToRecordIDCache,
       columnToFieldIDCache,
-      lastColumn,
-      lastRow,
+      lastFocusableColumn,
+      lastFocusableRow,
       mode,
       onOpenRecord,
       onSelectRecord,
@@ -127,18 +139,22 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   }, [
     rowToRecordIDCache,
     columnToFieldIDCache,
-    lastColumn,
-    lastRow,
+    lastFocusableColumn,
+    lastFocusableRow,
     mode,
     onOpenRecord,
     onSelectRecord,
   ]);
 
   const renderLeafRowCell = useCallback(
-    (c: RenderLeafRowCellProps) => {
-      const fieldID = columnToFieldIDCache[c.column];
-      const recordID = rowToRecordIDCache.get([...c.path, c.row]);
-      const primary = c.column === 1;
+    (cell: RenderLeafRowCellProps) => {
+      if (cell.last) {
+        return <LastLeafRowCell />;
+      }
+
+      const fieldID = columnToFieldIDCache[cell.column];
+      const recordID = rowToRecordIDCache.get([...cell.path, cell.row]);
+      const primary = cell.column === 1;
 
       if (recordID === undefined) {
         throw new Error('No corresponding recordID found for row path.');
@@ -146,7 +162,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
       return (
         <LeafRowCell
-          cell={c}
+          cell={cell}
           recordID={recordID}
           viewID={view.id}
           fieldID={fieldID}
@@ -158,26 +174,34 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   );
 
   const renderHeaderCell = useCallback(
-    ({ column }: RenderHeaderCellProps) => {
-      const field = fields[column - 1];
-      const primary = column === 1;
+    (cell: RenderHeaderCellProps) => {
+      if (cell.last) {
+        return <LastHeaderCell />;
+      }
 
-      return <HeaderCell field={field} primary={primary} />;
+      const fieldID = columnToFieldIDCache[cell.column];
+      const primary = cell.column === 1;
+
+      return <HeaderCell fieldID={fieldID} primary={primary} />;
     },
-    [fields],
+    [columnToFieldIDCache],
   );
 
   const renderLeafRow = useCallback(
-    ({ children, state, path, row }: RenderLeafRowProps) => {
-      const recordID = rowToRecordIDCache.get([...path, row]);
+    (row: RenderLeafRowProps) => {
+      if (row.last) {
+        return <LastLeafRow />;
+      }
+
+      const recordID = rowToRecordIDCache.get([...row.path, row.row]);
 
       if (recordID === undefined) {
         throw new Error('No corresponding recordID found for row path.');
       }
 
       return (
-        <LeafRow recordID={recordID} state={state}>
-          {children}
+        <LeafRow recordID={recordID} state={row.state}>
+          {row.children}
         </LeafRow>
       );
     },
@@ -198,17 +222,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const renderFooter = useCallback(({ children }: RenderFooterProps) => {
     return <Footer>{children}</Footer>;
   }, []);
-
-  const columns = useMemo(
-    (): number[] => fields.map((field) => field.config.width),
-    [fields],
-  );
-  const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
-
-  const selectedRows = useMemo(
-    (): SelectedRow[] => getSelectedRows(selectedRecords, rowPaths),
-    [selectedRecords, rowPaths],
-  );
 
   if (
     gridRef.current !== null &&
@@ -372,7 +385,7 @@ function toGridGroups(
       groups = groups.concat({
         type: 'leaf',
         collapsed: node.grouped === true && node.collapsed === true,
-        rowCount: node.children.length,
+        rowCount: node.children.length + 1, // + 1 adds a row for `Add record`
       });
     } else {
       groups = groups.concat({
@@ -426,8 +439,8 @@ function useFieldsOrderChanged(viewID: ViewID, fields: Field[]): boolean {
 interface ListViewViewContext {
   rowToRecordIDCache: RowToRecordIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
-  lastColumn: number;
-  lastRow: RowPath | undefined;
+  lastFocusableColumn: number;
+  lastFocusableRow: RowPath | undefined;
   mode: ViewMode;
   onOpenRecord: (recordID: RecordID) => void;
   onSelectRecord: (recordID: RecordID, selected: boolean) => void;
@@ -436,8 +449,8 @@ interface ListViewViewContext {
 export const ListViewViewContext = createContext<ListViewViewContext>({
   rowToRecordIDCache: FlatObject(),
   columnToFieldIDCache: {},
-  lastColumn: 0,
-  lastRow: {
+  lastFocusableColumn: 0,
+  lastFocusableRow: {
     recordID: 'rec',
     row: 1,
     path: [],

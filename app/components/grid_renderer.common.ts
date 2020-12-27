@@ -35,6 +35,7 @@ export interface LeafRow {
   y: number;
   path: number[];
   row: number;
+  last: boolean;
 }
 
 export interface SelectedRow {
@@ -202,6 +203,7 @@ function getLeafRows(
       y: offset + i * leafRowHeight,
       path,
       row: i + 1,
+      last: i === rowCount - 1,
     });
   }
 
@@ -537,6 +539,7 @@ export interface LeafRowCell {
   path: number[];
   row: number;
   column: number;
+  last: boolean;
 }
 
 export type Cell = GroupRowCell | LeafRowCell;
@@ -613,6 +616,7 @@ export function useGetStatefulRows(
           height: row.height,
           path: row.path,
           row: row.row,
+          last: row.last,
           y: row.y,
           state: getLeafRowState(leafRowCell, row, selectedRowsCache),
           activeCell: leafRowCell,

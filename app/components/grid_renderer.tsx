@@ -60,10 +60,12 @@ export interface RenderGroupRowCellProps {
 
 export interface RenderHeaderCellProps {
   column: number;
+  last: boolean;
 }
 
 export interface RenderFooterCellProps {
   column: number;
+  last: boolean;
 }
 
 export interface RenderLeafRowCellProps {
@@ -71,6 +73,7 @@ export interface RenderLeafRowCellProps {
   path: number[];
   row: number;
   column: number;
+  last: boolean;
   state: LeafRowCellState;
 }
 
@@ -84,6 +87,7 @@ export interface RenderLeafRowProps {
   path: number[];
   row: number;
   state: LeafRowState;
+  last: boolean;
   children: React.ReactNode;
 }
 

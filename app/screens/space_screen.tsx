@@ -188,7 +188,7 @@ function SelectMenu() {
 
   return (
     <Row spacing={4} alignItems="center">
-      <Text weight="bold">{selectedRecords.length} Selected</Text>
+      <Text weight="bold">{`${selectedRecords.length} Selected`}</Text>
       <FlatButton title="Share" />
       <FlatButton title="Copy" />
       <FlatButton title="Delete" color="error" />

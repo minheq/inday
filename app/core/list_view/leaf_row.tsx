@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { ContextMenu } from '../../components/context_menu';
 import { ContextMenuItem } from '../../components/context_menu_content';
 import { LeafRowState } from '../../components/grid_renderer.common';
+import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
 import { RecordID } from '../../data/records';
 import { useListViewViewContext } from './list_view_view';
@@ -88,6 +89,14 @@ export function useLeafRowContextMenuOptions(): ContextMenuItem[] {
       { label: 'Delete', icon: 'Archive' },
     ],
     [handleOpen],
+  );
+}
+
+export function LastLeafRow(): JSX.Element {
+  return (
+    <View>
+      <Text>Add record</Text>
+    </View>
   );
 }
 

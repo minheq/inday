@@ -6,7 +6,8 @@ import { Row } from '../../components/row';
 import { Text } from '../../components/text';
 
 import { useThemeStyles } from '../../components/theme';
-import { Field } from '../../data/fields';
+import { FieldID } from '../../data/fields';
+import { useGetField } from '../../data/store';
 import { getFieldIcon } from '../views/icon_helpers';
 
 interface HeaderProps {
@@ -23,14 +24,15 @@ export function Header(props: HeaderProps): JSX.Element {
 }
 
 interface HeaderCellProps {
-  field: Field;
+  fieldID: FieldID;
   primary: boolean;
 }
 
 export const HeaderCell = memo(function HeaderCell(
   props: HeaderCellProps,
 ): JSX.Element {
-  const { field, primary } = props;
+  const { fieldID, primary } = props;
+  const field = useGetField(fieldID);
   const themeStyles = useThemeStyles();
 
   return (
@@ -45,6 +47,16 @@ export const HeaderCell = memo(function HeaderCell(
         <Icon name={getFieldIcon(field.type)} />
         <Text weight="bold">{field.name}</Text>
       </Row>
+    </View>
+  );
+});
+
+export const LastHeaderCell = memo(function LastHeaderCell(): JSX.Element {
+  const themeStyles = useThemeStyles();
+
+  return (
+    <View style={[styles.headerCell, themeStyles.border.default]}>
+      <Text>Add field</Text>
     </View>
   );
 });

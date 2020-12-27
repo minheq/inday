@@ -131,6 +131,7 @@ export const GridRenderer = memo(
       spacerHeight,
     });
 
+    const columnCount = columns.length;
     const totalHeight = contentHeight + headerHeight + footerHeight;
     const scrollViewHeight = height - headerHeight - footerHeight;
     const scrollViewWidth = width - leftPaneContentWidth;
@@ -192,9 +193,11 @@ export const GridRenderer = memo(
                   row={row.row}
                   height={row.height}
                   state={row.state}
+                  last={row.last}
                   activeCell={row.activeCell}
                   width={_width}
                   columns={_columns}
+                  columnCount={columnCount}
                   renderLeafRow={renderLeafRow}
                   renderLeafRowCell={renderLeafRowCell}
                 />,
@@ -244,6 +247,7 @@ export const GridRenderer = memo(
         renderLeafRow,
         renderGroupRow,
         statefulRows,
+        columnCount,
       ],
     );
 
@@ -262,12 +266,13 @@ export const GridRenderer = memo(
             height={headerHeight}
             width={_width}
             columns={_columns}
+            columnCount={columnCount}
             renderHeader={renderHeader}
             renderHeaderCell={renderHeaderCell}
           />
         );
       },
-      [headerHeight, renderHeaderCell, renderHeader],
+      [headerHeight, renderHeaderCell, renderHeader, columnCount],
     );
 
     const _renderFooter = useCallback(
@@ -286,6 +291,7 @@ export const GridRenderer = memo(
             height={footerHeight}
             width={_width}
             columns={_columns}
+            columnCount={columnCount}
             renderFooter={renderFooter}
             renderFooterCell={renderFooterCell}
           />
@@ -297,6 +303,7 @@ export const GridRenderer = memo(
         footerHeight,
         renderFooterCell,
         renderFooter,
+        columnCount,
       ],
     );
 
@@ -336,12 +343,20 @@ interface HeaderContainerProps {
   renderHeader: (props: RenderHeaderProps) => React.ReactNode;
   renderHeaderCell: (props: RenderHeaderCellProps) => React.ReactNode;
   columns: Column[];
+  columnCount: number;
 }
 
 const HeaderContainer = memo(function HeaderContainer(
   props: HeaderContainerProps,
 ) {
-  const { height, width, columns, renderHeader, renderHeaderCell } = props;
+  const {
+    height,
+    width,
+    columns,
+    columnCount,
+    renderHeader,
+    renderHeaderCell,
+  } = props;
 
   const children = useMemo(
     () => (
@@ -351,13 +366,13 @@ const HeaderContainer = memo(function HeaderContainer(
 
           return (
             <div key={column} style={{ width: columnWidth }}>
-              {renderHeaderCell({ column })}
+              {renderHeaderCell({ column, last: column === columnCount })}
             </div>
           );
         })}
       </div>
     ),
-    [columns, renderHeaderCell, height],
+    [columns, renderHeaderCell, height, columnCount],
   );
 
   return (
@@ -374,12 +389,21 @@ interface FooterContainerProps {
   renderFooter: (props: RenderFooterProps) => React.ReactNode;
   renderFooterCell: (props: RenderFooterCellProps) => React.ReactNode;
   columns: Column[];
+  columnCount: number;
 }
 
 const FooterContainer = memo(function FooterContainer(
   props: FooterContainerProps,
 ) {
-  const { y, height, width, renderFooterCell, renderFooter, columns } = props;
+  const {
+    y,
+    height,
+    width,
+    columnCount,
+    renderFooterCell,
+    renderFooter,
+    columns,
+  } = props;
 
   const children = useMemo(
     () => (
@@ -389,13 +413,13 @@ const FooterContainer = memo(function FooterContainer(
 
           return (
             <div key={column} style={{ width: columnWidth }}>
-              {renderFooterCell({ column })}
+              {renderFooterCell({ column, last: column === columnCount })}
             </div>
           );
         })}
       </div>
     ),
-    [columns, renderFooterCell, height],
+    [columns, renderFooterCell, height, columnCount],
   );
 
   return (
@@ -411,6 +435,8 @@ interface LeafRowContainerProps {
   y: number;
   path: number[];
   row: number;
+  last: boolean;
+  columnCount: number;
   renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
   renderLeafRow: (props: RenderLeafRowProps) => React.ReactNode;
   columns: RecycledColumn[];
@@ -430,6 +456,8 @@ const LeafRowContainer = memo(function LeafRowContainer(
     columns,
     activeCell,
     state,
+    last,
+    columnCount,
     renderLeafRow,
     renderLeafRowCell,
   } = props;
@@ -452,13 +480,14 @@ const LeafRowContainer = memo(function LeafRowContainer(
               row={row}
               state={cellState}
               width={columnWidth}
+              last={column === columnCount}
               x={x}
             />
           );
         })}
       </div>
     ),
-    [activeCell, columns, height, path, renderLeafRowCell, row],
+    [activeCell, columns, height, path, renderLeafRowCell, row, columnCount],
   );
 
   return (
@@ -469,7 +498,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
         activeCell !== null && 'active',
       )}
     >
-      {renderLeafRow({ children, path, row, state })}
+      {renderLeafRow({ children, path, row, state, last })}
     </div>
   );
 });
@@ -563,6 +592,7 @@ interface LeafRowCellContainerProps {
   column: number;
   row: number;
   path: number[];
+  last: boolean;
   state: LeafRowCellState;
 }
 
@@ -576,6 +606,7 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
     column,
     width,
     height,
+    last,
     state = 'default',
     renderLeafRowCell,
   } = props;
@@ -594,6 +625,7 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
         row,
         column,
         state,
+        last,
         type: 'leaf',
       })}
     </div>
