@@ -238,7 +238,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   return (
     <ListViewViewContext.Provider value={context}>
       <View style={styles.root}>
-        <AutoSizer>
+        <AutoSizer resizeGreaterWidthOnly>
           {({ height, width }) => (
             <GridRenderer
               ref={gridRef}
