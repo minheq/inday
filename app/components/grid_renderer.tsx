@@ -80,6 +80,7 @@ export interface RenderLeafRowCellProps {
 export interface RenderGroupRowProps {
   path: number[];
   state: GroupRowState;
+  pane: Pane;
   children: React.ReactNode;
 }
 
@@ -88,14 +89,19 @@ export interface RenderLeafRowProps {
   row: number;
   state: LeafRowState;
   last: boolean;
+  pane: Pane;
   children: React.ReactNode;
 }
 
+export type Pane = 'left' | 'right';
+
 export interface RenderHeaderProps {
+  pane: Pane;
   children: React.ReactNode;
 }
 
 export interface RenderFooterProps {
+  pane: Pane;
   children: React.ReactNode;
 }
 

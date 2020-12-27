@@ -190,7 +190,11 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const renderLeafRow = useCallback(
     (row: RenderLeafRowProps) => {
       if (row.last) {
-        return <LastLeafRow />;
+        if (row.pane === 'left') {
+          return <LastLeafRow />;
+        } else {
+          return null;
+        }
       }
 
       const recordID = rowToRecordIDCache.get([...row.path, row.row]);
