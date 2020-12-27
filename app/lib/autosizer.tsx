@@ -22,8 +22,9 @@ export function AutoSizer(props: AutoSizerProps): JSX.Element {
 
   const handleLayout = useCallback(
     (event: LayoutChangeEvent) => {
-      if (ready === false) {
-        setLayout(event.nativeEvent.layout);
+      setLayout(event.nativeEvent.layout);
+
+      if (!ready) {
         setReady(true);
       }
     },
@@ -31,20 +32,15 @@ export function AutoSizer(props: AutoSizerProps): JSX.Element {
   );
 
   return (
-    <View
-      onLayout={handleLayout}
-      style={[
-        styles.base,
-        ready && { width: layout.width, height: layout.height },
-      ]}
-    >
-      {ready === true && children(layout)}
+    <View onLayout={handleLayout} style={styles.base}>
+      {ready && children(layout)}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
   },
 });
