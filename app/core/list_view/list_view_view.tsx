@@ -93,14 +93,14 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const fieldsOrderChanged = useFieldsOrderChanged(view.id, fields);
 
   useEffect(() => {
-    if (recordsOrderChanged === true) {
+    if (recordsOrderChanged) {
       setNodes(getRecordNodes(records, groups, sortGetters));
       setRowToRecordIDCache(getRowToRecordIDCache(rowPaths));
     }
   }, [rowPaths, recordsOrderChanged, records, groups, sortGetters]);
 
   useEffect(() => {
-    if (fieldsOrderChanged === true) {
+    if (fieldsOrderChanged) {
       setColumnToFieldIDCache(getColumnToFieldIDCache(fields));
     }
   }, [fields, fieldsOrderChanged]);
@@ -384,7 +384,7 @@ function toGridGroups(
     if (node.type === 'leaf') {
       groups = groups.concat({
         type: 'leaf',
-        collapsed: node.grouped === true && node.collapsed === true,
+        collapsed: node.grouped && node.collapsed,
         rowCount: node.children.length + 1, // + 1 adds a row for `Add record`
       });
     } else {
