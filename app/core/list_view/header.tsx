@@ -1,5 +1,13 @@
-import React, { memo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { memo, useCallback, useRef } from 'react';
+import {
+  GestureResponderEvent,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { atom, useRecoilState } from 'recoil';
+import { Hoverable } from '../../components/hoverable';
 import { Icon } from '../../components/icon';
 
 import { Row } from '../../components/row';
@@ -7,8 +15,9 @@ import { Text } from '../../components/text';
 
 import { useThemeStyles } from '../../components/theme';
 import { FieldID } from '../../data/fields';
-import { useGetField } from '../../data/store';
+import { useGetField, useUpdateListViewFieldConfig } from '../../data/store';
 import { getFieldIcon } from '../views/icon_helpers';
+import { useListViewViewContext } from './list_view_view';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -23,31 +32,77 @@ export function Header(props: HeaderProps): JSX.Element {
   );
 }
 
+const resizeFieldIDState = atom<FieldID | null>({
+  key: 'ResizeFieldID',
+  default: null,
+});
+
 interface HeaderCellProps {
   fieldID: FieldID;
   primary: boolean;
+  width: number;
 }
 
 export const HeaderCell = memo(function HeaderCell(
   props: HeaderCellProps,
 ): JSX.Element {
-  const { fieldID, primary } = props;
+  const { fieldID, primary, width } = props;
+  const { viewID } = useListViewViewContext();
+  const [resizeFieldID, setResizeFieldID] = useRecoilState(resizeFieldIDState);
   const field = useGetField(fieldID);
+  const widthRef = useRef(width);
   const themeStyles = useThemeStyles();
+  const updateListViewFieldConfig = useUpdateListViewFieldConfig();
+
+  const handlePressMove = useCallback(
+    (e: GestureResponderEvent) => {
+      const nextWidth = widthRef.current + e.nativeEvent.locationX;
+      updateListViewFieldConfig(viewID, fieldID, { width: nextWidth });
+    },
+    [updateListViewFieldConfig, viewID, fieldID, widthRef],
+  );
+
+  const handlePressIn = useCallback(() => {
+    setResizeFieldID(fieldID);
+  }, [setResizeFieldID, fieldID]);
+
+  const handlePressOut = useCallback(() => {
+    widthRef.current = width;
+    setResizeFieldID(null);
+  }, [width, setResizeFieldID]);
 
   return (
-    <View
-      style={[
-        styles.headerCell,
-        themeStyles.border.default,
-        primary && styles.primaryCell,
-      ]}
-    >
-      <Row spacing={4}>
-        <Icon name={getFieldIcon(field.type)} />
-        <Text weight="bold">{field.name}</Text>
-      </Row>
-    </View>
+    <Hoverable>
+      {(hovered) => (
+        <View
+          style={[
+            styles.headerCell,
+            themeStyles.border.default,
+            primary && styles.primaryCell,
+          ]}
+        >
+          <Row spacing={4}>
+            <Icon name={getFieldIcon(field.type)} />
+            <Text weight="bold">{field.name}</Text>
+          </Row>
+          {(resizeFieldID === fieldID ||
+            (resizeFieldID === null && hovered)) && (
+            <Pressable
+              onPressIn={handlePressIn}
+              onPressMove={handlePressMove}
+              onPressOut={handlePressOut}
+              style={[
+                styles.resizeHandler,
+                themeStyles.border.default,
+                themeStyles.elevation.level1,
+              ]}
+            >
+              <Icon color="primary" size="sm" name="ArrowHorizontal" />
+            </Pressable>
+          )}
+        </View>
+      )}
+    </Hoverable>
   );
 });
 
@@ -72,5 +127,16 @@ const styles = StyleSheet.create({
   },
   primaryCell: {
     borderRightWidth: 2,
+  },
+  resizeHandler: {
+    position: 'absolute',
+    right: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    ...Platform.select({
+      web: {
+        cursor: 'grab',
+      },
+    }),
   },
 });

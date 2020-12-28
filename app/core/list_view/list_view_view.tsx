@@ -166,13 +166,14 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         <LeafRowCell
           cell={cell}
           recordID={recordID}
-          viewID={view.id}
+          width={cell.width}
+          height={cell.height}
           fieldID={fieldID}
           primary={primary}
         />
       );
     },
-    [columnToFieldIDCache, rowToRecordIDCache, view.id],
+    [columnToFieldIDCache, rowToRecordIDCache],
   );
 
   const renderHeaderCell = useCallback(
@@ -184,7 +185,9 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const fieldID = columnToFieldIDCache[cell.column];
       const primary = cell.column === 1;
 
-      return <HeaderCell fieldID={fieldID} primary={primary} />;
+      return (
+        <HeaderCell fieldID={fieldID} primary={primary} width={cell.width} />
+      );
     },
     [columnToFieldIDCache],
   );

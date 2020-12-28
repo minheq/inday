@@ -55,16 +55,22 @@ export interface GridRendererProps {
 export interface RenderGroupRowCellProps {
   path: number[];
   column: number;
+  width: number;
+  height: number;
   state: GroupRowCellState;
 }
 
 export interface RenderHeaderCellProps {
   column: number;
+  width: number;
+  height: number;
   last: boolean;
 }
 
 export interface RenderFooterCellProps {
   column: number;
+  width: number;
+  height: number;
   last: boolean;
 }
 
@@ -73,6 +79,8 @@ export interface RenderLeafRowCellProps {
   path: number[];
   row: number;
   column: number;
+  width: number;
+  height: number;
   last: boolean;
   state: LeafRowCellState;
 }

@@ -20,7 +20,6 @@ import {
   useUpdateRecordFieldValue,
   useGetField,
   useGetRecordFieldValue,
-  useGetListViewFieldConfig,
 } from '../../data/store';
 import {
   FieldType,
@@ -75,7 +74,6 @@ import {
   assertPhoneNumberFieldValue,
   BooleanFieldKindValue,
 } from '../../data/fields';
-import { ViewID } from '../../data/views';
 import { Record, RecordID } from '../../data/records';
 import { useSetRecoilState } from 'recoil';
 import {
@@ -135,20 +133,19 @@ export const LEAF_ROW_HEIGHT = 40;
 interface LeafRowCellProps {
   cell: StatefulLeafRowCell;
   primary: boolean;
-  viewID: ViewID;
+  width: number;
+  height: number;
   fieldID: FieldID;
   recordID: RecordID;
 }
 
 export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
-  const { cell, primary, viewID, fieldID, recordID } = props;
+  const { cell, primary, width, fieldID, recordID } = props;
   const field = useGetField(fieldID);
-  const fieldConfig = useGetListViewFieldConfig(viewID, fieldID);
   const value = useGetRecordFieldValue(recordID, fieldID);
   const { mode, onSelectRecord, rowToRecordIDCache } = useListViewViewContext();
   const setActiveCell = useSetRecoilState(activeCellState);
   const { selected } = useLeafRowContext();
-  const width = fieldConfig.width;
 
   const handleFocus = useCallback(() => {
     if (cell.state === 'default') {

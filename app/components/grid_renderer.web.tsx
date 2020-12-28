@@ -648,10 +648,7 @@ const HeaderCellContainer = memo(function HeaderCellContainer(
 
   return (
     <div style={styles('cell', { left: x, width, height })}>
-      {renderHeaderCell({
-        column,
-        last,
-      })}
+      {renderHeaderCell({ column, width, height, last })}
     </div>
   );
 });
@@ -672,10 +669,7 @@ const FooterCellContainer = memo(function FooterCellContainer(
 
   return (
     <div style={styles('cell', { left: x, width, height })}>
-      {renderFooterCell({
-        column,
-        last,
-      })}
+      {renderFooterCell({ column, width, height, last })}
     </div>
   );
 });
@@ -721,6 +715,8 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
         row,
         column,
         state,
+        width,
+        height,
         last,
         type: 'leaf',
       })}
@@ -759,7 +755,7 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
         (state === 'editing' || state === 'hovered') && 'active',
       )}
     >
-      {renderGroupRowCell({ path, column, state })}
+      {renderGroupRowCell({ path, column, width, height, state })}
     </div>
   );
 });
