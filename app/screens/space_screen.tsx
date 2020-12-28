@@ -1,4 +1,4 @@
-import React, { useCallback, createContext, useContext } from 'react';
+import React, { useCallback, createContext, useContext, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../core/other/routes';
@@ -60,10 +60,13 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
   const { spaceID, viewID } = params;
   const view = useGetView(viewID);
 
+  const context = useMemo(
+    () => ({ spaceID, viewID, collectionID: view.collectionID }),
+    [spaceID, viewID, view.collectionID],
+  );
+
   return (
-    <SpaceScreenContext.Provider
-      value={{ spaceID, viewID, collectionID: view.collectionID }}
-    >
+    <SpaceScreenContext.Provider value={context}>
       <Screen>
         <SpaceScreenHeader />
         <CollectionsTabs viewID={viewID} spaceID={spaceID} />
@@ -104,7 +107,8 @@ const openRecordState = atom<OpenRecordState>({
 
 function SpaceScreenHeader(): JSX.Element {
   const navigation = useNavigation();
-  const { spaceID } = useContext(SpaceScreenContext);
+  const context = useContext(SpaceScreenContext);
+  const { spaceID } = context;
   const space = useGetSpace(spaceID);
 
   const handlePressBack = useCallback(() => {

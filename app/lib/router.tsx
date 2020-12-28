@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
 } from 'react';
 import { Pathname } from '../../lib/pathname';
@@ -18,7 +19,7 @@ interface UseNavigation {
 export function useNavigationImplementation(): UseNavigation {
   const { push, back, setParams } = useContext(RouterContext);
 
-  return { setParams, push, back };
+  return useMemo(() => ({ setParams, push, back }), [setParams, push, back]);
 }
 
 interface RouterContext {
@@ -164,19 +165,31 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
   const child =
     Screen !== null ? <Screen name={name} params={params} /> : fallback;
 
+  const context = useMemo(
+    () => ({
+      name,
+      params,
+      lastAction,
+      pathMap,
+      browserUpdate: handleBrowserUpdate,
+      back: handleGoBack,
+      push: handleNavigate,
+      setParams: handleSetParams,
+    }),
+    [
+      name,
+      params,
+      lastAction,
+      pathMap,
+      handleBrowserUpdate,
+      handleGoBack,
+      handleNavigate,
+      handleSetParams,
+    ],
+  );
+
   return (
-    <RouterContext.Provider
-      value={{
-        name,
-        params,
-        lastAction,
-        pathMap,
-        browserUpdate: handleBrowserUpdate,
-        back: handleGoBack,
-        push: handleNavigate,
-        setParams: handleSetParams,
-      }}
-    >
+    <RouterContext.Provider value={context}>
       <BrowserHistorySync />
       {child}
     </RouterContext.Provider>
