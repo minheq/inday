@@ -68,16 +68,16 @@ export const HeaderCell = memo(function HeaderCell(
   const handlePressIn = useCallback(
     (e: GestureResponderEvent) => {
       anchorRef.current = e.nativeEvent.pageX;
+      widthRef.current = width;
       setResizeFieldID(fieldID);
     },
-    [setResizeFieldID, fieldID],
+    [width, setResizeFieldID, fieldID],
   );
 
   const handlePressOut = useCallback(() => {
     anchorRef.current = 0;
-    widthRef.current = width;
     setResizeFieldID(null);
-  }, [width, setResizeFieldID]);
+  }, [setResizeFieldID]);
 
   return (
     <Hoverable>
