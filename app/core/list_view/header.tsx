@@ -57,6 +57,11 @@ export const HeaderCell = memo(function HeaderCell(
 
   const handlePressMove = useCallback(
     (e: GestureResponderEvent) => {
+      // Sometimes happens when pressing in and pressing out too fast
+      if (anchorRef.current === 0) {
+        return;
+      }
+
       const nextWidth =
         widthRef.current + (e.nativeEvent.pageX - anchorRef.current);
 
