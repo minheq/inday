@@ -84,7 +84,7 @@ import {
   UIKey,
   useKeyboard,
 } from '../../lib/keyboard';
-import { StatefulLeafRowCell } from '../../components/grid_renderer.common';
+import { LeafRowCellState } from '../../components/grid_renderer.common';
 import { isNumberString, toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import {
@@ -131,16 +131,44 @@ import { FlatButton } from '../../components/flat_button';
 export const LEAF_ROW_HEIGHT = 40;
 
 interface LeafRowCellProps {
-  cell: StatefulLeafRowCell;
   primary: boolean;
   width: number;
   height: number;
+  path: number[];
+  row: number;
+  column: number;
+  last: boolean;
+  state: LeafRowCellState;
   fieldID: FieldID;
   recordID: RecordID;
 }
 
 export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
-  const { cell, primary, width, fieldID, recordID } = props;
+  const {
+    primary,
+    width,
+    height,
+    path,
+    row,
+    column,
+    last,
+    state,
+    fieldID,
+    recordID,
+  } = props;
+  const cell = useMemo(
+    () => ({
+      primary,
+      width,
+      height,
+      path,
+      row,
+      column,
+      last,
+      state,
+    }),
+    [primary, width, height, path, row, column, last, state],
+  );
   const field = useGetField(fieldID);
   const value = useGetRecordFieldValue(recordID, fieldID);
   const { mode, onSelectRecord, rowToRecordIDCache } = useListViewViewContext();
@@ -149,19 +177,19 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
 
   const handleFocus = useCallback(() => {
     if (cell.state === 'default') {
-      setActiveCell({ ...cell, state: 'focused' });
+      setActiveCell({ ...cell, type: 'leaf', state: 'focused' });
     }
   }, [setActiveCell, cell]);
 
   const handleStartEditing = useCallback(() => {
     if (cell.state === 'focused') {
-      setActiveCell({ ...cell, state: 'editing' });
+      setActiveCell({ ...cell, type: 'leaf', state: 'editing' });
     }
   }, [setActiveCell, cell]);
 
   const handleStopEditing = useCallback(() => {
     if (cell.state === 'editing') {
-      setActiveCell({ ...cell, state: 'focused' });
+      setActiveCell({ ...cell, type: 'leaf', state: 'focused' });
     }
   }, [setActiveCell, cell]);
 
@@ -171,11 +199,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
       return;
     }
 
-    setActiveCell({
-      ...cell,
-      row: nextRow,
-      state: 'focused',
-    });
+    setActiveCell({ ...cell, type: 'leaf', row: nextRow, state: 'focused' });
   }, [setActiveCell, cell, rowToRecordIDCache]);
 
   const handlePress = useCallback(() => {
@@ -212,20 +236,28 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
         <LeafRowCellRenderer
           cell={cell}
           field={field}
-          width={width}
-          height={LEAF_ROW_HEIGHT}
           value={value}
-          primary={primary}
           onPress={handlePress}
           mode={mode}
         />
       </LeafRowCellContext.Provider>
     );
-  }, [context, cell, field, width, value, primary, mode, handlePress]);
+  }, [context, cell, field, value, mode, handlePress]);
 });
 
+interface LeafRowCell {
+  primary: boolean;
+  width: number;
+  height: number;
+  path: number[];
+  row: number;
+  column: number;
+  last: boolean;
+  state: LeafRowCellState;
+}
+
 interface LeafRowCellContext {
-  cell: StatefulLeafRowCell;
+  cell: LeafRowCell;
   recordID: RecordID;
   fieldID: FieldID;
   onFocus: () => void;
@@ -236,7 +268,9 @@ interface LeafRowCellContext {
 
 const LeafRowCellContext = createContext<LeafRowCellContext>({
   cell: {
-    type: 'leaf',
+    primary: false,
+    width: 0,
+    height: 0,
     path: [],
     row: 0,
     column: 0,
@@ -267,12 +301,9 @@ const FOCUS_BORDER_WIDTH = 3;
 
 // This component primarily serves as a optimization
 interface LeafRowCellRendererProps {
-  cell: StatefulLeafRowCell;
+  cell: LeafRowCell;
   field: Field;
-  width: number;
-  height: number;
   value: FieldValue;
-  primary: boolean;
   mode: ViewMode;
   onPress: () => void;
 }
@@ -280,7 +311,7 @@ interface LeafRowCellRendererProps {
 const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
   props: LeafRowCellRendererProps,
 ) {
-  const { cell, primary, height, field, width, value, mode, onPress } = props;
+  const { cell, field, value, mode, onPress } = props;
   const themeStyles = useThemeStyles();
   const { selected } = useLeafRowContext();
 
@@ -341,18 +372,18 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       styles.leafRowCell,
       themeStyles.border.default,
       mode === 'edit' && themeStyles.background.content,
-      primary && styles.primaryCell,
-      primary && cell.state !== 'default' && styles.focusedPrimaryCell,
+      cell.primary && styles.primaryCell,
+      cell.primary && cell.state !== 'default' && styles.focusedPrimaryCell,
       cell.state !== 'default' && styles.focusedLeafRowCell,
       cell.state !== 'default' && themeStyles.border.focused,
       cell.state !== 'default' && {
-        minHeight: height + FOCUS_BORDER_WIDTH * 2,
-        width: width + FOCUS_BORDER_WIDTH * 2,
+        minHeight: cell.height + FOCUS_BORDER_WIDTH * 2,
+        width: cell.width + FOCUS_BORDER_WIDTH * 2,
         top: -FOCUS_BORDER_WIDTH,
         left: -FOCUS_BORDER_WIDTH,
       },
     ],
-    [cell, height, mode, primary, themeStyles, width],
+    [cell, mode, themeStyles],
   );
 
   return (
@@ -362,11 +393,11 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       style={pressableStyle}
       onPress={onPress}
     >
-      {primary === true && (
+      {cell.primary === true && (
         <SelectCheckbox open={mode === 'select'} selected={selected} />
       )}
       {renderCell()}
-      {primary === true && mode === 'edit' && cell.state !== 'editing' && (
+      {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
         <DotsMenu />
       )}
     </Pressable>

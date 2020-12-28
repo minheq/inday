@@ -75,7 +75,6 @@ export interface RenderFooterCellProps {
 }
 
 export interface RenderLeafRowCellProps {
-  type: 'leaf';
   path: number[];
   row: number;
   column: number;

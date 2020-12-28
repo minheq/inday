@@ -79,6 +79,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const [nodes, setNodes] = useState(
     getRecordNodes(records, groups, sortGetters),
   );
+  const viewID = view.id;
   const gridRef = useRef<GridRendererRef>(null);
   const rowPaths = useMemo(() => getRowPaths(nodes, []), [nodes]);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
@@ -128,7 +129,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
   const context = useMemo((): ListViewViewContext => {
     return {
-      viewID: view.id,
+      viewID,
       rowToRecordIDCache,
       columnToFieldIDCache,
       lastFocusableColumn,
@@ -145,18 +146,18 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     mode,
     onOpenRecord,
     onSelectRecord,
-    view,
+    viewID,
   ]);
 
   const renderLeafRowCell = useCallback(
-    (cell: RenderLeafRowCellProps) => {
-      if (cell.last) {
+    (_props: RenderLeafRowCellProps) => {
+      if (_props.last) {
         return <LastLeafRowCell />;
       }
 
-      const fieldID = columnToFieldIDCache[cell.column];
-      const recordID = rowToRecordIDCache.get([...cell.path, cell.row]);
-      const primary = cell.column === 1;
+      const fieldID = columnToFieldIDCache[_props.column];
+      const recordID = rowToRecordIDCache.get([..._props.path, _props.row]);
+      const primary = _props.column === 1;
 
       if (recordID === undefined) {
         throw new Error('No corresponding recordID found for row path.');
@@ -164,12 +165,16 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
       return (
         <LeafRowCell
-          cell={cell}
-          recordID={recordID}
-          width={cell.width}
-          height={cell.height}
-          fieldID={fieldID}
           primary={primary}
+          width={_props.width}
+          height={_props.height}
+          path={_props.path}
+          row={_props.row}
+          column={_props.column}
+          last={_props.last}
+          state={_props.state}
+          recordID={recordID}
+          fieldID={fieldID}
         />
       );
     },
@@ -177,16 +182,16 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   );
 
   const renderHeaderCell = useCallback(
-    (cell: RenderHeaderCellProps) => {
-      if (cell.last) {
+    (_props: RenderHeaderCellProps) => {
+      if (_props.last) {
         return <LastHeaderCell />;
       }
 
-      const fieldID = columnToFieldIDCache[cell.column];
-      const primary = cell.column === 1;
+      const fieldID = columnToFieldIDCache[_props.column];
+      const primary = _props.column === 1;
 
       return (
-        <HeaderCell fieldID={fieldID} primary={primary} width={cell.width} />
+        <HeaderCell fieldID={fieldID} primary={primary} width={_props.width} />
       );
     },
     [columnToFieldIDCache],

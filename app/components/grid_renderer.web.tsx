@@ -718,7 +718,6 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
         width,
         height,
         last,
-        type: 'leaf',
       })}
     </div>
   );
