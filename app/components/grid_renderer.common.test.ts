@@ -57,7 +57,7 @@ function recycle(items: Item[], prevItems: RecycledItem[]) {
   return recycleItems({
     items,
     prevItems,
-    toRecycledItem: (item, key) => ({ value: item.value, key }),
+    toRecycledItem: (item, key) => ({ ...item, key }),
     getValue: (item) => item.value,
     getKey: (item) => item.key,
   });
@@ -145,6 +145,38 @@ test('recycleItems - more than previous', (t) => {
   t.deepEqual(recycle(items, prevItems), expected);
 });
 
+interface OtherItem extends Item {
+  other: number;
+}
+
+interface OtherRecycledItem extends RecycledItem {
+  other: number;
+}
+
+test('recycleItems - with changed other value', (t) => {
+  const items: OtherItem[] = [
+    { value: 2, other: 2 },
+    { value: 3, other: 2 },
+    { value: 4, other: 2 },
+  ];
+
+  const prevItems: OtherRecycledItem[] = [
+    { value: 1, key: 0, other: 1 },
+    { value: 2, key: 1, other: 1 },
+    { value: 3, key: 2, other: 2 },
+  ];
+
+  const expected: OtherRecycledItem[] = [
+    { value: 2, key: 1, other: 2 },
+    { value: 3, key: 2, other: 2 },
+    { value: 4, key: 0, other: 2 },
+  ];
+
+  const result = recycle(items, prevItems);
+
+  t.deepEqual(result, expected);
+});
+
 test('getColumns', (t) => {
   const result = getColumns([100, 200, 100, 200, 100, 200]);
 
@@ -173,8 +205,8 @@ test('getRows - single flat group', (t) => {
 
   const expected: Row[] = [
     { type: 'group', height: 0, y: 0, path: [0], collapsed: false },
-    { type: 'leaf', height: 40, y: 0, path: [0], row: 1 },
-    { type: 'leaf', height: 40, y: 40, path: [0], row: 2 },
+    { type: 'leaf', height: 40, y: 0, path: [0], row: 1, last: false },
+    { type: 'leaf', height: 40, y: 40, path: [0], row: 2, last: true },
     { type: 'spacer', height: 72, y: 80 },
   ];
 
@@ -217,16 +249,16 @@ test('getRows - nested with leaf rows', (t) => {
   const expected: Row[] = [
     { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
     { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: false },
-    { type: 'leaf', height: 40, y: 112, path: [0, 0], row: 1 },
-    { type: 'leaf', height: 40, y: 152, path: [0, 0], row: 2 },
+    { type: 'leaf', height: 40, y: 112, path: [0, 0], row: 1, last: false },
+    { type: 'leaf', height: 40, y: 152, path: [0, 0], row: 2, last: true },
     { type: 'spacer', height: 72, y: 192 },
     { type: 'group', height: 56, y: 264, path: [1], collapsed: false },
     { type: 'group', height: 56, y: 320, path: [1, 0], collapsed: false },
-    { type: 'leaf', height: 40, y: 376, path: [1, 0], row: 1 },
-    { type: 'leaf', height: 40, y: 416, path: [1, 0], row: 2 },
+    { type: 'leaf', height: 40, y: 376, path: [1, 0], row: 1, last: false },
+    { type: 'leaf', height: 40, y: 416, path: [1, 0], row: 2, last: true },
     { type: 'group', height: 56, y: 456, path: [1, 1], collapsed: false },
-    { type: 'leaf', height: 40, y: 512, path: [1, 1], row: 1 },
-    { type: 'leaf', height: 40, y: 552, path: [1, 1], row: 2 },
+    { type: 'leaf', height: 40, y: 512, path: [1, 1], row: 1, last: false },
+    { type: 'leaf', height: 40, y: 552, path: [1, 1], row: 2, last: true },
     { type: 'spacer', height: 72, y: 592 },
   ];
 

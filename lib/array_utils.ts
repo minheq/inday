@@ -101,11 +101,17 @@ export function intersect<T extends number | string>(a: T[], b: T[]): T[] {
   return intersectBy(a, b, (v) => v);
 }
 
-/** Returns array of values found in left and right array */
+/**
+ * Returns array of values found in left and right array.
+ * Other values not intersected by, will be taken from left array.
+ *
+ * If `merge` is true, objects will be merged, with the objects from right array overriding the other array objects.
+ */
 export function intersectBy<T, K>(
   a: T[],
   b: K[],
   getValue: (item: T | K) => string | number,
+  merge = false,
 ): T[] {
   const bMap: { [key: string]: K } = {};
 
@@ -120,9 +126,14 @@ export function intersectBy<T, K>(
   for (let i = 0; i < a.length; i++) {
     const itemA = a[i];
     const val = getValue(itemA);
+    const itemB = bMap[val];
 
-    if (bMap[val] !== undefined) {
-      result.push(itemA);
+    if (itemB !== undefined) {
+      if (merge) {
+        result.push({ ...itemA, ...itemB });
+      } else {
+        result.push(itemA);
+      }
     }
   }
 

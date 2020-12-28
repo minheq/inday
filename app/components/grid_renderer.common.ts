@@ -296,7 +296,7 @@ export function recycleItems<T, K extends T>(
 ): K[] {
   const { items, prevItems, getValue, toRecycledItem, getKey } = params;
 
-  const reusedItems = intersectBy(prevItems, items, getValue);
+  const reusedItems = intersectBy(prevItems, items, getValue, true);
   const recycledItems = differenceBy(prevItems, items, getValue);
   const newItems = differenceBy(items, prevItems, getValue);
 
