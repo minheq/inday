@@ -1,4 +1,10 @@
-import React, { useCallback, createContext, useContext, useMemo } from 'react';
+import React, {
+  useCallback,
+  createContext,
+  useContext,
+  useMemo,
+  memo,
+} from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../core/other/routes';
@@ -105,7 +111,7 @@ const openRecordState = atom<OpenRecordState>({
   default: null,
 });
 
-function SpaceScreenHeader(): JSX.Element {
+const SpaceScreenHeader = memo(function SpaceScreenHeader(): JSX.Element {
   const navigation = useNavigation();
   const context = useContext(SpaceScreenContext);
   const { spaceID } = context;
@@ -128,7 +134,7 @@ function SpaceScreenHeader(): JSX.Element {
       </Row>
     </View>
   );
-}
+});
 
 function TopMenu() {
   return (

@@ -267,12 +267,11 @@ export const viewQuery = selectorFamily<View, ViewID>({
 export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
   key: 'ViewFiltersQuery',
   get: (viewID: ViewID) => ({ get }) => {
-    const view = get(viewQuery(viewID));
     const filters = get(filtersQuery);
 
     return filters
       .slice(0)
-      .filter((f) => f.viewID === view.id)
+      .filter((f) => f.viewID === viewID)
       .sort((a, b) => a.group - b.group);
   },
 });
@@ -280,12 +279,11 @@ export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
 export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
   key: 'ViewSortsQuery',
   get: (viewID: ViewID) => ({ get }) => {
-    const view = get(viewQuery(viewID));
     const sorts = get(sortsQuery);
 
     return sorts
       .slice(0)
-      .filter((f) => f.viewID === view.id)
+      .filter((f) => f.viewID === viewID)
       .sort((a, b) => a.sequence - b.sequence);
   },
 });
@@ -293,12 +291,11 @@ export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
 export const viewGroupsQuery = selectorFamily<Group[], ViewID>({
   key: 'ViewGroupsQuery',
   get: (viewID: ViewID) => ({ get }) => {
-    const view = get(viewQuery(viewID));
     const groups = get(groupsQuery);
 
     return groups
       .slice(0)
-      .filter((f) => f.viewID === view.id)
+      .filter((f) => f.viewID === viewID)
       .sort((a, b) => a.sequence - b.sequence);
   },
 });

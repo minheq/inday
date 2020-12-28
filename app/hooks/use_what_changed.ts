@@ -6,16 +6,25 @@ export function useWhatChanged<T extends unknown[]>(...args: T): boolean {
   const arg2 = args[2];
   const arg3 = args[3];
   const arg4 = args[4];
+  const arg5 = args[5];
+  const arg6 = args[6];
+  const arg7 = args[7];
   const prevArg0Ref = useRef(arg0);
   const prevArg1Ref = useRef(arg1);
   const prevArg2Ref = useRef(arg2);
   const prevArg3Ref = useRef(arg3);
   const prevArg4Ref = useRef(arg4);
+  const prevArg5Ref = useRef(arg5);
+  const prevArg6Ref = useRef(arg6);
+  const prevArg7Ref = useRef(arg7);
   const prevArg0 = prevArg0Ref.current;
   const prevArg1 = prevArg1Ref.current;
   const prevArg2 = prevArg2Ref.current;
   const prevArg3 = prevArg3Ref.current;
   const prevArg4 = prevArg4Ref.current;
+  const prevArg5 = prevArg5Ref.current;
+  const prevArg6 = prevArg6Ref.current;
+  const prevArg7 = prevArg7Ref.current;
 
   let changed = false;
 
@@ -59,12 +68,39 @@ export function useWhatChanged<T extends unknown[]>(...args: T): boolean {
     );
     changed = true;
   }
+  if (prevArg5 && prevArg5 !== arg5) {
+    console.log(
+      `arg 5 changed, prev=${JSON.stringify(prevArg5)} next=${JSON.stringify(
+        arg5,
+      )}`,
+    );
+    changed = true;
+  }
+  if (prevArg6 && prevArg6 !== arg6) {
+    console.log(
+      `arg 6 changed, prev=${JSON.stringify(prevArg6)} next=${JSON.stringify(
+        arg6,
+      )}`,
+    );
+    changed = true;
+  }
+  if (prevArg7 && prevArg7 !== arg7) {
+    console.log(
+      `arg 7 changed, prev=${JSON.stringify(prevArg7)} next=${JSON.stringify(
+        arg7,
+      )}`,
+    );
+    changed = true;
+  }
 
   prevArg0Ref.current = arg0;
   prevArg1Ref.current = arg1;
   prevArg2Ref.current = arg2;
   prevArg3Ref.current = arg3;
   prevArg4Ref.current = arg4;
+  prevArg5Ref.current = arg5;
+  prevArg6Ref.current = arg6;
+  prevArg7Ref.current = arg7;
 
   return changed;
 }

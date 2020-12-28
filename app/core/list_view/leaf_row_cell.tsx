@@ -366,31 +366,46 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       onPress={onPress}
     >
       {primary === true && (
-        <View style={styles.selectCheckboxWrapper}>
-          <Slide open={mode === 'select'} width={32}>
-            <CheckboxStatic value={selected} />
-          </Slide>
-        </View>
+        <SelectCheckbox open={mode === 'select'} selected={selected} />
       )}
       {renderCell()}
       {primary === true && mode === 'edit' && cell.state !== 'editing' && (
-        <View style={styles.dotsMenuWrapper}>
-          <DotsMenu />
-        </View>
+        <DotsMenu />
       )}
     </Pressable>
   );
 });
 
-export function DotsMenu(): JSX.Element {
+interface SelectCheckboxProps {
+  open: boolean;
+  selected: boolean;
+}
+
+const SelectCheckbox = memo(function SelectCheckbox(
+  props: SelectCheckboxProps,
+): JSX.Element {
+  const { open, selected } = props;
+
+  return (
+    <View style={styles.selectCheckboxWrapper}>
+      <Slide open={open} width={32}>
+        <CheckboxStatic value={selected} />
+      </Slide>
+    </View>
+  );
+});
+
+const DotsMenu = memo(function DotsMenu(): JSX.Element {
   const options = useLeafRowContextMenuOptions();
 
   return (
-    <ContextMenuButton options={options} style={styles.dotsMenuButton}>
-      <Icon name="Dots" />
-    </ContextMenuButton>
+    <View style={styles.dotsMenuWrapper}>
+      <ContextMenuButton options={options} style={styles.dotsMenuButton}>
+        <Icon name="Dots" />
+      </ContextMenuButton>
+    </View>
   );
-}
+});
 
 interface CheckboxCellProps {
   value: CheckboxFieldValue;
@@ -692,6 +707,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   props: MultiLineTextCellProps,
 ) {
   const { value, field } = props;
+
   const { cell, recordID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 

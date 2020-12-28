@@ -406,25 +406,26 @@ function toGridGroups(
 }
 
 function useRecordsOrderChanged(viewID: ViewID, records: Record[]): boolean {
+  const recordsLength = records.length;
   const filters = useGetViewFilters(viewID);
   const sorts = useGetViewSorts(viewID);
   const groups = useGetViewGroups(viewID);
 
-  const prevRecords = usePrevious(records);
+  const prevRecordsLength = usePrevious(records.length);
   const prevFilters = usePrevious(filters);
   const prevSorts = usePrevious(sorts);
   const prevGroups = usePrevious(groups);
 
   return useMemo(() => {
     return (
-      records.length !== prevRecords.length ||
+      recordsLength !== prevRecordsLength ||
       filters !== prevFilters ||
       sorts !== prevSorts ||
       groups !== prevGroups
     );
   }, [
-    records,
-    prevRecords,
+    recordsLength,
+    prevRecordsLength,
     filters,
     prevFilters,
     sorts,
