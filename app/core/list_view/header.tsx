@@ -51,22 +51,30 @@ export const HeaderCell = memo(function HeaderCell(
   const [resizeFieldID, setResizeFieldID] = useRecoilState(resizeFieldIDState);
   const field = useGetField(fieldID);
   const widthRef = useRef(width);
+  const anchorRef = useRef(0);
   const themeStyles = useThemeStyles();
   const updateListViewFieldConfig = useUpdateListViewFieldConfig();
 
   const handlePressMove = useCallback(
     (e: GestureResponderEvent) => {
-      const nextWidth = widthRef.current + e.nativeEvent.locationX;
+      const nextWidth =
+        widthRef.current + (e.nativeEvent.pageX - anchorRef.current);
+
       updateListViewFieldConfig(viewID, fieldID, { width: nextWidth });
     },
     [updateListViewFieldConfig, viewID, fieldID, widthRef],
   );
 
-  const handlePressIn = useCallback(() => {
-    setResizeFieldID(fieldID);
-  }, [setResizeFieldID, fieldID]);
+  const handlePressIn = useCallback(
+    (e: GestureResponderEvent) => {
+      anchorRef.current = e.nativeEvent.pageX;
+      setResizeFieldID(fieldID);
+    },
+    [setResizeFieldID, fieldID],
+  );
 
   const handlePressOut = useCallback(() => {
+    anchorRef.current = 0;
     widthRef.current = width;
     setResizeFieldID(null);
   }, [width, setResizeFieldID]);
