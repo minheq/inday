@@ -29,7 +29,7 @@ export function LeafRow(props: LeafRowProps): JSX.Element {
 
   return (
     <LeafRowContext.Provider value={value}>
-      <LeafRowRenderer>{children}</LeafRowRenderer>
+      <LeafRowView>{children}</LeafRowView>
     </LeafRowContext.Provider>
   );
 }
@@ -48,11 +48,11 @@ export function useLeafRowContext(): LeafRowContext {
   return useContext(LeafRowContext);
 }
 
-interface LeafRowRendererProps {
+interface LeafRowViewProps {
   children: React.ReactNode;
 }
 
-function LeafRowRenderer(props: LeafRowRendererProps) {
+function LeafRowView(props: LeafRowViewProps) {
   const { children } = props;
   const { selected } = useLeafRowContext();
   const options = useLeafRowContextMenuOptions();

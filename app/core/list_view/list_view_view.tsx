@@ -166,8 +166,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       return (
         <LeafRowCell
           primary={primary}
-          width={_props.width}
-          height={_props.height}
           path={_props.path}
           row={_props.row}
           column={_props.column}

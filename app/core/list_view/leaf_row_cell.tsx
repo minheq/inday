@@ -87,11 +87,7 @@ import {
 import { LeafRowCellState } from '../../components/grid_renderer.common';
 import { isNumberString, toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
-import {
-  activeCellState,
-  useListViewViewContext,
-  ViewMode,
-} from './list_view_view';
+import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
 import { DateValueEdit } from '../fields/date_value_edit';
 import { MultiCollaboratorValueEdit } from '../fields/multi_collaborator_value_edit';
@@ -132,8 +128,6 @@ export const LEAF_ROW_HEIGHT = 40;
 
 interface LeafRowCellProps {
   primary: boolean;
-  width: number;
-  height: number;
   path: number[];
   row: number;
   column: number;
@@ -144,30 +138,17 @@ interface LeafRowCellProps {
 }
 
 export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
-  const {
-    primary,
-    width,
-    height,
-    path,
-    row,
-    column,
-    last,
-    state,
-    fieldID,
-    recordID,
-  } = props;
+  const { primary, path, row, column, last, state, fieldID, recordID } = props;
   const cell = useMemo(
-    () => ({
+    (): LeafRowCell => ({
       primary,
-      width,
-      height,
       path,
       row,
       column,
       last,
       state,
     }),
-    [primary, width, height, path, row, column, last, state],
+    [primary, path, row, column, last, state],
   );
   const field = useGetField(fieldID);
   const value = useGetRecordFieldValue(recordID, fieldID);
@@ -215,6 +196,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
       cell,
       recordID,
       fieldID,
+      onPress: handlePress,
       onFocus: handleFocus,
       onStartEditing: handleStartEditing,
       onStopEditing: handleStopEditing,
@@ -224,31 +206,22 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     cell,
     recordID,
     fieldID,
+    handlePress,
     handleFocus,
     handleStartEditing,
     handleStopEditing,
     handleFocusNextRecord,
   ]);
 
-  return useMemo(() => {
-    return (
-      <LeafRowCellContext.Provider value={context}>
-        <LeafRowCellRenderer
-          cell={cell}
-          field={field}
-          value={value}
-          onPress={handlePress}
-          mode={mode}
-        />
-      </LeafRowCellContext.Provider>
-    );
-  }, [context, cell, field, value, mode, handlePress]);
+  return (
+    <LeafRowCellContext.Provider value={context}>
+      <LeafRowCellView field={field} value={value} />
+    </LeafRowCellContext.Provider>
+  );
 });
 
 interface LeafRowCell {
   primary: boolean;
-  width: number;
-  height: number;
   path: number[];
   row: number;
   column: number;
@@ -260,6 +233,7 @@ interface LeafRowCellContext {
   cell: LeafRowCell;
   recordID: RecordID;
   fieldID: FieldID;
+  onPress: () => void;
   onFocus: () => void;
   onStartEditing: () => void;
   onStopEditing: () => void;
@@ -269,8 +243,6 @@ interface LeafRowCellContext {
 const LeafRowCellContext = createContext<LeafRowCellContext>({
   cell: {
     primary: false,
-    width: 0,
-    height: 0,
     path: [],
     row: 0,
     column: 0,
@@ -279,6 +251,9 @@ const LeafRowCellContext = createContext<LeafRowCellContext>({
   },
   recordID: Record.generateID(),
   fieldID: Field.generateID(),
+  onPress: () => {
+    return;
+  },
   onFocus: () => {
     return;
   },
@@ -300,20 +275,19 @@ function useLeafRowCellContext(): LeafRowCellContext {
 const FOCUS_BORDER_WIDTH = 3;
 
 // This component primarily serves as a optimization
-interface LeafRowCellRendererProps {
-  cell: LeafRowCell;
+interface LeafRowCellViewProps {
   field: Field;
   value: FieldValue;
-  mode: ViewMode;
-  onPress: () => void;
 }
 
-const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
-  props: LeafRowCellRendererProps,
+const LeafRowCellView = memo(function LeafRowCellView(
+  props: LeafRowCellViewProps,
 ) {
-  const { cell, field, value, mode, onPress } = props;
-  const themeStyles = useThemeStyles();
+  const { field, value } = props;
+  const { mode } = useListViewViewContext();
   const { selected } = useLeafRowContext();
+  const { cell, onPress } = useLeafRowCellContext();
+  const themeStyles = useThemeStyles();
 
   const renderCell = useCallback((): JSX.Element => {
     switch (field.type) {
@@ -376,12 +350,6 @@ const LeafRowCellRenderer = memo(function LeafRowCellRenderer(
       cell.primary && cell.state !== 'default' && styles.focusedPrimaryCell,
       cell.state !== 'default' && styles.focusedLeafRowCell,
       cell.state !== 'default' && themeStyles.border.focused,
-      cell.state !== 'default' && {
-        minHeight: cell.height + FOCUS_BORDER_WIDTH * 2,
-        width: cell.width + FOCUS_BORDER_WIDTH * 2,
-        top: -FOCUS_BORDER_WIDTH,
-        left: -FOCUS_BORDER_WIDTH,
-      },
     ],
     [cell, mode, themeStyles],
   );
