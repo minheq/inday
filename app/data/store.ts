@@ -945,22 +945,36 @@ export function useGetSortedFieldsWithListViewConfig(
   }, [fields, view]);
 }
 
-export function useUpdateListViewFieldConfig() {
+export function useUpdateListViewFieldConfig(): (
+  viewID: ViewID,
+  fieldID: FieldID,
+  config: Partial<ListViewFieldConfig>,
+) => void {
   const emitEvent = useEmitEvent();
   const getView = useGetViewCallback();
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
   return useCallback(
-    (viewID: ViewID, fieldID: FieldID, config: ListViewFieldConfig) => {
+    (
+      viewID: ViewID,
+      fieldID: FieldID,
+      config: Partial<ListViewFieldConfig>,
+    ) => {
       const prevView = getView(viewID).getValue();
 
       assertListView(prevView);
+
+      const nextConfig: ListViewFieldConfig = {
+        order: config.order || prevView.fieldsConfig[fieldID].order,
+        width: config.width || prevView.fieldsConfig[fieldID].width,
+        visible: config.visible || prevView.fieldsConfig[fieldID].visible,
+      };
 
       const nextView: View = {
         ...prevView,
         fieldsConfig: {
           ...prevView.fieldsConfig,
-          [fieldID]: config,
+          [fieldID]: nextConfig,
         },
       };
 

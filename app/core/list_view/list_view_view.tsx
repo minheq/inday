@@ -128,6 +128,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
   const context = useMemo((): ListViewViewContext => {
     return {
+      viewID: view.id,
       rowToRecordIDCache,
       columnToFieldIDCache,
       lastFocusableColumn,
@@ -144,6 +145,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     mode,
     onOpenRecord,
     onSelectRecord,
+    view,
   ]);
 
   const renderLeafRowCell = useCallback(
@@ -441,6 +443,7 @@ function useFieldsOrderChanged(viewID: ViewID, fields: Field[]): boolean {
 }
 
 interface ListViewViewContext {
+  viewID: ViewID;
   rowToRecordIDCache: RowToRecordIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
   lastFocusableColumn: number;
@@ -451,6 +454,7 @@ interface ListViewViewContext {
 }
 
 export const ListViewViewContext = createContext<ListViewViewContext>({
+  viewID: 'viw',
   rowToRecordIDCache: FlatObject(),
   columnToFieldIDCache: {},
   lastFocusableColumn: 0,
