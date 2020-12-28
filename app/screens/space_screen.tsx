@@ -20,7 +20,7 @@ import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize/organize_view';
 import { ViewsMenu } from '../core/views/views_menu';
 import { AutoSizer } from '../lib/autosizer';
-import { View as CollectionView, ViewID } from '../data/views';
+import { View as CollectionView, ViewID, ViewType } from '../data/views';
 import { ListViewView } from '../core/list_view/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { Record, RecordID } from '../data/records';
@@ -153,7 +153,6 @@ function ViewSettings() {
   const [mode, setMode] = useRecoilState(modeState);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
   const [, setOpenRecord] = useRecoilState(openRecordState);
-  const themeStyles = useThemeStyles();
 
   const handleToggleView = useCallback(() => {
     if (sidePanel !== 'views') {
@@ -167,14 +166,44 @@ function ViewSettings() {
   }, [sidePanel, setSidePanel, setMode, setOpenRecord]);
 
   return (
+    <ViewSettingsView
+      viewID={view.id}
+      name={view.name}
+      type={view.type}
+      onToggleView={handleToggleView}
+      mode={mode}
+    />
+  );
+}
+
+interface ViewSettingsViewProps {
+  onToggleView: () => void;
+  mode: ModeState;
+  viewID: ViewID;
+  name: string;
+  type: ViewType;
+}
+
+const ViewSettingsView = memo(function ViewSettingsView(
+  props: ViewSettingsViewProps,
+) {
+  const { onToggleView, mode, viewID, name, type } = props;
+  const themeStyles = useThemeStyles();
+
+  return (
     <View style={[styles.viewSettingsRoot, themeStyles.elevation.level1]}>
       <Row justifyContent="space-between">
-        <ViewMenuButton view={view} onPress={handleToggleView} />
+        <ViewMenuButton
+          viewID={viewID}
+          name={name}
+          type={type}
+          onPress={onToggleView}
+        />
         {mode === 'edit' ? <ViewMenu /> : <SelectMenu />}
       </Row>
     </View>
   );
-}
+});
 
 function SelectMenu() {
   const [, setMode] = useRecoilState(modeState);
@@ -243,25 +272,27 @@ function ViewMenu() {
 }
 
 interface ViewMenuButtonProps {
-  view: CollectionView;
+  viewID: ViewID;
+  name: string;
+  type: ViewType;
   onPress: (viewID: ViewID) => void;
 }
 
 function ViewMenuButton(props: ViewMenuButtonProps) {
-  const { view, onPress } = props;
+  const { viewID, type, name, onPress } = props;
   const theme = useTheme();
   const handlePress = useCallback(() => {
-    onPress(view.id);
-  }, [onPress, view]);
+    onPress(viewID);
+  }, [onPress, viewID]);
 
   return (
     <Button onPress={handlePress} style={styles.viewMenuButton}>
       <Row spacing={4}>
         <Icon
-          name={getViewIcon(view.type)}
-          customColor={getViewIconColor(view.type, theme.colorScheme)}
+          name={getViewIcon(type)}
+          customColor={getViewIconColor(type, theme.colorScheme)}
         />
-        <Text>{view.name}</Text>
+        <Text>{name}</Text>
       </Row>
     </Button>
   );

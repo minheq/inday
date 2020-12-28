@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button } from '../../components/button';
 import { Icon } from '../../components/icon';
@@ -26,7 +26,6 @@ export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
   const space = useGetSpace(spaceID);
   const view = useGetView(viewID);
   const collections = useGetSpaceCollections(space.id);
-  const themeStyles = useThemeStyles();
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   if (activeCollection === undefined) {
@@ -36,6 +35,24 @@ export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
   }
 
   return (
+    <CollectionTabsView
+      collections={collections}
+      activeCollectionID={activeCollection.id}
+    />
+  );
+}
+
+interface CollectionTabsViewProps {
+  collections: Collection[];
+  activeCollectionID: CollectionID;
+}
+
+const CollectionTabsView = memo(function CollectionTabsView(
+  props: CollectionTabsViewProps,
+) {
+  const { collections, activeCollectionID } = props;
+  const themeStyles = useThemeStyles();
+  return (
     <View style={[styles.collectionTabsRoot, themeStyles.border.default]}>
       <Row>
         <Button style={[styles.collectionItem, styles.addCollectionItem]}>
@@ -43,7 +60,7 @@ export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
         </Button>
         {collections.map((collection) => (
           <CollectionItem
-            active={collection.id === activeCollection.id}
+            active={collection.id === activeCollectionID}
             key={collection.id}
             collection={collection}
             onPress={() => {
@@ -54,7 +71,7 @@ export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
       </Row>
     </View>
   );
-}
+});
 
 interface CollectionItemProps {
   active: boolean;
