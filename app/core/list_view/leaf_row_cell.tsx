@@ -272,8 +272,6 @@ function useLeafRowCellContext(): LeafRowCellContext {
   return useContext(LeafRowCellContext);
 }
 
-const FOCUS_BORDER_WIDTH = 3;
-
 // This component primarily serves as a optimization
 interface LeafRowCellViewProps {
   field: Field;
@@ -347,9 +345,7 @@ const LeafRowCellView = memo(function LeafRowCellView(
       themeStyles.border.default,
       mode === 'edit' && themeStyles.background.content,
       cell.primary && styles.primaryCell,
-      cell.primary && cell.state !== 'default' && styles.focusedPrimaryCell,
       cell.state !== 'default' && styles.focusedLeafRowCell,
-      cell.state !== 'default' && themeStyles.border.focused,
     ],
     [cell, mode, themeStyles],
   );
@@ -367,6 +363,9 @@ const LeafRowCellView = memo(function LeafRowCellView(
       {renderCell()}
       {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
         <DotsMenu />
+      )}
+      {cell.state !== 'default' && (
+        <View style={[styles.focused, themeStyles.border.focused]} />
       )}
     </Pressable>
   );
@@ -423,7 +422,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   });
 
   return (
-    <View style={styles.checkboxCellRoot}>
+    <View style={[styles.cellRoot, styles.checkboxCellRoot]}>
       <CheckboxValueEdit recordID={recordID} field={field} value={value} />
     </View>
   );
@@ -1424,18 +1423,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    overflowY: 'hidden',
-    overflowX: 'hidden',
   },
   focusedLeafRowCell: {
     height: 'auto',
+  },
+  focused: {
     borderRadius: tokens.border.radius,
-    overflowY: 'visible',
-    overflowX: 'hidden',
-    borderBottomWidth: FOCUS_BORDER_WIDTH,
-    borderTopWidth: FOCUS_BORDER_WIDTH,
-    borderLeftWidth: FOCUS_BORDER_WIDTH,
-    borderRightWidth: FOCUS_BORDER_WIDTH,
+    position: 'absolute',
+    top: -1,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderWidth: 2,
+    zIndex: -1,
   },
   lastLeafRowCell: {
     height: LEAF_ROW_HEIGHT,
@@ -1444,10 +1444,6 @@ const styles = StyleSheet.create({
   primaryCell: {
     borderRightWidth: 2,
   },
-  focusedPrimaryCell: {
-    paddingRight: 2,
-  },
-
   checkboxCellRoot: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -1473,7 +1469,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
-
   actionsWrapper: {
     paddingHorizontal: 8,
     paddingBottom: 8,
