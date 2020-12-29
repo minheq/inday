@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 import { SpringConfig } from './animation';
 import { tokens } from './tokens';
@@ -12,7 +12,7 @@ interface SlideProps {
   onCollapsed?: () => void;
 }
 
-export function Slide(props: SlideProps): JSX.Element {
+export const Slide = memo(function Slide(props: SlideProps): JSX.Element {
   const {
     width: intrinsicWidth,
     visible,
@@ -47,16 +47,7 @@ export function Slide(props: SlideProps): JSX.Element {
         onCollapsed();
       }
     });
-  }, [
-    speed,
-    bounciness,
-    width,
-    opacity,
-    visible,
-    intrinsicWidth,
-    onSlide,
-    onCollapsed,
-  ]);
+  }, [speed, bounciness, width, opacity, visible, intrinsicWidth, onSlide, onCollapsed]);
 
   return <Animated.View style={{ width, opacity }}>{children}</Animated.View>;
-}
+});

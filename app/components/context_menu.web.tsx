@@ -1,5 +1,6 @@
 import React, {
   Fragment,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -15,7 +16,9 @@ import {
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { PopoverContainer } from './popover_trigger';
 
-export function ContextMenu(props: ContextMenuProps): JSX.Element {
+export const ContextMenu = memo(function ContextMenu(
+  props: ContextMenuProps,
+): JSX.Element {
   const { options, children, width = 240 } = props;
   const contentHeight = useMemo((): number => {
     return options.length * CONTEXT_MENU_ITEM_HEIGHT;
@@ -90,4 +93,4 @@ export function ContextMenu(props: ContextMenuProps): JSX.Element {
       <View ref={ref}>{children}</View>
     </Fragment>
   );
-}
+});
