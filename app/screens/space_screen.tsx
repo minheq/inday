@@ -363,7 +363,7 @@ function MainContent() {
 
   return (
     <View style={styles.mainContentRoot}>
-      <Slide width={VIEWS_MENU_WIDTH} open={sidePanel === 'views'}>
+      <Slide width={VIEWS_MENU_WIDTH} visible={sidePanel === 'views'}>
         <View style={styles.leftPanel}>
           {sidePanel === 'views' && (
             <ViewsMenu spaceID={spaceID} viewID={viewID} />
@@ -371,7 +371,7 @@ function MainContent() {
         </View>
       </Slide>
       <View style={styles.viewContainer}>{renderView()}</View>
-      <Slide width={ORGANIZE_VIEW_WIDTH} open={sidePanel === 'organize'}>
+      <Slide width={ORGANIZE_VIEW_WIDTH} visible={sidePanel === 'organize'}>
         <View
           style={[
             styles.rightPanel,
@@ -394,7 +394,7 @@ function MainContent() {
           </AutoSizer>
         </View>
       </Slide>
-      <Slide width={RECORD_VIEW_WIDTH} open={openRecord !== null}>
+      <Slide width={RECORD_VIEW_WIDTH} visible={openRecord !== null}>
         <View
           style={[
             styles.rightPanel,

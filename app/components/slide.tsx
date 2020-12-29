@@ -3,37 +3,50 @@ import { Animated } from 'react-native';
 
 interface SlideProps {
   width: number;
-  open?: boolean;
+  visible: boolean;
   children?: React.ReactNode;
   onSlide?: () => void;
   onCollapsed?: () => void;
 }
 
 export function Slide(props: SlideProps): JSX.Element {
-  const { width: intrinsicWidth, open, children, onSlide, onCollapsed } = props;
-  const width = useRef(new Animated.Value(open ? intrinsicWidth : 0)).current;
-  const opacity = useRef(new Animated.Value(open ? 1 : 0)).current;
+  const {
+    width: intrinsicWidth,
+    visible,
+    children,
+    onSlide,
+    onCollapsed,
+  } = props;
+  const width = useRef(new Animated.Value(visible ? intrinsicWidth : 0))
+    .current;
+  const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.spring(width, {
-        toValue: open ? intrinsicWidth : 0,
+        toValue: visible ? intrinsicWidth : 0,
+        speed: 80,
         bounciness: 0,
         useNativeDriver: false,
       }),
       Animated.spring(opacity, {
-        toValue: open ? 1 : 0,
+        toValue: visible ? 1 : 0,
+        speed: 80,
         bounciness: 0,
         useNativeDriver: false,
       }),
     ]).start(() => {
-      if (open === true && onSlide !== undefined) {
-        onSlide();
-      } else if (onCollapsed !== undefined) {
-        onCollapsed();
+      if (visible) {
+        if (onSlide !== undefined) {
+          onSlide();
+        }
+      } else {
+        if (onCollapsed !== undefined) {
+          onCollapsed();
+        }
       }
     });
-  }, [width, opacity, open, intrinsicWidth, onSlide, onCollapsed]);
+  }, [width, opacity, visible, intrinsicWidth, onSlide, onCollapsed]);
 
   return <Animated.View style={{ width, opacity }}>{children}</Animated.View>;
 }

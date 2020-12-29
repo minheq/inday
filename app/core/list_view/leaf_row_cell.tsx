@@ -358,7 +358,7 @@ const LeafRowCellView = memo(function LeafRowCellView(
       onPress={onPress}
     >
       {cell.primary === true && (
-        <SelectCheckbox open={mode === 'select'} selected={selected} />
+        <SelectCheckbox visible={mode === 'select'} selected={selected} />
       )}
       {renderCell()}
       {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
@@ -372,18 +372,18 @@ const LeafRowCellView = memo(function LeafRowCellView(
 });
 
 interface SelectCheckboxProps {
-  open: boolean;
+  visible: boolean;
   selected: boolean;
 }
 
 const SelectCheckbox = memo(function SelectCheckbox(
   props: SelectCheckboxProps,
 ): JSX.Element {
-  const { open, selected } = props;
+  const { visible, selected } = props;
 
   return (
     <View style={styles.selectCheckboxWrapper}>
-      <Slide open={open} width={32}>
+      <Slide visible={visible} width={32}>
         <CheckboxStatic value={selected} />
       </Slide>
     </View>
