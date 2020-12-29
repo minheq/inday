@@ -1,40 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
+import { SpringConfig } from './animation';
+import { tokens } from './tokens';
 
-interface FadeProps<T> {
-  open?: boolean;
-  value?: T;
+interface FadeProps {
   children?: React.ReactNode;
+  config?: SpringConfig;
 }
 
-export function Fade<T>(props: FadeProps<T>): JSX.Element {
-  const { open, value, children } = props;
-  const opacity = useRef(new Animated.Value(open ? 1 : 0)).current;
+export function Fade(props: FadeProps): JSX.Element {
+  const { children, config } = props;
+  const { bounciness, speed } = config || tokens.animation.default;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.spring(opacity, {
-      toValue: open ? 1 : 0,
-      bounciness: 0,
+      toValue: 1,
+      bounciness,
+      speed,
       useNativeDriver: false,
     }).start();
-  }, [open, opacity]);
-
-  useEffect(() => {
-    Animated.sequence([
-      Animated.spring(opacity, {
-        toValue: 0,
-        speed: 100,
-        bounciness: 0,
-        useNativeDriver: false,
-      }),
-      Animated.spring(opacity, {
-        toValue: 1,
-        speed: 100,
-        bounciness: 0,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, [value, opacity]);
+  }, [opacity, bounciness, speed]);
 
   return <Animated.View style={{ opacity }}>{children}</Animated.View>;
 }

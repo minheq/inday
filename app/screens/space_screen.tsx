@@ -44,6 +44,8 @@ import { Spacer } from '../components/spacer';
 import { Column } from '../components/column';
 import { RecordFieldValueEdit } from '../core/fields/field_value_input';
 import { CollectionsTabs } from '../core/collections/collection_tabs';
+import { Delay } from '../components/delay';
+import { Fade } from '../components/fade';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -305,7 +307,6 @@ function MainContent() {
   const space = useGetSpace(spaceID);
   const view = useGetView(viewID);
   const mode = useRecoilValue(modeState);
-  const themeStyles = useThemeStyles();
   const [selectedRecords, setSelectedRecords] = useRecoilState(
     selectedRecordsState,
   );
@@ -372,58 +373,90 @@ function MainContent() {
       </Slide>
       <View style={styles.viewContainer}>{renderView()}</View>
       <Slide width={ORGANIZE_VIEW_WIDTH} visible={sidePanel === 'organize'}>
-        <View
-          style={[
-            styles.rightPanel,
-            themeStyles.background.content,
-            themeStyles.border.default,
-          ]}
-        >
-          <AutoSizer>
-            {({ height }) => (
-              <View style={{ width: ORGANIZE_VIEW_WIDTH, height }}>
-                <ScrollView>
-                  <OrganizeView
-                    spaceID={spaceID}
-                    viewID={viewID}
-                    collectionID={collectionID}
-                  />
-                </ScrollView>
-              </View>
-            )}
-          </AutoSizer>
-        </View>
+        <OrganizeViewContainer
+          spaceID={spaceID}
+          viewID={viewID}
+          collectionID={collectionID}
+        />
       </Slide>
       <Slide width={RECORD_VIEW_WIDTH} visible={openRecord !== null}>
-        <View
-          style={[
-            styles.rightPanel,
-            themeStyles.background.content,
-            themeStyles.border.default,
-          ]}
-        >
-          <AutoSizer>
-            {({ height }) => (
-              <View style={{ width: RECORD_VIEW_WIDTH, height }}>
-                {openRecord !== null && (
-                  <RecordDetailsContainer recordID={openRecord} />
-                )}
-              </View>
-            )}
-          </AutoSizer>
-        </View>
+        <RecordDetailsContainer recordID={openRecord} />
       </Slide>
     </View>
   );
 }
 
+interface OrganizeViewContainerProps {
+  spaceID: SpaceID;
+  viewID: ViewID;
+  collectionID: CollectionID;
+}
+
+const OrganizeViewContainer = memo(function OrganizeViewContainer(
+  props: OrganizeViewContainerProps,
+) {
+  const { spaceID, viewID, collectionID } = props;
+  const themeStyles = useThemeStyles();
+
+  return (
+    <View
+      style={[
+        styles.rightPanel,
+        themeStyles.background.content,
+        themeStyles.border.default,
+      ]}
+    >
+      <AutoSizer>
+        {({ height }) => (
+          <View style={{ width: ORGANIZE_VIEW_WIDTH, height }}>
+            <ScrollView>
+              <OrganizeView
+                spaceID={spaceID}
+                viewID={viewID}
+                collectionID={collectionID}
+              />
+            </ScrollView>
+          </View>
+        )}
+      </AutoSizer>
+    </View>
+  );
+});
+
 interface RecordDetailsContainerProps {
+  recordID: RecordID | null;
+}
+
+const RecordDetailsContainer = memo(function RecordDetailsContainer(
+  props: RecordDetailsContainerProps,
+) {
+  const { recordID } = props;
+  const themeStyles = useThemeStyles();
+
+  return (
+    <View
+      style={[
+        styles.rightPanel,
+        themeStyles.background.content,
+        themeStyles.border.default,
+      ]}
+    >
+      <AutoSizer>
+        {({ height }) => (
+          <View style={{ width: RECORD_VIEW_WIDTH, height }}>
+            {recordID && <RecordDetailsView recordID={recordID} />}
+          </View>
+        )}
+      </AutoSizer>
+    </View>
+  );
+});
+
+interface RecordDetailsViewProps {
   recordID: RecordID;
 }
 
-function RecordDetailsContainer(
-  props: RecordDetailsContainerProps,
-): JSX.Element {
+function RecordDetailsView(props: RecordDetailsViewProps): JSX.Element {
   const { recordID } = props;
   const record = useGetRecord(recordID);
   const [primaryField, primaryFieldValue] = useGetRecordPrimaryFieldValue(
@@ -445,19 +478,23 @@ function RecordDetailsContainer(
         </Text>
       </View>
       <ScrollView>
-        <View style={styles.recordDetailsContainer}>
-          <RecordDetails record={record} />
+        <View style={styles.recordDetailsView}>
+          <Delay config={tokens.animation.fast}>
+            <Fade>
+              <RecordFields record={record} />
+            </Fade>
+          </Delay>
         </View>
       </ScrollView>
     </View>
   );
 }
 
-interface RecordDetailsProps {
+interface RecordFieldsProps {
   record: Record;
 }
 
-function RecordDetails(props: RecordDetailsProps) {
+function RecordFields(props: RecordFieldsProps) {
   const { record } = props;
   const recordFieldsEntries = useGetRecordFieldsEntries(record.id);
 
@@ -505,7 +542,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     flex: 1,
   },
-  recordDetailsContainer: {
+  recordDetailsView: {
     padding: 8,
   },
   rightPanel: {

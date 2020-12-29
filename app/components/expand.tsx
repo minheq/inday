@@ -1,15 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { SpringConfig } from './animation';
+import { tokens } from './tokens';
 
 interface ExpandProps {
   open?: boolean;
   children?: React.ReactNode;
+  config?: SpringConfig;
   onExpanded?: () => void;
   onCollapsed?: () => void;
 }
 
 export function Expand(props: ExpandProps): JSX.Element {
-  const { open, children, onExpanded, onCollapsed } = props;
+  const { open, children, onExpanded, onCollapsed, config } = props;
+  const { bounciness, speed } = config || tokens.animation.default;
   const height = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
   const [intrinsicHeight, setIntrinsicHeight] = useState(0);
@@ -22,22 +26,33 @@ export function Expand(props: ExpandProps): JSX.Element {
     Animated.parallel([
       Animated.spring(height, {
         toValue: open ? intrinsicHeight : 0,
-        bounciness: 0,
+        bounciness,
+        speed,
         useNativeDriver: false,
       }),
       Animated.spring(translateY, {
         toValue: open ? 0 : -intrinsicHeight,
-        bounciness: 0,
+        bounciness,
+        speed,
         useNativeDriver: false,
       }),
     ]).start(() => {
-      if (open === true && onExpanded !== undefined) {
+      if (open && onExpanded !== undefined) {
         onExpanded();
       } else if (onCollapsed !== undefined) {
         onCollapsed();
       }
     });
-  }, [height, translateY, open, intrinsicHeight, onExpanded, onCollapsed]);
+  }, [
+    height,
+    bounciness,
+    speed,
+    translateY,
+    open,
+    intrinsicHeight,
+    onExpanded,
+    onCollapsed,
+  ]);
 
   return (
     <Animated.View style={[styles.base, { height }]}>

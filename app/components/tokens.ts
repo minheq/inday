@@ -29,4 +29,14 @@ export const tokens = {
       },
     },
   },
+  animation: {
+    fast: {
+      speed: 80,
+      bounciness: 0,
+    },
+    default: {
+      speed: 40,
+      bounciness: 0,
+    },
+  },
 };
