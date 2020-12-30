@@ -203,7 +203,7 @@ export const recordsByIDFixtures: {
 };
 
 const col1View2Group1 = makeGroup(
-  {},
+  { viewID: col1View2.id },
   { fieldID: col1Field14.id, order: 'ascending' },
 );
 

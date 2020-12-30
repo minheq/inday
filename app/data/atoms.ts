@@ -6,6 +6,7 @@ import {
   fieldsByIDFixtures,
   spacesByIDFixtures,
   viewsByIDFixtures,
+  groupsByIDFixtures,
   collaboratorsByIDFixtures,
 } from './fake_data';
 import { Record } from './records';
@@ -63,7 +64,7 @@ export const sortsByIDState = atom<SortsByIDState>({
 export type GroupsByIDState = { [groupID: string]: Group | undefined };
 export const groupsByIDState = atom<GroupsByIDState>({
   key: 'GroupsByIDState',
-  default: {},
+  default: groupsByIDFixtures,
 });
 
 export type SpacesByIDState = { [spaceID: string]: Space | undefined };
