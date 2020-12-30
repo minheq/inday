@@ -13,12 +13,6 @@ export interface PressableHighlightProps extends PressableProps {
   style?: StyleProp<ViewStyle>;
 }
 
-interface PressableStateCallback {
-  hovered: boolean;
-  pressed: boolean;
-  focused: boolean;
-}
-
 export const PressableHighlight = forwardRef<View, PressableHighlightProps>(
   function PressableHighlight(props, ref): JSX.Element {
     const { children, style, ...restProps } = props;
@@ -47,3 +41,9 @@ export const PressableHighlight = forwardRef<View, PressableHighlightProps>(
     );
   },
 );
+
+interface PressableStateCallback {
+  hovered: boolean;
+  pressed: boolean;
+  focused: boolean;
+}

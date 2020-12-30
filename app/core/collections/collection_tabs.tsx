@@ -54,7 +54,7 @@ const CollectionTabsView = memo(function CollectionTabsView(
   const themeStyles = useThemeStyles();
   return (
     <View style={[styles.collectionTabsRoot, themeStyles.border.default]}>
-      <Row>
+      <Row spacing={2}>
         <PressableHighlight
           style={[styles.collectionItem, styles.addCollectionItem]}
         >

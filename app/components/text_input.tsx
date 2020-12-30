@@ -80,11 +80,7 @@ export function TextInput(props: TextInputProps): JSX.Element {
         ]}
       />
       {clearable && value !== undefined && value !== null && value !== '' && (
-        <PressableHighlight
-          onPress={handleClear}
-          style={styles.clearButton}
-          containerStyle={styles.clearButtonContainer}
-        >
+        <PressableHighlight onPress={handleClear} style={styles.clearButton}>
           <Icon name="X" />
         </PressableHighlight>
       )}
@@ -104,15 +100,12 @@ const styles = StyleSheet.create({
   hasIcon: {
     paddingLeft: 0,
   },
-  clearButtonContainer: {
+  clearButton: {
     width: 24,
     height: 24,
     position: 'absolute',
     right: 8,
     top: 8,
-    borderRadius: tokens.border.radius,
-  },
-  clearButton: {
     borderRadius: tokens.border.radius,
   },
   input: {
