@@ -117,9 +117,9 @@ import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
 import { URLValueView } from '../fields/url_value_view';
 import { PhoneNumberValueView } from '../fields/phone_number_value_view';
 import { assertUnreached } from '../../../lib/lang_utils';
-import { PopoverButton } from '../../components/popover_button';
+import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
 import { Slide } from '../../components/slide';
-import { ContextMenuButton } from '../../components/context_menu_button';
+import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
 import { Icon } from '../../components/icon';
 import { CheckboxStatic } from '../../components/checkbox_static';
 import { FlatButton } from '../../components/flat_button';
@@ -395,9 +395,12 @@ const DotsMenu = memo(function DotsMenu(): JSX.Element {
 
   return (
     <View style={styles.dotsMenuWrapper}>
-      <ContextMenuButton options={options} style={styles.dotsMenuButton}>
+      <PressableHighlightContextMenu
+        options={options}
+        style={styles.dotsMenuButton}
+      >
         <Icon name="Dots" />
-      </ContextMenuButton>
+      </PressableHighlightContextMenu>
     </View>
   );
 });
@@ -544,7 +547,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   if (cell.state === 'focused') {
     return (
-      <PopoverButton
+      <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <DateValueEdit
             recordID={recordID}
@@ -553,10 +556,10 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellRoot}
+        style={styles.cellRoot}
       >
         {child}
-      </PopoverButton>
+      </PressableHighlightPopover>
     );
   }
 
@@ -628,7 +631,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
 
   if (cell.state === 'focused') {
     return (
-      <PopoverButton
+      <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <MultiCollaboratorValueEdit
             recordID={recordID}
@@ -637,10 +640,10 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellRoot}
+        style={styles.cellRoot}
       >
         {child}
-      </PopoverButton>
+      </PressableHighlightPopover>
     );
   }
 
@@ -760,7 +763,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
 
   if (cell.state === 'focused') {
     return (
-      <PopoverButton
+      <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <MultiOptionValueEdit
             recordID={recordID}
@@ -769,10 +772,10 @@ const MultiOptionCell = memo(function MultiOptionCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellRoot}
+        style={styles.cellRoot}
       >
         {child}
-      </PopoverButton>
+      </PressableHighlightPopover>
     );
   }
 
@@ -883,7 +886,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
 
   if (cell.state === 'focused') {
     return (
-      <PopoverButton
+      <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <SingleCollaboratorValueEdit
             recordID={recordID}
@@ -892,10 +895,10 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellRoot}
+        style={styles.cellRoot}
       >
         {child}
-      </PopoverButton>
+      </PressableHighlightPopover>
     );
   }
 
@@ -1008,7 +1011,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
 
   if (cell.state === 'focused') {
     return (
-      <PopoverButton
+      <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <SingleOptionValueEdit
             recordID={recordID}
@@ -1017,10 +1020,10 @@ const SingleOptionCell = memo(function SingleOptionCell(
             onDone={onRequestClose}
           />
         )}
-        containerStyle={styles.cellRoot}
+        style={styles.cellRoot}
       >
         {child}
-      </PopoverButton>
+      </PressableHighlightPopover>
     );
   }
 

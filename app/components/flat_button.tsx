@@ -4,7 +4,7 @@ import { tokens } from './tokens';
 import { Icon, IconName } from './icon';
 import { Spacer } from './spacer';
 import { Text, TextColor } from './text';
-import { Button } from './button';
+import { PressableHighlight } from './pressable_highlight';
 
 interface FlatButtonProps {
   onPress?: () => void;
@@ -26,7 +26,11 @@ export function FlatButton(props: FlatButtonProps): JSX.Element {
   } = props;
 
   return (
-    <Button onPress={onPress} disabled={disabled} style={styles.button}>
+    <PressableHighlight
+      onPress={onPress}
+      disabled={disabled}
+      style={styles.button}
+    >
       <View style={styles.root}>
         {icon && (
           <Fragment>
@@ -40,7 +44,7 @@ export function FlatButton(props: FlatButtonProps): JSX.Element {
           </Text>
         )}
       </View>
-    </Button>
+    </PressableHighlight>
   );
 }
 

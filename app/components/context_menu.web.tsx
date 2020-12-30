@@ -9,10 +9,7 @@ import React, {
 } from 'react';
 import { View } from 'react-native';
 import { ContextMenuProps } from './context_menu';
-import {
-  ContextMenuContent,
-  CONTEXT_MENU_ITEM_HEIGHT,
-} from './context_menu_content';
+import { ContextMenuView, CONTEXT_MENU_ITEM_HEIGHT } from './context_menu_view';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { PopoverContainer } from './popover_trigger';
 
@@ -83,7 +80,7 @@ export const ContextMenu = memo(function ContextMenu(
         visible={state.visible}
       >
         <PopoverContainer>
-          <ContextMenuContent
+          <ContextMenuView
             onPressed={handleRequestClose}
             width={width}
             options={options}

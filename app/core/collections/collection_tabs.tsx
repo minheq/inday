@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button } from '../../components/button';
+import { PressableHighlight } from '../../components/pressable_highlight';
 import { Icon } from '../../components/icon';
 import { Row } from '../../components/row';
 import { Text } from '../../components/text';
@@ -55,9 +55,11 @@ const CollectionTabsView = memo(function CollectionTabsView(
   return (
     <View style={[styles.collectionTabsRoot, themeStyles.border.default]}>
       <Row>
-        <Button style={[styles.collectionItem, styles.addCollectionItem]}>
+        <PressableHighlight
+          style={[styles.collectionItem, styles.addCollectionItem]}
+        >
           <Icon name="Plus" color="muted" />
-        </Button>
+        </PressableHighlight>
         {collections.map((collection) => (
           <CollectionItem
             active={collection.id === activeCollectionID}
@@ -88,7 +90,7 @@ function CollectionItem(props: CollectionItemProps) {
   }, [onPress, collection]);
 
   return (
-    <Button
+    <PressableHighlight
       onPress={handlePress}
       style={[
         styles.collectionItem,
@@ -102,7 +104,7 @@ function CollectionItem(props: CollectionItemProps) {
       >
         {collection.name}
       </Text>
-    </Button>
+    </PressableHighlight>
   );
 }
 

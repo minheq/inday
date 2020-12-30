@@ -1,24 +1,27 @@
 import React from 'react';
 
 import { PopoverCallback } from './popover';
-import { Button, ButtonProps } from './button';
+import {
+  PressableHighlight,
+  PressableHighlightProps,
+} from './pressable_highlight';
 import { PopoverTrigger } from './popover_trigger';
 import { StyleProp, ViewStyle } from 'react-native';
 
-export interface PopoverButtonProps extends ButtonProps {
+export interface PressableHighlightPopoverProps
+  extends PressableHighlightProps {
   content: React.ReactNode | ((callbacks: PopoverCallback) => React.ReactNode);
   popoverContainerStyle?: StyleProp<ViewStyle>;
 }
 
-export function PopoverButton(props: PopoverButtonProps): JSX.Element {
+export function PressableHighlightPopover(
+  props: PressableHighlightPopoverProps,
+): JSX.Element {
   const {
     content,
-    onPress,
-    disabled,
-    children,
-    style,
-    containerStyle,
     popoverContainerStyle,
+    onPress,
+    ...pressableHighlightProps
   } = props;
 
   return (
@@ -27,21 +30,18 @@ export function PopoverButton(props: PopoverButtonProps): JSX.Element {
       popoverContainerStyle={popoverContainerStyle}
     >
       {({ ref, onOpen }) => (
-        <Button
+        <PressableHighlight
           ref={ref}
-          onPress={() => {
-            if (onPress !== undefined) {
-              onPress();
+          onPress={(e) => {
+            if (onPress !== undefined && onPress !== null) {
+              onPress(e);
             }
 
             onOpen();
           }}
-          disabled={disabled}
-          style={style}
-          containerStyle={containerStyle}
-        >
-          {children}
-        </Button>
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...pressableHighlightProps}
+        />
       )}
     </PopoverTrigger>
   );

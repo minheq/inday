@@ -34,7 +34,7 @@ import { BackButton } from '../components/back_button';
 import { Text } from '../components/text';
 import { IconButton } from '../components/icon_button';
 import { FlatButton } from '../components/flat_button';
-import { Button } from '../components/button';
+import { PressableHighlight } from '../components/pressable_highlight';
 import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
 import { isEmpty } from '../../lib/lang_utils';
@@ -288,7 +288,7 @@ function ViewMenuButton(props: ViewMenuButtonProps) {
   }, [onPress, viewID]);
 
   return (
-    <Button onPress={handlePress} style={styles.viewMenuButton}>
+    <PressableHighlight onPress={handlePress} style={styles.viewMenuButton}>
       <Row spacing={4}>
         <Icon
           name={getViewIcon(type)}
@@ -296,7 +296,7 @@ function ViewMenuButton(props: ViewMenuButtonProps) {
         />
         <Text>{name}</Text>
       </Row>
-    </Button>
+    </PressableHighlight>
   );
 }
 

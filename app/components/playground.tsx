@@ -6,7 +6,7 @@ import { DatePickerStories } from './date_picker.stories';
 import { TextInputStories } from './text_input.stories';
 import { Text } from './text';
 import { ScreenName, ScreenProps, useNavigation } from '../core/other/routes';
-import { Button } from './button';
+import { PressableHighlight } from './pressable_highlight';
 import { tokens } from './tokens';
 import { PickerStories } from './picker.stories';
 import { Spacer } from './spacer';
@@ -170,14 +170,14 @@ function MenuItem(props: MenuItemProps) {
 
   return (
     <View style={styles.menuItem}>
-      <Button style={styles.menuButton} onPress={handlePress}>
+      <PressableHighlight style={styles.menuButton} onPress={handlePress}>
         <Text
           weight={active ? 'bold' : 'normal'}
           color={active ? 'primary' : 'default'}
         >
           {component}
         </Text>
-      </Button>
+      </PressableHighlight>
     </View>
   );
 }

@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ContextMenu } from '../../components/context_menu';
-import { ContextMenuItem } from '../../components/context_menu_content';
+import { ContextMenuItem } from '../../components/context_menu_view';
 import { LeafRowState } from '../../components/grid_renderer.common';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';

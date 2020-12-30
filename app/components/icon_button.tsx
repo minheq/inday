@@ -4,7 +4,7 @@ import { tokens } from './tokens';
 import { Icon, IconName } from './icon';
 import { Spacer } from './spacer';
 import { Text } from './text';
-import { Button } from './button';
+import { PressableHighlight } from './pressable_highlight';
 
 interface IconButtonProps {
   onPress?: () => void;
@@ -17,7 +17,11 @@ export function IconButton(props: IconButtonProps): JSX.Element {
   const { onPress, icon, disabled = false, title } = props;
 
   return (
-    <Button onPress={onPress} disabled={disabled} style={styles.button}>
+    <PressableHighlight
+      onPress={onPress}
+      disabled={disabled}
+      style={styles.button}
+    >
       <View style={styles.root}>
         {icon && <Icon name={icon} />}
         {title && (
@@ -27,7 +31,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
           </Fragment>
         )}
       </View>
-    </Button>
+    </PressableHighlight>
   );
 }
 

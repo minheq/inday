@@ -8,7 +8,7 @@ import {
   TextInputSubmitEditingEventData,
   StyleSheet,
 } from 'react-native';
-import { Button } from './button';
+import { PressableHighlight } from './pressable_highlight';
 import { IconName, Icon } from './icon';
 import { useTheme, useThemeStyles } from './theme';
 import { tokens } from './tokens';
@@ -80,13 +80,13 @@ export function TextInput(props: TextInputProps): JSX.Element {
         ]}
       />
       {clearable && value !== undefined && value !== null && value !== '' && (
-        <Button
+        <PressableHighlight
           onPress={handleClear}
           style={styles.clearButton}
           containerStyle={styles.clearButtonContainer}
         >
           <Icon name="X" />
-        </Button>
+        </PressableHighlight>
       )}
     </Animated.View>
   );

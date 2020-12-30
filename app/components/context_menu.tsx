@@ -1,8 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
-import { ContextMenuContentProps } from './context_menu_content';
+import { ContextMenuViewProps } from './context_menu_view';
 
-export interface ContextMenuProps extends ContextMenuContentProps {
+export interface ContextMenuProps extends ContextMenuViewProps {
   children: React.ReactNode;
 }
 

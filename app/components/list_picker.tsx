@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 import { Text } from './text';
-import { Button } from './button';
+import { PressableHighlight } from './pressable_highlight';
 import { tokens } from './tokens';
 
 import { Icon } from './icon';
@@ -182,7 +182,7 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
   );
 
   return (
-    <Button
+    <PressableHighlight
       containerStyle={styles.listItemContainer}
       style={[
         styles.listItem,
@@ -209,7 +209,7 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
           </View>
         </Fragment>
       )}
-    </Button>
+    </PressableHighlight>
   );
 }
 

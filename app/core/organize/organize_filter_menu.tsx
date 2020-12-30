@@ -24,7 +24,7 @@ import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
 import { Picker, PickerOption } from '../../components/picker';
-import { Button } from '../../components/button';
+import { PressableHighlight } from '../../components/pressable_highlight';
 import { TextInput } from '../../components/text_input';
 
 import {
@@ -261,7 +261,7 @@ function FilterNew() {
   }
 
   return (
-    <Button
+    <PressableHighlight
       alignTitle="left"
       onPress={handlePressAddFilter}
       title="+ Add filter"

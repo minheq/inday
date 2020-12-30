@@ -67,7 +67,7 @@ import { SingleCollaboratorValueEdit } from './single_collaborator_value_edit';
 import { SingleOptionValueEdit } from './single_option_value_edit';
 import { SingleRecordLinkValueEdit } from './single_record_link_value_edit';
 import { DateValueEdit } from './date_value_edit';
-import { PopoverButton } from '../../components/popover_button';
+import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
 import { tokens } from '../../components/tokens';
 import { useThemeStyles } from '../../components/theme';
 import { SingleLineTextValueView } from './single_line_text_value_view';
@@ -86,7 +86,7 @@ import { SingleCollaboratorValueView } from './single_collaborator_value_view';
 import { SingleOptionValueView } from './single_option_value_view';
 import { SingleRecordLinkValueView } from './single_record_link_value_view';
 import { DateValueView } from './date_value_view';
-import { Button } from '../../components/button';
+import { PressableHighlight } from '../../components/pressable_highlight';
 import { Spacer } from '../../components/spacer';
 import { FlatButton } from '../../components/flat_button';
 import { Row } from '../../components/row';
@@ -353,12 +353,12 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   }
 
   return (
-    <Button
+    <PressableHighlight
       style={[styles.multiLineTextButton, themeStyles.border.default]}
       onPress={handlePress}
     >
       <MultiLineTextValueView value={value} field={field} />
-    </Button>
+    </PressableHighlight>
   );
 });
 
@@ -691,14 +691,14 @@ function PopoverWrapper(props: PopoverWrapperProps) {
   const themeStyles = useThemeStyles();
 
   return (
-    <PopoverButton
+    <PressableHighlightPopover
       style={[styles.popoverButton, themeStyles.border.default]}
       content={({ onRequestClose }) => (
         <View>{content({ onRequestClose })}</View>
       )}
     >
       {children}
-    </PopoverButton>
+    </PressableHighlightPopover>
   );
 }
 
@@ -732,12 +732,12 @@ function FieldButton(props: FieldButtonProps) {
   const themeStyles = useThemeStyles();
 
   return (
-    <Button
+    <PressableHighlight
       onPress={onPress}
       style={[styles.fieldButton, themeStyles.border.default]}
     >
       {children}
-    </Button>
+    </PressableHighlight>
   );
 }
 

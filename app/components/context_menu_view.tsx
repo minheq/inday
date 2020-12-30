@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button } from './button';
+import { PressableHighlight } from './pressable_highlight';
 import { Icon, IconName } from './icon';
 import { Text, TextColor, TextWeight } from './text';
 import { tokens } from './tokens';
@@ -13,7 +13,7 @@ export interface ContextMenuItem {
   icon?: IconName;
 }
 
-export interface ContextMenuContentProps {
+export interface ContextMenuViewProps {
   options: ContextMenuItem[];
   onPressed?: () => void;
   width?: number;
@@ -21,9 +21,7 @@ export interface ContextMenuContentProps {
 
 export const CONTEXT_MENU_ITEM_HEIGHT = 32;
 
-export function ContextMenuContent(
-  props: ContextMenuContentProps,
-): JSX.Element {
+export function ContextMenuView(props: ContextMenuViewProps): JSX.Element {
   const { options, onPressed, width = 240 } = props;
 
   return (
@@ -61,12 +59,12 @@ function ContextMenuButton(props: ContextMenuButtonProps) {
   }, [onPressed, onPress]);
 
   return (
-    <Button key={label} onPress={handlePress} style={styles.button}>
+    <PressableHighlight key={label} onPress={handlePress} style={styles.button}>
       <View style={styles.iconWrapper}>{icon && <Icon name={icon} />}</View>
       <Text weight={weight} color={color}>
         {label}
       </Text>
-    </Button>
+    </PressableHighlight>
   );
 }
 

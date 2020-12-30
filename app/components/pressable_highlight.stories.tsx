@@ -1,18 +1,18 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import { Button } from './button';
+import { PressableHighlight } from './pressable_highlight';
 import { Text } from './text';
 
 function Basic(): JSX.Element {
   return (
-    <Button
+    <PressableHighlight
       onPress={() => {
         return;
       }}
     >
       <Text>Button</Text>
-    </Button>
+    </PressableHighlight>
   );
 }
 
