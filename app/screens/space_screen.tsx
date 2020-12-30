@@ -18,7 +18,7 @@ import {
 } from '../data/store';
 import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize/organize_view';
-import { ViewsMenu } from '../core/views/views_menu';
+import { ViewList } from '../core/views/view_list';
 import { AutoSizer } from '../lib/autosizer';
 import { View as CollectionView, ViewID, ViewType } from '../data/views';
 import { ListViewView } from '../core/list_view/list_view_view';
@@ -365,11 +365,9 @@ function MainContent() {
   return (
     <View style={styles.mainContentRoot}>
       <Slide width={VIEWS_MENU_WIDTH} visible={sidePanel === 'views'}>
-        <View style={styles.leftPanel}>
-          {sidePanel === 'views' && (
-            <ViewsMenu spaceID={spaceID} viewID={viewID} />
-          )}
-        </View>
+        {sidePanel === 'views' && (
+          <ViewListContainer spaceID={spaceID} viewID={viewID} />
+        )}
       </Slide>
       <View style={styles.viewContainer}>{renderView()}</View>
       <Slide width={ORGANIZE_VIEW_WIDTH} visible={sidePanel === 'organize'}>
@@ -385,6 +383,28 @@ function MainContent() {
     </View>
   );
 }
+
+interface ViewListContainerProps {
+  spaceID: SpaceID;
+  viewID: ViewID;
+}
+
+const ViewListContainer = memo(function ViewListContainer(
+  props: ViewListContainerProps,
+) {
+  const { spaceID, viewID } = props;
+  const themeStyles = useThemeStyles();
+
+  return (
+    <View style={[styles.leftPanel, themeStyles.border.default]}>
+      <Delay config={tokens.animation.fast}>
+        <Fade config={tokens.animation.fast}>
+          <ViewList spaceID={spaceID} viewID={viewID} />
+        </Fade>
+      </Delay>
+    </View>
+  );
+});
 
 interface OrganizeViewContainerProps {
   spaceID: SpaceID;
@@ -480,7 +500,7 @@ function RecordDetailsView(props: RecordDetailsViewProps): JSX.Element {
       <ScrollView>
         <View style={styles.recordDetailsView}>
           <Delay config={tokens.animation.fast}>
-            <Fade>
+            <Fade config={tokens.animation.fast}>
               <RecordFields record={record} />
             </Fade>
           </Delay>
