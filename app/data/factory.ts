@@ -39,12 +39,12 @@ import {
   fakeWord,
   fakeWords,
 } from '../../lib/faker';
-import { tokens } from '../components/tokens';
 import { Workspace } from './workspace';
 import { keyedBy, range, sample } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 import { formatISODate } from '../../lib/date_utils';
 import { palette } from '../components/palette';
+import { Group } from './groups';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -488,6 +488,15 @@ export function makeSort(sort: Partial<Sort>, config: SortConfig): Sort {
     id: sort.id ?? Sort.generateID(),
     viewID: sort.viewID ?? View.generateID(),
     sequence: sort.sequence || 1,
+    ...config,
+  };
+}
+
+export function makeGroup(group: Partial<Group>, config: SortConfig): Group {
+  return {
+    id: group.id ?? Group.generateID(),
+    viewID: group.viewID ?? View.generateID(),
+    sequence: group.sequence || 1,
     ...config,
   };
 }

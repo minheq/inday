@@ -19,7 +19,7 @@ export function App(): JSX.Element {
             <Router
               pathMap={{
                 Space: {
-                  path: '/space/:spaceID/:viewID',
+                  path: '/s/:spaceID/:viewID',
                   component: SpaceScreen,
                 },
                 Playground: {

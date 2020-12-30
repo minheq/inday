@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useGetView, useGetCollectionViews } from '../../data/store';
@@ -17,10 +17,11 @@ import { tokens } from '../../components/tokens';
 interface ViewListProps {
   spaceID: SpaceID;
   viewID: ViewID;
+  onSelect: (viewID: ViewID) => void;
 }
 
 export function ViewList(props: ViewListProps): JSX.Element {
-  const { viewID } = props;
+  const { viewID, onSelect } = props;
   const activeView = useGetView(viewID);
   const views = useGetCollectionViews(activeView.collectionID);
 
@@ -34,7 +35,7 @@ export function ViewList(props: ViewListProps): JSX.Element {
       <Spacer size={16} />
       <Column spacing={4}>
         {views.map((view) => (
-          <ViewButton key={view.id} view={view} />
+          <ViewButton key={view.id} view={view} onSelect={onSelect} />
         ))}
       </Column>
       <Spacer size={32} />
@@ -47,14 +48,19 @@ export function ViewList(props: ViewListProps): JSX.Element {
 
 interface ViewButtonProps {
   view: CollectionView;
+  onSelect: (viewID: ViewID) => void;
 }
 
 function ViewButton(props: ViewButtonProps) {
-  const { view } = props;
+  const { view, onSelect } = props;
   const theme = useTheme();
 
+  const handlePress = useCallback(() => {
+    onSelect(view.id);
+  }, [onSelect, view]);
+
   return (
-    <PressableHighlight style={styles.button}>
+    <PressableHighlight onPress={handlePress} style={styles.button}>
       <Icon
         name={getViewIcon(view.type)}
         customColor={getViewIconColor(view.type, theme.colorScheme)}

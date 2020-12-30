@@ -393,13 +393,21 @@ const ViewListContainer = memo(function ViewListContainer(
   props: ViewListContainerProps,
 ) {
   const { spaceID, viewID } = props;
+  const navigation = useNavigation();
   const themeStyles = useThemeStyles();
+
+  const handleSelect = useCallback(
+    (id: ViewID) => {
+      navigation.setParams({ spaceID, viewID: id });
+    },
+    [spaceID, navigation],
+  );
 
   return (
     <View style={[styles.leftPanel, themeStyles.border.default]}>
       <Delay config={tokens.animation.fast}>
         <Fade config={tokens.animation.fast}>
-          <ViewList spaceID={spaceID} viewID={viewID} />
+          <ViewList onSelect={handleSelect} spaceID={spaceID} viewID={viewID} />
         </Fade>
       </Delay>
     </View>

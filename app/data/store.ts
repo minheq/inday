@@ -813,7 +813,7 @@ export function useCreateGroup(): (
   return useCallback(
     (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
       const newGroup: Group = {
-        id: GroupID(),
+        id: Group.generateID(),
         viewID,
         sequence,
         ...sortConfig,

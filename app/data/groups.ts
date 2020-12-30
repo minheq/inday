@@ -1,12 +1,18 @@
 import { ViewID } from './views';
-import { generateID } from '../../lib/id';
+import { generateID, validateID } from '../../lib/id';
 import { SortConfig } from './sorts';
 
 export const groupIDPrefix = `grp`;
 export type GroupID = `${typeof groupIDPrefix}${string}`;
-export function GroupID(): GroupID {
-  return generateID(groupIDPrefix);
-}
+
+export const Group = {
+  generateID: (): GroupID => {
+    return generateID(groupIDPrefix);
+  },
+  validateID: (id: string): void => {
+    return validateID(groupIDPrefix, id);
+  },
+};
 
 export interface BaseGroup {
   id: GroupID;

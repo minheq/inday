@@ -12,8 +12,10 @@ import {
   makeView,
   addFieldsToCollection,
   makeManyRecords,
+  makeGroup,
 } from './factory';
 import { keyedBy } from '../../lib/array_utils';
+import { Group } from './groups';
 
 const space1 = makeSpace({
   id: 'spc1',
@@ -127,11 +129,11 @@ const col1Fields = [
 const collection1WithFields = addFieldsToCollection(collection1, col1Fields);
 
 const col1View1 = makeView(
-  { id: 'viw1', collectionID: collection1.id },
+  { id: 'viw1', name: 'Flat list', collectionID: collection1.id },
   collection1WithFields,
 );
 const col1View2 = makeView(
-  { id: 'viw2', collectionID: collection1.id },
+  { id: 'viw2', name: 'Grouped list', collectionID: collection1.id },
   collection1WithFields,
 );
 
@@ -198,4 +200,15 @@ export const recordsByIDFixtures: {
 } = {
   ...keyedBy(col1Records, (field) => field.id),
   ...keyedBy(col2Records, (field) => field.id),
+};
+
+const col1View2Group1 = makeGroup(
+  {},
+  { fieldID: col1Field14.id, order: 'ascending' },
+);
+
+export const groupsByIDFixtures: {
+  [groupID: string]: Group;
+} = {
+  [col1View2Group1.id]: col1View2Group1,
 };
