@@ -364,8 +364,15 @@ const LeafRowCellView = memo(function LeafRowCellView(
       {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
         <DotsMenu />
       )}
+      <View
+        pointerEvents="none"
+        style={[styles.bottomBorder, themeStyles.border.default]}
+      />
       {cell.state !== 'default' && (
-        <View style={[styles.focused, themeStyles.border.focused]} />
+        <View
+          pointerEvents="none"
+          style={[styles.focused, themeStyles.border.focused]}
+        />
       )}
     </Pressable>
   );
@@ -1423,12 +1430,19 @@ export function LastLeafRowCell(): JSX.Element {
 const styles = StyleSheet.create({
   leafRowCell: {
     height: '100%',
-    borderBottomWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
   },
   focusedLeafRowCell: {
     height: 'auto',
+  },
+  bottomBorder: {
+    borderBottomWidth: 1,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
   },
   focused: {
     borderRadius: tokens.border.radius,
@@ -1438,7 +1452,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderWidth: 2,
-    zIndex: -1,
+    zIndex: 1,
   },
   lastLeafRowCell: {
     height: LEAF_ROW_HEIGHT,
