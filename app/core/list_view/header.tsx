@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import {
   GestureResponderEvent,
   Platform,
@@ -7,8 +7,11 @@ import {
   View,
 } from 'react-native';
 import { atom, useRecoilState } from 'recoil';
+import { ContextMenu } from '../../components/context_menu';
+import { ContextMenuItem } from '../../components/context_menu_view';
 import { Hoverable } from '../../components/hoverable';
 import { Icon } from '../../components/icon';
+import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
 
 import { Row } from '../../components/row';
 import { Text } from '../../components/text';
@@ -54,6 +57,7 @@ export const HeaderCell = memo(function HeaderCell(
   const anchorRef = useRef(0);
   const themeStyles = useThemeStyles();
   const updateListViewFieldConfig = useUpdateListViewFieldConfig();
+  const options = useHeaderCellContextMenuOptions();
 
   const handlePressMove = useCallback(
     (e: GestureResponderEvent) => {
@@ -87,37 +91,61 @@ export const HeaderCell = memo(function HeaderCell(
   return (
     <Hoverable>
       {(hovered) => (
-        <View
+        <PressableHighlightContextMenu
+          options={options}
           style={[
             styles.headerCell,
             themeStyles.border.default,
             primary && styles.primaryCell,
           ]}
         >
-          <Row spacing={4}>
-            <Icon name={getFieldIcon(field.type)} />
-            <Text weight="bold">{field.name}</Text>
-          </Row>
-          {(resizeFieldID === fieldID ||
-            (resizeFieldID === null && hovered)) && (
-            <Pressable
-              onPressIn={handlePressIn}
-              onPressMove={handlePressMove}
-              onPressOut={handlePressOut}
-              style={[
-                styles.resizeHandler,
-                themeStyles.border.default,
-                themeStyles.elevation.level1,
-              ]}
-            >
-              <Icon color="primary" size="sm" name="ArrowHorizontal" />
-            </Pressable>
-          )}
-        </View>
+          <ContextMenu options={options}>
+            <Row spacing={4}>
+              <Icon name={getFieldIcon(field.type)} />
+              <Text weight="bold">{field.name}</Text>
+            </Row>
+            {(resizeFieldID === fieldID ||
+              (resizeFieldID === null && hovered)) && (
+              <Pressable
+                onPressIn={handlePressIn}
+                onPressMove={handlePressMove}
+                onPressOut={handlePressOut}
+                style={[
+                  styles.resizeHandler,
+                  themeStyles.border.default,
+                  themeStyles.elevation.level1,
+                ]}
+              >
+                <Icon color="primary" size="sm" name="ArrowHorizontal" />
+              </Pressable>
+            )}
+          </ContextMenu>
+        </PressableHighlightContextMenu>
       )}
     </Hoverable>
   );
 });
+
+function useHeaderCellContextMenuOptions() {
+  return useMemo(
+    (): ContextMenuItem[] => [
+      { label: 'Edit field type' },
+      { label: 'Rename' },
+      { label: 'Edit description' },
+      { label: 'Edit permissions' },
+      { label: 'Move left' },
+      { label: 'Move right' },
+      { label: 'Sort ascending' },
+      { label: 'Sort descending' },
+      { label: 'Add filter' },
+      { label: 'Group by this field' },
+      { label: 'Duplicate' },
+      { label: 'Hide' },
+      { label: 'Delete' },
+    ],
+    [],
+  );
+}
 
 export const LastHeaderCell = memo(function LastHeaderCell(): JSX.Element {
   const themeStyles = useThemeStyles();
@@ -143,7 +171,7 @@ const styles = StyleSheet.create({
   },
   resizeHandler: {
     position: 'absolute',
-    right: 4,
+    right: -4,
     borderRadius: 999,
     borderWidth: 1,
     ...Platform.select({
