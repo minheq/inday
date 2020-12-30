@@ -2,7 +2,7 @@ import { Pool, PoolClient } from 'pg';
 import { env } from './env';
 import { Workspace } from '../app/data/workspace';
 import { NotFoundError } from './errors';
-import { first } from '../lib/js_utils';
+import { first } from '../lib/array_utils';
 import { Space } from '../app/data/spaces';
 import { Collection } from '../app/data/collections';
 import { Record } from '../app/data/records';
