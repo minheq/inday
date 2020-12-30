@@ -1,6 +1,6 @@
 import { generateID, validateID } from '../../lib/id';
 import { CollectionID } from './collections';
-import { FieldValue } from './fields';
+import { FieldID, FieldValue } from './fields';
 
 export const documentIDPrefix = 'doc' as const;
 export type DocumentID = `${typeof documentIDPrefix}${string}`;
@@ -22,6 +22,4 @@ export interface Document {
   collectionID: CollectionID;
 }
 
-export interface DocumentFieldValues {
-  [fieldID: string]: FieldValue;
-}
+export type DocumentFieldValues = Record<FieldID, FieldValue>;

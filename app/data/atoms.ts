@@ -9,17 +9,17 @@ import {
   groupsByIDFixtures,
   collaboratorsByIDFixtures,
 } from './fake_data';
-import { Document } from './documents';
-import { Collection } from './collections';
-import { Field } from './fields';
-import { Filter } from './filters';
-import { Space } from './spaces';
-import { View } from './views';
+import { Document, DocumentID } from './documents';
+import { Collection, CollectionID } from './collections';
+import { Field, FieldID } from './fields';
+import { Filter, FilterID } from './filters';
+import { Space, SpaceID } from './spaces';
+import { View, ViewID } from './views';
 import { Workspace } from './workspace';
-import { Sort } from './sorts';
+import { Sort, SortID } from './sorts';
 import { Event } from './events';
-import { Collaborator } from './collaborators';
-import { Group } from './groups';
+import { Collaborator, CollaboratorID } from './collaborators';
+import { Group, GroupID } from './groups';
 
 export type WorkspaceState = Workspace | null;
 export const workspaceState = atom<WorkspaceState>({
@@ -31,57 +31,56 @@ export const workspaceState = atom<WorkspaceState>({
   },
 });
 
-export type DocumentsByIDState = { [documentID: string]: Document | undefined };
+export type DocumentsByIDState = Record<DocumentID, Document | undefined>;
 export const documentsByIDState = atom<DocumentsByIDState>({
   key: 'DocumentsByIDState',
   default: documentsByIDFixtures,
 });
 
-export type CollectionsByIDState = { [id: string]: Collection | undefined };
+export type CollectionsByIDState = Record<CollectionID, Collection | undefined>;
 export const collectionsByIDState = atom<CollectionsByIDState>({
   key: 'CollectionsByIDState',
   default: collectionsByIDFixtures,
 });
 
-export type FieldsByIDState = { [fieldID: string]: Field | undefined };
+export type FieldsByIDState = Record<FieldID, Field | undefined>;
 export const fieldsByIDState = atom<FieldsByIDState>({
   key: 'FieldsByIDState',
   default: fieldsByIDFixtures,
 });
 
-export type FiltersByIDState = { [filterID: string]: Filter | undefined };
+export type FiltersByIDState = Record<FilterID, Filter | undefined>;
 export const filtersByIDState = atom<FiltersByIDState>({
   key: 'FiltersByIDState',
   default: {},
 });
 
-export type SortsByIDState = { [sortID: string]: Sort | undefined };
+export type SortsByIDState = Record<SortID, Sort | undefined>;
 export const sortsByIDState = atom<SortsByIDState>({
   key: 'SortsByIDState',
   default: {},
 });
 
-export type GroupsByIDState = { [groupID: string]: Group | undefined };
+export type GroupsByIDState = Record<GroupID, Group | undefined>;
 export const groupsByIDState = atom<GroupsByIDState>({
   key: 'GroupsByIDState',
   default: groupsByIDFixtures,
 });
 
-export type SpacesByIDState = { [spaceID: string]: Space | undefined };
+export type SpacesByIDState = Record<SpaceID, Space | undefined>;
 export const spacesByIDState = atom<SpacesByIDState>({
   key: 'SpacesByIDState',
   default: spacesByIDFixtures,
 });
 
-export type ViewsByIDState = { [viewID: string]: View | undefined };
+export type ViewsByIDState = Record<ViewID, View | undefined>;
 export const viewsByIDState = atom<ViewsByIDState>({
   key: 'ViewsByIDState',
   default: viewsByIDFixtures,
 });
 
-export type CollaboratorsByIDState = {
-  [collaboratorID: string]: Collaborator;
-};
+export type CollaboratorsByIDState = Record<CollaboratorID, Collaborator>;
+
 export const collaboratorsByIDState = atom<CollaboratorsByIDState>({
   key: 'CollaboratorsByIDState',
   default: collaboratorsByIDFixtures,

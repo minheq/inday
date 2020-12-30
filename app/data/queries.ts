@@ -28,12 +28,13 @@ import { Collaborator, CollaboratorID } from './collaborators';
 import { Group, GroupID } from './groups';
 import { keyedBy, last } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
+import { getKeyValue, keysOf } from '../../lib/object_utils';
 
 export const spaceQuery = selectorFamily<Space | null, SpaceID>({
   key: 'SpaceQuery',
   get: (spaceID: SpaceID) => ({ get }) => {
     const spacesByID = get(spacesByIDState);
-    const space = spacesByID[spaceID];
+    const space = getKeyValue(spacesByID, spaceID);
 
     if (space === undefined) {
       return null;
@@ -52,21 +53,21 @@ export const spaceCollectionsQuery = selectorFamily<Collection[], SpaceID>({
   },
 });
 
-export const spacesQuery = selector({
+export const spacesQuery = selector<Space[]>({
   key: 'SpacesQuery',
   get: ({ get }) => {
     const spacesByID = get(spacesByIDState);
 
-    return Object.values(spacesByID) as Space[];
+    return Object.values(spacesByID);
   },
 });
 
-export const documentsQuery = selector({
+export const documentsQuery = selector<Document[]>({
   key: 'DocumentsQuery',
   get: ({ get }) => {
     const documentsByID = get(documentsByIDState);
 
-    return Object.values(documentsByID) as Document[];
+    return Object.values(documentsByID);
   },
 });
 
@@ -74,7 +75,7 @@ export const documentQuery = selectorFamily<Document, DocumentID>({
   key: 'DocumentQuery',
   get: (documentID: DocumentID) => ({ get }) => {
     const documentsByID = get(documentsByIDState);
-    const document = documentsByID[documentID];
+    const document = getKeyValue(documentsByID, documentID);
 
     if (document === undefined) {
       throw new Error('Document not found');
@@ -98,12 +99,12 @@ export const collectionDocumentsQuery = selectorFamily<
   },
 });
 
-export const collectionsQuery = selector({
+export const collectionsQuery = selector<Collection[]>({
   key: 'CollectionsQuery',
   get: ({ get }) => {
     const collectionsByID = get(collectionsByIDState);
 
-    return Object.values(collectionsByID) as Collection[];
+    return Object.values(collectionsByID);
   },
 });
 
@@ -111,7 +112,7 @@ export const collectionQuery = selectorFamily<Collection, CollectionID>({
   key: 'CollectionQuery',
   get: (collectionID: CollectionID) => ({ get }) => {
     const collectionsByID = get(collectionsByIDState);
-    const collection = collectionsByID[collectionID];
+    const collection = getKeyValue(collectionsByID, collectionID);
 
     if (collection === undefined) {
       throw new Error('Collection not found');
@@ -121,12 +122,12 @@ export const collectionQuery = selectorFamily<Collection, CollectionID>({
   },
 });
 
-export const fieldsQuery = selector({
+export const fieldsQuery = selector<Field[]>({
   key: 'FieldsQuery',
   get: ({ get }) => {
     const fieldsByID = get(fieldsByIDState);
 
-    return Object.values(fieldsByID) as Field[];
+    return Object.values(fieldsByID);
   },
 });
 
@@ -135,7 +136,7 @@ export const fieldQuery = selectorFamily<Field, FieldID>({
   get: (fieldID: FieldID) => ({ get }) => {
     const fieldsByID = get(fieldsByIDState);
 
-    const field = fieldsByID[fieldID];
+    const field = getKeyValue(fieldsByID, fieldID);
 
     if (field === undefined) {
       throw new Error('Field not found');
@@ -174,12 +175,12 @@ export const collectionFieldsQuery = selectorFamily<Field[], CollectionID>({
   },
 });
 
-export const filtersQuery = selector({
+export const filtersQuery = selector<Filter[]>({
   key: 'FiltersQuery',
   get: ({ get }) => {
     const filtersByID = get(filtersByIDState);
 
-    return Object.values(filtersByID) as Filter[];
+    return Object.values(filtersByID);
   },
 });
 
@@ -188,7 +189,7 @@ export const filterQuery = selectorFamily<Filter, FilterID>({
   get: (filterID: FilterID) => ({ get }) => {
     const filtersByID = get(filtersByIDState);
 
-    const filter = filtersByID[filterID];
+    const filter = getKeyValue(filtersByID, filterID);
 
     if (filter === undefined) {
       throw new Error('Filter not found');
@@ -198,12 +199,12 @@ export const filterQuery = selectorFamily<Filter, FilterID>({
   },
 });
 
-export const sortsQuery = selector({
+export const sortsQuery = selector<Sort[]>({
   key: 'SortsQuery',
   get: ({ get }) => {
     const sortsByID = get(sortsByIDState);
 
-    return Object.values(sortsByID) as Sort[];
+    return Object.values(sortsByID);
   },
 });
 
@@ -212,7 +213,7 @@ export const sortQuery = selectorFamily<Sort, SortID>({
   get: (sortID: SortID) => ({ get }) => {
     const sortsByID = get(sortsByIDState);
 
-    const sort = sortsByID[sortID];
+    const sort = getKeyValue(sortsByID, sortID);
 
     if (sort === undefined) {
       throw new Error('Sort not found');
@@ -222,12 +223,12 @@ export const sortQuery = selectorFamily<Sort, SortID>({
   },
 });
 
-export const groupsQuery = selector({
+export const groupsQuery = selector<Group[]>({
   key: 'GroupsQuery',
   get: ({ get }) => {
     const groupsByID = get(groupsByIDState);
 
-    return Object.values(groupsByID) as Group[];
+    return Object.values(groupsByID);
   },
 });
 
@@ -236,7 +237,7 @@ export const groupQuery = selectorFamily<Group, GroupID>({
   get: (groupID: GroupID) => ({ get }) => {
     const groupsByID = get(groupsByIDState);
 
-    const group = groupsByID[groupID];
+    const group = getKeyValue(groupsByID, groupID);
 
     if (group === undefined) {
       throw new Error('Sort not found');
@@ -246,12 +247,12 @@ export const groupQuery = selectorFamily<Group, GroupID>({
   },
 });
 
-export const viewsQuery = selector({
+export const viewsQuery = selector<View[]>({
   key: 'ViewsQuery',
   get: ({ get }) => {
     const viewsByID = get(viewsByIDState);
 
-    return Object.values(viewsByID) as View[];
+    return Object.values(viewsByID);
   },
 });
 
@@ -259,7 +260,7 @@ export const viewQuery = selectorFamily<View, ViewID>({
   key: 'ViewQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const viewsByID = get(viewsByIDState);
-    const view = viewsByID[viewID];
+    const view = getKeyValue(viewsByID, viewID);
 
     if (view === undefined) {
       throw new Error('View not found');
@@ -397,7 +398,7 @@ export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
   key: 'CollaboratorQuery',
   get: (collaboratorID: CollaboratorID) => ({ get }) => {
     const collaboratorsByID = get(collaboratorsByIDState);
-    const collaborator = collaboratorsByID[collaboratorID];
+    const collaborator = getKeyValue(collaboratorsByID, collaboratorID);
 
     if (collaborator === undefined) {
       throw new Error('Collaborator not found');
@@ -423,13 +424,13 @@ export const documentFieldValueQuery = selectorFamily<
   key: 'DocumentFieldValueQuery',
   get: ({ documentID, fieldID }) => ({ get }) => {
     const documentsByID = get(documentsByIDState);
-    const document = documentsByID[documentID];
+    const document = getKeyValue(documentsByID, documentID);
 
     if (document === undefined) {
       throw new Error('Document not found');
     }
 
-    return document.fields[fieldID];
+    return getKeyValue(document.fields, fieldID);
   },
 });
 
@@ -493,11 +494,11 @@ export const documentFieldsEntriesQuery = selectorFamily<
   get: (documentID: DocumentID) => ({ get }) => {
     const document = get(documentQuery(documentID));
 
-    const fieldIDs = Object.keys(document.fields) as FieldID[];
+    const fieldIDs = keysOf(document.fields);
     const fields = fieldIDs.map((fieldID) => get(fieldQuery(fieldID)));
 
     return fields.map((field) => {
-      const value = document.fields[field.id];
+      const value = getKeyValue(document.fields, field.id);
 
       return [field, value];
     });

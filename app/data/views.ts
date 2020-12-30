@@ -34,10 +34,10 @@ interface ListViewConfig {
   groupsConfig: {
     // TODO: collapsed
   };
-  fieldsConfig: {
-    [fieldID: string]: ListViewFieldConfig;
-  };
+  fieldsConfig: ListViewFieldsConfig;
 }
+
+type ListViewFieldsConfig = Record<FieldID, ListViewFieldConfig>;
 
 export type FieldWithListViewConfig = Field & {
   config: ListViewFieldConfig;
