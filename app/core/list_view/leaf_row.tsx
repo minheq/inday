@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { ContextMenu } from '../../components/context_menu';
 import { ContextMenuItem } from '../../components/context_menu_view';
 import { LeafRowState } from '../../components/grid_renderer.common';
+import { PressableHighlight } from '../../components/pressable_highlight';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
 import { RecordID } from '../../data/records';
@@ -93,10 +94,12 @@ export function useLeafRowContextMenuOptions(): ContextMenuItem[] {
 }
 
 export function LastLeafRow(): JSX.Element {
+  const { onAddRecord } = useListViewViewContext();
+
   return (
-    <View>
+    <PressableHighlight onPress={onAddRecord}>
       <Text>Add record</Text>
-    </View>
+    </PressableHighlight>
   );
 }
 

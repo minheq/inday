@@ -1,5 +1,10 @@
 import { useCallback, useMemo } from 'react';
-import { useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
+import {
+  useRecoilValue,
+  useSetRecoilState,
+  useRecoilCallback,
+  Loadable,
+} from 'recoil';
 
 import { useEventEmitter, EventConfig, Event } from './events';
 import { Collection, CollectionID } from './collections';
@@ -12,8 +17,8 @@ import {
   FieldWithListViewConfig,
   ListViewFieldConfig,
 } from './views';
-import { Field, FieldConfig, FieldID, FieldValue } from './fields';
-import { Record, RecordID } from './records';
+import { Field, FieldConfig, FieldID, FieldValue, FieldType } from './fields';
+import { Record, RecordFieldValues, RecordID } from './records';
 import {
   Filter,
   FilterConfig,
@@ -77,6 +82,8 @@ import { SortConfig, Sort, SortID, deleteSort, SortGetters } from './sorts';
 import { Group, GroupID, deleteGroup } from './groups';
 import { Workspace } from './workspace';
 import { Collaborator, CollaboratorID } from './collaborators';
+import { keyedBy } from '../../lib/array_utils';
+import { assertUnreached, map } from '../../lib/lang_utils';
 
 export function useGetWorkspace(): Workspace {
   const workspace = useRecoilValue(workspaceState);
@@ -285,6 +292,17 @@ export function useGetCollection(collectionID: CollectionID): Collection {
 
 export function useGetCollectionFields(collectionID: CollectionID): Field[] {
   return useRecoilValue(collectionFieldsQuery(collectionID));
+}
+
+export function useGetCollectionFieldsCallback(): (
+  collectionID: CollectionID,
+) => Loadable<Field[]> {
+  return useRecoilCallback(
+    ({ snapshot }) => (collectionID: CollectionID) => {
+      return snapshot.getLoadable(collectionFieldsQuery(collectionID));
+    },
+    [],
+  );
 }
 
 export function useGetCollectionRecords(collectionID: CollectionID): Record[] {
@@ -529,7 +547,7 @@ export function useGetViewFilters(viewID: ViewID) {
   return useRecoilValue(viewFiltersQuery(viewID));
 }
 
-export function useGetRecordFieldsEntries(
+export function useGetRecordFieldValuesEntries(
   recordID: RecordID,
 ): [Field, FieldValue][] {
   return useRecoilValue(recordFieldsEntriesQuery(recordID));
@@ -1253,15 +1271,55 @@ export function useGetRecord(recordID: RecordID): Record {
   return record;
 }
 
-export function useCreateRecord() {
+function getDefaultFieldValue(field: Field): FieldValue {
+  switch (field.type) {
+    case FieldType.Checkbox:
+      return false;
+    case FieldType.Currency:
+    case FieldType.Number:
+    case FieldType.Date:
+    case FieldType.SingleCollaborator:
+    case FieldType.SingleOption:
+    case FieldType.SingleRecordLink:
+      return null;
+    case FieldType.PhoneNumber:
+    case FieldType.URL:
+    case FieldType.Email:
+    case FieldType.MultiLineText:
+    case FieldType.SingleLineText:
+      return '';
+    case FieldType.MultiCollaborator:
+    case FieldType.MultiOption:
+    case FieldType.MultiRecordLink:
+      return [];
+    default:
+      assertUnreached(field);
+  }
+}
+
+function getDefaultRecordFieldValues(fields: Field[]): RecordFieldValues {
+  const fieldsByID = keyedBy(fields, (field) => field.id);
+  return map(fieldsByID, getDefaultFieldValue);
+}
+
+export function useCreateRecord(): (
+  collectionID: CollectionID,
+  values?: RecordFieldValues,
+) => Record {
   const emitEvent = useEmitEvent();
   const setRecords = useSetRecoilState(recordsByIDState);
+  const getCollectionFields = useGetCollectionFieldsCallback();
 
   return useCallback(
-    (collectionID: CollectionID) => {
+    (collectionID: CollectionID, values?: RecordFieldValues) => {
+      const loadableFields = getCollectionFields(collectionID);
+
       const newRecord: Record = {
         id: Record.generateID(),
-        fields: {},
+        fields: {
+          ...getDefaultRecordFieldValues(loadableFields.getValue()),
+          ...values,
+        },
         createdAt: new Date(),
         updatedAt: new Date(),
         collectionID,
@@ -1279,7 +1337,7 @@ export function useCreateRecord() {
 
       return newRecord;
     },
-    [emitEvent, setRecords],
+    [emitEvent, setRecords, getCollectionFields],
   );
 }
 

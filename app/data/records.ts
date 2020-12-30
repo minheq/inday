@@ -18,8 +18,10 @@ export interface Record {
   id: RecordID;
   createdAt: Date;
   updatedAt: Date;
-  fields: {
-    [fieldID: string]: FieldValue;
-  };
+  fields: RecordFieldValues;
   collectionID: CollectionID;
+}
+
+export interface RecordFieldValues {
+  [fieldID: string]: FieldValue;
 }

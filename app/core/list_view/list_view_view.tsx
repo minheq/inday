@@ -57,6 +57,7 @@ interface ListViewViewProps {
   mode: ViewMode;
   selectedRecords: RecordID[];
   onSelectRecord: (recordID: RecordID, selected: boolean) => void;
+  onAddRecord: () => Record;
 }
 
 const FIELD_ROW_HEIGHT = 40;
@@ -70,7 +71,15 @@ export const activeCellState = atom<StatefulLeafRowCell | null>({
 // TODO:
 // - Display more information when focusing/editing cell
 export function ListViewView(props: ListViewViewProps): JSX.Element {
-  const { view, onOpenRecord, mode, selectedRecords, onSelectRecord } = props;
+  const {
+    view,
+    onOpenRecord,
+    onAddRecord,
+    mode,
+    selectedRecords,
+    onSelectRecord,
+  } = props;
+  const viewID = view.id;
   const [activeCell, setActiveCell] = useRecoilState(activeCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const records = useGetViewRecords(view.id);
@@ -79,7 +88,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const [nodes, setNodes] = useState(
     getRecordNodes(records, groups, sortGetters),
   );
-  const viewID = view.id;
   const gridRef = useRef<GridRendererRef>(null);
   const rowPaths = useMemo(() => getRowPaths(nodes, []), [nodes]);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
@@ -92,6 +100,21 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const fixedFieldCount = view.fixedFieldCount;
   const recordsOrderChanged = useRecordsOrderChanged(view.id, records);
   const fieldsOrderChanged = useFieldsOrderChanged(view.id, fields);
+  const newRecordAdded = useNewRecordAdded(records);
+  const columns = useMemo(
+    (): number[] =>
+      fields.map((field) => field.config.width).concat(ADD_FIELD_COLUMN_WIDTH),
+    [fields],
+  );
+  const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
+  const selectedRows = useMemo(
+    (): SelectedRow[] => getSelectedRows(selectedRecords, rowPaths),
+    [selectedRecords, rowPaths],
+  );
+  const lastFocusableColumn = useMemo(() => fields.length, [fields]);
+  const lastFocusableRow = useMemo((): RowPath | undefined => last(rowPaths), [
+    rowPaths,
+  ]);
 
   useEffect(() => {
     if (recordsOrderChanged) {
@@ -112,20 +135,18 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     }
   }, [mode, activeCell, setActiveCell]);
 
-  const columns = useMemo(
-    (): number[] =>
-      fields.map((field) => field.config.width).concat(ADD_FIELD_COLUMN_WIDTH),
-    [fields],
-  );
-  const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
-  const selectedRows = useMemo(
-    (): SelectedRow[] => getSelectedRows(selectedRecords, rowPaths),
-    [selectedRecords, rowPaths],
-  );
-  const lastFocusableColumn = useMemo(() => fields.length, [fields]);
-  const lastFocusableRow = useMemo((): RowPath | undefined => last(rowPaths), [
-    rowPaths,
-  ]);
+  useEffect(() => {
+    if (newRecordAdded && lastFocusableRow) {
+      setActiveCell({
+        type: 'leaf',
+        row: lastFocusableRow.row,
+        column: 1,
+        path: lastFocusableRow.path,
+        state: 'focused',
+        last: true,
+      });
+    }
+  }, [setActiveCell, newRecordAdded, lastFocusableRow]);
 
   const context = useMemo((): ListViewViewContext => {
     return {
@@ -137,8 +158,10 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       mode,
       onOpenRecord,
       onSelectRecord,
+      onAddRecord,
     };
   }, [
+    viewID,
     rowToRecordIDCache,
     columnToFieldIDCache,
     lastFocusableColumn,
@@ -146,7 +169,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     mode,
     onOpenRecord,
     onSelectRecord,
-    viewID,
+    onAddRecord,
   ]);
 
   const renderLeafRowCell = useCallback(
@@ -411,6 +434,13 @@ function toGridGroups(
   return groups;
 }
 
+function useNewRecordAdded(records: Record[]): boolean {
+  const recordsLength = records.length;
+  const prevRecordsLength = usePrevious(records.length);
+
+  return recordsLength - prevRecordsLength === 1;
+}
+
 function useRecordsOrderChanged(viewID: ViewID, records: Record[]): boolean {
   const recordsLength = records.length;
   const filters = useGetViewFilters(viewID);
@@ -458,6 +488,7 @@ interface ListViewViewContext {
   mode: ViewMode;
   onOpenRecord: (recordID: RecordID) => void;
   onSelectRecord: (recordID: RecordID, selected: boolean) => void;
+  onAddRecord: () => void;
 }
 
 export const ListViewViewContext = createContext<ListViewViewContext>({
@@ -475,6 +506,9 @@ export const ListViewViewContext = createContext<ListViewViewContext>({
     return;
   },
   onSelectRecord: () => {
+    return;
+  },
+  onAddRecord: () => {
     return;
   },
 });

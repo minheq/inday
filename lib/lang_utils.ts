@@ -93,3 +93,19 @@ export function assertUnreached(p: unknown, message?: string): never {
     throw new Error('Unknown value' + JSON.stringify(p));
   }
 }
+
+export function map<T, K>(
+  obj: Record<string, T>,
+  callback: (value: T) => K,
+): Record<string, K> {
+  const keys = Object.keys(obj);
+  const result: Record<string, K> = {};
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const value = obj[key];
+    result[key] = callback(value);
+  }
+
+  return result;
+}

@@ -14,7 +14,8 @@ import {
   useGetSpaceCollections,
   useGetRecordPrimaryFieldValue,
   useGetRecord,
-  useGetRecordFieldsEntries,
+  useGetRecordFieldValuesEntries,
+  useCreateRecord,
 } from '../data/store';
 import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize/organize_view';
@@ -310,6 +311,7 @@ function MainContent() {
   const [selectedRecords, setSelectedRecords] = useRecoilState(
     selectedRecordsState,
   );
+  const createRecord = useCreateRecord();
   const [openRecord, setOpenRecord] = useRecoilState(openRecordState);
   const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
@@ -345,6 +347,10 @@ function MainContent() {
     [setSelectedRecords],
   );
 
+  const handleAddRecord = useCallback((): Record => {
+    return createRecord(collectionID);
+  }, [createRecord, collectionID]);
+
   const renderView = useCallback((): React.ReactNode => {
     switch (view.type) {
       case 'list':
@@ -352,15 +358,23 @@ function MainContent() {
           <ListViewView
             mode={mode}
             view={view}
-            onOpenRecord={handleOpenRecord}
             selectedRecords={selectedRecords}
+            onOpenRecord={handleOpenRecord}
             onSelectRecord={handleSelectRecord}
+            onAddRecord={handleAddRecord}
           />
         );
       case 'board':
         return null;
     }
-  }, [mode, view, handleOpenRecord, selectedRecords, handleSelectRecord]);
+  }, [
+    mode,
+    view,
+    handleOpenRecord,
+    selectedRecords,
+    handleSelectRecord,
+    handleAddRecord,
+  ]);
 
   return (
     <View style={styles.mainContentRoot}>
@@ -509,7 +523,7 @@ function RecordDetailsView(props: RecordDetailsViewProps): JSX.Element {
         <View style={styles.recordDetailsView}>
           <Delay config={tokens.animation.fast}>
             <Fade config={tokens.animation.fast}>
-              <RecordFields record={record} />
+              <RecordFieldValues record={record} />
             </Fade>
           </Delay>
         </View>
@@ -518,13 +532,13 @@ function RecordDetailsView(props: RecordDetailsViewProps): JSX.Element {
   );
 }
 
-interface RecordFieldsProps {
+interface RecordFieldValuesProps {
   record: Record;
 }
 
-function RecordFields(props: RecordFieldsProps) {
+function RecordFieldValues(props: RecordFieldValuesProps) {
   const { record } = props;
-  const recordFieldsEntries = useGetRecordFieldsEntries(record.id);
+  const recordFieldsEntries = useGetRecordFieldValuesEntries(record.id);
 
   return (
     <View>
