@@ -9,11 +9,11 @@ import {
   MultiSelectFieldKindValue,
   SelectOptionID,
 } from '../../data/fields';
-import { RecordID } from '../../data/records';
-import { useUpdateRecordFieldValue } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useUpdateDocumentFieldValue } from '../../data/store';
 
 interface MultiSelectKindValueEditProps<T> {
-  recordID: RecordID;
+  documentID: DocumentID;
   fieldID: FieldID;
   value: T[];
   renderLabel: (value: NonNullable<T>) => JSX.Element;
@@ -22,26 +22,26 @@ interface MultiSelectKindValueEditProps<T> {
 }
 
 export function MultiSelectKindValueEdit<
-  T extends CollaboratorID | RecordID | SelectOptionID
+  T extends CollaboratorID | DocumentID | SelectOptionID
 >(props: MultiSelectKindValueEditProps<T>): JSX.Element {
-  const { onDone, value, options, renderLabel, recordID, fieldID } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<MultiSelectFieldKindValue>();
+  const { onDone, value, options, renderLabel, documentID, fieldID } = props;
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<MultiSelectFieldKindValue>();
 
   const handleChange = useCallback(
     (nextValue: T[]) => {
-      updateRecordFieldValue(
-        recordID,
+      updateDocumentFieldValue(
+        documentID,
         fieldID,
         nextValue as MultiSelectFieldKindValue,
       );
     },
-    [updateRecordFieldValue, recordID, fieldID],
+    [updateDocumentFieldValue, documentID, fieldID],
   );
 
   const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, []);
+    updateDocumentFieldValue(documentID, fieldID, []);
     onDone();
-  }, [updateRecordFieldValue, recordID, fieldID, onDone]);
+  }, [updateDocumentFieldValue, documentID, fieldID, onDone]);
 
   return (
     <View>

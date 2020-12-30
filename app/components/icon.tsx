@@ -53,7 +53,7 @@ export type IconName =
   | 'Dots'
   | 'DotsInCircle'
   | 'Email'
-  | 'LinkToRecord'
+  | 'LinkToDocument'
   | 'Form'
   | 'Formula'
   | 'Grid'
@@ -123,7 +123,7 @@ const iconMap: {
   Dots,
   DotsInCircle,
   Email,
-  LinkToRecord,
+  LinkToDocument,
   Form,
   Formula,
   Grid,
@@ -650,7 +650,7 @@ function Email(props: TheIconProps) {
   );
 }
 
-function LinkToRecord(props: TheIconProps) {
+function LinkToDocument(props: TheIconProps) {
   const { size, color } = props;
 
   return (

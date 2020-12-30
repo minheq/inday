@@ -14,13 +14,13 @@ import {
   assertMultiCollaboratorFieldValue,
   assertMultiLineTextFieldValue,
   assertMultiOptionFieldValue,
-  assertMultiRecordLinkFieldValue,
+  assertMultiDocumentLinkFieldValue,
   assertNumberFieldValue,
   assertPhoneNumberFieldValue,
   assertSingleCollaboratorFieldValue,
   assertSingleLineTextFieldValue,
   assertSingleOptionFieldValue,
-  assertSingleRecordLinkFieldValue,
+  assertSingleDocumentLinkFieldValue,
   assertURLFieldValue,
   CheckboxField,
   CheckboxFieldValue,
@@ -39,8 +39,8 @@ import {
   MultiLineTextFieldValue,
   MultiOptionField,
   MultiOptionFieldValue,
-  MultiRecordLinkField,
-  MultiRecordLinkFieldValue,
+  MultiDocumentLinkField,
+  MultiDocumentLinkFieldValue,
   NumberField,
   NumberFieldValue,
   PhoneNumberField,
@@ -51,21 +51,21 @@ import {
   SingleLineTextFieldValue,
   SingleOptionField,
   SingleOptionFieldValue,
-  SingleRecordLinkField,
-  SingleRecordLinkFieldValue,
+  SingleDocumentLinkField,
+  SingleDocumentLinkFieldValue,
   URLField,
   URLFieldValue,
 } from '../../data/fields';
-import { RecordID } from '../../data/records';
+import { DocumentID } from '../../data/documents';
 import { TextKindValueEdit } from './text_kind_value_edit';
 import { NumberKindValueEdit } from './number_kind_value_edit';
 import { CheckboxValueEdit } from './checkbox_value_edit';
 import { MultiCollaboratorValueEdit } from './multi_collaborator_value_edit';
 import { MultiOptionValueEdit } from './multi_option_value_edit';
-import { MultiRecordLinkValueEdit } from './multi_record_link_value_edit';
+import { MultiDocumentLinkValueEdit } from './multi_document_link_value_edit';
 import { SingleCollaboratorValueEdit } from './single_collaborator_value_edit';
 import { SingleOptionValueEdit } from './single_option_value_edit';
-import { SingleRecordLinkValueEdit } from './single_record_link_value_edit';
+import { SingleDocumentLinkValueEdit } from './single_document_link_value_edit';
 import { DateValueEdit } from './date_value_edit';
 import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
 import { tokens } from '../../components/tokens';
@@ -81,10 +81,10 @@ import { NumberValueView } from './number_value_view';
 import { CurrencyValueView } from './currency_value_view';
 import { MultiCollaboratorValueView } from './multi_collaborator_value_view';
 import { MultiOptionValueView } from './multi_option_value_view';
-import { MultiRecordLinkValueView } from './multi_record_link_value_view';
+import { MultiDocumentLinkValueView } from './multi_document_link_value_view';
 import { SingleCollaboratorValueView } from './single_collaborator_value_view';
 import { SingleOptionValueView } from './single_option_value_view';
-import { SingleRecordLinkValueView } from './single_record_link_value_view';
+import { SingleDocumentLinkValueView } from './single_document_link_value_view';
 import { DateValueView } from './date_value_view';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Spacer } from '../../components/spacer';
@@ -97,45 +97,51 @@ import { URLValueActions } from './url_value_actions';
 import { Icon } from '../../components/icon';
 import { getFieldIcon } from '../views/icon_helpers';
 
-interface RecordFieldValueEditProps {
+interface DocumentFieldValueEditProps {
   field: Field;
-  recordID: RecordID;
+  documentID: DocumentID;
   value: FieldValue;
 }
 
-export function RecordFieldValueEdit(
-  props: RecordFieldValueEditProps,
+export function DocumentFieldValueEdit(
+  props: DocumentFieldValueEditProps,
 ): JSX.Element {
-  const { recordID, field, value } = props;
+  const { documentID, field, value } = props;
 
   const renderCell = useCallback((): JSX.Element => {
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
-        return <CheckboxCell recordID={recordID} field={field} value={value} />;
+        return (
+          <CheckboxCell documentID={documentID} field={field} value={value} />
+        );
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
-        return <CurrencyCell recordID={recordID} field={field} value={value} />;
+        return (
+          <CurrencyCell documentID={documentID} field={field} value={value} />
+        );
       case FieldType.Date:
         assertDateFieldValue(value);
-        return <DateCell recordID={recordID} field={field} value={value} />;
+        return <DateCell documentID={documentID} field={field} value={value} />;
       case FieldType.Email:
         assertEmailFieldValue(value);
-        return <EmailCell recordID={recordID} field={field} value={value} />;
+        return (
+          <EmailCell documentID={documentID} field={field} value={value} />
+        );
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
         return (
           <MultiCollaboratorCell
-            recordID={recordID}
+            documentID={documentID}
             field={field}
             value={value}
           />
         );
-      case FieldType.MultiRecordLink:
-        assertMultiRecordLinkFieldValue(value);
+      case FieldType.MultiDocumentLink:
+        assertMultiDocumentLinkFieldValue(value);
         return (
-          <MultiRecordLinkCell
-            recordID={recordID}
+          <MultiDocumentLinkCell
+            documentID={documentID}
             field={field}
             value={value}
           />
@@ -143,35 +149,49 @@ export function RecordFieldValueEdit(
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return (
-          <MultiLineTextCell recordID={recordID} field={field} value={value} />
+          <MultiLineTextCell
+            documentID={documentID}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
         return (
-          <MultiOptionCell recordID={recordID} field={field} value={value} />
+          <MultiOptionCell
+            documentID={documentID}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.Number:
         assertNumberFieldValue(value);
-        return <NumberCell recordID={recordID} field={field} value={value} />;
+        return (
+          <NumberCell documentID={documentID} field={field} value={value} />
+        );
       case FieldType.PhoneNumber:
         assertPhoneNumberFieldValue(value);
         return (
-          <PhoneNumberCell recordID={recordID} field={field} value={value} />
+          <PhoneNumberCell
+            documentID={documentID}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
         return (
           <SingleCollaboratorCell
-            recordID={recordID}
+            documentID={documentID}
             field={field}
             value={value}
           />
         );
-      case FieldType.SingleRecordLink:
-        assertSingleRecordLinkFieldValue(value);
+      case FieldType.SingleDocumentLink:
+        assertSingleDocumentLinkFieldValue(value);
         return (
-          <SingleRecordLinkCell
-            recordID={recordID}
+          <SingleDocumentLinkCell
+            documentID={documentID}
             field={field}
             value={value}
           />
@@ -179,24 +199,32 @@ export function RecordFieldValueEdit(
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return (
-          <SingleLineTextCell recordID={recordID} field={field} value={value} />
+          <SingleLineTextCell
+            documentID={documentID}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.SingleOption:
         assertSingleOptionFieldValue(value);
         return (
-          <SingleOptionCell recordID={recordID} field={field} value={value} />
+          <SingleOptionCell
+            documentID={documentID}
+            field={field}
+            value={value}
+          />
         );
       case FieldType.URL:
         assertURLFieldValue(value);
-        return <URLCell recordID={recordID} field={field} value={value} />;
+        return <URLCell documentID={documentID} field={field} value={value} />;
     }
-  }, [field, value, recordID]);
+  }, [field, value, documentID]);
 
   return <FieldWrapper field={field}>{renderCell()}</FieldWrapper>;
 }
 
 interface SingleLineTextCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: SingleLineTextFieldValue;
   field: SingleLineTextField;
 }
@@ -204,7 +232,7 @@ interface SingleLineTextCellProps {
 const SingleLineTextCell = memo(function SingleLineTextCell(
   props: SingleLineTextCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
@@ -218,7 +246,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
     return (
       <FieldEditWrapper onDone={handleDone}>
         <TextKindValueEdit
-          recordID={recordID}
+          documentID={documentID}
           autoFocus
           value={value}
           field={field}
@@ -236,13 +264,13 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
 });
 
 interface URLCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: URLFieldValue;
   field: URLField;
 }
 
 const URLCell = memo(function URLCell(props: URLCellProps) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
@@ -256,7 +284,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
     return (
       <FieldEditWrapper onDone={handleDone}>
         <TextKindValueEdit
-          recordID={recordID}
+          documentID={documentID}
           autoFocus
           value={value}
           field={field}
@@ -277,13 +305,13 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 });
 
 interface EmailCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: EmailFieldValue;
   field: EmailField;
 }
 
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
@@ -297,7 +325,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     return (
       <FieldEditWrapper onDone={handleDone}>
         <TextKindValueEdit
-          recordID={recordID}
+          documentID={documentID}
           autoFocus
           value={value}
           field={field}
@@ -319,7 +347,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
 });
 
 interface MultiLineTextCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: MultiLineTextFieldValue;
   field: MultiLineTextField;
 }
@@ -327,7 +355,7 @@ interface MultiLineTextCellProps {
 const MultiLineTextCell = memo(function MultiLineTextCell(
   props: MultiLineTextCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
   const themeStyles = useThemeStyles();
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
@@ -342,7 +370,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
     return (
       <FieldEditActions onDone={handleDone}>
         <MultiLineTextValueEdit
-          recordID={recordID}
+          documentID={documentID}
           autoFocus
           value={value}
           field={field}
@@ -363,7 +391,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 });
 
 interface PhoneNumberCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
 }
@@ -371,7 +399,7 @@ interface PhoneNumberCellProps {
 const PhoneNumberCell = memo(function PhoneNumberCell(
   props: PhoneNumberCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
@@ -385,7 +413,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
     return (
       <FieldEditWrapper onDone={handleDone}>
         <TextKindValueEdit
-          recordID={recordID}
+          documentID={documentID}
           autoFocus
           value={value}
           field={field}
@@ -407,13 +435,13 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
 });
 
 interface NumberCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: NumberFieldValue;
   field: NumberField;
 }
 
 const NumberCell = memo(function NumberCell(props: NumberCellProps) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
@@ -427,7 +455,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     return (
       <FieldEditWrapper onDone={handleDone}>
         <NumberKindValueEdit
-          recordID={recordID}
+          documentID={documentID}
           autoFocus
           value={value}
           field={field}
@@ -445,13 +473,13 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
 });
 
 interface CurrencyCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: CurrencyFieldValue;
   field: CurrencyField;
 }
 
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
@@ -465,7 +493,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
     return (
       <FieldEditWrapper onDone={handleDone}>
         <NumberKindValueEdit
-          recordID={recordID}
+          documentID={documentID}
           autoFocus
           value={value}
           field={field}
@@ -483,7 +511,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
 });
 
 interface MultiCollaboratorCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
 }
@@ -491,13 +519,13 @@ interface MultiCollaboratorCellProps {
 const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
   return (
     <PopoverWrapper
       content={({ onRequestClose }) => (
         <MultiCollaboratorValueEdit
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           value={value}
           onDone={onRequestClose}
@@ -510,7 +538,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
 });
 
 interface MultiOptionCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: MultiOptionFieldValue;
   field: MultiOptionField;
 }
@@ -518,13 +546,13 @@ interface MultiOptionCellProps {
 const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
   return (
     <PopoverWrapper
       content={({ onRequestClose }) => (
         <MultiOptionValueEdit
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           value={value}
           onDone={onRequestClose}
@@ -536,35 +564,35 @@ const MultiOptionCell = memo(function MultiOptionCell(
   );
 });
 
-interface MultiRecordLinkCellProps {
-  recordID: RecordID;
-  value: MultiRecordLinkFieldValue;
-  field: MultiRecordLinkField;
+interface MultiDocumentLinkCellProps {
+  documentID: DocumentID;
+  value: MultiDocumentLinkFieldValue;
+  field: MultiDocumentLinkField;
 }
 
-const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
-  props: MultiRecordLinkCellProps,
+const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
+  props: MultiDocumentLinkCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
   return (
     <PopoverWrapper
       content={({ onRequestClose }) => (
-        <MultiRecordLinkValueEdit
-          recordID={recordID}
+        <MultiDocumentLinkValueEdit
+          documentID={documentID}
           field={field}
           value={value}
           onDone={onRequestClose}
         />
       )}
     >
-      <MultiRecordLinkValueView value={value} field={field} />
+      <MultiDocumentLinkValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
 
 interface SingleCollaboratorCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
 }
@@ -572,13 +600,13 @@ interface SingleCollaboratorCellProps {
 const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
   return (
     <PopoverWrapper
       content={({ onRequestClose }) => (
         <SingleCollaboratorValueEdit
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           value={value}
           onDone={onRequestClose}
@@ -591,7 +619,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
 });
 
 interface SingleOptionCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: SingleOptionFieldValue;
   field: SingleOptionField;
 }
@@ -599,13 +627,13 @@ interface SingleOptionCellProps {
 const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
   return (
     <PopoverWrapper
       content={({ onRequestClose }) => (
         <SingleOptionValueEdit
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           value={value}
           onDone={onRequestClose}
@@ -617,59 +645,61 @@ const SingleOptionCell = memo(function SingleOptionCell(
   );
 });
 
-interface SingleRecordLinkCellProps {
-  recordID: RecordID;
-  value: SingleRecordLinkFieldValue;
-  field: SingleRecordLinkField;
+interface SingleDocumentLinkCellProps {
+  documentID: DocumentID;
+  value: SingleDocumentLinkFieldValue;
+  field: SingleDocumentLinkField;
 }
 
-const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
-  props: SingleRecordLinkCellProps,
+const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
+  props: SingleDocumentLinkCellProps,
 ) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
   return (
     <PopoverWrapper
       content={({ onRequestClose }) => (
-        <SingleRecordLinkValueEdit
-          recordID={recordID}
+        <SingleDocumentLinkValueEdit
+          documentID={documentID}
           field={field}
           value={value}
           onDone={onRequestClose}
         />
       )}
     >
-      <SingleRecordLinkValueView value={value} field={field} />
+      <SingleDocumentLinkValueView value={value} field={field} />
     </PopoverWrapper>
   );
 });
 
 interface CheckboxCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: CheckboxFieldValue;
   field: CheckboxField;
 }
 
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
-  return <CheckboxValueEdit recordID={recordID} value={value} field={field} />;
+  return (
+    <CheckboxValueEdit documentID={documentID} value={value} field={field} />
+  );
 });
 
 interface DateCellProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   value: DateFieldValue;
   field: DateField;
 }
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
-  const { value, field, recordID } = props;
+  const { value, field, documentID } = props;
 
   return (
     <PopoverWrapper
       content={({ onRequestClose }) => (
         <DateValueEdit
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           value={value}
           onDone={onRequestClose}

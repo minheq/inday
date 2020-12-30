@@ -4,31 +4,31 @@ import { formatISODate, parseISODate } from '../../../lib/date_utils';
 import { DatePicker } from '../../components/date_picker';
 import { FlatButton } from '../../components/flat_button';
 import { DateField, DateFieldValue } from '../../data/fields';
-import { RecordID } from '../../data/records';
-import { useUpdateRecordFieldValue } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useUpdateDocumentFieldValue } from '../../data/store';
 
 interface DateValueEditProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   field: DateField;
   value: DateFieldValue;
   onDone: () => void;
 }
 
 export function DateValueEdit(props: DateValueEditProps): JSX.Element {
-  const { value, recordID, field, onDone } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<DateFieldValue>();
+  const { value, documentID, field, onDone } = props;
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<DateFieldValue>();
 
   const handleChangeDate = useCallback(
     (date: Date) => {
-      updateRecordFieldValue(recordID, field.id, formatISODate(date));
+      updateDocumentFieldValue(documentID, field.id, formatISODate(date));
       onDone();
     },
-    [updateRecordFieldValue, onDone, recordID, field],
+    [updateDocumentFieldValue, onDone, documentID, field],
   );
 
   const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, field.id, null);
-  }, [updateRecordFieldValue, recordID, field]);
+    updateDocumentFieldValue(documentID, field.id, null);
+  }, [updateDocumentFieldValue, documentID, field]);
 
   return (
     <View style={styles.root}>

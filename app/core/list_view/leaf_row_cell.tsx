@@ -17,9 +17,9 @@ import {
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
 import {
-  useUpdateRecordFieldValue,
+  useUpdateDocumentFieldValue,
   useGetField,
-  useGetRecordFieldValue,
+  useGetDocumentFieldValue,
 } from '../../data/store';
 import {
   FieldType,
@@ -28,13 +28,13 @@ import {
   DateField,
   EmailField,
   MultiCollaboratorField,
-  MultiRecordLinkField,
+  MultiDocumentLinkField,
   MultiLineTextField,
   MultiOptionField,
   NumberField,
   PhoneNumberField,
   SingleCollaboratorField,
-  SingleRecordLinkField,
+  SingleDocumentLinkField,
   SingleLineTextField,
   SingleOptionField,
   URLField,
@@ -44,13 +44,13 @@ import {
   DateFieldValue,
   EmailFieldValue,
   MultiCollaboratorFieldValue,
-  MultiRecordLinkFieldValue,
+  MultiDocumentLinkFieldValue,
   MultiLineTextFieldValue,
   MultiOptionFieldValue,
   NumberFieldValue,
   PhoneNumberFieldValue,
   SingleCollaboratorFieldValue,
-  SingleRecordLinkFieldValue,
+  SingleDocumentLinkFieldValue,
   SingleLineTextFieldValue,
   SingleOptionFieldValue,
   URLFieldValue,
@@ -62,19 +62,19 @@ import {
   assertDateFieldValue,
   assertEmailFieldValue,
   assertMultiCollaboratorFieldValue,
-  assertMultiRecordLinkFieldValue,
+  assertMultiDocumentLinkFieldValue,
   assertMultiLineTextFieldValue,
   assertMultiOptionFieldValue,
   assertNumberFieldValue,
   assertSingleCollaboratorFieldValue,
-  assertSingleRecordLinkFieldValue,
+  assertSingleDocumentLinkFieldValue,
   assertSingleLineTextFieldValue,
   assertSingleOptionFieldValue,
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
   BooleanFieldKindValue,
 } from '../../data/fields';
-import { Record, RecordID } from '../../data/records';
+import { Document, DocumentID } from '../../data/documents';
 import { useSetRecoilState } from 'recoil';
 import {
   NavigationKey,
@@ -94,8 +94,8 @@ import { MultiCollaboratorValueEdit } from '../fields/multi_collaborator_value_e
 import { SingleCollaboratorValueEdit } from '../fields/single_collaborator_value_edit';
 import { SingleOptionValueEdit } from '../fields/single_option_value_edit';
 import { MultiOptionValueEdit } from '../fields/multi_option_value_edit';
-import { MultiRecordLinkValueEdit } from '../fields/multi_record_link_value_edit';
-import { SingleRecordLinkValueEdit } from '../fields/single_record_link_value_edit';
+import { MultiDocumentLinkValueEdit } from '../fields/multi_document_link_value_edit';
+import { SingleDocumentLinkValueEdit } from '../fields/single_document_link_value_edit';
 import { TextKindValueEdit } from '../fields/text_kind_value_edit';
 import { NumberKindValueEdit } from '../fields/number_kind_value_edit';
 import { MultiLineTextValueEdit } from '../fields/multi_line_text_value_edit';
@@ -105,8 +105,8 @@ import { SingleOptionValueView } from '../fields/single_option_value_view';
 import { MultiOptionValueView } from '../fields/multi_option_value_view';
 import { MultiCollaboratorValueView } from '../fields/multi_collaborator_value_view';
 import { SingleCollaboratorValueView } from '../fields/single_collaborator_value_view';
-import { SingleRecordLinkValueView } from '../fields/single_record_link_value_view';
-import { MultiRecordLinkValueView } from '../fields/multi_record_link_value_view';
+import { SingleDocumentLinkValueView } from '../fields/single_document_link_value_view';
+import { MultiDocumentLinkValueView } from '../fields/multi_document_link_value_view';
 import { CurrencyValueView } from '../fields/currency_value_view';
 import { DateValueView } from '../fields/date_value_view';
 import { EmailValueView } from '../fields/email_value_view';
@@ -134,11 +134,20 @@ interface LeafRowCellProps {
   last: boolean;
   state: LeafRowCellState;
   fieldID: FieldID;
-  recordID: RecordID;
+  documentID: DocumentID;
 }
 
 export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
-  const { primary, path, row, column, last, state, fieldID, recordID } = props;
+  const {
+    primary,
+    path,
+    row,
+    column,
+    last,
+    state,
+    fieldID,
+    documentID,
+  } = props;
   const cell = useMemo(
     (): LeafRowCell => ({
       primary,
@@ -151,8 +160,12 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     [primary, path, row, column, last, state],
   );
   const field = useGetField(fieldID);
-  const value = useGetRecordFieldValue(recordID, fieldID);
-  const { mode, onSelectRecord, rowToRecordIDCache } = useListViewViewContext();
+  const value = useGetDocumentFieldValue(documentID, fieldID);
+  const {
+    mode,
+    onSelectDocument,
+    rowToDocumentIDCache,
+  } = useListViewViewContext();
   const setActiveCell = useSetRecoilState(activeCellState);
   const { selected } = useLeafRowContext();
 
@@ -174,43 +187,43 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     }
   }, [setActiveCell, cell]);
 
-  const handleFocusNextRecord = useCallback(() => {
+  const handleFocusNextDocument = useCallback(() => {
     const nextRow = cell.row + 1;
-    if (rowToRecordIDCache.get([...cell.path, nextRow]) === undefined) {
+    if (rowToDocumentIDCache.get([...cell.path, nextRow]) === undefined) {
       return;
     }
 
     setActiveCell({ ...cell, type: 'leaf', row: nextRow, state: 'focused' });
-  }, [setActiveCell, cell, rowToRecordIDCache]);
+  }, [setActiveCell, cell, rowToDocumentIDCache]);
 
   const handlePress = useCallback(() => {
     if (mode === 'edit') {
       handleFocus();
     } else {
-      onSelectRecord(recordID, !selected);
+      onSelectDocument(documentID, !selected);
     }
-  }, [mode, handleFocus, onSelectRecord, recordID, selected]);
+  }, [mode, handleFocus, onSelectDocument, documentID, selected]);
 
   const context: LeafRowCellContext = useMemo(() => {
     return {
       cell,
-      recordID,
+      documentID,
       fieldID,
       onPress: handlePress,
       onFocus: handleFocus,
       onStartEditing: handleStartEditing,
       onStopEditing: handleStopEditing,
-      onFocusNextRecord: handleFocusNextRecord,
+      onFocusNextDocument: handleFocusNextDocument,
     };
   }, [
     cell,
-    recordID,
+    documentID,
     fieldID,
     handlePress,
     handleFocus,
     handleStartEditing,
     handleStopEditing,
-    handleFocusNextRecord,
+    handleFocusNextDocument,
   ]);
 
   return (
@@ -231,13 +244,13 @@ interface LeafRowCell {
 
 interface LeafRowCellContext {
   cell: LeafRowCell;
-  recordID: RecordID;
+  documentID: DocumentID;
   fieldID: FieldID;
   onPress: () => void;
   onFocus: () => void;
   onStartEditing: () => void;
   onStopEditing: () => void;
-  onFocusNextRecord: () => void;
+  onFocusNextDocument: () => void;
 }
 
 const LeafRowCellContext = createContext<LeafRowCellContext>({
@@ -249,7 +262,7 @@ const LeafRowCellContext = createContext<LeafRowCellContext>({
     state: 'default',
     last: false,
   },
-  recordID: Record.generateID(),
+  documentID: Document.generateID(),
   fieldID: Field.generateID(),
   onPress: () => {
     return;
@@ -263,7 +276,7 @@ const LeafRowCellContext = createContext<LeafRowCellContext>({
   onStopEditing: () => {
     return;
   },
-  onFocusNextRecord: () => {
+  onFocusNextDocument: () => {
     return;
   },
 });
@@ -304,9 +317,9 @@ const LeafRowCellView = memo(function LeafRowCellView(
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
         return <MultiCollaboratorCell field={field} value={value} />;
-      case FieldType.MultiRecordLink:
-        assertMultiRecordLinkFieldValue(value);
-        return <MultiRecordLinkCell field={field} value={value} />;
+      case FieldType.MultiDocumentLink:
+        assertMultiDocumentLinkFieldValue(value);
+        return <MultiDocumentLinkCell field={field} value={value} />;
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return <MultiLineTextCell field={field} value={value} />;
@@ -322,9 +335,9 @@ const LeafRowCellView = memo(function LeafRowCellView(
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
         return <SingleCollaboratorCell field={field} value={value} />;
-      case FieldType.SingleRecordLink:
-        assertSingleRecordLinkFieldValue(value);
-        return <SingleRecordLinkCell field={field} value={value} />;
+      case FieldType.SingleDocumentLink:
+        assertSingleDocumentLinkFieldValue(value);
+        return <SingleDocumentLinkCell field={field} value={value} />;
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return <SingleLineTextCell field={field} value={value} />;
@@ -419,13 +432,13 @@ interface CheckboxCellProps {
 
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   const { value, field } = props;
-  const { recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
+  const { documentID, fieldID } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<BooleanFieldKindValue>();
 
   const handleToggle = useCallback(() => {
     const checked = !value;
-    updateRecordFieldValue(recordID, fieldID, checked);
-  }, [updateRecordFieldValue, recordID, fieldID, value]);
+    updateDocumentFieldValue(documentID, fieldID, checked);
+  }, [updateDocumentFieldValue, documentID, fieldID, value]);
 
   useCellKeyBindings({
     onEnter: handleToggle,
@@ -433,7 +446,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={[styles.cellRoot, styles.checkboxCellRoot]}>
-      <CheckboxValueEdit recordID={recordID} field={field} value={value} />
+      <CheckboxValueEdit documentID={documentID} field={field} value={value} />
     </View>
   );
 });
@@ -445,7 +458,7 @@ interface CurrencyCellProps {
 
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const { cell, recordID } = useLeafRowCellContext();
+  const { cell, documentID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -454,7 +467,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
         <NumberKindValueEdit<CurrencyFieldValue>
           autoFocus
           value={value}
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           onKeyPress={handleKeyPress}
         />
@@ -481,8 +494,8 @@ interface NumberFieldKindCellFocusedProps {
 
 function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
   const { children } = props;
-  const { onStartEditing, recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue();
+  const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue();
 
   const handlePrintableKey = useCallback(
     (key: string) => {
@@ -490,10 +503,10 @@ function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
         return;
       }
 
-      updateRecordFieldValue(recordID, fieldID, toNumber(key));
+      updateDocumentFieldValue(documentID, fieldID, toNumber(key));
       onStartEditing();
     },
-    [onStartEditing, updateRecordFieldValue, recordID, fieldID],
+    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
   );
 
   useCellKeyBindings({
@@ -513,15 +526,15 @@ interface TextFieldKindCellFocusedProps {
 
 function TextFieldKindCellFocused(props: TextFieldKindCellFocusedProps) {
   const { children } = props;
-  const { onStartEditing, recordID, fieldID } = useLeafRowCellContext();
-  const updateRecordFieldValue = useUpdateRecordFieldValue();
+  const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue();
 
   const handlePrintableKey = useCallback(
     (key: string) => {
-      updateRecordFieldValue(recordID, fieldID, key);
+      updateDocumentFieldValue(documentID, fieldID, key);
       onStartEditing();
     },
-    [onStartEditing, updateRecordFieldValue, recordID, fieldID],
+    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
   );
 
   useCellKeyBindings({
@@ -542,7 +555,7 @@ interface DateCellProps {
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value, field } = props;
-  const { recordID, cell } = useLeafRowCellContext();
+  const { documentID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -557,7 +570,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
       <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <DateValueEdit
-            recordID={recordID}
+            documentID={documentID}
             field={field}
             value={value}
             onDone={onRequestClose}
@@ -580,7 +593,7 @@ interface EmailCellProps {
 
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value, field } = props;
-  const { cell, recordID } = useLeafRowCellContext();
+  const { cell, documentID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -589,7 +602,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
         <TextKindValueEdit<EmailFieldValue>
           autoFocus
           field={field}
-          recordID={recordID}
+          documentID={documentID}
           value={value}
           onKeyPress={handleKeyPress}
         />
@@ -626,7 +639,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { recordID, cell } = useLeafRowCellContext();
+  const { documentID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -641,7 +654,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
       <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <MultiCollaboratorValueEdit
-            recordID={recordID}
+            documentID={documentID}
             field={field}
             value={value}
             onDone={onRequestClose}
@@ -657,17 +670,17 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   return <View style={styles.cellRoot}>{child}</View>;
 });
 
-interface MultiRecordLinkCellProps {
-  value: MultiRecordLinkFieldValue;
-  field: MultiRecordLinkField;
+interface MultiDocumentLinkCellProps {
+  value: MultiDocumentLinkFieldValue;
+  field: MultiDocumentLinkField;
 }
 
-const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
-  props: MultiRecordLinkCellProps,
+const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
+  props: MultiDocumentLinkCellProps,
 ) {
   const { value, field } = props;
   const {
-    recordID,
+    documentID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -677,8 +690,8 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
 
   if (cell.state === 'editing') {
     return (
-      <MultiRecordLinkValueEdit
-        recordID={recordID}
+      <MultiDocumentLinkValueEdit
+        documentID={documentID}
         field={field}
         value={value}
         onDone={onStopEditing}
@@ -688,7 +701,7 @@ const MultiRecordLinkCell = memo(function MultiRecordLinkCell(
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <MultiRecordLinkValueView value={value} field={field} />
+      <MultiDocumentLinkValueView value={value} field={field} />
     </View>
   );
 
@@ -713,7 +726,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 ) {
   const { value, field } = props;
 
-  const { cell, recordID } = useLeafRowCellContext();
+  const { cell, documentID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -721,7 +734,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
       <FieldEditActions>
         <MultiLineTextValueEdit
           autoFocus
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           value={value}
           onKeyPress={handleKeyPress}
@@ -758,7 +771,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
   const { value, field } = props;
-  const { recordID, cell } = useLeafRowCellContext();
+  const { documentID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -773,7 +786,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
       <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <MultiOptionValueEdit
-            recordID={recordID}
+            documentID={documentID}
             field={field}
             value={value}
             onDone={onRequestClose}
@@ -796,7 +809,7 @@ interface NumberCellProps {
 
 const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { recordID, cell } = useLeafRowCellContext();
+  const { documentID, cell } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -805,7 +818,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
         <NumberKindValueEdit<NumberFieldKindValue>
           autoFocus
           value={value}
-          recordID={recordID}
+          documentID={documentID}
           field={field}
           onKeyPress={handleKeyPress}
         />
@@ -835,7 +848,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   props: PhoneNumberCellProps,
 ) {
   const { value, field } = props;
-  const { recordID, cell } = useLeafRowCellContext();
+  const { documentID, cell } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -844,7 +857,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
         <TextKindValueEdit<PhoneNumberFieldValue>
           autoFocus
           field={field}
-          recordID={recordID}
+          documentID={documentID}
           value={value}
           onKeyPress={handleKeyPress}
         />
@@ -881,7 +894,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { recordID, cell } = useLeafRowCellContext();
+  const { documentID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -896,7 +909,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
       <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <SingleCollaboratorValueEdit
-            recordID={recordID}
+            documentID={documentID}
             field={field}
             value={value}
             onDone={onRequestClose}
@@ -912,17 +925,17 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   return <View style={styles.cellRoot}>{child}</View>;
 });
 
-interface SingleRecordLinkCellProps {
-  value: SingleRecordLinkFieldValue;
-  field: SingleRecordLinkField;
+interface SingleDocumentLinkCellProps {
+  value: SingleDocumentLinkFieldValue;
+  field: SingleDocumentLinkField;
 }
 
-const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
-  props: SingleRecordLinkCellProps,
+const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
+  props: SingleDocumentLinkCellProps,
 ) {
   const { value, field } = props;
   const {
-    recordID,
+    documentID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -932,8 +945,8 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
 
   if (cell.state === 'editing') {
     return (
-      <SingleRecordLinkValueEdit
-        recordID={recordID}
+      <SingleDocumentLinkValueEdit
+        documentID={documentID}
         field={field}
         value={value}
         onDone={onStopEditing}
@@ -943,7 +956,7 @@ const SingleRecordLinkCell = memo(function SingleRecordLinkCell(
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <SingleRecordLinkValueView value={value} field={field} />
+      <SingleDocumentLinkValueView value={value} field={field} />
     </View>
   );
 
@@ -967,7 +980,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   props: SingleLineTextCellProps,
 ) {
   const { value, field } = props;
-  const { cell, recordID } = useLeafRowCellContext();
+  const { cell, documentID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -976,7 +989,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
         <TextKindValueEdit<SingleLineTextFieldValue>
           autoFocus
           field={field}
-          recordID={recordID}
+          documentID={documentID}
           value={value}
           onKeyPress={handleKeyPress}
         />
@@ -1006,7 +1019,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
   const { value, field } = props;
-  const { recordID, cell } = useLeafRowCellContext();
+  const { documentID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -1021,7 +1034,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
       <PressableHighlightPopover
         content={({ onRequestClose }) => (
           <SingleOptionValueEdit
-            recordID={recordID}
+            documentID={documentID}
             field={field}
             value={value}
             onDone={onRequestClose}
@@ -1044,7 +1057,7 @@ interface URLCellProps {
 
 const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value, field } = props;
-  const { cell, recordID } = useLeafRowCellContext();
+  const { cell, documentID } = useLeafRowCellContext();
   const handleKeyPress = useCellKeyPressHandler();
 
   if (cell.state === 'editing') {
@@ -1053,7 +1066,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
         <TextKindValueEdit<URLFieldValue>
           autoFocus
           field={field}
-          recordID={recordID}
+          documentID={documentID}
           value={value}
           onKeyPress={handleKeyPress}
         />
@@ -1125,11 +1138,11 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
     onPrintableKey: onPrintableKeyOverride,
   } = props;
   const {
-    rowToRecordIDCache,
+    rowToDocumentIDCache,
     columnToFieldIDCache,
     lastFocusableRow,
     lastFocusableColumn,
-    onOpenRecord,
+    onOpenDocument,
   } = useListViewViewContext();
   const { cell } = useLeafRowCellContext();
   const setActiveCell = useSetRecoilState(activeCellState);
@@ -1140,7 +1153,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const onArrowDown = useCallback(() => {
     const { row, column, path, last } = cell;
     const nextRow = row + 1;
-    const next = rowToRecordIDCache.get([...cell.path, nextRow]);
+    const next = rowToDocumentIDCache.get([...cell.path, nextRow]);
 
     if (next === undefined) {
       return;
@@ -1154,12 +1167,12 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       state: 'focused',
       last,
     });
-  }, [cell, setActiveCell, rowToRecordIDCache]);
+  }, [cell, setActiveCell, rowToDocumentIDCache]);
 
   const onArrowUp = useCallback(() => {
     const { row, column, path, last } = cell;
     const prevRow = row - 1;
-    const prev = rowToRecordIDCache.get([...cell.path, prevRow]);
+    const prev = rowToDocumentIDCache.get([...cell.path, prevRow]);
 
     if (prev === undefined) {
       return;
@@ -1173,7 +1186,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
       state: 'focused',
       last,
     });
-  }, [cell, setActiveCell, rowToRecordIDCache]);
+  }, [cell, setActiveCell, rowToDocumentIDCache]);
 
   const onArrowLeft = useCallback(() => {
     const { row, column, path, last } = cell;
@@ -1302,14 +1315,14 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
 
   const onSpace = useCallback(() => {
     const { row, path } = cell;
-    const recordID = rowToRecordIDCache.get([...path, row]);
+    const documentID = rowToDocumentIDCache.get([...path, row]);
 
-    if (recordID === undefined) {
+    if (documentID === undefined) {
       throw new Error('onSpace called on faulty row path');
     }
 
-    onOpenRecord(recordID);
-  }, [cell, onOpenRecord, rowToRecordIDCache]);
+    onOpenDocument(documentID);
+  }, [cell, onOpenDocument, rowToDocumentIDCache]);
 
   const focusedCellKeyBindings = useMemo((): KeyBinding[] => {
     return [
@@ -1394,7 +1407,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
 }
 
 interface KeyPressHandlerConfig {
-  /** When true, pressing Enter key will shift focus on next record */
+  /** When true, pressing Enter key will shift focus on next document */
   enter?: boolean;
   /** When true, pressing Escape key will stop editing current cell */
   escape?: boolean;
@@ -1404,7 +1417,7 @@ function useCellKeyPressHandler(
   config: KeyPressHandlerConfig = {},
 ): (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void {
   const { enter = true, escape = true } = config;
-  const { onStopEditing, onFocusNextRecord } = useLeafRowCellContext();
+  const { onStopEditing, onFocusNextDocument } = useLeafRowCellContext();
 
   return useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -1414,10 +1427,10 @@ function useCellKeyPressHandler(
         onStopEditing();
       }
       if (enter === true && key === WhiteSpaceKey.Enter) {
-        onFocusNextRecord();
+        onFocusNextDocument();
       }
     },
-    [onStopEditing, onFocusNextRecord, escape, enter],
+    [onStopEditing, onFocusNextDocument, escape, enter],
   );
 }
 

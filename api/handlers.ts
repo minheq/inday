@@ -15,11 +15,11 @@ import {
   updateCollectionName,
   getCollectionByID,
   deleteCollection,
-  createRecord,
-  fullUpdateRecord,
-  partialUpdateRecord,
-  getRecordByID,
-  deleteRecord,
+  createDocument,
+  fullUpdateDocument,
+  partialUpdateDocument,
+  getDocumentByID,
+  deleteDocument,
   createView,
   deleteView,
   updateViewName,
@@ -258,58 +258,58 @@ export const handleDeleteCollection: AH = async (ctx, req, res) => {
   res.send({ id: collectionID, deleted: true });
 };
 
-interface RecordIDParams {
-  recordID: string;
+interface DocumentIDParams {
+  documentID: string;
 }
 
-export interface CreateRecordInput {
+export interface CreateDocumentInput {
   collectionID: string;
 }
 
-export const handleCreateRecord: AH = async (ctx, req, res) => {
-  validateID(req.params.recordID);
+export const handleCreateDocument: AH = async (ctx, req, res) => {
+  validateID(req.params.documentID);
 
-  const { recordID } = req.params;
+  const { documentID } = req.params;
   const { collectionID } = req.body;
 
-  const record = await createRecord(ctx.db, recordID, collectionID);
+  const document = await createDocument(ctx.db, documentID, collectionID);
 
-  res.send(record);
+  res.send(document);
 };
 
-export interface FullUpdateRecordInput {}
+export interface FullUpdateDocumentInput {}
 
-export const handleFullUpdateRecord: AH = async (ctx, req, res) => {
-  const { recordID } = req.params;
+export const handleFullUpdateDocument: AH = async (ctx, req, res) => {
+  const { documentID } = req.params;
 
-  const record = await fullUpdateRecord(ctx.db, recordID);
+  const document = await fullUpdateDocument(ctx.db, documentID);
 
-  res.send(record);
+  res.send(document);
 };
 
-export interface PartialUpdateRecordInput {}
+export interface PartialUpdateDocumentInput {}
 
-export const handlePartialUpdateRecord: AH = async (ctx, req, res) => {
-  const { recordID } = req.params;
+export const handlePartialUpdateDocument: AH = async (ctx, req, res) => {
+  const { documentID } = req.params;
 
-  const record = await partialUpdateRecord(ctx.db, recordID);
+  const document = await partialUpdateDocument(ctx.db, documentID);
 
-  res.send(record);
+  res.send(document);
 };
 
-export const handleGetRecord: AH = async (ctx, req, res) => {
-  const { recordID } = req.params;
-  const record = await getRecordByID(ctx.db, recordID);
+export const handleGetDocument: AH = async (ctx, req, res) => {
+  const { documentID } = req.params;
+  const document = await getDocumentByID(ctx.db, documentID);
 
-  res.send(record);
+  res.send(document);
 };
 
-export const handleDeleteRecord: AH = async (ctx, req, res) => {
-  const { recordID } = req.params;
+export const handleDeleteDocument: AH = async (ctx, req, res) => {
+  const { documentID } = req.params;
 
-  await deleteRecord(ctx.db, recordID);
+  await deleteDocument(ctx.db, documentID);
 
-  res.send({ id: recordID, deleted: true });
+  res.send({ id: documentID, deleted: true });
 };
 
 interface ViewIDParams {
@@ -369,8 +369,8 @@ const fieldTypes: FieldType[] = [
   'multiSelect',
   'singleCollaborator',
   'multiCollaborator',
-  'singleRecordLink',
-  'multiRecordLink',
+  'singleDocumentLink',
+  'multiDocumentLink',
   'date',
   'phoneNumber',
   'email',
@@ -403,18 +403,18 @@ export const handleCreateField: AH = async (ctx, req, res) => {
 
 export interface DuplicateFieldInput {
   fromFieldID: string;
-  duplicateRecordFieldValues: boolean;
+  duplicateDocumentFieldValues: boolean;
 }
 
 export const handleDuplicateField: AH = async (ctx, req, res) => {
   const { fieldID } = req.params;
-  const { fromFieldID, duplicateRecordFieldValues } = req.body;
+  const { fromFieldID, duplicateDocumentFieldValues } = req.body;
 
   const field = await duplicateField(
     ctx.db,
     fieldID,
     fromFieldID,
-    duplicateRecordFieldValues,
+    duplicateDocumentFieldValues,
   );
 
   res.send(field);

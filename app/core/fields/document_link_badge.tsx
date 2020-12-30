@@ -1,21 +1,21 @@
-import { RecordID } from '../../data/records';
-import { useGetCollection, useGetRecord } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useGetCollection, useGetDocument } from '../../data/store';
 import React from 'react';
 import { Badge } from '../../components/badge';
 import { assertPrimaryFieldValue } from '../../data/fields';
 import { useTheme } from '../../components/theme';
 import { palette } from '../../components/palette';
 
-interface RecordLinkBadgeProps {
-  recordID: RecordID;
+interface DocumentLinkBadgeProps {
+  documentID: DocumentID;
 }
 
-export function RecordLinkBadge(props: RecordLinkBadgeProps): JSX.Element {
-  const { recordID } = props;
+export function DocumentLinkBadge(props: DocumentLinkBadgeProps): JSX.Element {
+  const { documentID } = props;
   const theme = useTheme();
-  const record = useGetRecord(recordID);
-  const collection = useGetCollection(record.collectionID);
-  const primaryFieldValue = record.fields[collection.primaryFieldID];
+  const document = useGetDocument(documentID);
+  const collection = useGetCollection(document.collectionID);
+  const primaryFieldValue = document.fields[collection.primaryFieldID];
 
   assertPrimaryFieldValue(primaryFieldValue);
 

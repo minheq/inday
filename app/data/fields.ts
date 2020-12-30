@@ -12,7 +12,7 @@ import {
 } from '../../lib/date_utils';
 import { CollaboratorID } from './collaborators';
 import { CollectionID } from './collections';
-import { RecordID } from './records';
+import { DocumentID } from './documents';
 import { assertUnreached } from '../../lib/lang_utils';
 import { getSystemLocale } from '../lib/locale';
 
@@ -37,13 +37,13 @@ export enum FieldType {
   MultiCollaborator = 'MultiCollaborator',
   MultiLineText = 'MultiLineText',
   MultiOption = 'MultiOption',
-  MultiRecordLink = 'MultiRecordLink',
+  MultiDocumentLink = 'MultiDocumentLink',
   Number = 'Number',
   PhoneNumber = 'PhoneNumber',
   SingleCollaborator = 'SingleCollaborator',
   SingleLineText = 'SingleLineText',
   SingleOption = 'SingleOption',
-  SingleRecordLink = 'SingleRecordLink',
+  SingleDocumentLink = 'SingleDocumentLink',
   URL = 'URL',
 }
 
@@ -117,21 +117,21 @@ export interface MultiCollaboratorField
   extends BaseField,
     MultiCollaboratorFieldConfig {}
 
-export interface SingleRecordLinkFieldConfig {
-  type: FieldType.SingleRecordLink;
-  recordsFromCollectionID: CollectionID;
+export interface SingleDocumentLinkFieldConfig {
+  type: FieldType.SingleDocumentLink;
+  documentsFromCollectionID: CollectionID;
 }
-export interface SingleRecordLinkField
+export interface SingleDocumentLinkField
   extends BaseField,
-    SingleRecordLinkFieldConfig {}
+    SingleDocumentLinkFieldConfig {}
 
-export interface MultiRecordLinkFieldConfig {
-  type: FieldType.MultiRecordLink;
-  recordsFromCollectionID: CollectionID;
+export interface MultiDocumentLinkFieldConfig {
+  type: FieldType.MultiDocumentLink;
+  documentsFromCollectionID: CollectionID;
 }
-export interface MultiRecordLinkField
+export interface MultiDocumentLinkField
   extends BaseField,
-    MultiRecordLinkFieldConfig {}
+    MultiDocumentLinkFieldConfig {}
 
 export interface DateOnlyFieldConfig {
   type: FieldType.Date;
@@ -206,13 +206,13 @@ export type FieldConfig =
   | DateFieldConfig
   | EmailFieldConfig
   | MultiCollaboratorFieldConfig
-  | MultiRecordLinkFieldConfig
+  | MultiDocumentLinkFieldConfig
   | MultiLineTextFieldConfig
   | MultiOptionFieldConfig
   | NumberFieldConfig
   | PhoneNumberFieldConfig
   | SingleCollaboratorFieldConfig
-  | SingleRecordLinkFieldConfig
+  | SingleDocumentLinkFieldConfig
   | SingleLineTextFieldConfig
   | SingleOptionFieldConfig
   | URLFieldConfig;
@@ -221,12 +221,12 @@ export type BooleanFieldKind = CheckboxField;
 export type DateFieldKind = DateField;
 export type MultiSelectFieldKind =
   | MultiCollaboratorField
-  | MultiRecordLinkField
+  | MultiDocumentLinkField
   | MultiOptionField;
 export type NumberFieldKind = CurrencyField | NumberField;
 export type SingleSelectFieldKind =
   | SingleCollaboratorField
-  | SingleRecordLinkField
+  | SingleDocumentLinkField
   | SingleOptionField;
 export type TextFieldKind =
   | EmailField
@@ -249,13 +249,13 @@ export type CurrencyFieldValue = number | null;
 export type DateFieldValue = ISODate | null;
 export type EmailFieldValue = string;
 export type MultiCollaboratorFieldValue = CollaboratorID[];
-export type MultiRecordLinkFieldValue = RecordID[];
+export type MultiDocumentLinkFieldValue = DocumentID[];
 export type MultiLineTextFieldValue = string;
 export type MultiOptionFieldValue = SelectOptionID[];
 export type NumberFieldValue = number | null;
 export type PhoneNumberFieldValue = string;
 export type SingleCollaboratorFieldValue = CollaboratorID | null;
-export type SingleRecordLinkFieldValue = RecordID | null;
+export type SingleDocumentLinkFieldValue = DocumentID | null;
 export type SingleLineTextFieldValue = string;
 export type SingleOptionFieldValue = SelectOptionID | null;
 export type URLFieldValue = string;
@@ -264,12 +264,12 @@ export type BooleanFieldKindValue = CheckboxFieldValue;
 export type DateFieldKindValue = DateFieldValue;
 export type MultiSelectFieldKindValue =
   | MultiCollaboratorFieldValue
-  | MultiRecordLinkFieldValue
+  | MultiDocumentLinkFieldValue
   | MultiOptionFieldValue;
 export type NumberFieldKindValue = CurrencyFieldValue | NumberFieldValue;
 export type SingleSelectFieldKindValue =
   | SingleCollaboratorFieldValue
-  | SingleRecordLinkFieldValue
+  | SingleDocumentLinkFieldValue
   | SingleOptionFieldValue;
 export type TextFieldKindValue =
   | EmailFieldValue
@@ -295,13 +295,13 @@ export interface FieldTypeToField {
   [FieldType.MultiCollaborator]: MultiCollaboratorField;
   [FieldType.MultiLineText]: MultiLineTextField;
   [FieldType.MultiOption]: MultiOptionField;
-  [FieldType.MultiRecordLink]: MultiRecordLinkField;
+  [FieldType.MultiDocumentLink]: MultiDocumentLinkField;
   [FieldType.Number]: NumberField;
   [FieldType.PhoneNumber]: PhoneNumberField;
   [FieldType.SingleCollaborator]: SingleCollaboratorField;
   [FieldType.SingleLineText]: SingleLineTextField;
   [FieldType.SingleOption]: SingleOptionField;
-  [FieldType.SingleRecordLink]: SingleRecordLinkField;
+  [FieldType.SingleDocumentLink]: SingleDocumentLinkField;
   [FieldType.URL]: URLField;
 }
 
@@ -313,13 +313,13 @@ export interface FieldTypeToFieldValue {
   [FieldType.MultiCollaborator]: MultiCollaboratorFieldValue;
   [FieldType.MultiLineText]: MultiLineTextFieldValue;
   [FieldType.MultiOption]: MultiOptionFieldValue;
-  [FieldType.MultiRecordLink]: MultiRecordLinkFieldValue;
+  [FieldType.MultiDocumentLink]: MultiDocumentLinkFieldValue;
   [FieldType.Number]: NumberFieldValue;
   [FieldType.PhoneNumber]: PhoneNumberFieldValue;
   [FieldType.SingleCollaborator]: SingleCollaboratorFieldValue;
   [FieldType.SingleLineText]: SingleLineTextFieldValue;
   [FieldType.SingleOption]: SingleOptionFieldValue;
-  [FieldType.SingleRecordLink]: SingleRecordLinkFieldValue;
+  [FieldType.SingleDocumentLink]: SingleDocumentLinkFieldValue;
   [FieldType.URL]: URLFieldValue;
 }
 
@@ -406,13 +406,13 @@ export function areFieldValuesEqual(
       return areNumberFieldKindValueEqual(a, b);
     case FieldType.MultiCollaborator:
     case FieldType.MultiOption:
-    case FieldType.MultiRecordLink:
+    case FieldType.MultiDocumentLink:
       assertMultiSelectFieldKindValue(a);
       assertMultiSelectFieldKindValue(b);
       return areMultiSelectFieldKindValueEqual(a, b);
     case FieldType.SingleCollaborator:
     case FieldType.SingleOption:
-    case FieldType.SingleRecordLink:
+    case FieldType.SingleDocumentLink:
       assertSingleSelectFieldKindValue(a);
       assertSingleSelectFieldKindValue(b);
       return areSingleSelectFieldKindValueEqual(a, b);
@@ -532,22 +532,22 @@ export function assertMultiCollaboratorField(
   }
 }
 
-export function assertSingleRecordLinkField(
+export function assertSingleDocumentLinkField(
   field: Field,
-): asserts field is SingleRecordLinkField {
-  if (field.type !== FieldType.SingleRecordLink) {
+): asserts field is SingleDocumentLinkField {
+  if (field.type !== FieldType.SingleDocumentLink) {
     throw new Error(
-      `Expected field to be SingleRecordLinkField. Received ${field.type}`,
+      `Expected field to be SingleDocumentLinkField. Received ${field.type}`,
     );
   }
 }
 
-export function assertMultiRecordLinkField(
+export function assertMultiDocumentLinkField(
   field: Field,
-): asserts field is MultiRecordLinkField {
-  if (field.type !== FieldType.MultiRecordLink) {
+): asserts field is MultiDocumentLinkField {
+  if (field.type !== FieldType.MultiDocumentLink) {
     throw new Error(
-      `Expected field to be MultiRecordLinkField. Received ${field.type}`,
+      `Expected field to be MultiDocumentLinkField. Received ${field.type}`,
     );
   }
 }
@@ -648,8 +648,8 @@ export function assertFieldValueType<T extends FieldType>(
     case FieldType.MultiOption:
       assertMultiOptionFieldValue(value);
       break;
-    case FieldType.MultiRecordLink:
-      assertMultiRecordLinkFieldValue(value);
+    case FieldType.MultiDocumentLink:
+      assertMultiDocumentLinkFieldValue(value);
       break;
     case FieldType.Number:
       assertNumberFieldValue(value);
@@ -666,8 +666,8 @@ export function assertFieldValueType<T extends FieldType>(
     case FieldType.SingleOption:
       assertSingleOptionFieldValue(value);
       break;
-    case FieldType.SingleRecordLink:
-      assertSingleRecordLinkFieldValue(value);
+    case FieldType.SingleDocumentLink:
+      assertSingleDocumentLinkFieldValue(value);
       break;
     case FieldType.URL:
       assertURLFieldValue(value);
@@ -749,16 +749,16 @@ export function assertMultiCollaboratorFieldValue(
   }
 }
 
-export function assertMultiRecordLinkFieldValue(
+export function assertMultiDocumentLinkFieldValue(
   value: FieldValue,
-): asserts value is MultiRecordLinkFieldValue {
+): asserts value is MultiDocumentLinkFieldValue {
   if (value === null) {
     return;
   }
 
   if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiRecordLinkFieldValue to be string[]. Received "${JSON.stringify(
+      `Expected MultiDocumentLinkFieldValue to be string[]. Received "${JSON.stringify(
         value,
       )}"`,
     );
@@ -844,16 +844,16 @@ export function assertSingleCollaboratorFieldValue(
     );
   }
 }
-export function assertSingleRecordLinkFieldValue(
+export function assertSingleDocumentLinkFieldValue(
   value: FieldValue,
-): asserts value is SingleRecordLinkFieldValue {
+): asserts value is SingleDocumentLinkFieldValue {
   if (value === null) {
     return;
   }
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleRecordLinkFieldValue to be string. Received "${JSON.stringify(
+      `Expected SingleDocumentLinkFieldValue to be string. Received "${JSON.stringify(
         value,
       )}"`,
     );

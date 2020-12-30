@@ -1,4 +1,4 @@
-import { Record, RecordID } from './records';
+import { Document, DocumentID } from './documents';
 import {
   assertBooleanFieldKindValue,
   assertDateFieldValue,
@@ -100,15 +100,15 @@ export interface MultiCollaboratorFieldFilter
   extends BaseFilter,
     MultiCollaboratorFieldFilterConfig {}
 
-export interface MultiRecordLinkFieldFilterConfig {
+export interface MultiDocumentLinkFieldFilterConfig {
   fieldID: FieldID;
   rule: MultiSelectFieldKindFilterRule;
-  value: MultiRecordLinkFieldFilterValue;
+  value: MultiDocumentLinkFieldFilterValue;
 }
-type MultiRecordLinkFieldFilterValue = RecordID[];
-export interface MultiRecordLinkFieldFilter
+type MultiDocumentLinkFieldFilterValue = DocumentID[];
+export interface MultiDocumentLinkFieldFilter
   extends BaseFilter,
-    MultiRecordLinkFieldFilterConfig {}
+    MultiDocumentLinkFieldFilterConfig {}
 
 export interface MultiLineTextFieldFilterConfig {
   fieldID: FieldID;
@@ -162,16 +162,16 @@ export interface SingleCollaboratorFieldFilter
   extends BaseFilter,
     SingleCollaboratorFieldFilterConfig {}
 
-export interface SingleRecordLinkFieldFilterConfig {
+export interface SingleDocumentLinkFieldFilterConfig {
   fieldID: FieldID;
   rule: SingleSelectFieldKindFilterRule;
-  value: SingleRecordLinkFieldFilterValue;
+  value: SingleDocumentLinkFieldFilterValue;
 }
-type SingleRecordLinkFieldFilterValue = RecordID | RecordID[] | null;
+type SingleDocumentLinkFieldFilterValue = DocumentID | DocumentID[] | null;
 
-export interface SingleRecordLinkFieldFilter
+export interface SingleDocumentLinkFieldFilter
   extends BaseFilter,
-    SingleRecordLinkFieldFilterConfig {}
+    SingleDocumentLinkFieldFilterConfig {}
 
 export interface SingleLineTextFieldFilterConfig {
   fieldID: FieldID;
@@ -223,7 +223,7 @@ export enum SingleSelectFieldKindFilterRule {
 export type SingleSelectFieldKindFilterRuleValue =
   | SingleOptionFieldFilterValue
   | SingleCollaboratorFieldFilterValue
-  | SingleRecordLinkFieldFilterValue;
+  | SingleDocumentLinkFieldFilterValue;
 
 // eslint-disable-next-line
 export enum MultiSelectFieldKindFilterRule {
@@ -236,7 +236,7 @@ export enum MultiSelectFieldKindFilterRule {
 export type MultiSelectFieldKindFilterRuleValue =
   | MultiOptionFieldFilterValue
   | MultiCollaboratorFieldFilterValue
-  | MultiRecordLinkFieldFilterValue;
+  | MultiDocumentLinkFieldFilterValue;
 
 // eslint-disable-next-line
 export enum DateFieldKindFilterRule {
@@ -309,12 +309,12 @@ export type BooleanFieldKindFilter = CheckboxFieldFilter;
 export type DateFieldKindFilter = DateFieldFilter;
 export type MultiSelectFieldKindFilter =
   | MultiCollaboratorFieldFilter
-  | MultiRecordLinkFieldFilter
+  | MultiDocumentLinkFieldFilter
   | MultiOptionFieldFilter;
 export type NumberFieldKindFilter = CurrencyFieldFilter | NumberFieldFilter;
 export type SingleSelectFieldKindFilter =
   | SingleCollaboratorFieldFilter
-  | SingleRecordLinkFieldFilter
+  | SingleDocumentLinkFieldFilter
   | SingleOptionFieldFilter;
 export type TextFieldKindFilter =
   | EmailFieldFilter
@@ -327,14 +327,14 @@ export type BooleanFieldKindFilterConfig = CheckboxFieldFilterConfig;
 export type DateFieldKindFilterConfig = DateFieldFilterConfig;
 export type MultiSelectFieldKindFilterConfig =
   | MultiCollaboratorFieldFilterConfig
-  | MultiRecordLinkFieldFilterConfig
+  | MultiDocumentLinkFieldFilterConfig
   | MultiOptionFieldFilterConfig;
 export type NumberFieldKindFilterConfig =
   | CurrencyFieldFilterConfig
   | NumberFieldFilterConfig;
 export type SingleSelectFieldKindFilterConfig =
   | SingleCollaboratorFieldFilterConfig
-  | SingleRecordLinkFieldFilterConfig
+  | SingleDocumentLinkFieldFilterConfig
   | SingleOptionFieldFilterConfig;
 export type TextFieldKindFilterConfig =
   | EmailFieldFilterConfig
@@ -375,7 +375,7 @@ export function getDefaultFilterConfig(field: Field): FilterConfig {
         value: null,
       };
     case FieldType.MultiCollaborator:
-    case FieldType.MultiRecordLink:
+    case FieldType.MultiDocumentLink:
     case FieldType.MultiOption:
       return {
         fieldID: field.id,
@@ -383,7 +383,7 @@ export function getDefaultFilterConfig(field: Field): FilterConfig {
         value: [],
       };
     case FieldType.SingleOption:
-    case FieldType.SingleRecordLink:
+    case FieldType.SingleDocumentLink:
     case FieldType.SingleCollaborator:
       return {
         fieldID: field.id,
@@ -451,16 +451,16 @@ export interface FilterGetters {
   getField: (fieldID: FieldID) => Field;
 }
 
-export function filterRecords(
+export function filterDocuments(
   filterGroups: FilterGroup[],
-  records: Record[],
+  documents: Document[],
   getters: FilterGetters,
-): Record[] {
+): Document[] {
   const { getField } = getters;
 
-  let filteredRecords = records;
+  let filteredDocuments = documents;
 
-  filteredRecords = filteredRecords.filter((record) => {
+  filteredDocuments = filteredDocuments.filter((document) => {
     if (isEmpty(filterGroups)) {
       return true;
     }
@@ -469,12 +469,12 @@ export function filterRecords(
       return filterGroup.every((filter) => {
         const field = getField(filter.fieldID);
 
-        return filterByFilter(field, record.fields[filter.fieldID], filter);
+        return filterByFilter(field, document.fields[filter.fieldID], filter);
       });
     });
   });
 
-  return filteredRecords;
+  return filteredDocuments;
 }
 
 function filterByFilter(
@@ -509,14 +509,14 @@ function filterByFilter(
 
       return filterByTextFieldKindFilter(value, filter);
     case FieldType.MultiCollaborator:
-    case FieldType.MultiRecordLink:
+    case FieldType.MultiDocumentLink:
     case FieldType.MultiOption:
       assertMultiSelectFieldKindValue(value);
       assertMultiSelectFilter(filter);
 
       return filterByMultiSelectFieldKindFilter(value, filter);
     case FieldType.SingleCollaborator:
-    case FieldType.SingleRecordLink:
+    case FieldType.SingleDocumentLink:
     case FieldType.SingleOption:
       assertSingleSelectFieldKindValue(value);
       assertSingleSelectFilter(filter);
@@ -1102,7 +1102,7 @@ export function filterByMultiSelectFieldKindFilterRuleHasAnyOf(
     return false;
   }
 
-  return hasAnyOf<CollaboratorID | RecordID | SelectOptionID>(
+  return hasAnyOf<CollaboratorID | DocumentID | SelectOptionID>(
     value,
     filterValue,
   );
@@ -1115,7 +1115,7 @@ export function filterByMultiSelectFieldKindFilterRuleHasAllOf(
     return false;
   }
 
-  return hasAllOf<CollaboratorID | RecordID | SelectOptionID>(
+  return hasAllOf<CollaboratorID | DocumentID | SelectOptionID>(
     value,
     filterValue,
   );
@@ -1128,7 +1128,7 @@ export function filterByMultiSelectFieldKindFilterRuleHasNoneOf(
     return false;
   }
 
-  return hasNoneOf<CollaboratorID | RecordID | SelectOptionID>(
+  return hasNoneOf<CollaboratorID | DocumentID | SelectOptionID>(
     value,
     filterValue,
   );
@@ -1136,12 +1136,12 @@ export function filterByMultiSelectFieldKindFilterRuleHasNoneOf(
 export function filterByMultiSelectFieldKindFilterRuleIsEmpty(
   value: MultiSelectFieldKindValue,
 ): boolean {
-  return isEmpty<CollaboratorID | RecordID | SelectOptionID>(value);
+  return isEmpty<CollaboratorID | DocumentID | SelectOptionID>(value);
 }
 export function filterByMultiSelectFieldKindFilterRuleIsNotEmpty(
   value: MultiSelectFieldKindValue,
 ): boolean {
-  return !isEmpty<CollaboratorID | RecordID | SelectOptionID>(value);
+  return !isEmpty<CollaboratorID | DocumentID | SelectOptionID>(value);
 }
 
 export function assertNumberFieldKindFilterRule(

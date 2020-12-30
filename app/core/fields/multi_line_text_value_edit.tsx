@@ -13,12 +13,12 @@ import {
   MultiLineTextFieldValue,
   TextFieldKindValue,
 } from '../../data/fields';
-import { RecordID } from '../../data/records';
-import { useUpdateRecordFieldValue } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useUpdateDocumentFieldValue } from '../../data/store';
 
 interface MultiLineTextValueEditProps {
   autoFocus: boolean;
-  recordID: RecordID;
+  documentID: DocumentID;
   field: MultiLineTextField;
   value: MultiLineTextFieldValue;
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
@@ -27,15 +27,15 @@ interface MultiLineTextValueEditProps {
 export function MultiLineTextValueEdit(
   props: MultiLineTextValueEditProps,
 ): JSX.Element {
-  const { autoFocus, recordID, field, value, onKeyPress } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
+  const { autoFocus, documentID, field, value, onKeyPress } = props;
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<TextFieldKindValue>();
   const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
     (nextValue: string) => {
-      updateRecordFieldValue(recordID, field.id, nextValue);
+      updateDocumentFieldValue(documentID, field.id, nextValue);
     },
-    [updateRecordFieldValue, recordID, field],
+    [updateDocumentFieldValue, documentID, field],
   );
 
   return (

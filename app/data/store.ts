@@ -18,7 +18,7 @@ import {
   ListViewFieldConfig,
 } from './views';
 import { Field, FieldConfig, FieldID, FieldValue, FieldType } from './fields';
-import { Record, RecordFieldValues, RecordID } from './records';
+import { Document, DocumentFieldValues, DocumentID } from './documents';
 import {
   Filter,
   FilterConfig,
@@ -37,7 +37,7 @@ import {
   FiltersByIDState,
   ViewsByIDState,
   fieldsByIDState,
-  recordsByIDState,
+  documentsByIDState,
   sortsByIDState,
   eventsState,
   SortsByIDState,
@@ -46,7 +46,7 @@ import {
   SpacesByIDState,
   collaboratorsByIDState,
   CollaboratorsByIDState,
-  RecordsByIDState,
+  DocumentsByIDState,
   CollectionsByIDState,
 } from './atoms';
 import {
@@ -54,16 +54,16 @@ import {
   spaceCollectionsQuery,
   collectionQuery,
   collectionFieldsQuery,
-  collectionRecordsQuery,
+  collectionDocumentsQuery,
   collectionFieldsByIDQuery,
   collectionViewsQuery,
   viewQuery,
-  viewRecordsQuery,
+  viewDocumentsQuery,
   viewFilterGroupsQuery,
   viewFiltersQuery,
   viewFiltersGroupMaxQuery,
   fieldQuery,
-  recordQuery,
+  documentQuery,
   viewSortsQuery,
   filterQuery,
   sortQuery,
@@ -71,12 +71,12 @@ import {
   viewGroupsSequenceMaxQuery,
   viewGroupsQuery,
   groupQuery,
-  collectionRecordsByIDQuery,
-  recordFieldValueQuery,
+  collectionDocumentsByIDQuery,
+  documentFieldValueQuery,
   collaboratorsQuery,
   collaboratorQuery,
   sortGettersQuery,
-  recordFieldsEntriesQuery,
+  documentFieldsEntriesQuery,
 } from './queries';
 import { SortConfig, Sort, SortID, deleteSort, SortGetters } from './sorts';
 import { Group, GroupID, deleteGroup } from './groups';
@@ -305,8 +305,10 @@ export function useGetCollectionFieldsCallback(): (
   );
 }
 
-export function useGetCollectionRecords(collectionID: CollectionID): Record[] {
-  return useRecoilValue(collectionRecordsQuery(collectionID));
+export function useGetCollectionDocuments(
+  collectionID: CollectionID,
+): Document[] {
+  return useRecoilValue(collectionDocumentsQuery(collectionID));
 }
 
 export function useGetCollectionFieldsByID(
@@ -355,41 +357,41 @@ export function useCreateCollection(): (spaceID: SpaceID) => Collection {
   );
 }
 
-export function useUpdateRecordFieldValue<T extends FieldValue>(): (
-  recordID: RecordID,
+export function useUpdateDocumentFieldValue<T extends FieldValue>(): (
+  documentID: DocumentID,
   fieldID: FieldID,
   nextValue: T,
 ) => void {
   const emitEvent = useEmitEvent();
-  const setRecordsByID = useSetRecoilState(recordsByIDState);
-  const getRecord = useGetRecordCallback();
+  const setDocumentsByID = useSetRecoilState(documentsByIDState);
+  const getDocument = useGetDocumentCallback();
 
   return useCallback(
-    (recordID, fieldID, nextValue) => {
-      const prevRecord = getRecord(recordID);
-      const prevValue = prevRecord.fields[fieldID];
+    (documentID, fieldID, nextValue) => {
+      const prevDocument = getDocument(documentID);
+      const prevValue = prevDocument.fields[fieldID];
 
-      const nextRecord: Record = {
-        ...prevRecord,
+      const nextDocument: Document = {
+        ...prevDocument,
         fields: {
-          ...prevRecord.fields,
+          ...prevDocument.fields,
           [fieldID]: nextValue,
         },
       };
 
-      setRecordsByID((previousRecordsByID) => ({
-        ...previousRecordsByID,
-        [nextRecord.id]: nextRecord,
+      setDocumentsByID((previousDocumentsByID) => ({
+        ...previousDocumentsByID,
+        [nextDocument.id]: nextDocument,
       }));
 
       emitEvent({
-        name: 'RecordFieldValueUpdated',
+        name: 'DocumentFieldValueUpdated',
         fieldID,
         prevValue,
         nextValue,
       });
     },
-    [emitEvent, getRecord, setRecordsByID],
+    [emitEvent, getDocument, setDocumentsByID],
   );
 }
 
@@ -473,14 +475,14 @@ export function useGetView(viewID: ViewID): View {
   return useRecoilValue(viewQuery(viewID));
 }
 
-export function useGetViewRecords(viewID: ViewID): Record[] {
-  return useRecoilValue(viewRecordsQuery(viewID));
+export function useGetViewDocuments(viewID: ViewID): Document[] {
+  return useRecoilValue(viewDocumentsQuery(viewID));
 }
 
-export function useGetCollectionRecordsByID(
+export function useGetCollectionDocumentsByID(
   collectionID: CollectionID,
-): RecordsByIDState {
-  return useRecoilValue(collectionRecordsByIDQuery(collectionID));
+): DocumentsByIDState {
+  return useRecoilValue(collectionDocumentsByIDQuery(collectionID));
 }
 
 export function useGetFiltersByID() {
@@ -509,48 +511,48 @@ export function useGetViewFiltersGroups(viewID: ViewID): FilterGroup[] {
   return useRecoilValue(viewFilterGroupsQuery(viewID));
 }
 
-export function useGetRecordPrimaryFieldValueCallback(): (
-  recordID: RecordID,
+export function useGetDocumentPrimaryFieldValueCallback(): (
+  documentID: DocumentID,
 ) => [field: Field, value: FieldValue] {
-  const getRecord = useGetRecordCallback();
+  const getDocument = useGetDocumentCallback();
   const getCollection = useGetCollectionCallback();
   const getField = useGetFieldCallback();
 
   return useCallback(
-    (recordID: RecordID) => {
-      const record = getRecord(recordID);
-      const collection = getCollection(record.collectionID);
+    (documentID: DocumentID) => {
+      const document = getDocument(documentID);
+      const collection = getCollection(document.collectionID);
       const field = getField(collection.primaryFieldID);
 
-      return [field, record.fields[collection.primaryFieldID]];
+      return [field, document.fields[collection.primaryFieldID]];
     },
-    [getRecord, getCollection, getField],
+    [getDocument, getCollection, getField],
   );
 }
 
-export function useGetRecordPrimaryFieldValue(
-  recordID: RecordID,
+export function useGetDocumentPrimaryFieldValue(
+  documentID: DocumentID,
 ): [field: Field, value: FieldValue] {
-  const getRecord = useGetRecordCallback();
+  const getDocument = useGetDocumentCallback();
   const getCollection = useGetCollectionCallback();
   const getField = useGetFieldCallback();
 
-  const record = getRecord(recordID);
-  const collection = getCollection(record.collectionID);
+  const document = getDocument(documentID);
+  const collection = getCollection(document.collectionID);
 
   const field = getField(collection.primaryFieldID);
 
-  return [field, record.fields[collection.primaryFieldID]];
+  return [field, document.fields[collection.primaryFieldID]];
 }
 
 export function useGetViewFilters(viewID: ViewID) {
   return useRecoilValue(viewFiltersQuery(viewID));
 }
 
-export function useGetRecordFieldValuesEntries(
-  recordID: RecordID,
+export function useGetDocumentFieldValuesEntries(
+  documentID: DocumentID,
 ): [Field, FieldValue][] {
-  return useRecoilValue(recordFieldsEntriesQuery(recordID));
+  return useRecoilValue(documentFieldsEntriesQuery(documentID));
 }
 
 export function useGetViewSorts(viewID: ViewID): Sort[] {
@@ -1140,13 +1142,16 @@ export function useGetFieldConfig(fieldID: FieldID): FieldConfig {
   return field;
 }
 
-export function useGetRecordFieldValue(
-  recordID: RecordID,
+export function useGetDocumentFieldValue(
+  documentID: DocumentID,
   fieldID: FieldID,
 ): FieldValue {
-  const params = useMemo(() => ({ recordID, fieldID }), [recordID, fieldID]);
+  const params = useMemo(() => ({ documentID, fieldID }), [
+    documentID,
+    fieldID,
+  ]);
 
-  return useRecoilValue(recordFieldValueQuery(params));
+  return useRecoilValue(documentFieldValueQuery(params));
 }
 
 export function useCreateField() {
@@ -1244,31 +1249,31 @@ export function useUpdateFieldName() {
   );
 }
 
-export function useGetRecordCallback(): (recordID: RecordID) => Record {
-  const records = useRecoilValue(recordsByIDState);
+export function useGetDocumentCallback(): (documentID: DocumentID) => Document {
+  const documents = useRecoilValue(documentsByIDState);
 
   return useCallback(
-    (recordID: RecordID) => {
-      const record = records[recordID];
+    (documentID: DocumentID) => {
+      const document = documents[documentID];
 
-      if (record === undefined) {
-        throw new Error('Record not found');
+      if (document === undefined) {
+        throw new Error('Document not found');
       }
 
-      return record;
+      return document;
     },
-    [records],
+    [documents],
   );
 }
 
-export function useGetRecord(recordID: RecordID): Record {
-  const record = useRecoilValue(recordQuery(recordID));
+export function useGetDocument(documentID: DocumentID): Document {
+  const document = useRecoilValue(documentQuery(documentID));
 
-  if (record === null) {
-    throw new Error('Record not found');
+  if (document === null) {
+    throw new Error('Document not found');
   }
 
-  return record;
+  return document;
 }
 
 function getDefaultFieldValue(field: Field): FieldValue {
@@ -1280,7 +1285,7 @@ function getDefaultFieldValue(field: Field): FieldValue {
     case FieldType.Date:
     case FieldType.SingleCollaborator:
     case FieldType.SingleOption:
-    case FieldType.SingleRecordLink:
+    case FieldType.SingleDocumentLink:
       return null;
     case FieldType.PhoneNumber:
     case FieldType.URL:
@@ -1290,34 +1295,34 @@ function getDefaultFieldValue(field: Field): FieldValue {
       return '';
     case FieldType.MultiCollaborator:
     case FieldType.MultiOption:
-    case FieldType.MultiRecordLink:
+    case FieldType.MultiDocumentLink:
       return [];
     default:
       assertUnreached(field);
   }
 }
 
-function getDefaultRecordFieldValues(fields: Field[]): RecordFieldValues {
+function getDefaultDocumentFieldValues(fields: Field[]): DocumentFieldValues {
   const fieldsByID = keyedBy(fields, (field) => field.id);
   return map(fieldsByID, getDefaultFieldValue);
 }
 
-export function useCreateRecord(): (
+export function useCreateDocument(): (
   collectionID: CollectionID,
-  values?: RecordFieldValues,
-) => Record {
+  values?: DocumentFieldValues,
+) => Document {
   const emitEvent = useEmitEvent();
-  const setRecords = useSetRecoilState(recordsByIDState);
+  const setDocuments = useSetRecoilState(documentsByIDState);
   const getCollectionFields = useGetCollectionFieldsCallback();
 
   return useCallback(
-    (collectionID: CollectionID, values?: RecordFieldValues) => {
+    (collectionID: CollectionID, values?: DocumentFieldValues) => {
       const loadableFields = getCollectionFields(collectionID);
 
-      const newRecord: Record = {
-        id: Record.generateID(),
+      const newDocument: Document = {
+        id: Document.generateID(),
         fields: {
-          ...getDefaultRecordFieldValues(loadableFields.getValue()),
+          ...getDefaultDocumentFieldValues(loadableFields.getValue()),
           ...values,
         },
         createdAt: new Date(),
@@ -1325,74 +1330,74 @@ export function useCreateRecord(): (
         collectionID,
       };
 
-      setRecords((previousRecords) => ({
-        ...previousRecords,
-        [newRecord.id]: newRecord,
+      setDocuments((previousDocuments) => ({
+        ...previousDocuments,
+        [newDocument.id]: newDocument,
       }));
 
       emitEvent({
-        name: 'RecordCreated',
-        record: newRecord,
+        name: 'DocumentCreated',
+        document: newDocument,
       });
 
-      return newRecord;
+      return newDocument;
     },
-    [emitEvent, setRecords, getCollectionFields],
+    [emitEvent, setDocuments, getCollectionFields],
   );
 }
 
-export function useDeleteRecord() {
+export function useDeleteDocument() {
   const emitEvent = useEmitEvent();
-  const setRecords = useSetRecoilState(recordsByIDState);
+  const setDocuments = useSetRecoilState(documentsByIDState);
 
   return useCallback(
-    (record: Record) => {
-      setRecords((previousRecords) => {
-        const updatedRecords = { ...previousRecords };
+    (document: Document) => {
+      setDocuments((previousDocuments) => {
+        const updatedDocuments = { ...previousDocuments };
 
-        delete updatedRecords[record.id];
+        delete updatedDocuments[document.id];
 
-        return updatedRecords;
+        return updatedDocuments;
       });
 
       emitEvent({
-        name: 'RecordDeleted',
-        record,
+        name: 'DocumentDeleted',
+        document,
       });
     },
-    [emitEvent, setRecords],
+    [emitEvent, setDocuments],
   );
 }
 
-export interface UpdateRecordNameInput {
-  recordID: RecordID;
+export interface UpdateDocumentNameInput {
+  documentID: DocumentID;
 }
 
-export function useUpdateRecordName() {
+export function useUpdateDocumentName() {
   const emitEvent = useEmitEvent();
-  const getRecord = useGetRecordCallback();
-  const setRecords = useSetRecoilState(recordsByIDState);
+  const getDocument = useGetDocumentCallback();
+  const setDocuments = useSetRecoilState(documentsByIDState);
 
   return useCallback(
-    (input: UpdateRecordNameInput) => {
-      const { recordID } = input;
-      const prevRecord = getRecord(recordID);
+    (input: UpdateDocumentNameInput) => {
+      const { documentID } = input;
+      const prevDocument = getDocument(documentID);
 
-      const nextRecord: Record = {
-        ...prevRecord,
+      const nextDocument: Document = {
+        ...prevDocument,
       };
 
-      setRecords((previousRecords) => ({
-        ...previousRecords,
-        [nextRecord.id]: nextRecord,
+      setDocuments((previousDocuments) => ({
+        ...previousDocuments,
+        [nextDocument.id]: nextDocument,
       }));
 
       emitEvent({
-        name: 'RecordNameUpdated',
-        prevRecord,
-        nextRecord,
+        name: 'DocumentNameUpdated',
+        prevDocument,
+        nextDocument,
       });
     },
-    [getRecord, setRecords, emitEvent],
+    [getDocument, setDocuments, emitEvent],
   );
 }

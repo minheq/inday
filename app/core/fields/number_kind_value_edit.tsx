@@ -10,12 +10,12 @@ import { toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
 import { NumberFieldKind, NumberFieldKindValue } from '../../data/fields';
-import { RecordID } from '../../data/records';
-import { useUpdateRecordFieldValue } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useUpdateDocumentFieldValue } from '../../data/store';
 
 interface NumberKindValueEditProps<T extends NumberFieldKindValue> {
   autoFocus: boolean;
-  recordID: RecordID;
+  documentID: DocumentID;
   field: NumberFieldKind;
   value: T;
   onKeyPress: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
@@ -24,15 +24,15 @@ interface NumberKindValueEditProps<T extends NumberFieldKindValue> {
 export function NumberKindValueEdit<T extends NumberFieldKindValue>(
   props: NumberKindValueEditProps<T>,
 ): JSX.Element {
-  const { autoFocus, recordID, field, value, onKeyPress } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<NumberFieldKindValue>();
+  const { autoFocus, documentID, field, value, onKeyPress } = props;
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<NumberFieldKindValue>();
   const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
     (nextValue: string) => {
-      updateRecordFieldValue(recordID, field.id, toNumber(nextValue));
+      updateDocumentFieldValue(documentID, field.id, toNumber(nextValue));
     },
-    [updateRecordFieldValue, recordID, field],
+    [updateDocumentFieldValue, documentID, field],
   );
 
   return (

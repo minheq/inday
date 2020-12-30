@@ -3,7 +3,7 @@ import { Space } from './spaces';
 import { Collection } from './collections';
 import { View, ListView } from './views';
 import { Field, FieldID, FieldValue } from './fields';
-import { Record } from './records';
+import { Document } from './documents';
 import { Filter } from './filters';
 import { Sort } from './sorts';
 import { Group } from './groups';
@@ -109,40 +109,40 @@ export interface FieldDeletedEventConfig {
 }
 export interface FieldDeletedEvent extends BaseEvent, FieldDeletedEventConfig {}
 
-export interface RecordCreatedEventConfig {
-  name: 'RecordCreated';
-  record: Record;
+export interface DocumentCreatedEventConfig {
+  name: 'DocumentCreated';
+  document: Document;
 }
-export interface RecordCreatedEvent
+export interface DocumentCreatedEvent
   extends BaseEvent,
-    RecordCreatedEventConfig {}
+    DocumentCreatedEventConfig {}
 
-export interface RecordNameUpdatedEventConfig {
-  name: 'RecordNameUpdated';
-  prevRecord: Record;
-  nextRecord: Record;
+export interface DocumentNameUpdatedEventConfig {
+  name: 'DocumentNameUpdated';
+  prevDocument: Document;
+  nextDocument: Document;
 }
-export interface RecordNameUpdatedEvent
+export interface DocumentNameUpdatedEvent
   extends BaseEvent,
-    RecordNameUpdatedEventConfig {}
+    DocumentNameUpdatedEventConfig {}
 
-export interface RecordFieldValueUpdatedEventConfig {
-  name: 'RecordFieldValueUpdated';
+export interface DocumentFieldValueUpdatedEventConfig {
+  name: 'DocumentFieldValueUpdated';
   fieldID: FieldID;
   prevValue: FieldValue;
   nextValue: FieldValue;
 }
-export interface RecordFieldValueUpdatedEvent
+export interface DocumentFieldValueUpdatedEvent
   extends BaseEvent,
-    RecordFieldValueUpdatedEventConfig {}
+    DocumentFieldValueUpdatedEventConfig {}
 
-export interface RecordDeletedEventConfig {
-  name: 'RecordDeleted';
-  record: Record;
+export interface DocumentDeletedEventConfig {
+  name: 'DocumentDeleted';
+  document: Document;
 }
-export interface RecordDeletedEvent
+export interface DocumentDeletedEvent
   extends BaseEvent,
-    RecordDeletedEventConfig {}
+    DocumentDeletedEventConfig {}
 
 export interface FilterCreatedEventConfig {
   name: 'FilterCreated';
@@ -246,10 +246,10 @@ export type EventConfig =
   | FieldCreatedEventConfig
   | FieldNameUpdatedEventConfig
   | FieldDeletedEventConfig
-  | RecordCreatedEventConfig
-  | RecordNameUpdatedEventConfig
-  | RecordFieldValueUpdatedEventConfig
-  | RecordDeletedEventConfig
+  | DocumentCreatedEventConfig
+  | DocumentNameUpdatedEventConfig
+  | DocumentFieldValueUpdatedEventConfig
+  | DocumentDeletedEventConfig
   | FilterCreatedEventConfig
   | FilterConfigUpdatedEventConfig
   | FilterGroupUpdatedEventConfig
@@ -276,10 +276,10 @@ export type Event =
   | FieldCreatedEvent
   | FieldNameUpdatedEvent
   | FieldDeletedEvent
-  | RecordCreatedEvent
-  | RecordNameUpdatedEvent
-  | RecordFieldValueUpdatedEvent
-  | RecordDeletedEvent
+  | DocumentCreatedEvent
+  | DocumentNameUpdatedEvent
+  | DocumentFieldValueUpdatedEvent
+  | DocumentDeletedEvent
   | FilterCreatedEvent
   | FilterConfigUpdatedEvent
   | FilterGroupUpdatedEvent

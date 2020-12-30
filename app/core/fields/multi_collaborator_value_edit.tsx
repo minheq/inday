@@ -5,7 +5,7 @@ import {
   MultiCollaboratorField,
   MultiCollaboratorFieldValue,
 } from '../../data/fields';
-import { RecordID } from '../../data/records';
+import { DocumentID } from '../../data/documents';
 import { useGetCollaborators } from '../../data/store';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
 import {
@@ -14,7 +14,7 @@ import {
 } from './single_collaborator_value_edit';
 
 interface MultiCollaboratorValueEditProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   field: MultiCollaboratorField;
   value: MultiCollaboratorFieldValue;
   onDone: () => void;
@@ -23,14 +23,14 @@ interface MultiCollaboratorValueEditProps {
 export function MultiCollaboratorValueEdit(
   props: MultiCollaboratorValueEditProps,
 ): JSX.Element {
-  const { recordID, field, value, onDone } = props;
+  const { documentID, field, value, onDone } = props;
   const collaborators = useGetCollaborators();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
 
   return (
     <MultiSelectKindValueEdit<CollaboratorID>
-      recordID={recordID}
+      documentID={documentID}
       fieldID={field.id}
       renderLabel={renderCollaborator}
       options={options}

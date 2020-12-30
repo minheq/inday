@@ -9,23 +9,23 @@ import {
   CheckboxField,
   CheckboxFieldValue,
 } from '../../data/fields';
-import { RecordID } from '../../data/records';
-import { useUpdateRecordFieldValue } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useUpdateDocumentFieldValue } from '../../data/store';
 
 interface CheckboxValueEditProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   field: CheckboxField;
   value: CheckboxFieldValue;
 }
 
 export function CheckboxValueEdit(props: CheckboxValueEditProps): JSX.Element {
-  const { recordID, value, field } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<BooleanFieldKindValue>();
+  const { documentID, value, field } = props;
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<BooleanFieldKindValue>();
 
   const handleToggle = useCallback(() => {
     const checked = !value;
-    updateRecordFieldValue(recordID, field.id, checked);
-  }, [updateRecordFieldValue, recordID, field, value]);
+    updateDocumentFieldValue(documentID, field.id, checked);
+  }, [updateDocumentFieldValue, documentID, field, value]);
 
   return <Checkbox value={value} onChange={handleToggle} />;
 }

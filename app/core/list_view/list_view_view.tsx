@@ -15,7 +15,7 @@ import {
   useGetViewFilters,
   useGetViewSorts,
   useGetViewGroups,
-  useGetViewRecords,
+  useGetViewDocuments,
   useGetSortGetters,
 } from '../../data/store';
 import { Field, FieldID, FieldValue } from '../../data/fields';
@@ -31,7 +31,7 @@ import {
   RenderHeaderProps,
   RenderFooterProps,
 } from '../../components/grid_renderer';
-import { Record, RecordID } from '../../data/records';
+import { Document, DocumentID } from '../../data/documents';
 import {
   GridGroup,
   SelectedRow,
@@ -41,7 +41,7 @@ import { usePrevious } from '../../hooks/use_previous';
 import { isEmpty } from '../../../lib/lang_utils';
 import { last } from '../../../lib/array_utils';
 import { Group } from '../../data/groups';
-import { makeRecordNodes, RecordNode, SortGetters } from '../../data/sorts';
+import { makeDocumentNodes, DocumentNode, SortGetters } from '../../data/sorts';
 import { LastLeafRowCell, LeafRowCell, LEAF_ROW_HEIGHT } from './leaf_row_cell';
 import { Header, HeaderCell, LastHeaderCell } from './header';
 import { Footer } from './footer';
@@ -53,11 +53,11 @@ export type ViewMode = 'edit' | 'select';
 
 interface ListViewViewProps {
   view: ListView;
-  onOpenRecord: (recordID: RecordID) => void;
+  onOpenDocument: (documentID: DocumentID) => void;
   mode: ViewMode;
-  selectedRecords: RecordID[];
-  onSelectRecord: (recordID: RecordID, selected: boolean) => void;
-  onAddRecord: () => Record;
+  selectedDocuments: DocumentID[];
+  onSelectDocument: (documentID: DocumentID, selected: boolean) => void;
+  onAddDocument: () => Document;
 }
 
 const FIELD_ROW_HEIGHT = 40;
@@ -73,34 +73,34 @@ export const activeCellState = atom<StatefulLeafRowCell | null>({
 export function ListViewView(props: ListViewViewProps): JSX.Element {
   const {
     view,
-    onOpenRecord,
-    onAddRecord,
+    onOpenDocument,
+    onAddDocument,
     mode,
-    selectedRecords,
-    onSelectRecord,
+    selectedDocuments,
+    onSelectDocument,
   } = props;
   const viewID = view.id;
   const [activeCell, setActiveCell] = useRecoilState(activeCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
-  const records = useGetViewRecords(view.id);
+  const documents = useGetViewDocuments(view.id);
   const groups = useGetViewGroups(view.id);
   const sortGetters = useGetSortGetters();
   const [nodes, setNodes] = useState(
-    getRecordNodes(records, groups, sortGetters),
+    getDocumentNodes(documents, groups, sortGetters),
   );
   const gridRef = useRef<GridRendererRef>(null);
   const rowPaths = useMemo(() => getRowPaths(nodes, []), [nodes]);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
     getColumnToFieldIDCache(fields),
   );
-  const [rowToRecordIDCache, setRowToRecordIDCache] = useState(
-    getRowToRecordIDCache(rowPaths),
+  const [rowToDocumentIDCache, setRowToDocumentIDCache] = useState(
+    getRowToDocumentIDCache(rowPaths),
   );
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
-  const recordsOrderChanged = useRecordsOrderChanged(view.id, records);
+  const documentsOrderChanged = useDocumentsOrderChanged(view.id, documents);
   const fieldsOrderChanged = useFieldsOrderChanged(view.id, fields);
-  const newRecordAdded = useNewRecordAdded(records);
+  const newDocumentAdded = useNewDocumentAdded(documents);
   const columns = useMemo(
     (): number[] =>
       fields.map((field) => field.config.width).concat(ADD_FIELD_COLUMN_WIDTH),
@@ -108,8 +108,8 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   );
   const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
   const selectedRows = useMemo(
-    (): SelectedRow[] => getSelectedRows(selectedRecords, rowPaths),
-    [selectedRecords, rowPaths],
+    (): SelectedRow[] => getSelectedRows(selectedDocuments, rowPaths),
+    [selectedDocuments, rowPaths],
   );
   const lastFocusableColumn = useMemo(() => fields.length, [fields]);
   const lastFocusableRow = useMemo((): RowPath | undefined => last(rowPaths), [
@@ -117,11 +117,11 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   ]);
 
   useEffect(() => {
-    if (recordsOrderChanged) {
-      setNodes(getRecordNodes(records, groups, sortGetters));
-      setRowToRecordIDCache(getRowToRecordIDCache(rowPaths));
+    if (documentsOrderChanged) {
+      setNodes(getDocumentNodes(documents, groups, sortGetters));
+      setRowToDocumentIDCache(getRowToDocumentIDCache(rowPaths));
     }
-  }, [rowPaths, recordsOrderChanged, records, groups, sortGetters]);
+  }, [rowPaths, documentsOrderChanged, documents, groups, sortGetters]);
 
   useEffect(() => {
     if (fieldsOrderChanged) {
@@ -136,7 +136,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   }, [mode, activeCell, setActiveCell]);
 
   useEffect(() => {
-    if (newRecordAdded && lastFocusableRow) {
+    if (newDocumentAdded && lastFocusableRow) {
       setActiveCell({
         type: 'leaf',
         row: lastFocusableRow.row,
@@ -146,30 +146,30 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         last: true,
       });
     }
-  }, [setActiveCell, newRecordAdded, lastFocusableRow]);
+  }, [setActiveCell, newDocumentAdded, lastFocusableRow]);
 
   const context = useMemo((): ListViewViewContext => {
     return {
       viewID,
-      rowToRecordIDCache,
+      rowToDocumentIDCache,
       columnToFieldIDCache,
       lastFocusableColumn,
       lastFocusableRow,
       mode,
-      onOpenRecord,
-      onSelectRecord,
-      onAddRecord,
+      onOpenDocument,
+      onSelectDocument,
+      onAddDocument,
     };
   }, [
     viewID,
-    rowToRecordIDCache,
+    rowToDocumentIDCache,
     columnToFieldIDCache,
     lastFocusableColumn,
     lastFocusableRow,
     mode,
-    onOpenRecord,
-    onSelectRecord,
-    onAddRecord,
+    onOpenDocument,
+    onSelectDocument,
+    onAddDocument,
   ]);
 
   const renderLeafRowCell = useCallback(
@@ -179,11 +179,11 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       }
 
       const fieldID = columnToFieldIDCache[_props.column];
-      const recordID = rowToRecordIDCache.get([..._props.path, _props.row]);
+      const documentID = rowToDocumentIDCache.get([..._props.path, _props.row]);
       const primary = _props.column === 1;
 
-      if (recordID === undefined) {
-        throw new Error('No corresponding recordID found for row path.');
+      if (documentID === undefined) {
+        throw new Error('No corresponding documentID found for row path.');
       }
 
       return (
@@ -194,12 +194,12 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           column={_props.column}
           last={_props.last}
           state={_props.state}
-          recordID={recordID}
+          documentID={documentID}
           fieldID={fieldID}
         />
       );
     },
-    [columnToFieldIDCache, rowToRecordIDCache],
+    [columnToFieldIDCache, rowToDocumentIDCache],
   );
 
   const renderHeaderCell = useCallback(
@@ -228,19 +228,19 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         }
       }
 
-      const recordID = rowToRecordIDCache.get([...row.path, row.row]);
+      const documentID = rowToDocumentIDCache.get([...row.path, row.row]);
 
-      if (recordID === undefined) {
-        throw new Error('No corresponding recordID found for row path.');
+      if (documentID === undefined) {
+        throw new Error('No corresponding documentID found for row path.');
       }
 
       return (
-        <LeafRow recordID={recordID} state={row.state}>
+        <LeafRow documentID={documentID} state={row.state}>
           {row.children}
         </LeafRow>
       );
     },
-    [rowToRecordIDCache],
+    [rowToDocumentIDCache],
   );
 
   const renderGroupRow = useCallback(
@@ -296,28 +296,28 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   );
 }
 
-interface FlatRecordNode {
+interface FlatDocumentNode {
   type: 'leaf';
   grouped: false;
-  children: Record[];
+  children: Document[];
 }
 
-function getRecordNodes(
-  records: Record[],
+function getDocumentNodes(
+  documents: Document[],
   groups: Group[],
   sortGetters: SortGetters,
-): FlatRecordNode[] | GroupedRecordNode[] {
+): FlatDocumentNode[] | GroupedDocumentNode[] {
   if (isEmpty(groups)) {
-    return [{ type: 'leaf', children: records, grouped: false }];
+    return [{ type: 'leaf', children: documents, grouped: false }];
   }
 
-  const nodes = makeRecordNodes(groups, records, sortGetters);
+  const nodes = makeDocumentNodes(groups, documents, sortGetters);
 
-  return toGroupedRecordNode(nodes);
+  return toGroupedDocumentNode(nodes);
 }
 
-function toGroupedRecordNode(nodes: RecordNode[]): GroupedRecordNode[] {
-  let groups: GroupedRecordNode[] = [];
+function toGroupedDocumentNode(nodes: DocumentNode[]): GroupedDocumentNode[] {
+  let groups: GroupedDocumentNode[] = [];
 
   for (const node of nodes) {
     if (node.type === 'leaf') {
@@ -335,7 +335,7 @@ function toGroupedRecordNode(nodes: RecordNode[]): GroupedRecordNode[] {
         collapsed: false,
         field: node.field,
         value: node.value,
-        children: toGroupedRecordNode(node.children),
+        children: toGroupedDocumentNode(node.children),
       });
     }
   }
@@ -343,39 +343,43 @@ function toGroupedRecordNode(nodes: RecordNode[]): GroupedRecordNode[] {
   return groups;
 }
 
-interface LeafGroupedRecordNode {
+interface LeafGroupedDocumentNode {
   type: 'leaf';
   grouped: true;
   collapsed: boolean;
   field: Field;
   value: FieldValue;
-  children: Record[];
+  children: Document[];
 }
 
-interface AncestorGroupedRecordNode {
+interface AncestorGroupedDocumentNode {
   type: 'ancestor';
   collapsed: boolean;
   field: Field;
   value: FieldValue;
-  children: GroupedRecordNode[];
+  children: GroupedDocumentNode[];
 }
 
-type GroupedRecordNode = LeafGroupedRecordNode | AncestorGroupedRecordNode;
+type GroupedDocumentNode =
+  | LeafGroupedDocumentNode
+  | AncestorGroupedDocumentNode;
 
 function getSelectedRows(
-  selectedRecords: RecordID[],
+  selectedDocuments: DocumentID[],
   rowPaths: RowPath[],
 ): SelectedRow[] {
   const selectedRows: SelectedRow[] = [];
 
   for (const row of rowPaths) {
-    const found = selectedRecords.find((recordID) => recordID === row.recordID);
+    const found = selectedDocuments.find(
+      (documentID) => documentID === row.documentID,
+    );
 
     if (found !== undefined) {
       selectedRows.push(row);
     }
 
-    if (selectedRecords.length === selectedRows.length) {
+    if (selectedDocuments.length === selectedRows.length) {
       break;
     }
   }
@@ -384,7 +388,7 @@ function getSelectedRows(
 }
 
 function getRowPaths(
-  nodes: GroupedRecordNode[] | FlatRecordNode[],
+  nodes: GroupedDocumentNode[] | FlatDocumentNode[],
   prevPath: number[],
 ): RowPath[] {
   let rows: RowPath[] = [];
@@ -395,9 +399,9 @@ function getRowPaths(
 
     if (group.type === 'leaf') {
       for (let j = 0; j < group.children.length; j++) {
-        const record = group.children[j];
+        const document = group.children[j];
 
-        rows = rows.concat({ path, row: j + 1, recordID: record.id });
+        rows = rows.concat({ path, row: j + 1, documentID: document.id });
       }
     } else {
       const { children } = group;
@@ -411,7 +415,7 @@ function getRowPaths(
 }
 
 function toGridGroups(
-  nodes: GroupedRecordNode[] | FlatRecordNode[],
+  nodes: GroupedDocumentNode[] | FlatDocumentNode[],
 ): GridGroup[] {
   let groups: GridGroup[] = [];
 
@@ -420,7 +424,7 @@ function toGridGroups(
       groups = groups.concat({
         type: 'leaf',
         collapsed: node.grouped && node.collapsed,
-        rowCount: node.children.length + 1, // + 1 adds a row for `Add record`
+        rowCount: node.children.length + 1, // + 1 adds a row for `Add document`
       });
     } else {
       groups = groups.concat({
@@ -434,34 +438,37 @@ function toGridGroups(
   return groups;
 }
 
-function useNewRecordAdded(records: Record[]): boolean {
-  const recordsLength = records.length;
-  const prevRecordsLength = usePrevious(records.length);
+function useNewDocumentAdded(documents: Document[]): boolean {
+  const documentsLength = documents.length;
+  const prevDocumentsLength = usePrevious(documents.length);
 
-  return recordsLength - prevRecordsLength === 1;
+  return documentsLength - prevDocumentsLength === 1;
 }
 
-function useRecordsOrderChanged(viewID: ViewID, records: Record[]): boolean {
-  const recordsLength = records.length;
+function useDocumentsOrderChanged(
+  viewID: ViewID,
+  documents: Document[],
+): boolean {
+  const documentsLength = documents.length;
   const filters = useGetViewFilters(viewID);
   const sorts = useGetViewSorts(viewID);
   const groups = useGetViewGroups(viewID);
 
-  const prevRecordsLength = usePrevious(records.length);
+  const prevDocumentsLength = usePrevious(documents.length);
   const prevFilters = usePrevious(filters);
   const prevSorts = usePrevious(sorts);
   const prevGroups = usePrevious(groups);
 
   return useMemo(() => {
     return (
-      recordsLength !== prevRecordsLength ||
+      documentsLength !== prevDocumentsLength ||
       filters !== prevFilters ||
       sorts !== prevSorts ||
       groups !== prevGroups
     );
   }, [
-    recordsLength,
-    prevRecordsLength,
+    documentsLength,
+    prevDocumentsLength,
     filters,
     prevFilters,
     sorts,
@@ -481,34 +488,34 @@ function useFieldsOrderChanged(viewID: ViewID, fields: Field[]): boolean {
 
 interface ListViewViewContext {
   viewID: ViewID;
-  rowToRecordIDCache: RowToRecordIDCache;
+  rowToDocumentIDCache: RowToDocumentIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
   lastFocusableColumn: number;
   lastFocusableRow: RowPath | undefined;
   mode: ViewMode;
-  onOpenRecord: (recordID: RecordID) => void;
-  onSelectRecord: (recordID: RecordID, selected: boolean) => void;
-  onAddRecord: () => void;
+  onOpenDocument: (documentID: DocumentID) => void;
+  onSelectDocument: (documentID: DocumentID, selected: boolean) => void;
+  onAddDocument: () => void;
 }
 
 export const ListViewViewContext = createContext<ListViewViewContext>({
   viewID: 'viw',
-  rowToRecordIDCache: FlatObject(),
+  rowToDocumentIDCache: FlatObject(),
   columnToFieldIDCache: {},
   lastFocusableColumn: 0,
   lastFocusableRow: {
-    recordID: 'rec',
+    documentID: 'doc',
     row: 1,
     path: [],
   },
   mode: 'edit',
-  onOpenRecord: () => {
+  onOpenDocument: () => {
     return;
   },
-  onSelectRecord: () => {
+  onSelectDocument: () => {
     return;
   },
-  onAddRecord: () => {
+  onAddDocument: () => {
     return;
   },
 });
@@ -521,7 +528,7 @@ type ColumnToFieldIDCache = {
   [column: number]: FieldID;
 };
 
-type RowToRecordIDCache = FlatObject<RecordID, number>;
+type RowToDocumentIDCache = FlatObject<DocumentID, number>;
 
 function getColumnToFieldIDCache(fields: Field[]): ColumnToFieldIDCache {
   const cache: ColumnToFieldIDCache = {};
@@ -535,13 +542,13 @@ function getColumnToFieldIDCache(fields: Field[]): ColumnToFieldIDCache {
 }
 
 interface RowPath {
-  recordID: RecordID;
+  documentID: DocumentID;
   path: number[];
   row: number;
 }
 
-function getRowToRecordIDCache(rows: RowPath[]): RowToRecordIDCache {
-  const cache = FlatObject<RecordID, number>();
+function getRowToDocumentIDCache(rows: RowPath[]): RowToDocumentIDCache {
+  const cache = FlatObject<DocumentID, number>();
 
   if (isEmpty(rows)) {
     return cache;
@@ -550,7 +557,7 @@ function getRowToRecordIDCache(rows: RowPath[]): RowToRecordIDCache {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
 
-    cache.set([...row.path, row.row], row.recordID);
+    cache.set([...row.path, row.row], row.documentID);
   }
 
   return cache;

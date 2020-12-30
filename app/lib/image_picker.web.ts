@@ -4,14 +4,14 @@ import type {
   Image,
 } from 'react-native-image-crop-picker';
 
-const imageInput = record.createElement('input');
+const imageInput = document.createElement('input');
 imageInput.setAttribute('accept', 'image/png, image/jpg, image/jpeg');
 imageInput.setAttribute('type', 'file');
 imageInput.setAttribute('multiple', 'true');
 imageInput.setAttribute('id', 'file-image-upload');
 imageInput.style.display = 'none';
 
-record.body.appendChild(imageInput);
+document.body.appendChild(imageInput);
 
 const MediaTypeInput = {
   any: 'video/mp4,video/quicktime,video/x-m4v,video/*,image/*',
@@ -44,7 +44,7 @@ function openFileBrowser(
   const { multiple, mediaType = 'photo' } = options;
   const mediaTypeFormat = MediaTypeInput[mediaType];
 
-  const input = record.createElement('input');
+  const input = document.createElement('input');
   input.style.display = 'none';
   input.setAttribute('type', 'file');
   input.setAttribute('accept', mediaTypeFormat);
@@ -54,7 +54,7 @@ function openFileBrowser(
   if (capture) {
     input.setAttribute('capture', 'camera');
   }
-  record.body.appendChild(input);
+  document.body.appendChild(input);
 
   return new Promise((resolve, reject) => {
     input.addEventListener('change', () => {
@@ -74,7 +74,7 @@ function openFileBrowser(
         reject('Image not selected');
       }
 
-      record.body.removeChild(input);
+      document.body.removeChild(input);
     });
 
     const event = new window.MouseEvent('click');

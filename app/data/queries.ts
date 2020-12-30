@@ -1,6 +1,6 @@
 import { selectorFamily, selector } from 'recoil';
 import {
-  recordsByIDState,
+  documentsByIDState,
   collectionsByIDState,
   fieldsByIDState,
   filtersByIDState,
@@ -9,21 +9,21 @@ import {
   sortsByIDState,
   collaboratorsByIDState,
   groupsByIDState,
-  RecordsByIDState,
+  DocumentsByIDState,
 } from './atoms';
-import { Record, RecordID } from './records';
+import { Document, DocumentID } from './documents';
 import { Collection, CollectionID } from './collections';
 import { Field, FieldID, FieldValue } from './fields';
 import {
   Filter,
   FilterGroup,
   FilterID,
-  filterRecords,
+  filterDocuments,
   FilterGetters,
 } from './filters';
 import { Space, SpaceID } from './spaces';
 import { View, ViewID } from './views';
-import { Sort, SortID, sortRecords, SortGetters } from './sorts';
+import { Sort, SortID, sortDocuments, SortGetters } from './sorts';
 import { Collaborator, CollaboratorID } from './collaborators';
 import { Group, GroupID } from './groups';
 import { keyedBy, last } from '../../lib/array_utils';
@@ -61,35 +61,40 @@ export const spacesQuery = selector({
   },
 });
 
-export const recordsQuery = selector({
-  key: 'RecordsQuery',
+export const documentsQuery = selector({
+  key: 'DocumentsQuery',
   get: ({ get }) => {
-    const recordsByID = get(recordsByIDState);
+    const documentsByID = get(documentsByIDState);
 
-    return Object.values(recordsByID) as Record[];
+    return Object.values(documentsByID) as Document[];
   },
 });
 
-export const recordQuery = selectorFamily<Record, RecordID>({
-  key: 'RecordQuery',
-  get: (recordID: RecordID) => ({ get }) => {
-    const recordsByID = get(recordsByIDState);
-    const record = recordsByID[recordID];
+export const documentQuery = selectorFamily<Document, DocumentID>({
+  key: 'DocumentQuery',
+  get: (documentID: DocumentID) => ({ get }) => {
+    const documentsByID = get(documentsByIDState);
+    const document = documentsByID[documentID];
 
-    if (record === undefined) {
-      throw new Error('Record not found');
+    if (document === undefined) {
+      throw new Error('Document not found');
     }
 
-    return record;
+    return document;
   },
 });
 
-export const collectionRecordsQuery = selectorFamily<Record[], CollectionID>({
-  key: 'CollectionRecordsQuery',
+export const collectionDocumentsQuery = selectorFamily<
+  Document[],
+  CollectionID
+>({
+  key: 'CollectionDocumentsQuery',
   get: (collectionID: CollectionID) => ({ get }) => {
-    const records = get(recordsQuery);
+    const documents = get(documentsQuery);
 
-    return records.filter((record) => record.collectionID === collectionID);
+    return documents.filter(
+      (document) => document.collectionID === collectionID,
+    );
   },
 });
 
@@ -372,19 +377,19 @@ export const collectionViewsQuery = selectorFamily<View[], CollectionID>({
   },
 });
 
-export const collectionRecordsByIDQuery = selectorFamily<
-  RecordsByIDState,
+export const collectionDocumentsByIDQuery = selectorFamily<
+  DocumentsByIDState,
   CollectionID
 >({
-  key: 'CollectionRecordsByIDQuery',
+  key: 'CollectionDocumentsByIDQuery',
   get: (collectionID: CollectionID) => ({ get }) => {
-    const records = get(recordsQuery);
+    const documents = get(documentsQuery);
 
-    const collectionRecords = records.filter(
+    const collectionDocuments = documents.filter(
       (r) => r.collectionID === collectionID,
     );
 
-    return keyedBy(collectionRecords, (r) => r.id);
+    return keyedBy(collectionDocuments, (r) => r.id);
   },
 });
 
@@ -411,20 +416,20 @@ export const collaboratorsQuery = selector<Collaborator[]>({
   },
 });
 
-export const recordFieldValueQuery = selectorFamily<
+export const documentFieldValueQuery = selectorFamily<
   FieldValue,
-  { recordID: RecordID; fieldID: FieldID }
+  { documentID: DocumentID; fieldID: FieldID }
 >({
-  key: 'RecordFieldValueQuery',
-  get: ({ recordID, fieldID }) => ({ get }) => {
-    const recordsByID = get(recordsByIDState);
-    const record = recordsByID[recordID];
+  key: 'DocumentFieldValueQuery',
+  get: ({ documentID, fieldID }) => ({ get }) => {
+    const documentsByID = get(documentsByIDState);
+    const document = documentsByID[documentID];
 
-    if (record === undefined) {
-      throw new Error('Record not found');
+    if (document === undefined) {
+      throw new Error('Document not found');
     }
 
-    return record.fields[fieldID];
+    return document.fields[fieldID];
   },
 });
 
@@ -432,7 +437,8 @@ export const sortGettersQuery = selector<SortGetters>({
   key: 'SortGettersQuery',
   get: ({ get }) => {
     const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
-    const getRecord = (recordID: RecordID) => get(recordQuery(recordID));
+    const getDocument = (documentID: DocumentID) =>
+      get(documentQuery(documentID));
     const getCollaborator = (collaboratorID: CollaboratorID) =>
       get(collaboratorQuery(collaboratorID));
     const getCollection = (collectionID: CollectionID) =>
@@ -440,7 +446,7 @@ export const sortGettersQuery = selector<SortGetters>({
 
     return {
       getField,
-      getRecord,
+      getDocument,
       getCollaborator,
       getCollection,
     };
@@ -456,38 +462,42 @@ export const filterGettersQuery = selector<FilterGetters>({
   },
 });
 
-export const viewRecordsQuery = selectorFamily<Record[], ViewID>({
-  key: 'ViewRecordsQuery',
+export const viewDocumentsQuery = selectorFamily<Document[], ViewID>({
+  key: 'ViewDocumentsQuery',
   get: (viewID: ViewID) => ({ get }) => {
     const view = get(viewQuery(viewID));
-    const records = get(collectionRecordsQuery(view.collectionID));
+    const documents = get(collectionDocumentsQuery(view.collectionID));
     const filterGroups = get(viewFilterGroupsQuery(viewID));
     const sorts = get(viewSortsQuery(viewID));
     const sortGetters = get(sortGettersQuery);
     const filterGetters = get(filterGettersQuery);
 
-    let finalRecords = records;
+    let finalDocuments = documents;
 
-    finalRecords = filterRecords(filterGroups, finalRecords, filterGetters);
-    finalRecords = sortRecords(sorts, finalRecords, sortGetters);
+    finalDocuments = filterDocuments(
+      filterGroups,
+      finalDocuments,
+      filterGetters,
+    );
+    finalDocuments = sortDocuments(sorts, finalDocuments, sortGetters);
 
-    return finalRecords;
+    return finalDocuments;
   },
 });
 
-export const recordFieldsEntriesQuery = selectorFamily<
+export const documentFieldsEntriesQuery = selectorFamily<
   [Field, FieldValue][],
-  RecordID
+  DocumentID
 >({
-  key: 'RecordFieldsEntriesQuery',
-  get: (recordID: RecordID) => ({ get }) => {
-    const record = get(recordQuery(recordID));
+  key: 'DocumentFieldsEntriesQuery',
+  get: (documentID: DocumentID) => ({ get }) => {
+    const document = get(documentQuery(documentID));
 
-    const fieldIDs = Object.keys(record.fields) as FieldID[];
+    const fieldIDs = Object.keys(document.fields) as FieldID[];
     const fields = fieldIDs.map((fieldID) => get(fieldQuery(fieldID)));
 
     return fields.map((field) => {
-      const value = record.fields[field.id];
+      const value = document.fields[field.id];
 
       return [field, value];
     });

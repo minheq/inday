@@ -33,13 +33,13 @@ const fieldIconMap: { [fieldType in FieldType]: IconName } = {
   [FieldType.MultiCollaborator]: 'User',
   [FieldType.MultiLineText]: 'AlignLeft',
   [FieldType.MultiOption]: 'MultiSelect',
-  [FieldType.MultiRecordLink]: 'LinkToRecord',
+  [FieldType.MultiDocumentLink]: 'LinkToDocument',
   [FieldType.Number]: 'Number',
   [FieldType.PhoneNumber]: 'Phone',
   [FieldType.SingleCollaborator]: 'User',
   [FieldType.SingleLineText]: 'Typography',
   [FieldType.SingleOption]: 'Select',
-  [FieldType.SingleRecordLink]: 'LinkToRecord',
+  [FieldType.SingleDocumentLink]: 'LinkToDocument',
   [FieldType.URL]: 'Link',
 };
 

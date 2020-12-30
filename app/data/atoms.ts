@@ -1,7 +1,7 @@
 import { atom } from 'recoil';
 
 import {
-  recordsByIDFixtures,
+  documentsByIDFixtures,
   collectionsByIDFixtures,
   fieldsByIDFixtures,
   spacesByIDFixtures,
@@ -9,7 +9,7 @@ import {
   groupsByIDFixtures,
   collaboratorsByIDFixtures,
 } from './fake_data';
-import { Record } from './records';
+import { Document } from './documents';
 import { Collection } from './collections';
 import { Field } from './fields';
 import { Filter } from './filters';
@@ -31,10 +31,10 @@ export const workspaceState = atom<WorkspaceState>({
   },
 });
 
-export type RecordsByIDState = { [recordID: string]: Record | undefined };
-export const recordsByIDState = atom<RecordsByIDState>({
-  key: 'RecordsByIDState',
-  default: recordsByIDFixtures,
+export type DocumentsByIDState = { [documentID: string]: Document | undefined };
+export const documentsByIDState = atom<DocumentsByIDState>({
+  key: 'DocumentsByIDState',
+  default: documentsByIDFixtures,
 });
 
 export type CollectionsByIDState = { [id: string]: Collection | undefined };

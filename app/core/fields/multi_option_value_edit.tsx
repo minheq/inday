@@ -5,7 +5,7 @@ import {
   MultiOptionFieldValue,
   MultiOptionField,
 } from '../../data/fields';
-import { RecordID } from '../../data/records';
+import { DocumentID } from '../../data/documents';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
 import {
   useGetOptionOptions,
@@ -13,7 +13,7 @@ import {
 } from './single_option_value_edit';
 
 interface MultiOptionValueEditProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   field: MultiOptionField;
   value: MultiOptionFieldValue;
   onDone: () => void;
@@ -22,13 +22,13 @@ interface MultiOptionValueEditProps {
 export function MultiOptionValueEdit(
   props: MultiOptionValueEditProps,
 ): JSX.Element {
-  const { recordID, field, value, onDone } = props;
+  const { documentID, field, value, onDone } = props;
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
   return (
     <MultiSelectKindValueEdit<SelectOptionID>
-      recordID={recordID}
+      documentID={documentID}
       fieldID={field.id}
       renderLabel={renderOption}
       options={options}

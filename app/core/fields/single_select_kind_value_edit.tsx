@@ -4,11 +4,11 @@ import { StyleSheet, View } from 'react-native';
 import { FlatButton } from '../../components/flat_button';
 import { ListPicker, ListPickerOption } from '../../components/list_picker';
 import { FieldID, SingleSelectFieldKindValue } from '../../data/fields';
-import { RecordID } from '../../data/records';
-import { useUpdateRecordFieldValue } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useUpdateDocumentFieldValue } from '../../data/store';
 
 interface SingleSelectKindValueEditProps<T extends SingleSelectFieldKindValue> {
-  recordID: RecordID;
+  documentID: DocumentID;
   fieldID: FieldID;
   value: T;
   renderLabel: (value: NonNullable<T>) => JSX.Element;
@@ -19,21 +19,21 @@ interface SingleSelectKindValueEditProps<T extends SingleSelectFieldKindValue> {
 export function SingleSelectKindValueEdit<T extends SingleSelectFieldKindValue>(
   props: SingleSelectKindValueEditProps<T>,
 ): JSX.Element {
-  const { onDone, value, options, renderLabel, recordID, fieldID } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<SingleSelectFieldKindValue>();
+  const { onDone, value, options, renderLabel, documentID, fieldID } = props;
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<SingleSelectFieldKindValue>();
 
   const handleChange = useCallback(
     (nextValue: SingleSelectFieldKindValue) => {
-      updateRecordFieldValue(recordID, fieldID, nextValue);
+      updateDocumentFieldValue(documentID, fieldID, nextValue);
       onDone();
     },
-    [updateRecordFieldValue, recordID, fieldID, onDone],
+    [updateDocumentFieldValue, documentID, fieldID, onDone],
   );
 
   const handleClear = useCallback(() => {
-    updateRecordFieldValue(recordID, fieldID, null);
+    updateDocumentFieldValue(documentID, fieldID, null);
     onDone();
-  }, [updateRecordFieldValue, recordID, fieldID, onDone]);
+  }, [updateDocumentFieldValue, documentID, fieldID, onDone]);
 
   return (
     <View>

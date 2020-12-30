@@ -5,10 +5,10 @@ import {
   FieldType,
   MultiCollaboratorFieldValue,
   MultiOptionFieldValue,
-  MultiRecordLinkFieldValue,
+  MultiDocumentLinkFieldValue,
   SingleCollaboratorFieldValue,
   SingleOptionFieldValue,
-  SingleRecordLinkFieldValue,
+  SingleDocumentLinkFieldValue,
   assertTextFieldKindValue,
   assertNumberFieldKindValue,
   assertDateFieldKindValue,
@@ -17,12 +17,12 @@ import {
   assertSingleOptionFieldValue,
   assertMultiCollaboratorFieldValue,
   assertSingleCollaboratorFieldValue,
-  assertMultiRecordLinkFieldValue,
-  assertSingleRecordLinkFieldValue,
+  assertMultiDocumentLinkFieldValue,
+  assertSingleDocumentLinkFieldValue,
   assertMultiOptionField,
   assertSingleOptionField,
-  assertMultiRecordLinkField,
-  assertSingleRecordLinkField,
+  assertMultiDocumentLinkField,
+  assertSingleDocumentLinkField,
   FieldValue,
   areFieldValuesEqual,
   TextFieldKindValue,
@@ -34,7 +34,7 @@ import {
   PrimaryField,
   assertPrimaryFieldValue,
 } from './fields';
-import { Record, RecordID } from './records';
+import { Document, DocumentID } from './documents';
 
 import { Collaborator, CollaboratorID } from './collaborators';
 import { CollectionID, Collection } from './collections';
@@ -98,25 +98,27 @@ export interface Sort extends BaseSort, SortConfig {}
 
 export interface SortGetters {
   getField: (fieldID: FieldID) => Field;
-  getRecord: (recordID: RecordID) => Record;
+  getDocument: (documentID: DocumentID) => Document;
   getCollection: (collectionID: CollectionID) => Collection;
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator;
 }
 
-export function sortRecords(
+export function sortDocuments(
   sorts: SortConfig[],
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
+): Document[] {
   if (isEmpty(sorts)) {
-    return records;
+    return documents;
   }
-  const nodes = makeRecordNodes(sorts, records, getters);
+  const nodes = makeDocumentNodes(sorts, documents, getters);
 
-  return toRecords(nodes);
+  return toDocuments(nodes);
 }
 
-function isLeafRecordNode(nodes: RecordNode[]): nodes is LeafRecordNode[] {
+function isLeafDocumentNode(
+  nodes: DocumentNode[],
+): nodes is LeafDocumentNode[] {
   const firstNode = first(nodes);
 
   if (firstNode === undefined) {
@@ -126,56 +128,56 @@ function isLeafRecordNode(nodes: RecordNode[]): nodes is LeafRecordNode[] {
   return firstNode.type === 'leaf';
 }
 
-function toRecords(nodes: RecordNode[]): Record[] {
+function toDocuments(nodes: DocumentNode[]): Document[] {
   if (isEmpty(nodes)) {
     return [];
   }
 
-  if (isLeafRecordNode(nodes)) {
-    return flattenLeafRecordNode(nodes);
+  if (isLeafDocumentNode(nodes)) {
+    return flattenLeafDocumentNode(nodes);
   }
 
-  let records: Record[] = [];
+  let documents: Document[] = [];
 
   for (const node of nodes) {
-    records = records.concat(toRecords(node.children as RecordNode[]));
+    documents = documents.concat(toDocuments(node.children as DocumentNode[]));
   }
 
-  return records;
+  return documents;
 }
 
-function flattenLeafRecordNode(leafNodes: LeafRecordNode[]): Record[] {
-  let records: Record[] = [];
+function flattenLeafDocumentNode(leafNodes: LeafDocumentNode[]): Document[] {
+  let documents: Document[] = [];
 
   for (const node of leafNodes) {
-    records = records.concat(node.children);
+    documents = documents.concat(node.children);
   }
 
-  return records;
+  return documents;
 }
 
-interface AncestorRecordNode {
+interface AncestorDocumentNode {
   type: 'ancestor';
   field: Field;
   value: FieldValue;
-  children: RecordNode[];
+  children: DocumentNode[];
 }
 
-interface LeafRecordNode {
+interface LeafDocumentNode {
   type: 'leaf';
   field: Field;
   value: FieldValue;
-  children: Record[];
+  children: Document[];
 }
 
-export type RecordNode = AncestorRecordNode | LeafRecordNode;
+export type DocumentNode = AncestorDocumentNode | LeafDocumentNode;
 
-export function makeRecordNodes(
+export function makeDocumentNodes(
   sorts: SortConfig[],
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): RecordNode[] {
-  if (isEmpty(records)) {
+): DocumentNode[] {
+  if (isEmpty(documents)) {
     return [];
   }
 
@@ -188,20 +190,20 @@ export function makeRecordNodes(
     );
   }
 
-  const leafNodes = makeLeafNodes(sort, records, getters);
+  const leafNodes = makeLeafNodes(sort, documents, getters);
 
   if (sorts.length === 1) {
     return leafNodes;
   }
 
-  const nodes: AncestorRecordNode[] = [];
+  const nodes: AncestorDocumentNode[] = [];
 
   for (const leafNode of leafNodes) {
     nodes.push({
       type: 'ancestor',
       field: leafNode.field,
       value: leafNode.value,
-      children: makeRecordNodes(nextSorts, leafNode.children, getters),
+      children: makeDocumentNodes(nextSorts, leafNode.children, getters),
     });
   }
 
@@ -210,43 +212,43 @@ export function makeRecordNodes(
 
 function makeLeafNodes(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): LeafRecordNode[] {
+): LeafDocumentNode[] {
   const { getField } = getters;
   const field = getField(sort.fieldID);
-  const sorted = sortBy(field, sort, records, getters);
+  const sorted = sortBy(field, sort, documents, getters);
 
-  const firstRecord = first(sorted);
+  const firstDocument = first(sorted);
 
-  if (firstRecord === undefined) {
-    throw new Error('records empty');
+  if (firstDocument === undefined) {
+    throw new Error('documents empty');
   }
 
-  let currentNode: LeafRecordNode = {
+  let currentNode: LeafDocumentNode = {
     type: 'leaf',
     field,
-    value: firstRecord.fields[field.id],
-    children: [firstRecord],
+    value: firstDocument.fields[field.id],
+    children: [firstDocument],
   };
 
-  const nodes: LeafRecordNode[] = [currentNode];
+  const nodes: LeafDocumentNode[] = [currentNode];
 
   for (let i = 1; i < sorted.length; i++) {
-    const record = sorted[i];
+    const document = sorted[i];
 
     if (
-      areFieldValuesEqual(field, record.fields[field.id], currentNode.value)
+      areFieldValuesEqual(field, document.fields[field.id], currentNode.value)
     ) {
       if (currentNode.type === 'leaf') {
-        currentNode.children.push(record);
+        currentNode.children.push(document);
       }
     } else {
       currentNode = {
         type: 'leaf',
         field,
-        value: record.fields[field.id],
-        children: [record],
+        value: document.fields[field.id],
+        children: [document],
       };
       nodes.push(currentNode);
     }
@@ -258,49 +260,49 @@ function makeLeafNodes(
 function sortBy(
   field: Field,
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
+): Document[] {
   switch (field.type) {
     case FieldType.SingleLineText:
     case FieldType.MultiLineText:
     case FieldType.URL:
     case FieldType.PhoneNumber:
     case FieldType.Email:
-      return sortByTextFieldKind(sort, records, getters);
+      return sortByTextFieldKind(sort, documents, getters);
     case FieldType.Checkbox:
-      return sortByBooleanFieldKind(sort, records, getters);
+      return sortByBooleanFieldKind(sort, documents, getters);
     case FieldType.Date:
-      return sortByDateFieldKind(sort, records, getters);
+      return sortByDateFieldKind(sort, documents, getters);
     case FieldType.Number:
     case FieldType.Currency:
-      return sortByNumberFieldKind(sort, records, getters);
+      return sortByNumberFieldKind(sort, documents, getters);
     case FieldType.MultiCollaborator:
-      return sortByMultiCollaboratorField(sort, records, getters);
+      return sortByMultiCollaboratorField(sort, documents, getters);
     case FieldType.MultiOption:
-      return sortByMultiOptionField(sort, records, getters);
-    case FieldType.MultiRecordLink:
-      return sortByMultiRecordLinkField(sort, records, getters);
+      return sortByMultiOptionField(sort, documents, getters);
+    case FieldType.MultiDocumentLink:
+      return sortByMultiDocumentLinkField(sort, documents, getters);
     case FieldType.SingleCollaborator:
-      return sortBySingleCollaboratorField(sort, records, getters);
+      return sortBySingleCollaboratorField(sort, documents, getters);
     case FieldType.SingleOption:
-      return sortBySingleOptionField(sort, records, getters);
-    case FieldType.SingleRecordLink:
-      return sortBySingleRecordLinkField(sort, records, getters);
+      return sortBySingleOptionField(sort, documents, getters);
+    case FieldType.SingleDocumentLink:
+      return sortBySingleDocumentLinkField(sort, documents, getters);
   }
 }
 
 export function sortByTextFieldKind(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -317,15 +319,15 @@ export function sortByTextFieldKind(
 
 export function sortByNumberFieldKind(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -342,15 +344,15 @@ export function sortByNumberFieldKind(
 
 export function sortByDateFieldKind(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -367,10 +369,10 @@ export function sortByDateFieldKind(
 
 export function sortBySingleOptionField(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
@@ -378,7 +380,7 @@ export function sortBySingleOptionField(
 
   const optionsByID = keyedBy(field.options, (item) => item.id);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -394,10 +396,10 @@ export function sortBySingleOptionField(
 
 export function sortByMultiOptionField(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
@@ -405,7 +407,7 @@ export function sortByMultiOptionField(
 
   const optionsByID = keyedBy(field.options, (item) => item.id);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -422,13 +424,13 @@ export function sortByMultiOptionField(
 
 export function sortBySingleCollaboratorField(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getCollaborator } = getters;
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[sort.fieldID];
     const valB = b.fields[sort.fieldID];
 
@@ -445,15 +447,15 @@ export function sortBySingleCollaboratorField(
 
 export function sortByMultiCollaboratorField(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getField, getCollaborator } = getters;
 
   const field = getField(sort.fieldID);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -468,93 +470,98 @@ export function sortByMultiCollaboratorField(
   });
 }
 
-export function sortBySingleRecordLinkField(
+export function sortBySingleDocumentLinkField(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
-  const { getField, getRecord, getCollection } = getters;
+): Document[] {
+  const documentsClone = documents.slice(0);
+  const { getField, getDocument, getCollection } = getters;
 
   const field = getField(sort.fieldID);
-  assertSingleRecordLinkField(field);
+  assertSingleDocumentLinkField(field);
 
-  const collection = getCollection(field.recordsFromCollectionID);
+  const collection = getCollection(field.documentsFromCollectionID);
 
   const primaryField = getField(collection.primaryFieldID);
   assertPrimaryField(primaryField);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    assertSingleRecordLinkFieldValue(valA);
-    assertSingleRecordLinkFieldValue(valB);
+    assertSingleDocumentLinkFieldValue(valA);
+    assertSingleDocumentLinkFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortByAscendingSingleRecordLink(
+      return sortByAscendingSingleDocumentLink(
         primaryField,
-        getRecord,
+        getDocument,
         valA,
         valB,
       );
     }
 
-    return sortByDescendingSingleRecordLink(
+    return sortByDescendingSingleDocumentLink(
       primaryField,
-      getRecord,
+      getDocument,
       valA,
       valB,
     );
   });
 }
 
-export function sortByMultiRecordLinkField(
+export function sortByMultiDocumentLinkField(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
-  const { getField, getRecord, getCollection } = getters;
+): Document[] {
+  const documentsClone = documents.slice(0);
+  const { getField, getDocument, getCollection } = getters;
 
   const field = getField(sort.fieldID);
-  assertMultiRecordLinkField(field);
+  assertMultiDocumentLinkField(field);
 
-  const collection = getCollection(field.recordsFromCollectionID);
+  const collection = getCollection(field.documentsFromCollectionID);
   const primaryField = getField(collection.primaryFieldID);
   assertPrimaryField(primaryField);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    assertMultiRecordLinkFieldValue(valA);
-    assertMultiRecordLinkFieldValue(valB);
+    assertMultiDocumentLinkFieldValue(valA);
+    assertMultiDocumentLinkFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortByAscendingMultiRecordLink(
+      return sortByAscendingMultiDocumentLink(
         primaryField,
-        getRecord,
+        getDocument,
         valA,
         valB,
       );
     }
 
-    return sortByDescendingMultiRecordLink(primaryField, getRecord, valA, valB);
+    return sortByDescendingMultiDocumentLink(
+      primaryField,
+      getDocument,
+      valA,
+      valB,
+    );
   });
 }
 
 export function sortByBooleanFieldKind(
   sort: SortConfig,
-  records: Record[],
+  documents: Document[],
   getters: SortGetters,
-): Record[] {
-  const recordsClone = records.slice(0);
+): Document[] {
+  const documentsClone = documents.slice(0);
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
 
-  return recordsClone.sort((a, b) => {
+  return documentsClone.sort((a, b) => {
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
@@ -950,11 +957,11 @@ function sortByDescendingMultiCollaborator(
   return 0;
 }
 
-function sortByAscendingSingleRecordLink(
+function sortByAscendingSingleDocumentLink(
   primaryField: PrimaryField,
-  getRecord: (recordID: RecordID) => Record,
-  a: SingleRecordLinkFieldValue,
-  b: SingleRecordLinkFieldValue,
+  getDocument: (documentID: DocumentID) => Document,
+  a: SingleDocumentLinkFieldValue,
+  b: SingleDocumentLinkFieldValue,
 ) {
   if (a === null && b === null) {
     return 0;
@@ -968,26 +975,26 @@ function sortByAscendingSingleRecordLink(
     return 1;
   }
 
-  const recordA = getRecord(a);
-  const recordB = getRecord(b);
+  const documentA = getDocument(a);
+  const documentB = getDocument(b);
 
-  const recordAPrimaryFieldValue = recordA.fields[primaryField.id];
-  const recordBPrimaryFieldValue = recordB.fields[primaryField.id];
+  const documentAPrimaryFieldValue = documentA.fields[primaryField.id];
+  const documentBPrimaryFieldValue = documentB.fields[primaryField.id];
 
-  assertPrimaryFieldValue(recordAPrimaryFieldValue);
-  assertPrimaryFieldValue(recordBPrimaryFieldValue);
+  assertPrimaryFieldValue(documentAPrimaryFieldValue);
+  assertPrimaryFieldValue(documentBPrimaryFieldValue);
 
   return ascendingTextFieldKindValueSort(
-    recordAPrimaryFieldValue,
-    recordBPrimaryFieldValue,
+    documentAPrimaryFieldValue,
+    documentBPrimaryFieldValue,
   );
 }
 
-function sortByDescendingSingleRecordLink(
+function sortByDescendingSingleDocumentLink(
   primaryField: PrimaryField,
-  getRecord: (recordID: RecordID) => Record,
-  a: SingleRecordLinkFieldValue,
-  b: SingleRecordLinkFieldValue,
+  getDocument: (documentID: DocumentID) => Document,
+  a: SingleDocumentLinkFieldValue,
+  b: SingleDocumentLinkFieldValue,
 ) {
   if (a === null && b === null) {
     return 0;
@@ -1001,26 +1008,26 @@ function sortByDescendingSingleRecordLink(
     return -1;
   }
 
-  const recordA = getRecord(a);
-  const recordB = getRecord(b);
+  const documentA = getDocument(a);
+  const documentB = getDocument(b);
 
-  const recordAPrimaryFieldValue = recordA.fields[primaryField.id];
-  const recordBPrimaryFieldValue = recordB.fields[primaryField.id];
+  const documentAPrimaryFieldValue = documentA.fields[primaryField.id];
+  const documentBPrimaryFieldValue = documentB.fields[primaryField.id];
 
-  assertPrimaryFieldValue(recordAPrimaryFieldValue);
-  assertPrimaryFieldValue(recordBPrimaryFieldValue);
+  assertPrimaryFieldValue(documentAPrimaryFieldValue);
+  assertPrimaryFieldValue(documentBPrimaryFieldValue);
 
   return descendingTextFieldKindValueSort(
-    recordAPrimaryFieldValue,
-    recordBPrimaryFieldValue,
+    documentAPrimaryFieldValue,
+    documentBPrimaryFieldValue,
   );
 }
 
-function sortByAscendingMultiRecordLink(
+function sortByAscendingMultiDocumentLink(
   primaryField: PrimaryField,
-  getRecord: (recordID: RecordID) => Record,
-  a: MultiRecordLinkFieldValue,
-  b: MultiRecordLinkFieldValue,
+  getDocument: (documentID: DocumentID) => Document,
+  a: MultiDocumentLinkFieldValue,
+  b: MultiDocumentLinkFieldValue,
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -1034,26 +1041,26 @@ function sortByAscendingMultiRecordLink(
     return 1;
   }
 
-  const recordA = getRecord(a[0]);
-  const recordB = getRecord(b[0]);
+  const documentA = getDocument(a[0]);
+  const documentB = getDocument(b[0]);
 
-  const recordAPrimaryFieldValue = recordA.fields[primaryField.id];
-  const recordBPrimaryFieldValue = recordB.fields[primaryField.id];
+  const documentAPrimaryFieldValue = documentA.fields[primaryField.id];
+  const documentBPrimaryFieldValue = documentB.fields[primaryField.id];
 
-  assertPrimaryFieldValue(recordAPrimaryFieldValue);
-  assertPrimaryFieldValue(recordBPrimaryFieldValue);
+  assertPrimaryFieldValue(documentAPrimaryFieldValue);
+  assertPrimaryFieldValue(documentBPrimaryFieldValue);
 
   return ascendingTextFieldKindValueSort(
-    recordAPrimaryFieldValue,
-    recordBPrimaryFieldValue,
+    documentAPrimaryFieldValue,
+    documentBPrimaryFieldValue,
   );
 }
 
-function sortByDescendingMultiRecordLink(
+function sortByDescendingMultiDocumentLink(
   primaryField: PrimaryField,
-  getRecord: (recordID: RecordID) => Record,
-  a: MultiRecordLinkFieldValue,
-  b: MultiRecordLinkFieldValue,
+  getDocument: (documentID: DocumentID) => Document,
+  a: MultiDocumentLinkFieldValue,
+  b: MultiDocumentLinkFieldValue,
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -1067,17 +1074,17 @@ function sortByDescendingMultiRecordLink(
     return -1;
   }
 
-  const recordA = getRecord(a[0]);
-  const recordB = getRecord(b[0]);
+  const documentA = getDocument(a[0]);
+  const documentB = getDocument(b[0]);
 
-  const recordAPrimaryFieldValue = recordA.fields[primaryField.id];
-  const recordBPrimaryFieldValue = recordB.fields[primaryField.id];
+  const documentAPrimaryFieldValue = documentA.fields[primaryField.id];
+  const documentBPrimaryFieldValue = documentB.fields[primaryField.id];
 
-  assertPrimaryFieldValue(recordAPrimaryFieldValue);
-  assertPrimaryFieldValue(recordBPrimaryFieldValue);
+  assertPrimaryFieldValue(documentAPrimaryFieldValue);
+  assertPrimaryFieldValue(documentBPrimaryFieldValue);
 
   return descendingTextFieldKindValueSort(
-    recordAPrimaryFieldValue,
-    recordBPrimaryFieldValue,
+    documentAPrimaryFieldValue,
+    documentBPrimaryFieldValue,
   );
 }

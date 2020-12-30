@@ -12,10 +12,10 @@ import {
   useGetSpace,
   useGetView,
   useGetSpaceCollections,
-  useGetRecordPrimaryFieldValue,
-  useGetRecord,
-  useGetRecordFieldValuesEntries,
-  useCreateRecord,
+  useGetDocumentPrimaryFieldValue,
+  useGetDocument,
+  useGetDocumentFieldValuesEntries,
+  useCreateDocument,
 } from '../data/store';
 import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize/organize_view';
@@ -24,7 +24,7 @@ import { AutoSizer } from '../lib/autosizer';
 import { View as CollectionView, ViewID, ViewType } from '../data/views';
 import { ListViewView } from '../core/list_view/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { Record, RecordID } from '../data/records';
+import { Document, DocumentID } from '../data/documents';
 import { Collection, CollectionID } from '../data/collections';
 import { getViewIcon, getViewIconColor } from '../core/views/icon_helpers';
 import { Space, SpaceID } from '../data/spaces';
@@ -43,7 +43,7 @@ import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
 import { CloseButton } from '../components/close_button';
 import { Spacer } from '../components/spacer';
 import { Column } from '../components/column';
-import { RecordFieldValueEdit } from '../core/fields/field_value_input';
+import { DocumentFieldValueEdit } from '../core/fields/field_value_input';
 import { CollectionsTabs } from '../core/collections/collection_tabs';
 import { Delay } from '../components/delay';
 import { Fade } from '../components/fade';
@@ -100,17 +100,17 @@ const modeState = atom<ModeState>({
   default: 'edit',
 });
 
-type SelectedRecordsState = RecordID[];
+type SelectedDocumentsState = DocumentID[];
 
-const selectedRecordsState = atom<SelectedRecordsState>({
-  key: 'SpaceScreen_SelectedRecords',
+const selectedDocumentsState = atom<SelectedDocumentsState>({
+  key: 'SpaceScreen_SelectedDocuments',
   default: [],
 });
 
-type OpenRecordState = RecordID | null;
+type OpenDocumentState = DocumentID | null;
 
-const openRecordState = atom<OpenRecordState>({
-  key: 'SpaceScreen_OpenRecord',
+const openDocumentState = atom<OpenDocumentState>({
+  key: 'SpaceScreen_OpenDocument',
   default: null,
 });
 
@@ -155,7 +155,7 @@ function ViewSettings() {
   const view = useGetView(viewID);
   const [mode, setMode] = useRecoilState(modeState);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
-  const [, setOpenRecord] = useRecoilState(openRecordState);
+  const [, setOpenDocument] = useRecoilState(openDocumentState);
 
   const handleToggleView = useCallback(() => {
     if (sidePanel !== 'views') {
@@ -165,8 +165,8 @@ function ViewSettings() {
     }
 
     setMode('edit');
-    setOpenRecord(null);
-  }, [sidePanel, setSidePanel, setMode, setOpenRecord]);
+    setOpenDocument(null);
+  }, [sidePanel, setSidePanel, setMode, setOpenDocument]);
 
   return (
     <ViewSettingsView
@@ -210,19 +210,19 @@ const ViewSettingsView = memo(function ViewSettingsView(
 
 function SelectMenu() {
   const [, setMode] = useRecoilState(modeState);
-  const [selectedRecords, setSelectedRecords] = useRecoilState(
-    selectedRecordsState,
+  const [selectedDocuments, setSelectedDocuments] = useRecoilState(
+    selectedDocumentsState,
   );
 
   const handleToggleSelect = useCallback(() => {
     setMode('edit');
-    setSelectedRecords([]);
-  }, [setMode, setSelectedRecords]);
+    setSelectedDocuments([]);
+  }, [setMode, setSelectedDocuments]);
 
-  if (isEmpty(selectedRecords)) {
+  if (isEmpty(selectedDocuments)) {
     return (
       <Row spacing={4} alignItems="center">
-        <Text color="muted">Press on records to select</Text>
+        <Text color="muted">Press on documents to select</Text>
         <FlatButton onPress={handleToggleSelect} title="Cancel" />
       </Row>
     );
@@ -230,7 +230,7 @@ function SelectMenu() {
 
   return (
     <Row spacing={4} alignItems="center">
-      <Text weight="bold">{`${selectedRecords.length} Selected`}</Text>
+      <Text weight="bold">{`${selectedDocuments.length} Selected`}</Text>
       <FlatButton title="Share" />
       <FlatButton title="Copy" />
       <FlatButton title="Delete" color="error" />
@@ -242,7 +242,7 @@ function SelectMenu() {
 function ViewMenu() {
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
   const [, setMode] = useRecoilState(modeState);
-  const [, setOpenRecord] = useRecoilState(openRecordState);
+  const [, setOpenDocument] = useRecoilState(openDocumentState);
 
   const handleToggleOrganize = useCallback(() => {
     if (sidePanel !== 'organize') {
@@ -251,13 +251,13 @@ function ViewMenu() {
       setSidePanel(null);
     }
 
-    setOpenRecord(null);
-  }, [sidePanel, setSidePanel, setOpenRecord]);
+    setOpenDocument(null);
+  }, [sidePanel, setSidePanel, setOpenDocument]);
 
   const handleToggleSelect = useCallback(() => {
     setMode('select');
-    setOpenRecord(null);
-  }, [setMode, setOpenRecord]);
+    setOpenDocument(null);
+  }, [setMode, setOpenDocument]);
 
   return (
     <Row spacing={4}>
@@ -268,7 +268,7 @@ function ViewMenu() {
         weight="bold"
         color="primary"
         icon="Plus"
-        title="Add record"
+        title="Add document"
       />
     </Row>
   );
@@ -308,11 +308,11 @@ function MainContent() {
   const space = useGetSpace(spaceID);
   const view = useGetView(viewID);
   const mode = useRecoilValue(modeState);
-  const [selectedRecords, setSelectedRecords] = useRecoilState(
-    selectedRecordsState,
+  const [selectedDocuments, setSelectedDocuments] = useRecoilState(
+    selectedDocumentsState,
   );
-  const createRecord = useCreateRecord();
-  const [openRecord, setOpenRecord] = useRecoilState(openRecordState);
+  const createDocument = useCreateDocument();
+  const [openDocument, setOpenDocument] = useRecoilState(openDocumentState);
   const collections = useGetSpaceCollections(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
@@ -320,36 +320,36 @@ function MainContent() {
     throw new Error('Invalid collection');
   }
 
-  const handleOpenRecord = useCallback(
-    (recordID: RecordID) => {
-      if (openRecord === recordID) {
-        setOpenRecord(null);
+  const handleOpenDocument = useCallback(
+    (documentID: DocumentID) => {
+      if (openDocument === documentID) {
+        setOpenDocument(null);
         return;
       }
 
-      setOpenRecord(recordID);
+      setOpenDocument(documentID);
     },
-    [openRecord, setOpenRecord],
+    [openDocument, setOpenDocument],
   );
 
-  const handleSelectRecord = useCallback(
-    (recordID: RecordID, selected: boolean) => {
+  const handleSelectDocument = useCallback(
+    (documentID: DocumentID, selected: boolean) => {
       if (selected === true) {
-        setSelectedRecords((prevSelectedRecords) =>
-          prevSelectedRecords.concat(recordID),
+        setSelectedDocuments((prevSelectedDocuments) =>
+          prevSelectedDocuments.concat(documentID),
         );
       } else {
-        setSelectedRecords((prevSelectedRecords) =>
-          prevSelectedRecords.filter((id) => id !== recordID),
+        setSelectedDocuments((prevSelectedDocuments) =>
+          prevSelectedDocuments.filter((id) => id !== documentID),
         );
       }
     },
-    [setSelectedRecords],
+    [setSelectedDocuments],
   );
 
-  const handleAddRecord = useCallback((): Record => {
-    return createRecord(collectionID);
-  }, [createRecord, collectionID]);
+  const handleAddDocument = useCallback((): Document => {
+    return createDocument(collectionID);
+  }, [createDocument, collectionID]);
 
   const renderView = useCallback((): React.ReactNode => {
     switch (view.type) {
@@ -358,10 +358,10 @@ function MainContent() {
           <ListViewView
             mode={mode}
             view={view}
-            selectedRecords={selectedRecords}
-            onOpenRecord={handleOpenRecord}
-            onSelectRecord={handleSelectRecord}
-            onAddRecord={handleAddRecord}
+            selectedDocuments={selectedDocuments}
+            onOpenDocument={handleOpenDocument}
+            onSelectDocument={handleSelectDocument}
+            onAddDocument={handleAddDocument}
           />
         );
       case 'board':
@@ -370,10 +370,10 @@ function MainContent() {
   }, [
     mode,
     view,
-    handleOpenRecord,
-    selectedRecords,
-    handleSelectRecord,
-    handleAddRecord,
+    handleOpenDocument,
+    selectedDocuments,
+    handleSelectDocument,
+    handleAddDocument,
   ]);
 
   return (
@@ -391,8 +391,8 @@ function MainContent() {
           collectionID={collectionID}
         />
       </Slide>
-      <Slide width={RECORD_VIEW_WIDTH} visible={openRecord !== null}>
-        <RecordDetailsContainer recordID={openRecord} />
+      <Slide width={RECORD_VIEW_WIDTH} visible={openDocument !== null}>
+        <DocumentDetailsContainer documentID={openDocument} />
       </Slide>
     </View>
   );
@@ -465,14 +465,14 @@ const OrganizeViewContainer = memo(function OrganizeViewContainer(
   );
 });
 
-interface RecordDetailsContainerProps {
-  recordID: RecordID | null;
+interface DocumentDetailsContainerProps {
+  documentID: DocumentID | null;
 }
 
-const RecordDetailsContainer = memo(function RecordDetailsContainer(
-  props: RecordDetailsContainerProps,
+const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
+  props: DocumentDetailsContainerProps,
 ) {
-  const { recordID } = props;
+  const { documentID } = props;
   const themeStyles = useThemeStyles();
 
   return (
@@ -486,7 +486,7 @@ const RecordDetailsContainer = memo(function RecordDetailsContainer(
       <AutoSizer>
         {({ height }) => (
           <View style={{ width: RECORD_VIEW_WIDTH, height }}>
-            {recordID && <RecordDetailsView recordID={recordID} />}
+            {documentID && <DocumentDetailsView documentID={documentID} />}
           </View>
         )}
       </AutoSizer>
@@ -494,25 +494,25 @@ const RecordDetailsContainer = memo(function RecordDetailsContainer(
   );
 });
 
-interface RecordDetailsViewProps {
-  recordID: RecordID;
+interface DocumentDetailsViewProps {
+  documentID: DocumentID;
 }
 
-function RecordDetailsView(props: RecordDetailsViewProps): JSX.Element {
-  const { recordID } = props;
-  const record = useGetRecord(recordID);
-  const [primaryField, primaryFieldValue] = useGetRecordPrimaryFieldValue(
-    record.id,
+function DocumentDetailsView(props: DocumentDetailsViewProps): JSX.Element {
+  const { documentID } = props;
+  const document = useGetDocument(documentID);
+  const [primaryField, primaryFieldValue] = useGetDocumentPrimaryFieldValue(
+    document.id,
   );
-  const [, setOpenRecord] = useRecoilState(openRecordState);
+  const [, setOpenDocument] = useRecoilState(openDocumentState);
 
   const handleClose = useCallback(() => {
-    setOpenRecord(null);
-  }, [setOpenRecord]);
+    setOpenDocument(null);
+  }, [setOpenDocument]);
 
   return (
-    <View style={styles.recordDetailsWrapper}>
-      <View style={styles.recordDetailsHeader}>
+    <View style={styles.documentDetailsWrapper}>
+      <View style={styles.documentDetailsHeader}>
         <CloseButton onPress={handleClose} />
         <Spacer direction="row" size={16} />
         <Text size="xl">
@@ -520,10 +520,10 @@ function RecordDetailsView(props: RecordDetailsViewProps): JSX.Element {
         </Text>
       </View>
       <ScrollView>
-        <View style={styles.recordDetailsView}>
+        <View style={styles.documentDetailsView}>
           <Delay config={tokens.animation.fast}>
             <Fade config={tokens.animation.fast}>
-              <RecordFieldValues record={record} />
+              <DocumentFieldValues document={document} />
             </Fade>
           </Delay>
         </View>
@@ -532,21 +532,21 @@ function RecordDetailsView(props: RecordDetailsViewProps): JSX.Element {
   );
 }
 
-interface RecordFieldValuesProps {
-  record: Record;
+interface DocumentFieldValuesProps {
+  document: Document;
 }
 
-function RecordFieldValues(props: RecordFieldValuesProps) {
-  const { record } = props;
-  const recordFieldsEntries = useGetRecordFieldValuesEntries(record.id);
+function DocumentFieldValues(props: DocumentFieldValuesProps) {
+  const { document } = props;
+  const documentFieldsEntries = useGetDocumentFieldValuesEntries(document.id);
 
   return (
     <View>
       <Spacer size={24} />
       <Column spacing={16}>
-        {recordFieldsEntries.map(([field, value]) => (
+        {documentFieldsEntries.map(([field, value]) => (
           <FieldInputRenderer
-            record={record}
+            document={document}
             key={field.id}
             field={field}
             value={value}
@@ -558,16 +558,20 @@ function RecordFieldValues(props: RecordFieldValuesProps) {
 }
 
 interface FieldInputRendererProps {
-  record: Record;
+  document: Document;
   field: Field;
   value: FieldValue;
 }
 
 function FieldInputRenderer(props: FieldInputRendererProps) {
-  const { record, field, value } = props;
+  const { document, field, value } = props;
 
   return (
-    <RecordFieldValueEdit recordID={record.id} field={field} value={value} />
+    <DocumentFieldValueEdit
+      documentID={document.id}
+      field={field}
+      value={value}
+    />
   );
 }
 
@@ -584,17 +588,17 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     flex: 1,
   },
-  recordDetailsView: {
+  documentDetailsView: {
     padding: 8,
   },
   rightPanel: {
     flex: 1,
     borderLeftWidth: 1,
   },
-  recordDetailsWrapper: {
+  documentDetailsWrapper: {
     flex: 1,
   },
-  recordDetailsHeader: {
+  documentDetailsHeader: {
     paddingHorizontal: 8,
     paddingVertical: 16,
     flexDirection: 'row',

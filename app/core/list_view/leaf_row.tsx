@@ -7,26 +7,26 @@ import { LeafRowState } from '../../components/grid_renderer.common';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
-import { RecordID } from '../../data/records';
+import { DocumentID } from '../../data/documents';
 import { useListViewViewContext } from './list_view_view';
 
 interface LeafRowProps {
-  recordID: RecordID;
+  documentID: DocumentID;
   state: LeafRowState;
   children: React.ReactNode;
 }
 
 export function LeafRow(props: LeafRowProps): JSX.Element {
-  const { children, state, recordID } = props;
+  const { children, state, documentID } = props;
 
   const selected = state === 'selected';
 
   const value = useMemo((): LeafRowContext => {
     return {
-      recordID,
+      documentID,
       selected,
     };
-  }, [selected, recordID]);
+  }, [selected, documentID]);
 
   return (
     <LeafRowContext.Provider value={value}>
@@ -37,12 +37,12 @@ export function LeafRow(props: LeafRowProps): JSX.Element {
 
 interface LeafRowContext {
   selected: boolean;
-  recordID: RecordID;
+  documentID: DocumentID;
 }
 
 const LeafRowContext = createContext<LeafRowContext>({
   selected: false,
-  recordID: 'rec',
+  documentID: 'doc',
 });
 
 export function useLeafRowContext(): LeafRowContext {
@@ -73,18 +73,18 @@ function LeafRowView(props: LeafRowViewProps) {
 }
 
 export function useLeafRowContextMenuOptions(): ContextMenuItem[] {
-  const { onOpenRecord } = useListViewViewContext();
-  const { recordID } = useLeafRowContext();
+  const { onOpenDocument } = useListViewViewContext();
+  const { documentID } = useLeafRowContext();
 
   const handleOpen = useCallback(() => {
-    onOpenRecord(recordID);
-  }, [onOpenRecord, recordID]);
+    onOpenDocument(documentID);
+  }, [onOpenDocument, documentID]);
 
   return useMemo(
     (): ContextMenuItem[] => [
       { label: 'Open', icon: 'Archive', onPress: handleOpen },
-      { label: 'Insert record below' },
-      { label: 'Insert record above' },
+      { label: 'Insert document below' },
+      { label: 'Insert document above' },
       { label: 'Duplicate' },
       { label: 'Share' },
       { label: 'Delete', icon: 'Archive' },
@@ -94,11 +94,11 @@ export function useLeafRowContextMenuOptions(): ContextMenuItem[] {
 }
 
 export function LastLeafRow(): JSX.Element {
-  const { onAddRecord } = useListViewViewContext();
+  const { onAddDocument } = useListViewViewContext();
 
   return (
-    <PressableHighlight onPress={onAddRecord}>
-      <Text>Add record</Text>
+    <PressableHighlight onPress={onAddDocument}>
+      <Text>Add document</Text>
     </PressableHighlight>
   );
 }

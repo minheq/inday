@@ -9,12 +9,12 @@ import {
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
 import { TextFieldKind, TextFieldKindValue } from '../../data/fields';
-import { RecordID } from '../../data/records';
-import { useUpdateRecordFieldValue } from '../../data/store';
+import { DocumentID } from '../../data/documents';
+import { useUpdateDocumentFieldValue } from '../../data/store';
 
 interface TextKindValueEditProps<T extends TextFieldKindValue> {
   autoFocus: boolean;
-  recordID: RecordID;
+  documentID: DocumentID;
   field: TextFieldKind;
   value: T;
   onKeyPress?: (
@@ -25,15 +25,15 @@ interface TextKindValueEditProps<T extends TextFieldKindValue> {
 export function TextKindValueEdit<T extends TextFieldKindValue>(
   props: TextKindValueEditProps<T>,
 ): JSX.Element {
-  const { autoFocus, recordID, field, value, onKeyPress } = props;
-  const updateRecordFieldValue = useUpdateRecordFieldValue<TextFieldKindValue>();
+  const { autoFocus, documentID, field, value, onKeyPress } = props;
+  const updateDocumentFieldValue = useUpdateDocumentFieldValue<TextFieldKindValue>();
   const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
     (nextValue: string) => {
-      updateRecordFieldValue(recordID, field.id, nextValue);
+      updateDocumentFieldValue(documentID, field.id, nextValue);
     },
-    [updateRecordFieldValue, recordID, field],
+    [updateDocumentFieldValue, documentID, field],
   );
 
   return (

@@ -1,4 +1,4 @@
-import { Record } from './records';
+import { Document } from './documents';
 import { Collection } from './collections';
 import { Space } from './spaces';
 import { Field, FieldType } from './fields';
@@ -11,7 +11,7 @@ import {
   makeField,
   makeView,
   addFieldsToCollection,
-  makeManyRecords,
+  makeManyDocuments,
   makeGroup,
 } from './factory';
 import { keyedBy } from '../../lib/array_utils';
@@ -52,9 +52,9 @@ const col1Field5 = makeField({
 });
 
 const col1Field6 = makeField({
-  type: FieldType.MultiRecordLink,
+  type: FieldType.MultiDocumentLink,
   collectionID: collection1.id,
-  recordsFromCollectionID: collection2.id,
+  documentsFromCollectionID: collection2.id,
 });
 
 const col1Field7 = makeField({
@@ -83,9 +83,9 @@ const col1Field11 = makeField({
 });
 
 const col1Field12 = makeField({
-  type: FieldType.SingleRecordLink,
+  type: FieldType.SingleDocumentLink,
   collectionID: collection1.id,
-  recordsFromCollectionID: collection2.id,
+  documentsFromCollectionID: collection2.id,
 });
 
 const col1Field13 = makeField({
@@ -156,14 +156,14 @@ const collection2WithFields = addFieldsToCollection(collection2, col2Fields);
 
 const col2View1 = makeView({}, collection2WithFields);
 
-const col2Records = makeManyRecords(2, collection2WithFields);
+const col2Documents = makeManyDocuments(2, collection2WithFields);
 
-const col1Records = makeManyRecords(
+const col1Documents = makeManyDocuments(
   50,
   collection1WithFields,
   {
-    [col1Field6.id]: col2Records,
-    [col1Field12.id]: col2Records,
+    [col1Field6.id]: col2Documents,
+    [col1Field12.id]: col2Documents,
   },
   [collaborator1, collaborator2],
 );
@@ -195,11 +195,11 @@ export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
   ...keyedBy(col2Fields, (field) => field.id),
 };
 
-export const recordsByIDFixtures: {
-  [recordID: string]: Record;
+export const documentsByIDFixtures: {
+  [documentID: string]: Document;
 } = {
-  ...keyedBy(col1Records, (field) => field.id),
-  ...keyedBy(col2Records, (field) => field.id),
+  ...keyedBy(col1Documents, (field) => field.id),
+  ...keyedBy(col2Documents, (field) => field.id),
 };
 
 const col1View2Group1 = makeGroup(

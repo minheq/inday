@@ -2,7 +2,7 @@ import { test } from '../../lib/testing';
 import {
   Filter,
   updateFilterGroup,
-  filterRecords,
+  filterDocuments,
   FilterGetters,
   TextFieldKindFilterRule,
   filterByTextFieldKindFilterRuleContains,
@@ -46,7 +46,7 @@ import {
   makeCollection,
   makeField,
   addFieldsToCollection,
-  makeRecord,
+  makeDocument,
   makeFilter,
 } from './factory';
 import { FieldType, FieldValue } from './fields';
@@ -54,15 +54,18 @@ import {} from '../../lib/date_utils';
 
 test('no filter', (t) => {
   const values = ['AWord', 'BWord'];
-  const { records, getters } = prepare(FieldType.SingleLineText, values);
-  const result = filterRecords([], records, getters);
+  const { documents, getters } = prepare(FieldType.SingleLineText, values);
+  const result = filterDocuments([], documents, getters);
 
   t.deepEqual(result.length, values.length);
 });
 
 test('filter text - contains same case', (t) => {
   const values = ['AWord', 'BWord'];
-  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
+  const { documents, getters, field } = prepare(
+    FieldType.SingleLineText,
+    values,
+  );
 
   const filter = makeFilter(
     {},
@@ -72,14 +75,17 @@ test('filter text - contains same case', (t) => {
       fieldID: field.id,
     },
   );
-  const result = filterRecords([[filter]], records, getters);
+  const result = filterDocuments([[filter]], documents, getters);
 
   t.deepEqual(result.length, values.length);
 });
 
 test('filter text - one word different case', (t) => {
   const values = ['AWord', 'BWord'];
-  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
+  const { documents, getters, field } = prepare(
+    FieldType.SingleLineText,
+    values,
+  );
   const filter = makeFilter(
     {},
     {
@@ -88,14 +94,17 @@ test('filter text - one word different case', (t) => {
       fieldID: field.id,
     },
   );
-  const result = filterRecords([[filter]], records, getters);
+  const result = filterDocuments([[filter]], documents, getters);
 
   t.deepEqual(result.length, 1);
 });
 
 test('filter text - 2 for one', (t) => {
   const values = ['AWord', 'BWord'];
-  const { records, getters, field } = prepare(FieldType.SingleLineText, values);
+  const { documents, getters, field } = prepare(
+    FieldType.SingleLineText,
+    values,
+  );
   const filter1 = makeFilter(
     {},
     {
@@ -112,7 +121,7 @@ test('filter text - 2 for one', (t) => {
       fieldID: field.id,
     },
   );
-  const result = filterRecords([[filter1, filter2]], records, getters);
+  const result = filterDocuments([[filter1, filter2]], documents, getters);
 
   t.deepEqual(result.length, 1);
 });
@@ -493,8 +502,11 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
   const field = makeField({ type: fieldType });
   const collectionWithFields = addFieldsToCollection(collection, [field]);
 
-  const records = values.map((value) => {
-    return makeRecord({ fields: { [field.id]: value } }, collectionWithFields);
+  const documents = values.map((value) => {
+    return makeDocument(
+      { fields: { [field.id]: value } },
+      collectionWithFields,
+    );
   });
 
   const getField = () => field;
@@ -503,5 +515,5 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
     getField,
   };
 
-  return { records, field, getters };
+  return { documents, field, getters };
 }
