@@ -23,9 +23,9 @@ export function isObject(o: unknown): o is Record<string, unknown> {
   return false;
 }
 
-export function getKeyValue<
-  T extends Record<string, unknown>,
-  K extends keyof T
->(obj: T, key: K): T[K] {
+export function get<T extends Record<string, unknown>, K extends keyof T>(
+  obj: T,
+  key: K,
+): T[K] {
   return obj[key];
 }
