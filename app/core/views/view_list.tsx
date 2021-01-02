@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useGetView, useGetCollectionViews } from '../../data/store';
@@ -6,13 +6,9 @@ import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
 import { SpaceID } from '../../data/spaces';
 import { ViewID } from '../../data/views';
-import { useTheme, useThemeStyles } from '../../components/theme';
+import { useThemeStyles } from '../../components/theme';
 import { Column } from '../../components/column';
-import { PressableHighlight } from '../../components/pressable_highlight';
-import { Icon } from '../../components/icon';
-import { View as CollectionView } from '../../data/views';
-import { getViewIcon, getViewIconColor } from './icon_helpers';
-import { tokens } from '../../components/tokens';
+import { ViewButton } from './view_button';
 
 interface ViewListProps {
   spaceID: SpaceID;
@@ -35,7 +31,13 @@ export function ViewList(props: ViewListProps): JSX.Element {
       <Spacer size={16} />
       <Column spacing={4}>
         {views.map((view) => (
-          <ViewButton key={view.id} view={view} onSelect={onSelect} />
+          <ViewButton
+            key={view.id}
+            viewID={view.id}
+            name={view.name}
+            type={view.type}
+            onPress={onSelect}
+          />
         ))}
       </Column>
       <Spacer size={32} />
@@ -46,41 +48,9 @@ export function ViewList(props: ViewListProps): JSX.Element {
   );
 }
 
-interface ViewButtonProps {
-  view: CollectionView;
-  onSelect: (viewID: ViewID) => void;
-}
-
-function ViewButton(props: ViewButtonProps) {
-  const { view, onSelect } = props;
-  const theme = useTheme();
-
-  const handlePress = useCallback(() => {
-    onSelect(view.id);
-  }, [onSelect, view]);
-
-  return (
-    <PressableHighlight onPress={handlePress} style={styles.button}>
-      <Icon
-        name={getViewIcon(view.type)}
-        customColor={getViewIconColor(view.type, theme.colorScheme)}
-      />
-      <Spacer direction="row" size={4} />
-      <Text>{view.name}</Text>
-    </PressableHighlight>
-  );
-}
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     padding: 8,
-  },
-  button: {
-    borderRadius: tokens.border.radius,
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 8,
-    height: 40,
   },
 });

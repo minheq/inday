@@ -21,22 +21,19 @@ import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize/organize_view';
 import { ViewList } from '../core/views/view_list';
 import { AutoSizer } from '../lib/autosizer';
-import { View as CollectionView, ViewID, ViewType } from '../data/views';
+import { ViewID, ViewType } from '../data/views';
 import { ListViewView } from '../core/list_view/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { Document, DocumentID } from '../data/documents';
-import { Collection, CollectionID } from '../data/collections';
-import { getViewIcon, getViewIconColor } from '../core/views/icon_helpers';
-import { Space, SpaceID } from '../data/spaces';
-import { useTheme, useThemeStyles } from '../components/theme';
+import { CollectionID } from '../data/collections';
+import { SpaceID } from '../data/spaces';
+import { useThemeStyles } from '../components/theme';
 import { Screen } from '../components/screen';
 import { Row } from '../components/row';
 import { BackButton } from '../components/back_button';
 import { Text } from '../components/text';
 import { IconButton } from '../components/icon_button';
 import { FlatButton } from '../components/flat_button';
-import { PressableHighlight } from '../components/pressable_highlight';
-import { Icon } from '../components/icon';
 import { tokens } from '../components/tokens';
 import { isEmpty } from '../../lib/lang_utils';
 import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
@@ -47,6 +44,7 @@ import { DocumentFieldValueEdit } from '../core/fields/field_value_input';
 import { CollectionsTabs } from '../core/collections/collection_tabs';
 import { Delay } from '../components/delay';
 import { Fade } from '../components/fade';
+import { ViewButton } from '../core/views/view_button';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -59,9 +57,9 @@ const RECORD_VIEW_WIDTH = 360;
 const ORGANIZE_VIEW_WIDTH = 360;
 
 const SpaceScreenContext = createContext<SpaceScreenContext>({
-  spaceID: Space.generateID(),
-  viewID: CollectionView.generateID(),
-  collectionID: Collection.generateID(),
+  spaceID: 'spc',
+  viewID: 'viw',
+  collectionID: 'col',
 });
 
 export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
@@ -196,7 +194,7 @@ const ViewSettingsView = memo(function ViewSettingsView(
   return (
     <View style={[styles.viewSettingsRoot, themeStyles.elevation.level1]}>
       <Row justifyContent="space-between">
-        <ViewMenuButton
+        <ViewButton
           viewID={viewID}
           name={name}
           type={type}
@@ -271,33 +269,6 @@ function ViewMenu() {
         title="Add document"
       />
     </Row>
-  );
-}
-
-interface ViewMenuButtonProps {
-  viewID: ViewID;
-  name: string;
-  type: ViewType;
-  onPress: (viewID: ViewID) => void;
-}
-
-function ViewMenuButton(props: ViewMenuButtonProps) {
-  const { viewID, type, name, onPress } = props;
-  const theme = useTheme();
-  const handlePress = useCallback(() => {
-    onPress(viewID);
-  }, [onPress, viewID]);
-
-  return (
-    <PressableHighlight onPress={handlePress} style={styles.viewMenuButton}>
-      <Row spacing={4}>
-        <Icon
-          name={getViewIcon(type)}
-          customColor={getViewIconColor(type, theme.colorScheme)}
-        />
-        <Text>{name}</Text>
-      </Row>
-    </PressableHighlight>
   );
 }
 
@@ -603,15 +574,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  viewMenuButton: {
-    borderRadius: tokens.border.radius,
-    flexDirection: 'row',
-    minWidth: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 8,
   },
   header: {
     height: 56,
