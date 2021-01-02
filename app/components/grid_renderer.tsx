@@ -57,6 +57,7 @@ export interface RenderGroupRowCellProps {
   column: number;
   width: number;
   height: number;
+  level: number;
   last: boolean;
   state: GroupRowCellState;
 }
@@ -81,6 +82,7 @@ export interface RenderLeafRowCellProps {
   column: number;
   width: number;
   height: number;
+  level: number;
   last: boolean;
   state: LeafRowCellState;
 }
@@ -89,6 +91,7 @@ export interface RenderGroupRowProps {
   path: number[];
   state: GroupRowState;
   pane: Pane;
+  level: number;
   children: React.ReactNode;
 }
 
@@ -98,6 +101,7 @@ export interface RenderLeafRowProps {
   state: LeafRowState;
   last: boolean;
   pane: Pane;
+  level: number;
   children: React.ReactNode;
 }
 

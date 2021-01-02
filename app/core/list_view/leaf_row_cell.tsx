@@ -123,6 +123,7 @@ import { PressableHighlightContextMenu } from '../../components/pressable_highli
 import { Icon } from '../../components/icon';
 import { CheckboxStatic } from '../../components/checkbox_static';
 import { FlatButton } from '../../components/flat_button';
+import { Spacer } from '../../components/spacer';
 
 export const LEAF_ROW_HEIGHT = 40;
 
@@ -133,6 +134,7 @@ interface LeafRowCellProps {
   column: number;
   last: boolean;
   state: LeafRowCellState;
+  level: number;
   fieldID: FieldID;
   documentID: DocumentID;
 }
@@ -145,6 +147,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     column,
     last,
     state,
+    level,
     fieldID,
     documentID,
   } = props;
@@ -228,7 +231,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
 
   return (
     <LeafRowCellContext.Provider value={context}>
-      <LeafRowCellView field={field} value={value} />
+      <LeafRowCellView level={level} field={field} value={value} />
     </LeafRowCellContext.Provider>
   );
 });
@@ -289,12 +292,13 @@ function useLeafRowCellContext(): LeafRowCellContext {
 interface LeafRowCellViewProps {
   field: Field;
   value: FieldValue;
+  level: number;
 }
 
 const LeafRowCellView = memo(function LeafRowCellView(
   props: LeafRowCellViewProps,
 ) {
-  const { field, value } = props;
+  const { field, value, level } = props;
   const { mode } = useListViewViewContext();
   const { selected } = useLeafRowContext();
   const { cell, onPress } = useLeafRowCellContext();
@@ -373,6 +377,7 @@ const LeafRowCellView = memo(function LeafRowCellView(
       {cell.primary === true && (
         <SelectCheckbox visible={mode === 'select'} selected={selected} />
       )}
+      <Spacer direction="row" size={level * 32} />
       {renderCell()}
       {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
         <DotsMenu />
@@ -402,7 +407,7 @@ const SelectCheckbox = memo(function SelectCheckbox(
   const { visible, selected } = props;
 
   return (
-    <View style={styles.selectCheckboxWrapper}>
+    <View style={visible && styles.selectCheckboxWrapper}>
       <Slide visible={visible} width={32}>
         <CheckboxStatic value={selected} />
       </Slide>

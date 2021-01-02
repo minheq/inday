@@ -30,12 +30,12 @@ export function CheckboxValueEdit(props: CheckboxValueEditProps): JSX.Element {
   return <Checkbox value={value} onChange={handleToggle} />;
 }
 
-interface FieldCheckboxProps {
+interface CheckboxProps {
   value: boolean;
   onChange: (value: boolean) => void;
 }
 
-function Checkbox(props: FieldCheckboxProps): JSX.Element {
+function Checkbox(props: CheckboxProps): JSX.Element {
   const { value, onChange } = props;
   const themeStyles = useThemeStyles();
 
@@ -48,7 +48,7 @@ function Checkbox(props: FieldCheckboxProps): JSX.Element {
       style={[styles.checkbox, themeStyles.border.default]}
       onPress={handlePress}
     >
-      {value === true && <Icon name="CheckThick" color="success" />}
+      {value && <Icon name="CheckThick" color="success" />}
     </Pressable>
   );
 }

@@ -19,11 +19,12 @@ export function Spacer(props: SpacerProps): JSX.Element {
   return (
     <View
       style={
-        size
+        size !== 0 &&
+        (size !== undefined
           ? effectiveDirection === 'row'
             ? { width: size }
             : { height: size }
-          : styles.base
+          : styles.base)
       }
     />
   );

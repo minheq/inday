@@ -35,6 +35,7 @@ export interface LeafRow {
   y: number;
   path: number[];
   row: number;
+  level: number;
   last: boolean;
 }
 
@@ -48,6 +49,7 @@ export interface GroupRow {
   height: number;
   y: number;
   path: number[];
+  level: number;
   collapsed: boolean;
 }
 
@@ -148,6 +150,7 @@ export function getRows(
       type: 'group',
       height: groupRowHeight,
       y: offset,
+      level: 0,
       path,
       collapsed,
     });
@@ -202,6 +205,7 @@ function getLeafRows(
       height: leafRowHeight,
       y: offset + i * leafRowHeight,
       path,
+      level: 0,
       row: i + 1,
       last: i === rowCount - 1,
     });
@@ -617,6 +621,7 @@ export function useGetStatefulRows(
           path: row.path,
           row: row.row,
           last: row.last,
+          level: 0,
           y: row.y,
           state: getLeafRowState(leafRowCell, row, selectedRowsCache),
           activeCell: leafRowCell,
@@ -631,6 +636,7 @@ export function useGetStatefulRows(
         height: row.height,
         y: row.y,
         path: row.path,
+        level: 0,
         state: 'default',
         collapsed: row.collapsed,
         activeCell: groupRowCell,

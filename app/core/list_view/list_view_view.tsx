@@ -41,7 +41,7 @@ import {
 import { usePrevious } from '../../hooks/use_previous';
 import { isEmpty } from '../../../lib/lang_utils';
 import { last } from '../../../lib/array_utils';
-import { Group, groupIDPrefix } from '../../data/groups';
+import { Group } from '../../data/groups';
 import { makeDocumentNodes, DocumentNode, SortGetters } from '../../data/sorts';
 import { LastLeafRowCell, LeafRowCell, LEAF_ROW_HEIGHT } from './leaf_row_cell';
 import { Header, HeaderCell, LastHeaderCell } from './header';
@@ -99,8 +99,8 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const [rowToDocumentIDCache, setRowToDocumentIDCache] = useState(
     getRowToDocumentIDCache(leafRowPaths),
   );
-  const [pathToFieldValueCache, setPathToFieldValueCache] = useState(
-    getPathToFieldValueCache(groupRowPaths),
+  const [pathToGroupCache, setPathToGroupCache] = useState(
+    getPathToGroupCache(groupRowPaths),
   );
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
@@ -127,7 +127,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     if (documentsOrderChanged) {
       setNodes(getDocumentNodes(documents, groups, sortGetters));
       setRowToDocumentIDCache(getRowToDocumentIDCache(leafRowPaths));
-      setPathToFieldValueCache(getPathToFieldValueCache(groupRowPaths));
+      setPathToGroupCache(getPathToGroupCache(groupRowPaths));
     }
   }, [
     leafRowPaths,
@@ -209,6 +209,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           column={_props.column}
           last={_props.last}
           state={_props.state}
+          level={_props.level}
           documentID={documentID}
           fieldID={fieldID}
         />
@@ -224,10 +225,10 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       }
 
       const fieldID = columnToFieldIDCache[_props.column];
-      const value = pathToFieldValueCache.get(_props.path);
+      const group = pathToGroupCache.get(_props.path);
       const primary = _props.column === 1;
 
-      if (value === undefined) {
+      if (group === undefined) {
         throw new Error('No corresponding value found for path.');
       }
 
@@ -238,12 +239,13 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           column={_props.column}
           last={_props.last}
           state={_props.state}
-          fieldID={fieldID}
-          value={value}
+          columnFieldID={fieldID}
+          field={group.field}
+          value={group.value}
         />
       );
     },
-    [columnToFieldIDCache, pathToFieldValueCache],
+    [columnToFieldIDCache, pathToGroupCache],
   );
 
   const renderHeaderCell = useCallback(
@@ -434,7 +436,7 @@ function getSelectedRows(
 }
 
 interface GroupRowPath {
-  fieldID: FieldID;
+  field: Field;
   value: FieldValue;
   path: number[];
 }
@@ -453,7 +455,7 @@ function getGroupRowPaths(
       if (group.grouped) {
         rows = rows.concat({
           path,
-          fieldID: group.field.id,
+          field: group.field,
           value: group.value,
         });
       }
@@ -648,10 +650,14 @@ function getRowToDocumentIDCache(rows: LeafRowPath[]): RowToDocumentIDCache {
   return cache;
 }
 
-type PathToFieldValueCache = FlatObject<FieldValue, number>;
+interface GroupData {
+  field: Field;
+  value: FieldValue;
+}
+type PathToGroupCache = FlatObject<GroupData, number>;
 
-function getPathToFieldValueCache(rows: GroupRowPath[]): PathToFieldValueCache {
-  const cache = FlatObject<FieldValue, number>();
+function getPathToGroupCache(rows: GroupRowPath[]): PathToGroupCache {
+  const cache = FlatObject<GroupData, number>();
 
   if (isEmpty(rows)) {
     return cache;
@@ -659,8 +665,11 @@ function getPathToFieldValueCache(rows: GroupRowPath[]): PathToFieldValueCache {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-
-    cache.set(row.path, row.value);
+    const data: GroupData = {
+      field: row.field,
+      value: row.value,
+    };
+    cache.set(row.path, data);
   }
 
   return cache;
