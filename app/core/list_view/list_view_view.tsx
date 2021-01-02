@@ -30,6 +30,7 @@ import {
   RenderGroupRowProps,
   RenderHeaderProps,
   RenderFooterProps,
+  RenderGroupRowCellProps,
 } from '../../components/grid_renderer';
 import { Document, DocumentID } from '../../data/documents';
 import {
@@ -40,7 +41,7 @@ import {
 import { usePrevious } from '../../hooks/use_previous';
 import { isEmpty } from '../../../lib/lang_utils';
 import { last } from '../../../lib/array_utils';
-import { Group } from '../../data/groups';
+import { Group, groupIDPrefix } from '../../data/groups';
 import { makeDocumentNodes, DocumentNode, SortGetters } from '../../data/sorts';
 import { LastLeafRowCell, LeafRowCell, LEAF_ROW_HEIGHT } from './leaf_row_cell';
 import { Header, HeaderCell, LastHeaderCell } from './header';
@@ -48,6 +49,7 @@ import { Footer } from './footer';
 import { GroupRow } from './group_row';
 import { FlatObject } from '../../../lib/flat_object';
 import { LastLeafRow, LeafRow } from './leaf_row';
+import { GroupRowCell, GROUP_ROW_HEIGHT } from './group_row_cell';
 
 export type ViewMode = 'edit' | 'select';
 
@@ -89,12 +91,16 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     getDocumentNodes(documents, groups, sortGetters),
   );
   const gridRef = useRef<GridRendererRef>(null);
-  const rowPaths = useMemo(() => getRowPaths(nodes, []), [nodes]);
+  const leafRowPaths = useMemo(() => getLeafRowPaths(nodes, []), [nodes]);
+  const groupRowPaths = useMemo(() => getGroupRowPaths(nodes, []), [nodes]);
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
     getColumnToFieldIDCache(fields),
   );
   const [rowToDocumentIDCache, setRowToDocumentIDCache] = useState(
-    getRowToDocumentIDCache(rowPaths),
+    getRowToDocumentIDCache(leafRowPaths),
+  );
+  const [pathToFieldValueCache, setPathToFieldValueCache] = useState(
+    getPathToFieldValueCache(groupRowPaths),
   );
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
@@ -108,20 +114,29 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   );
   const gridGroups = useMemo((): GridGroup[] => toGridGroups(nodes), [nodes]);
   const selectedRows = useMemo(
-    (): SelectedRow[] => getSelectedRows(selectedDocuments, rowPaths),
-    [selectedDocuments, rowPaths],
+    (): SelectedRow[] => getSelectedRows(selectedDocuments, leafRowPaths),
+    [selectedDocuments, leafRowPaths],
   );
   const lastFocusableColumn = useMemo(() => fields.length, [fields]);
-  const lastFocusableRow = useMemo((): RowPath | undefined => last(rowPaths), [
-    rowPaths,
-  ]);
+  const lastFocusableRow = useMemo(
+    (): LeafRowPath | undefined => last(leafRowPaths),
+    [leafRowPaths],
+  );
 
   useEffect(() => {
     if (documentsOrderChanged) {
       setNodes(getDocumentNodes(documents, groups, sortGetters));
-      setRowToDocumentIDCache(getRowToDocumentIDCache(rowPaths));
+      setRowToDocumentIDCache(getRowToDocumentIDCache(leafRowPaths));
+      setPathToFieldValueCache(getPathToFieldValueCache(groupRowPaths));
     }
-  }, [rowPaths, documentsOrderChanged, documents, groups, sortGetters]);
+  }, [
+    leafRowPaths,
+    groupRowPaths,
+    documentsOrderChanged,
+    documents,
+    groups,
+    sortGetters,
+  ]);
 
   useEffect(() => {
     if (fieldsOrderChanged) {
@@ -200,6 +215,35 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       );
     },
     [columnToFieldIDCache, rowToDocumentIDCache],
+  );
+
+  const renderGroupRowCell = useCallback(
+    (_props: RenderGroupRowCellProps) => {
+      if (_props.last) {
+        return <LastLeafRowCell />;
+      }
+
+      const fieldID = columnToFieldIDCache[_props.column];
+      const value = pathToFieldValueCache.get(_props.path);
+      const primary = _props.column === 1;
+
+      if (value === undefined) {
+        throw new Error('No corresponding value found for path.');
+      }
+
+      return (
+        <GroupRowCell
+          primary={primary}
+          path={_props.path}
+          column={_props.column}
+          last={_props.last}
+          state={_props.state}
+          fieldID={fieldID}
+          value={value}
+        />
+      );
+    },
+    [columnToFieldIDCache, pathToFieldValueCache],
   );
 
   const renderHeaderCell = useCallback(
@@ -282,8 +326,10 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
               renderLeafRowCell={renderLeafRowCell}
               renderHeaderCell={renderHeaderCell}
               renderHeader={renderHeader}
+              renderGroupRowCell={renderGroupRowCell}
               renderFooter={renderFooter}
               leafRowHeight={LEAF_ROW_HEIGHT}
+              groupRowHeight={GROUP_ROW_HEIGHT}
               headerHeight={FIELD_ROW_HEIGHT}
               columns={columns}
               fixedColumnCount={fixedFieldCount}
@@ -366,11 +412,11 @@ type GroupedDocumentNode =
 
 function getSelectedRows(
   selectedDocuments: DocumentID[],
-  rowPaths: RowPath[],
+  leafRowPaths: LeafRowPath[],
 ): SelectedRow[] {
   const selectedRows: SelectedRow[] = [];
 
-  for (const row of rowPaths) {
+  for (const row of leafRowPaths) {
     const found = selectedDocuments.find(
       (documentID) => documentID === row.documentID,
     );
@@ -387,11 +433,52 @@ function getSelectedRows(
   return selectedRows;
 }
 
-function getRowPaths(
+interface GroupRowPath {
+  fieldID: FieldID;
+  value: FieldValue;
+  path: number[];
+}
+
+function getGroupRowPaths(
   nodes: GroupedDocumentNode[] | FlatDocumentNode[],
   prevPath: number[],
-): RowPath[] {
-  let rows: RowPath[] = [];
+): GroupRowPath[] {
+  let rows: GroupRowPath[] = [];
+
+  for (let i = 0; i < nodes.length; i++) {
+    const group = nodes[i];
+    const path = [...prevPath, i];
+
+    if (group.type === 'leaf') {
+      if (group.grouped) {
+        rows = rows.concat({
+          path,
+          fieldID: group.field.id,
+          value: group.value,
+        });
+      }
+    } else {
+      const { children } = group;
+      const groupRows = getGroupRowPaths(children, path);
+
+      rows = rows.concat(groupRows);
+    }
+  }
+
+  return rows;
+}
+
+interface LeafRowPath {
+  documentID: DocumentID;
+  path: number[];
+  row: number;
+}
+
+function getLeafRowPaths(
+  nodes: GroupedDocumentNode[] | FlatDocumentNode[],
+  prevPath: number[],
+): LeafRowPath[] {
+  let rows: LeafRowPath[] = [];
 
   for (let i = 0; i < nodes.length; i++) {
     const group = nodes[i];
@@ -401,11 +488,15 @@ function getRowPaths(
       for (let j = 0; j < group.children.length; j++) {
         const document = group.children[j];
 
-        rows = rows.concat({ path, row: j + 1, documentID: document.id });
+        rows = rows.concat({
+          path,
+          row: j + 1,
+          documentID: document.id,
+        });
       }
     } else {
       const { children } = group;
-      const groupRows = getRowPaths(children, path);
+      const groupRows = getLeafRowPaths(children, path);
 
       rows = rows.concat(groupRows);
     }
@@ -491,7 +582,7 @@ interface ListViewViewContext {
   rowToDocumentIDCache: RowToDocumentIDCache;
   columnToFieldIDCache: ColumnToFieldIDCache;
   lastFocusableColumn: number;
-  lastFocusableRow: RowPath | undefined;
+  lastFocusableRow: LeafRowPath | undefined;
   mode: ViewMode;
   onOpenDocument: (documentID: DocumentID) => void;
   onSelectDocument: (documentID: DocumentID, selected: boolean) => void;
@@ -528,8 +619,6 @@ type ColumnToFieldIDCache = {
   [column: number]: FieldID;
 };
 
-type RowToDocumentIDCache = FlatObject<DocumentID, number>;
-
 function getColumnToFieldIDCache(fields: Field[]): ColumnToFieldIDCache {
   const cache: ColumnToFieldIDCache = {};
 
@@ -541,13 +630,9 @@ function getColumnToFieldIDCache(fields: Field[]): ColumnToFieldIDCache {
   return cache;
 }
 
-interface RowPath {
-  documentID: DocumentID;
-  path: number[];
-  row: number;
-}
+type RowToDocumentIDCache = FlatObject<DocumentID, number>;
 
-function getRowToDocumentIDCache(rows: RowPath[]): RowToDocumentIDCache {
+function getRowToDocumentIDCache(rows: LeafRowPath[]): RowToDocumentIDCache {
   const cache = FlatObject<DocumentID, number>();
 
   if (isEmpty(rows)) {
@@ -558,6 +643,24 @@ function getRowToDocumentIDCache(rows: RowPath[]): RowToDocumentIDCache {
     const row = rows[i];
 
     cache.set([...row.path, row.row], row.documentID);
+  }
+
+  return cache;
+}
+
+type PathToFieldValueCache = FlatObject<FieldValue, number>;
+
+function getPathToFieldValueCache(rows: GroupRowPath[]): PathToFieldValueCache {
+  const cache = FlatObject<FieldValue, number>();
+
+  if (isEmpty(rows)) {
+    return cache;
+  }
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+
+    cache.set(row.path, row.value);
   }
 
   return cache;
