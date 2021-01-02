@@ -224,6 +224,7 @@ export const GridRenderer = memo(
                   activeCell={row.activeCell}
                   width={_width}
                   columns={_columns}
+                  columnCount={columnCount}
                   renderGroupRow={renderGroupRow}
                   renderGroupRowCell={renderGroupRowCell}
                 />,
@@ -571,6 +572,7 @@ interface GroupRowContainerProps {
   height: number;
   width: number;
   y: number;
+  columnCount: number;
   collapsed: boolean;
   path: number[];
   pane: Pane;
@@ -588,6 +590,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
     width,
     height,
     y,
+    columnCount,
     collapsed,
     path,
     columns,
@@ -627,6 +630,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
               state={cellState}
               width={columnWidth}
               x={x}
+              last={column === columnCount}
             />
           );
         })}
@@ -771,6 +775,7 @@ interface GroupRowCellContainerProps {
   column: number;
   path: number[];
   state: GroupRowCellState;
+  last: boolean;
 }
 
 const GroupRowCellContainer = memo(function GroupRowCellContainer(
@@ -783,6 +788,7 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
     width,
     height,
     state = 'default',
+    last,
     renderGroupRowCell,
   } = props;
 
@@ -798,7 +804,7 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
 
   return (
     <div style={style}>
-      {renderGroupRowCell({ path, column, width, height, state })}
+      {renderGroupRowCell({ path, column, width, height, state, last })}
     </div>
   );
 });

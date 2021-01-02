@@ -57,6 +57,7 @@ export interface RenderGroupRowCellProps {
   column: number;
   width: number;
   height: number;
+  last: boolean;
   state: GroupRowCellState;
 }
 
