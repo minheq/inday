@@ -196,6 +196,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const fieldID = columnToFieldIDCache[_props.column];
       const documentID = rowToDocumentIDCache.get([..._props.path, _props.row]);
       const primary = _props.column === 1;
+      const level = isEmpty(groups) ? 0 : _props.level;
 
       if (documentID === undefined) {
         throw new Error('No corresponding documentID found for row path.');
@@ -209,13 +210,13 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           column={_props.column}
           last={_props.last}
           state={_props.state}
-          level={_props.level}
+          level={level}
           documentID={documentID}
           fieldID={fieldID}
         />
       );
     },
-    [columnToFieldIDCache, rowToDocumentIDCache],
+    [columnToFieldIDCache, rowToDocumentIDCache, groups],
   );
 
   const renderGroupRowCell = useCallback(

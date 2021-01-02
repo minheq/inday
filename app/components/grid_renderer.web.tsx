@@ -194,6 +194,7 @@ export const GridRenderer = memo(
                   height={row.height}
                   state={row.state}
                   last={row.last}
+                  level={row.level}
                   activeCell={row.activeCell}
                   pane={pane}
                   width={_width}
@@ -217,6 +218,7 @@ export const GridRenderer = memo(
                   key={row.key}
                   y={row.y}
                   path={row.path}
+                  level={row.level}
                   height={row.height}
                   collapsed={row.collapsed}
                   state={row.state}
@@ -484,6 +486,7 @@ interface LeafRowContainerProps {
   y: number;
   path: number[];
   row: number;
+  level: number;
   last: boolean;
   pane: Pane;
   columnCount: number;
@@ -504,6 +507,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
     path,
     row,
     columns,
+    level,
     activeCell,
     state,
     last,
@@ -540,6 +544,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
               path={path}
               renderLeafRowCell={renderLeafRowCell}
               row={row}
+              level={level}
               state={cellState}
               width={columnWidth}
               last={column === columnCount}
@@ -555,6 +560,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
       columns,
       height,
       path,
+      level,
       renderLeafRowCell,
       row,
       columnCount,
@@ -563,7 +569,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
 
   return (
     <div style={wrapperStyle}>
-      {renderLeafRow({ children, path, row, state, last, pane })}
+      {renderLeafRow({ children, path, row, state, last, pane, level })}
     </div>
   );
 });
@@ -573,6 +579,7 @@ interface GroupRowContainerProps {
   width: number;
   y: number;
   columnCount: number;
+  level: number;
   collapsed: boolean;
   path: number[];
   pane: Pane;
@@ -591,6 +598,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
     height,
     y,
     columnCount,
+    level,
     collapsed,
     path,
     columns,
@@ -626,6 +634,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
               height={height}
               key={key}
               path={path}
+              level={level}
               renderGroupRowCell={renderGroupRowCell}
               state={cellState}
               width={columnWidth}
@@ -636,12 +645,21 @@ const GroupRowContainer = memo(function GroupRowContainer(
         })}
       </div>
     ),
-    [activeCell, rowStyle, columns, height, path, renderGroupRowCell],
+    [
+      activeCell,
+      rowStyle,
+      columns,
+      height,
+      level,
+      path,
+      renderGroupRowCell,
+      columnCount,
+    ],
   );
 
   return (
     <div style={wrapperStyle}>
-      {renderGroupRow({ children, path, state, pane })}
+      {renderGroupRow({ children, path, state, pane, level })}
     </div>
   );
 });
@@ -721,6 +739,7 @@ interface LeafRowCellContainerProps {
   renderLeafRowCell: (props: RenderLeafRowCellProps) => React.ReactNode;
   column: number;
   row: number;
+  level: number;
   path: number[];
   last: boolean;
   state: LeafRowCellState;
@@ -734,6 +753,7 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
     row,
     path,
     column,
+    level,
     width,
     height,
     last,
@@ -759,6 +779,7 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
         row,
         column,
         state,
+        level,
         width,
         height,
         last,
@@ -773,6 +794,7 @@ interface GroupRowCellContainerProps {
   height: number;
   renderGroupRowCell: (props: RenderGroupRowCellProps) => React.ReactNode;
   column: number;
+  level: number;
   path: number[];
   state: GroupRowCellState;
   last: boolean;
@@ -787,6 +809,7 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
     column,
     width,
     height,
+    level,
     state = 'default',
     last,
     renderGroupRowCell,
@@ -804,7 +827,7 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
 
   return (
     <div style={style}>
-      {renderGroupRowCell({ path, column, width, height, state, last })}
+      {renderGroupRowCell({ path, column, width, height, state, last, level })}
     </div>
   );
 });
