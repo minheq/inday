@@ -638,6 +638,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
               renderGroupRowCell={renderGroupRowCell}
               state={cellState}
               width={columnWidth}
+              collapsed={collapsed}
               x={x}
               last={column === columnCount}
             />
@@ -652,6 +653,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
       height,
       level,
       path,
+      collapsed,
       renderGroupRowCell,
       columnCount,
     ],
@@ -659,7 +661,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
 
   return (
     <div style={wrapperStyle}>
-      {renderGroupRow({ children, path, state, pane, level })}
+      {renderGroupRow({ children, path, state, pane, level, collapsed })}
     </div>
   );
 });
@@ -797,6 +799,7 @@ interface GroupRowCellContainerProps {
   level: number;
   path: number[];
   state: GroupRowCellState;
+  collapsed: boolean;
   last: boolean;
 }
 
@@ -812,6 +815,7 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
     level,
     state = 'default',
     last,
+    collapsed,
     renderGroupRowCell,
   } = props;
 
@@ -827,7 +831,16 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
 
   return (
     <div style={style}>
-      {renderGroupRowCell({ path, column, width, height, state, last, level })}
+      {renderGroupRowCell({
+        path,
+        column,
+        width,
+        height,
+        state,
+        last,
+        level,
+        collapsed,
+      })}
     </div>
   );
 });

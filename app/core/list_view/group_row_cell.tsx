@@ -1,8 +1,12 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { assertUnreached } from '../../../lib/lang_utils';
+import { ContextMenuItem } from '../../components/context_menu_view';
 
 import { GroupRowCellState } from '../../components/grid_renderer.common';
+import { Icon } from '../../components/icon';
+import { PressableHighlight } from '../../components/pressable_highlight';
+import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
 import {
@@ -26,7 +30,6 @@ import {
   FieldType,
   FieldValue,
 } from '../../data/fields';
-import { useGetField } from '../../data/store';
 import { CheckboxValueView } from '../fields/checkbox_value_view';
 import { CurrencyValueView } from '../fields/currency_value_view';
 import { DateValueView } from '../fields/date_value_view';
@@ -42,6 +45,7 @@ import { SingleDocumentLinkValueView } from '../fields/single_document_link_valu
 import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
 import { SingleOptionValueView } from '../fields/single_option_value_view';
 import { URLValueView } from '../fields/url_value_view';
+import { useListViewViewContext } from './list_view_view';
 
 interface GroupRowCellProps {
   state: GroupRowCellState;
@@ -49,6 +53,7 @@ interface GroupRowCellProps {
   path: number[];
   column: number;
   last: boolean;
+  collapsed: boolean;
   // Corresponding column
   columnFieldID: FieldID;
   // Field of the group
@@ -59,21 +64,16 @@ interface GroupRowCellProps {
 export const GROUP_ROW_HEIGHT = 56;
 
 export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
-  const {
-    state,
-    primary,
-    path,
-    column,
-    last,
-    columnFieldID,
-    field,
-    value,
-  } = props;
-
-  console.log(columnFieldID, 'columnFieldID');
+  const { primary, collapsed, field, value } = props;
 
   if (primary) {
-    return <PrimaryGroupRowCellView field={field} value={value} />;
+    return (
+      <PrimaryGroupRowCellView
+        collapsed={collapsed}
+        field={field}
+        value={value}
+      />
+    );
   }
 
   return <GroupRowCellView field={field} />;
@@ -82,10 +82,12 @@ export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
 interface PrimaryGroupRowCellViewProps {
   field: Field;
   value: FieldValue;
+  collapsed: boolean;
 }
 
 function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
-  const { field, value } = props;
+  const { field, value, collapsed } = props;
+  const { mode } = useListViewViewContext();
   const themeStyles = useThemeStyles();
 
   const renderValue = useCallback((): JSX.Element => {
@@ -141,16 +143,68 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
   }, [field, value]);
 
   return (
-    <View style={[styles.primaryCell, themeStyles.border.default]}>
-      <Text color="muted" size="xs">
-        {field.name}
-      </Text>
-      {renderValue()}
+    <View
+      style={[
+        styles.primaryCell,
+        themeStyles.border.default,
+        themeStyles.background.content,
+      ]}
+    >
+      <CollapseToggle collapsed={collapsed} onToggle={() => {}} />
+      <View style={styles.primaryCellText}>
+        <Text color="muted" size="xs">
+          {field.name}
+        </Text>
+        {renderValue()}
+      </View>
       <View
         pointerEvents="none"
         style={[styles.bottomBorder, themeStyles.border.default]}
       />
+      {mode === 'edit' && <DotsMenu />}
     </View>
+  );
+}
+
+interface CollapseToggleProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+const CollapseToggle = memo(function CollapseToggle(
+  props: CollapseToggleProps,
+): JSX.Element {
+  const { collapsed, onToggle } = props;
+  return (
+    <View style={styles.collapseToggleWrapper}>
+      <PressableHighlight onPress={onToggle} style={styles.dotsMenuButton}>
+        <Icon name={collapsed ? 'CaretRight' : 'CaretDown'} />
+      </PressableHighlight>
+    </View>
+  );
+});
+
+const DotsMenu = memo(function DotsMenu(): JSX.Element {
+  const options = useGroupRowContextMenuOptions();
+
+  return (
+    <PressableHighlightContextMenu
+      options={options}
+      style={styles.dotsMenuButton}
+    >
+      <Icon name="Dots" />
+    </PressableHighlightContextMenu>
+  );
+});
+
+function useGroupRowContextMenuOptions(): ContextMenuItem[] {
+  return useMemo(
+    (): ContextMenuItem[] => [
+      { label: 'Collapse' },
+      { label: 'Expand subgroups' },
+      { label: 'Collapse subgroups' },
+    ],
+    [],
   );
 }
 
@@ -159,17 +213,18 @@ interface GroupRowCellViewProps {
 }
 
 const GroupRowCellView = memo(function GroupRowCellView(
-  props: GroupRowCellViewProps,
+  _props: GroupRowCellViewProps,
 ) {
+  const options = useGroupRowContextMenuOptions();
   const themeStyles = useThemeStyles();
 
   return (
-    <View style={styles.cellRoot}>
+    <PressableHighlightContextMenu options={options} style={styles.cellRoot}>
       <View
         pointerEvents="none"
         style={[styles.bottomBorder, themeStyles.border.default]}
       />
-    </View>
+    </PressableHighlightContextMenu>
   );
 });
 
@@ -180,9 +235,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryCell: {
+    flex: 1,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRightWidth: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  primaryCellText: {
+    flex: 1,
   },
   bottomBorder: {
     borderBottomWidth: 1,
@@ -191,5 +252,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
+  },
+  collapseToggleWrapper: {
+    paddingRight: 8,
+  },
+  dotsMenuButton: {
+    borderRadius: 999,
   },
 });

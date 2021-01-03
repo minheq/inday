@@ -58,6 +58,7 @@ export interface RenderGroupRowCellProps {
   width: number;
   height: number;
   level: number;
+  collapsed: boolean;
   last: boolean;
   state: GroupRowCellState;
 }
@@ -92,6 +93,7 @@ export interface RenderGroupRowProps {
   state: GroupRowState;
   pane: Pane;
   level: number;
+  collapsed: boolean;
   children: React.ReactNode;
 }
 
