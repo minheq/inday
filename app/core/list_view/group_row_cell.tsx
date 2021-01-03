@@ -61,8 +61,6 @@ interface GroupRowCellProps {
   value: FieldValue;
 }
 
-export const GROUP_ROW_HEIGHT = 56;
-
 export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
   const { primary, collapsed, field, value } = props;
 

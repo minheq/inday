@@ -43,13 +43,20 @@ import { isEmpty } from '../../../lib/lang_utils';
 import { last } from '../../../lib/array_utils';
 import { Group } from '../../data/groups';
 import { makeDocumentNodes, DocumentNode, SortGetters } from '../../data/sorts';
-import { LastLeafRowCell, LeafRowCell, LEAF_ROW_HEIGHT } from './leaf_row_cell';
+import { LastLeafRowCell, LeafRowCell } from './leaf_row_cell';
 import { Header, HeaderCell, LastHeaderCell } from './header';
 import { Footer } from './footer';
 import { GroupRow } from './group_row';
 import { FlatObject } from '../../../lib/flat_object';
 import { LastLeafRow, LeafRow } from './leaf_row';
-import { GroupRowCell, GROUP_ROW_HEIGHT } from './group_row_cell';
+import { GroupRowCell } from './group_row_cell';
+import {
+  ADD_FIELD_COLUMN_WIDTH,
+  GROUP_ROW_HEIGHT,
+  HEADER_HEIGHT,
+  LEAF_ROW_HEIGHT,
+  SPACER_ROW_HEIGHT,
+} from './layout_constants';
 
 export type ViewMode = 'edit' | 'select';
 
@@ -62,13 +69,18 @@ interface ListViewViewProps {
   onAddDocument: () => Document;
 }
 
-const SPACER_HEIGHT = 72;
-const FIELD_ROW_HEIGHT = 40;
-const ADD_FIELD_COLUMN_WIDTH = 100;
-
 export const activeCellState = atom<StatefulLeafRowCell | null>({
   key: 'ListViewView_ActiveCell',
   default: null,
+});
+
+type CollapsedGroupsByFieldValue = Record<string, boolean>;
+type CollapsedGroupsByFieldID = Record<FieldID, CollapsedGroupsByFieldValue>;
+type CollapsedGroupsByViewID = Record<ViewID, CollapsedGroupsByFieldID>;
+
+export const collapsedGroupsState = atom<CollapsedGroupsByViewID>({
+  key: 'ListViewView_CollapsedGroups',
+  default: {},
 });
 
 // TODO:
@@ -335,8 +347,8 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
               renderFooter={renderFooter}
               leafRowHeight={LEAF_ROW_HEIGHT}
               groupRowHeight={GROUP_ROW_HEIGHT}
-              headerHeight={FIELD_ROW_HEIGHT}
-              spacerHeight={SPACER_HEIGHT}
+              spacerHeight={SPACER_ROW_HEIGHT}
+              headerHeight={HEADER_HEIGHT}
               columns={columns}
               fixedColumnCount={fixedFieldCount}
               activeCell={activeCell}
