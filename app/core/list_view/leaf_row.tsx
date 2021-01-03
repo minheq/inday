@@ -95,14 +95,24 @@ export function useLeafRowContextMenuOptions(): ContextMenuItem[] {
 
 export function LastLeafRow(): JSX.Element {
   const { onAddDocument } = useListViewViewContext();
+  const themeStyles = useThemeStyles();
 
   return (
-    <PressableHighlight onPress={onAddDocument}>
-      <Text>Add document</Text>
+    <PressableHighlight
+      style={[styles.addDocument, themeStyles.border.default]}
+      onPress={onAddDocument}
+    >
+      <Text color="muted">Add document</Text>
     </PressableHighlight>
   );
 }
 
 const styles = StyleSheet.create({
   row: {},
+  addDocument: {
+    height: 40,
+    paddingHorizontal: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });

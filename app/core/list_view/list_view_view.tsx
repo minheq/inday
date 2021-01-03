@@ -62,6 +62,7 @@ interface ListViewViewProps {
   onAddDocument: () => Document;
 }
 
+const SPACER_HEIGHT = 72;
 const FIELD_ROW_HEIGHT = 40;
 const ADD_FIELD_COLUMN_WIDTH = 100;
 
@@ -335,6 +336,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
               leafRowHeight={LEAF_ROW_HEIGHT}
               groupRowHeight={GROUP_ROW_HEIGHT}
               headerHeight={FIELD_ROW_HEIGHT}
+              spacerHeight={SPACER_HEIGHT}
               columns={columns}
               fixedColumnCount={fixedFieldCount}
               activeCell={activeCell}
