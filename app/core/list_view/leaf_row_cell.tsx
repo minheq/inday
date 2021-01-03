@@ -124,7 +124,7 @@ import { Icon } from '../../components/icon';
 import { CheckboxStatic } from '../../components/checkbox_static';
 import { FlatButton } from '../../components/flat_button';
 import { Spacer } from '../../components/spacer';
-import { LEAF_ROW_HEIGHT } from './layout_constants';
+import { LEAF_ROW_HEIGHT } from './list_view_constants';
 
 interface LeafRowCellProps {
   primary: boolean;

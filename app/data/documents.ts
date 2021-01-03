@@ -22,4 +22,7 @@ export interface Document {
   collectionID: CollectionID;
 }
 
-export type DocumentFieldValues = Record<FieldID, FieldValue>;
+export type DocumentFieldValues = {
+  [fieldID: string]: FieldValue;
+};
+// export type DocumentFieldValues = Record<FieldID, FieldValue>;
