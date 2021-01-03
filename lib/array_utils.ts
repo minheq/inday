@@ -83,8 +83,22 @@ export function take<T>(arr: T[], size: number): T[] {
   return arr.slice(0, size);
 }
 
-export function remove<T>(arr: T[], size: number): T[] {
-  return arr.slice(0, arr.length - size);
+export function filterBy<T>(arr: T[], getValue: (item: T) => boolean): T[] {
+  return arr.filter((v) => getValue(v));
+}
+
+export function removeBy<T>(arr: T[], getValue: (item: T) => boolean): T[] {
+  const result: T[] = [];
+
+  for (const item of arr) {
+    const skip = getValue(item);
+
+    if (!skip) {
+      result.push(item);
+    }
+  }
+
+  return result;
 }
 
 export function append<T>(arr: T[], item: T): T[] {

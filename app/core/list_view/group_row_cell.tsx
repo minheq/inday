@@ -59,10 +59,15 @@ interface GroupRowCellProps {
   // Field of the group
   field: Field;
   value: FieldValue;
+  onToggleCollapseGroup: (
+    field: Field,
+    value: FieldValue,
+    collapsed: boolean,
+  ) => void;
 }
 
 export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
-  const { primary, collapsed, field, value } = props;
+  const { primary, collapsed, field, value, onToggleCollapseGroup } = props;
 
   if (primary) {
     return (
@@ -70,6 +75,7 @@ export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
         collapsed={collapsed}
         field={field}
         value={value}
+        onToggleCollapseGroup={onToggleCollapseGroup}
       />
     );
   }
@@ -81,12 +87,21 @@ interface PrimaryGroupRowCellViewProps {
   field: Field;
   value: FieldValue;
   collapsed: boolean;
+  onToggleCollapseGroup: (
+    field: Field,
+    value: FieldValue,
+    collapsed: boolean,
+  ) => void;
 }
 
 function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
-  const { field, value, collapsed } = props;
+  const { field, value, collapsed, onToggleCollapseGroup } = props;
   const { mode } = useListViewViewContext();
   const themeStyles = useThemeStyles();
+
+  const handlePressCollapseGroup = useCallback(() => {
+    onToggleCollapseGroup(field, value, !collapsed);
+  }, [onToggleCollapseGroup, field, value, collapsed]);
 
   const renderValue = useCallback((): JSX.Element => {
     switch (field.type) {
@@ -148,7 +163,10 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         themeStyles.background.content,
       ]}
     >
-      <CollapseToggle collapsed={collapsed} onToggle={() => {}} />
+      <CollapseToggle
+        collapsed={collapsed}
+        onToggle={handlePressCollapseGroup}
+      />
       <View style={styles.primaryCellText}>
         <Text color="muted" size="xs">
           {field.name}

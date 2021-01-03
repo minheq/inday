@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { atom, useRecoilState } from 'recoil';
+import { atom, useRecoilState, useRecoilValue } from 'recoil';
 
 import {
   useGetSortedFieldsWithListViewConfig,
@@ -18,7 +18,12 @@ import {
   useGetViewDocuments,
   useGetSortGetters,
 } from '../../data/store';
-import { Field, FieldID, FieldValue } from '../../data/fields';
+import {
+  areFieldValuesEqual,
+  Field,
+  FieldID,
+  FieldValue,
+} from '../../data/fields';
 import { AutoSizer } from '../../lib/autosizer';
 import { ListView, ViewID } from '../../data/views';
 import {
@@ -40,7 +45,7 @@ import {
 } from '../../components/grid_renderer.common';
 import { usePrevious } from '../../hooks/use_previous';
 import { isEmpty } from '../../../lib/lang_utils';
-import { last } from '../../../lib/array_utils';
+import { filterBy, isNotEmpty, last, removeBy } from '../../../lib/array_utils';
 import { Group } from '../../data/groups';
 import { makeDocumentNodes, DocumentNode, SortGetters } from '../../data/sorts';
 import { LastLeafRowCell, LeafRowCell } from './leaf_row_cell';
@@ -74,9 +79,13 @@ export const activeCellState = atom<StatefulLeafRowCell | null>({
   default: null,
 });
 
-type CollapsedGroupsByFieldValue = Record<string, boolean>;
-type CollapsedGroupsByFieldID = Record<FieldID, CollapsedGroupsByFieldValue>;
-type CollapsedGroupsByViewID = Record<ViewID, CollapsedGroupsByFieldID>;
+type CollapsedGroupsByFieldID = {
+  [fieldID: string]: FieldValue[] | undefined;
+};
+
+type CollapsedGroupsByViewID = {
+  [viewID: string]: CollapsedGroupsByFieldID | undefined;
+};
 
 export const collapsedGroupsState = atom<CollapsedGroupsByViewID>({
   key: 'ListViewView_CollapsedGroups',
@@ -95,13 +104,20 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     onSelectDocument,
   } = props;
   const viewID = view.id;
+  const [collapsedGroupsByViewID, setCollapsedGroupsByViewID] = useRecoilState(
+    collapsedGroupsState,
+  );
   const [activeCell, setActiveCell] = useRecoilState(activeCellState);
   const fields = useGetSortedFieldsWithListViewConfig(view.id);
   const documents = useGetViewDocuments(view.id);
   const groups = useGetViewGroups(view.id);
   const sortGetters = useGetSortGetters();
+  const collapsedGroupsByFieldID = useMemo(
+    () => collapsedGroupsByViewID[viewID],
+    [collapsedGroupsByViewID, viewID],
+  );
   const [nodes, setNodes] = useState(
-    getDocumentNodes(documents, groups, sortGetters),
+    getDocumentNodes(documents, groups, sortGetters, collapsedGroupsByFieldID),
   );
   const gridRef = useRef<GridRendererRef>(null);
   const leafRowPaths = useMemo(() => getLeafRowPaths(nodes, []), [nodes]);
@@ -109,12 +125,15 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
     getColumnToFieldIDCache(fields),
   );
-  const [rowToDocumentIDCache, setRowToDocumentIDCache] = useState(
-    getRowToDocumentIDCache(leafRowPaths),
+  const rowToDocumentIDCache = useMemo(
+    (): RowToDocumentIDCache => getRowToDocumentIDCache(leafRowPaths),
+    [leafRowPaths],
   );
-  const [pathToGroupCache, setPathToGroupCache] = useState(
-    getPathToGroupCache(groupRowPaths),
+  const pathToGroupCache = useMemo(
+    (): PathToGroupCache => getPathToGroupCache(groupRowPaths),
+    [groupRowPaths],
   );
+  const grouped = isNotEmpty(groups);
   const prevActiveCell = usePrevious(activeCell);
   const fixedFieldCount = view.fixedFieldCount;
   const documentsOrderChanged = useDocumentsOrderChanged(view.id, documents);
@@ -138,9 +157,14 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
   useEffect(() => {
     if (documentsOrderChanged) {
-      setNodes(getDocumentNodes(documents, groups, sortGetters));
-      setRowToDocumentIDCache(getRowToDocumentIDCache(leafRowPaths));
-      setPathToGroupCache(getPathToGroupCache(groupRowPaths));
+      setNodes(
+        getDocumentNodes(
+          documents,
+          groups,
+          sortGetters,
+          collapsedGroupsByFieldID,
+        ),
+      );
     }
   }, [
     leafRowPaths,
@@ -149,6 +173,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     documents,
     groups,
     sortGetters,
+    collapsedGroupsByFieldID,
   ]);
 
   useEffect(() => {
@@ -199,6 +224,40 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     onSelectDocument,
     onAddDocument,
   ]);
+
+  const handleToggleCollapseGroup = useCallback(
+    (field: Field, value: FieldValue, collapsed: boolean) => {
+      setCollapsedGroupsByViewID((prevCollapsedGroupsByViewID) => {
+        const nextCollapsedGroupsByViewID: CollapsedGroupsByViewID = {
+          ...prevCollapsedGroupsByViewID,
+        };
+        const collapsedGroups = {
+          ...nextCollapsedGroupsByViewID[viewID],
+        };
+        let collapsedValues = collapsedGroups[field.id];
+
+        if (collapsed) {
+          if (collapsedValues) {
+            collapsedValues = collapsedValues.concat(value);
+          } else {
+            collapsedValues = [value];
+          }
+        } else {
+          if (collapsedValues) {
+            collapsedValues = removeBy(collapsedValues, (v) =>
+              areFieldValuesEqual(field, v, value),
+            );
+          }
+        }
+
+        collapsedGroups[field.id] = collapsedValues;
+        nextCollapsedGroupsByViewID[viewID] = collapsedGroups;
+
+        return nextCollapsedGroupsByViewID;
+      });
+    },
+    [setCollapsedGroupsByViewID, viewID],
+  );
 
   const renderLeafRowCell = useCallback(
     (_props: RenderLeafRowCellProps) => {
@@ -257,10 +316,11 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           columnFieldID={fieldID}
           field={group.field}
           value={group.value}
+          onToggleCollapseGroup={handleToggleCollapseGroup}
         />
       );
     },
-    [columnToFieldIDCache, pathToGroupCache],
+    [columnToFieldIDCache, pathToGroupCache, handleToggleCollapseGroup],
   );
 
   const renderHeaderCell = useCallback(
@@ -370,6 +430,7 @@ function getDocumentNodes(
   documents: Document[],
   groups: Group[],
   sortGetters: SortGetters,
+  collapsedGroups?: CollapsedGroupsByFieldID,
 ): FlatDocumentNode[] | GroupedDocumentNode[] {
   if (isEmpty(groups)) {
     return [{ type: 'leaf', children: documents, grouped: false }];
@@ -377,18 +438,29 @@ function getDocumentNodes(
 
   const nodes = makeDocumentNodes(groups, documents, sortGetters);
 
-  return toGroupedDocumentNode(nodes);
+  return toGroupedDocumentNode(nodes, collapsedGroups);
 }
 
-function toGroupedDocumentNode(nodes: DocumentNode[]): GroupedDocumentNode[] {
+function toGroupedDocumentNode(
+  nodes: DocumentNode[],
+  collapsedGroups?: CollapsedGroupsByFieldID,
+): GroupedDocumentNode[] {
   let groups: GroupedDocumentNode[] = [];
 
   for (const node of nodes) {
+    const collapsedValues = collapsedGroups && collapsedGroups[node.field.id];
+    const collapsed = !!(
+      collapsedValues &&
+      collapsedValues.some((v) =>
+        areFieldValuesEqual(node.field, v, node.value),
+      )
+    );
+
     if (node.type === 'leaf') {
       groups = groups.concat({
         type: 'leaf',
         grouped: true,
-        collapsed: false,
+        collapsed,
         field: node.field,
         value: node.value,
         children: node.children,
@@ -396,10 +468,10 @@ function toGroupedDocumentNode(nodes: DocumentNode[]): GroupedDocumentNode[] {
     } else {
       groups = groups.concat({
         type: 'ancestor',
-        collapsed: false,
+        collapsed,
         field: node.field,
         value: node.value,
-        children: toGroupedDocumentNode(node.children),
+        children: toGroupedDocumentNode(node.children, collapsedGroups),
       });
     }
   }
@@ -558,11 +630,17 @@ function useDocumentsOrderChanged(
   viewID: ViewID,
   documents: Document[],
 ): boolean {
+  const collapsedGroupsByViewID = useRecoilValue(collapsedGroupsState);
+  const collapsedGroups = useMemo(() => collapsedGroupsByViewID[viewID], [
+    collapsedGroupsByViewID,
+    viewID,
+  ]);
   const documentsLength = documents.length;
   const filters = useGetViewFilters(viewID);
   const sorts = useGetViewSorts(viewID);
   const groups = useGetViewGroups(viewID);
 
+  const prevCollapsedGroups = usePrevious(collapsedGroups);
   const prevDocumentsLength = usePrevious(documents.length);
   const prevFilters = usePrevious(filters);
   const prevSorts = usePrevious(sorts);
@@ -573,7 +651,8 @@ function useDocumentsOrderChanged(
       documentsLength !== prevDocumentsLength ||
       filters !== prevFilters ||
       sorts !== prevSorts ||
-      groups !== prevGroups
+      groups !== prevGroups ||
+      collapsedGroups !== prevCollapsedGroups
     );
   }, [
     documentsLength,
@@ -584,6 +663,8 @@ function useDocumentsOrderChanged(
     prevSorts,
     groups,
     prevGroups,
+    collapsedGroups,
+    prevCollapsedGroups,
   ]);
 }
 
