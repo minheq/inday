@@ -10,6 +10,7 @@ import {
   collectionsByIDState,
   CollectionsByIDState,
   DocumentsByIDState,
+  FiltersByIDState,
   filtersByIDState,
   spacesByIDState,
   SpacesByIDState,
@@ -43,11 +44,7 @@ import {
   viewSortsQuery,
   viewSortsSequenceMaxQuery,
 } from './selectors';
-import {
-  Document,
-  DocumentFieldValues,
-  DocumentID,
-} from '../../models/documents';
+import { Document, DocumentID } from '../../models/documents';
 import {
   assertListView,
   FieldWithListViewConfig,
@@ -152,7 +149,7 @@ export function useCollectionDocumentsByIDQuery(
   return useRecoilValue(collectionDocumentsByIDQuery(collectionID));
 }
 
-export function useFiltersByIDQuery() {
+export function useFiltersByIDQuery(): FiltersByIDState {
   return useRecoilValue(filtersByIDState);
 }
 
@@ -174,7 +171,7 @@ export function useDocumentPrimaryFieldValueQuery(
   return [field, document.fields[collection.primaryFieldID]];
 }
 
-export function useViewFiltersQuery(viewID: ViewID) {
+export function useViewFiltersQuery(viewID: ViewID): Filter[] {
   return useRecoilValue(viewFiltersQuery(viewID));
 }
 
@@ -196,15 +193,15 @@ export function useGroupQuery(groupID: GroupID): Group {
   return useRecoilValue(groupQuery(groupID));
 }
 
-export function useFiltersGroupMaxQuery(viewID: ViewID) {
+export function useFiltersGroupMaxQuery(viewID: ViewID): number {
   return useRecoilValue(viewFiltersGroupMaxQuery(viewID));
 }
 
-export function useSortsSequenceMaxQuery(viewID: ViewID) {
+export function useSortsSequenceMaxQuery(viewID: ViewID): number {
   return useRecoilValue(viewSortsSequenceMaxQuery(viewID));
 }
 
-export function useGroupsSequenceMaxQuery(viewID: ViewID) {
+export function useGroupsSequenceMaxQuery(viewID: ViewID): number {
   return useRecoilValue(viewGroupsSequenceMaxQuery(viewID));
 }
 
@@ -254,7 +251,7 @@ export function useSortedFieldsWithListViewConfigQuery(
   }, [fields, view]);
 }
 
-export function useFieldQuery(fieldID: FieldID) {
+export function useFieldQuery(fieldID: FieldID): Field {
   const field = useRecoilValue(fieldQuery(fieldID));
 
   if (field === null) {
