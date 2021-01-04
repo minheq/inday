@@ -47,6 +47,8 @@ interface ListViewGrid {
 export function useListViewGrid(props: UseListViewGridProps): ListViewGrid {
   const { viewID, selectedDocuments } = props;
   const view = useGetView(viewID);
+  assertListView(view);
+
   const {
     grouped,
     nodes,
@@ -55,7 +57,6 @@ export function useListViewGrid(props: UseListViewGridProps): ListViewGrid {
     columnToFieldIDCache,
     pathToGroupCache,
   } = useListViewData(viewID);
-  assertListView(view);
   const fields = useGetSortedFieldsWithListViewConfig(viewID);
   const fixedFieldCount = view.fixedFieldCount;
   const columns = useMemo(

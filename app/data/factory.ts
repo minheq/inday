@@ -313,7 +313,6 @@ export function makeView(
     ...baseView,
     type: 'list',
     fixedFieldCount: 1,
-    groupsConfig: {},
     fieldsConfig: keyedBy(
       collection.fields.map((f, i) => ({
         id: f.id,

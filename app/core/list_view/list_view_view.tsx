@@ -265,10 +265,10 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
               renderLeafRowCell={renderLeafRowCell}
               renderHeaderCell={renderHeaderCell}
               renderHeader={renderHeader}
-              renderGroupRowCell={renderGroupRowCell}
+              renderGroupRowCell={grouped ? renderGroupRowCell : undefined}
               renderFooter={renderFooter}
               leafRowHeight={LEAF_ROW_HEIGHT}
-              groupRowHeight={GROUP_ROW_HEIGHT}
+              groupRowHeight={grouped ? GROUP_ROW_HEIGHT : 0}
               spacerHeight={SPACER_ROW_HEIGHT}
               headerHeight={HEADER_HEIGHT}
               activeCell={activeCell}
