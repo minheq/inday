@@ -1,9 +1,9 @@
 import { Workspace } from './workspace';
 import { Space } from './spaces';
 import { Collection } from './collections';
-import { View, ListView } from './views';
+import { View, ListView, ViewID } from './views';
 import { Field, FieldID, FieldValue } from './fields';
-import { Document } from './documents';
+import { Document, DocumentID } from './documents';
 import { Filter } from './filters';
 import { Sort } from './sorts';
 import { Group } from './groups';
@@ -84,7 +84,7 @@ export interface ViewNameUpdatedEvent
 
 export interface ViewDeletedEventConfig {
   name: 'ViewDeleted';
-  view: View;
+  viewID: ViewID;
 }
 export interface ViewDeletedEvent extends BaseEvent, ViewDeletedEventConfig {}
 
@@ -105,7 +105,7 @@ export interface FieldNameUpdatedEvent
 
 export interface FieldDeletedEventConfig {
   name: 'FieldDeleted';
-  field: Field;
+  fieldID: FieldID;
 }
 export interface FieldDeletedEvent extends BaseEvent, FieldDeletedEventConfig {}
 
@@ -138,7 +138,7 @@ export interface DocumentFieldValueUpdatedEvent
 
 export interface DocumentDeletedEventConfig {
   name: 'DocumentDeleted';
-  document: Document;
+  documentID: DocumentID;
 }
 export interface DocumentDeletedEvent
   extends BaseEvent,

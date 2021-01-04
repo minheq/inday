@@ -14,13 +14,7 @@ import {
 import { Document, DocumentID } from '../../models/documents';
 import { Collection, CollectionID } from '../../models/collections';
 import { Field, FieldID, FieldValue } from '../../models/fields';
-import {
-  Filter,
-  FilterGroup,
-  FilterID,
-  filterDocuments,
-  FilterGetters,
-} from '../../models/filters';
+import { Filter, FilterGroup, FilterID } from '../../models/filters';
 import { Space, SpaceID } from '../../models/spaces';
 import { View, ViewID } from '../../models/views';
 import { Sort, SortID, sortDocuments, SortGetters } from '../../models/sorts';
@@ -430,46 +424,6 @@ export const documentFieldValueQuery = selectorFamily<
     }
 
     return document.fields[fieldID];
-  },
-});
-
-export const viewDocumentsQuery = selectorFamily<Document[], ViewID>({
-  key: 'ViewDocumentsQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const view = get(viewQuery(viewID));
-    const documents = get(collectionDocumentsQuery(view.collectionID));
-    const filterGroups = get(viewFilterGroupsQuery(viewID));
-    const sorts = get(viewSortsQuery(viewID));
-
-    const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
-    const getDocument = (documentID: DocumentID) =>
-      get(documentQuery(documentID));
-    const getCollaborator = (collaboratorID: CollaboratorID) =>
-      get(collaboratorQuery(collaboratorID));
-    const getCollection = (collectionID: CollectionID) =>
-      get(collectionQuery(collectionID));
-
-    const sortGetters: SortGetters = {
-      getField,
-      getDocument,
-      getCollaborator,
-      getCollection,
-    };
-
-    const filterGetters: FilterGetters = {
-      getField,
-    };
-
-    let finalDocuments = documents;
-
-    finalDocuments = filterDocuments(
-      filterGroups,
-      finalDocuments,
-      filterGetters,
-    );
-    finalDocuments = sortDocuments(sorts, finalDocuments, sortGetters);
-
-    return finalDocuments;
   },
 });
 

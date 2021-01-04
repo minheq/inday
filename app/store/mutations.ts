@@ -21,7 +21,6 @@ import {
   FieldConfig,
   FieldID,
   FieldValue,
-  FieldType,
   generateFieldID,
   getDefaultDocumentFieldValues,
 } from '../../models/fields';
@@ -37,12 +36,10 @@ import {
   updateFilterGroup,
   FilterID,
   deleteFilter,
-  FilterGroup,
   generateFilterID,
 } from '../../models/filters';
 import { useLogger } from '../../lib/logger';
 import {
-  workspaceState,
   spacesByIDState,
   collectionsByIDState,
   viewsByIDState,
@@ -62,7 +59,6 @@ import {
   Sort,
   SortID,
   deleteSort,
-  SortGetters,
   generateSortID,
 } from '../../models/sorts';
 import {
@@ -90,13 +86,8 @@ import {
 
 export const eventEmitter = new EventEmitter<Event>();
 
-export function useEventEmitter(): EventEmitter<Event> {
-  return eventEmitter;
-}
-
 export function useEmitEvent(): (eventConfig: EventConfig) => void {
   const logger = useLogger();
-  const eventEmitter = useEventEmitter();
   const workspace = useWorkspaceQuery();
   const setEvents = useSetRecoilState(eventsState);
 
@@ -114,7 +105,7 @@ export function useEmitEvent(): (eventConfig: EventConfig) => void {
 
       eventEmitter.emit(event);
     },
-    [workspace, setEvents, eventEmitter, logger],
+    [workspace, setEvents, logger],
   );
 }
 
@@ -241,18 +232,15 @@ export function useCreateCollection(): (spaceID: SpaceID) => Collection {
   );
 }
 
-export function useUpdateDocumentFieldValue<T extends FieldValue>(): (
+export function useUpdateDocumentFieldValue<T extends FieldValue>(
   documentID: DocumentID,
-  fieldID: FieldID,
-  nextValue: T,
-) => void {
+): (fieldID: FieldID, nextValue: T) => void {
   const emitEvent = useEmitEvent();
   const setDocumentsByID = useSetRecoilState(documentsByIDState);
-  const getDocument = useDocumentQueryCallback();
+  const prevDocument = useDocumentQuery(documentID);
 
   return useCallback(
-    (documentID, fieldID, nextValue) => {
-      const prevDocument = getDocument(documentID);
+    (fieldID, nextValue) => {
       const prevValue = prevDocument.fields[fieldID];
 
       const nextDocument: Document = {
@@ -275,38 +263,38 @@ export function useUpdateDocumentFieldValue<T extends FieldValue>(): (
         nextValue,
       });
     },
-    [emitEvent, getDocument, setDocumentsByID],
+    [emitEvent, setDocumentsByID, prevDocument],
   );
 }
 
-export function useDeleteCollection() {
+export function useDeleteCollection(collectionID: CollectionID): () => void {
   const emitEvent = useEmitEvent();
   const setCollections = useSetRecoilState(collectionsByIDState);
+  const collection = useCollectionQuery(collectionID);
 
-  return useCallback(
-    (collection: Collection) => {
-      setCollections((previousCollections) => {
-        const updatedCollections = { ...previousCollections };
+  return useCallback(() => {
+    setCollections((previousCollections) => {
+      const updatedCollections = { ...previousCollections };
 
-        delete updatedCollections[collection.id];
+      delete updatedCollections[collectionID];
 
-        return updatedCollections;
-      });
+      return updatedCollections;
+    });
 
-      emitEvent({
-        name: 'CollectionDeleted',
-        collection,
-      });
-    },
-    [emitEvent, setCollections],
-  );
+    emitEvent({
+      name: 'CollectionDeleted',
+      collection,
+    });
+  }, [emitEvent, setCollections, collection, collectionID]);
 }
 
 export interface UpdateCollectionNameInput {
   name: string;
 }
 
-export function useUpdateCollectionName(collectionID: CollectionID) {
+export function useUpdateCollectionName(
+  collectionID: CollectionID,
+): (input: UpdateCollectionNameInput) => Collection {
   const emitEvent = useEmitEvent();
   const prevCollection = useCollectionQuery(collectionID);
   const setCollections = useSetRecoilState(collectionsByIDState);
@@ -330,6 +318,8 @@ export function useUpdateCollectionName(collectionID: CollectionID) {
         prevCollection,
         nextCollection,
       });
+
+      return nextCollection;
     },
     [prevCollection, setCollections, emitEvent],
   );
@@ -345,26 +335,14 @@ export function useDocumentQueryPrimaryFieldValueCallback(
   return [field, document.fields[collection.primaryFieldID]];
 }
 
-export function useSortGettersQuery(): SortGetters {
-  const getField = useGetFieldCallback();
-  const getDocument = useDocumentQueryCallback();
-  const getCollaborator = useGetCollaboratorCallback();
-  const getCollection = useCollectionQueryCallback();
-
-  return {
-    getField,
-    getDocument,
-    getCollaborator,
-    getCollection,
-  };
-}
-
-export function useCreateFilter() {
+export function useCreateFilter(
+  viewID: ViewID,
+): (group: number, filterConfig: FilterConfig) => Filter {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
 
   return useCallback(
-    (viewID: ViewID, group: number, filterConfig: FilterConfig) => {
+    (group: number, filterConfig: FilterConfig) => {
       const newFilter: Filter = {
         id: generateFilterID(),
         viewID,
@@ -384,17 +362,19 @@ export function useCreateFilter() {
 
       return newFilter;
     },
-    [emitEvent, setFilters],
+    [emitEvent, setFilters, viewID],
   );
 }
 
-export function useUpdateFilterConfig(filterID: FilterID) {
+export function useUpdateFilterConfig(
+  filterID: FilterID,
+): (group: number, filterConfig: FilterConfig) => void {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
   const prevFilter = useFilterQuery(filterID);
 
   return useCallback(
-    async (group: number, filterConfig: FilterConfig) => {
+    (group: number, filterConfig: FilterConfig) => {
       const nextFilter: Filter = {
         ...prevFilter,
         ...filterConfig,
@@ -417,14 +397,16 @@ export function useUpdateFilterConfig(filterID: FilterID) {
   );
 }
 
-export function useUpdateFilterGroup(filterID: FilterID) {
+export function useUpdateFilterGroup(
+  filterID: FilterID,
+): (value: 'and' | 'or') => Filter {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
   const prevFilter = useFilterQuery(filterID);
   const prevFilters = useViewFiltersQuery(prevFilter.viewID);
 
   return useCallback(
-    async (value: 'and' | 'or') => {
+    (value: 'and' | 'or') => {
       const nextFilters = updateFilterGroup(prevFilter, value, prevFilters);
 
       setFilters((previousFilters) => ({
@@ -440,17 +422,17 @@ export function useUpdateFilterGroup(filterID: FilterID) {
 
       return nextFilters[filterID];
     },
-    [emitEvent, setFilters, prevFilter, prevFilters],
+    [emitEvent, setFilters, prevFilter, prevFilters, filterID],
   );
 }
 
-export function useDeleteFilter(filterID: FilterID) {
+export function useDeleteFilter(filterID: FilterID): () => void {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState<FiltersByIDState>(filtersByIDState);
   const prevFilter = useFilterQuery(filterID);
   const prevFilters = useViewFiltersQuery(prevFilter.viewID);
 
-  return useCallback(async () => {
+  return useCallback(() => {
     const nextFilters = deleteFilter(prevFilter, prevFilters);
 
     setFilters((_prevFilters) => {
@@ -471,15 +453,17 @@ export function useDeleteFilter(filterID: FilterID) {
       prevFilters,
       nextFilters: Object.values(nextFilters),
     });
-  }, [emitEvent, setFilters, prevFilters, filterID]);
+  }, [emitEvent, setFilters, prevFilters, prevFilter, filterID]);
 }
 
-export function useCreateSort() {
+export function useCreateSort(
+  viewID: ViewID,
+): (sequence: number, sortConfig: SortConfig) => Sort {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState(sortsByIDState);
 
   return useCallback(
-    (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
+    (sequence: number, sortConfig: SortConfig) => {
       const newSort: Sort = {
         id: generateSortID(),
         viewID,
@@ -499,17 +483,19 @@ export function useCreateSort() {
 
       return newSort;
     },
-    [emitEvent, setSorts],
+    [emitEvent, setSorts, viewID],
   );
 }
 
-export function useUpdateSortConfig(sortID: SortID) {
+export function useUpdateSortConfig(
+  sortID: SortID,
+): (sortConfig: SortConfig) => Sort {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState(sortsByIDState);
   const prevSort = useSortQuery(sortID);
 
   return useCallback(
-    async (sortConfig: SortConfig) => {
+    (sortConfig: SortConfig) => {
       const nextSort: Sort = {
         ...prevSort,
         ...sortConfig,
@@ -532,13 +518,13 @@ export function useUpdateSortConfig(sortID: SortID) {
   );
 }
 
-export function useDeleteSort(sortID: SortID) {
+export function useDeleteSort(sortID: SortID): () => void {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState<SortsByIDState>(sortsByIDState);
   const prevSort = useSortQuery(sortID);
   const prevSorts = useViewSortsQuery(prevSort.viewID);
 
-  return useCallback(async () => {
+  return useCallback(() => {
     const nextSorts = deleteSort(prevSort, prevSorts);
 
     setSorts((previousSorts) => {
@@ -595,13 +581,15 @@ export function useCreateGroup(): (
   );
 }
 
-export function useUpdateGroupSortConfig(groupID: GroupID) {
+export function useUpdateGroupSortConfig(
+  groupID: GroupID,
+): (sortConfig: SortConfig) => Group {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState(groupsByIDState);
   const prevGroup = useGroupQuery(groupID);
 
   return useCallback(
-    async (sortConfig: SortConfig) => {
+    (sortConfig: SortConfig) => {
       const nextGroup: Group = {
         ...prevGroup,
         ...sortConfig,
@@ -624,13 +612,13 @@ export function useUpdateGroupSortConfig(groupID: GroupID) {
   );
 }
 
-export function useDeleteGroup(groupID: GroupID) {
+export function useDeleteGroup(groupID: GroupID): () => void {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState<GroupsByIDState>(groupsByIDState);
   const prevGroup = useGroupQuery(groupID);
   const prevGroups = useViewGroupsQuery(prevGroup.viewID);
 
-  return useCallback(async () => {
+  return useCallback(() => {
     const nextGroups = deleteGroup(prevGroup, prevGroups);
 
     setGroups((previousGroups) => {
@@ -726,40 +714,39 @@ export function useCreateView(): (collectionID: CollectionID) => View {
   );
 }
 
-export function useDeleteView() {
+export function useDeleteView(viewID: ViewID): () => void {
   const emitEvent = useEmitEvent();
   const setViews = useSetRecoilState(viewsByIDState);
 
-  return useCallback(
-    (view: View) => {
-      setViews((previousViews) => {
-        const updatedViews = { ...previousViews };
+  return useCallback(() => {
+    setViews((previousViews) => {
+      const updatedViews = { ...previousViews };
 
-        delete updatedViews[view.id];
+      delete updatedViews[viewID];
 
-        return updatedViews;
-      });
+      return updatedViews;
+    });
 
-      emitEvent({
-        name: 'ViewDeleted',
-        view,
-      });
-    },
-    [emitEvent, setViews],
-  );
+    emitEvent({
+      name: 'ViewDeleted',
+      viewID,
+    });
+  }, [emitEvent, setViews, viewID]);
 }
 
 export interface UpdateViewNameInput {
   name: string;
 }
 
-export function useUpdateViewName(viewID: ViewID) {
+export function useUpdateViewName(
+  viewID: ViewID,
+): (input: UpdateViewNameInput) => View {
   const emitEvent = useEmitEvent();
   const prevView = useViewQuery(viewID);
   const setViews = useSetRecoilState(viewsByIDState);
 
   return useCallback(
-    async (input: UpdateViewNameInput) => {
+    (input: UpdateViewNameInput) => {
       const { name } = input;
 
       const nextView: View = {
@@ -777,6 +764,8 @@ export function useUpdateViewName(viewID: ViewID) {
         prevView,
         nextView,
       });
+
+      return nextView;
     },
     [prevView, setViews, emitEvent],
   );
@@ -799,7 +788,12 @@ export function useGetFieldCallback(): (fieldID: FieldID) => Field {
   );
 }
 
-export function useCreateField() {
+export function useCreateField(): (
+  collectionID: CollectionID,
+  name: string,
+  description: string,
+  fieldConfig: FieldConfig,
+) => Field {
   const emitEvent = useEmitEvent();
   const setFields = useSetRecoilState(fieldsByIDState);
 
@@ -836,42 +830,40 @@ export function useCreateField() {
   );
 }
 
-export function useDeleteField() {
+export function useDeleteField(fieldID: FieldID): () => void {
   const emitEvent = useEmitEvent();
   const setFields = useSetRecoilState(fieldsByIDState);
 
-  return useCallback(
-    (field: Field) => {
-      setFields((previousFields) => {
-        const updatedFields = { ...previousFields };
+  return useCallback(() => {
+    setFields((previousFields) => {
+      const updatedFields = { ...previousFields };
 
-        delete updatedFields[field.id];
+      delete updatedFields[fieldID];
 
-        return updatedFields;
-      });
+      return updatedFields;
+    });
 
-      emitEvent({
-        name: 'FieldDeleted',
-        field,
-      });
-    },
-    [emitEvent, setFields],
-  );
+    emitEvent({
+      name: 'FieldDeleted',
+      fieldID,
+    });
+  }, [emitEvent, setFields, fieldID]);
 }
 
 export interface UpdateFieldNameInput {
-  fieldID: FieldID;
   name: string;
 }
 
-export function useUpdateFieldName() {
+export function useUpdateFieldName(
+  fieldID: FieldID,
+): (input: UpdateFieldNameInput) => Field {
   const emitEvent = useEmitEvent();
   const getField = useGetFieldCallback();
   const setFields = useSetRecoilState(fieldsByIDState);
 
   return useCallback(
     (input: UpdateFieldNameInput) => {
-      const { fieldID, name } = input;
+      const { name } = input;
       const prevField = getField(fieldID);
 
       const nextField: Field = {
@@ -889,27 +881,10 @@ export function useUpdateFieldName() {
         prevField,
         nextField,
       });
+
+      return nextField;
     },
-    [getField, setFields, emitEvent],
-  );
-}
-
-export function useDocumentQueryCallback(): (
-  documentID: DocumentID,
-) => Document {
-  const documents = useRecoilValue(documentsByIDState);
-
-  return useCallback(
-    (documentID: DocumentID) => {
-      const document = documents[documentID];
-
-      if (document === undefined) {
-        throw new Error('Document not found');
-      }
-
-      return document;
-    },
-    [documents],
+    [getField, setFields, emitEvent, fieldID],
   );
 }
 
@@ -945,62 +920,29 @@ export function useCreateDocument(
 
       return newDocument;
     },
-    [emitEvent, setDocuments, collectionFields],
+    [emitEvent, setDocuments, collectionFields, collectionID],
   );
 }
 
-export function useDeleteDocument() {
+export function useDeleteDocument(): (documentID: DocumentID) => void {
   const emitEvent = useEmitEvent();
   const setDocuments = useSetRecoilState(documentsByIDState);
 
   return useCallback(
-    (document: Document) => {
+    (documentID: DocumentID) => {
       setDocuments((previousDocuments) => {
         const updatedDocuments = { ...previousDocuments };
 
-        delete updatedDocuments[document.id];
+        delete updatedDocuments[documentID];
 
         return updatedDocuments;
       });
 
       emitEvent({
         name: 'DocumentDeleted',
-        document,
+        documentID,
       });
     },
     [emitEvent, setDocuments],
-  );
-}
-
-export interface UpdateDocumentNameInput {
-  documentID: DocumentID;
-}
-
-export function useUpdateDocumentName() {
-  const emitEvent = useEmitEvent();
-  const getDocument = useDocumentQueryCallback();
-  const setDocuments = useSetRecoilState(documentsByIDState);
-
-  return useCallback(
-    (input: UpdateDocumentNameInput) => {
-      const { documentID } = input;
-      const prevDocument = getDocument(documentID);
-
-      const nextDocument: Document = {
-        ...prevDocument,
-      };
-
-      setDocuments((previousDocuments) => ({
-        ...previousDocuments,
-        [nextDocument.id]: nextDocument,
-      }));
-
-      emitEvent({
-        name: 'DocumentNameUpdated',
-        prevDocument,
-        nextDocument,
-      });
-    },
-    [getDocument, setDocuments, emitEvent],
   );
 }

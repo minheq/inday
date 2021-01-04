@@ -34,7 +34,6 @@ import {
   sortQuery,
   spaceCollectionsQuery,
   spaceQuery,
-  viewDocumentsQuery,
   viewFilterGroupsQuery,
   viewFiltersGroupMaxQuery,
   viewFiltersQuery,
@@ -52,10 +51,15 @@ import {
   View,
   ViewID,
 } from '../../models/views';
-import { Sort, SortID } from '../../models/sorts';
+import { Sort, SortGetters, SortID } from '../../models/sorts';
 import { Group, GroupID } from '../../models/groups';
 import { useMemo } from 'react';
-import { Filter, FilterGroup, FilterID } from '../../models/filters';
+import {
+  Filter,
+  FilterGetters,
+  FilterGroup,
+  FilterID,
+} from '../../models/filters';
 
 export function useSpacesByIDQuery(): SpacesByIDState {
   return useRecoilValue(spacesByIDState);
@@ -139,8 +143,65 @@ export function useViewQuery(viewID: ViewID): View {
   return useRecoilValue(viewQuery(viewID));
 }
 
+export function useSortGettersQuery(): SortGetters {
+  const getField = useGetFieldCallback();
+  const prevDocument = useDocumentQuery(documentID);
+  const getCollaborator = useGetCollaboratorCallback();
+  const getCollection = useCollectionQueryCallback();
+
+  return {
+    getField,
+    getDocument,
+    getCollaborator,
+    getCollection,
+  };
+}
+
+export function useFilterGettersQuery(): FilterGetters {
+  const getField = useGetFieldCallback();
+  const prevDocument = useDocumentQuery(documentID);
+  const getCollaborator = useGetCollaboratorCallback();
+  const getCollection = useCollectionQueryCallback();
+
+  return {
+    getField,
+    getDocument,
+    getCollaborator,
+    getCollection,
+  };
+}
+
 export function useViewDocumentsQuery(viewID: ViewID): Document[] {
-  return useRecoilValue(viewDocumentsQuery(viewID));
+  const view = get(viewQuery(viewID));
+  const documents = get(collectionDocumentsQuery(view.collectionID));
+  const filterGroups = get(viewFilterGroupsQuery(viewID));
+  const sorts = get(viewSortsQuery(viewID));
+
+  const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
+  const getDocument = (documentID: DocumentID) =>
+    get(documentQuery(documentID));
+  const getCollaborator = (collaboratorID: CollaboratorID) =>
+    get(collaboratorQuery(collaboratorID));
+  const getCollection = (collectionID: CollectionID) =>
+    get(collectionQuery(collectionID));
+
+  const sortGetters: SortGetters = {
+    getField,
+    getDocument,
+    getCollaborator,
+    getCollection,
+  };
+
+  const filterGetters: FilterGetters = {
+    getField,
+  };
+
+  let finalDocuments = documents;
+
+  finalDocuments = filterDocuments(filterGroups, finalDocuments, filterGetters);
+  finalDocuments = sortDocuments(sorts, finalDocuments, sortGetters);
+
+  return finalDocuments;
 }
 
 export function useCollectionDocumentsByIDQuery(

@@ -18,13 +18,13 @@ import {
   SortGetters,
 } from '../../../models/sorts';
 import {
-  useGetSortedFieldsWithListViewConfig,
-  useGetSortGetters,
-  useGetView,
-  useGetViewDocuments,
-  useGetViewFilters,
-  useGetViewGroups,
-  useGetViewSorts,
+  useSortedFieldsWithListViewConfigQuery,
+  useSortGettersQuery,
+  useViewQuery,
+  useViewDocumentsQuery,
+  useViewFiltersQuery,
+  useViewGroupsQuery,
+  useViewSortsQuery,
 } from '../../store/queries';
 import { assertListView, ViewID } from '../../../models/views';
 import { usePrevious } from '../../hooks/use_previous';
@@ -50,7 +50,7 @@ interface ListViewGrid {
 
 export function useListViewGrid(props: UseListViewGridProps): ListViewGrid {
   const { viewID, selectedDocuments } = props;
-  const view = useGetView(viewID);
+  const view = useViewQuery(viewID);
   assertListView(view);
 
   const {
@@ -61,7 +61,7 @@ export function useListViewGrid(props: UseListViewGridProps): ListViewGrid {
     columnToFieldIDCache,
     pathToGroupCache,
   } = useListViewData(viewID);
-  const fields = useGetSortedFieldsWithListViewConfig(viewID);
+  const fields = useSortedFieldsWithListViewConfigQuery(viewID);
   const fixedFieldCount = view.fixedFieldCount;
   const columns = useMemo(
     (): number[] =>
@@ -189,11 +189,11 @@ function useListViewData(viewID: ViewID): ListViewData {
     () => collapsedGroupsByViewID[viewID],
     [collapsedGroupsByViewID, viewID],
   );
-  const documents = useGetViewDocuments(viewID);
-  const fields = useGetSortedFieldsWithListViewConfig(viewID);
-  const groups = useGetViewGroups(viewID);
+  const documents = useViewDocumentsQuery(viewID);
+  const fields = useSortedFieldsWithListViewConfigQuery(viewID);
+  const groups = useViewGroupsQuery(viewID);
   const grouped = isNotEmpty(groups);
-  const sortGetters = useGetSortGetters();
+  const sortGetters = useSortGettersQuery();
   const [nodes, setNodes] = useState(
     grouped
       ? getGroupedDocumentNodes(
@@ -435,9 +435,9 @@ function useDocumentsOrderChanged(
     viewID,
   ]);
   const documentsLength = documents.length;
-  const filters = useGetViewFilters(viewID);
-  const sorts = useGetViewSorts(viewID);
-  const groups = useGetViewGroups(viewID);
+  const filters = useViewFiltersQuery(viewID);
+  const sorts = useViewSortsQuery(viewID);
+  const groups = useViewGroupsQuery(viewID);
 
   const prevCollapsedGroups = usePrevious(collapsedGroups);
   const prevDocumentsLength = usePrevious(documents.length);
