@@ -3,10 +3,10 @@ import React from 'react';
 import {
   MultiDocumentLinkField,
   MultiDocumentLinkFieldValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
-import { useGetCollectionDocuments } from '../../data/store';
+import { useCollectionDocumentsQuery } from '../../store/queries';
 import {
   useDocumentLinkOptions,
   useRenderDocumentLink,
@@ -25,7 +25,9 @@ export function MultiDocumentLinkValueEdit(
   const { documentID, field, value, onDone } = props;
   const renderDocumentLink = useRenderDocumentLink();
 
-  const documents = useGetCollectionDocuments(field.documentsFromCollectionID);
+  const documents = useCollectionDocumentsQuery(
+    field.documentsFromCollectionID,
+  );
   const options = useDocumentLinkOptions(documents);
 
   return (

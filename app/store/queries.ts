@@ -1,0 +1,301 @@
+import { useRecoilValue } from 'recoil';
+import { Collaborator, CollaboratorID } from '../../models/collaborators';
+import { Collection, CollectionID } from '../../models/collections';
+import { Space, SpaceID } from '../../models/spaces';
+import { Workspace } from '../../models/workspace';
+import { Field, FieldID, FieldValue, FieldConfig } from '../../models/fields';
+import {
+  collaboratorsByIDState,
+  CollaboratorsByIDState,
+  collectionsByIDState,
+  CollectionsByIDState,
+  DocumentsByIDState,
+  filtersByIDState,
+  spacesByIDState,
+  SpacesByIDState,
+  workspaceState,
+} from './atoms';
+import {
+  collaboratorQuery,
+  collaboratorsQuery,
+  collectionDocumentsByIDQuery,
+  collectionDocumentsQuery,
+  collectionFieldsByIDQuery,
+  collectionFieldsQuery,
+  collectionQuery,
+  collectionViewsQuery,
+  documentFieldsEntriesQuery,
+  documentFieldValueQuery,
+  documentQuery,
+  fieldQuery,
+  filterQuery,
+  groupQuery,
+  sortQuery,
+  spaceCollectionsQuery,
+  spaceQuery,
+  viewDocumentsQuery,
+  viewFilterGroupsQuery,
+  viewFiltersGroupMaxQuery,
+  viewFiltersQuery,
+  viewGroupsQuery,
+  viewGroupsSequenceMaxQuery,
+  viewQuery,
+  viewSortsQuery,
+  viewSortsSequenceMaxQuery,
+} from './selectors';
+import {
+  Document,
+  DocumentFieldValues,
+  DocumentID,
+} from '../../models/documents';
+import {
+  assertListView,
+  FieldWithListViewConfig,
+  ListViewFieldConfig,
+  View,
+  ViewID,
+} from '../../models/views';
+import { Sort, SortID } from '../../models/sorts';
+import { Group, GroupID } from '../../models/groups';
+import { useMemo } from 'react';
+import { Filter, FilterGroup, FilterID } from '../../models/filters';
+
+export function useSpacesByIDQuery(): SpacesByIDState {
+  return useRecoilValue(spacesByIDState);
+}
+
+export function useSpaceQuery(spaceID: SpaceID): Space {
+  const space = useRecoilValue(spaceQuery(spaceID));
+
+  if (space === null) {
+    throw new Error('Space not found');
+  }
+
+  return space;
+}
+
+export function useSpaceCollectionsQuery(spaceID: SpaceID): Collection[] {
+  return useRecoilValue(spaceCollectionsQuery(spaceID));
+}
+
+export function useWorkspaceQuery(): Workspace {
+  const workspace = useRecoilValue(workspaceState);
+
+  if (workspace === null) {
+    throw new Error('Workspace not found');
+  }
+
+  return workspace;
+}
+
+export function useCollaboratorsByIDQuery(): CollaboratorsByIDState {
+  return useRecoilValue(collaboratorsByIDState);
+}
+
+export function useCollaboratorsQuery(): Collaborator[] {
+  return useRecoilValue(collaboratorsQuery);
+}
+
+export function useCollaboratorQuery(
+  collaboratorID: CollaboratorID,
+): Collaborator {
+  return useRecoilValue(collaboratorQuery(collaboratorID));
+}
+
+export function useCollectionsByIDQuery(): CollectionsByIDState {
+  return useRecoilValue(collectionsByIDState);
+}
+
+export function useCollectionQuery(collectionID: CollectionID): Collection {
+  const collection = useRecoilValue(collectionQuery(collectionID));
+
+  if (collection === null) {
+    throw new Error('Collection not found');
+  }
+
+  return collection;
+}
+
+export function useCollectionFieldsQuery(collectionID: CollectionID): Field[] {
+  return useRecoilValue(collectionFieldsQuery(collectionID));
+}
+
+export function useCollectionDocumentsQuery(
+  collectionID: CollectionID,
+): Document[] {
+  return useRecoilValue(collectionDocumentsQuery(collectionID));
+}
+
+export function useCollectionFieldsByIDQuery(
+  collectionID: CollectionID,
+): {
+  [fieldID: string]: Field;
+} {
+  return useRecoilValue(collectionFieldsByIDQuery(collectionID));
+}
+
+export function useCollectionViewsQuery(collectionID: CollectionID): View[] {
+  return useRecoilValue(collectionViewsQuery(collectionID));
+}
+
+export function useViewQuery(viewID: ViewID): View {
+  return useRecoilValue(viewQuery(viewID));
+}
+
+export function useViewDocumentsQuery(viewID: ViewID): Document[] {
+  return useRecoilValue(viewDocumentsQuery(viewID));
+}
+
+export function useCollectionDocumentsByIDQuery(
+  collectionID: CollectionID,
+): DocumentsByIDState {
+  return useRecoilValue(collectionDocumentsByIDQuery(collectionID));
+}
+
+export function useFiltersByIDQuery() {
+  return useRecoilValue(filtersByIDState);
+}
+
+export function useFilterQuery(filterID: FilterID): Filter {
+  return useRecoilValue(filterQuery(filterID));
+}
+
+export function useSortQuery(sortID: SortID): Sort {
+  return useRecoilValue(sortQuery(sortID));
+}
+
+export function useDocumentPrimaryFieldValueQuery(
+  documentID: DocumentID,
+): [field: Field, value: FieldValue] {
+  const document = useDocumentQuery(documentID);
+  const collection = useCollectionQuery(document.collectionID);
+  const field = useFieldQuery(collection.primaryFieldID);
+
+  return [field, document.fields[collection.primaryFieldID]];
+}
+
+export function useViewFiltersQuery(viewID: ViewID) {
+  return useRecoilValue(viewFiltersQuery(viewID));
+}
+
+export function useDocumentFieldValuesEntriesQuery(
+  documentID: DocumentID,
+): [Field, FieldValue][] {
+  return useRecoilValue(documentFieldsEntriesQuery(documentID));
+}
+
+export function useViewSortsQuery(viewID: ViewID): Sort[] {
+  return useRecoilValue(viewSortsQuery(viewID));
+}
+
+export function useViewGroupsQuery(viewID: ViewID): Group[] {
+  return useRecoilValue(viewGroupsQuery(viewID));
+}
+
+export function useGroupQuery(groupID: GroupID): Group {
+  return useRecoilValue(groupQuery(groupID));
+}
+
+export function useFiltersGroupMaxQuery(viewID: ViewID) {
+  return useRecoilValue(viewFiltersGroupMaxQuery(viewID));
+}
+
+export function useSortsSequenceMaxQuery(viewID: ViewID) {
+  return useRecoilValue(viewSortsSequenceMaxQuery(viewID));
+}
+
+export function useGroupsSequenceMaxQuery(viewID: ViewID) {
+  return useRecoilValue(viewGroupsSequenceMaxQuery(viewID));
+}
+
+export function useListViewFieldConfigQuery(
+  viewID: ViewID,
+  fieldID: FieldID,
+): ListViewFieldConfig {
+  const view = useViewQuery(viewID);
+
+  assertListView(view);
+
+  return view.fieldsConfig[fieldID];
+}
+
+export function useSortedFieldsWithListViewConfigQuery(
+  viewID: ViewID,
+): FieldWithListViewConfig[] {
+  const view = useViewQuery(viewID);
+
+  assertListView(view);
+
+  const fields = useCollectionFieldsQuery(view.collectionID);
+
+  return useMemo(() => {
+    return fields
+      .slice(0)
+      .sort((a, b) => {
+        const fieldConfigA = view.fieldsConfig[a.id];
+        const fieldConfigB = view.fieldsConfig[b.id];
+
+        if (fieldConfigA.order < fieldConfigB.order) {
+          return -1;
+        } else if (fieldConfigA.order > fieldConfigB.order) {
+          return 1;
+        }
+
+        return 0;
+      })
+      .map((f) => {
+        const config = view.fieldsConfig[f.id];
+
+        return {
+          ...f,
+          config,
+        };
+      });
+  }, [fields, view]);
+}
+
+export function useFieldQuery(fieldID: FieldID) {
+  const field = useRecoilValue(fieldQuery(fieldID));
+
+  if (field === null) {
+    throw new Error('Field not found');
+  }
+
+  return field;
+}
+
+export function useFieldConfigQuery(fieldID: FieldID): FieldConfig {
+  const field = useRecoilValue(fieldQuery(fieldID));
+
+  if (field === null) {
+    throw new Error('Field config not found');
+  }
+
+  return field;
+}
+
+export function useDocumentFieldValueQuery(
+  documentID: DocumentID,
+  fieldID: FieldID,
+): FieldValue {
+  const params = useMemo(() => ({ documentID, fieldID }), [
+    documentID,
+    fieldID,
+  ]);
+
+  return useRecoilValue(documentFieldValueQuery(params));
+}
+
+export function useDocumentQuery(documentID: DocumentID): Document {
+  const document = useRecoilValue(documentQuery(documentID));
+
+  if (document === null) {
+    throw new Error('Document not found');
+  }
+
+  return document;
+}
+
+export function useViewFiltersGroupsQuery(viewID: ViewID): FilterGroup[] {
+  return useRecoilValue(viewFilterGroupsQuery(viewID));
+}

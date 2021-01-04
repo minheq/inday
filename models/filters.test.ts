@@ -1,4 +1,4 @@
-import { test } from '../../lib/testing';
+import { test } from '../lib/testing';
 import {
   Filter,
   updateFilterGroup,
@@ -50,7 +50,7 @@ import {
   makeFilter,
 } from './factory';
 import { FieldType, FieldValue } from './fields';
-import {} from '../../lib/date_utils';
+import {} from '../lib/date_utils';
 
 test('no filter', (t) => {
   const values = ['AWord', 'BWord'];

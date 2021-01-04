@@ -16,19 +16,19 @@ import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
 import {
-  useGetCollectionFields,
+  useCollectionQueryFields,
   useGetField,
   useGetViewSorts,
   useDeleteSort,
   useUpdateSortConfig,
   useCreateSort,
   useGetSortsSequenceMax,
-} from '../../data/store';
+} from '../../store/queries';
 import { first } from '../../../lib/array_utils';
 import { isEmpty } from '../../../lib/lang_utils';
-import { FieldID } from '../../data/fields';
+import { FieldID } from '../../../models/fields';
 import { FieldPicker } from '../fields/field_picker';
-import { SortID, Sort, SortConfig, SortOrder } from '../../data/sorts';
+import { SortID, Sort, SortConfig, SortOrder } from '../../../models/sorts';
 import { SegmentedControl } from '../../components/segmented_control';
 
 const sortEditIDState = atom<SortID>({
@@ -157,7 +157,7 @@ function SortNew() {
   const sortEditID = useRecoilValue(sortEditIDState);
   const context = useContext(SortMenuContext);
 
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionQueryFields(context.collectionID);
 
   const createSort = useCreateSort();
   const firstField = first(fields);
@@ -232,7 +232,7 @@ function SortEdit(props: SortEditProps) {
   const { sortConfig, onChange } = props;
   const context = useContext(SortMenuContext);
   const field = useGetField(sortConfig.fieldID);
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionQueryFields(context.collectionID);
 
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {

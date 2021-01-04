@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Row } from '../../components/row';
 import { TextLink } from '../../components/text_link';
-import { PhoneNumberFieldValue } from '../../data/fields';
+import { PhoneNumberFieldValue } from '../../../models/fields';
 
 interface PhoneNumberValueActionsProps {
   value: PhoneNumberFieldValue;

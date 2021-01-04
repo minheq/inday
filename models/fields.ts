@@ -1,6 +1,6 @@
-import { NumberUnit } from '../../lib/unit';
-import { generateID, validateID } from '../../lib/id';
-import { hasAllOf } from '../../lib/array_utils';
+import { NumberUnit } from '../lib/unit';
+import { generateID, validateID } from '../lib/id';
+import { hasAllOf, keyedBy } from '../lib/array_utils';
 import {
   DateTimeFormatOptions,
   formatDate,
@@ -9,24 +9,22 @@ import {
   ISODate,
   isSameDay,
   parseISODate,
-} from '../../lib/date_utils';
+} from '../lib/date_utils';
 import { CollaboratorID } from './collaborators';
 import { CollectionID } from './collections';
-import { DocumentID } from './documents';
-import { assertUnreached } from '../../lib/lang_utils';
-import { getSystemLocale } from '../lib/locale';
+import { DocumentFieldValues, DocumentID } from './documents';
+import { assertUnreached, map } from '../lib/lang_utils';
 
 export const fieldIDPrefix = 'fld' as const;
 export type FieldID = `${typeof fieldIDPrefix}${string}`;
 
-export const Field = {
-  generateID: (): FieldID => {
-    return generateID(fieldIDPrefix);
-  },
-  validateID: (id: string): void => {
-    return validateID(fieldIDPrefix, id);
-  },
-};
+export function generateFieldID(): FieldID {
+  return generateID(fieldIDPrefix);
+}
+
+export function validateFieldID(id: string): void {
+  return validateID(fieldIDPrefix, id);
+}
 
 // eslint-disable-next-line
 export enum FieldType {
@@ -75,14 +73,13 @@ export interface MultiLineTextField
 export const selectOptionIDPrefix = 'opt' as const;
 export type SelectOptionID = `${typeof selectOptionIDPrefix}${string}`;
 
-export const SelectOption = {
-  generateID: (): SelectOptionID => {
-    return generateID(selectOptionIDPrefix);
-  },
-  validateID: (id: string): void => {
-    return validateID(selectOptionIDPrefix, id);
-  },
-};
+export function generateSelectOptionID(): SelectOptionID {
+  return generateID(selectOptionIDPrefix);
+}
+
+export function validateSelectOptionID(id: string): void {
+  return validateID(selectOptionIDPrefix, id);
+}
 
 export interface SelectOption {
   id: SelectOptionID;
@@ -323,7 +320,11 @@ export interface FieldTypeToFieldValue {
   [FieldType.URL]: URLFieldValue;
 }
 
-export function stringifyFieldValue(field: Field, value: FieldValue): string {
+export function stringifyFieldValue(
+  field: Field,
+  value: FieldValue,
+  locales?: string | string[],
+): string {
   switch (field.type) {
     case FieldType.SingleLineText:
     case FieldType.URL:
@@ -379,7 +380,7 @@ export function stringifyFieldValue(field: Field, value: FieldValue): string {
         return value;
       }
 
-      return formatDate(parseISODate(value), getSystemLocale());
+      return formatDate(parseISODate(value), locales);
     default:
       throw new Error(`Field type ${field.type} cannot be stringified.`);
   }
@@ -975,4 +976,38 @@ export function assertPrimaryFieldValue(
       `Expected PrimaryFieldValue. Received ${JSON.stringify(value)}`,
     );
   }
+}
+
+export function getDefaultFieldValue(field: Field): FieldValue {
+  switch (field.type) {
+    case FieldType.Checkbox:
+      return false;
+    case FieldType.Currency:
+    case FieldType.Number:
+    case FieldType.Date:
+    case FieldType.SingleCollaborator:
+    case FieldType.SingleOption:
+    case FieldType.SingleDocumentLink:
+      return null;
+    case FieldType.PhoneNumber:
+    case FieldType.URL:
+    case FieldType.Email:
+    case FieldType.MultiLineText:
+    case FieldType.SingleLineText:
+      return '';
+    case FieldType.MultiCollaborator:
+    case FieldType.MultiOption:
+    case FieldType.MultiDocumentLink:
+      return [];
+    default:
+      assertUnreached(field);
+  }
+}
+
+export function getDefaultDocumentFieldValues(
+  fields: Field[],
+): DocumentFieldValues {
+  const fieldsByID = keyedBy(fields, (field) => field.id);
+
+  return map(fieldsByID, getDefaultFieldValue);
 }

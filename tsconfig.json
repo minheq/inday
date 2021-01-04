@@ -17,7 +17,7 @@
       "react-native": ["./node_modules/react-native-web"]
     }
   },
-  "include": ["app", "api", "lib", "index.web.tsx"],
+  "include": ["app", "api", "models", "lib", "index.web.tsx"],
   "exclude": [
     "node_modules",
     "scripts",

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Text } from '../../components/text';
-import { URLField, URLFieldValue } from '../../data/fields';
+import { URLField, URLFieldValue } from '../../../models/fields';
 
 interface URLValueViewProps {
   field: URLField;

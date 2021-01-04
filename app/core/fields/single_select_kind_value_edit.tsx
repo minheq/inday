@@ -3,9 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 import { FlatButton } from '../../components/flat_button';
 import { ListPicker, ListPickerOption } from '../../components/list_picker';
-import { FieldID, SingleSelectFieldKindValue } from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+import { FieldID, SingleSelectFieldKindValue } from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValue } from '../../store/mutations';
 
 interface SingleSelectKindValueEditProps<T extends SingleSelectFieldKindValue> {
   documentID: DocumentID;

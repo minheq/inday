@@ -8,9 +8,9 @@ import {
   BooleanFieldKindValue,
   CheckboxField,
   CheckboxFieldValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValue } from '../../store/mutations';
 
 interface CheckboxValueEditProps {
   documentID: DocumentID;

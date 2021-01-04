@@ -1,18 +1,17 @@
-import { generateID, validateID } from '../../lib/id';
+import { generateID, validateID } from '../lib/id';
 import { CollectionID } from './collections';
 import { FieldID, Field } from './fields';
 
 export const viewIDPrefix = 'viw' as const;
 export type ViewID = `${typeof viewIDPrefix}${string}`;
 
-export const View = {
-  generateID: (): ViewID => {
-    return generateID(viewIDPrefix);
-  },
-  validateID: (id: string): void => {
-    return validateID(viewIDPrefix, id);
-  },
-};
+export function generateViewID(): ViewID {
+  return generateID(viewIDPrefix);
+}
+
+export function validateViewID(id: string): void {
+  return validateID(viewIDPrefix, id);
+}
 
 export interface BaseView {
   id: ViewID;
@@ -34,7 +33,10 @@ interface ListViewConfig {
   fieldsConfig: ListViewFieldsConfig;
 }
 
-type ListViewFieldsConfig = Record<FieldID, ListViewFieldConfig>;
+type ListViewFieldsConfig = {
+  [FieldID: string]: ListViewFieldConfig;
+};
+// type ListViewFieldsConfig = Record<FieldID, ListViewFieldConfig>;
 
 export type FieldWithListViewConfig = Field & {
   config: ListViewFieldConfig;

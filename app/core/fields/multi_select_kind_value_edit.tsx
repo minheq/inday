@@ -3,14 +3,14 @@ import { StyleSheet, View } from 'react-native';
 import { FlatButton } from '../../components/flat_button';
 import { ListPickerOption } from '../../components/list_picker';
 import { MultiListPicker } from '../../components/multi_list_picker';
-import { CollaboratorID } from '../../data/collaborators';
+import { CollaboratorID } from '../../../models/collaborators';
 import {
   FieldID,
   MultiSelectFieldKindValue,
   SelectOptionID,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValue } from '../../store/queries';
 
 interface MultiSelectKindValueEditProps<T> {
   documentID: DocumentID;

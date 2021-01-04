@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { formatCurrency } from '../../../lib/currency';
 import { Text } from '../../components/text';
-import { CurrencyField, CurrencyFieldValue } from '../../data/fields';
+import { CurrencyField, CurrencyFieldValue } from '../../../models/fields';
 import { getSystemLocale } from '../../lib/locale';
 
 interface CurrencyValueViewProps {

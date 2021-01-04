@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Row } from '../../components/row';
 import { TextLink } from '../../components/text_link';
-import { URLFieldValue } from '../../data/fields';
+import { URLFieldValue } from '../../../models/fields';
 
 interface URLValueActionsProps {
   value: URLFieldValue;

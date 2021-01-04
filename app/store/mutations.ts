@@ -1,24 +1,36 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+
+import { EventConfig, Event } from '../../models/events';
 import {
-  useRecoilValue,
-  useSetRecoilState,
-  useRecoilCallback,
-  Loadable,
-} from 'recoil';
+  Collection,
+  CollectionID,
+  generateCollectionID,
+} from '../../models/collections';
 
-import { useEventEmitter, EventConfig, Event } from './events';
-import { Collection, CollectionID } from './collections';
-
-import { Space, SpaceID } from './spaces';
+import { generateSpaceID, Space, SpaceID } from '../../models/spaces';
 import {
   View,
   ViewID,
   assertListView,
-  FieldWithListViewConfig,
   ListViewFieldConfig,
-} from './views';
-import { Field, FieldConfig, FieldID, FieldValue, FieldType } from './fields';
-import { Document, DocumentFieldValues, DocumentID } from './documents';
+  generateViewID,
+} from '../../models/views';
+import {
+  Field,
+  FieldConfig,
+  FieldID,
+  FieldValue,
+  FieldType,
+  generateFieldID,
+  getDefaultDocumentFieldValues,
+} from '../../models/fields';
+import {
+  Document,
+  DocumentFieldValues,
+  DocumentID,
+  generateDocumentID,
+} from '../../models/documents';
 import {
   Filter,
   FilterConfig,
@@ -26,7 +38,8 @@ import {
   FilterID,
   deleteFilter,
   FilterGroup,
-} from './filters';
+  generateFilterID,
+} from '../../models/filters';
 import { useLogger } from '../../lib/logger';
 import {
   workspaceState,
@@ -43,62 +56,48 @@ import {
   SortsByIDState,
   groupsByIDState,
   GroupsByIDState,
-  SpacesByIDState,
-  collaboratorsByIDState,
-  CollaboratorsByIDState,
-  DocumentsByIDState,
-  CollectionsByIDState,
 } from './atoms';
 import {
-  spaceQuery,
-  spaceCollectionsQuery,
-  collectionQuery,
-  collectionFieldsQuery,
-  collectionDocumentsQuery,
-  collectionFieldsByIDQuery,
-  collectionViewsQuery,
-  viewQuery,
-  viewDocumentsQuery,
-  viewFilterGroupsQuery,
-  viewFiltersQuery,
-  viewFiltersGroupMaxQuery,
-  fieldQuery,
-  documentQuery,
-  viewSortsQuery,
-  filterQuery,
-  sortQuery,
-  viewSortsSequenceMaxQuery,
-  viewGroupsSequenceMaxQuery,
-  viewGroupsQuery,
-  groupQuery,
-  collectionDocumentsByIDQuery,
-  documentFieldValueQuery,
-  collaboratorsQuery,
-  collaboratorQuery,
-  sortGettersQuery,
-  documentFieldsEntriesQuery,
+  SortConfig,
+  Sort,
+  SortID,
+  deleteSort,
+  SortGetters,
+  generateSortID,
+} from '../../models/sorts';
+import {
+  Group,
+  GroupID,
+  deleteGroup,
+  generateGroupID,
+} from '../../models/groups';
+import { EventEmitter } from '../../lib/event_emitter';
+import {
+  useCollectionFieldsQuery,
+  useCollectionQuery,
+  useDocumentQuery,
+  useFieldQuery,
+  useFilterQuery,
+  useGroupQuery,
+  useSortQuery,
+  useSpaceQuery,
+  useViewFiltersQuery,
+  useViewGroupsQuery,
+  useViewQuery,
+  useViewSortsQuery,
+  useWorkspaceQuery,
 } from './queries';
-import { SortConfig, Sort, SortID, deleteSort, SortGetters } from './sorts';
-import { Group, GroupID, deleteGroup } from './groups';
-import { Workspace } from './workspace';
-import { Collaborator, CollaboratorID } from './collaborators';
-import { keyedBy } from '../../lib/array_utils';
-import { assertUnreached, map } from '../../lib/lang_utils';
 
-export function useGetWorkspace(): Workspace {
-  const workspace = useRecoilValue(workspaceState);
+export const eventEmitter = new EventEmitter<Event>();
 
-  if (workspace === null) {
-    throw new Error('Workspace not found');
-  }
-
-  return workspace;
+export function useEventEmitter(): EventEmitter<Event> {
+  return eventEmitter;
 }
 
 export function useEmitEvent(): (eventConfig: EventConfig) => void {
   const logger = useLogger();
   const eventEmitter = useEventEmitter();
-  const workspace = useGetWorkspace();
+  const workspace = useWorkspaceQuery();
   const setEvents = useSetRecoilState(eventsState);
 
   return useCallback(
@@ -119,50 +118,15 @@ export function useEmitEvent(): (eventConfig: EventConfig) => void {
   );
 }
 
-export function useGetSpaces(): SpacesByIDState {
-  return useRecoilValue(spacesByIDState);
-}
-
-export function useGetSpaceCallback(): (spaceID: SpaceID) => Space {
-  const spaces = useGetSpaces();
-
-  return useCallback(
-    (spaceID: SpaceID) => {
-      const space = spaces[spaceID];
-
-      if (space === undefined) {
-        throw new Error('Space not found');
-      }
-
-      return space;
-    },
-    [spaces],
-  );
-}
-
-export function useGetSpace(spaceID: SpaceID): Space {
-  const space = useRecoilValue(spaceQuery(spaceID));
-
-  if (space === null) {
-    throw new Error('Space not found');
-  }
-
-  return space;
-}
-
-export function useGetSpaceCollections(spaceID: SpaceID): Collection[] {
-  return useRecoilValue(spaceCollectionsQuery(spaceID));
-}
-
 export function useCreateSpace(): () => Space {
   const emitEvent = useEmitEvent();
-  const workspace = useGetWorkspace();
+  const workspace = useWorkspaceQuery();
   const setSpaces = useSetRecoilState(spacesByIDState);
   const createCollection = useCreateCollection();
 
   return useCallback(() => {
     const newSpace: Space = {
-      id: Space.generateID(),
+      id: generateSpaceID(),
       name: '',
       workspaceID: workspace.id,
       createdAt: new Date(),
@@ -209,19 +173,19 @@ export function useDeleteSpace(): (space: Space) => void {
 }
 
 export interface UpdateSpaceNameInput {
-  spaceID: SpaceID;
   name: string;
 }
 
-export function useUpdateSpaceName(): (input: UpdateSpaceNameInput) => void {
+export function useUpdateSpaceName(
+  spaceID: SpaceID,
+): (input: UpdateSpaceNameInput) => void {
   const emitEvent = useEmitEvent();
-  const getSpace = useGetSpaceCallback();
+  const prevSpace = useSpaceQuery(spaceID);
   const setSpaces = useSetRecoilState(spacesByIDState);
 
   return useCallback(
     (input: UpdateSpaceNameInput) => {
-      const { spaceID, name } = input;
-      const prevSpace = getSpace(spaceID);
+      const { name } = input;
 
       const nextSpace: Space = {
         ...prevSpace,
@@ -239,88 +203,8 @@ export function useUpdateSpaceName(): (input: UpdateSpaceNameInput) => void {
         nextSpace,
       });
     },
-    [emitEvent, setSpaces, getSpace],
+    [emitEvent, setSpaces, prevSpace],
   );
-}
-
-export function useGetCollaboratorsByID(): CollaboratorsByIDState {
-  return useRecoilValue(collaboratorsByIDState);
-}
-
-export function useGetCollaborators(): Collaborator[] {
-  return useRecoilValue(collaboratorsQuery);
-}
-
-export function useGetCollaborator(
-  collaboratorID: CollaboratorID,
-): Collaborator {
-  return useRecoilValue(collaboratorQuery(collaboratorID));
-}
-
-export function useGetCollectionsByID(): CollectionsByIDState {
-  return useRecoilValue(collectionsByIDState);
-}
-
-export function useGetCollectionCallback(): (
-  collectionID: CollectionID,
-) => Collection {
-  const collections = useGetCollectionsByID();
-
-  return useCallback(
-    (collectionID) => {
-      const collection = collections[collectionID];
-
-      if (collection === undefined) {
-        throw new Error('Collection not found');
-      }
-
-      return collection;
-    },
-    [collections],
-  );
-}
-
-export function useGetCollection(collectionID: CollectionID): Collection {
-  const collection = useRecoilValue(collectionQuery(collectionID));
-
-  if (collection === null) {
-    throw new Error('Collection not found');
-  }
-
-  return collection;
-}
-
-export function useGetCollectionFields(collectionID: CollectionID): Field[] {
-  return useRecoilValue(collectionFieldsQuery(collectionID));
-}
-
-export function useGetCollectionFieldsCallback(): (
-  collectionID: CollectionID,
-) => Loadable<Field[]> {
-  return useRecoilCallback(
-    ({ snapshot }) => (collectionID: CollectionID) => {
-      return snapshot.getLoadable(collectionFieldsQuery(collectionID));
-    },
-    [],
-  );
-}
-
-export function useGetCollectionDocuments(
-  collectionID: CollectionID,
-): Document[] {
-  return useRecoilValue(collectionDocumentsQuery(collectionID));
-}
-
-export function useGetCollectionFieldsByID(
-  collectionID: CollectionID,
-): {
-  [fieldID: string]: Field;
-} {
-  return useRecoilValue(collectionFieldsByIDQuery(collectionID));
-}
-
-export function useGetCollectionViews(collectionID: CollectionID): View[] {
-  return useRecoilValue(collectionViewsQuery(collectionID));
 }
 
 export function useCreateCollection(): (spaceID: SpaceID) => Collection {
@@ -331,9 +215,9 @@ export function useCreateCollection(): (spaceID: SpaceID) => Collection {
   return useCallback(
     (spaceID: SpaceID) => {
       const newCollection: Collection = {
-        id: Collection.generateID(),
+        id: generateCollectionID(),
         name: '',
-        primaryFieldID: Field.generateID(),
+        primaryFieldID: generateFieldID(),
         createdAt: new Date(),
         updatedAt: new Date(),
         spaceID,
@@ -364,7 +248,7 @@ export function useUpdateDocumentFieldValue<T extends FieldValue>(): (
 ) => void {
   const emitEvent = useEmitEvent();
   const setDocumentsByID = useSetRecoilState(documentsByIDState);
-  const getDocument = useGetDocumentCallback();
+  const getDocument = useDocumentQueryCallback();
 
   return useCallback(
     (documentID, fieldID, nextValue) => {
@@ -419,19 +303,17 @@ export function useDeleteCollection() {
 }
 
 export interface UpdateCollectionNameInput {
-  collectionID: CollectionID;
   name: string;
 }
 
-export function useUpdateCollectionName() {
+export function useUpdateCollectionName(collectionID: CollectionID) {
   const emitEvent = useEmitEvent();
-  const getCollection = useGetCollectionCallback();
+  const prevCollection = useCollectionQuery(collectionID);
   const setCollections = useSetRecoilState(collectionsByIDState);
 
   return useCallback(
     (input: UpdateCollectionNameInput) => {
-      const { collectionID, name } = input;
-      const prevCollection = getCollection(collectionID);
+      const { name } = input;
 
       const nextCollection: Collection = {
         ...prevCollection,
@@ -449,161 +331,32 @@ export function useUpdateCollectionName() {
         nextCollection,
       });
     },
-    [getCollection, setCollections, emitEvent],
+    [prevCollection, setCollections, emitEvent],
   );
 }
 
-export function useGetViewCallback() {
-  return useRecoilCallback(
-    ({ snapshot }) => (viewID: ViewID) => {
-      return snapshot.getLoadable(viewQuery(viewID));
-    },
-    [],
-  );
-}
-
-export function useGetGroupCallback() {
-  return useRecoilCallback(
-    ({ snapshot }) => async (groupID: GroupID) => {
-      return snapshot.getPromise(groupQuery(groupID));
-    },
-    [],
-  );
-}
-
-export function useGetView(viewID: ViewID): View {
-  return useRecoilValue(viewQuery(viewID));
-}
-
-export function useGetViewDocuments(viewID: ViewID): Document[] {
-  return useRecoilValue(viewDocumentsQuery(viewID));
-}
-
-export function useGetCollectionDocumentsByID(
-  collectionID: CollectionID,
-): DocumentsByIDState {
-  return useRecoilValue(collectionDocumentsByIDQuery(collectionID));
-}
-
-export function useGetFiltersByID() {
-  return useRecoilValue(filtersByIDState);
-}
-
-export function useGetFilterCallback() {
-  return useRecoilCallback(
-    ({ snapshot }) => async (filterID: FilterID) => {
-      return snapshot.getPromise(filterQuery(filterID));
-    },
-    [],
-  );
-}
-
-export function useGetSortCallback() {
-  return useRecoilCallback(
-    ({ snapshot }) => async (sortID: SortID) => {
-      return snapshot.getPromise(sortQuery(sortID));
-    },
-    [],
-  );
-}
-
-export function useGetViewFiltersGroups(viewID: ViewID): FilterGroup[] {
-  return useRecoilValue(viewFilterGroupsQuery(viewID));
-}
-
-export function useGetDocumentPrimaryFieldValueCallback(): (
-  documentID: DocumentID,
-) => [field: Field, value: FieldValue] {
-  const getDocument = useGetDocumentCallback();
-  const getCollection = useGetCollectionCallback();
-  const getField = useGetFieldCallback();
-
-  return useCallback(
-    (documentID: DocumentID) => {
-      const document = getDocument(documentID);
-      const collection = getCollection(document.collectionID);
-      const field = getField(collection.primaryFieldID);
-
-      return [field, document.fields[collection.primaryFieldID]];
-    },
-    [getDocument, getCollection, getField],
-  );
-}
-
-export function useGetDocumentPrimaryFieldValue(
+export function useDocumentQueryPrimaryFieldValueCallback(
   documentID: DocumentID,
 ): [field: Field, value: FieldValue] {
-  const getDocument = useGetDocumentCallback();
-  const getCollection = useGetCollectionCallback();
-  const getField = useGetFieldCallback();
-
-  const document = getDocument(documentID);
-  const collection = getCollection(document.collectionID);
-
-  const field = getField(collection.primaryFieldID);
+  const document = useDocumentQuery(documentID);
+  const collection = useCollectionQuery(document.collectionID);
+  const field = useFieldQuery(collection.primaryFieldID);
 
   return [field, document.fields[collection.primaryFieldID]];
 }
 
-export function useGetViewFilters(viewID: ViewID) {
-  return useRecoilValue(viewFiltersQuery(viewID));
-}
+export function useSortGettersQuery(): SortGetters {
+  const getField = useGetFieldCallback();
+  const getDocument = useDocumentQueryCallback();
+  const getCollaborator = useGetCollaboratorCallback();
+  const getCollection = useCollectionQueryCallback();
 
-export function useGetDocumentFieldValuesEntries(
-  documentID: DocumentID,
-): [Field, FieldValue][] {
-  return useRecoilValue(documentFieldsEntriesQuery(documentID));
-}
-
-export function useGetViewSorts(viewID: ViewID): Sort[] {
-  return useRecoilValue(viewSortsQuery(viewID));
-}
-
-export function useGetViewGroups(viewID: ViewID): Group[] {
-  return useRecoilValue(viewGroupsQuery(viewID));
-}
-
-export function useGetSortGetters(): SortGetters {
-  return useRecoilValue(sortGettersQuery);
-}
-
-export function useGetViewFiltersCallback() {
-  return useRecoilCallback(
-    ({ snapshot }) => async (viewID: ViewID) => {
-      return snapshot.getPromise(viewFiltersQuery(viewID));
-    },
-    [],
-  );
-}
-
-export function useGetViewSortsCallback() {
-  return useRecoilCallback(
-    ({ snapshot }) => async (viewID: ViewID) => {
-      return snapshot.getPromise(viewSortsQuery(viewID));
-    },
-    [],
-  );
-}
-
-export function useGetViewGroupsCallback() {
-  return useRecoilCallback(
-    ({ snapshot }) => async (viewID: ViewID) => {
-      return snapshot.getPromise(viewGroupsQuery(viewID));
-    },
-    [],
-  );
-}
-
-export function useGetFiltersGroupMax(viewID: ViewID) {
-  return useRecoilValue(viewFiltersGroupMaxQuery(viewID));
-}
-
-export function useGetSortsSequenceMax(viewID: ViewID) {
-  return useRecoilValue(viewSortsSequenceMaxQuery(viewID));
-}
-
-export function useGetGroupsSequenceMax(viewID: ViewID) {
-  return useRecoilValue(viewGroupsSequenceMaxQuery(viewID));
+  return {
+    getField,
+    getDocument,
+    getCollaborator,
+    getCollection,
+  };
 }
 
 export function useCreateFilter() {
@@ -613,7 +366,7 @@ export function useCreateFilter() {
   return useCallback(
     (viewID: ViewID, group: number, filterConfig: FilterConfig) => {
       const newFilter: Filter = {
-        id: Filter.generateID(),
+        id: generateFilterID(),
         viewID,
         group,
         ...filterConfig,
@@ -635,15 +388,13 @@ export function useCreateFilter() {
   );
 }
 
-export function useUpdateFilterConfig() {
+export function useUpdateFilterConfig(filterID: FilterID) {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
-  const getFilter = useGetFilterCallback();
+  const prevFilter = useFilterQuery(filterID);
 
   return useCallback(
-    async (filterID: FilterID, group: number, filterConfig: FilterConfig) => {
-      const prevFilter = await getFilter(filterID);
-
+    async (group: number, filterConfig: FilterConfig) => {
       const nextFilter: Filter = {
         ...prevFilter,
         ...filterConfig,
@@ -662,21 +413,18 @@ export function useUpdateFilterConfig() {
 
       return nextFilter;
     },
-    [emitEvent, setFilters, getFilter],
+    [emitEvent, setFilters, prevFilter],
   );
 }
 
-export function useUpdateFilterGroup() {
+export function useUpdateFilterGroup(filterID: FilterID) {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState(filtersByIDState);
-  const getViewFilters = useGetViewFiltersCallback();
-  const getFilter = useGetFilterCallback();
+  const prevFilter = useFilterQuery(filterID);
+  const prevFilters = useViewFiltersQuery(prevFilter.viewID);
 
   return useCallback(
-    async (filterID: FilterID, value: 'and' | 'or') => {
-      const prevFilter = await getFilter(filterID);
-      const prevFilters = await getViewFilters(prevFilter.viewID);
-
+    async (value: 'and' | 'or') => {
       const nextFilters = updateFilterGroup(prevFilter, value, prevFilters);
 
       setFilters((previousFilters) => ({
@@ -692,41 +440,38 @@ export function useUpdateFilterGroup() {
 
       return nextFilters[filterID];
     },
-    [emitEvent, setFilters, getFilter, getViewFilters],
+    [emitEvent, setFilters, prevFilter, prevFilters],
   );
 }
 
-export function useDeleteFilter() {
+export function useDeleteFilter(filterID: FilterID) {
   const emitEvent = useEmitEvent();
   const setFilters = useSetRecoilState<FiltersByIDState>(filtersByIDState);
-  const getViewFilter = useGetViewFiltersCallback();
+  const prevFilter = useFilterQuery(filterID);
+  const prevFilters = useViewFiltersQuery(prevFilter.viewID);
 
-  return useCallback(
-    async (filter: Filter) => {
-      const prevFilters = await getViewFilter(filter.viewID);
-      const nextFilters = deleteFilter(filter, prevFilters);
+  return useCallback(async () => {
+    const nextFilters = deleteFilter(prevFilter, prevFilters);
 
-      setFilters((_prevFilters) => {
-        const clonedPreviousFilters: FiltersByIDState = {
-          ..._prevFilters,
-        };
+    setFilters((_prevFilters) => {
+      const clonedPreviousFilters: FiltersByIDState = {
+        ..._prevFilters,
+      };
 
-        delete clonedPreviousFilters[filter.id];
+      delete clonedPreviousFilters[filterID];
 
-        return {
-          ...clonedPreviousFilters,
-          ...nextFilters,
-        };
-      });
+      return {
+        ...clonedPreviousFilters,
+        ...nextFilters,
+      };
+    });
 
-      emitEvent({
-        name: 'FilterDeleted',
-        prevFilters,
-        nextFilters: Object.values(nextFilters),
-      });
-    },
-    [emitEvent, setFilters, getViewFilter],
-  );
+    emitEvent({
+      name: 'FilterDeleted',
+      prevFilters,
+      nextFilters: Object.values(nextFilters),
+    });
+  }, [emitEvent, setFilters, prevFilters, filterID]);
 }
 
 export function useCreateSort() {
@@ -736,7 +481,7 @@ export function useCreateSort() {
   return useCallback(
     (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
       const newSort: Sort = {
-        id: Sort.generateID(),
+        id: generateSortID(),
         viewID,
         sequence,
         ...sortConfig,
@@ -758,15 +503,13 @@ export function useCreateSort() {
   );
 }
 
-export function useUpdateSortConfig() {
+export function useUpdateSortConfig(sortID: SortID) {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState(sortsByIDState);
-  const getSort = useGetSortCallback();
+  const prevSort = useSortQuery(sortID);
 
   return useCallback(
-    async (sortID: SortID, sortConfig: SortConfig) => {
-      const prevSort = await getSort(sortID);
-
+    async (sortConfig: SortConfig) => {
       const nextSort: Sort = {
         ...prevSort,
         ...sortConfig,
@@ -785,41 +528,38 @@ export function useUpdateSortConfig() {
 
       return nextSort;
     },
-    [emitEvent, setSorts, getSort],
+    [emitEvent, setSorts, prevSort],
   );
 }
 
-export function useDeleteSort() {
+export function useDeleteSort(sortID: SortID) {
   const emitEvent = useEmitEvent();
   const setSorts = useSetRecoilState<SortsByIDState>(sortsByIDState);
-  const getViewSorts = useGetViewSortsCallback();
+  const prevSort = useSortQuery(sortID);
+  const prevSorts = useViewSortsQuery(prevSort.viewID);
 
-  return useCallback(
-    async (sort: Sort) => {
-      const prevSorts = await getViewSorts(sort.viewID);
-      const nextSorts = deleteSort(sort, prevSorts);
+  return useCallback(async () => {
+    const nextSorts = deleteSort(prevSort, prevSorts);
 
-      setSorts((previousSorts) => {
-        const clonedPreviousSorts: SortsByIDState = {
-          ...previousSorts,
-        };
+    setSorts((previousSorts) => {
+      const clonedPreviousSorts: SortsByIDState = {
+        ...previousSorts,
+      };
 
-        delete clonedPreviousSorts[sort.id];
+      delete clonedPreviousSorts[sortID];
 
-        return {
-          ...clonedPreviousSorts,
-          ...nextSorts,
-        };
-      });
+      return {
+        ...clonedPreviousSorts,
+        ...nextSorts,
+      };
+    });
 
-      emitEvent({
-        name: 'SortDeleted',
-        prevSorts,
-        nextSorts: Object.values(nextSorts),
-      });
-    },
-    [emitEvent, setSorts, getViewSorts],
-  );
+    emitEvent({
+      name: 'SortDeleted',
+      prevSorts,
+      nextSorts: Object.values(nextSorts),
+    });
+  }, [emitEvent, setSorts, prevSorts, prevSort, sortID]);
 }
 
 export function useCreateGroup(): (
@@ -833,7 +573,7 @@ export function useCreateGroup(): (
   return useCallback(
     (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
       const newGroup: Group = {
-        id: Group.generateID(),
+        id: generateGroupID(),
         viewID,
         sequence,
         ...sortConfig,
@@ -855,15 +595,13 @@ export function useCreateGroup(): (
   );
 }
 
-export function useUpdateGroupSortConfig() {
+export function useUpdateGroupSortConfig(groupID: GroupID) {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState(groupsByIDState);
-  const getGroup = useGetGroupCallback();
+  const prevGroup = useGroupQuery(groupID);
 
   return useCallback(
-    async (groupID: GroupID, sortConfig: SortConfig) => {
-      const prevGroup = await getGroup(groupID);
-
+    async (sortConfig: SortConfig) => {
       const nextGroup: Group = {
         ...prevGroup,
         ...sortConfig,
@@ -882,108 +620,50 @@ export function useUpdateGroupSortConfig() {
 
       return nextGroup;
     },
-    [emitEvent, setGroups, getGroup],
+    [emitEvent, setGroups, prevGroup],
   );
 }
 
-export function useDeleteGroup() {
+export function useDeleteGroup(groupID: GroupID) {
   const emitEvent = useEmitEvent();
   const setGroups = useSetRecoilState<GroupsByIDState>(groupsByIDState);
-  const getViewGroups = useGetViewGroupsCallback();
+  const prevGroup = useGroupQuery(groupID);
+  const prevGroups = useViewGroupsQuery(prevGroup.viewID);
 
-  return useCallback(
-    async (group: Group) => {
-      const prevGroups = await getViewGroups(group.viewID);
-      const nextGroups = deleteGroup(group, prevGroups);
+  return useCallback(async () => {
+    const nextGroups = deleteGroup(prevGroup, prevGroups);
 
-      setGroups((previousGroups) => {
-        const clonedPreviousGroups: GroupsByIDState = {
-          ...previousGroups,
-        };
+    setGroups((previousGroups) => {
+      const clonedPreviousGroups: GroupsByIDState = {
+        ...previousGroups,
+      };
 
-        delete clonedPreviousGroups[group.id];
+      delete clonedPreviousGroups[groupID];
 
-        return {
-          ...clonedPreviousGroups,
-          ...nextGroups,
-        };
-      });
+      return {
+        ...clonedPreviousGroups,
+        ...nextGroups,
+      };
+    });
 
-      emitEvent({
-        name: 'GroupDeleted',
-        prevGroups,
-        nextGroups: Object.values(nextGroups),
-      });
-    },
-    [emitEvent, setGroups, getViewGroups],
-  );
+    emitEvent({
+      name: 'GroupDeleted',
+      prevGroups,
+      nextGroups: Object.values(nextGroups),
+    });
+  }, [emitEvent, setGroups, prevGroup, prevGroups, groupID]);
 }
 
-export function useGetListViewFieldConfig(
+export function useUpdateListViewFieldConfig(
   viewID: ViewID,
-  fieldID: FieldID,
-): ListViewFieldConfig {
-  const view = useGetView(viewID);
-
-  assertListView(view);
-
-  return view.fieldsConfig[fieldID];
-}
-
-export function useGetSortedFieldsWithListViewConfig(
-  viewID: ViewID,
-): FieldWithListViewConfig[] {
-  const view = useGetView(viewID);
-
-  assertListView(view);
-
-  const fields = useGetCollectionFields(view.collectionID);
-
-  return useMemo(() => {
-    return fields
-      .slice(0)
-      .sort((a, b) => {
-        const fieldConfigA = view.fieldsConfig[a.id];
-        const fieldConfigB = view.fieldsConfig[b.id];
-
-        if (fieldConfigA.order < fieldConfigB.order) {
-          return -1;
-        } else if (fieldConfigA.order > fieldConfigB.order) {
-          return 1;
-        }
-
-        return 0;
-      })
-      .map((f) => {
-        const config = view.fieldsConfig[f.id];
-
-        return {
-          ...f,
-          config,
-        };
-      });
-  }, [fields, view]);
-}
-
-export function useUpdateListViewFieldConfig(): (
-  viewID: ViewID,
-  fieldID: FieldID,
-  config: Partial<ListViewFieldConfig>,
-) => void {
+): (fieldID: FieldID, config: Partial<ListViewFieldConfig>) => void {
   const emitEvent = useEmitEvent();
-  const getView = useGetViewCallback();
+  const prevView = useViewQuery(viewID);
   const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
+  assertListView(prevView);
 
   return useCallback(
-    (
-      viewID: ViewID,
-      fieldID: FieldID,
-      config: Partial<ListViewFieldConfig>,
-    ) => {
-      const prevView = getView(viewID).getValue();
-
-      assertListView(prevView);
-
+    (fieldID: FieldID, config: Partial<ListViewFieldConfig>) => {
       const nextConfig: ListViewFieldConfig = {
         order: config.order || prevView.fieldsConfig[fieldID].order,
         width: config.width || prevView.fieldsConfig[fieldID].width,
@@ -1009,7 +689,7 @@ export function useUpdateListViewFieldConfig(): (
         nextView,
       });
     },
-    [emitEvent, setViews, getView],
+    [emitEvent, setViews, prevView],
   );
 }
 
@@ -1020,11 +700,10 @@ export function useCreateView(): (collectionID: CollectionID) => View {
   return useCallback(
     (collectionID: CollectionID) => {
       const newView: View = {
-        id: View.generateID(),
+        id: generateViewID(),
         name: '',
         type: 'list',
         fixedFieldCount: 1,
-        groupsConfig: {},
         fieldsConfig: {},
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -1071,19 +750,17 @@ export function useDeleteView() {
 }
 
 export interface UpdateViewNameInput {
-  viewID: ViewID;
   name: string;
 }
 
-export function useUpdateViewName() {
+export function useUpdateViewName(viewID: ViewID) {
   const emitEvent = useEmitEvent();
-  const getView = useGetViewCallback();
+  const prevView = useViewQuery(viewID);
   const setViews = useSetRecoilState(viewsByIDState);
 
   return useCallback(
     async (input: UpdateViewNameInput) => {
-      const { viewID, name } = input;
-      const prevView = await getView(viewID);
+      const { name } = input;
 
       const nextView: View = {
         ...prevView,
@@ -1101,7 +778,7 @@ export function useUpdateViewName() {
         nextView,
       });
     },
-    [getView, setViews, emitEvent],
+    [prevView, setViews, emitEvent],
   );
 }
 
@@ -1122,38 +799,6 @@ export function useGetFieldCallback(): (fieldID: FieldID) => Field {
   );
 }
 
-export function useGetField(fieldID: FieldID) {
-  const field = useRecoilValue(fieldQuery(fieldID));
-
-  if (field === null) {
-    throw new Error('Field not found');
-  }
-
-  return field;
-}
-
-export function useGetFieldConfig(fieldID: FieldID): FieldConfig {
-  const field = useRecoilValue(fieldQuery(fieldID));
-
-  if (field === null) {
-    throw new Error('Field config not found');
-  }
-
-  return field;
-}
-
-export function useGetDocumentFieldValue(
-  documentID: DocumentID,
-  fieldID: FieldID,
-): FieldValue {
-  const params = useMemo(() => ({ documentID, fieldID }), [
-    documentID,
-    fieldID,
-  ]);
-
-  return useRecoilValue(documentFieldValueQuery(params));
-}
-
 export function useCreateField() {
   const emitEvent = useEmitEvent();
   const setFields = useSetRecoilState(fieldsByIDState);
@@ -1166,7 +811,7 @@ export function useCreateField() {
       fieldConfig: FieldConfig,
     ) => {
       const newField: Field = {
-        id: Field.generateID(),
+        id: generateFieldID(),
         name,
         description,
         createdAt: new Date(),
@@ -1249,7 +894,9 @@ export function useUpdateFieldName() {
   );
 }
 
-export function useGetDocumentCallback(): (documentID: DocumentID) => Document {
+export function useDocumentQueryCallback(): (
+  documentID: DocumentID,
+) => Document {
   const documents = useRecoilValue(documentsByIDState);
 
   return useCallback(
@@ -1266,63 +913,19 @@ export function useGetDocumentCallback(): (documentID: DocumentID) => Document {
   );
 }
 
-export function useGetDocument(documentID: DocumentID): Document {
-  const document = useRecoilValue(documentQuery(documentID));
-
-  if (document === null) {
-    throw new Error('Document not found');
-  }
-
-  return document;
-}
-
-function getDefaultFieldValue(field: Field): FieldValue {
-  switch (field.type) {
-    case FieldType.Checkbox:
-      return false;
-    case FieldType.Currency:
-    case FieldType.Number:
-    case FieldType.Date:
-    case FieldType.SingleCollaborator:
-    case FieldType.SingleOption:
-    case FieldType.SingleDocumentLink:
-      return null;
-    case FieldType.PhoneNumber:
-    case FieldType.URL:
-    case FieldType.Email:
-    case FieldType.MultiLineText:
-    case FieldType.SingleLineText:
-      return '';
-    case FieldType.MultiCollaborator:
-    case FieldType.MultiOption:
-    case FieldType.MultiDocumentLink:
-      return [];
-    default:
-      assertUnreached(field);
-  }
-}
-
-function getDefaultDocumentFieldValues(fields: Field[]): DocumentFieldValues {
-  const fieldsByID = keyedBy(fields, (field) => field.id);
-  return map(fieldsByID, getDefaultFieldValue);
-}
-
-export function useCreateDocument(): (
+export function useCreateDocument(
   collectionID: CollectionID,
-  values?: DocumentFieldValues,
-) => Document {
+): (values?: DocumentFieldValues) => Document {
   const emitEvent = useEmitEvent();
   const setDocuments = useSetRecoilState(documentsByIDState);
-  const getCollectionFields = useGetCollectionFieldsCallback();
+  const collectionFields = useCollectionFieldsQuery(collectionID);
 
   return useCallback(
-    (collectionID: CollectionID, values?: DocumentFieldValues) => {
-      const loadableFields = getCollectionFields(collectionID);
-
+    (values?: DocumentFieldValues) => {
       const newDocument: Document = {
-        id: Document.generateID(),
+        id: generateDocumentID(),
         fields: {
-          ...getDefaultDocumentFieldValues(loadableFields.getValue()),
+          ...getDefaultDocumentFieldValues(collectionFields),
           ...values,
         },
         createdAt: new Date(),
@@ -1342,7 +945,7 @@ export function useCreateDocument(): (
 
       return newDocument;
     },
-    [emitEvent, setDocuments, getCollectionFields],
+    [emitEvent, setDocuments, collectionFields],
   );
 }
 
@@ -1375,7 +978,7 @@ export interface UpdateDocumentNameInput {
 
 export function useUpdateDocumentName() {
   const emitEvent = useEmitEvent();
-  const getDocument = useGetDocumentCallback();
+  const getDocument = useDocumentQueryCallback();
   const setDocuments = useSetRecoilState(documentsByIDState);
 
   return useCallback(

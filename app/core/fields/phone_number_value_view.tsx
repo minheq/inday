@@ -1,7 +1,10 @@
 import React from 'react';
 
 import { Text } from '../../components/text';
-import { PhoneNumberField, PhoneNumberFieldValue } from '../../data/fields';
+import {
+  PhoneNumberField,
+  PhoneNumberFieldValue,
+} from '../../../models/fields';
 
 interface PhoneNumberValueViewProps {
   field: PhoneNumberField;

@@ -1,5 +1,5 @@
-import { SpaceID } from '../../data/spaces';
-import { ViewID } from '../../data/views';
+import { SpaceID } from '../../../models/spaces';
+import { ViewID } from '../../../models/views';
 import {
   RouterImplementation,
   useNavigationImplementation,

@@ -291,31 +291,3 @@ export type Event =
   | GroupConfigUpdatedEvent
   | GroupDeletedEvent
   | ListViewFieldConfigUpdatedEvent;
-
-type SubscriptionCallback = (event: Event) => void;
-
-class EventEmitter {
-  private subscribers: SubscriptionCallback[] = [];
-
-  subscribe(callback: SubscriptionCallback) {
-    this.subscribers.push(callback);
-  }
-
-  unsubscribe(callback: SubscriptionCallback) {
-    this.subscribers = this.subscribers.filter((c) => c !== callback);
-  }
-
-  emit(event: Event) {
-    setTimeout(() => {
-      this.subscribers.forEach((callback) => {
-        callback(event);
-      });
-    }, 0);
-  }
-}
-
-export const eventEmitter = new EventEmitter();
-
-export function useEventEmitter(): EventEmitter {
-  return eventEmitter;
-}

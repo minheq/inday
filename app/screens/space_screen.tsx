@@ -9,24 +9,24 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ScreenName, ScreenProps, useNavigation } from '../core/other/routes';
 import {
-  useGetSpace,
-  useGetView,
-  useGetSpaceCollections,
-  useGetDocumentPrimaryFieldValue,
-  useGetDocument,
-  useGetDocumentFieldValuesEntries,
-  useCreateDocument,
-} from '../data/store';
+  useSpaceQuery,
+  useViewQuery,
+  useSpaceCollectionsQuery,
+  useDocumentPrimaryFieldValueQuery,
+  useDocumentQuery,
+  useDocumentFieldValuesEntriesQuery,
+} from '../store/queries';
+import { useCreateDocument } from '../store/mutations';
 import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize/organize_view';
 import { ViewList } from '../core/views/view_list';
 import { AutoSizer } from '../lib/autosizer';
-import { ViewID, ViewType } from '../data/views';
+import { ViewID, ViewType } from '../../models/views';
 import { ListViewView } from '../core/list_view/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { Document, DocumentID } from '../data/documents';
-import { CollectionID } from '../data/collections';
-import { SpaceID } from '../data/spaces';
+import { Document, DocumentID } from '../../models/documents';
+import { CollectionID } from '../../models/collections';
+import { SpaceID } from '../../models/spaces';
 import { useThemeStyles } from '../components/theme';
 import { Screen } from '../components/screen';
 import { Row } from '../components/row';
@@ -36,7 +36,7 @@ import { IconButton } from '../components/icon_button';
 import { FlatButton } from '../components/flat_button';
 import { tokens } from '../components/tokens';
 import { isEmpty } from '../../lib/lang_utils';
-import { Field, FieldValue, stringifyFieldValue } from '../data/fields';
+import { Field, FieldValue, stringifyFieldValue } from '../../models/fields';
 import { CloseButton } from '../components/close_button';
 import { Spacer } from '../components/spacer';
 import { Column } from '../components/column';
@@ -65,7 +65,7 @@ const SpaceScreenContext = createContext<SpaceScreenContext>({
 export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
   const { params } = props;
   const { spaceID, viewID } = params;
-  const view = useGetView(viewID);
+  const view = useViewQuery(viewID);
 
   const context = useMemo(
     () => ({ spaceID, viewID, collectionID: view.collectionID }),
@@ -116,7 +116,7 @@ const SpaceScreenHeader = memo(function SpaceScreenHeader(): JSX.Element {
   const navigation = useNavigation();
   const context = useContext(SpaceScreenContext);
   const { spaceID } = context;
-  const space = useGetSpace(spaceID);
+  const space = useSpaceQuery(spaceID);
 
   const handlePressBack = useCallback(() => {
     navigation.back();
@@ -150,7 +150,7 @@ function TopMenu() {
 
 function ViewSettings() {
   const { viewID } = useContext(SpaceScreenContext);
-  const view = useGetView(viewID);
+  const view = useViewQuery(viewID);
   const [mode, setMode] = useRecoilState(modeState);
   const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
   const [, setOpenDocument] = useRecoilState(openDocumentState);
@@ -276,15 +276,15 @@ function MainContent() {
   const sidePanel = useRecoilValue(sidePanelState);
   const context = useContext(SpaceScreenContext);
   const { spaceID, viewID, collectionID } = context;
-  const space = useGetSpace(spaceID);
-  const view = useGetView(viewID);
+  const space = useSpaceQuery(spaceID);
+  const view = useViewQuery(viewID);
   const mode = useRecoilValue(modeState);
   const [selectedDocuments, setSelectedDocuments] = useRecoilState(
     selectedDocumentsState,
   );
   const createDocument = useCreateDocument();
   const [openDocument, setOpenDocument] = useRecoilState(openDocumentState);
-  const collections = useGetSpaceCollections(space.id);
+  const collections = useSpaceCollectionsQuery(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   if (activeCollection === undefined) {
@@ -471,8 +471,8 @@ interface DocumentDetailsViewProps {
 
 function DocumentDetailsView(props: DocumentDetailsViewProps): JSX.Element {
   const { documentID } = props;
-  const document = useGetDocument(documentID);
-  const [primaryField, primaryFieldValue] = useGetDocumentPrimaryFieldValue(
+  const document = useDocumentQuery(documentID);
+  const [primaryField, primaryFieldValue] = useDocumentPrimaryFieldValueQuery(
     document.id,
   );
   const [, setOpenDocument] = useRecoilState(openDocumentState);
@@ -509,7 +509,7 @@ interface DocumentFieldValuesProps {
 
 function DocumentFieldValues(props: DocumentFieldValuesProps) {
   const { document } = props;
-  const documentFieldsEntries = useGetDocumentFieldValuesEntries(document.id);
+  const documentFieldsEntries = useDocumentFieldValuesEntriesQuery(document.id);
 
   return (
     <View>

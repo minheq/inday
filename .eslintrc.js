@@ -43,7 +43,7 @@ module.exports = {
       },
     },
     {
-      files: ['server/**/*.ts', 'lib/**/*.ts'],
+      files: ['server/**/*.ts', 'lib/**/*.ts', 'models/**/*.ts'],
       env: { node: true },
       extends: [
         'eslint:recommended',

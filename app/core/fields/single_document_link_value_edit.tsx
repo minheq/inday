@@ -5,13 +5,13 @@ import {
   SingleDocumentLinkField,
   SingleDocumentLinkFieldValue,
   stringifyFieldValue,
-} from '../../data/fields';
-import { Document, DocumentID } from '../../data/documents';
+} from '../../../models/fields';
+import { Document, DocumentID } from '../../../models/documents';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 import {
-  useGetCollectionDocuments,
-  useGetDocumentPrimaryFieldValueCallback,
-} from '../../data/store';
+  useCollectionDocumentsQuery,
+  useDocumentQueryPrimaryFieldValueCallback,
+} from '../../store/queries';
 import { DocumentLinkBadge } from './document_link_badge';
 
 interface SingleDocumentLinkValueEditProps {
@@ -26,7 +26,9 @@ export function SingleDocumentLinkValueEdit(
 ): JSX.Element {
   const { documentID, field, value, onDone } = props;
   const renderDocumentLink = useRenderDocumentLink();
-  const documents = useGetCollectionDocuments(field.documentsFromCollectionID);
+  const documents = useCollectionDocumentsQuery(
+    field.documentsFromCollectionID,
+  );
   const options = useDocumentLinkOptions(documents);
 
   return (
@@ -52,7 +54,7 @@ export function useRenderDocumentLink(): (
 export function useDocumentLinkOptions(
   documents: Document[],
 ): ListPickerOption<DocumentID>[] {
-  const getDocumentPrimaryFieldValue = useGetDocumentPrimaryFieldValueCallback();
+  const getDocumentPrimaryFieldValue = useDocumentQueryPrimaryFieldValueCallback();
 
   return documents.map((document) => {
     const [field, value] = getDocumentPrimaryFieldValue(document.id);

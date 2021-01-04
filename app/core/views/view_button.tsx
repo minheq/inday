@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
-import { ViewID, ViewType } from '../../data/views';
+import { ViewID, ViewType } from '../../../models/views';
 import { useTheme } from '../../components/theme';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Icon } from '../../components/icon';

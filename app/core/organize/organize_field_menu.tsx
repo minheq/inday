@@ -5,13 +5,13 @@ import { Spacer } from '../../components/spacer';
 import { Switch } from '../../components/switch';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
-import { CollectionID } from '../../data/collections';
+import { CollectionID } from '../../../models/collections';
 
 import {
   useGetSortedFieldsWithListViewConfig,
   useUpdateListViewFieldConfig,
-} from '../../data/store';
-import { FieldWithListViewConfig, ViewID } from '../../data/views';
+} from '../../store/queries';
+import { FieldWithListViewConfig, ViewID } from '../../../models/views';
 
 interface FieldMenuContext {
   viewID: ViewID;

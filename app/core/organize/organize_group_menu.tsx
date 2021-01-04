@@ -15,22 +15,22 @@ import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
 import {
-  useGetCollectionFields,
+  useCollectionQueryFields,
   useGetField,
   useGetViewGroups,
   useDeleteGroup,
   useUpdateGroupSortConfig,
   useCreateGroup,
   useGetGroupsSequenceMax,
-} from '../../data/store';
+} from '../../store/queries';
 import { first } from '../../../lib/array_utils';
 import { isEmpty } from '../../../lib/lang_utils';
-import { FieldID } from '../../data/fields';
+import { FieldID } from '../../../models/fields';
 import { FieldPicker } from '../fields/field_picker';
-import { GroupID, Group } from '../../data/groups';
+import { GroupID, Group } from '../../../models/groups';
 import { SegmentedControl } from '../../components/segmented_control';
-import { ViewID } from '../../data/views';
-import { SortConfig, SortOrder } from '../../data/sorts';
+import { ViewID } from '../../../models/views';
+import { SortConfig, SortOrder } from '../../../models/sorts';
 
 const groupEditIDState = atom<GroupID>({
   key: 'GroupMenuGroupEditID',
@@ -164,7 +164,7 @@ function GroupNew() {
   const groupEditID = useRecoilValue(groupEditIDState);
   const context = useContext(GroupMenuContext);
 
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionQueryFields(context.collectionID);
 
   const createGroup = useCreateGroup();
   const firstField = first(fields);
@@ -240,7 +240,7 @@ function GroupEdit(props: GroupEditProps) {
   const { groupConfig, onChange } = props;
   const context = useContext(GroupMenuContext);
   const field = useGetField(groupConfig.fieldID);
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionQueryFields(context.collectionID);
 
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {

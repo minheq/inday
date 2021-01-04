@@ -11,21 +11,21 @@ import {
   groupsByIDState,
   DocumentsByIDState,
 } from './atoms';
-import { Document, DocumentID } from './documents';
-import { Collection, CollectionID } from './collections';
-import { Field, FieldID, FieldValue } from './fields';
+import { Document, DocumentID } from '../../models/documents';
+import { Collection, CollectionID } from '../../models/collections';
+import { Field, FieldID, FieldValue } from '../../models/fields';
 import {
   Filter,
   FilterGroup,
   FilterID,
   filterDocuments,
   FilterGetters,
-} from './filters';
-import { Space, SpaceID } from './spaces';
-import { View, ViewID } from './views';
-import { Sort, SortID, sortDocuments, SortGetters } from './sorts';
-import { Collaborator, CollaboratorID } from './collaborators';
-import { Group, GroupID } from './groups';
+} from '../../models/filters';
+import { Space, SpaceID } from '../../models/spaces';
+import { View, ViewID } from '../../models/views';
+import { Sort, SortID, sortDocuments, SortGetters } from '../../models/sorts';
+import { Collaborator, CollaboratorID } from '../../models/collaborators';
+import { Group, GroupID } from '../../models/groups';
 import { keyedBy, last } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 
@@ -433,9 +433,14 @@ export const documentFieldValueQuery = selectorFamily<
   },
 });
 
-export const sortGettersQuery = selector<SortGetters>({
-  key: 'SortGettersQuery',
-  get: ({ get }) => {
+export const viewDocumentsQuery = selectorFamily<Document[], ViewID>({
+  key: 'ViewDocumentsQuery',
+  get: (viewID: ViewID) => ({ get }) => {
+    const view = get(viewQuery(viewID));
+    const documents = get(collectionDocumentsQuery(view.collectionID));
+    const filterGroups = get(viewFilterGroupsQuery(viewID));
+    const sorts = get(viewSortsQuery(viewID));
+
     const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
     const getDocument = (documentID: DocumentID) =>
       get(documentQuery(documentID));
@@ -444,33 +449,16 @@ export const sortGettersQuery = selector<SortGetters>({
     const getCollection = (collectionID: CollectionID) =>
       get(collectionQuery(collectionID));
 
-    return {
+    const sortGetters: SortGetters = {
       getField,
       getDocument,
       getCollaborator,
       getCollection,
     };
-  },
-});
 
-export const filterGettersQuery = selector<FilterGetters>({
-  key: 'FilterGettersQuery',
-  get: ({ get }) => {
-    const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
-
-    return { getField };
-  },
-});
-
-export const viewDocumentsQuery = selectorFamily<Document[], ViewID>({
-  key: 'ViewDocumentsQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const view = get(viewQuery(viewID));
-    const documents = get(collectionDocumentsQuery(view.collectionID));
-    const filterGroups = get(viewFilterGroupsQuery(viewID));
-    const sorts = get(viewSortsQuery(viewID));
-    const sortGetters = get(sortGettersQuery);
-    const filterGetters = get(filterGettersQuery);
+    const filterGetters: FilterGetters = {
+      getField,
+    };
 
     let finalDocuments = documents;
 

@@ -18,7 +18,7 @@ import {
   FilterConfig,
   assertNumberFilterConfig,
   assertTextFilterConfig,
-} from '../../data/filters';
+} from '../../../models/filters';
 import { Row } from '../../components/row';
 import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
@@ -29,7 +29,7 @@ import { TextInput } from '../../components/text_input';
 
 import {
   useCreateFilter,
-  useGetCollectionFields,
+  useCollectionQueryFields,
   useGetViewFilters,
   useDeleteFilter,
   useUpdateFilterConfig,
@@ -37,9 +37,9 @@ import {
   useGetFieldCallback,
   useGetFiltersGroupMax,
   useUpdateFilterGroup,
-} from '../../data/store';
+} from '../../store/queries';
 import { first } from '../../../lib/array_utils';
-import { FieldID, FieldType } from '../../data/fields';
+import { FieldID, FieldType } from '../../../models/fields';
 import { FieldPicker } from '../fields/field_picker';
 const filterEditIDState = atom<FilterID>({
   key: 'FilterMenuFilterEditID',
@@ -200,7 +200,7 @@ function FilterNew() {
   const filterEditID = useRecoilValue(filterEditIDState);
   const context = useContext(FilterMenuContext);
 
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionQueryFields(context.collectionID);
 
   const createFilter = useCreateFilter();
   const firstField = first(fields);
@@ -279,7 +279,7 @@ function FilterEdit(props: FilterEditProps) {
   const { filterConfig, onChange, onSubmit } = props;
   const context = useContext(FilterMenuContext);
   const field = useGetField(filterConfig.fieldID);
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionQueryFields(context.collectionID);
   const getField = useGetFieldCallback();
 
   const handleChangeField = useCallback(

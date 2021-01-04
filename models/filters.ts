@@ -19,7 +19,7 @@ import {
   TextFieldKindValue,
 } from './fields';
 import { ViewID } from './views';
-import { generateID, validateID } from '../../lib/id';
+import { generateID, validateID } from '../lib/id';
 import {
   isISODate,
   isISODateInterval,
@@ -27,28 +27,27 @@ import {
   ISODateInterval,
   parseISODate,
   parseISODateInterval,
-} from '../../lib/date_utils';
+} from '../lib/date_utils';
 import {
   isAfter,
   isBefore,
   isSameDay,
   isWithinDateInterval,
-} from '../../lib/date_utils';
-import { hasAllOf, hasAnyOf, hasNoneOf } from '../../lib/array_utils';
-import { isEmpty } from '../../lib/lang_utils';
+} from '../lib/date_utils';
+import { hasAllOf, hasAnyOf, hasNoneOf } from '../lib/array_utils';
+import { isEmpty } from '../lib/lang_utils';
 import { CollaboratorID } from './collaborators';
 
 export const filterIDPrefix = `fil` as const;
 export type FilterID = `${typeof filterIDPrefix}${string}`;
 
-export const Filter = {
-  generateID: (): FilterID => {
-    return generateID(filterIDPrefix);
-  },
-  validateID: (id: string): void => {
-    return validateID(filterIDPrefix, id);
-  },
-};
+export function generateFilterID(): FilterID {
+  return generateID(filterIDPrefix);
+}
+
+export function validateFilterID(id: string): void {
+  return validateID(filterIDPrefix, id);
+}
 
 export interface BaseFilter {
   id: FilterID;

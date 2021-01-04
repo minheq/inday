@@ -7,7 +7,7 @@ import { LeafRowState } from '../../components/grid_renderer.common';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
-import { DocumentID } from '../../data/documents';
+import { DocumentID } from '../../../models/documents';
 import { useListViewViewContext } from './list_view_view';
 
 interface LeafRowProps {

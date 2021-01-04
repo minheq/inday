@@ -2,7 +2,10 @@ import React, { Fragment } from 'react';
 import { isEmpty } from '../../../lib/lang_utils';
 import { Row } from '../../components/row';
 
-import { MultiOptionFieldValue, MultiOptionField } from '../../data/fields';
+import {
+  MultiOptionFieldValue,
+  MultiOptionField,
+} from '../../../models/fields';
 import { OptionBadge } from './option_badge';
 
 interface MultiOptionValueViewProps {

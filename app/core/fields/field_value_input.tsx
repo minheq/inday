@@ -55,8 +55,8 @@ import {
   SingleDocumentLinkFieldValue,
   URLField,
   URLFieldValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
 import { TextKindValueEdit } from './text_kind_value_edit';
 import { NumberKindValueEdit } from './number_kind_value_edit';
 import { CheckboxValueEdit } from './checkbox_value_edit';

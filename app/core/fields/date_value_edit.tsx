@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { formatISODate, parseISODate } from '../../../lib/date_utils';
+import { DocumentID } from '../../../models/documents';
+import { DateField, DateFieldValue } from '../../../models/fields';
 import { DatePicker } from '../../components/date_picker';
 import { FlatButton } from '../../components/flat_button';
-import { DateField, DateFieldValue } from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+import { useUpdateDocumentFieldValue } from '../../store/mutations';
 
 interface DateValueEditProps {
   documentID: DocumentID;

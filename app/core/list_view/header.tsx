@@ -17,8 +17,8 @@ import { Row } from '../../components/row';
 import { Text } from '../../components/text';
 
 import { useThemeStyles } from '../../components/theme';
-import { FieldID } from '../../data/fields';
-import { useGetField, useUpdateListViewFieldConfig } from '../../data/store';
+import { FieldID } from '../../../models/fields';
+import { useGetField, useUpdateListViewFieldConfig } from '../../store/queries';
 import { getFieldIcon } from '../views/icon_helpers';
 import { useListViewViewContext } from './list_view_view';
 

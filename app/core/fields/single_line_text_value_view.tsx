@@ -4,7 +4,7 @@ import { Text } from '../../components/text';
 import {
   SingleLineTextField,
   SingleLineTextFieldValue,
-} from '../../data/fields';
+} from '../../../models/fields';
 
 interface SingleLineTextValueViewProps {
   field: SingleLineTextField;

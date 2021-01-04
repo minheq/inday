@@ -9,9 +9,9 @@ import {
 import { toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import { NumberFieldKind, NumberFieldKindValue } from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+import { NumberFieldKind, NumberFieldKindValue } from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValue } from '../../store/queries';
 
 interface NumberKindValueEditProps<T extends NumberFieldKindValue> {
   autoFocus: boolean;

@@ -4,15 +4,19 @@ import { isNotEmpty, last, removeBy } from '../../../lib/array_utils';
 import { FlatObject } from '../../../lib/flat_object';
 import { isEmpty } from '../../../lib/lang_utils';
 import { GridGroup, SelectedRow } from '../../components/grid_renderer.common';
-import { Document, DocumentID } from '../../data/documents';
+import { Document, DocumentID } from '../../../models/documents';
 import {
   areFieldValuesEqual,
   Field,
   FieldID,
   FieldValue,
-} from '../../data/fields';
-import { Group } from '../../data/groups';
-import { DocumentNode, makeDocumentNodes, SortGetters } from '../../data/sorts';
+} from '../../../models/fields';
+import { Group } from '../../../models/groups';
+import {
+  DocumentNode,
+  makeDocumentNodes,
+  SortGetters,
+} from '../../../models/sorts';
 import {
   useGetSortedFieldsWithListViewConfig,
   useGetSortGetters,
@@ -21,8 +25,8 @@ import {
   useGetViewFilters,
   useGetViewGroups,
   useGetViewSorts,
-} from '../../data/store';
-import { assertListView, ViewID } from '../../data/views';
+} from '../../store/queries';
+import { assertListView, ViewID } from '../../../models/views';
 import { usePrevious } from '../../hooks/use_previous';
 import { ADD_FIELD_COLUMN_WIDTH } from './list_view_constants';
 

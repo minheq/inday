@@ -1,8 +1,8 @@
 import { ColorSchemeName } from 'react-native';
 import { IconName } from '../../components/icon';
 import { palette } from '../../components/palette';
-import { FieldType } from '../../data/fields';
-import { ViewType } from '../../data/views';
+import { FieldType } from '../../../models/fields';
+import { ViewType } from '../../../models/views';
 
 const viewIconMap: { [viewType in ViewType]: IconName } = {
   list: 'Table',

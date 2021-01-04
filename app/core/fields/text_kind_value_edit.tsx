@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import { TextFieldKind, TextFieldKindValue } from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+import { TextFieldKind, TextFieldKindValue } from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValue } from '../../store/mutations';
 
 interface TextKindValueEditProps<T extends TextFieldKindValue> {
   autoFocus: boolean;

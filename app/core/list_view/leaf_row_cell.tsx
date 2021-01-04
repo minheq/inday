@@ -19,8 +19,8 @@ import { tokens } from '../../components/tokens';
 import {
   useUpdateDocumentFieldValue,
   useGetField,
-  useGetDocumentFieldValue,
-} from '../../data/store';
+  useDocumentQueryFieldValue,
+} from '../../store/queries';
 import {
   FieldType,
   CheckboxField,
@@ -73,8 +73,8 @@ import {
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
   BooleanFieldKindValue,
-} from '../../data/fields';
-import { Document, DocumentID } from '../../data/documents';
+} from '../../../models/fields';
+import { Document, DocumentID } from '../../../models/documents';
 import { useSetRecoilState } from 'recoil';
 import {
   NavigationKey,
@@ -162,7 +162,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     [primary, path, row, column, last, state],
   );
   const field = useGetField(fieldID);
-  const value = useGetDocumentFieldValue(documentID, fieldID);
+  const value = useDocumentQueryFieldValue(documentID, fieldID);
   const {
     mode,
     onSelectDocument,

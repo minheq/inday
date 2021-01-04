@@ -4,7 +4,7 @@ import { Row } from '../../components/row';
 import {
   SingleCollaboratorFieldValue,
   SingleCollaboratorField,
-} from '../../data/fields';
+} from '../../../models/fields';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 
 interface SingleCollaboratorValueViewProps {

@@ -38,27 +38,21 @@ import { Document, DocumentID } from './documents';
 
 import { Collaborator, CollaboratorID } from './collaborators';
 import { CollectionID, Collection } from './collections';
-import { generateID, validateID } from '../../lib/id';
-import { isEmpty } from '../../lib/lang_utils';
-import { first, keyedBy } from '../../lib/array_utils';
-import {
-  isBefore,
-  isAfter,
-  isISODate,
-  parseISODate,
-} from '../../lib/date_utils';
+import { generateID, validateID } from '../lib/id';
+import { isEmpty } from '../lib/lang_utils';
+import { first, keyedBy } from '../lib/array_utils';
+import { isBefore, isAfter, isISODate, parseISODate } from '../lib/date_utils';
 
 export const sortIDPrefix = 'srt' as const;
 export type SortID = `${typeof sortIDPrefix}${string}`;
 
-export const Sort = {
-  generateID: (): SortID => {
-    return generateID(sortIDPrefix);
-  },
-  validateID: (id: string): void => {
-    return validateID(sortIDPrefix, id);
-  },
-};
+export function generateSortID(): SortID {
+  return generateID(sortIDPrefix);
+}
+
+export function validateSortID(id: string): void {
+  return validateID(sortIDPrefix, id);
+}
 
 export function deleteSort(
   sort: Sort,

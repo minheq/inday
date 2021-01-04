@@ -1,7 +1,10 @@
 import React from 'react';
 
 import { Text } from '../../components/text';
-import { MultiLineTextField, MultiLineTextFieldValue } from '../../data/fields';
+import {
+  MultiLineTextField,
+  MultiLineTextFieldValue,
+} from '../../../models/fields';
 
 interface MultiLineTextValueViewProps {
   field: MultiLineTextField;

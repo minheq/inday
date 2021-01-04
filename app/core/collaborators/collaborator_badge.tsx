@@ -1,8 +1,8 @@
-import { useGetCollaborator } from '../../data/store';
+import { useCollaboratorQuery } from '../../store/queries';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { CollaboratorID } from '../../data/collaborators';
+import { CollaboratorID } from '../../../models/collaborators';
 import { Avatar } from '../../components/avatar';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
@@ -13,7 +13,7 @@ interface CollaboratorBadgeProps {
 
 export function CollaboratorBadge(props: CollaboratorBadgeProps): JSX.Element {
   const { collaboratorID } = props;
-  const collaborator = useGetCollaborator(collaboratorID);
+  const collaborator = useCollaboratorQuery(collaboratorID);
 
   return (
     <View style={styles.base}>

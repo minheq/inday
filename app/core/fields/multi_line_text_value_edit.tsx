@@ -12,9 +12,9 @@ import {
   MultiLineTextField,
   MultiLineTextFieldValue,
   TextFieldKindValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValue } from '../../store/queries';
 
 interface MultiLineTextValueEditProps {
   autoFocus: boolean;
