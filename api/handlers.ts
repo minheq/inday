@@ -31,8 +31,8 @@ import {
   duplicateField,
 } from './db';
 import { AuthenticationError, UnauthorizedError } from './errors';
-import { ViewType } from '../app/data/views';
-import { FieldType } from '../app/data/fields';
+import { ViewType } from '../models/views';
+import { FieldType } from '../app/store/fields';
 import { validateID } from '../lib/id';
 
 type Request = FastifyRequest;

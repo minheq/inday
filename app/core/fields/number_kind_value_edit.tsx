@@ -9,9 +9,9 @@ import {
 import { toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import { NumberFieldKind, NumberFieldKindValue } from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+import { NumberFieldKind, NumberFieldKindValue } from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface NumberKindValueEditProps<T extends NumberFieldKindValue> {
   autoFocus: boolean;
@@ -25,12 +25,12 @@ export function NumberKindValueEdit<T extends NumberFieldKindValue>(
   props: NumberKindValueEditProps<T>,
 ): JSX.Element {
   const { autoFocus, documentID, field, value, onKeyPress } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<NumberFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<NumberFieldKindValue>();
   const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
-    (nextValue: string) => {
-      updateDocumentFieldValue(documentID, field.id, toNumber(nextValue));
+    async (nextValue: string) => {
+      await updateDocumentFieldValue(documentID, field.id, toNumber(nextValue));
     },
     [updateDocumentFieldValue, documentID, field],
   );

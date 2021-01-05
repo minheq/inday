@@ -1,20 +1,21 @@
 import React, { memo, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
+
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Icon } from '../../components/icon';
 import { Row } from '../../components/row';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import { Collection, CollectionID } from '../../data/collections';
+import { Collection, CollectionID } from '../../../models/collections';
 
-import { SpaceID } from '../../data/spaces';
 import {
-  useGetSpace,
-  useGetSpaceCollections,
-  useGetView,
-} from '../../data/store';
-import { ViewID } from '../../data/views';
+  useSpaceQuery,
+  useSpaceCollectionsQuery,
+  useViewQuery,
+} from '../../store/queries';
+import { ViewID } from '../../../models/views';
+import { SpaceID } from '../../../models/spaces';
 
 interface CollectionsTabsProps {
   spaceID: SpaceID;
@@ -23,9 +24,9 @@ interface CollectionsTabsProps {
 
 export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
   const { spaceID, viewID } = props;
-  const space = useGetSpace(spaceID);
-  const view = useGetView(viewID);
-  const collections = useGetSpaceCollections(space.id);
+  const space = useSpaceQuery(spaceID);
+  const view = useViewQuery(viewID);
+  const collections = useSpaceCollectionsQuery(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   if (activeCollection === undefined) {

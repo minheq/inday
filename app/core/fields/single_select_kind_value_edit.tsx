@@ -3,9 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 import { FlatButton } from '../../components/flat_button';
 import { ListPicker, ListPickerOption } from '../../components/list_picker';
-import { FieldID, SingleSelectFieldKindValue } from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+import { FieldID, SingleSelectFieldKindValue } from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface SingleSelectKindValueEditProps<T extends SingleSelectFieldKindValue> {
   documentID: DocumentID;
@@ -20,18 +20,18 @@ export function SingleSelectKindValueEdit<T extends SingleSelectFieldKindValue>(
   props: SingleSelectKindValueEditProps<T>,
 ): JSX.Element {
   const { onDone, value, options, renderLabel, documentID, fieldID } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<SingleSelectFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<SingleSelectFieldKindValue>();
 
   const handleChange = useCallback(
-    (nextValue: SingleSelectFieldKindValue) => {
-      updateDocumentFieldValue(documentID, fieldID, nextValue);
+    async (nextValue: SingleSelectFieldKindValue) => {
+      await updateDocumentFieldValue(documentID, fieldID, nextValue);
       onDone();
     },
     [updateDocumentFieldValue, documentID, fieldID, onDone],
   );
 
-  const handleClear = useCallback(() => {
-    updateDocumentFieldValue(documentID, fieldID, null);
+  const handleClear = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, null);
     onDone();
   }, [updateDocumentFieldValue, documentID, fieldID, onDone]);
 

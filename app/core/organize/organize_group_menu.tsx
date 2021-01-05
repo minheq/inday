@@ -15,22 +15,24 @@ import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
 import {
-  useGetCollectionFields,
-  useGetField,
-  useGetViewGroups,
-  useDeleteGroup,
-  useUpdateGroupSortConfig,
-  useCreateGroup,
-  useGetGroupsSequenceMax,
-} from '../../data/store';
+  useCollectionFieldsQuery,
+  useFieldQuery,
+  useViewGroupsQuery,
+  useGroupsSequenceMaxQuery,
+} from '../../store/queries';
+import {
+  useDeleteGroupMutation,
+  useUpdateGroupSortConfigMutation,
+  useCreateGroupMutation,
+} from '../../store/mutations';
 import { first } from '../../../lib/array_utils';
 import { isEmpty } from '../../../lib/lang_utils';
-import { FieldID } from '../../data/fields';
+import { FieldID } from '../../../models/fields';
 import { FieldPicker } from '../fields/field_picker';
-import { GroupID, Group } from '../../data/groups';
+import { GroupID, Group } from '../../../models/groups';
 import { SegmentedControl } from '../../components/segmented_control';
-import { ViewID } from '../../data/views';
-import { SortConfig, SortOrder } from '../../data/sorts';
+import { ViewID } from '../../../models/views';
+import { SortConfig, SortOrder } from '../../../models/sorts';
 
 const groupEditIDState = atom<GroupID>({
   key: 'GroupMenuGroupEditID',
@@ -49,7 +51,7 @@ interface GroupMenuProps {
 
 export function GroupMenu(props: GroupMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
-  const groups = useGetViewGroups(viewID);
+  const groups = useViewGroupsQuery(viewID);
 
   return (
     <GroupMenuContext.Provider value={{ viewID, collectionID }}>
@@ -77,9 +79,9 @@ interface GroupListItemProps {
 function GroupListItem(props: GroupListItemProps) {
   const { group } = props;
   const [groupEditID, setGroupEditID] = useRecoilState(groupEditIDState);
-  const field = useGetField(group.fieldID);
-  const deleteGroup = useDeleteGroup();
-  const updateSortConfig = useUpdateGroupSortConfig();
+  const field = useFieldQuery(group.fieldID);
+  const deleteGroup = useDeleteGroupMutation();
+  const updateSortConfig = useUpdateGroupSortConfigMutation();
   const [groupConfig, setSortConfig] = useState<SortConfig>(group);
   const edit = groupEditID === group.id;
 
@@ -164,9 +166,9 @@ function GroupNew() {
   const groupEditID = useRecoilValue(groupEditIDState);
   const context = useContext(GroupMenuContext);
 
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionFieldsQuery(context.collectionID);
 
-  const createGroup = useCreateGroup();
+  const createGroup = useCreateGroupMutation();
   const firstField = first(fields);
 
   if (isEmpty(fields)) {
@@ -183,7 +185,7 @@ function GroupNew() {
   }, [firstField]);
 
   const [groupConfig, setSortConfig] = useState<SortConfig>(defaultSortConfig);
-  const sequenceMax = useGetGroupsSequenceMax(context.viewID);
+  const sequenceMax = useGroupsSequenceMaxQuery(context.viewID);
 
   const handleClose = useCallback(() => {
     setOpen(false);
@@ -239,8 +241,8 @@ interface GroupEditProps {
 function GroupEdit(props: GroupEditProps) {
   const { groupConfig, onChange } = props;
   const context = useContext(GroupMenuContext);
-  const field = useGetField(groupConfig.fieldID);
-  const fields = useGetCollectionFields(context.collectionID);
+  const field = useFieldQuery(groupConfig.fieldID);
+  const fields = useCollectionFieldsQuery(context.collectionID);
 
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {

@@ -1,7 +1,10 @@
 import React, { Fragment } from 'react';
 import { Row } from '../../components/row';
 
-import { SingleOptionFieldValue, SingleOptionField } from '../../data/fields';
+import {
+  SingleOptionFieldValue,
+  SingleOptionField,
+} from '../../../models/fields';
 import { OptionBadge } from './option_badge';
 
 interface SingleOptionValueViewProps {

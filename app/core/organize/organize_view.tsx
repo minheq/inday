@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-import { SpaceID } from '../../data/spaces';
-import { ViewID } from '../../data/views';
-import { CollectionID } from '../../data/collections';
+import { SpaceID } from '../../../models/spaces';
+import { ViewID } from '../../../models/views';
+import { CollectionID } from '../../../models/collections';
 import { FilterMenu } from './organize_filter_menu';
 import { SortMenu } from './organize_sort_menu';
 import { GroupMenu } from './organize_group_menu';

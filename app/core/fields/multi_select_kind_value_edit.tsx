@@ -3,14 +3,14 @@ import { StyleSheet, View } from 'react-native';
 import { FlatButton } from '../../components/flat_button';
 import { ListPickerOption } from '../../components/list_picker';
 import { MultiListPicker } from '../../components/multi_list_picker';
-import { CollaboratorID } from '../../data/collaborators';
+import { CollaboratorID } from '../../../models/collaborators';
 import {
   FieldID,
   MultiSelectFieldKindValue,
   SelectOptionID,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface MultiSelectKindValueEditProps<T> {
   documentID: DocumentID;
@@ -25,11 +25,11 @@ export function MultiSelectKindValueEdit<
   T extends CollaboratorID | DocumentID | SelectOptionID
 >(props: MultiSelectKindValueEditProps<T>): JSX.Element {
   const { onDone, value, options, renderLabel, documentID, fieldID } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<MultiSelectFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<MultiSelectFieldKindValue>();
 
   const handleChange = useCallback(
-    (nextValue: T[]) => {
-      updateDocumentFieldValue(
+    async (nextValue: T[]) => {
+      await updateDocumentFieldValue(
         documentID,
         fieldID,
         nextValue as MultiSelectFieldKindValue,
@@ -38,8 +38,8 @@ export function MultiSelectKindValueEdit<
     [updateDocumentFieldValue, documentID, fieldID],
   );
 
-  const handleClear = useCallback(() => {
-    updateDocumentFieldValue(documentID, fieldID, []);
+  const handleClear = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, []);
     onDone();
   }, [updateDocumentFieldValue, documentID, fieldID, onDone]);
 

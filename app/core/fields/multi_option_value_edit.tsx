@@ -4,8 +4,8 @@ import {
   SelectOptionID,
   MultiOptionFieldValue,
   MultiOptionField,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
 import {
   useGetOptionOptions,

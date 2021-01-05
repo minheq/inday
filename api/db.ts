@@ -1,14 +1,14 @@
 import { Pool, PoolClient } from 'pg';
 import { env } from './env';
-import { Workspace } from '../app/data/workspace';
+import { Workspace } from '../models/workspace';
 import { NotFoundError } from './errors';
 import { first } from '../lib/array_utils';
-import { Space } from '../app/data/spaces';
-import { Collection } from '../app/data/collections';
-import { Document } from '../app/data/documents';
-import { View, ViewType } from '../app/data/views';
-import { Field, FieldType } from '../app/data/fields';
-import { Template } from '../app/data/templates';
+import { Space } from '../app/store/spaces';
+import { Collection } from '../models/collections';
+import { Document } from '../app/store/documents';
+import { View, ViewType } from '../models/views';
+import { Field, FieldType } from '../app/store/fields';
+import { Template } from '../models/templates';
 
 const pool = new Pool({
   user: env.database.username,

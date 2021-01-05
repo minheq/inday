@@ -5,13 +5,11 @@ import { Spacer } from '../../components/spacer';
 import { Switch } from '../../components/switch';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
-import { CollectionID } from '../../data/collections';
+import { CollectionID } from '../../../models/collections';
 
-import {
-  useGetSortedFieldsWithListViewConfig,
-  useUpdateListViewFieldConfig,
-} from '../../data/store';
-import { FieldWithListViewConfig, ViewID } from '../../data/views';
+import { useSortedFieldsWithListViewConfigQuery } from '../../store/queries';
+import { FieldWithListViewConfig, ViewID } from '../../../models/views';
+import { useUpdateListViewFieldConfigMutation } from '../../store/mutations';
 
 interface FieldMenuContext {
   viewID: ViewID;
@@ -31,7 +29,7 @@ interface FieldMenuProps {
 export function FieldMenu(props: FieldMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
 
-  const fields = useGetSortedFieldsWithListViewConfig(viewID);
+  const fields = useSortedFieldsWithListViewConfigQuery(viewID);
 
   return (
     <FieldMenuContext.Provider value={{ viewID, collectionID }}>
@@ -58,7 +56,7 @@ interface FieldListItemProps {
 function FieldListItem(props: FieldListItemProps) {
   const { field } = props;
   const { viewID } = useContext(FieldMenuContext);
-  const updateListViewFieldConfig = useUpdateListViewFieldConfig();
+  const updateListViewFieldConfig = useUpdateListViewFieldConfigMutation();
 
   const handleChange = useCallback(
     (value: boolean) => {

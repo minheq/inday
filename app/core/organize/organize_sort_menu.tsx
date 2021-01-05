@@ -16,19 +16,21 @@ import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
 import {
-  useGetCollectionFields,
-  useGetField,
-  useGetViewSorts,
-  useDeleteSort,
-  useUpdateSortConfig,
-  useCreateSort,
-  useGetSortsSequenceMax,
-} from '../../data/store';
+  useCollectionFieldsQuery,
+  useFieldQuery,
+  useViewSortsQuery,
+  useSortsSequenceMaxQuery,
+} from '../../store/queries';
+import {
+  useUpdateSortConfigMutation,
+  useDeleteSortMutation,
+  useCreateSortMutation,
+} from '../../store/mutations';
 import { first } from '../../../lib/array_utils';
 import { isEmpty } from '../../../lib/lang_utils';
-import { FieldID } from '../../data/fields';
+import { FieldID } from '../../../models/fields';
 import { FieldPicker } from '../fields/field_picker';
-import { SortID, Sort, SortConfig, SortOrder } from '../../data/sorts';
+import { SortID, Sort, SortConfig, SortOrder } from '../../../models/sorts';
 import { SegmentedControl } from '../../components/segmented_control';
 
 const sortEditIDState = atom<SortID>({
@@ -48,7 +50,7 @@ interface SortMenuProps {
 
 export function SortMenu(props: SortMenuProps): JSX.Element {
   const { viewID, collectionID } = props;
-  const sorts = useGetViewSorts(viewID);
+  const sorts = useViewSortsQuery(viewID);
 
   return (
     <SortMenuContext.Provider value={{ viewID, collectionID }}>
@@ -76,9 +78,9 @@ interface SortListItemProps {
 function SortListItem(props: SortListItemProps) {
   const { sort } = props;
   const [sortEditID, setSortEditID] = useRecoilState(sortEditIDState);
-  const field = useGetField(sort.fieldID);
-  const deleteSort = useDeleteSort();
-  const updateSortConfig = useUpdateSortConfig();
+  const field = useFieldQuery(sort.fieldID);
+  const deleteSort = useDeleteSortMutation();
+  const updateSortConfig = useUpdateSortConfigMutation();
   const [sortConfig, setSortConfig] = useState<SortConfig>(sort);
   const edit = sortEditID === sort.id;
 
@@ -157,9 +159,9 @@ function SortNew() {
   const sortEditID = useRecoilValue(sortEditIDState);
   const context = useContext(SortMenuContext);
 
-  const fields = useGetCollectionFields(context.collectionID);
+  const fields = useCollectionFieldsQuery(context.collectionID);
 
-  const createSort = useCreateSort();
+  const createSort = useCreateSortMutation();
   const firstField = first(fields);
 
   if (isEmpty(fields)) {
@@ -177,7 +179,7 @@ function SortNew() {
   );
 
   const [sortConfig, setSortConfig] = useState<SortConfig>(defaultSortConfig);
-  const sequenceMax = useGetSortsSequenceMax(context.viewID);
+  const sequenceMax = useSortsSequenceMaxQuery(context.viewID);
 
   const handleClose = useCallback(() => {
     setOpen(false);
@@ -231,8 +233,8 @@ interface SortEditProps {
 function SortEdit(props: SortEditProps) {
   const { sortConfig, onChange } = props;
   const context = useContext(SortMenuContext);
-  const field = useGetField(sortConfig.fieldID);
-  const fields = useGetCollectionFields(context.collectionID);
+  const field = useFieldQuery(sortConfig.fieldID);
+  const fields = useCollectionFieldsQuery(context.collectionID);
 
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {

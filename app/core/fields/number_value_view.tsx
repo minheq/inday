@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { formatUnit } from '../../../lib/unit';
 import { Text } from '../../components/text';
-import { NumberField, NumberFieldValue } from '../../data/fields';
+import { NumberField, NumberFieldValue } from '../../../models/fields';
 import { getSystemLocale } from '../../lib/locale';
 
 interface NumberValueViewProps {

@@ -4,7 +4,7 @@ import { Icon } from '../../components/icon';
 
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import { CheckboxField } from '../../data/fields';
+import { CheckboxField } from '../../../models/fields';
 
 interface CheckboxValueViewProps {
   value: boolean;

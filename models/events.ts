@@ -1,12 +1,12 @@
 import { Workspace } from './workspace';
-import { Space } from './spaces';
-import { Collection } from './collections';
-import { View, ListView } from './views';
+import { Space, SpaceID } from './spaces';
+import { Collection, CollectionID } from './collections';
+import { View, ListView, ViewID } from './views';
 import { Field, FieldID, FieldValue } from './fields';
-import { Document } from './documents';
-import { Filter } from './filters';
-import { Sort } from './sorts';
-import { Group } from './groups';
+import { Document, DocumentID } from './documents';
+import { Filter, FilterID } from './filters';
+import { Sort, SortID } from './sorts';
+import { Group, GroupID } from './groups';
 
 export interface BaseEvent {
   createdAt: Date;
@@ -29,14 +29,15 @@ export interface SpaceCreatedEvent extends BaseEvent, SpaceCreatedEventConfig {}
 
 export interface SpaceDeletedEventConfig {
   name: 'SpaceDeleted';
-  space: Space;
+  spaceID: SpaceID;
 }
 export interface SpaceDeletedEvent extends BaseEvent, SpaceDeletedEventConfig {}
 
 export interface SpaceNameUpdatedEventConfig {
   name: 'SpaceNameUpdated';
-  prevSpace: Space;
-  nextSpace: Space;
+  spaceID: SpaceID;
+  prevName: string;
+  nextName: string;
 }
 export interface SpaceNameUpdatedEvent
   extends BaseEvent,
@@ -52,8 +53,9 @@ export interface CollectionCreatedEvent
 
 export interface CollectionNameUpdatedEventConfig {
   name: 'CollectionNameUpdated';
-  prevCollection: Collection;
-  nextCollection: Collection;
+  collectionID: CollectionID;
+  prevName: string;
+  nextName: string;
 }
 export interface CollectionNameUpdatedEvent
   extends BaseEvent,
@@ -61,7 +63,7 @@ export interface CollectionNameUpdatedEvent
 
 export interface CollectionDeletedEventConfig {
   name: 'CollectionDeleted';
-  collection: Collection;
+  collectionID: CollectionID;
 }
 export interface CollectionDeletedEvent
   extends BaseEvent,
@@ -84,7 +86,7 @@ export interface ViewNameUpdatedEvent
 
 export interface ViewDeletedEventConfig {
   name: 'ViewDeleted';
-  view: View;
+  viewID: ViewID;
 }
 export interface ViewDeletedEvent extends BaseEvent, ViewDeletedEventConfig {}
 
@@ -105,7 +107,7 @@ export interface FieldNameUpdatedEvent
 
 export interface FieldDeletedEventConfig {
   name: 'FieldDeleted';
-  field: Field;
+  fieldID: FieldID;
 }
 export interface FieldDeletedEvent extends BaseEvent, FieldDeletedEventConfig {}
 
@@ -138,7 +140,7 @@ export interface DocumentFieldValueUpdatedEvent
 
 export interface DocumentDeletedEventConfig {
   name: 'DocumentDeleted';
-  document: Document;
+  documentID: DocumentID;
 }
 export interface DocumentDeletedEvent
   extends BaseEvent,
@@ -172,8 +174,7 @@ export interface FilterGroupUpdatedEvent
 
 export interface FilterDeletedEventConfig {
   name: 'FilterDeleted';
-  prevFilters: Filter[];
-  nextFilters: Filter[];
+  filterID: FilterID;
 }
 export interface FilterDeletedEvent
   extends BaseEvent,
@@ -196,8 +197,7 @@ export interface SortConfigUpdatedEvent
 
 export interface SortDeletedEventConfig {
   name: 'SortDeleted';
-  prevSorts: Sort[];
-  nextSorts: Sort[];
+  sortID: SortID;
 }
 export interface SortDeletedEvent extends BaseEvent, SortDeletedEventConfig {}
 
@@ -218,8 +218,7 @@ export interface GroupConfigUpdatedEvent
 
 export interface GroupDeletedEventConfig {
   name: 'GroupDeleted';
-  prevGroups: Group[];
-  nextGroups: Group[];
+  groupID: GroupID;
 }
 export interface GroupDeletedEvent extends BaseEvent, GroupDeletedEventConfig {}
 
@@ -291,31 +290,3 @@ export type Event =
   | GroupConfigUpdatedEvent
   | GroupDeletedEvent
   | ListViewFieldConfigUpdatedEvent;
-
-type SubscriptionCallback = (event: Event) => void;
-
-class EventEmitter {
-  private subscribers: SubscriptionCallback[] = [];
-
-  subscribe(callback: SubscriptionCallback) {
-    this.subscribers.push(callback);
-  }
-
-  unsubscribe(callback: SubscriptionCallback) {
-    this.subscribers = this.subscribers.filter((c) => c !== callback);
-  }
-
-  emit(event: Event) {
-    setTimeout(() => {
-      this.subscribers.forEach((callback) => {
-        callback(event);
-      });
-    }, 0);
-  }
-}
-
-export const eventEmitter = new EventEmitter();
-
-export function useEventEmitter(): EventEmitter {
-  return eventEmitter;
-}

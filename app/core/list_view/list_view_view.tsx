@@ -10,7 +10,7 @@ import { StyleSheet, View } from 'react-native';
 import { atom, useRecoilState } from 'recoil';
 
 import { AutoSizer } from '../../lib/autosizer';
-import { ListView, ViewID } from '../../data/views';
+import { ListView, ViewID } from '../../../models/views';
 import {
   GridRenderer,
   GridRendererRef,
@@ -22,7 +22,7 @@ import {
   RenderFooterProps,
   RenderGroupRowCellProps,
 } from '../../components/grid_renderer';
-import { Document, DocumentID } from '../../data/documents';
+import { Document, DocumentID } from '../../../models/documents';
 import { StatefulLeafRowCell } from '../../components/grid_renderer.common';
 import { usePrevious } from '../../hooks/use_previous';
 import { LastLeafRowCell, LeafRowCell } from './leaf_row_cell';

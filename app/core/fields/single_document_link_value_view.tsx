@@ -3,7 +3,7 @@ import React, { Fragment } from 'react';
 import {
   SingleDocumentLinkFieldValue,
   SingleDocumentLinkField,
-} from '../../data/fields';
+} from '../../../models/fields';
 import { DocumentLinkBadge } from './document_link_badge';
 
 interface SingleDocumentLinkValueViewProps {

@@ -6,7 +6,7 @@ import { Row } from '../../components/row';
 import {
   MultiDocumentLinkFieldValue,
   MultiDocumentLinkField,
-} from '../../data/fields';
+} from '../../../models/fields';
 import { DocumentLinkBadge } from './document_link_badge';
 
 interface MultiDocumentLinkValueViewProps {

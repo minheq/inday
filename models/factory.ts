@@ -1,5 +1,5 @@
-import { Space } from './spaces';
-import { Collaborator } from './collaborators';
+import { generateSpaceID, Space } from './spaces';
+import { Collaborator, generateCollaboratorID } from './collaborators';
 import {
   FieldType,
   FieldValue,
@@ -23,12 +23,14 @@ import {
   SingleOptionField,
   URLField,
   SelectOption,
+  generateFieldID,
+  generateSelectOptionID,
 } from './fields';
-import { BaseView, View } from './views';
-import { Collection } from './collections';
-import { Document } from './documents';
-import { Filter, FilterConfig } from './filters';
-import { Sort, SortConfig } from './sorts';
+import { BaseView, generateViewID, View } from './views';
+import { Collection, generateCollectionID } from './collections';
+import { Document, generateDocumentID } from './documents';
+import { Filter, FilterConfig, generateFilterID } from './filters';
+import { generateSortID, Sort, SortConfig } from './sorts';
 import {
   fakeBoolean,
   fakeDate,
@@ -38,19 +40,19 @@ import {
   fakeURL,
   fakeWord,
   fakeWords,
-} from '../../lib/faker';
-import { Workspace } from './workspace';
-import { keyedBy, range, sample } from '../../lib/array_utils';
-import { isEmpty } from '../../lib/lang_utils';
-import { formatISODate } from '../../lib/date_utils';
-import { palette } from '../components/palette';
-import { Group } from './groups';
+} from '../lib/faker';
+import { generateWorkspaceID, Workspace } from './workspace';
+import { keyedBy, range, sample } from '../lib/array_utils';
+import { isEmpty } from '../lib/lang_utils';
+import { formatISODate } from '../lib/date_utils';
+import { palette } from '../app/components/palette';
+import { generateGroupID, Group } from './groups';
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
-    id: space.id ?? Space.generateID(),
+    id: space.id ?? generateSpaceID(),
     name: space.name ?? fakeWords(2),
-    workspaceID: space.workspaceID ?? Workspace.generateID(),
+    workspaceID: space.workspaceID ?? generateWorkspaceID(),
     updatedAt: space.updatedAt ?? new Date(),
     createdAt: space.createdAt ?? new Date(),
   };
@@ -60,12 +62,12 @@ export function makeCollaborator(
   collaborator: Partial<Collaborator>,
 ): Collaborator {
   return {
-    id: collaborator.id ?? Collaborator.generateID(),
-    userID: collaborator.userID ?? Collaborator.generateID(),
+    id: collaborator.id ?? generateCollaboratorID(),
+    userID: collaborator.userID ?? generateCollaboratorID(),
     profileImageID: collaborator.profileImageID ?? 'someID',
     name: collaborator.name ?? fakeWords(2),
     email: collaborator.email ?? fakeEmail(),
-    spaceID: collaborator.spaceID ?? Space.generateID(),
+    spaceID: collaborator.spaceID ?? generateSpaceID(),
     updatedAt: collaborator.updatedAt ?? new Date(),
     createdAt: collaborator.createdAt ?? new Date(),
   };
@@ -81,10 +83,10 @@ export function makeField(field: Partial<Field>): Field {
 
 export function makeBaseField(field: Partial<Field>): BaseField {
   return {
-    id: field.id ?? Field.generateID(),
+    id: field.id ?? generateFieldID(),
     name: field.name ?? fakeWord(),
     description: field.description ?? fakeWords(50),
-    collectionID: field.collectionID ?? Collection.generateID(),
+    collectionID: field.collectionID ?? generateCollectionID(),
     updatedAt: field.updatedAt ?? new Date(),
     createdAt: field.createdAt ?? new Date(),
   };
@@ -142,7 +144,7 @@ const makeFieldByType: {
       type: FieldType.MultiDocumentLink,
       documentsFromCollectionID:
         (field as Partial<MultiDocumentLinkField>).documentsFromCollectionID ??
-        Collection.generateID(),
+        generateCollectionID(),
       ...base,
     };
   },
@@ -160,19 +162,19 @@ const makeFieldByType: {
       type: FieldType.MultiOption,
       options: [
         {
-          id: SelectOption.generateID(),
+          id: generateSelectOptionID(),
           label: fakeWord(),
           color: palette.green[100],
           order: 1,
         },
         {
-          id: SelectOption.generateID(),
+          id: generateSelectOptionID(),
           label: fakeWord(),
           color: palette.blue[100],
           order: 2,
         },
         {
-          id: SelectOption.generateID(),
+          id: generateSelectOptionID(),
           label: fakeWord(),
           color: palette.red[100],
           order: 3,
@@ -212,7 +214,7 @@ const makeFieldByType: {
       type: FieldType.SingleDocumentLink,
       documentsFromCollectionID:
         (field as Partial<MultiDocumentLinkField>).documentsFromCollectionID ??
-        Collection.generateID(),
+        generateCollectionID(),
       ...base,
     };
   },
@@ -230,19 +232,19 @@ const makeFieldByType: {
       type: FieldType.SingleOption,
       options: [
         {
-          id: SelectOption.generateID(),
+          id: generateSelectOptionID(),
           label: fakeWord(),
           color: palette.green[100],
           order: 1,
         },
         {
-          id: SelectOption.generateID(),
+          id: generateSelectOptionID(),
           label: fakeWord(),
           color: palette.blue[100],
           order: 2,
         },
         {
-          id: SelectOption.generateID(),
+          id: generateSelectOptionID(),
           label: fakeWord(),
           color: palette.red[100],
           order: 3,
@@ -266,12 +268,12 @@ interface CollectionWithFields extends Collection {
 
 export function makeCollection(collection: Partial<Collection>): Collection {
   return {
-    id: collection.id ?? Collection.generateID(),
+    id: collection.id ?? generateCollectionID(),
     name: collection.name ?? fakeWords(2),
-    spaceID: collection.spaceID ?? Space.generateID(),
+    spaceID: collection.spaceID ?? generateSpaceID(),
     updatedAt: collection.updatedAt ?? new Date(),
     createdAt: collection.createdAt ?? new Date(),
-    primaryFieldID: collection.primaryFieldID ?? Field.generateID(),
+    primaryFieldID: collection.primaryFieldID ?? generateFieldID(),
   };
 }
 
@@ -294,9 +296,9 @@ export function makeView(
   collection: CollectionWithFields,
 ): View {
   const baseView: BaseView = {
-    id: view.id ?? View.generateID(),
+    id: view.id ?? generateViewID(),
     name: view.name ?? fakeWords(2),
-    collectionID: view.collectionID ?? Collection.generateID(),
+    collectionID: view.collectionID ?? generateCollectionID(),
     updatedAt: view.updatedAt ?? new Date(),
     createdAt: view.createdAt ?? new Date(),
   };
@@ -365,10 +367,10 @@ export function makeDocument(
   }
 
   return {
-    id: document.id ?? Document.generateID(),
+    id: document.id ?? generateDocumentID(),
     fields,
     collectionID:
-      document.collectionID ?? collection?.id ?? Collection.generateID(),
+      document.collectionID ?? collection?.id ?? generateCollectionID(),
     updatedAt: document.updatedAt ?? new Date(),
     createdAt: document.createdAt ?? new Date(),
   };
@@ -483,8 +485,8 @@ export function makeFilter(
   config: FilterConfig,
 ): Filter {
   return {
-    id: filter.id ?? Filter.generateID(),
-    viewID: filter.viewID ?? View.generateID(),
+    id: filter.id ?? generateFilterID(),
+    viewID: filter.viewID ?? generateViewID(),
     group: filter.group || 1,
     ...config,
   };
@@ -492,8 +494,8 @@ export function makeFilter(
 
 export function makeSort(sort: Partial<Sort>, config: SortConfig): Sort {
   return {
-    id: sort.id ?? Sort.generateID(),
-    viewID: sort.viewID ?? View.generateID(),
+    id: sort.id ?? generateSortID(),
+    viewID: sort.viewID ?? generateViewID(),
     sequence: sort.sequence || 1,
     ...config,
   };
@@ -501,8 +503,8 @@ export function makeSort(sort: Partial<Sort>, config: SortConfig): Sort {
 
 export function makeGroup(group: Partial<Group>, config: SortConfig): Group {
   return {
-    id: group.id ?? Group.generateID(),
-    viewID: group.viewID ?? View.generateID(),
+    id: group.id ?? generateGroupID(),
+    viewID: group.viewID ?? generateViewID(),
     sequence: group.sequence || 1,
     ...config,
   };

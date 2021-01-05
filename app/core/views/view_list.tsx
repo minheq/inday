@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { useGetView, useGetCollectionViews } from '../../data/store';
+import { useViewQuery, useCollectionViewsQuery } from '../../store/queries';
 import { Spacer } from '../../components/spacer';
 import { Text } from '../../components/text';
-import { SpaceID } from '../../data/spaces';
-import { ViewID } from '../../data/views';
+import { SpaceID } from '../../../models/spaces';
+import { ViewID } from '../../../models/views';
 import { useThemeStyles } from '../../components/theme';
 import { Column } from '../../components/column';
 import { ViewButton } from './view_button';
@@ -18,8 +18,8 @@ interface ViewListProps {
 
 export function ViewList(props: ViewListProps): JSX.Element {
   const { viewID, onSelect } = props;
-  const activeView = useGetView(viewID);
-  const views = useGetCollectionViews(activeView.collectionID);
+  const activeView = useViewQuery(viewID);
+  const views = useCollectionViewsQuery(activeView.collectionID);
 
   const themeStyles = useThemeStyles();
 

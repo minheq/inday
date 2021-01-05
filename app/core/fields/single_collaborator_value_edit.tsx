@@ -4,12 +4,12 @@ import { ListPickerOption } from '../../components/list_picker';
 import {
   SingleCollaboratorField,
   SingleCollaboratorFieldValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
-import { useGetCollaborators } from '../../data/store';
+import { useCollaboratorsQuery } from '../../store/queries';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
-import { Collaborator, CollaboratorID } from '../../data/collaborators';
+import { Collaborator, CollaboratorID } from '../../../models/collaborators';
 
 interface SingleCollaboratorValueEditProps {
   documentID: DocumentID;
@@ -22,7 +22,7 @@ export function SingleCollaboratorValueEdit(
   props: SingleCollaboratorValueEditProps,
 ): JSX.Element {
   const { documentID, field, value, onDone } = props;
-  const collaborators = useGetCollaborators();
+  const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
 

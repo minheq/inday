@@ -4,25 +4,29 @@ import { isNotEmpty, last, removeBy } from '../../../lib/array_utils';
 import { FlatObject } from '../../../lib/flat_object';
 import { isEmpty } from '../../../lib/lang_utils';
 import { GridGroup, SelectedRow } from '../../components/grid_renderer.common';
-import { Document, DocumentID } from '../../data/documents';
+import { Document, DocumentID } from '../../../models/documents';
 import {
   areFieldValuesEqual,
   Field,
   FieldID,
   FieldValue,
-} from '../../data/fields';
-import { Group } from '../../data/groups';
-import { DocumentNode, makeDocumentNodes, SortGetters } from '../../data/sorts';
+} from '../../../models/fields';
+import { Group } from '../../../models/groups';
 import {
-  useGetSortedFieldsWithListViewConfig,
-  useGetSortGetters,
-  useGetView,
-  useGetViewDocuments,
-  useGetViewFilters,
-  useGetViewGroups,
-  useGetViewSorts,
-} from '../../data/store';
-import { assertListView, ViewID } from '../../data/views';
+  DocumentNode,
+  makeDocumentNodes,
+  SortGetters,
+} from '../../../models/sorts';
+import {
+  useSortedFieldsWithListViewConfigQuery,
+  useSortGettersQuery,
+  useViewQuery,
+  useViewDocumentsQuery,
+  useViewFiltersQuery,
+  useViewGroupsQuery,
+  useViewSortsQuery,
+} from '../../store/queries';
+import { assertListView, ViewID } from '../../../models/views';
 import { usePrevious } from '../../hooks/use_previous';
 import { ADD_FIELD_COLUMN_WIDTH } from './list_view_constants';
 
@@ -46,7 +50,7 @@ interface ListViewGrid {
 
 export function useListViewGrid(props: UseListViewGridProps): ListViewGrid {
   const { viewID, selectedDocuments } = props;
-  const view = useGetView(viewID);
+  const view = useViewQuery(viewID);
   assertListView(view);
 
   const {
@@ -57,7 +61,7 @@ export function useListViewGrid(props: UseListViewGridProps): ListViewGrid {
     columnToFieldIDCache,
     pathToGroupCache,
   } = useListViewData(viewID);
-  const fields = useGetSortedFieldsWithListViewConfig(viewID);
+  const fields = useSortedFieldsWithListViewConfigQuery(viewID);
   const fixedFieldCount = view.fixedFieldCount;
   const columns = useMemo(
     (): number[] =>
@@ -185,11 +189,11 @@ function useListViewData(viewID: ViewID): ListViewData {
     () => collapsedGroupsByViewID[viewID],
     [collapsedGroupsByViewID, viewID],
   );
-  const documents = useGetViewDocuments(viewID);
-  const fields = useGetSortedFieldsWithListViewConfig(viewID);
-  const groups = useGetViewGroups(viewID);
+  const documents = useViewDocumentsQuery(viewID);
+  const fields = useSortedFieldsWithListViewConfigQuery(viewID);
+  const groups = useViewGroupsQuery(viewID);
   const grouped = isNotEmpty(groups);
-  const sortGetters = useGetSortGetters();
+  const sortGetters = useSortGettersQuery();
   const [nodes, setNodes] = useState(
     grouped
       ? getGroupedDocumentNodes(
@@ -431,9 +435,9 @@ function useDocumentsOrderChanged(
     viewID,
   ]);
   const documentsLength = documents.length;
-  const filters = useGetViewFilters(viewID);
-  const sorts = useGetViewSorts(viewID);
-  const groups = useGetViewGroups(viewID);
+  const filters = useViewFiltersQuery(viewID);
+  const sorts = useViewSortsQuery(viewID);
+  const groups = useViewGroupsQuery(viewID);
 
   const prevCollapsedGroups = usePrevious(collapsedGroups);
   const prevDocumentsLength = usePrevious(documents.length);

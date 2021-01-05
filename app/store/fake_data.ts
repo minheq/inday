@@ -1,9 +1,9 @@
-import { Document } from './documents';
-import { Collection } from './collections';
-import { Space } from './spaces';
-import { Field, FieldType } from './fields';
-import { View } from './views';
-import { Collaborator } from './collaborators';
+import { Document } from '../../models/documents';
+import { Collection } from '../../models/collections';
+import { Space } from '../../models/spaces';
+import { Field, FieldType } from '../../models/fields';
+import { View } from '../../models/views';
+import { Collaborator } from '../../models/collaborators';
 import {
   makeSpace,
   makeCollaborator,
@@ -13,9 +13,9 @@ import {
   addFieldsToCollection,
   makeManyDocuments,
   makeGroup,
-} from './factory';
+} from '../../models/factory';
 import { keyedBy } from '../../lib/array_utils';
-import { Group } from './groups';
+import { Group } from '../../models/groups';
 
 const space1 = makeSpace({
   id: 'spc1',

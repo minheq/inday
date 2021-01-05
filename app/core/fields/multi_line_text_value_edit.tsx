@@ -12,9 +12,9 @@ import {
   MultiLineTextField,
   MultiLineTextFieldValue,
   TextFieldKindValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface MultiLineTextValueEditProps {
   autoFocus: boolean;
@@ -28,12 +28,12 @@ export function MultiLineTextValueEdit(
   props: MultiLineTextValueEditProps,
 ): JSX.Element {
   const { autoFocus, documentID, field, value, onKeyPress } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<TextFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<TextFieldKindValue>();
   const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
-    (nextValue: string) => {
-      updateDocumentFieldValue(documentID, field.id, nextValue);
+    async (nextValue: string) => {
+      await updateDocumentFieldValue(documentID, field.id, nextValue);
     },
     [updateDocumentFieldValue, documentID, field],
   );

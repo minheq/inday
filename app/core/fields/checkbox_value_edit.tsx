@@ -8,9 +8,9 @@ import {
   BooleanFieldKindValue,
   CheckboxField,
   CheckboxFieldValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
-import { useUpdateDocumentFieldValue } from '../../data/store';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface CheckboxValueEditProps {
   documentID: DocumentID;
@@ -20,11 +20,11 @@ interface CheckboxValueEditProps {
 
 export function CheckboxValueEdit(props: CheckboxValueEditProps): JSX.Element {
   const { documentID, value, field } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<BooleanFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
 
-  const handleToggle = useCallback(() => {
+  const handleToggle = useCallback(async () => {
     const checked = !value;
-    updateDocumentFieldValue(documentID, field.id, checked);
+    await updateDocumentFieldValue(documentID, field.id, checked);
   }, [updateDocumentFieldValue, documentID, field, value]);
 
   return <Checkbox value={value} onChange={handleToggle} />;

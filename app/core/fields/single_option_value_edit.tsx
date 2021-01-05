@@ -6,8 +6,8 @@ import {
   SelectOptionID,
   SingleOptionField,
   SingleOptionFieldValue,
-} from '../../data/fields';
-import { DocumentID } from '../../data/documents';
+} from '../../../models/fields';
+import { DocumentID } from '../../../models/documents';
 import { OptionBadge } from './option_badge';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 

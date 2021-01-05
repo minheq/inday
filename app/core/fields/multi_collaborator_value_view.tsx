@@ -5,7 +5,7 @@ import { Row } from '../../components/row';
 import {
   MultiCollaboratorFieldValue,
   MultiCollaboratorField,
-} from '../../data/fields';
+} from '../../../models/fields';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 
 interface MultiCollaboratorValueViewProps {

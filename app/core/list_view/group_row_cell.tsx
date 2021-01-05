@@ -29,7 +29,7 @@ import {
   FieldID,
   FieldType,
   FieldValue,
-} from '../../data/fields';
+} from '../../../models/fields';
 import { CheckboxValueView } from '../fields/checkbox_value_view';
 import { CurrencyValueView } from '../fields/currency_value_view';
 import { DateValueView } from '../fields/date_value_view';

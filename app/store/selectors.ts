@@ -10,33 +10,36 @@ import {
   collaboratorsByIDState,
   groupsByIDState,
   DocumentsByIDState,
+  workspaceState,
+  WorkspaceState,
 } from './atoms';
-import { Document, DocumentID } from './documents';
-import { Collection, CollectionID } from './collections';
-import { Field, FieldID, FieldValue } from './fields';
-import {
-  Filter,
-  FilterGroup,
-  FilterID,
-  filterDocuments,
-  FilterGetters,
-} from './filters';
-import { Space, SpaceID } from './spaces';
-import { View, ViewID } from './views';
-import { Sort, SortID, sortDocuments, SortGetters } from './sorts';
-import { Collaborator, CollaboratorID } from './collaborators';
-import { Group, GroupID } from './groups';
+import { Document, DocumentID } from '../../models/documents';
+import { Collection, CollectionID } from '../../models/collections';
+import { Field, FieldID, FieldValue } from '../../models/fields';
+import { Filter, FilterGroup, FilterID } from '../../models/filters';
+import { Space, SpaceID } from '../../models/spaces';
+import { View, ViewID } from '../../models/views';
+import { Sort, SortID } from '../../models/sorts';
+import { Collaborator, CollaboratorID } from '../../models/collaborators';
+import { Group, GroupID } from '../../models/groups';
 import { keyedBy, last } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 
-export const spaceQuery = selectorFamily<Space | null, SpaceID>({
+export const workspaceQuery = selector<WorkspaceState>({
+  key: 'WorkspaceQuery',
+  get: ({ get }) => {
+    return get(workspaceState);
+  },
+});
+
+export const spaceQuery = selectorFamily<Space, SpaceID>({
   key: 'SpaceQuery',
   get: (spaceID: SpaceID) => ({ get }) => {
     const spacesByID = get(spacesByIDState);
     const space = spacesByID[spaceID];
 
     if (space === undefined) {
-      return null;
+      throw new Error('Space not found');
     }
 
     return space;
@@ -430,58 +433,6 @@ export const documentFieldValueQuery = selectorFamily<
     }
 
     return document.fields[fieldID];
-  },
-});
-
-export const sortGettersQuery = selector<SortGetters>({
-  key: 'SortGettersQuery',
-  get: ({ get }) => {
-    const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
-    const getDocument = (documentID: DocumentID) =>
-      get(documentQuery(documentID));
-    const getCollaborator = (collaboratorID: CollaboratorID) =>
-      get(collaboratorQuery(collaboratorID));
-    const getCollection = (collectionID: CollectionID) =>
-      get(collectionQuery(collectionID));
-
-    return {
-      getField,
-      getDocument,
-      getCollaborator,
-      getCollection,
-    };
-  },
-});
-
-export const filterGettersQuery = selector<FilterGetters>({
-  key: 'FilterGettersQuery',
-  get: ({ get }) => {
-    const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
-
-    return { getField };
-  },
-});
-
-export const viewDocumentsQuery = selectorFamily<Document[], ViewID>({
-  key: 'ViewDocumentsQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const view = get(viewQuery(viewID));
-    const documents = get(collectionDocumentsQuery(view.collectionID));
-    const filterGroups = get(viewFilterGroupsQuery(viewID));
-    const sorts = get(viewSortsQuery(viewID));
-    const sortGetters = get(sortGettersQuery);
-    const filterGetters = get(filterGettersQuery);
-
-    let finalDocuments = documents;
-
-    finalDocuments = filterDocuments(
-      filterGroups,
-      finalDocuments,
-      filterGetters,
-    );
-    finalDocuments = sortDocuments(sorts, finalDocuments, sortGetters);
-
-    return finalDocuments;
   },
 });
 

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Text } from '../../components/text';
-import { EmailField, EmailFieldValue } from '../../data/fields';
+import { EmailField, EmailFieldValue } from '../../../models/fields';
 
 interface EmailValueViewProps {
   field: EmailField;

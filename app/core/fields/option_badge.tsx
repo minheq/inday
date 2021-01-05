@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from '../../components/badge';
-import { SelectOption } from '../../data/fields';
+import { SelectOption } from '../../../models/fields';
 
 interface OptionBadgeProps {
   option: SelectOption;

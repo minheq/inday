@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 
 import { TextLink } from '../../components/text_link';
-import { EmailFieldValue } from '../../data/fields';
+import { EmailFieldValue } from '../../../models/fields';
 
 interface EmailValueActionsProps {
   value: EmailFieldValue;
