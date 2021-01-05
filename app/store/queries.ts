@@ -9,7 +9,10 @@ import {
   CollaboratorsByIDState,
   collectionsByIDState,
   CollectionsByIDState,
+  documentsByIDState,
   DocumentsByIDState,
+  FieldsByIDState,
+  fieldsByIDState,
   FiltersByIDState,
   filtersByIDState,
   spacesByIDState,
@@ -42,6 +45,7 @@ import {
   viewQuery,
   viewSortsQuery,
   viewSortsSequenceMaxQuery,
+  workspaceQuery,
 } from './selectors';
 import { Document, DocumentID } from '../../models/documents';
 import {
@@ -51,11 +55,12 @@ import {
   View,
   ViewID,
 } from '../../models/views';
-import { Sort, SortGetters, SortID } from '../../models/sorts';
+import { Sort, sortDocuments, SortGetters, SortID } from '../../models/sorts';
 import { Group, GroupID } from '../../models/groups';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   Filter,
+  filterDocuments,
   FilterGetters,
   FilterGroup,
   FilterID,
@@ -80,7 +85,7 @@ export function useSpaceCollectionsQuery(spaceID: SpaceID): Collection[] {
 }
 
 export function useWorkspaceQuery(): Workspace {
-  const workspace = useRecoilValue(workspaceState);
+  const workspace = useRecoilValue(workspaceQuery);
 
   if (workspace === null) {
     throw new Error('Workspace not found');
@@ -105,6 +110,14 @@ export function useCollaboratorQuery(
 
 export function useCollectionsByIDQuery(): CollectionsByIDState {
   return useRecoilValue(collectionsByIDState);
+}
+
+export function useFieldsByIDQuery(): FieldsByIDState {
+  return useRecoilValue(fieldsByIDState);
+}
+
+export function useDocumentsByIDQuery(): DocumentsByIDState {
+  return useRecoilValue(documentsByIDState);
 }
 
 export function useCollectionQuery(collectionID: CollectionID): Collection {
@@ -143,10 +156,81 @@ export function useViewQuery(viewID: ViewID): View {
   return useRecoilValue(viewQuery(viewID));
 }
 
+function useFieldQueryCallback() {
+  const fieldsByID = useFieldsByIDQuery();
+
+  return useCallback(
+    (fieldID: FieldID) => {
+      const field = fieldsByID[fieldID];
+
+      if (field === undefined) {
+        throw new Error(`Field not found for fieldID=${fieldID}`);
+      }
+
+      return field;
+    },
+    [fieldsByID],
+  );
+}
+
+function useDocumentQueryCallback() {
+  const documentsByID = useDocumentsByIDQuery();
+
+  return useCallback(
+    (documentID: DocumentID) => {
+      const document = documentsByID[documentID];
+      if (document === undefined) {
+        throw new Error(`Document not found for documentID=${documentID}`);
+      }
+
+      return document;
+    },
+    [documentsByID],
+  );
+}
+
+function useCollaboratorQueryCallback() {
+  const collaboratorsByID = useCollaboratorsByIDQuery();
+
+  return useCallback(
+    (collaboratorID: CollaboratorID) => {
+      const collaborator = collaboratorsByID[collaboratorID];
+
+      if (collaborator === undefined) {
+        throw new Error(
+          `Collaborator not found for collaboratorID=${collaboratorID}`,
+        );
+      }
+
+      return collaborator;
+    },
+    [collaboratorsByID],
+  );
+}
+
+function useCollectionQueryCallback() {
+  const collectionsByID = useCollectionsByIDQuery();
+
+  return useCallback(
+    (collectionID: CollectionID) => {
+      const collection = collectionsByID[collectionID];
+
+      if (collection === undefined) {
+        throw new Error(
+          `Collection not found for collectionID=${collectionID}`,
+        );
+      }
+
+      return collection;
+    },
+    [collectionsByID],
+  );
+}
+
 export function useSortGettersQuery(): SortGetters {
-  const getField = useGetFieldCallback();
-  const prevDocument = useDocumentQuery(documentID);
-  const getCollaborator = useGetCollaboratorCallback();
+  const getField = useFieldQueryCallback();
+  const getDocument = useDocumentQueryCallback();
+  const getCollaborator = useCollaboratorQueryCallback();
   const getCollection = useCollectionQueryCallback();
 
   return {
@@ -158,43 +242,20 @@ export function useSortGettersQuery(): SortGetters {
 }
 
 export function useFilterGettersQuery(): FilterGetters {
-  const getField = useGetFieldCallback();
-  const prevDocument = useDocumentQuery(documentID);
-  const getCollaborator = useGetCollaboratorCallback();
-  const getCollection = useCollectionQueryCallback();
+  const getField = useFieldQueryCallback();
 
   return {
     getField,
-    getDocument,
-    getCollaborator,
-    getCollection,
   };
 }
 
 export function useViewDocumentsQuery(viewID: ViewID): Document[] {
-  const view = get(viewQuery(viewID));
-  const documents = get(collectionDocumentsQuery(view.collectionID));
-  const filterGroups = get(viewFilterGroupsQuery(viewID));
-  const sorts = get(viewSortsQuery(viewID));
-
-  const getField = (fieldID: FieldID) => get(fieldQuery(fieldID));
-  const getDocument = (documentID: DocumentID) =>
-    get(documentQuery(documentID));
-  const getCollaborator = (collaboratorID: CollaboratorID) =>
-    get(collaboratorQuery(collaboratorID));
-  const getCollection = (collectionID: CollectionID) =>
-    get(collectionQuery(collectionID));
-
-  const sortGetters: SortGetters = {
-    getField,
-    getDocument,
-    getCollaborator,
-    getCollection,
-  };
-
-  const filterGetters: FilterGetters = {
-    getField,
-  };
+  const view = useViewQuery(viewID);
+  const filterGroups = useViewFiltersGroupsQuery(viewID);
+  const sorts = useViewSortsQuery(viewID);
+  const documents = useCollectionDocumentsQuery(view.collectionID);
+  const sortGetters = useSortGettersQuery();
+  const filterGetters = useFilterGettersQuery();
 
   let finalDocuments = documents;
 

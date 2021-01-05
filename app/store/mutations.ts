@@ -1,5 +1,4 @@
-import { useCallback } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilCallback } from 'recoil';
 
 import { EventConfig, Event } from '../../models/events';
 import {
@@ -45,7 +44,6 @@ import {
   viewsByIDState,
   filtersByIDState,
   FiltersByIDState,
-  ViewsByIDState,
   fieldsByIDState,
   documentsByIDState,
   sortsByIDState,
@@ -69,97 +67,107 @@ import {
 } from '../../models/groups';
 import { EventEmitter } from '../../lib/event_emitter';
 import {
-  useCollectionFieldsQuery,
   useCollectionQuery,
   useDocumentQuery,
   useFieldQuery,
-  useFilterQuery,
-  useGroupQuery,
-  useSortQuery,
-  useSpaceQuery,
-  useViewFiltersQuery,
-  useViewGroupsQuery,
-  useViewQuery,
-  useViewSortsQuery,
   useWorkspaceQuery,
 } from './queries';
+import {
+  collectionFieldsQuery,
+  collectionQuery,
+  documentQuery,
+  filterQuery,
+  groupQuery,
+  sortQuery,
+  spaceQuery,
+  viewFiltersQuery,
+  viewGroupsQuery,
+  viewQuery,
+  viewSortsQuery,
+  workspaceQuery,
+} from './selectors';
 
 export const eventEmitter = new EventEmitter<Event>();
 
 export function useEmitEvent(): (eventConfig: EventConfig) => void {
   const logger = useLogger();
   const workspace = useWorkspaceQuery();
-  const setEvents = useSetRecoilState(eventsState);
 
-  return useCallback(
-    (eventConfig: EventConfig) => {
+  return useRecoilCallback(
+    ({ set }) => (eventConfig: EventConfig) => {
       const event: Event = {
         ...eventConfig,
         createdAt: new Date(),
         workspaceID: workspace.id,
       };
 
-      setEvents((prevEvents) => [...prevEvents, event]);
+      set(eventsState, (prevEvents) => [...prevEvents, event]);
 
       logger.debug('Emit event', event);
 
       eventEmitter.emit(event);
     },
-    [workspace, setEvents, logger],
+    [workspace, logger],
   );
 }
 
-export function useCreateSpace(): () => Space {
+export function useCreateSpaceMutation(): () => Promise<Space> {
   const emitEvent = useEmitEvent();
-  const workspace = useWorkspaceQuery();
-  const setSpaces = useSetRecoilState(spacesByIDState);
-  const createCollection = useCreateCollection();
+  const createCollection = useCreateCollectionMutation();
 
-  return useCallback(() => {
-    const newSpace: Space = {
-      id: generateSpaceID(),
-      name: '',
-      workspaceID: workspace.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  return useRecoilCallback(
+    ({ snapshot, set }) => async () => {
+      const workspace = await snapshot.getPromise(workspaceQuery);
 
-    setSpaces((previousSpaces) => ({
-      ...previousSpaces,
-      [newSpace.id]: newSpace,
-    }));
+      if (workspace === null) {
+        throw new Error('');
+      }
 
-    emitEvent({
-      name: 'SpaceCreated',
-      space: newSpace,
-    });
+      const newSpace: Space = {
+        id: generateSpaceID(),
+        name: '',
+        workspaceID: workspace.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-    createCollection(newSpace.id);
+      set(spacesByIDState, (previousSpacesByID) => ({
+        ...previousSpacesByID,
+        [newSpace.id]: newSpace,
+      }));
 
-    return newSpace;
-  }, [emitEvent, workspace, setSpaces, createCollection]);
+      emitEvent({
+        name: 'SpaceCreated',
+        space: newSpace,
+      });
+
+      createCollection(newSpace.id);
+
+      return newSpace;
+    },
+    [emitEvent],
+  );
 }
 
-export function useDeleteSpace(): (space: Space) => void {
+export function useDeleteSpaceMutation(): (spaceID: SpaceID) => void {
   const emitEvent = useEmitEvent();
-  const setSpaces = useSetRecoilState(spacesByIDState);
 
-  return useCallback(
-    (space: Space) => {
-      setSpaces((previousSpaces) => {
+  return useRecoilCallback(
+    ({ set }) => (spaceID: SpaceID) => {
+      set(spacesByIDState, (previousSpaces) => {
         const updatedSpaces = { ...previousSpaces };
 
-        delete updatedSpaces[space.id];
+        delete updatedSpaces[spaceID];
 
         return updatedSpaces;
       });
 
       emitEvent({
         name: 'SpaceDeleted',
-        space,
+        spaceID,
       });
     },
-    [emitEvent, setSpaces],
+    [emitEvent],
   );
 }
 
@@ -167,15 +175,16 @@ export interface UpdateSpaceNameInput {
   name: string;
 }
 
-export function useUpdateSpaceName(
+export function useUpdateSpaceNameMutation(): (
   spaceID: SpaceID,
-): (input: UpdateSpaceNameInput) => void {
+  input: UpdateSpaceNameInput,
+) => Promise<void> {
   const emitEvent = useEmitEvent();
-  const prevSpace = useSpaceQuery(spaceID);
-  const setSpaces = useSetRecoilState(spacesByIDState);
 
-  return useCallback(
-    (input: UpdateSpaceNameInput) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (spaceID, input) => {
+      const prevSpace = await snapshot.getPromise(spaceQuery(spaceID));
+
       const { name } = input;
 
       const nextSpace: Space = {
@@ -183,28 +192,30 @@ export function useUpdateSpaceName(
         name,
       };
 
-      setSpaces((previousSpaces) => ({
+      set(spacesByIDState, (previousSpaces) => ({
         ...previousSpaces,
         [nextSpace.id]: nextSpace,
       }));
 
       emitEvent({
         name: 'SpaceNameUpdated',
-        prevSpace,
-        nextSpace,
+        spaceID,
+        prevName: prevSpace.name,
+        nextName: nextSpace.name,
       });
     },
-    [emitEvent, setSpaces, prevSpace],
+    [emitEvent],
   );
 }
 
-export function useCreateCollection(): (spaceID: SpaceID) => Collection {
+export function useCreateCollectionMutation(): (
+  spaceID: SpaceID,
+) => Collection {
   const emitEvent = useEmitEvent();
-  const setCollections = useSetRecoilState(collectionsByIDState);
-  const createView = useCreateView();
+  const createView = useCreateViewMutation();
 
-  return useCallback(
-    (spaceID: SpaceID) => {
+  return useRecoilCallback(
+    ({ set }) => (spaceID) => {
       const newCollection: Collection = {
         id: generateCollectionID(),
         name: '',
@@ -214,8 +225,8 @@ export function useCreateCollection(): (spaceID: SpaceID) => Collection {
         spaceID,
       };
 
-      setCollections((previousCollections) => ({
-        ...previousCollections,
+      set(collectionsByIDState, (previousCollectionsByID) => ({
+        ...previousCollectionsByID,
         [newCollection.id]: newCollection,
       }));
 
@@ -228,19 +239,20 @@ export function useCreateCollection(): (spaceID: SpaceID) => Collection {
 
       return newCollection;
     },
-    [emitEvent, setCollections, createView],
+    [emitEvent, createView],
   );
 }
 
-export function useUpdateDocumentFieldValue<T extends FieldValue>(
+export function useUpdateDocumentFieldValueMutation<T extends FieldValue>(): (
   documentID: DocumentID,
-): (fieldID: FieldID, nextValue: T) => void {
+  fieldID: FieldID,
+  nextValue: T,
+) => Promise<void> {
   const emitEvent = useEmitEvent();
-  const setDocumentsByID = useSetRecoilState(documentsByIDState);
-  const prevDocument = useDocumentQuery(documentID);
 
-  return useCallback(
-    (fieldID, nextValue) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (documentID, fieldID, nextValue) => {
+      const prevDocument = await snapshot.getPromise(documentQuery(documentID));
       const prevValue = prevDocument.fields[fieldID];
 
       const nextDocument: Document = {
@@ -251,7 +263,7 @@ export function useUpdateDocumentFieldValue<T extends FieldValue>(
         },
       };
 
-      setDocumentsByID((previousDocumentsByID) => ({
+      set(documentsByIDState, (previousDocumentsByID) => ({
         ...previousDocumentsByID,
         [nextDocument.id]: nextDocument,
       }));
@@ -263,44 +275,49 @@ export function useUpdateDocumentFieldValue<T extends FieldValue>(
         nextValue,
       });
     },
-    [emitEvent, setDocumentsByID, prevDocument],
+    [emitEvent],
   );
 }
 
-export function useDeleteCollection(collectionID: CollectionID): () => void {
+export function useDeleteCollectionMutation(): (
+  collectionID: CollectionID,
+) => void {
   const emitEvent = useEmitEvent();
-  const setCollections = useSetRecoilState(collectionsByIDState);
-  const collection = useCollectionQuery(collectionID);
 
-  return useCallback(() => {
-    setCollections((previousCollections) => {
-      const updatedCollections = { ...previousCollections };
+  return useRecoilCallback(
+    ({ set }) => (collectionID) => {
+      set(collectionsByIDState, (previousCollections) => {
+        const updatedCollections = { ...previousCollections };
 
-      delete updatedCollections[collectionID];
+        delete updatedCollections[collectionID];
 
-      return updatedCollections;
-    });
+        return updatedCollections;
+      });
 
-    emitEvent({
-      name: 'CollectionDeleted',
-      collection,
-    });
-  }, [emitEvent, setCollections, collection, collectionID]);
+      emitEvent({
+        name: 'CollectionDeleted',
+        collectionID,
+      });
+    },
+    [emitEvent],
+  );
 }
 
 export interface UpdateCollectionNameInput {
   name: string;
 }
 
-export function useUpdateCollectionName(
+export function useUpdateCollectionNameMutation(): (
   collectionID: CollectionID,
-): (input: UpdateCollectionNameInput) => Collection {
+  input: UpdateCollectionNameInput,
+) => Promise<Collection> {
   const emitEvent = useEmitEvent();
-  const prevCollection = useCollectionQuery(collectionID);
-  const setCollections = useSetRecoilState(collectionsByIDState);
 
-  return useCallback(
-    (input: UpdateCollectionNameInput) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (collectionID, input) => {
+      const prevCollection = await snapshot.getPromise(
+        collectionQuery(collectionID),
+      );
       const { name } = input;
 
       const nextCollection: Collection = {
@@ -308,20 +325,21 @@ export function useUpdateCollectionName(
         name,
       };
 
-      setCollections((previousCollections) => ({
+      set(collectionsByIDState, (previousCollections) => ({
         ...previousCollections,
         [nextCollection.id]: nextCollection,
       }));
 
       emitEvent({
         name: 'CollectionNameUpdated',
-        prevCollection,
-        nextCollection,
+        collectionID,
+        prevName: prevCollection.name,
+        nextName: nextCollection.name,
       });
 
       return nextCollection;
     },
-    [prevCollection, setCollections, emitEvent],
+    [emitEvent],
   );
 }
 
@@ -335,14 +353,15 @@ export function useDocumentQueryPrimaryFieldValueCallback(
   return [field, document.fields[collection.primaryFieldID]];
 }
 
-export function useCreateFilter(
+export function useCreateFilterMutation(): (
   viewID: ViewID,
-): (group: number, filterConfig: FilterConfig) => Filter {
+  group: number,
+  filterConfig: FilterConfig,
+) => Filter {
   const emitEvent = useEmitEvent();
-  const setFilters = useSetRecoilState(filtersByIDState);
 
-  return useCallback(
-    (group: number, filterConfig: FilterConfig) => {
+  return useRecoilCallback(
+    ({ set }) => (viewID, group, filterConfig) => {
       const newFilter: Filter = {
         id: generateFilterID(),
         viewID,
@@ -350,7 +369,7 @@ export function useCreateFilter(
         ...filterConfig,
       };
 
-      setFilters((prevFilters) => ({
+      set(filtersByIDState, (prevFilters) => ({
         ...prevFilters,
         [newFilter.id]: newFilter,
       }));
@@ -362,25 +381,28 @@ export function useCreateFilter(
 
       return newFilter;
     },
-    [emitEvent, setFilters, viewID],
+    [emitEvent],
   );
 }
 
-export function useUpdateFilterConfig(
+export function useUpdateFilterConfigMutation(): (
   filterID: FilterID,
-): (group: number, filterConfig: FilterConfig) => void {
+  group: number,
+  filterConfig: FilterConfig,
+) => Promise<Filter> {
   const emitEvent = useEmitEvent();
-  const setFilters = useSetRecoilState(filtersByIDState);
-  const prevFilter = useFilterQuery(filterID);
 
-  return useCallback(
-    (group: number, filterConfig: FilterConfig) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (filterID, group, filterConfig) => {
+      const prevFilter = await snapshot.getPromise(filterQuery(filterID));
+
       const nextFilter: Filter = {
         ...prevFilter,
         ...filterConfig,
         group,
       };
-      setFilters((prevFilters) => ({
+
+      set(filtersByIDState, (prevFilters) => ({
         ...prevFilters,
         [nextFilter.id]: nextFilter,
       }));
@@ -393,23 +415,25 @@ export function useUpdateFilterConfig(
 
       return nextFilter;
     },
-    [emitEvent, setFilters, prevFilter],
+    [emitEvent],
   );
 }
 
-export function useUpdateFilterGroup(
+export function useUpdateFilterGroupMutation(): (
   filterID: FilterID,
-): (value: 'and' | 'or') => Filter {
+  value: 'and' | 'or',
+) => Promise<Filter> {
   const emitEvent = useEmitEvent();
-  const setFilters = useSetRecoilState(filtersByIDState);
-  const prevFilter = useFilterQuery(filterID);
-  const prevFilters = useViewFiltersQuery(prevFilter.viewID);
 
-  return useCallback(
-    (value: 'and' | 'or') => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (filterID, value) => {
+      const prevFilter = await snapshot.getPromise(filterQuery(filterID));
+      const prevFilters = await snapshot.getPromise(
+        viewFiltersQuery(prevFilter.viewID),
+      );
       const nextFilters = updateFilterGroup(prevFilter, value, prevFilters);
 
-      setFilters((previousFilters) => ({
+      set(filtersByIDState, (previousFilters) => ({
         ...previousFilters,
         ...nextFilters,
       }));
@@ -422,48 +446,54 @@ export function useUpdateFilterGroup(
 
       return nextFilters[filterID];
     },
-    [emitEvent, setFilters, prevFilter, prevFilters, filterID],
+    [emitEvent],
   );
 }
 
-export function useDeleteFilter(filterID: FilterID): () => void {
+export function useDeleteFilterMutation(): (
+  filterID: FilterID,
+) => Promise<void> {
   const emitEvent = useEmitEvent();
-  const setFilters = useSetRecoilState<FiltersByIDState>(filtersByIDState);
-  const prevFilter = useFilterQuery(filterID);
-  const prevFilters = useViewFiltersQuery(prevFilter.viewID);
 
-  return useCallback(() => {
-    const nextFilters = deleteFilter(prevFilter, prevFilters);
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (filterID) => {
+      const prevFilter = await snapshot.getPromise(filterQuery(filterID));
+      const prevFilters = await snapshot.getPromise(
+        viewFiltersQuery(prevFilter.viewID),
+      );
+      const nextFilters = deleteFilter(prevFilter, prevFilters);
 
-    setFilters((_prevFilters) => {
-      const clonedPreviousFilters: FiltersByIDState = {
-        ..._prevFilters,
-      };
+      set(filtersByIDState, (_prevFilters) => {
+        const clonedPreviousFilters: FiltersByIDState = {
+          ..._prevFilters,
+        };
 
-      delete clonedPreviousFilters[filterID];
+        delete clonedPreviousFilters[filterID];
 
-      return {
-        ...clonedPreviousFilters,
-        ...nextFilters,
-      };
-    });
+        return {
+          ...clonedPreviousFilters,
+          ...nextFilters,
+        };
+      });
 
-    emitEvent({
-      name: 'FilterDeleted',
-      prevFilters,
-      nextFilters: Object.values(nextFilters),
-    });
-  }, [emitEvent, setFilters, prevFilters, prevFilter, filterID]);
+      emitEvent({
+        name: 'FilterDeleted',
+        filterID,
+      });
+    },
+    [emitEvent],
+  );
 }
 
-export function useCreateSort(
+export function useCreateSortMutation(): (
   viewID: ViewID,
-): (sequence: number, sortConfig: SortConfig) => Sort {
+  sequence: number,
+  sortConfig: SortConfig,
+) => Sort {
   const emitEvent = useEmitEvent();
-  const setSorts = useSetRecoilState(sortsByIDState);
 
-  return useCallback(
-    (sequence: number, sortConfig: SortConfig) => {
+  return useRecoilCallback(
+    ({ set }) => (viewID, sequence, sortConfig) => {
       const newSort: Sort = {
         id: generateSortID(),
         viewID,
@@ -471,7 +501,7 @@ export function useCreateSort(
         ...sortConfig,
       };
 
-      setSorts((previousSorts) => ({
+      set(sortsByIDState, (previousSorts) => ({
         ...previousSorts,
         [newSort.id]: newSort,
       }));
@@ -483,26 +513,26 @@ export function useCreateSort(
 
       return newSort;
     },
-    [emitEvent, setSorts, viewID],
+    [emitEvent],
   );
 }
 
-export function useUpdateSortConfig(
+export function useUpdateSortConfigMutation(): (
   sortID: SortID,
-): (sortConfig: SortConfig) => Sort {
+  sortConfig: SortConfig,
+) => Promise<Sort> {
   const emitEvent = useEmitEvent();
-  const setSorts = useSetRecoilState(sortsByIDState);
-  const prevSort = useSortQuery(sortID);
 
-  return useCallback(
-    (sortConfig: SortConfig) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (sortID, sortConfig) => {
+      const prevSort = await snapshot.getPromise(sortQuery(sortID));
       const nextSort: Sort = {
         ...prevSort,
         ...sortConfig,
       };
 
-      setSorts((previousSorts) => ({
-        ...previousSorts,
+      set(sortsByIDState, (previousSortsByID) => ({
+        ...previousSortsByID,
         [nextSort.id]: nextSort,
       }));
 
@@ -514,50 +544,52 @@ export function useUpdateSortConfig(
 
       return nextSort;
     },
-    [emitEvent, setSorts, prevSort],
+    [emitEvent],
   );
 }
 
-export function useDeleteSort(sortID: SortID): () => void {
+export function useDeleteSortMutation(): (sortID: SortID) => Promise<void> {
   const emitEvent = useEmitEvent();
-  const setSorts = useSetRecoilState<SortsByIDState>(sortsByIDState);
-  const prevSort = useSortQuery(sortID);
-  const prevSorts = useViewSortsQuery(prevSort.viewID);
 
-  return useCallback(() => {
-    const nextSorts = deleteSort(prevSort, prevSorts);
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (sortID) => {
+      const prevSort = await snapshot.getPromise(sortQuery(sortID));
+      const prevSorts = await snapshot.getPromise(
+        viewSortsQuery(prevSort.viewID),
+      );
+      const nextSorts = deleteSort(prevSort, prevSorts);
 
-    setSorts((previousSorts) => {
-      const clonedPreviousSorts: SortsByIDState = {
-        ...previousSorts,
-      };
+      set(sortsByIDState, (previousSorts) => {
+        const clonedPreviousSorts: SortsByIDState = {
+          ...previousSorts,
+        };
 
-      delete clonedPreviousSorts[sortID];
+        delete clonedPreviousSorts[sortID];
 
-      return {
-        ...clonedPreviousSorts,
-        ...nextSorts,
-      };
-    });
+        return {
+          ...clonedPreviousSorts,
+          ...nextSorts,
+        };
+      });
 
-    emitEvent({
-      name: 'SortDeleted',
-      prevSorts,
-      nextSorts: Object.values(nextSorts),
-    });
-  }, [emitEvent, setSorts, prevSorts, prevSort, sortID]);
+      emitEvent({
+        name: 'SortDeleted',
+        sortID,
+      });
+    },
+    [emitEvent],
+  );
 }
 
-export function useCreateGroup(): (
+export function useCreateGroupMutation(): (
   viewID: ViewID,
   sequence: number,
   sortConfig: SortConfig,
 ) => Group {
   const emitEvent = useEmitEvent();
-  const setGroups = useSetRecoilState(groupsByIDState);
 
-  return useCallback(
-    (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
+  return useRecoilCallback(
+    ({ set }) => (viewID: ViewID, sequence: number, sortConfig: SortConfig) => {
       const newGroup: Group = {
         id: generateGroupID(),
         viewID,
@@ -565,7 +597,7 @@ export function useCreateGroup(): (
         ...sortConfig,
       };
 
-      setGroups((previousGroups) => ({
+      set(groupsByIDState, (previousGroups) => ({
         ...previousGroups,
         [newGroup.id]: newGroup,
       }));
@@ -577,25 +609,25 @@ export function useCreateGroup(): (
 
       return newGroup;
     },
-    [emitEvent, setGroups],
+    [emitEvent],
   );
 }
 
-export function useUpdateGroupSortConfig(
+export function useUpdateGroupSortConfigMutation(): (
   groupID: GroupID,
-): (sortConfig: SortConfig) => Group {
+  sortConfig: SortConfig,
+) => Promise<Group> {
   const emitEvent = useEmitEvent();
-  const setGroups = useSetRecoilState(groupsByIDState);
-  const prevGroup = useGroupQuery(groupID);
 
-  return useCallback(
-    (sortConfig: SortConfig) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (groupID, sortConfig: SortConfig) => {
+      const prevGroup = await snapshot.getPromise(groupQuery(groupID));
       const nextGroup: Group = {
         ...prevGroup,
         ...sortConfig,
       };
 
-      setGroups((previousGroups) => ({
+      set(groupsByIDState, (previousGroups) => ({
         ...previousGroups,
         [nextGroup.id]: nextGroup,
       }));
@@ -608,50 +640,55 @@ export function useUpdateGroupSortConfig(
 
       return nextGroup;
     },
-    [emitEvent, setGroups, prevGroup],
+    [emitEvent],
   );
 }
 
-export function useDeleteGroup(groupID: GroupID): () => void {
+export function useDeleteGroupMutation(): (groupID: GroupID) => Promise<void> {
   const emitEvent = useEmitEvent();
-  const setGroups = useSetRecoilState<GroupsByIDState>(groupsByIDState);
-  const prevGroup = useGroupQuery(groupID);
-  const prevGroups = useViewGroupsQuery(prevGroup.viewID);
 
-  return useCallback(() => {
-    const nextGroups = deleteGroup(prevGroup, prevGroups);
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (groupID) => {
+      const prevGroup = await snapshot.getPromise(groupQuery(groupID));
+      const prevGroups = await snapshot.getPromise(
+        viewGroupsQuery(prevGroup.viewID),
+      );
+      const nextGroups = deleteGroup(prevGroup, prevGroups);
 
-    setGroups((previousGroups) => {
-      const clonedPreviousGroups: GroupsByIDState = {
-        ...previousGroups,
-      };
+      set(groupsByIDState, (previousGroups) => {
+        const clonedPreviousGroups: GroupsByIDState = {
+          ...previousGroups,
+        };
 
-      delete clonedPreviousGroups[groupID];
+        delete clonedPreviousGroups[groupID];
 
-      return {
-        ...clonedPreviousGroups,
-        ...nextGroups,
-      };
-    });
+        return {
+          ...clonedPreviousGroups,
+          ...nextGroups,
+        };
+      });
 
-    emitEvent({
-      name: 'GroupDeleted',
-      prevGroups,
-      nextGroups: Object.values(nextGroups),
-    });
-  }, [emitEvent, setGroups, prevGroup, prevGroups, groupID]);
+      emitEvent({
+        name: 'GroupDeleted',
+        groupID,
+      });
+    },
+    [emitEvent],
+  );
 }
 
-export function useUpdateListViewFieldConfig(
+export function useUpdateListViewFieldConfigMutation(): (
   viewID: ViewID,
-): (fieldID: FieldID, config: Partial<ListViewFieldConfig>) => void {
+  fieldID: FieldID,
+  config: Partial<ListViewFieldConfig>,
+) => Promise<void> {
   const emitEvent = useEmitEvent();
-  const prevView = useViewQuery(viewID);
-  const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
-  assertListView(prevView);
 
-  return useCallback(
-    (fieldID: FieldID, config: Partial<ListViewFieldConfig>) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (viewID, fieldID, config) => {
+      const prevView = await snapshot.getPromise(viewQuery(viewID));
+      assertListView(prevView);
+
       const nextConfig: ListViewFieldConfig = {
         order: config.order || prevView.fieldsConfig[fieldID].order,
         width: config.width || prevView.fieldsConfig[fieldID].width,
@@ -666,7 +703,7 @@ export function useUpdateListViewFieldConfig(
         },
       };
 
-      setViews((previousViews) => ({
+      set(viewsByIDState, (previousViews) => ({
         ...previousViews,
         [nextView.id]: nextView,
       }));
@@ -677,16 +714,15 @@ export function useUpdateListViewFieldConfig(
         nextView,
       });
     },
-    [emitEvent, setViews, prevView],
+    [emitEvent],
   );
 }
 
-export function useCreateView(): (collectionID: CollectionID) => View {
+export function useCreateViewMutation(): (collectionID: CollectionID) => View {
   const emitEvent = useEmitEvent();
-  const setViews = useSetRecoilState<ViewsByIDState>(viewsByIDState);
 
-  return useCallback(
-    (collectionID: CollectionID) => {
+  return useRecoilCallback(
+    ({ set }) => (collectionID: CollectionID) => {
       const newView: View = {
         id: generateViewID(),
         name: '',
@@ -698,7 +734,7 @@ export function useCreateView(): (collectionID: CollectionID) => View {
         collectionID,
       };
 
-      setViews((previousViews) => ({
+      set(viewsByIDState, (previousViews) => ({
         ...previousViews,
         [newView.id]: newView,
       }));
@@ -710,43 +746,45 @@ export function useCreateView(): (collectionID: CollectionID) => View {
 
       return newView;
     },
-    [emitEvent, setViews],
+    [emitEvent],
   );
 }
 
-export function useDeleteView(viewID: ViewID): () => void {
+export function useDeleteViewMutation(): (viewID: ViewID) => void {
   const emitEvent = useEmitEvent();
-  const setViews = useSetRecoilState(viewsByIDState);
 
-  return useCallback(() => {
-    setViews((previousViews) => {
-      const updatedViews = { ...previousViews };
+  return useRecoilCallback(
+    ({ set }) => (viewID: ViewID) => {
+      set(viewsByIDState, (previousViews) => {
+        const updatedViews = { ...previousViews };
 
-      delete updatedViews[viewID];
+        delete updatedViews[viewID];
 
-      return updatedViews;
-    });
+        return updatedViews;
+      });
 
-    emitEvent({
-      name: 'ViewDeleted',
-      viewID,
-    });
-  }, [emitEvent, setViews, viewID]);
+      emitEvent({
+        name: 'ViewDeleted',
+        viewID,
+      });
+    },
+    [emitEvent],
+  );
 }
 
 export interface UpdateViewNameInput {
   name: string;
 }
 
-export function useUpdateViewName(
+export function useUpdateViewNameMutation(): (
   viewID: ViewID,
-): (input: UpdateViewNameInput) => View {
+  input: UpdateViewNameInput,
+) => Promise<View> {
   const emitEvent = useEmitEvent();
-  const prevView = useViewQuery(viewID);
-  const setViews = useSetRecoilState(viewsByIDState);
 
-  return useCallback(
-    (input: UpdateViewNameInput) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => async (viewID, input) => {
+      const prevView = await snapshot.getPromise(viewQuery(viewID));
       const { name } = input;
 
       const nextView: View = {
@@ -754,7 +792,7 @@ export function useUpdateViewName(
         name,
       };
 
-      setViews((previousViews) => ({
+      set(viewsByIDState, (previousViews) => ({
         ...previousViews,
         [nextView.id]: nextView,
       }));
@@ -767,38 +805,20 @@ export function useUpdateViewName(
 
       return nextView;
     },
-    [prevView, setViews, emitEvent],
+    [emitEvent],
   );
 }
 
-export function useGetFieldCallback(): (fieldID: FieldID) => Field {
-  const fields = useRecoilValue(fieldsByIDState);
-
-  return useCallback(
-    (fieldID: FieldID) => {
-      const field = fields[fieldID];
-
-      if (field === undefined) {
-        throw new Error('Field not found');
-      }
-
-      return field;
-    },
-    [fields],
-  );
-}
-
-export function useCreateField(): (
+export function useCreateFieldMutation(): (
   collectionID: CollectionID,
   name: string,
   description: string,
   fieldConfig: FieldConfig,
 ) => Field {
   const emitEvent = useEmitEvent();
-  const setFields = useSetRecoilState(fieldsByIDState);
 
-  return useCallback(
-    (
+  return useRecoilCallback(
+    ({ set }) => (
       collectionID: CollectionID,
       name: string,
       description: string,
@@ -814,7 +834,7 @@ export function useCreateField(): (
         ...fieldConfig,
       };
 
-      setFields((previousFields) => ({
+      set(fieldsByIDState, (previousFields) => ({
         ...previousFields,
         [newField.id]: newField,
       }));
@@ -826,77 +846,44 @@ export function useCreateField(): (
 
       return newField;
     },
-    [emitEvent, setFields],
+    [emitEvent],
   );
 }
 
-export function useDeleteField(fieldID: FieldID): () => void {
+export function useDeleteFieldMutation(): (fieldID: FieldID) => void {
   const emitEvent = useEmitEvent();
-  const setFields = useSetRecoilState(fieldsByIDState);
 
-  return useCallback(() => {
-    setFields((previousFields) => {
-      const updatedFields = { ...previousFields };
+  return useRecoilCallback(
+    ({ set }) => (fieldID) => {
+      set(fieldsByIDState, (previousFields) => {
+        const updatedFields = { ...previousFields };
 
-      delete updatedFields[fieldID];
+        delete updatedFields[fieldID];
 
-      return updatedFields;
-    });
-
-    emitEvent({
-      name: 'FieldDeleted',
-      fieldID,
-    });
-  }, [emitEvent, setFields, fieldID]);
-}
-
-export interface UpdateFieldNameInput {
-  name: string;
-}
-
-export function useUpdateFieldName(
-  fieldID: FieldID,
-): (input: UpdateFieldNameInput) => Field {
-  const emitEvent = useEmitEvent();
-  const getField = useGetFieldCallback();
-  const setFields = useSetRecoilState(fieldsByIDState);
-
-  return useCallback(
-    (input: UpdateFieldNameInput) => {
-      const { name } = input;
-      const prevField = getField(fieldID);
-
-      const nextField: Field = {
-        ...prevField,
-        name,
-      };
-
-      setFields((previousFields) => ({
-        ...previousFields,
-        [nextField.id]: nextField,
-      }));
-
-      emitEvent({
-        name: 'FieldNameUpdated',
-        prevField,
-        nextField,
+        return updatedFields;
       });
 
-      return nextField;
+      emitEvent({
+        name: 'FieldDeleted',
+        fieldID,
+      });
     },
-    [getField, setFields, emitEvent, fieldID],
+    [emitEvent],
   );
 }
 
-export function useCreateDocument(
+export function useCreateDocumentMutation(): (
   collectionID: CollectionID,
-): (values?: DocumentFieldValues) => Document {
+  values?: DocumentFieldValues,
+) => Document {
   const emitEvent = useEmitEvent();
-  const setDocuments = useSetRecoilState(documentsByIDState);
-  const collectionFields = useCollectionFieldsQuery(collectionID);
 
-  return useCallback(
-    (values?: DocumentFieldValues) => {
+  return useRecoilCallback(
+    ({ snapshot, set }) => (collectionID, values) => {
+      const collectionFields = snapshot
+        .getLoadable(collectionFieldsQuery(collectionID))
+        .getValue();
+
       const newDocument: Document = {
         id: generateDocumentID(),
         fields: {
@@ -908,7 +895,7 @@ export function useCreateDocument(
         collectionID,
       };
 
-      setDocuments((previousDocuments) => ({
+      set(documentsByIDState, (previousDocuments) => ({
         ...previousDocuments,
         [newDocument.id]: newDocument,
       }));
@@ -920,17 +907,16 @@ export function useCreateDocument(
 
       return newDocument;
     },
-    [emitEvent, setDocuments, collectionFields, collectionID],
+    [emitEvent],
   );
 }
 
 export function useDeleteDocument(): (documentID: DocumentID) => void {
   const emitEvent = useEmitEvent();
-  const setDocuments = useSetRecoilState(documentsByIDState);
 
-  return useCallback(
-    (documentID: DocumentID) => {
-      setDocuments((previousDocuments) => {
+  return useRecoilCallback(
+    ({ set }) => (documentID: DocumentID) => {
+      set(documentsByIDState, (previousDocuments) => {
         const updatedDocuments = { ...previousDocuments };
 
         delete updatedDocuments[documentID];
@@ -943,6 +929,6 @@ export function useDeleteDocument(): (documentID: DocumentID) => void {
         documentID,
       });
     },
-    [emitEvent, setDocuments],
+    [emitEvent],
   );
 }

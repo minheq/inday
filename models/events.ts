@@ -1,12 +1,12 @@
 import { Workspace } from './workspace';
-import { Space } from './spaces';
-import { Collection } from './collections';
+import { Space, SpaceID } from './spaces';
+import { Collection, CollectionID } from './collections';
 import { View, ListView, ViewID } from './views';
 import { Field, FieldID, FieldValue } from './fields';
 import { Document, DocumentID } from './documents';
-import { Filter } from './filters';
-import { Sort } from './sorts';
-import { Group } from './groups';
+import { Filter, FilterID } from './filters';
+import { Sort, SortID } from './sorts';
+import { Group, GroupID } from './groups';
 
 export interface BaseEvent {
   createdAt: Date;
@@ -29,14 +29,15 @@ export interface SpaceCreatedEvent extends BaseEvent, SpaceCreatedEventConfig {}
 
 export interface SpaceDeletedEventConfig {
   name: 'SpaceDeleted';
-  space: Space;
+  spaceID: SpaceID;
 }
 export interface SpaceDeletedEvent extends BaseEvent, SpaceDeletedEventConfig {}
 
 export interface SpaceNameUpdatedEventConfig {
   name: 'SpaceNameUpdated';
-  prevSpace: Space;
-  nextSpace: Space;
+  spaceID: SpaceID;
+  prevName: string;
+  nextName: string;
 }
 export interface SpaceNameUpdatedEvent
   extends BaseEvent,
@@ -52,8 +53,9 @@ export interface CollectionCreatedEvent
 
 export interface CollectionNameUpdatedEventConfig {
   name: 'CollectionNameUpdated';
-  prevCollection: Collection;
-  nextCollection: Collection;
+  collectionID: CollectionID;
+  prevName: string;
+  nextName: string;
 }
 export interface CollectionNameUpdatedEvent
   extends BaseEvent,
@@ -61,7 +63,7 @@ export interface CollectionNameUpdatedEvent
 
 export interface CollectionDeletedEventConfig {
   name: 'CollectionDeleted';
-  collection: Collection;
+  collectionID: CollectionID;
 }
 export interface CollectionDeletedEvent
   extends BaseEvent,
@@ -172,8 +174,7 @@ export interface FilterGroupUpdatedEvent
 
 export interface FilterDeletedEventConfig {
   name: 'FilterDeleted';
-  prevFilters: Filter[];
-  nextFilters: Filter[];
+  filterID: FilterID;
 }
 export interface FilterDeletedEvent
   extends BaseEvent,
@@ -196,8 +197,7 @@ export interface SortConfigUpdatedEvent
 
 export interface SortDeletedEventConfig {
   name: 'SortDeleted';
-  prevSorts: Sort[];
-  nextSorts: Sort[];
+  sortID: SortID;
 }
 export interface SortDeletedEvent extends BaseEvent, SortDeletedEventConfig {}
 
@@ -218,8 +218,7 @@ export interface GroupConfigUpdatedEvent
 
 export interface GroupDeletedEventConfig {
   name: 'GroupDeleted';
-  prevGroups: Group[];
-  nextGroups: Group[];
+  groupID: GroupID;
 }
 export interface GroupDeletedEvent extends BaseEvent, GroupDeletedEventConfig {}
 

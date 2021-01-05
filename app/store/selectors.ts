@@ -10,6 +10,8 @@ import {
   collaboratorsByIDState,
   groupsByIDState,
   DocumentsByIDState,
+  workspaceState,
+  WorkspaceState,
 } from './atoms';
 import { Document, DocumentID } from '../../models/documents';
 import { Collection, CollectionID } from '../../models/collections';
@@ -17,20 +19,27 @@ import { Field, FieldID, FieldValue } from '../../models/fields';
 import { Filter, FilterGroup, FilterID } from '../../models/filters';
 import { Space, SpaceID } from '../../models/spaces';
 import { View, ViewID } from '../../models/views';
-import { Sort, SortID, sortDocuments, SortGetters } from '../../models/sorts';
+import { Sort, SortID } from '../../models/sorts';
 import { Collaborator, CollaboratorID } from '../../models/collaborators';
 import { Group, GroupID } from '../../models/groups';
 import { keyedBy, last } from '../../lib/array_utils';
 import { isEmpty } from '../../lib/lang_utils';
 
-export const spaceQuery = selectorFamily<Space | null, SpaceID>({
+export const workspaceQuery = selector<WorkspaceState>({
+  key: 'WorkspaceQuery',
+  get: ({ get }) => {
+    return get(workspaceState);
+  },
+});
+
+export const spaceQuery = selectorFamily<Space, SpaceID>({
   key: 'SpaceQuery',
   get: (spaceID: SpaceID) => ({ get }) => {
     const spacesByID = get(spacesByIDState);
     const space = spacesByID[spaceID];
 
     if (space === undefined) {
-      return null;
+      throw new Error('Space not found');
     }
 
     return space;
