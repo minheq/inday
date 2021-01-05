@@ -66,12 +66,7 @@ import {
   generateGroupID,
 } from '../../models/groups';
 import { EventEmitter } from '../../lib/event_emitter';
-import {
-  useCollectionQuery,
-  useDocumentQuery,
-  useFieldQuery,
-  useWorkspaceQuery,
-} from './queries';
+import { useWorkspaceQuery } from './queries';
 import {
   collectionFieldsQuery,
   collectionQuery,
@@ -341,16 +336,6 @@ export function useUpdateCollectionNameMutation(): (
     },
     [emitEvent],
   );
-}
-
-export function useDocumentQueryPrimaryFieldValueCallback(
-  documentID: DocumentID,
-): [field: Field, value: FieldValue] {
-  const document = useDocumentQuery(documentID);
-  const collection = useCollectionQuery(document.collectionID);
-  const field = useFieldQuery(collection.primaryFieldID);
-
-  return [field, document.fields[collection.primaryFieldID]];
 }
 
 export function useCreateFilterMutation(): (

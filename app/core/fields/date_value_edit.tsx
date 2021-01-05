@@ -5,7 +5,7 @@ import { DocumentID } from '../../../models/documents';
 import { DateField, DateFieldValue } from '../../../models/fields';
 import { DatePicker } from '../../components/date_picker';
 import { FlatButton } from '../../components/flat_button';
-import { useUpdateDocumentFieldValue } from '../../store/mutations';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface DateValueEditProps {
   documentID: DocumentID;
@@ -16,18 +16,18 @@ interface DateValueEditProps {
 
 export function DateValueEdit(props: DateValueEditProps): JSX.Element {
   const { value, documentID, field, onDone } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<DateFieldValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<DateFieldValue>();
 
   const handleChangeDate = useCallback(
-    (date: Date) => {
-      updateDocumentFieldValue(documentID, field.id, formatISODate(date));
+    async (date: Date) => {
+      await updateDocumentFieldValue(documentID, field.id, formatISODate(date));
       onDone();
     },
     [updateDocumentFieldValue, onDone, documentID, field],
   );
 
-  const handleClear = useCallback(() => {
-    updateDocumentFieldValue(documentID, field.id, null);
+  const handleClear = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, field.id, null);
   }, [updateDocumentFieldValue, documentID, field]);
 
   return (

@@ -17,7 +17,6 @@ import {
   filtersByIDState,
   spacesByIDState,
   SpacesByIDState,
-  workspaceState,
 } from './atoms';
 import {
   collaboratorQuery,
@@ -208,6 +207,16 @@ function useCollaboratorQueryCallback() {
   );
 }
 
+export function useDocumentPrimaryFieldValueQuery(
+  documentID: DocumentID,
+): [field: Field, value: FieldValue] {
+  const document = useDocumentQuery(documentID);
+  const collection = useCollectionQuery(document.collectionID);
+  const field = useFieldQuery(collection.primaryFieldID);
+
+  return [field, document.fields[collection.primaryFieldID]];
+}
+
 function useCollectionQueryCallback() {
   const collectionsByID = useCollectionsByIDQuery();
 
@@ -281,16 +290,6 @@ export function useFilterQuery(filterID: FilterID): Filter {
 
 export function useSortQuery(sortID: SortID): Sort {
   return useRecoilValue(sortQuery(sortID));
-}
-
-export function useDocumentPrimaryFieldValueQuery(
-  documentID: DocumentID,
-): [field: Field, value: FieldValue] {
-  const document = useDocumentQuery(documentID);
-  const collection = useCollectionQuery(document.collectionID);
-  const field = useFieldQuery(collection.primaryFieldID);
-
-  return [field, document.fields[collection.primaryFieldID]];
 }
 
 export function useViewFiltersQuery(viewID: ViewID): Filter[] {

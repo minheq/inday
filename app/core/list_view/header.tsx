@@ -7,20 +7,20 @@ import {
   View,
 } from 'react-native';
 import { atom, useRecoilState } from 'recoil';
+
 import { ContextMenu } from '../../components/context_menu';
 import { ContextMenuItem } from '../../components/context_menu_view';
 import { Hoverable } from '../../components/hoverable';
 import { Icon } from '../../components/icon';
 import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
-
 import { Row } from '../../components/row';
 import { Text } from '../../components/text';
-
 import { useThemeStyles } from '../../components/theme';
 import { FieldID } from '../../../models/fields';
-import { useGetField, useUpdateListViewFieldConfig } from '../../store/queries';
+import { useFieldQuery } from '../../store/queries';
 import { getFieldIcon } from '../views/icon_helpers';
 import { useListViewViewContext } from './list_view_view';
+import { useUpdateListViewFieldConfigMutation } from '../../store/mutations';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -52,15 +52,15 @@ export const HeaderCell = memo(function HeaderCell(
   const { fieldID, primary, width } = props;
   const { viewID } = useListViewViewContext();
   const [resizeFieldID, setResizeFieldID] = useRecoilState(resizeFieldIDState);
-  const field = useGetField(fieldID);
+  const field = useFieldQuery(fieldID);
   const widthRef = useRef(width);
   const anchorRef = useRef(0);
   const themeStyles = useThemeStyles();
-  const updateListViewFieldConfig = useUpdateListViewFieldConfig();
+  const updateListViewFieldConfig = useUpdateListViewFieldConfigMutation();
   const options = useHeaderCellContextMenuOptions();
 
   const handlePressMove = useCallback(
-    (e: GestureResponderEvent) => {
+    async (e: GestureResponderEvent) => {
       // Sometimes happens when pressing in and pressing out too fast
       if (anchorRef.current === 0) {
         return;
@@ -69,7 +69,7 @@ export const HeaderCell = memo(function HeaderCell(
       const nextWidth =
         widthRef.current + (e.nativeEvent.pageX - anchorRef.current);
 
-      updateListViewFieldConfig(viewID, fieldID, { width: nextWidth });
+      await updateListViewFieldConfig(viewID, fieldID, { width: nextWidth });
     },
     [updateListViewFieldConfig, viewID, fieldID, widthRef],
   );

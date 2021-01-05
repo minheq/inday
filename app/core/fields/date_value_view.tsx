@@ -19,7 +19,7 @@ export function DateValueView(props: DateValueViewProps): JSX.Element {
 
   return (
     <Text numberOfLines={1} align="right">
-      <Text>{formatDate(parseISODate(value), getSystemLocale())}</Text>
+      {formatDate(parseISODate(value), getSystemLocale())}
     </Text>
   );
 }

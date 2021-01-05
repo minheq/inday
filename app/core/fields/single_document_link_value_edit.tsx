@@ -4,14 +4,10 @@ import { ListPickerOption } from '../../components/list_picker';
 import {
   SingleDocumentLinkField,
   SingleDocumentLinkFieldValue,
-  stringifyFieldValue,
 } from '../../../models/fields';
 import { Document, DocumentID } from '../../../models/documents';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
-import {
-  useCollectionDocumentsQuery,
-  useDocumentQueryPrimaryFieldValueCallback,
-} from '../../store/queries';
+import { useCollectionDocumentsQuery } from '../../store/queries';
 import { DocumentLinkBadge } from './document_link_badge';
 
 interface SingleDocumentLinkValueEditProps {
@@ -54,14 +50,6 @@ export function useRenderDocumentLink(): (
 export function useDocumentLinkOptions(
   documents: Document[],
 ): ListPickerOption<DocumentID>[] {
-  const getDocumentPrimaryFieldValue = useDocumentQueryPrimaryFieldValueCallback();
-
-  return documents.map((document) => {
-    const [field, value] = getDocumentPrimaryFieldValue(document.id);
-
-    return {
-      value: document.id,
-      label: stringifyFieldValue(field, value),
-    };
-  });
+  // TODO
+  return [];
 }

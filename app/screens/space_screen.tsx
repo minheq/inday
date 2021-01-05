@@ -16,7 +16,7 @@ import {
   useDocumentQuery,
   useDocumentFieldValuesEntriesQuery,
 } from '../store/queries';
-import { useCreateDocument } from '../store/mutations';
+import { useCreateDocumentMutation } from '../store/mutations';
 import { Slide } from '../components/slide';
 import { OrganizeView } from '../core/organize/organize_view';
 import { ViewList } from '../core/views/view_list';
@@ -282,7 +282,7 @@ function MainContent() {
   const [selectedDocuments, setSelectedDocuments] = useRecoilState(
     selectedDocumentsState,
   );
-  const createDocument = useCreateDocument();
+  const createDocument = useCreateDocumentMutation();
   const [openDocument, setOpenDocument] = useRecoilState(openDocumentState);
   const collections = useSpaceCollectionsQuery(space.id);
   const activeCollection = collections.find((c) => c.id === view.collectionID);

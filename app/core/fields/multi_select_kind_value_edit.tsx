@@ -10,7 +10,7 @@ import {
   SelectOptionID,
 } from '../../../models/fields';
 import { DocumentID } from '../../../models/documents';
-import { useUpdateDocumentFieldValue } from '../../store/queries';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface MultiSelectKindValueEditProps<T> {
   documentID: DocumentID;
@@ -25,11 +25,11 @@ export function MultiSelectKindValueEdit<
   T extends CollaboratorID | DocumentID | SelectOptionID
 >(props: MultiSelectKindValueEditProps<T>): JSX.Element {
   const { onDone, value, options, renderLabel, documentID, fieldID } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<MultiSelectFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<MultiSelectFieldKindValue>();
 
   const handleChange = useCallback(
-    (nextValue: T[]) => {
-      updateDocumentFieldValue(
+    async (nextValue: T[]) => {
+      await updateDocumentFieldValue(
         documentID,
         fieldID,
         nextValue as MultiSelectFieldKindValue,
@@ -38,8 +38,8 @@ export function MultiSelectKindValueEdit<
     [updateDocumentFieldValue, documentID, fieldID],
   );
 
-  const handleClear = useCallback(() => {
-    updateDocumentFieldValue(documentID, fieldID, []);
+  const handleClear = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, []);
     onDone();
   }, [updateDocumentFieldValue, documentID, fieldID, onDone]);
 

@@ -10,7 +10,7 @@ import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
 import { TextFieldKind, TextFieldKindValue } from '../../../models/fields';
 import { DocumentID } from '../../../models/documents';
-import { useUpdateDocumentFieldValue } from '../../store/mutations';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface TextKindValueEditProps<T extends TextFieldKindValue> {
   autoFocus: boolean;
@@ -26,12 +26,12 @@ export function TextKindValueEdit<T extends TextFieldKindValue>(
   props: TextKindValueEditProps<T>,
 ): JSX.Element {
   const { autoFocus, documentID, field, value, onKeyPress } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<TextFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<TextFieldKindValue>();
   const themeStyles = useThemeStyles();
 
   const handleChange = useCallback(
-    (nextValue: string) => {
-      updateDocumentFieldValue(documentID, field.id, nextValue);
+    async (nextValue: string) => {
+      await updateDocumentFieldValue(documentID, field.id, nextValue);
     },
     [updateDocumentFieldValue, documentID, field],
   );

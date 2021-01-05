@@ -16,11 +16,7 @@ import {
 } from 'react-native';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
-import {
-  useUpdateDocumentFieldValue,
-  useGetField,
-  useDocumentQueryFieldValue,
-} from '../../store/queries';
+import { useFieldQuery, useDocumentFieldValueQuery } from '../../store/queries';
 import {
   FieldType,
   CheckboxField,
@@ -73,8 +69,9 @@ import {
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
   BooleanFieldKindValue,
+  generateFieldID,
 } from '../../../models/fields';
-import { Document, DocumentID } from '../../../models/documents';
+import { DocumentID, generateDocumentID } from '../../../models/documents';
 import { useSetRecoilState } from 'recoil';
 import {
   NavigationKey,
@@ -125,6 +122,7 @@ import { CheckboxStatic } from '../../components/checkbox_static';
 import { FlatButton } from '../../components/flat_button';
 import { Spacer } from '../../components/spacer';
 import { LEAF_ROW_HEIGHT } from './list_view_constants';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -161,8 +159,8 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
     }),
     [primary, path, row, column, last, state],
   );
-  const field = useGetField(fieldID);
-  const value = useDocumentQueryFieldValue(documentID, fieldID);
+  const field = useFieldQuery(fieldID);
+  const value = useDocumentFieldValueQuery(documentID, fieldID);
   const {
     mode,
     onSelectDocument,
@@ -264,8 +262,8 @@ const LeafRowCellContext = createContext<LeafRowCellContext>({
     state: 'default',
     last: false,
   },
-  documentID: Document.generateID(),
-  fieldID: Field.generateID(),
+  documentID: generateDocumentID(),
+  fieldID: generateFieldID(),
   onPress: () => {
     return;
   },
@@ -437,11 +435,11 @@ interface CheckboxCellProps {
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   const { value, field } = props;
   const { documentID, fieldID } = useLeafRowCellContext();
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue<BooleanFieldKindValue>();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
 
-  const handleToggle = useCallback(() => {
+  const handleToggle = useCallback(async () => {
     const checked = !value;
-    updateDocumentFieldValue(documentID, fieldID, checked);
+    await updateDocumentFieldValue(documentID, fieldID, checked);
   }, [updateDocumentFieldValue, documentID, fieldID, value]);
 
   useCellKeyBindings({
@@ -499,15 +497,15 @@ interface NumberFieldKindCellFocusedProps {
 function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
   const { children } = props;
   const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
 
   const handlePrintableKey = useCallback(
-    (key: string) => {
+    async (key: string) => {
       if (isNumberString(key) === false) {
         return;
       }
 
-      updateDocumentFieldValue(documentID, fieldID, toNumber(key));
+      await updateDocumentFieldValue(documentID, fieldID, toNumber(key));
       onStartEditing();
     },
     [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
@@ -531,11 +529,11 @@ interface TextFieldKindCellFocusedProps {
 function TextFieldKindCellFocused(props: TextFieldKindCellFocusedProps) {
   const { children } = props;
   const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
-  const updateDocumentFieldValue = useUpdateDocumentFieldValue();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
 
   const handlePrintableKey = useCallback(
-    (key: string) => {
-      updateDocumentFieldValue(documentID, fieldID, key);
+    async (key: string) => {
+      await updateDocumentFieldValue(documentID, fieldID, key);
       onStartEditing();
     },
     [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
