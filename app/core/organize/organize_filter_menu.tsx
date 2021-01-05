@@ -28,16 +28,17 @@ import { PressableHighlight } from '../../components/pressable_highlight';
 import { TextInput } from '../../components/text_input';
 
 import {
-  useCreateFilter,
-  useCollectionQueryFields,
-  useGetViewFilters,
-  useDeleteFilter,
-  useUpdateFilterConfig,
-  useGetField,
-  useGetFieldCallback,
-  useGetFiltersGroupMax,
-  useUpdateFilterGroup,
+  useViewFiltersQuery,
+  useFieldQuery,
+  useFiltersGroupMaxQuery,
+  useCollectionFieldsQuery,
 } from '../../store/queries';
+import {
+  useCreateFilterMutation,
+  useDeleteFilterMutation,
+  useUpdateFilterConfigMutation,
+  useUpdateFilterGroupMutation,
+} from '../../store/mutations';
 import { first } from '../../../lib/array_utils';
 import { FieldID, FieldType } from '../../../models/fields';
 import { FieldPicker } from '../fields/field_picker';
@@ -58,7 +59,7 @@ interface FilterMenuProps {
 
 export function FilterMenu(props: FilterMenuProps) {
   const { viewID, collectionID } = props;
-  const filters = useGetViewFilters(viewID);
+  const filters = useViewFiltersQuery(viewID);
 
   return (
     <FilterMenuContext.Provider value={{ viewID, collectionID }}>
@@ -90,10 +91,10 @@ interface FilterListItemProps {
 function FilterListItem(props: FilterListItemProps) {
   const { prevFilter, filter } = props;
   const [filterEditID, setFilterEditID] = useRecoilState(filterEditIDState);
-  const field = useGetField(filter.fieldID);
-  const deleteFilter = useDeleteFilter();
-  const updateFilterConfig = useUpdateFilterConfig();
-  const updateFilterGroup = useUpdateFilterGroup();
+  const field = useFieldQuery(filter.fieldID);
+  const deleteFilter = useDeleteFilterMutation();
+  const updateFilterConfig = useUpdateFilterConfigMutation();
+  const updateFilterGroup = useUpdateFilterGroupMutation();
   const [filterConfig, setFilterConfig] = useState<FilterConfig>(filter);
   const edit = filterEditID === filter.id;
 
@@ -200,9 +201,9 @@ function FilterNew() {
   const filterEditID = useRecoilValue(filterEditIDState);
   const context = useContext(FilterMenuContext);
 
-  const fields = useCollectionQueryFields(context.collectionID);
+  const fields = useCollectionFieldsQuery(context.collectionID);
 
-  const createFilter = useCreateFilter();
+  const createFilter = useCreateFilterMutation();
   const firstField = first(fields);
 
   if (firstField === null) {
@@ -213,7 +214,7 @@ function FilterNew() {
 
   const defaultFilterConfig = getDefaultFilterConfig(firstField);
   const [filterConfig, setFilterConfig] = useState(defaultFilterConfig);
-  const groupMax = useGetFiltersGroupMax(context.viewID);
+  const groupMax = useFiltersGroupMaxQuery(context.viewID);
 
   const handleClose = useCallback(() => {
     setOpen(false);
@@ -278,9 +279,8 @@ interface FilterEditProps {
 function FilterEdit(props: FilterEditProps) {
   const { filterConfig, onChange, onSubmit } = props;
   const context = useContext(FilterMenuContext);
-  const field = useGetField(filterConfig.fieldID);
-  const fields = useCollectionQueryFields(context.collectionID);
-  const getField = useGetFieldCallback();
+  const field = useFieldQuery(filterConfig.fieldID);
+  const fields = useCollectionFieldsQuery(context.collectionID);
 
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {
@@ -292,7 +292,7 @@ function FilterEdit(props: FilterEditProps) {
         fieldID,
       });
     },
-    [getField, onChange],
+    [onChange],
   );
 
   const FilterConfigEdit = filterConfigEditComponentByFieldType[field.type];

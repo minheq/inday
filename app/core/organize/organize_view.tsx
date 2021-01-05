@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { SpaceID } from '../../store/spaces';
+import { SpaceID } from '../../../models/spaces';
 import { ViewID } from '../../../models/views';
 import { CollectionID } from '../../../models/collections';
 import { FilterMenu } from './organize_filter_menu';
