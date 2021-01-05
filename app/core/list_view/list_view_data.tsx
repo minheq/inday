@@ -29,6 +29,8 @@ import {
 import { assertListView, ViewID } from '../../../models/views';
 import { usePrevious } from '../../hooks/use_previous';
 import { ADD_FIELD_COLUMN_WIDTH } from './list_view_constants';
+import { useMemoCompare } from '../../hooks/use_memo_compare';
+import { useWhatChanged } from '../../hooks/use_what_changed';
 
 interface UseListViewGridProps {
   viewID: ViewID;
@@ -194,18 +196,22 @@ function useListViewData(viewID: ViewID): ListViewData {
   const groups = useViewGroupsQuery(viewID);
   const grouped = isNotEmpty(groups);
   const sortGetters = useSortGettersQuery();
-  const [nodes, setNodes] = useState(
-    grouped
-      ? getGroupedDocumentNodes(
-          documents,
-          groups,
-          sortGetters,
-          collapsedGroupsByFieldID,
-        )
-      : getFlatDocumentNodes(documents),
-  );
   const documentsOrderChanged = useDocumentsOrderChanged(viewID, documents);
   const fieldsOrderChanged = useFieldsOrderChanged(viewID, fields);
+  const nodes = useMemoCompare(
+    () => {
+      return grouped
+        ? getGroupedDocumentNodes(
+            documents,
+            groups,
+            sortGetters,
+            collapsedGroupsByFieldID,
+          )
+        : getFlatDocumentNodes(documents);
+    },
+    () => !documentsOrderChanged,
+  );
+
   const leafRowPaths = useMemo(
     (): LeafRowPath[] => getLeafRowPaths(nodes, []),
     [nodes],
@@ -224,29 +230,6 @@ function useListViewData(viewID: ViewID): ListViewData {
 
     return FlatObject();
   }, [nodes, grouped]);
-
-  useEffect(() => {
-    if (documentsOrderChanged) {
-      setNodes(
-        grouped
-          ? getGroupedDocumentNodes(
-              documents,
-              groups,
-              sortGetters,
-              collapsedGroupsByFieldID,
-            )
-          : getFlatDocumentNodes(documents),
-      );
-    }
-  }, [
-    grouped,
-    leafRowPaths,
-    documentsOrderChanged,
-    documents,
-    groups,
-    sortGetters,
-    collapsedGroupsByFieldID,
-  ]);
 
   useEffect(() => {
     if (fieldsOrderChanged) {

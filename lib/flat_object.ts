@@ -5,6 +5,7 @@ export type FlatObject<T, K extends string | number> = {
   get: (arr: K[]) => T | undefined;
   set: (arr: K[], value: T) => void;
   keysOf: () => K[][];
+  entries: () => [K[], T][];
 };
 
 /**
@@ -24,6 +25,16 @@ export function FlatObject<T, K extends string | number>(
     return key;
   }
 
+  function toKeyArray(arrString: string): K[] {
+    return arrString.split('.').map((i) => {
+      if (isNumberString(i)) {
+        return toNumber(i) as K;
+      }
+
+      return i as K;
+    });
+  }
+
   return {
     get: (arr: K[]) => {
       return obj[makeKey(arr)];
@@ -41,15 +52,16 @@ export function FlatObject<T, K extends string | number>(
     keysOf: (): K[][] => {
       const keys = Object.keys(obj);
 
-      return keys.map((arrString) =>
-        arrString.split('.').map((i) => {
-          if (isNumberString(i)) {
-            return toNumber(i) as K;
-          }
+      return keys.map((arrString) => toKeyArray(arrString));
+    },
+    entries: (): [K[], T][] => {
+      const keys = Object.keys(obj);
 
-          return i as K;
-        }),
-      );
+      return keys.map((arrString) => {
+        const arr = toKeyArray(arrString);
+
+        return [arr, obj[makeKey(arr)]];
+      });
     },
   };
 }
