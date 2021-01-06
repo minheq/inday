@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { isNotEmpty, last, removeBy } from '../../../lib/array_utils';
 import { FlatObject } from '../../../lib/flat_object';
@@ -29,8 +29,6 @@ import {
 import { assertListView, ViewID } from '../../../models/views';
 import { usePrevious } from '../../hooks/use_previous';
 import { ADD_FIELD_COLUMN_WIDTH } from './list_view_constants';
-import { useMemoCompare } from '../../hooks/use_memo_compare';
-import { useWhatChanged } from '../../hooks/use_what_changed';
 
 interface UseListViewGridProps {
   viewID: ViewID;
@@ -198,7 +196,8 @@ function useListViewData(viewID: ViewID): ListViewData {
   const sortGetters = useSortGettersQuery();
   const documentsOrderChanged = useDocumentsOrderChanged(viewID, documents);
   const fieldsOrderChanged = useFieldsOrderChanged(viewID, fields);
-  const nodes = useMemoCompare(
+
+  const nodes = useMemo(
     () => {
       return grouped
         ? getGroupedDocumentNodes(
@@ -209,15 +208,19 @@ function useListViewData(viewID: ViewID): ListViewData {
           )
         : getFlatDocumentNodes(documents);
     },
-    () => !documentsOrderChanged,
+    // This is intentional so as to calculate nodes only when we intend to
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [documentsOrderChanged],
+  );
+  const columnToFieldIDCache = useMemo(
+    () => getColumnToFieldIDCache(fields),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fieldsOrderChanged],
   );
 
   const leafRowPaths = useMemo(
     (): LeafRowPath[] => getLeafRowPaths(nodes, []),
     [nodes],
-  );
-  const [columnToFieldIDCache, setColumnToFieldIDCache] = useState(
-    getColumnToFieldIDCache(fields),
   );
   const rowToDocumentIDCache = useMemo(
     (): RowToDocumentIDCache => getRowToDocumentIDCache(leafRowPaths),
@@ -230,12 +233,6 @@ function useListViewData(viewID: ViewID): ListViewData {
 
     return FlatObject();
   }, [nodes, grouped]);
-
-  useEffect(() => {
-    if (fieldsOrderChanged) {
-      setColumnToFieldIDCache(getColumnToFieldIDCache(fields));
-    }
-  }, [fields, fieldsOrderChanged]);
 
   return {
     grouped,
