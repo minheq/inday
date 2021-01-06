@@ -8,38 +8,48 @@ import {
 } from 'react-native';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import { TextFieldKind, TextFieldKindValue } from '../../../models/fields';
-import { DocumentID } from '../../../models/documents';
-import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
+import { TextFieldKindValue } from '../../../models/fields';
+import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
 
 interface TextKindValueEditProps<T extends TextFieldKindValue> {
   autoFocus: boolean;
-  documentID: DocumentID;
-  field: TextFieldKind;
   value: T;
-  onKeyPress?: (
-    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
-  ) => void;
+  onChange: (value: T) => void;
+  onRequestClose: () => void;
+  onSubmitEditing: () => void;
 }
 
 export function TextKindValueEdit<T extends TextFieldKindValue>(
   props: TextKindValueEditProps<T>,
 ): JSX.Element {
-  const { autoFocus, documentID, field, value, onKeyPress } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<TextFieldKindValue>();
+  const { autoFocus, onChange, value, onRequestClose, onSubmitEditing } = props;
   const themeStyles = useThemeStyles();
 
-  const handleChange = useCallback(
-    async (nextValue: string) => {
-      await updateDocumentFieldValue(documentID, field.id, nextValue);
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
+
+      if (key === UIKey.Escape) {
+        onRequestClose();
+      }
+      if (key === WhiteSpaceKey.Enter) {
+        onSubmitEditing();
+      }
     },
-    [updateDocumentFieldValue, documentID, field],
+    [onSubmitEditing, onRequestClose],
+  );
+
+  const handleChange = useCallback(
+    (nextValue: string) => {
+      onChange(nextValue as T);
+    },
+    [onChange],
   );
 
   return (
     <TextInput
       autoFocus={autoFocus}
-      onKeyPress={onKeyPress}
+      onKeyPress={handleKeyPress}
       onChangeText={handleChange}
       value={value}
       style={[styles.textCellInput, themeStyles.text.default]}

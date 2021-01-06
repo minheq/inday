@@ -122,11 +122,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const fieldID = columnToFieldIDCache[_props.column];
       const documentID = rowToDocumentIDCache.get([..._props.path, _props.row]);
       const primary = _props.column === 1;
-      const level = grouped ? _props.level : 0;
-
-      if (documentID === undefined) {
-        throw new Error('No corresponding documentID found for row path.');
-      }
+      const level = _props.level;
 
       return (
         <LeafRowCell
@@ -142,7 +138,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         />
       );
     },
-    [columnToFieldIDCache, rowToDocumentIDCache, grouped],
+    [columnToFieldIDCache, rowToDocumentIDCache],
   );
 
   const renderGroupRowCell = useCallback(
@@ -154,10 +150,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const fieldID = columnToFieldIDCache[_props.column];
       const group = pathToGroupCache.get(_props.path);
       const primary = _props.column === 1;
-
-      if (group === undefined) {
-        throw new Error('No corresponding value found for path.');
-      }
 
       return (
         <GroupRowCell
@@ -196,18 +188,10 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const renderLeafRow = useCallback(
     (row: RenderLeafRowProps) => {
       if (row.last) {
-        if (row.pane === 'left') {
-          return <LastLeafRow />;
-        } else {
-          return null;
-        }
+        return row.pane === 'left' ? <LastLeafRow /> : null;
       }
 
       const documentID = rowToDocumentIDCache.get([...row.path, row.row]);
-
-      if (documentID === undefined) {
-        throw new Error('No corresponding documentID found for row path.');
-      }
 
       return (
         <LeafRow documentID={documentID} state={row.state}>

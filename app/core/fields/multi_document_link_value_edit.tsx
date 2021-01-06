@@ -1,9 +1,6 @@
 import React from 'react';
 
-import {
-  MultiDocumentLinkField,
-  MultiDocumentLinkFieldValue,
-} from '../../../models/fields';
+import { MultiDocumentLinkFieldValue } from '../../../models/fields';
 import { DocumentID } from '../../../models/documents';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
 import { useCollectionDocumentsQuery } from '../../store/queries';
@@ -11,33 +8,31 @@ import {
   useDocumentLinkOptions,
   useRenderDocumentLink,
 } from './single_document_link_value_edit';
+import { CollectionID } from '../../../models/collections';
 
 interface MultiDocumentLinkValueEditProps {
-  documentID: DocumentID;
-  field: MultiDocumentLinkField;
+  collectionID: CollectionID;
   value: MultiDocumentLinkFieldValue;
-  onDone: () => void;
+  onChange: (value: MultiDocumentLinkFieldValue) => void;
+  onRequestClose: () => void;
 }
 
 export function MultiDocumentLinkValueEdit(
   props: MultiDocumentLinkValueEditProps,
 ): JSX.Element {
-  const { documentID, field, value, onDone } = props;
+  const { value, collectionID, onChange, onRequestClose } = props;
   const renderDocumentLink = useRenderDocumentLink();
 
-  const documents = useCollectionDocumentsQuery(
-    field.documentsFromCollectionID,
-  );
+  const documents = useCollectionDocumentsQuery(collectionID);
   const options = useDocumentLinkOptions(documents);
 
   return (
     <MultiSelectKindValueEdit<DocumentID>
-      documentID={documentID}
-      fieldID={field.id}
+      onChange={onChange}
       renderLabel={renderDocumentLink}
       options={options}
       value={value}
-      onDone={onDone}
+      onRequestClose={onRequestClose}
     />
   );
 }

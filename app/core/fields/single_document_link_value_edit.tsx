@@ -1,40 +1,35 @@
 import React, { useCallback } from 'react';
 import { ListPickerOption } from '../../components/list_picker';
 
-import {
-  SingleDocumentLinkField,
-  SingleDocumentLinkFieldValue,
-} from '../../../models/fields';
+import { SingleDocumentLinkFieldValue } from '../../../models/fields';
 import { Document, DocumentID } from '../../../models/documents';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 import { useCollectionDocumentsQuery } from '../../store/queries';
 import { DocumentLinkBadge } from './document_link_badge';
+import { CollectionID } from '../../../models/collections';
 
 interface SingleDocumentLinkValueEditProps {
-  documentID: DocumentID;
-  field: SingleDocumentLinkField;
   value: SingleDocumentLinkFieldValue;
-  onDone: () => void;
+  onChange: (value: SingleDocumentLinkFieldValue) => void;
+  onRequestClose: () => void;
+  collectionID: CollectionID;
 }
 
 export function SingleDocumentLinkValueEdit(
   props: SingleDocumentLinkValueEditProps,
 ): JSX.Element {
-  const { documentID, field, value, onDone } = props;
+  const { onRequestClose, value, onChange, collectionID } = props;
   const renderDocumentLink = useRenderDocumentLink();
-  const documents = useCollectionDocumentsQuery(
-    field.documentsFromCollectionID,
-  );
+  const documents = useCollectionDocumentsQuery(collectionID);
   const options = useDocumentLinkOptions(documents);
 
   return (
     <SingleSelectKindValueEdit<SingleDocumentLinkFieldValue>
-      documentID={documentID}
-      fieldID={field.id}
       renderLabel={renderDocumentLink}
       options={options}
       value={value}
-      onDone={onDone}
+      onChange={onChange}
+      onRequestClose={onRequestClose}
     />
   );
 }

@@ -1,39 +1,33 @@
 import React, { useCallback, useMemo } from 'react';
-import { ListPickerOption } from '../../components/list_picker';
 
-import {
-  SingleCollaboratorField,
-  SingleCollaboratorFieldValue,
-} from '../../../models/fields';
-import { DocumentID } from '../../../models/documents';
+import { ListPickerOption } from '../../components/list_picker';
+import { SingleCollaboratorFieldValue } from '../../../models/fields';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 import { useCollaboratorsQuery } from '../../store/queries';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { Collaborator, CollaboratorID } from '../../../models/collaborators';
 
 interface SingleCollaboratorValueEditProps {
-  documentID: DocumentID;
-  field: SingleCollaboratorField;
+  onChange: (value: SingleCollaboratorFieldValue) => void;
   value: SingleCollaboratorFieldValue;
-  onDone: () => void;
+  onRequestClose: () => void;
 }
 
 export function SingleCollaboratorValueEdit(
   props: SingleCollaboratorValueEditProps,
 ): JSX.Element {
-  const { documentID, field, value, onDone } = props;
+  const { value, onChange, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
 
   return (
     <SingleSelectKindValueEdit<SingleCollaboratorFieldValue>
-      documentID={documentID}
-      fieldID={field.id}
       renderLabel={renderCollaborator}
       options={options}
       value={value}
-      onDone={onDone}
+      onChange={onChange}
+      onRequestClose={onRequestClose}
     />
   );
 }

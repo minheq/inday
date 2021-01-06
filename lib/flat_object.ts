@@ -2,7 +2,7 @@ import { isEmpty } from './lang_utils';
 import { isNumberString, toNumber } from './number_utils';
 
 export type FlatObject<T, K extends string | number> = {
-  get: (arr: K[]) => T | undefined;
+  get: (arr: K[]) => T;
   set: (arr: K[], value: T) => void;
   keysOf: () => K[][];
   entries: () => [K[], T][];

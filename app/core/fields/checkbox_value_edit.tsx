@@ -4,28 +4,20 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Icon } from '../../components/icon';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import {
-  BooleanFieldKindValue,
-  CheckboxField,
-  CheckboxFieldValue,
-} from '../../../models/fields';
-import { DocumentID } from '../../../models/documents';
-import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
+import { CheckboxFieldValue } from '../../../models/fields';
 
 interface CheckboxValueEditProps {
-  documentID: DocumentID;
-  field: CheckboxField;
   value: CheckboxFieldValue;
+  onChange: (value: CheckboxFieldValue) => void;
 }
 
 export function CheckboxValueEdit(props: CheckboxValueEditProps): JSX.Element {
-  const { documentID, value, field } = props;
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
+  const { onChange, value } = props;
 
-  const handleToggle = useCallback(async () => {
+  const handleToggle = useCallback(() => {
     const checked = !value;
-    await updateDocumentFieldValue(documentID, field.id, checked);
-  }, [updateDocumentFieldValue, documentID, field, value]);
+    onChange(checked);
+  }, [onChange, value]);
 
   return <Checkbox value={value} onChange={handleToggle} />;
 }

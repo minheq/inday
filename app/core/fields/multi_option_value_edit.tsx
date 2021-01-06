@@ -3,9 +3,10 @@ import React from 'react';
 import {
   SelectOptionID,
   MultiOptionFieldValue,
-  MultiOptionField,
+  FieldID,
+  assertMultiOptionField,
 } from '../../../models/fields';
-import { DocumentID } from '../../../models/documents';
+import { useFieldQuery } from '../../store/queries';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
 import {
   useGetOptionOptions,
@@ -13,27 +14,28 @@ import {
 } from './single_option_value_edit';
 
 interface MultiOptionValueEditProps {
-  documentID: DocumentID;
-  field: MultiOptionField;
   value: MultiOptionFieldValue;
-  onDone: () => void;
+  onChange: (value: MultiOptionFieldValue) => void;
+  fieldID: FieldID;
+  onRequestClose: () => void;
 }
 
 export function MultiOptionValueEdit(
   props: MultiOptionValueEditProps,
 ): JSX.Element {
-  const { documentID, field, value, onDone } = props;
+  const { fieldID, value, onChange, onRequestClose } = props;
+  const field = useFieldQuery(fieldID);
+  assertMultiOptionField(field);
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
   return (
     <MultiSelectKindValueEdit<SelectOptionID>
-      documentID={documentID}
-      fieldID={field.id}
       renderLabel={renderOption}
       options={options}
       value={value}
-      onDone={onDone}
+      onChange={onChange}
+      onRequestClose={onRequestClose}
     />
   );
 }

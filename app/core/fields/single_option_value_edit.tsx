@@ -2,38 +2,39 @@ import React, { Fragment, useCallback } from 'react';
 import { ListPickerOption } from '../../components/list_picker';
 
 import {
+  assertSingleOptionField,
+  FieldID,
   SelectOption,
   SelectOptionID,
-  SingleOptionField,
   SingleOptionFieldValue,
 } from '../../../models/fields';
-import { DocumentID } from '../../../models/documents';
 import { OptionBadge } from './option_badge';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
+import { useFieldQuery } from '../../store/queries';
 
 interface SingleOptionValueEditProps {
-  documentID: DocumentID;
-  field: SingleOptionField;
+  onChange: (value: SingleOptionFieldValue) => void;
   value: SingleOptionFieldValue;
-  onDone: () => void;
+  fieldID: FieldID;
+  onRequestClose: () => void;
 }
 
 export function SingleOptionValueEdit(
   props: SingleOptionValueEditProps,
 ): JSX.Element {
-  const { documentID, field, value, onDone } = props;
-
+  const { fieldID, value, onChange, onRequestClose } = props;
+  const field = useFieldQuery(fieldID);
+  assertSingleOptionField(field);
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
   return (
     <SingleSelectKindValueEdit<SingleOptionFieldValue>
-      documentID={documentID}
-      fieldID={field.id}
       renderLabel={renderOption}
       options={options}
       value={value}
-      onDone={onDone}
+      onChange={onChange}
+      onRequestClose={onRequestClose}
     />
   );
 }
