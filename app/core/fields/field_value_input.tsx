@@ -234,7 +234,6 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
 ) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
-  const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
     setEditing(true);
   }, []);
@@ -272,7 +271,6 @@ interface URLCellProps {
 const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
-  const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
     setEditing(true);
   }, []);
@@ -313,7 +311,6 @@ interface EmailCellProps {
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
-  const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
     setEditing(true);
   }, []);
@@ -358,7 +355,6 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   const { value, field, documentID } = props;
   const themeStyles = useThemeStyles();
   const [editing, setEditing] = useState(false);
-  const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
     setEditing(true);
   }, []);
@@ -401,7 +397,6 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
 ) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
-  const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
     setEditing(true);
   }, []);
@@ -443,7 +438,6 @@ interface NumberCellProps {
 const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
-  const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
     setEditing(true);
   }, []);
@@ -481,7 +475,6 @@ interface CurrencyCellProps {
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
-  const onKeyPress = useCellKeyPressHandler(setEditing);
   const handlePress = useCallback(() => {
     setEditing(true);
   }, []);
@@ -805,24 +798,6 @@ function FieldEditActions(props: FieldEditActionsProps) {
         <FlatButton onPress={onDone} title="Done" color="primary" />
       </Row>
     </View>
-  );
-}
-
-function useCellKeyPressHandler(
-  setEditing: (editing: boolean) => void,
-): (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void {
-  return useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-
-      if (key === UIKey.Escape) {
-        setEditing(false);
-      }
-      if (key === WhiteSpaceKey.Enter) {
-        setEditing(false);
-      }
-    },
-    [setEditing],
   );
 }
 

@@ -1,34 +1,51 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { ListPickerOption } from '../../components/list_picker';
-import { SingleCollaboratorFieldValue } from '../../../models/fields';
+import {
+  assertSingleCollaboratorField,
+  assertSingleCollaboratorFieldValue,
+  FieldID,
+  SingleCollaboratorFieldValue,
+} from '../../../models/fields';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
-import { useCollaboratorsQuery } from '../../store/queries';
+import {
+  useCollaboratorsQuery,
+  useDocumentFieldValueQuery,
+  useFieldQuery,
+} from '../../store/queries';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { Collaborator, CollaboratorID } from '../../../models/collaborators';
+import { SingleCollaboratorValueView } from './single_collaborator_value_view';
+import { DocumentID } from '../../../models/documents';
 
 interface SingleCollaboratorValueEditProps {
-  onChange: (value: SingleCollaboratorFieldValue) => void;
-  value: SingleCollaboratorFieldValue;
+  fieldID: FieldID;
+  documentID: DocumentID;
   onRequestClose: () => void;
 }
 
 export function SingleCollaboratorValueEdit(
   props: SingleCollaboratorValueEditProps,
 ): JSX.Element {
-  const { value, onChange, onRequestClose } = props;
+  const { fieldID, documentID, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
+  const value = useDocumentFieldValueQuery(documentID, fieldID);
+  assertSingleCollaboratorFieldValue(value);
+  const field = useFieldQuery(fieldID);
+  assertSingleCollaboratorField(field);
 
   return (
-    <SingleSelectKindValueEdit<SingleCollaboratorFieldValue>
+    <SingleSelectKindValueEdit<CollaboratorID>
+      fieldID={fieldID}
+      documentID={documentID}
       renderLabel={renderCollaborator}
       options={options}
-      value={value}
-      onChange={onChange}
       onRequestClose={onRequestClose}
-    />
+    >
+      <SingleCollaboratorValueView value={value} field={field} />
+    </SingleSelectKindValueEdit>
   );
 }
 

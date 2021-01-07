@@ -1,8 +1,18 @@
 import React from 'react';
 import { CollaboratorID } from '../../../models/collaborators';
+import { DocumentID } from '../../../models/documents';
 
-import { MultiCollaboratorFieldValue } from '../../../models/fields';
-import { useCollaboratorsQuery } from '../../store/queries';
+import {
+  assertMultiCollaboratorField,
+  assertMultiCollaboratorFieldValue,
+  FieldID,
+} from '../../../models/fields';
+import {
+  useCollaboratorsQuery,
+  useDocumentFieldValueQuery,
+  useFieldQuery,
+} from '../../store/queries';
+import { MultiCollaboratorValueView } from './multi_collaborator_value_view';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
 import {
   useGetCollaboratorOptions,
@@ -10,26 +20,32 @@ import {
 } from './single_collaborator_value_edit';
 
 interface MultiCollaboratorValueEditProps {
-  value: MultiCollaboratorFieldValue;
-  onChange: (value: MultiCollaboratorFieldValue) => void;
+  fieldID: FieldID;
+  documentID: DocumentID;
   onRequestClose: () => void;
 }
 
 export function MultiCollaboratorValueEdit(
   props: MultiCollaboratorValueEditProps,
 ): JSX.Element {
-  const { value, onChange, onRequestClose } = props;
+  const { fieldID, documentID, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
+  const value = useDocumentFieldValueQuery(documentID, fieldID);
+  assertMultiCollaboratorFieldValue(value);
+  const field = useFieldQuery(fieldID);
+  assertMultiCollaboratorField(field);
 
   return (
     <MultiSelectKindValueEdit<CollaboratorID>
-      onChange={onChange}
+      fieldID={fieldID}
+      documentID={documentID}
       renderLabel={renderCollaborator}
       options={options}
-      value={value}
       onRequestClose={onRequestClose}
-    />
+    >
+      <MultiCollaboratorValueView value={value} field={field} />
+    </MultiSelectKindValueEdit>
   );
 }

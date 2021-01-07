@@ -1,12 +1,14 @@
 import React from 'react';
+import { DocumentID } from '../../../models/documents';
 
 import {
   SelectOptionID,
-  MultiOptionFieldValue,
   FieldID,
   assertMultiOptionField,
+  assertMultiOptionFieldValue,
 } from '../../../models/fields';
-import { useFieldQuery } from '../../store/queries';
+import { useDocumentFieldValueQuery, useFieldQuery } from '../../store/queries';
+import { MultiOptionValueView } from './multi_option_value_view';
 import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
 import {
   useGetOptionOptions,
@@ -14,16 +16,17 @@ import {
 } from './single_option_value_edit';
 
 interface MultiOptionValueEditProps {
-  value: MultiOptionFieldValue;
-  onChange: (value: MultiOptionFieldValue) => void;
   fieldID: FieldID;
+  documentID: DocumentID;
   onRequestClose: () => void;
 }
 
 export function MultiOptionValueEdit(
   props: MultiOptionValueEditProps,
 ): JSX.Element {
-  const { fieldID, value, onChange, onRequestClose } = props;
+  const { fieldID, documentID, onRequestClose } = props;
+  const value = useDocumentFieldValueQuery(documentID, fieldID);
+  assertMultiOptionFieldValue(value);
   const field = useFieldQuery(fieldID);
   assertMultiOptionField(field);
   const renderOption = useRenderOption(field.options);
@@ -31,11 +34,13 @@ export function MultiOptionValueEdit(
 
   return (
     <MultiSelectKindValueEdit<SelectOptionID>
+      fieldID={fieldID}
+      documentID={documentID}
       renderLabel={renderOption}
       options={options}
-      value={value}
-      onChange={onChange}
       onRequestClose={onRequestClose}
-    />
+    >
+      <MultiOptionValueView value={value} field={field} />
+    </MultiSelectKindValueEdit>
   );
 }

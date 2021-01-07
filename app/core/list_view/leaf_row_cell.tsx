@@ -8,8 +8,6 @@ import React, {
 import {
   View,
   Pressable,
-  NativeSyntheticEvent,
-  TextInputKeyPressEventData,
   StyleSheet,
   StyleProp,
   ViewStyle,
@@ -52,7 +50,6 @@ import {
   URLFieldValue,
   FieldValue,
   FieldID,
-  NumberFieldKindValue,
   assertCheckboxFieldValue,
   assertCurrencyFieldValue,
   assertDateFieldValue,
@@ -114,12 +111,10 @@ import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
 import { URLValueView } from '../fields/url_value_view';
 import { PhoneNumberValueView } from '../fields/phone_number_value_view';
 import { assertUnreached } from '../../../lib/lang_utils';
-import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
 import { Slide } from '../../components/slide';
 import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
 import { Icon } from '../../components/icon';
 import { CheckboxStatic } from '../../components/checkbox_static';
-import { FlatButton } from '../../components/flat_button';
 import { Spacer } from '../../components/spacer';
 import { LEAF_ROW_HEIGHT } from './list_view_constants';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
@@ -433,7 +428,7 @@ interface CheckboxCellProps {
 }
 
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
-  const { value, field } = props;
+  const { value } = props;
   const { documentID, fieldID } = useLeafRowCellContext();
   const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
 
@@ -448,7 +443,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={[styles.cellRoot, styles.checkboxCellRoot]}>
-      <CheckboxValueEdit documentID={documentID} field={field} value={value} />
+      <CheckboxValueEdit onChange={handleToggle} value={value} />
     </View>
   );
 });
@@ -460,20 +455,23 @@ interface CurrencyCellProps {
 
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const { cell, documentID } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
+  const {
+    cell,
+    fieldID,
+    documentID,
+    onFocusNextDocument,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return (
-      <FieldEditWrapper>
-        <NumberKindValueEdit<CurrencyFieldValue>
-          autoFocus
-          value={value}
-          documentID={documentID}
-          field={field}
-          onKeyPress={handleKeyPress}
-        />
-      </FieldEditWrapper>
+      <NumberKindValueEdit
+        autoFocus
+        fieldID={fieldID}
+        documentID={documentID}
+        onRequestClose={onStopEditing}
+        onSubmitEditing={onFocusNextDocument}
+      />
     );
   }
 
@@ -557,7 +555,7 @@ interface DateCellProps {
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value, field } = props;
-  const { documentID, cell } = useLeafRowCellContext();
+  const { documentID, fieldID, cell, onStopEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -569,19 +567,11 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   if (cell.state === 'focused') {
     return (
-      <PressableHighlightPopover
-        content={({ onRequestClose }) => (
-          <DateValueEdit
-            documentID={documentID}
-            field={field}
-            value={value}
-            onDone={onRequestClose}
-          />
-        )}
-        style={styles.cellRoot}
-      >
-        {child}
-      </PressableHighlightPopover>
+      <DateValueEdit
+        documentID={documentID}
+        fieldID={fieldID}
+        onRequestClose={onStopEditing}
+      />
     );
   }
 
@@ -595,20 +585,23 @@ interface EmailCellProps {
 
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value, field } = props;
-  const { cell, documentID } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
+  const {
+    cell,
+    documentID,
+    fieldID,
+    onStopEditing,
+    onFocusNextDocument,
+  } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return (
-      <FieldEditWrapper>
-        <TextKindValueEdit<EmailFieldValue>
-          autoFocus
-          field={field}
-          documentID={documentID}
-          value={value}
-          onKeyPress={handleKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        fieldID={fieldID}
+        documentID={documentID}
+        onRequestClose={onStopEditing}
+        onSubmitEditing={onFocusNextDocument}
+      />
     );
   }
 
@@ -641,35 +634,27 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, cell } = useLeafRowCellContext();
+  const { documentID, fieldID, cell, onStopEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const child = (
-    <View style={styles.cellValueContainer}>
-      <MultiCollaboratorValueView value={value} field={field} />
-    </View>
-  );
-
   if (cell.state === 'focused') {
     return (
-      <PressableHighlightPopover
-        content={({ onRequestClose }) => (
-          <MultiCollaboratorValueEdit
-            documentID={documentID}
-            field={field}
-            value={value}
-            onDone={onRequestClose}
-          />
-        )}
-        style={styles.cellRoot}
-      >
-        {child}
-      </PressableHighlightPopover>
+      <MultiCollaboratorValueEdit
+        documentID={documentID}
+        fieldID={fieldID}
+        onRequestClose={onStopEditing}
+      />
     );
   }
 
-  return <View style={styles.cellRoot}>{child}</View>;
+  return (
+    <View style={styles.cellRoot}>
+      <View style={styles.cellValueContainer}>
+        <MultiCollaboratorValueView value={value} field={field} />
+      </View>
+    </View>
+  );
 });
 
 interface MultiDocumentLinkCellProps {
@@ -683,6 +668,7 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
   const { value, field } = props;
   const {
     documentID,
+    fieldID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -694,9 +680,9 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
     return (
       <MultiDocumentLinkValueEdit
         documentID={documentID}
-        field={field}
-        value={value}
-        onDone={onStopEditing}
+        fieldID={fieldID}
+        collectionID={field.documentsFromCollectionID}
+        onRequestClose={onStopEditing}
       />
     );
   }
@@ -726,22 +712,24 @@ interface MultiLineTextCellProps {
 const MultiLineTextCell = memo(function MultiLineTextCell(
   props: MultiLineTextCellProps,
 ) {
-  const { value, field } = props;
-
-  const { cell, documentID } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
+  const { value } = props;
+  const {
+    cell,
+    documentID,
+    fieldID,
+    onFocusNextDocument,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return (
-      <FieldEditActions>
-        <MultiLineTextValueEdit
-          autoFocus
-          documentID={documentID}
-          field={field}
-          value={value}
-          onKeyPress={handleKeyPress}
-        />
-      </FieldEditActions>
+      <MultiLineTextValueEdit
+        autoFocus
+        documentID={documentID}
+        fieldID={fieldID}
+        onRequestClose={onStopEditing}
+        onSubmitEditing={onFocusNextDocument}
+      />
     );
   }
 
@@ -773,35 +761,21 @@ const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, cell } = useLeafRowCellContext();
+  const { documentID, fieldID, onStopEditing, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const child = (
-    <View style={styles.cellValueContainer}>
-      <MultiOptionValueView value={value} field={field} />
-    </View>
-  );
-
   if (cell.state === 'focused') {
     return (
-      <PressableHighlightPopover
-        content={({ onRequestClose }) => (
-          <MultiOptionValueEdit
-            documentID={documentID}
-            field={field}
-            value={value}
-            onDone={onRequestClose}
-          />
-        )}
-        style={styles.cellRoot}
-      >
-        {child}
-      </PressableHighlightPopover>
+      <MultiOptionValueEdit
+        documentID={documentID}
+        fieldID={fieldID}
+        onRequestClose={onStopEditing}
+      />
     );
   }
 
-  return <View style={styles.cellRoot}>{child}</View>;
+  return <MultiOptionValueView value={value} field={field} />;
 });
 
 interface NumberCellProps {
@@ -811,20 +785,23 @@ interface NumberCellProps {
 
 const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const { documentID, cell } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
+  const {
+    cell,
+    fieldID,
+    documentID,
+    onFocusNextDocument,
+    onStopEditing,
+  } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return (
-      <FieldEditWrapper>
-        <NumberKindValueEdit<NumberFieldKindValue>
-          autoFocus
-          value={value}
-          documentID={documentID}
-          field={field}
-          onKeyPress={handleKeyPress}
-        />
-      </FieldEditWrapper>
+      <NumberKindValueEdit
+        autoFocus
+        fieldID={fieldID}
+        documentID={documentID}
+        onRequestClose={onStopEditing}
+        onSubmitEditing={onFocusNextDocument}
+      />
     );
   }
 
@@ -850,23 +827,25 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   props: PhoneNumberCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, cell } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
+  const {
+    cell,
+    documentID,
+    fieldID,
+    onStopEditing,
+    onFocusNextDocument,
+  } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return (
-      <FieldEditWrapper>
-        <TextKindValueEdit<PhoneNumberFieldValue>
-          autoFocus
-          field={field}
-          documentID={documentID}
-          value={value}
-          onKeyPress={handleKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        fieldID={fieldID}
+        documentID={documentID}
+        onRequestClose={onStopEditing}
+        onSubmitEditing={onFocusNextDocument}
+      />
     );
   }
-
   const child = (
     <View style={styles.cellValueContainer}>
       <PhoneNumberValueView value={value} field={field} />
@@ -896,35 +875,27 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, cell } = useLeafRowCellContext();
+  const { documentID, fieldID, cell, onStopEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const child = (
-    <View style={styles.cellValueContainer}>
-      <SingleCollaboratorValueView value={value} field={field} />
-    </View>
-  );
-
   if (cell.state === 'focused') {
     return (
-      <PressableHighlightPopover
-        content={({ onRequestClose }) => (
-          <SingleCollaboratorValueEdit
-            documentID={documentID}
-            field={field}
-            value={value}
-            onDone={onRequestClose}
-          />
-        )}
-        style={styles.cellRoot}
-      >
-        {child}
-      </PressableHighlightPopover>
+      <SingleCollaboratorValueEdit
+        documentID={documentID}
+        fieldID={fieldID}
+        onRequestClose={onStopEditing}
+      />
     );
   }
 
-  return <View style={styles.cellRoot}>{child}</View>;
+  return (
+    <View style={styles.cellRoot}>
+      <View style={styles.cellValueContainer}>
+        <SingleCollaboratorValueView value={value} field={field} />
+      </View>
+    </View>
+  );
 });
 
 interface SingleDocumentLinkCellProps {
@@ -938,6 +909,7 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   const { value, field } = props;
   const {
     documentID,
+    fieldID,
     cell,
     onStartEditing,
     onStopEditing,
@@ -949,9 +921,9 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
     return (
       <SingleDocumentLinkValueEdit
         documentID={documentID}
-        field={field}
-        value={value}
-        onDone={onStopEditing}
+        fieldID={fieldID}
+        collectionID={field.documentsFromCollectionID}
+        onRequestClose={onStopEditing}
       />
     );
   }
@@ -982,20 +954,23 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   props: SingleLineTextCellProps,
 ) {
   const { value, field } = props;
-  const { cell, documentID } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
+  const {
+    cell,
+    documentID,
+    fieldID,
+    onStopEditing,
+    onFocusNextDocument,
+  } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return (
-      <FieldEditWrapper>
-        <TextKindValueEdit<SingleLineTextFieldValue>
-          autoFocus
-          field={field}
-          documentID={documentID}
-          value={value}
-          onKeyPress={handleKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        fieldID={fieldID}
+        documentID={documentID}
+        onRequestClose={onStopEditing}
+        onSubmitEditing={onFocusNextDocument}
+      />
     );
   }
 
@@ -1021,35 +996,27 @@ const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, cell } = useLeafRowCellContext();
+  const { documentID, fieldID, onStopEditing, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const child = (
-    <View style={styles.cellValueContainer}>
-      <SingleOptionValueView value={value} field={field} />
-    </View>
-  );
-
   if (cell.state === 'focused') {
     return (
-      <PressableHighlightPopover
-        content={({ onRequestClose }) => (
-          <SingleOptionValueEdit
-            documentID={documentID}
-            field={field}
-            value={value}
-            onDone={onRequestClose}
-          />
-        )}
-        style={styles.cellRoot}
-      >
-        {child}
-      </PressableHighlightPopover>
+      <SingleOptionValueEdit
+        documentID={documentID}
+        fieldID={fieldID}
+        onRequestClose={onStopEditing}
+      />
     );
   }
 
-  return <View style={styles.cellRoot}>{child}</View>;
+  return (
+    <View style={styles.cellRoot}>
+      <View style={styles.cellValueContainer}>
+        <SingleOptionValueView value={value} field={field} />
+      </View>
+    </View>
+  );
 });
 
 interface URLCellProps {
@@ -1059,20 +1026,23 @@ interface URLCellProps {
 
 const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value, field } = props;
-  const { cell, documentID } = useLeafRowCellContext();
-  const handleKeyPress = useCellKeyPressHandler();
+  const {
+    cell,
+    documentID,
+    fieldID,
+    onStopEditing,
+    onFocusNextDocument,
+  } = useLeafRowCellContext();
 
   if (cell.state === 'editing') {
     return (
-      <FieldEditWrapper>
-        <TextKindValueEdit<URLFieldValue>
-          autoFocus
-          field={field}
-          documentID={documentID}
-          value={value}
-          onKeyPress={handleKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        fieldID={fieldID}
+        documentID={documentID}
+        onRequestClose={onStopEditing}
+        onSubmitEditing={onFocusNextDocument}
+      />
     );
   }
 
@@ -1095,38 +1065,6 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   return <View style={styles.cellRoot}>{child}</View>;
 });
-
-interface FieldEditWrapperProps {
-  children: React.ReactNode;
-}
-
-function FieldEditWrapper(props: FieldEditWrapperProps) {
-  const { children } = props;
-
-  return (
-    <FieldEditActions>
-      <View style={styles.editCellValueContainer}>{children}</View>
-    </FieldEditActions>
-  );
-}
-
-interface FieldEditActionsProps {
-  children: React.ReactNode;
-}
-
-function FieldEditActions(props: FieldEditActionsProps) {
-  const { children } = props;
-  const { onStopEditing } = useLeafRowCellContext();
-
-  return (
-    <View style={styles.cellRoot}>
-      {children}
-      <View style={styles.cellEditActionsWrapper}>
-        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
-      </View>
-    </View>
-  );
-}
 
 interface UseCellKeyBindingsProps {
   onDelete?: () => void;
@@ -1408,34 +1346,6 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   useKeyboard(focusedCellKeyBindings, active);
 }
 
-interface KeyPressHandlerConfig {
-  /** When true, pressing Enter key will shift focus on next document */
-  enter?: boolean;
-  /** When true, pressing Escape key will stop editing current cell */
-  escape?: boolean;
-}
-
-function useCellKeyPressHandler(
-  config: KeyPressHandlerConfig = {},
-): (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void {
-  const { enter = true, escape = true } = config;
-  const { onStopEditing, onFocusNextDocument } = useLeafRowCellContext();
-
-  return useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-
-      if (escape === true && key === UIKey.Escape) {
-        onStopEditing();
-      }
-      if (enter === true && key === WhiteSpaceKey.Enter) {
-        onFocusNextDocument();
-      }
-    },
-    [onStopEditing, onFocusNextDocument, escape, enter],
-  );
-}
-
 export function LastLeafRowCell(): JSX.Element {
   const themeStyles = useThemeStyles();
 
@@ -1491,15 +1401,6 @@ const styles = StyleSheet.create({
     height: LEAF_ROW_HEIGHT,
     justifyContent: 'center',
     paddingHorizontal: 8,
-  },
-  editCellValueContainer: {
-    height: LEAF_ROW_HEIGHT,
-    justifyContent: 'center',
-  },
-  cellEditActionsWrapper: {
-    padding: 8,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   actionsWrapper: {
     paddingHorizontal: 8,

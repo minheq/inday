@@ -2,10 +2,71 @@ import React, { useCallback } from 'react';
 import { ListPickerOption } from '../../components/list_picker';
 import { MultiListPicker } from '../../components/multi_list_picker';
 import { CollaboratorID } from '../../../models/collaborators';
-import { SelectOptionID } from '../../../models/fields';
+import {
+  assertMultiSelectFieldKindValue,
+  FieldID,
+  MultiSelectFieldKindValue,
+  SelectOptionID,
+} from '../../../models/fields';
 import { DocumentID } from '../../../models/documents';
+import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
+import { useDocumentFieldValueQuery } from '../../store/queries';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
 interface MultiSelectKindValueEditProps<T> {
+  fieldID: FieldID;
+  documentID: DocumentID;
+  renderLabel: (value: NonNullable<T>) => JSX.Element;
+  options: ListPickerOption<NonNullable<T>>[];
+  onRequestClose: () => void;
+  children: React.ReactNode;
+}
+
+export function MultiSelectKindValueEdit<
+  T extends CollaboratorID | DocumentID | SelectOptionID
+>(props: MultiSelectKindValueEditProps<T>): JSX.Element {
+  const {
+    fieldID,
+    documentID,
+    options,
+    onRequestClose,
+    renderLabel,
+    children,
+  } = props;
+  const value = useDocumentFieldValueQuery(documentID, fieldID);
+  assertMultiSelectFieldKindValue(value);
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+
+  const handleChange = useCallback(
+    async (nextValue: T[]) => {
+      await updateDocumentFieldValue(
+        documentID,
+        fieldID,
+        nextValue as MultiSelectFieldKindValue,
+      );
+    },
+    [updateDocumentFieldValue, documentID, fieldID],
+  );
+
+  return (
+    <PressableHighlightPopover
+      onRequestClose={onRequestClose}
+      content={
+        <MultiSelectKindValueInput<T>
+          value={value as T[]}
+          options={options}
+          renderLabel={renderLabel}
+          onChange={handleChange}
+          onRequestClose={onRequestClose}
+        />
+      }
+    >
+      {children}
+    </PressableHighlightPopover>
+  );
+}
+
+interface MultiSelectKindValueInputProps<T> {
   value: T[];
   onChange: (value: T[]) => void;
   renderLabel: (value: NonNullable<T>) => JSX.Element;
@@ -13,9 +74,9 @@ interface MultiSelectKindValueEditProps<T> {
   onRequestClose: () => void;
 }
 
-export function MultiSelectKindValueEdit<
+export function MultiSelectKindValueInput<
   T extends CollaboratorID | DocumentID | SelectOptionID
->(props: MultiSelectKindValueEditProps<T>): JSX.Element {
+>(props: MultiSelectKindValueInputProps<T>): JSX.Element {
   const { onChange, value, options, onRequestClose, renderLabel } = props;
 
   const handleChange = useCallback(

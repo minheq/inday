@@ -1,19 +1,79 @@
 import React, { useCallback } from 'react';
 
 import { ListPicker, ListPickerOption } from '../../components/list_picker';
-import { SingleSelectFieldKindValue } from '../../../models/fields';
+import {
+  assertSingleSelectFieldKindValue,
+  FieldID,
+  SelectOptionID,
+} from '../../../models/fields';
+import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
+import { useDocumentFieldValueQuery } from '../../store/queries';
+import { DocumentID } from '../../../models/documents';
+import { CollaboratorID } from '../../../models/collaborators';
+import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 
-interface SingleSelectKindValueEditProps<T extends SingleSelectFieldKindValue> {
-  value: T;
+interface SingleSelectKindValueEditProps<T> {
+  fieldID: FieldID;
+  documentID: DocumentID;
+  renderLabel: (value: NonNullable<T>) => JSX.Element;
+  options: ListPickerOption<NonNullable<T>>[];
+  onRequestClose: () => void;
+  children: React.ReactNode;
+}
+
+export function SingleSelectKindValueEdit<
+  T extends CollaboratorID | DocumentID | SelectOptionID
+>(props: SingleSelectKindValueEditProps<T>): JSX.Element {
+  const {
+    fieldID,
+    documentID,
+    options,
+    onRequestClose,
+    renderLabel,
+    children,
+  } = props;
+  const value = useDocumentFieldValueQuery(documentID, fieldID);
+  assertSingleSelectFieldKindValue(value);
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+
+  const handleChange = useCallback(
+    async (nextValue: T) => {
+      await updateDocumentFieldValue(documentID, fieldID, nextValue);
+    },
+    [updateDocumentFieldValue, documentID, fieldID],
+  );
+
+  return (
+    <PressableHighlightPopover
+      onRequestClose={onRequestClose}
+      content={
+        <SingleSelectKindValueInput<T>
+          value={value}
+          options={options}
+          renderLabel={renderLabel}
+          onChange={handleChange}
+          onRequestClose={onRequestClose}
+        />
+      }
+    >
+      {children}
+    </PressableHighlightPopover>
+  );
+}
+
+interface SingleSelectKindValueInputProps<
+  T extends CollaboratorID | DocumentID | SelectOptionID
+> {
+  value: T | null;
   onChange: (value: T) => void;
   renderLabel: (value: NonNullable<T>) => JSX.Element;
   options: ListPickerOption<NonNullable<T>>[];
   onRequestClose: () => void;
 }
 
-export function SingleSelectKindValueEdit<T extends SingleSelectFieldKindValue>(
-  props: SingleSelectKindValueEditProps<T>,
-): JSX.Element {
+export function SingleSelectKindValueInput<
+  T extends CollaboratorID | DocumentID | SelectOptionID
+>(props: SingleSelectKindValueInputProps<T>): JSX.Element {
   const { onChange, value, options, renderLabel, onRequestClose } = props;
 
   const handleChange = useCallback(
