@@ -1,10 +1,5 @@
 import React, { memo, useCallback, useState } from 'react';
-import {
-  NativeSyntheticEvent,
-  StyleSheet,
-  TextInputKeyPressEventData,
-  View,
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Text } from '../../components/text';
 import {
   assertCheckboxFieldValue,
@@ -67,30 +62,22 @@ import { SingleCollaboratorValueEdit } from './single_collaborator_value_edit';
 import { SingleOptionValueEdit } from './single_option_value_edit';
 import { SingleDocumentLinkValueEdit } from './single_document_link_value_edit';
 import { DateValueEdit } from './date_value_edit';
-import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
 import { tokens } from '../../components/tokens';
 import { useThemeStyles } from '../../components/theme';
 import { SingleLineTextValueView } from './single_line_text_value_view';
 import { URLValueView } from './url_value_view';
-import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
+
 import { MultiLineTextValueEdit } from './multi_line_text_value_edit';
 import { PhoneNumberValueView } from './phone_number_value_view';
 import { MultiLineTextValueView } from './multi_line_text_value_view';
 import { EmailValueView } from './email_value_view';
 import { NumberValueView } from './number_value_view';
 import { CurrencyValueView } from './currency_value_view';
-import { MultiCollaboratorValueView } from './multi_collaborator_value_view';
-import { MultiOptionValueView } from './multi_option_value_view';
-import { MultiDocumentLinkValueView } from './multi_document_link_value_view';
-import { SingleCollaboratorValueView } from './single_collaborator_value_view';
-import { SingleOptionValueView } from './single_option_value_view';
-import { SingleDocumentLinkValueView } from './single_document_link_value_view';
-import { DateValueView } from './date_value_view';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Spacer } from '../../components/spacer';
 import { FlatButton } from '../../components/flat_button';
 import { Row } from '../../components/row';
-import { PopoverCallback } from '../../components/popover';
+
 import { EmailValueActions } from './email_value_actions';
 import { PhoneNumberValueActions } from './phone_number_value_actions';
 import { URLValueActions } from './url_value_actions';
@@ -243,15 +230,13 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
 
   if (editing === true) {
     return (
-      <FieldEditWrapper onDone={handleDone}>
-        <TextKindValueEdit
-          documentID={documentID}
-          autoFocus
-          value={value}
-          field={field}
-          onKeyPress={onKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        documentID={documentID}
+        fieldID={field.id}
+        onRequestClose={handleDone}
+        onSubmitEditing={handleDone}
+      />
     );
   }
 
@@ -280,15 +265,13 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   if (editing === true) {
     return (
-      <FieldEditWrapper onDone={handleDone}>
-        <TextKindValueEdit
-          documentID={documentID}
-          autoFocus
-          value={value}
-          field={field}
-          onKeyPress={onKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        documentID={documentID}
+        fieldID={field.id}
+        onRequestClose={handleDone}
+        onSubmitEditing={handleDone}
+      />
     );
   }
   return (
@@ -320,15 +303,13 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
 
   if (editing === true) {
     return (
-      <FieldEditWrapper onDone={handleDone}>
-        <TextKindValueEdit
-          documentID={documentID}
-          autoFocus
-          value={value}
-          field={field}
-          onKeyPress={onKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        documentID={documentID}
+        fieldID={field.id}
+        onRequestClose={handleDone}
+        onSubmitEditing={handleDone}
+      />
     );
   }
 
@@ -364,15 +345,13 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (editing === true) {
     return (
-      <FieldEditActions onDone={handleDone}>
-        <MultiLineTextValueEdit
-          documentID={documentID}
-          autoFocus
-          value={value}
-          field={field}
-          onKeyPress={onKeyPress}
-        />
-      </FieldEditActions>
+      <MultiLineTextValueEdit
+        documentID={documentID}
+        autoFocus
+        fieldID={field.id}
+        onRequestClose={handleDone}
+        onSubmitEditing={handleDone}
+      />
     );
   }
 
@@ -406,15 +385,13 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
 
   if (editing === true) {
     return (
-      <FieldEditWrapper onDone={handleDone}>
-        <TextKindValueEdit
-          documentID={documentID}
-          autoFocus
-          value={value}
-          field={field}
-          onKeyPress={onKeyPress}
-        />
-      </FieldEditWrapper>
+      <TextKindValueEdit
+        autoFocus
+        documentID={documentID}
+        fieldID={field.id}
+        onRequestClose={handleDone}
+        onSubmitEditing={handleDone}
+      />
     );
   }
 
@@ -447,15 +424,13 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
 
   if (editing === true) {
     return (
-      <FieldEditWrapper onDone={handleDone}>
-        <NumberKindValueEdit
-          documentID={documentID}
-          autoFocus
-          value={value}
-          field={field}
-          onKeyPress={onKeyPress}
-        />
-      </FieldEditWrapper>
+      <NumberKindValueEdit
+        autoFocus
+        documentID={documentID}
+        fieldID={field.id}
+        onRequestClose={handleDone}
+        onSubmitEditing={handleDone}
+      />
     );
   }
 
@@ -484,15 +459,13 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
 
   if (editing === true) {
     return (
-      <FieldEditWrapper onDone={handleDone}>
-        <NumberKindValueEdit
-          documentID={documentID}
-          autoFocus
-          value={value}
-          field={field}
-          onKeyPress={onKeyPress}
-        />
-      </FieldEditWrapper>
+      <NumberKindValueEdit
+        autoFocus
+        documentID={documentID}
+        fieldID={field.id}
+        onRequestClose={handleDone}
+        onSubmitEditing={handleDone}
+      />
     );
   }
 
@@ -512,21 +485,10 @@ interface MultiCollaboratorCellProps {
 const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return (
-    <PopoverWrapper
-      content={({ onRequestClose }) => (
-        <MultiCollaboratorValueEdit
-          documentID={documentID}
-          field={field}
-          value={value}
-          onDone={onRequestClose}
-        />
-      )}
-    >
-      <MultiCollaboratorValueView value={value} field={field} />
-    </PopoverWrapper>
+    <MultiCollaboratorValueEdit documentID={documentID} fieldID={field.id} />
   );
 });
 
@@ -541,20 +503,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
 ) {
   const { value, field, documentID } = props;
 
-  return (
-    <PopoverWrapper
-      content={({ onRequestClose }) => (
-        <MultiOptionValueEdit
-          documentID={documentID}
-          field={field}
-          value={value}
-          onDone={onRequestClose}
-        />
-      )}
-    >
-      <MultiOptionValueView value={value} field={field} />
-    </PopoverWrapper>
-  );
+  return <MultiOptionValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
 interface MultiDocumentLinkCellProps {
@@ -569,18 +518,7 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
   const { value, field, documentID } = props;
 
   return (
-    <PopoverWrapper
-      content={({ onRequestClose }) => (
-        <MultiDocumentLinkValueEdit
-          documentID={documentID}
-          field={field}
-          value={value}
-          onDone={onRequestClose}
-        />
-      )}
-    >
-      <MultiDocumentLinkValueView value={value} field={field} />
-    </PopoverWrapper>
+    <MultiDocumentLinkValueEdit documentID={documentID} fieldID={field.id} />
   );
 });
 
@@ -596,18 +534,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   const { value, field, documentID } = props;
 
   return (
-    <PopoverWrapper
-      content={({ onRequestClose }) => (
-        <SingleCollaboratorValueEdit
-          documentID={documentID}
-          field={field}
-          value={value}
-          onDone={onRequestClose}
-        />
-      )}
-    >
-      <SingleCollaboratorValueView value={value} field={field} />
-    </PopoverWrapper>
+    <SingleCollaboratorValueEdit documentID={documentID} fieldID={field.id} />
   );
 });
 
@@ -622,20 +549,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
 ) {
   const { value, field, documentID } = props;
 
-  return (
-    <PopoverWrapper
-      content={({ onRequestClose }) => (
-        <SingleOptionValueEdit
-          documentID={documentID}
-          field={field}
-          value={value}
-          onDone={onRequestClose}
-        />
-      )}
-    >
-      <SingleOptionValueView value={value} field={field} />
-    </PopoverWrapper>
-  );
+  return <SingleOptionValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
 interface SingleDocumentLinkCellProps {
@@ -650,18 +564,7 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   const { value, field, documentID } = props;
 
   return (
-    <PopoverWrapper
-      content={({ onRequestClose }) => (
-        <SingleDocumentLinkValueEdit
-          documentID={documentID}
-          field={field}
-          value={value}
-          onDone={onRequestClose}
-        />
-      )}
-    >
-      <SingleDocumentLinkValueView value={value} field={field} />
-    </PopoverWrapper>
+    <SingleDocumentLinkValueEdit documentID={documentID} fieldID={field.id} />
   );
 });
 
@@ -674,9 +577,7 @@ interface CheckboxCellProps {
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   const { value, field, documentID } = props;
 
-  return (
-    <CheckboxValueEdit documentID={documentID} value={value} field={field} />
-  );
+  return <CheckboxValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
 interface DateCellProps {
@@ -688,42 +589,8 @@ interface DateCellProps {
 const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value, field, documentID } = props;
 
-  return (
-    <PopoverWrapper
-      content={({ onRequestClose }) => (
-        <DateValueEdit
-          documentID={documentID}
-          field={field}
-          value={value}
-          onDone={onRequestClose}
-        />
-      )}
-    >
-      <DateValueView value={value} field={field} />
-    </PopoverWrapper>
-  );
+  return <DateValueEdit documentID={documentID} fieldID={field.id} />;
 });
-
-interface PopoverWrapperProps {
-  children: React.ReactNode;
-  content: (callbacks: PopoverCallback) => React.ReactNode;
-}
-
-function PopoverWrapper(props: PopoverWrapperProps) {
-  const { children, content } = props;
-  const themeStyles = useThemeStyles();
-
-  return (
-    <PressableHighlightPopover
-      style={[styles.popoverButton, themeStyles.border.default]}
-      content={({ onRequestClose }) => (
-        <View>{content({ onRequestClose })}</View>
-      )}
-    >
-      {children}
-    </PressableHighlightPopover>
-  );
-}
 
 interface FieldWrapperProps {
   field: Field;
@@ -764,53 +631,9 @@ function FieldButton(props: FieldButtonProps) {
   );
 }
 
-interface FieldEditWrapperProps {
-  onDone: () => void;
-  children: React.ReactNode;
-}
-
-function FieldEditWrapper(props: FieldEditWrapperProps) {
-  const { children, onDone } = props;
-  const themeStyles = useThemeStyles();
-
-  return (
-    <FieldEditActions onDone={onDone}>
-      <View style={[styles.fieldEditWrapper, themeStyles.border.focused]}>
-        {children}
-      </View>
-    </FieldEditActions>
-  );
-}
-
-interface FieldEditActionsProps {
-  onDone: () => void;
-  children: React.ReactNode;
-}
-
-function FieldEditActions(props: FieldEditActionsProps) {
-  const { children, onDone } = props;
-
-  return (
-    <View>
-      {children}
-      <Spacer size={8} />
-      <Row justifyContent="flex-end">
-        <FlatButton onPress={onDone} title="Done" color="primary" />
-      </Row>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   fieldWrapper: {
     paddingBottom: 32,
-  },
-  fieldEditWrapper: {
-    height: 40,
-    borderWidth: 2,
-    borderRadius: tokens.border.radius,
-    alignItems: 'center',
-    flexDirection: 'row',
   },
   multiLineTextButton: {
     paddingVertical: 7,
@@ -821,13 +644,6 @@ const styles = StyleSheet.create({
   fieldButton: {
     height: 40,
     paddingHorizontal: 9,
-    borderWidth: 1,
-    borderRadius: tokens.border.radius,
-    justifyContent: 'center',
-  },
-  popoverButton: {
-    height: 40,
-    paddingHorizontal: 4,
     borderWidth: 1,
     borderRadius: tokens.border.radius,
     justifyContent: 'center',

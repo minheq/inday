@@ -443,7 +443,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={[styles.cellRoot, styles.checkboxCellRoot]}>
-      <CheckboxValueEdit onChange={handleToggle} value={value} />
+      <CheckboxValueEdit documentID={documentID} fieldID={fieldID} />
     </View>
   );
 });
