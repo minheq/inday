@@ -17,11 +17,10 @@ import { DateValueView } from './date_value_view';
 interface DateValueEditProps {
   fieldID: FieldID;
   documentID: DocumentID;
-  onRequestClose: () => void;
 }
 
 export function DateValueEdit(props: DateValueEditProps): JSX.Element {
-  const { fieldID, documentID, onRequestClose } = props;
+  const { fieldID, documentID } = props;
   const field = useFieldQuery(fieldID);
   assertDateField(field);
   const value = useDocumentFieldValueQuery(documentID, fieldID);
@@ -37,8 +36,13 @@ export function DateValueEdit(props: DateValueEditProps): JSX.Element {
 
   return (
     <PressableHighlightPopover
-      onRequestClose={onRequestClose}
-      content={<DateValueInput value={value} onChange={handleChange} />}
+      content={({ onRequestClose }) => (
+        <DateValueInput
+          value={value}
+          onChange={handleChange}
+          onRequestClose={onRequestClose}
+        />
+      )}
     >
       <DateValueView field={field} value={value} />
     </PressableHighlightPopover>
@@ -48,16 +52,18 @@ export function DateValueEdit(props: DateValueEditProps): JSX.Element {
 interface DateValueInputProps {
   value: DateFieldValue;
   onChange: (value: DateFieldValue) => void;
+  onRequestClose: () => void;
 }
 
 export function DateValueInput(props: DateValueInputProps): JSX.Element {
-  const { value, onChange } = props;
+  const { value, onChange, onRequestClose } = props;
 
   const handleChangeDate = useCallback(
     (date: Date) => {
+      onRequestClose();
       onChange(formatISODate(date));
     },
-    [onChange],
+    [onChange, onRequestClose],
   );
 
   return (

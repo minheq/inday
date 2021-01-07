@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { PopoverCallback } from './popover';
 import {
   PressableHighlight,
   PressableHighlightProps,
@@ -9,8 +10,7 @@ import { StyleProp, ViewStyle } from 'react-native';
 
 export interface PressableHighlightPopoverProps
   extends PressableHighlightProps {
-  content: React.ReactNode;
-  onRequestClose?: () => void;
+  content: React.ReactNode | ((callbacks: PopoverCallback) => React.ReactNode);
   popoverContainerStyle?: StyleProp<ViewStyle>;
 }
 
@@ -21,7 +21,6 @@ export function PressableHighlightPopover(
     content,
     popoverContainerStyle,
     onPress,
-    onRequestClose,
     ...pressableHighlightProps
   } = props;
 
@@ -29,7 +28,6 @@ export function PressableHighlightPopover(
     <PopoverTrigger
       content={content}
       popoverContainerStyle={popoverContainerStyle}
-      onRequestClose={onRequestClose}
     >
       {({ ref, onOpen }) => (
         <PressableHighlight

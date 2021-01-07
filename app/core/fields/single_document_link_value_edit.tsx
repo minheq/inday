@@ -20,14 +20,13 @@ import { SingleDocumentLinkValueView } from './single_document_link_value_view';
 interface SingleDocumentLinkValueEditProps {
   fieldID: FieldID;
   documentID: DocumentID;
-  onRequestClose: () => void;
   collectionID: CollectionID;
 }
 
 export function SingleDocumentLinkValueEdit(
   props: SingleDocumentLinkValueEditProps,
 ): JSX.Element {
-  const { onRequestClose, fieldID, documentID, collectionID } = props;
+  const { fieldID, documentID, collectionID } = props;
   const renderDocumentLink = useRenderDocumentLink();
   const documents = useCollectionDocumentsQuery(collectionID);
   const options = useDocumentLinkOptions(documents);
@@ -42,7 +41,6 @@ export function SingleDocumentLinkValueEdit(
       documentID={documentID}
       renderLabel={renderDocumentLink}
       options={options}
-      onRequestClose={onRequestClose}
     >
       <SingleDocumentLinkValueView value={value} field={field} />
     </SingleSelectKindValueEdit>

@@ -17,21 +17,13 @@ interface SingleSelectKindValueEditProps<T> {
   documentID: DocumentID;
   renderLabel: (value: NonNullable<T>) => JSX.Element;
   options: ListPickerOption<NonNullable<T>>[];
-  onRequestClose: () => void;
   children: React.ReactNode;
 }
 
 export function SingleSelectKindValueEdit<
   T extends CollaboratorID | DocumentID | SelectOptionID
 >(props: SingleSelectKindValueEditProps<T>): JSX.Element {
-  const {
-    fieldID,
-    documentID,
-    options,
-    onRequestClose,
-    renderLabel,
-    children,
-  } = props;
+  const { fieldID, documentID, options, renderLabel, children } = props;
   const value = useDocumentFieldValueQuery(documentID, fieldID);
   assertSingleSelectFieldKindValue(value);
   const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
@@ -45,8 +37,7 @@ export function SingleSelectKindValueEdit<
 
   return (
     <PressableHighlightPopover
-      onRequestClose={onRequestClose}
-      content={
+      content={({ onRequestClose }) => (
         <SingleSelectKindValueInput<T>
           value={value}
           options={options}
@@ -54,7 +45,7 @@ export function SingleSelectKindValueEdit<
           onChange={handleChange}
           onRequestClose={onRequestClose}
         />
-      }
+      )}
     >
       {children}
     </PressableHighlightPopover>
@@ -79,8 +70,9 @@ export function SingleSelectKindValueInput<
   const handleChange = useCallback(
     (nextValue: T) => {
       onChange(nextValue);
+      onRequestClose();
     },
-    [onChange],
+    [onChange, onRequestClose],
   );
 
   return (

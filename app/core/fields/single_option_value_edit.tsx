@@ -17,13 +17,12 @@ import { DocumentID } from '../../../models/documents';
 interface SingleOptionValueEditProps {
   fieldID: FieldID;
   documentID: DocumentID;
-  onRequestClose: () => void;
 }
 
 export function SingleOptionValueEdit(
   props: SingleOptionValueEditProps,
 ): JSX.Element {
-  const { fieldID, documentID, onRequestClose } = props;
+  const { fieldID, documentID } = props;
   const field = useFieldQuery(fieldID);
   assertSingleOptionField(field);
   const value = useDocumentFieldValueQuery(documentID, fieldID);
@@ -37,7 +36,6 @@ export function SingleOptionValueEdit(
       documentID={documentID}
       renderLabel={renderOption}
       options={options}
-      onRequestClose={onRequestClose}
     >
       <SingleOptionValueView field={field} value={value} />
     </SingleSelectKindValueEdit>

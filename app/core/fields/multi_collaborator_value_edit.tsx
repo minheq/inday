@@ -22,13 +22,12 @@ import {
 interface MultiCollaboratorValueEditProps {
   fieldID: FieldID;
   documentID: DocumentID;
-  onRequestClose: () => void;
 }
 
 export function MultiCollaboratorValueEdit(
   props: MultiCollaboratorValueEditProps,
 ): JSX.Element {
-  const { fieldID, documentID, onRequestClose } = props;
+  const { fieldID, documentID } = props;
   const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
@@ -43,7 +42,6 @@ export function MultiCollaboratorValueEdit(
       documentID={documentID}
       renderLabel={renderCollaborator}
       options={options}
-      onRequestClose={onRequestClose}
     >
       <MultiCollaboratorValueView value={value} field={field} />
     </MultiSelectKindValueEdit>

@@ -23,13 +23,12 @@ interface MultiDocumentLinkValueEditProps {
   collectionID: CollectionID;
   fieldID: FieldID;
   documentID: DocumentID;
-  onRequestClose: () => void;
 }
 
 export function MultiDocumentLinkValueEdit(
   props: MultiDocumentLinkValueEditProps,
 ): JSX.Element {
-  const { fieldID, documentID, collectionID, onRequestClose } = props;
+  const { fieldID, documentID, collectionID } = props;
   const renderDocumentLink = useRenderDocumentLink();
   const documents = useCollectionDocumentsQuery(collectionID);
   const options = useDocumentLinkOptions(documents);
@@ -44,7 +43,6 @@ export function MultiDocumentLinkValueEdit(
       documentID={documentID}
       renderLabel={renderDocumentLink}
       options={options}
-      onRequestClose={onRequestClose}
     >
       <MultiDocumentLinkValueView value={value} field={field} />
     </MultiSelectKindValueEdit>

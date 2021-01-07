@@ -18,21 +18,13 @@ interface MultiSelectKindValueEditProps<T> {
   documentID: DocumentID;
   renderLabel: (value: NonNullable<T>) => JSX.Element;
   options: ListPickerOption<NonNullable<T>>[];
-  onRequestClose: () => void;
   children: React.ReactNode;
 }
 
 export function MultiSelectKindValueEdit<
   T extends CollaboratorID | DocumentID | SelectOptionID
 >(props: MultiSelectKindValueEditProps<T>): JSX.Element {
-  const {
-    fieldID,
-    documentID,
-    options,
-    onRequestClose,
-    renderLabel,
-    children,
-  } = props;
+  const { fieldID, documentID, options, renderLabel, children } = props;
   const value = useDocumentFieldValueQuery(documentID, fieldID);
   assertMultiSelectFieldKindValue(value);
   const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
@@ -50,8 +42,7 @@ export function MultiSelectKindValueEdit<
 
   return (
     <PressableHighlightPopover
-      onRequestClose={onRequestClose}
-      content={
+      content={({ onRequestClose }) => (
         <MultiSelectKindValueInput<T>
           value={value as T[]}
           options={options}
@@ -59,7 +50,7 @@ export function MultiSelectKindValueEdit<
           onChange={handleChange}
           onRequestClose={onRequestClose}
         />
-      }
+      )}
     >
       {children}
     </PressableHighlightPopover>

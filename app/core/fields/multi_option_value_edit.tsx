@@ -18,13 +18,12 @@ import {
 interface MultiOptionValueEditProps {
   fieldID: FieldID;
   documentID: DocumentID;
-  onRequestClose: () => void;
 }
 
 export function MultiOptionValueEdit(
   props: MultiOptionValueEditProps,
 ): JSX.Element {
-  const { fieldID, documentID, onRequestClose } = props;
+  const { fieldID, documentID } = props;
   const value = useDocumentFieldValueQuery(documentID, fieldID);
   assertMultiOptionFieldValue(value);
   const field = useFieldQuery(fieldID);
@@ -38,7 +37,6 @@ export function MultiOptionValueEdit(
       documentID={documentID}
       renderLabel={renderOption}
       options={options}
-      onRequestClose={onRequestClose}
     >
       <MultiOptionValueView value={value} field={field} />
     </MultiSelectKindValueEdit>

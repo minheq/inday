@@ -12,6 +12,7 @@ import {
   getPopoverAnchorAndHeight,
   Popover,
   PopoverAnchor,
+  PopoverCallback,
   PopoverContentMeasurements,
   PopoverTriggerMeasurements,
 } from './popover';
@@ -25,8 +26,7 @@ interface PopoverTriggerCallback {
 
 export interface PopoverTriggerProps {
   children: (callbacks: PopoverTriggerCallback) => React.ReactNode;
-  content: React.ReactNode;
-  onRequestClose?: () => void;
+  content: React.ReactNode | ((callbacks: PopoverCallback) => React.ReactNode);
   popoverContainerStyle?: StyleProp<ViewStyle>;
 }
 
@@ -87,22 +87,16 @@ const initialState: State = {
 };
 
 export function PopoverTrigger(props: PopoverTriggerProps): JSX.Element {
-  const { content, popoverContainerStyle, onRequestClose, children } = props;
+  const { content, popoverContainerStyle, children } = props;
   const ref = useRef<View>(null);
   const contentRef = useRef<View>(null);
   const opacity = useRef(new Animated.Value(0)).current;
   const [state, dispatch] = useReducer(reducer, initialState);
   const { ready, visible, anchor, height, tm } = state;
-
   const handleRequestClose = useCallback(() => {
-    if (!onRequestClose) {
-      return;
-    }
-
-    onRequestClose();
     opacity.setValue(0);
     dispatch({ type: 'CLOSE' });
-  }, [opacity, onRequestClose]);
+  }, [opacity]);
 
   const handleOpen = useCallback(() => {
     if (ref.current !== null) {
@@ -155,7 +149,9 @@ export function PopoverTrigger(props: PopoverTriggerProps): JSX.Element {
           style={{ opacity, height }}
         >
           <PopoverContainer popoverContainerStyle={popoverContainerStyle}>
-            {content}
+            {typeof content === 'function'
+              ? content({ onRequestClose: handleRequestClose })
+              : content}
           </PopoverContainer>
         </Animated.View>
       </Popover>

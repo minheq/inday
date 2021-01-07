@@ -555,7 +555,7 @@ interface DateCellProps {
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value, field } = props;
-  const { documentID, fieldID, cell, onStopEditing } = useLeafRowCellContext();
+  const { documentID, fieldID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -566,13 +566,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
   );
 
   if (cell.state === 'focused') {
-    return (
-      <DateValueEdit
-        documentID={documentID}
-        fieldID={fieldID}
-        onRequestClose={onStopEditing}
-      />
-    );
+    return <DateValueEdit documentID={documentID} fieldID={fieldID} />;
   }
 
   return <View style={styles.cellRoot}>{child}</View>;
@@ -634,17 +628,13 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell, onStopEditing } = useLeafRowCellContext();
+  const { documentID, fieldID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
   if (cell.state === 'focused') {
     return (
-      <MultiCollaboratorValueEdit
-        documentID={documentID}
-        fieldID={fieldID}
-        onRequestClose={onStopEditing}
-      />
+      <MultiCollaboratorValueEdit documentID={documentID} fieldID={fieldID} />
     );
   }
 
@@ -666,13 +656,7 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
   props: MultiDocumentLinkCellProps,
 ) {
   const { value, field } = props;
-  const {
-    documentID,
-    fieldID,
-    cell,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { documentID, fieldID, cell, onStartEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -682,7 +666,6 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
         documentID={documentID}
         fieldID={fieldID}
         collectionID={field.documentsFromCollectionID}
-        onRequestClose={onStopEditing}
       />
     );
   }
@@ -761,18 +744,12 @@ const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, onStopEditing, cell } = useLeafRowCellContext();
+  const { documentID, fieldID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
   if (cell.state === 'focused') {
-    return (
-      <MultiOptionValueEdit
-        documentID={documentID}
-        fieldID={fieldID}
-        onRequestClose={onStopEditing}
-      />
-    );
+    return <MultiOptionValueEdit documentID={documentID} fieldID={fieldID} />;
   }
 
   return <MultiOptionValueView value={value} field={field} />;
@@ -875,17 +852,13 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell, onStopEditing } = useLeafRowCellContext();
+  const { documentID, fieldID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
   if (cell.state === 'focused') {
     return (
-      <SingleCollaboratorValueEdit
-        documentID={documentID}
-        fieldID={fieldID}
-        onRequestClose={onStopEditing}
-      />
+      <SingleCollaboratorValueEdit documentID={documentID} fieldID={fieldID} />
     );
   }
 
@@ -907,13 +880,7 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   props: SingleDocumentLinkCellProps,
 ) {
   const { value, field } = props;
-  const {
-    documentID,
-    fieldID,
-    cell,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { documentID, fieldID, cell, onStartEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
@@ -923,7 +890,6 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
         documentID={documentID}
         fieldID={fieldID}
         collectionID={field.documentsFromCollectionID}
-        onRequestClose={onStopEditing}
       />
     );
   }
@@ -996,18 +962,12 @@ const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, onStopEditing, cell } = useLeafRowCellContext();
+  const { documentID, fieldID, cell } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
   if (cell.state === 'focused') {
-    return (
-      <SingleOptionValueEdit
-        documentID={documentID}
-        fieldID={fieldID}
-        onRequestClose={onStopEditing}
-      />
-    );
+    return <SingleOptionValueEdit documentID={documentID} fieldID={fieldID} />;
   }
 
   return (

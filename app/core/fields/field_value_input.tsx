@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+
 import { Text } from '../../components/text';
 import {
   assertCheckboxFieldValue,
@@ -66,7 +67,6 @@ import { tokens } from '../../components/tokens';
 import { useThemeStyles } from '../../components/theme';
 import { SingleLineTextValueView } from './single_line_text_value_view';
 import { URLValueView } from './url_value_view';
-
 import { MultiLineTextValueEdit } from './multi_line_text_value_edit';
 import { PhoneNumberValueView } from './phone_number_value_view';
 import { MultiLineTextValueView } from './multi_line_text_value_view';
@@ -75,9 +75,7 @@ import { NumberValueView } from './number_value_view';
 import { CurrencyValueView } from './currency_value_view';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Spacer } from '../../components/spacer';
-import { FlatButton } from '../../components/flat_button';
 import { Row } from '../../components/row';
-
 import { EmailValueActions } from './email_value_actions';
 import { PhoneNumberValueActions } from './phone_number_value_actions';
 import { URLValueActions } from './url_value_actions';
@@ -501,7 +499,7 @@ interface MultiOptionCellProps {
 const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return <MultiOptionValueEdit documentID={documentID} fieldID={field.id} />;
 });
@@ -515,10 +513,14 @@ interface MultiDocumentLinkCellProps {
 const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
   props: MultiDocumentLinkCellProps,
 ) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return (
-    <MultiDocumentLinkValueEdit documentID={documentID} fieldID={field.id} />
+    <MultiDocumentLinkValueEdit
+      collectionID={field.documentsFromCollectionID}
+      documentID={documentID}
+      fieldID={field.id}
+    />
   );
 });
 
@@ -531,7 +533,7 @@ interface SingleCollaboratorCellProps {
 const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return (
     <SingleCollaboratorValueEdit documentID={documentID} fieldID={field.id} />
@@ -547,7 +549,7 @@ interface SingleOptionCellProps {
 const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return <SingleOptionValueEdit documentID={documentID} fieldID={field.id} />;
 });
@@ -561,10 +563,14 @@ interface SingleDocumentLinkCellProps {
 const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   props: SingleDocumentLinkCellProps,
 ) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return (
-    <SingleDocumentLinkValueEdit documentID={documentID} fieldID={field.id} />
+    <SingleDocumentLinkValueEdit
+      collectionID={field.documentsFromCollectionID}
+      documentID={documentID}
+      fieldID={field.id}
+    />
   );
 });
 
@@ -575,7 +581,7 @@ interface CheckboxCellProps {
 }
 
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return <CheckboxValueEdit documentID={documentID} fieldID={field.id} />;
 });
@@ -587,7 +593,7 @@ interface DateCellProps {
 }
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
-  const { value, field, documentID } = props;
+  const { field, documentID } = props;
 
   return <DateValueEdit documentID={documentID} fieldID={field.id} />;
 });

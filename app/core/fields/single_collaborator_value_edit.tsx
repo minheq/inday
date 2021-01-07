@@ -5,7 +5,6 @@ import {
   assertSingleCollaboratorField,
   assertSingleCollaboratorFieldValue,
   FieldID,
-  SingleCollaboratorFieldValue,
 } from '../../../models/fields';
 import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
 import {
@@ -21,13 +20,12 @@ import { DocumentID } from '../../../models/documents';
 interface SingleCollaboratorValueEditProps {
   fieldID: FieldID;
   documentID: DocumentID;
-  onRequestClose: () => void;
 }
 
 export function SingleCollaboratorValueEdit(
   props: SingleCollaboratorValueEditProps,
 ): JSX.Element {
-  const { fieldID, documentID, onRequestClose } = props;
+  const { fieldID, documentID } = props;
   const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
@@ -42,7 +40,6 @@ export function SingleCollaboratorValueEdit(
       documentID={documentID}
       renderLabel={renderCollaborator}
       options={options}
-      onRequestClose={onRequestClose}
     >
       <SingleCollaboratorValueView value={value} field={field} />
     </SingleSelectKindValueEdit>
