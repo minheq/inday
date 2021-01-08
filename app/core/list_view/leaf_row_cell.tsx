@@ -374,7 +374,7 @@ const LeafRowCellView = memo(function LeafRowCellView(
       {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
         <DotsMenu />
       )}
-      {cell.state !== 'editing' && (
+      {cell.state === 'default' && (
         <View
           pointerEvents="none"
           style={[styles.bottomBorder, themeStyles.border.default]}
@@ -444,7 +444,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   });
 
   return (
-    <View style={styles.checkboxCellRoot}>
+    <View style={[styles.cellValueContainer, styles.checkboxCellRoot]}>
       <CheckboxValueEdit documentID={documentID} fieldID={fieldID} />
     </View>
   );
@@ -591,10 +591,8 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   }
 
   return (
-    <View style={styles.cellRoot}>
-      <View style={styles.cellValueContainer}>
-        <MultiCollaboratorValueView value={value} field={field} />
-      </View>
+    <View style={styles.cellValueContainer}>
+      <MultiCollaboratorValueView value={value} field={field} />
     </View>
   );
 });
@@ -678,10 +676,8 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   }
 
   return (
-    <View style={styles.cellRoot}>
-      <View style={styles.cellValueContainer}>
-        <Text numberOfLines={1}>{value}</Text>
-      </View>
+    <View style={styles.cellValueContainer}>
+      <Text numberOfLines={1}>{value}</Text>
     </View>
   );
 });
@@ -703,7 +699,11 @@ const MultiOptionCell = memo(function MultiOptionCell(
     return <MultiOptionValueEdit documentID={documentID} fieldID={fieldID} />;
   }
 
-  return <MultiOptionValueView value={value} field={field} />;
+  return (
+    <View style={styles.cellValueContainer}>
+      <MultiOptionValueView value={value} field={field} />
+    </View>
+  );
 });
 
 interface NumberCellProps {
@@ -824,10 +824,8 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   }
 
   return (
-    <View style={styles.cellRoot}>
-      <View style={styles.cellValueContainer}>
-        <SingleCollaboratorValueView value={value} field={field} />
-      </View>
+    <View style={styles.cellValueContainer}>
+      <SingleCollaboratorValueView value={value} field={field} />
     </View>
   );
 });
@@ -938,10 +936,8 @@ const SingleOptionCell = memo(function SingleOptionCell(
   }
 
   return (
-    <View style={styles.cellRoot}>
-      <View style={styles.cellValueContainer}>
-        <SingleOptionValueView value={value} field={field} />
-      </View>
+    <View style={styles.cellValueContainer}>
+      <SingleOptionValueView value={value} field={field} />
     </View>
   );
 });
