@@ -296,12 +296,10 @@ function DayDisplay(props: DayDisplayProps) {
                 styles.dayWrapper,
                 today && styles.todayWrapper,
                 hovered && themeStyles.background.lightPrimary,
-                selected && styles.selectedDay,
+                selected && themeStyles.background.primary,
               ]}
             >
-              <Text
-                color={selected ? 'contrast' : today ? 'primary' : 'default'}
-              >
+              <Text color={!selected && today ? 'primary' : 'default'}>
                 {formatDate(day, getSystemLocale(), {
                   day: 'numeric',
                 })}
@@ -465,7 +463,6 @@ const styles = StyleSheet.create({
   firstMonthPickerWrapper: {
     paddingRight: 8,
   },
-  selectedDay: {},
   dateWrapper: {
     display: 'flex',
     flexDirection: 'column',
