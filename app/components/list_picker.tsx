@@ -1,10 +1,4 @@
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   NativeSyntheticEvent,
   ScrollView,
@@ -20,7 +14,6 @@ import { tokens } from './tokens';
 import { Icon } from './icon';
 import { TextInput } from './text_input';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
-import { Hover } from './hover';
 import { SearchEngine } from '../../lib/search';
 import { useTheme } from './theme';
 
@@ -164,7 +157,6 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
     onSelect,
     renderLabel,
     renderCheck,
-    onHoverChange,
   } = props;
   const theme = useTheme();
 
@@ -172,43 +164,28 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
     onSelect(option.value, selected);
   }, [onSelect, option, selected]);
 
-  const handleHoverChange = useCallback(
-    (hovered: boolean) => {
-      if (onHoverChange !== undefined) {
-        onHoverChange(option.value, hovered);
-      }
-    },
-    [onHoverChange, option],
-  );
-
   return (
     <PressableHighlight
-      containerStyle={styles.listItemContainer}
       style={[
         styles.listItem,
         active && { backgroundColor: theme.background.lightPrimary },
       ]}
       onPress={handlePress}
     >
-      {({ hovered }) => (
-        <Fragment>
-          <Hover hovered={hovered} onHoverChange={handleHoverChange} />
-          {renderLabel ? (
-            renderLabel(option.value, selected)
-          ) : (
-            <View style={styles.labelWrapper}>
-              <Text>{option.label}</Text>
-            </View>
-          )}
-          <View style={styles.checkWrapper}>
-            {renderCheck ? (
-              renderCheck(option.value, selected)
-            ) : selected ? (
-              <Icon name="CheckThick" color="primary" />
-            ) : null}
-          </View>
-        </Fragment>
+      {renderLabel ? (
+        renderLabel(option.value, selected)
+      ) : (
+        <View style={styles.labelWrapper}>
+          <Text>{option.label}</Text>
+        </View>
       )}
+      <View style={styles.checkWrapper}>
+        {renderCheck ? (
+          renderCheck(option.value, selected)
+        ) : selected ? (
+          <Icon name="CheckThick" color="primary" />
+        ) : null}
+      </View>
     </PressableHighlight>
   );
 }
@@ -271,9 +248,6 @@ const styles = StyleSheet.create({
   },
   searchInputWrapper: {
     paddingBottom: 16,
-  },
-  listItemContainer: {
-    marginBottom: 4,
   },
   checkWrapper: {
     paddingLeft: 16,

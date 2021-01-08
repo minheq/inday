@@ -11,6 +11,7 @@ import {
   StyleSheet,
   StyleProp,
   ViewStyle,
+  Platform,
 } from 'react-native';
 import { Text } from '../../components/text';
 import { tokens } from '../../components/tokens';
@@ -354,7 +355,6 @@ const LeafRowCellView = memo(function LeafRowCellView(
       themeStyles.border.default,
       mode === 'edit' && themeStyles.background.content,
       cell.primary && styles.primaryCell,
-      cell.state !== 'default' && styles.focusedLeafRowCell,
     ],
     [cell, mode, themeStyles],
   );
@@ -369,15 +369,17 @@ const LeafRowCellView = memo(function LeafRowCellView(
       {cell.primary === true && (
         <SelectCheckbox visible={mode === 'select'} selected={selected} />
       )}
-      <Spacer direction="row" size={level * 32} />
-      {renderCell()}
+      {cell.primary && <Spacer direction="row" size={level * 32} />}
+      <View style={styles.cellRoot}>{renderCell()}</View>
       {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
         <DotsMenu />
       )}
-      <View
-        pointerEvents="none"
-        style={[styles.bottomBorder, themeStyles.border.default]}
-      />
+      {cell.state !== 'editing' && (
+        <View
+          pointerEvents="none"
+          style={[styles.bottomBorder, themeStyles.border.default]}
+        />
+      )}
       {cell.state !== 'default' && (
         <View
           pointerEvents="none"
@@ -442,7 +444,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   });
 
   return (
-    <View style={[styles.cellRoot, styles.checkboxCellRoot]}>
+    <View style={styles.checkboxCellRoot}>
       <CheckboxValueEdit documentID={documentID} fieldID={fieldID} />
     </View>
   );
@@ -460,8 +462,10 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
     fieldID,
     documentID,
     onFocusNextDocument,
+    onStartEditing,
     onStopEditing,
   } = useLeafRowCellContext();
+  useNumberFieldKindCellKeyBindings();
 
   if (cell.state === 'editing') {
     return (
@@ -482,71 +486,15 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   );
 
   if (cell.state === 'focused') {
-    return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
+    return (
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+        {child}
+      </Pressable>
+    );
   }
 
   return <View style={styles.cellRoot}>{child}</View>;
 });
-
-interface NumberFieldKindCellFocusedProps {
-  children: React.ReactNode;
-}
-
-function NumberFieldKindCellFocused(props: NumberFieldKindCellFocusedProps) {
-  const { children } = props;
-  const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
-
-  const handlePrintableKey = useCallback(
-    async (key: string) => {
-      if (isNumberString(key) === false) {
-        return;
-      }
-
-      await updateDocumentFieldValue(documentID, fieldID, toNumber(key));
-      onStartEditing();
-    },
-    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
-  );
-
-  useCellKeyBindings({
-    onPrintableKey: handlePrintableKey,
-  });
-
-  return (
-    <Pressable style={styles.cellRoot} onPress={onStartEditing}>
-      {children}
-    </Pressable>
-  );
-}
-
-interface TextFieldKindCellFocusedProps {
-  children: React.ReactNode;
-}
-
-function TextFieldKindCellFocused(props: TextFieldKindCellFocusedProps) {
-  const { children } = props;
-  const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
-
-  const handlePrintableKey = useCallback(
-    async (key: string) => {
-      await updateDocumentFieldValue(documentID, fieldID, key);
-      onStartEditing();
-    },
-    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
-  );
-
-  useCellKeyBindings({
-    onPrintableKey: handlePrintableKey,
-  });
-
-  return (
-    <Pressable style={styles.cellRoot} onPress={onStartEditing}>
-      {children}
-    </Pressable>
-  );
-}
 
 interface DateCellProps {
   value: DateFieldValue;
@@ -583,9 +531,11 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     cell,
     documentID,
     fieldID,
+    onStartEditing,
     onStopEditing,
     onFocusNextDocument,
   } = useLeafRowCellContext();
+  useTextFieldKindCellKeyBindings();
 
   if (cell.state === 'editing') {
     return (
@@ -608,7 +558,9 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   if (cell.state === 'focused') {
     return (
       <View style={styles.cellRoot}>
-        <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
+        <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+          {child}
+        </Pressable>
         <View style={styles.actionsWrapper}>
           <EmailValueActions value={value} />
         </View>
@@ -703,6 +655,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
     onFocusNextDocument,
     onStopEditing,
   } = useLeafRowCellContext();
+  useTextFieldKindCellKeyBindings();
 
   if (cell.state === 'editing') {
     return (
@@ -718,11 +671,9 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (cell.state === 'focused') {
     return (
-      <TextFieldKindCellFocused>
-        <View style={styles.multiLineTextFocused}>
-          <Text>{value}</Text>
-        </View>
-      </TextFieldKindCellFocused>
+      <View style={styles.multiLineTextFocused}>
+        <Text>{value}</Text>
+      </View>
     );
   }
 
@@ -768,7 +719,9 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     documentID,
     onFocusNextDocument,
     onStopEditing,
+    onStartEditing,
   } = useLeafRowCellContext();
+  useNumberFieldKindCellKeyBindings();
 
   if (cell.state === 'editing') {
     return (
@@ -789,7 +742,11 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   );
 
   if (cell.state === 'focused') {
-    return <NumberFieldKindCellFocused>{child}</NumberFieldKindCellFocused>;
+    return (
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+        {child}
+      </Pressable>
+    );
   }
 
   return <View style={styles.cellRoot}>{child}</View>;
@@ -810,7 +767,9 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
     fieldID,
     onStopEditing,
     onFocusNextDocument,
+    onStartEditing,
   } = useLeafRowCellContext();
+  useTextFieldKindCellKeyBindings();
 
   if (cell.state === 'editing') {
     return (
@@ -832,7 +791,9 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   if (cell.state === 'focused') {
     return (
       <View style={styles.cellRoot}>
-        <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
+        <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+          {child}
+        </Pressable>
         <View style={styles.actionsWrapper}>
           <PhoneNumberValueActions value={value} />
         </View>
@@ -925,8 +886,10 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
     documentID,
     fieldID,
     onStopEditing,
+    onStartEditing,
     onFocusNextDocument,
   } = useLeafRowCellContext();
+  useTextFieldKindCellKeyBindings();
 
   if (cell.state === 'editing') {
     return (
@@ -947,7 +910,11 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   );
 
   if (cell.state === 'focused') {
-    return <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>;
+    return (
+      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+        {child}
+      </Pressable>
+    );
   }
 
   return <View style={styles.cellRoot}>{child}</View>;
@@ -990,9 +957,11 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
     cell,
     documentID,
     fieldID,
+    onStartEditing,
     onStopEditing,
     onFocusNextDocument,
   } = useLeafRowCellContext();
+  useTextFieldKindCellKeyBindings();
 
   if (cell.state === 'editing') {
     return (
@@ -1015,7 +984,9 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
   if (cell.state === 'focused') {
     return (
       <View style={styles.cellRoot}>
-        <TextFieldKindCellFocused>{child}</TextFieldKindCellFocused>
+        <Pressable style={styles.cellRoot} onPress={onStartEditing}>
+          {child}
+        </Pressable>
         <View style={styles.actionsWrapper}>
           <URLValueActions value={value} />
         </View>
@@ -1025,6 +996,44 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   return <View style={styles.cellRoot}>{child}</View>;
 });
+
+function useTextFieldKindCellKeyBindings() {
+  const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+
+  const handlePrintableKey = useCallback(
+    async (key: string) => {
+      await updateDocumentFieldValue(documentID, fieldID, key);
+      onStartEditing();
+    },
+    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
+  );
+
+  useCellKeyBindings({
+    onPrintableKey: handlePrintableKey,
+  });
+}
+
+function useNumberFieldKindCellKeyBindings() {
+  const { onStartEditing, documentID, fieldID } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+
+  const handlePrintableKey = useCallback(
+    async (key: string) => {
+      if (isNumberString(key) === false) {
+        return;
+      }
+
+      await updateDocumentFieldValue(documentID, fieldID, toNumber(key));
+      onStartEditing();
+    },
+    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
+  );
+
+  useCellKeyBindings({
+    onPrintableKey: handlePrintableKey,
+  });
+}
 
 interface UseCellKeyBindingsProps {
   onDelete?: () => void;
@@ -1314,12 +1323,13 @@ export function LastLeafRowCell(): JSX.Element {
 
 const styles = StyleSheet.create({
   leafRowCell: {
-    height: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  focusedLeafRowCell: {
-    height: 'auto',
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
   bottomBorder: {
     borderBottomWidth: 1,

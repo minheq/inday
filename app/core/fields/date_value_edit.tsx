@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { formatISODate, parseISODate } from '../../../lib/date_utils';
 import { DocumentID } from '../../../models/documents';
@@ -43,6 +44,7 @@ export function DateValueEdit(props: DateValueEditProps): JSX.Element {
           onRequestClose={onRequestClose}
         />
       )}
+      style={styles.pressable}
     >
       <DateValueView field={field} value={value} />
     </PressableHighlightPopover>
@@ -73,3 +75,11 @@ export function DateValueInput(props: DateValueInputProps): JSX.Element {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  pressable: {
+    height: 40,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+});

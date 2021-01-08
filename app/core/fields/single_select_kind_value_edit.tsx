@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { ListPicker, ListPickerOption } from '../../components/list_picker';
 import {
@@ -46,6 +47,7 @@ export function SingleSelectKindValueEdit<
           onRequestClose={onRequestClose}
         />
       )}
+      style={styles.pressable}
     >
       {children}
     </PressableHighlightPopover>
@@ -85,3 +87,11 @@ export function SingleSelectKindValueInput<
     />
   );
 }
+
+const styles = StyleSheet.create({
+  pressable: {
+    height: 40,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+});

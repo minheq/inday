@@ -119,8 +119,7 @@ export function NumberKindValueInput<T extends NumberFieldKindValue>(
 
 const styles = StyleSheet.create({
   numberCellInput: {
-    width: '100%',
-    height: '100%',
+    height: 40,
     paddingHorizontal: 8,
     textAlign: 'right',
     ...tokens.text.size.md,

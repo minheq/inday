@@ -112,8 +112,7 @@ export function TextKindValueInput<T extends TextFieldKindValue>(
 
 const styles = StyleSheet.create({
   textCellInput: {
-    width: '100%',
-    height: '100%',
+    height: 40,
     paddingHorizontal: 8,
     ...tokens.text.size.md,
     ...Platform.select({

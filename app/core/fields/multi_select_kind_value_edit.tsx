@@ -1,4 +1,6 @@
 import React, { useCallback } from 'react';
+import { StyleSheet } from 'react-native';
+
 import { ListPickerOption } from '../../components/list_picker';
 import { MultiListPicker } from '../../components/multi_list_picker';
 import { CollaboratorID } from '../../../models/collaborators';
@@ -51,6 +53,7 @@ export function MultiSelectKindValueEdit<
           onRequestClose={onRequestClose}
         />
       )}
+      style={styles.pressable}
     >
       {children}
     </PressableHighlightPopover>
@@ -87,3 +90,11 @@ export function MultiSelectKindValueInput<
     />
   );
 }
+
+const styles = StyleSheet.create({
+  pressable: {
+    height: 40,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+});

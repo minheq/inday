@@ -868,6 +868,8 @@ const styles = css.create({
   },
   cell: {
     position: 'absolute',
+    display: 'flex',
+    flexDirection: 'column',
   },
   headerWrapper: {
     zIndex: 2,
