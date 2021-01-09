@@ -10,6 +10,7 @@ import { tokens } from './tokens';
 import { Modal } from './modal';
 import { assertUnreached } from '../../lib/lang_utils';
 import { usePrevious } from '../hooks/use_previous';
+import { useThemeStyles } from './theme';
 
 export interface PopoverProps {
   visible: boolean;
@@ -79,6 +80,7 @@ export function Popover(props: PopoverProps): JSX.Element {
   const contentRef = useRef<View>(null);
   const opacity = useRef(new Animated.Value(0)).current;
   const [state, dispatch] = useReducer(reducer, initialState);
+  const themeStyles = useThemeStyles();
   const prevVisible = usePrevious(visible);
   const { ready, actuallyVisible, anchor, height, tm } = state;
 
@@ -145,7 +147,13 @@ export function Popover(props: PopoverProps): JSX.Element {
       <Animated.View
         onLayout={handleLayout}
         ref={contentRef}
-        style={{ opacity, height }}
+        style={[
+          styles.popoverContainer,
+          themeStyles.background.content,
+          themeStyles.border.default,
+          themeStyles.elevation.level1,
+          { opacity, height },
+        ]}
       >
         {typeof content === 'function' ? content({ onRequestClose }) : content}
       </Animated.View>
@@ -289,6 +297,11 @@ const styles = StyleSheet.create({
   popover: {
     position: 'absolute',
     zIndex: 1,
+    borderRadius: tokens.border.radius,
+  },
+  popoverContainer: {
+    borderWidth: 1,
+    padding: 8,
     borderRadius: tokens.border.radius,
   },
   background: {
