@@ -4,6 +4,7 @@ import React, {
   useContext,
   useMemo,
   memo,
+  useEffect,
 } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
@@ -45,6 +46,7 @@ import { CollectionsTabs } from '../core/collections/collection_tabs';
 import { Delay } from '../components/delay';
 import { Fade } from '../components/fade';
 import { ViewButton } from '../core/views/view_button';
+import { matchPathname } from '../../lib/pathname';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -66,6 +68,19 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
   const { params } = props;
   const { spaceID, viewID } = params;
   const view = useViewQuery(viewID);
+  const navigation = useNavigation();
+
+  // TODO: Remove from dev purposes
+  useEffect(() => {
+    const match = matchPathname(
+      '/s/:spaceID/:viewID',
+      window.location.pathname,
+    );
+
+    if (!match) {
+      navigation.push(ScreenName.Space, { spaceID, viewID });
+    }
+  }, [spaceID, viewID, navigation]);
 
   const context = useMemo(
     () => ({ spaceID, viewID, collectionID: view.collectionID }),

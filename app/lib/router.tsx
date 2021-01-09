@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useReducer,
 } from 'react';
-import { Pathname } from '../../lib/pathname';
+import { compilePathname, matchPathname } from '../../lib/pathname';
 import { keysOf } from '../../lib/object_utils';
 
 interface UseNavigation {
@@ -121,7 +121,7 @@ function getInitialState(pathMap: PathMap): State {
 
   for (const _name of screens) {
     const { path } = pathMap[_name];
-    const result = Pathname.match<Params>(path, window.location.pathname);
+    const result = matchPathname<Params>(path, window.location.pathname);
 
     if (result !== false) {
       name = _name;
@@ -238,13 +238,13 @@ function BrowserHistorySync(): JSX.Element {
       history.pushState(
         state,
         name,
-        Pathname.compile(pathMap[name].path, params),
+        compilePathname(pathMap[name].path, params),
       );
     } else if (lastAction.type === 'SET_PARAMS') {
       history.replaceState(
         state,
         name,
-        Pathname.compile(pathMap[name].path, params),
+        compilePathname(pathMap[name].path, params),
       );
     } else if (lastAction.type === 'BACK') {
       history.back();
