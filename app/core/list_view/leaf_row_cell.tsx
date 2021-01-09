@@ -651,6 +651,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
     documentID,
     fieldID,
     onFocusNextDocument,
+    onStartEditing,
     onStopEditing,
   } = useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
@@ -669,9 +670,9 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (cell.state === 'focused') {
     return (
-      <View style={styles.multiLineTextFocused}>
+      <Pressable style={styles.multiLineTextFocused} onPress={onStartEditing}>
         <Text>{value}</Text>
-      </View>
+      </Pressable>
     );
   }
 
@@ -1359,9 +1360,11 @@ const styles = StyleSheet.create({
   multiLineTextFocused: {
     padding: 8,
     maxHeight: 400,
+    overflow: 'hidden',
   },
   cellRoot: {
     flex: 1,
+    overflowX: 'hidden',
   },
   cellValueContainer: {
     height: LEAF_ROW_HEIGHT,

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ListPicker, ListPickerOption } from '../../components/list_picker';
 import {
@@ -12,6 +12,8 @@ import { useDocumentFieldValueQuery } from '../../store/queries';
 import { DocumentID } from '../../../models/documents';
 import { CollaboratorID } from '../../../models/collaborators';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
+import { Spacer } from '../../components/spacer';
+import { FlatButton } from '../../components/flat_button';
 
 interface SingleSelectKindValueEditProps<T> {
   fieldID: FieldID;
@@ -36,16 +38,27 @@ export function SingleSelectKindValueEdit<
     [updateDocumentFieldValue, documentID, fieldID],
   );
 
+  const handleClear = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, null);
+  }, [updateDocumentFieldValue, documentID, fieldID]);
+
   return (
     <PressableHighlightPopover
       content={({ onRequestClose }) => (
-        <SingleSelectKindValueInput<T>
-          value={value}
-          options={options}
-          renderLabel={renderLabel}
-          onChange={handleChange}
-          onRequestClose={onRequestClose}
-        />
+        <View>
+          <SingleSelectKindValueInput<T>
+            value={value}
+            options={options}
+            renderLabel={renderLabel}
+            onChange={handleChange}
+            onRequestClose={onRequestClose}
+          />
+          <Spacer size={16} />
+          <View style={styles.actions}>
+            <FlatButton onPress={handleClear} title="Clear" />
+            <FlatButton onPress={onRequestClose} title="Done" color="primary" />
+          </View>
+        </View>
       )}
       style={styles.pressable}
     >
@@ -93,5 +106,9 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     paddingHorizontal: 8,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ListPickerOption } from '../../components/list_picker';
 import { MultiListPicker } from '../../components/multi_list_picker';
@@ -14,6 +14,8 @@ import { DocumentID } from '../../../models/documents';
 import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
 import { useDocumentFieldValueQuery } from '../../store/queries';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
+import { Spacer } from '../../components/spacer';
+import { FlatButton } from '../../components/flat_button';
 
 interface MultiSelectKindValueEditProps<T> {
   fieldID: FieldID;
@@ -42,16 +44,31 @@ export function MultiSelectKindValueEdit<
     [updateDocumentFieldValue, documentID, fieldID],
   );
 
+  const handleClearAll = useCallback(async () => {
+    await updateDocumentFieldValue(
+      documentID,
+      fieldID,
+      [] as MultiSelectFieldKindValue,
+    );
+  }, [updateDocumentFieldValue, documentID, fieldID]);
+
   return (
     <PressableHighlightPopover
       content={({ onRequestClose }) => (
-        <MultiSelectKindValueInput<T>
-          value={value as T[]}
-          options={options}
-          renderLabel={renderLabel}
-          onChange={handleChange}
-          onRequestClose={onRequestClose}
-        />
+        <View>
+          <MultiSelectKindValueInput<T>
+            value={value as T[]}
+            options={options}
+            renderLabel={renderLabel}
+            onChange={handleChange}
+            onRequestClose={onRequestClose}
+          />
+          <Spacer size={16} />
+          <View style={styles.actions}>
+            <FlatButton onPress={handleClearAll} title="Clear all" />
+            <FlatButton onPress={onRequestClose} title="Done" color="primary" />
+          </View>
+        </View>
       )}
       style={styles.pressable}
     >
@@ -96,5 +113,9 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     paddingHorizontal: 8,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
