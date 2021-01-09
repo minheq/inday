@@ -2,7 +2,7 @@ import { useRef } from 'react';
 
 /**
  * This hook is similar to useMemo, but instead of passing an array of dependencies we pass a custom compare function that receives the previous and new value.
- * If the compare function returns true then the hook returns the old object reference.
+ * If the compare function returns false then the hook returns the old object reference.
  */
 export function useMemoCompare<T>(
   getValue: () => T,
@@ -14,9 +14,9 @@ export function useMemoCompare<T>(
 
   // Pass previous and next value to compare function
   // to determine whether to consider them equal.
-  const equal = compare();
+  const changed = compare();
 
-  if (equal) {
+  if (!changed) {
     return previous;
   }
 

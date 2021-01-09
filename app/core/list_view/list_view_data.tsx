@@ -209,12 +209,11 @@ function useListViewData(viewID: ViewID): ListViewData {
             collapsedGroupsByFieldID,
           )
         : getFlatDocumentNodes(documents),
-    () => !documentsOrderChanged,
+    () => documentsOrderChanged,
   );
-  const columnToFieldIDCache = useMemo(
+  const columnToFieldIDCache = useMemoCompare(
     () => getColumnToFieldIDCache(fields),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fieldsOrderChanged],
+    () => fieldsOrderChanged,
   );
 
   const leafRowPaths = useMemo(
