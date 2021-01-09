@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { formatISODate, parseISODate } from '../../../lib/date_utils';
 import { DocumentID } from '../../../models/documents';
@@ -10,7 +10,9 @@ import {
   FieldID,
 } from '../../../models/fields';
 import { DatePicker } from '../../components/date_picker';
+import { FlatButton } from '../../components/flat_button';
 import { PressableHighlightPopover } from '../../components/pressable_highlight_popover';
+import { Spacer } from '../../components/spacer';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 import { useDocumentFieldValueQuery, useFieldQuery } from '../../store/queries';
 import { DateValueView } from './date_value_view';
@@ -35,14 +37,25 @@ export function DateValueEdit(props: DateValueEditProps): JSX.Element {
     [updateDocumentFieldValue, documentID, fieldID],
   );
 
+  const handleClear = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, null);
+  }, [updateDocumentFieldValue, documentID, fieldID]);
+
   return (
     <PressableHighlightPopover
       content={({ onRequestClose }) => (
-        <DateValueInput
-          value={value}
-          onChange={handleChange}
-          onRequestClose={onRequestClose}
-        />
+        <View>
+          <DateValueInput
+            value={value}
+            onChange={handleChange}
+            onRequestClose={onRequestClose}
+          />
+          <Spacer size={16} />
+          <View style={styles.actions}>
+            <FlatButton onPress={handleClear} title="Clear" />
+            <FlatButton onPress={onRequestClose} title="Done" color="primary" />
+          </View>
+        </View>
       )}
       style={styles.pressable}
     >
@@ -81,5 +94,9 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     paddingHorizontal: 8,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
