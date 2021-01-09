@@ -2,47 +2,37 @@ import React, { useCallback, useMemo } from 'react';
 
 import { ListPickerOption } from '../../components/list_picker';
 import {
-  assertSingleCollaboratorField,
-  assertSingleCollaboratorFieldValue,
-  FieldID,
+  SingleCollaboratorField,
+  SingleCollaboratorFieldValue,
 } from '../../../models/fields';
-import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
-import {
-  useCollaboratorsQuery,
-  useDocumentFieldValueQuery,
-  useFieldQuery,
-} from '../../store/queries';
+import { SingleSelectKindPicker } from './single_select_kind_value_edit';
+import { useCollaboratorsQuery } from '../../store/queries';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { Collaborator, CollaboratorID } from '../../../models/collaborators';
-import { SingleCollaboratorValueView } from './single_collaborator_value_view';
-import { DocumentID } from '../../../models/documents';
 
-interface SingleCollaboratorValueEditProps {
-  fieldID: FieldID;
-  documentID: DocumentID;
+interface SingleCollaboratorPickerProps {
+  value: SingleCollaboratorFieldValue;
+  field: SingleCollaboratorField;
+  onChange: (value: SingleCollaboratorFieldValue) => void;
+  onRequestClose: () => void;
 }
 
-export function SingleCollaboratorValueEdit(
-  props: SingleCollaboratorValueEditProps,
+export function SingleCollaboratorPicker(
+  props: SingleCollaboratorPickerProps,
 ): JSX.Element {
-  const { fieldID, documentID } = props;
+  const { value, onChange, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
-  const value = useDocumentFieldValueQuery(documentID, fieldID);
-  assertSingleCollaboratorFieldValue(value);
-  const field = useFieldQuery(fieldID);
-  assertSingleCollaboratorField(field);
 
   return (
-    <SingleSelectKindValueEdit<CollaboratorID>
-      fieldID={fieldID}
-      documentID={documentID}
+    <SingleSelectKindPicker<CollaboratorID>
+      value={value}
+      onChange={onChange}
       renderLabel={renderCollaborator}
       options={options}
-    >
-      <SingleCollaboratorValueView value={value} field={field} />
-    </SingleSelectKindValueEdit>
+      onRequestClose={onRequestClose}
+    />
   );
 }
 

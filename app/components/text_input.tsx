@@ -1,20 +1,17 @@
 import React, { useCallback, useRef } from 'react';
 import {
   TextInput as RNTextInput,
-  View,
-  Animated,
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
-  TextInputSubmitEditingEventData,
-  StyleSheet,
+  StyleProp,
+  TextStyle,
 } from 'react-native';
-import { PressableHighlight } from './pressable_highlight';
-import { IconName, Icon } from './icon';
+
 import { useTheme, useThemeStyles } from './theme';
 import { tokens } from './tokens';
+import { UIKey } from '../lib/keyboard';
 
 export interface TextInputProps {
-  icon?: IconName;
   testID?: string;
   value?: string | null;
   autoFocus?: boolean;
@@ -22,98 +19,55 @@ export interface TextInputProps {
   onKeyPress?: (
     event: NativeSyntheticEvent<TextInputKeyPressEventData>,
   ) => void;
-  onSubmitEditing?: (
-    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
-  ) => void;
-  clearable?: boolean;
   placeholder?: string;
+  onSubmitEditing?: () => void;
+  onRequestClose?: () => void;
+  style?: StyleProp<TextStyle>;
 }
 
 export function TextInput(props: TextInputProps): JSX.Element {
   const {
     testID,
     autoFocus,
-    icon,
     value,
-    clearable,
-    onChange,
-    onKeyPress,
-    onSubmitEditing,
     placeholder,
+    onKeyPress,
+    onChange,
+    onRequestClose,
+    onSubmitEditing,
+    style,
   } = props;
   const ref = useRef<RNTextInput>(null);
   const theme = useTheme();
   const themeStyles = useThemeStyles();
 
-  const handleClear = useCallback(() => {
-    if (ref.current !== null) {
-      ref.current.focus();
-    }
+  const handleKeyPress = useCallback(
+    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      const key = event.nativeEvent.key;
 
-    if (onChange !== undefined) {
-      onChange('');
-    }
-  }, [onChange]);
+      if (onKeyPress) {
+        onKeyPress(event);
+      }
+
+      if (onRequestClose && key === UIKey.Escape) {
+        onRequestClose();
+      }
+    },
+    [onRequestClose, onKeyPress],
+  );
 
   return (
-    <Animated.View style={[styles.base, themeStyles.background.content]}>
-      {icon && (
-        <View style={styles.icon}>
-          <Icon name={icon} color="muted" />
-        </View>
-      )}
-      <RNTextInput
-        ref={ref}
-        testID={testID}
-        value={value !== null ? value : undefined}
-        autoFocus={autoFocus}
-        placeholder={placeholder}
-        onChangeText={onChange}
-        onKeyPress={onKeyPress}
-        onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.text.muted}
-        style={[
-          styles.input,
-          themeStyles.border.default,
-          tokens.text.size.md,
-          !!icon && styles.hasIcon,
-        ]}
-      />
-      {clearable && value !== undefined && value !== null && value !== '' && (
-        <PressableHighlight onPress={handleClear} style={styles.clearButton}>
-          <Icon name="X" />
-        </PressableHighlight>
-      )}
-    </Animated.View>
+    <RNTextInput
+      ref={ref}
+      testID={testID}
+      value={value !== null ? value : undefined}
+      autoFocus={autoFocus}
+      placeholder={placeholder}
+      onChangeText={onChange}
+      onKeyPress={handleKeyPress}
+      onSubmitEditing={onSubmitEditing}
+      placeholderTextColor={theme.text.muted}
+      style={[tokens.text.size.md, themeStyles.text.default, style]}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    borderRadius: tokens.border.radius,
-    alignItems: 'center',
-  },
-  icon: {
-    paddingHorizontal: 8,
-  },
-  hasIcon: {
-    paddingLeft: 0,
-  },
-  clearButton: {
-    width: 24,
-    height: 24,
-    position: 'absolute',
-    right: 8,
-    top: 8,
-    borderRadius: tokens.border.radius,
-  },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    paddingLeft: 8,
-    paddingRight: 40,
-    borderRadius: tokens.border.radius,
-    flex: 1,
-  },
-});

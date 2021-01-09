@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useMemo,
+  useRef,
 } from 'react';
 import {
   View,
@@ -84,18 +85,16 @@ import { isNumberString, toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
-import { DateValueEdit } from '../fields/date_value_edit';
-import { MultiCollaboratorValueEdit } from '../fields/multi_collaborator_value_edit';
-import { SingleCollaboratorValueEdit } from '../fields/single_collaborator_value_edit';
-import { SingleOptionValueEdit } from '../fields/single_option_value_edit';
-import { MultiOptionValueEdit } from '../fields/multi_option_value_edit';
-import { MultiDocumentLinkValueEdit } from '../fields/multi_document_link_value_edit';
-import { SingleDocumentLinkValueEdit } from '../fields/single_document_link_value_edit';
-import { TextKindValueEdit } from '../fields/text_kind_value_edit';
-import { NumberKindValueEdit } from '../fields/number_kind_value_edit';
-import { MultiLineTextValueEdit } from '../fields/multi_line_text_value_edit';
+import { DateValueInput } from '../fields/date_value_edit';
+import { MultiCollaboratorPicker } from '../fields/multi_collaborator_value_edit';
+import { SingleCollaboratorPicker } from '../fields/single_collaborator_value_edit';
+import { SingleOptionPicker } from '../fields/single_option_value_edit';
+import { MultiOptionPicker } from '../fields/multi_option_value_edit';
+import { TextKindValueInput } from '../fields/text_kind_value_edit';
+import { NumberKindValueInput } from '../fields/number_kind_value_edit';
+import { MultiLineTextValueInput } from '../fields/multi_line_text_value_edit';
 import { NumberValueView } from '../fields/number_value_view';
-import { CheckboxValueEdit } from '../fields/checkbox_value_edit';
+import { Checkbox } from '../fields/checkbox_value_edit';
 import { SingleOptionValueView } from '../fields/single_option_value_view';
 import { MultiOptionValueView } from '../fields/multi_option_value_view';
 import { MultiCollaboratorValueView } from '../fields/multi_collaborator_value_view';
@@ -119,6 +118,8 @@ import { CheckboxStatic } from '../../components/checkbox_static';
 import { Spacer } from '../../components/spacer';
 import { LEAF_ROW_HEIGHT } from './list_view_constants';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
+import { FlatButton } from '../../components/flat_button';
+import { Popover } from '../../components/popover';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -445,7 +446,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={[styles.cellValueContainer, styles.checkboxCellRoot]}>
-      <CheckboxValueEdit documentID={documentID} fieldID={fieldID} />
+      <Checkbox value={value} onChange={handleToggle} />
     </View>
   );
 });
@@ -459,23 +460,24 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
   const {
     cell,
-    fieldID,
-    documentID,
     onFocusNextDocument,
     onStartEditing,
     onStopEditing,
   } = useLeafRowCellContext();
   useNumberFieldKindCellKeyBindings();
+  const handleChange = useFieldValueChangeHandler();
 
   if (cell.state === 'editing') {
     return (
-      <NumberKindValueEdit
-        autoFocus
-        fieldID={fieldID}
-        documentID={documentID}
-        onRequestClose={onStopEditing}
-        onSubmitEditing={onFocusNextDocument}
-      />
+      <InputWrapper>
+        <NumberKindValueInput
+          autoFocus
+          value={value}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+          onSubmitEditing={onFocusNextDocument}
+        />
+      </InputWrapper>
     );
   }
 
@@ -503,8 +505,8 @@ interface DateCellProps {
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value, field } = props;
-  const { documentID, fieldID, cell } = useLeafRowCellContext();
-
+  const { cell } = useLeafRowCellContext();
+  const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
   const child = (
@@ -513,11 +515,17 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
     </View>
   );
 
-  if (cell.state === 'focused') {
-    return <DateValueEdit documentID={documentID} fieldID={fieldID} />;
+  if (cell.state === 'default') {
+    return child;
   }
 
-  return <View style={styles.cellRoot}>{child}</View>;
+  return (
+    <PickerTrigger
+      content={<DateValueInput value={value} onChange={handleChange} />}
+    >
+      {child}
+    </PickerTrigger>
+  );
 });
 
 interface EmailCellProps {
@@ -529,23 +537,24 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value, field } = props;
   const {
     cell,
-    documentID,
-    fieldID,
     onStartEditing,
     onStopEditing,
     onFocusNextDocument,
   } = useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
+  const handleChange = useFieldValueChangeHandler();
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit
-        autoFocus
-        fieldID={fieldID}
-        documentID={documentID}
-        onRequestClose={onStopEditing}
-        onSubmitEditing={onFocusNextDocument}
-      />
+      <InputWrapper>
+        <TextKindValueInput
+          autoFocus
+          value={value}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+          onSubmitEditing={onFocusNextDocument}
+        />
+      </InputWrapper>
     );
   }
 
@@ -568,7 +577,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     );
   }
 
-  return <View style={styles.cellRoot}>{child}</View>;
+  return child;
 });
 
 interface MultiCollaboratorCellProps {
@@ -580,20 +589,33 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell } = useLeafRowCellContext();
-
+  const { cell, onStopEditing } = useLeafRowCellContext();
+  const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
-  if (cell.state === 'focused') {
-    return (
-      <MultiCollaboratorValueEdit documentID={documentID} fieldID={fieldID} />
-    );
-  }
-
-  return (
+  const child = (
     <View style={styles.cellValueContainer}>
       <MultiCollaboratorValueView value={value} field={field} />
     </View>
+  );
+
+  if (cell.state === 'default') {
+    return child;
+  }
+
+  return (
+    <PickerTrigger
+      content={
+        <MultiCollaboratorPicker
+          value={value}
+          field={field}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+        />
+      }
+    >
+      {child}
+    </PickerTrigger>
   );
 });
 
@@ -606,33 +628,14 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
   props: MultiDocumentLinkCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell, onStartEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
-
-  if (cell.state === 'editing') {
-    return (
-      <MultiDocumentLinkValueEdit
-        documentID={documentID}
-        fieldID={fieldID}
-        collectionID={field.documentsFromCollectionID}
-      />
-    );
-  }
 
   const child = (
     <View style={styles.cellValueContainer}>
       <MultiDocumentLinkValueView value={value} field={field} />
     </View>
   );
-
-  if (cell.state === 'focused') {
-    return (
-      <Pressable style={styles.cellRoot} onPress={onStartEditing}>
-        {child}
-      </Pressable>
-    );
-  }
 
   return <View style={styles.cellRoot}>{child}</View>;
 });
@@ -648,20 +651,19 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   const { value } = props;
   const {
     cell,
-    documentID,
-    fieldID,
     onFocusNextDocument,
     onStartEditing,
     onStopEditing,
   } = useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
+  const handleChange = useFieldValueChangeHandler();
 
   if (cell.state === 'editing') {
     return (
-      <MultiLineTextValueEdit
+      <MultiLineTextValueInput
         autoFocus
-        documentID={documentID}
-        fieldID={fieldID}
+        value={value}
+        onChange={handleChange}
         onRequestClose={onStopEditing}
         onSubmitEditing={onFocusNextDocument}
       />
@@ -692,18 +694,32 @@ const MultiOptionCell = memo(function MultiOptionCell(
   props: MultiOptionCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell } = useLeafRowCellContext();
-
+  const { cell, onStopEditing } = useLeafRowCellContext();
+  const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
-  if (cell.state === 'focused') {
-    return <MultiOptionValueEdit documentID={documentID} fieldID={fieldID} />;
-  }
-
-  return (
+  const child = (
     <View style={styles.cellValueContainer}>
       <MultiOptionValueView value={value} field={field} />
     </View>
+  );
+  if (cell.state === 'default') {
+    return child;
+  }
+
+  return (
+    <PickerTrigger
+      content={
+        <MultiOptionPicker
+          value={value}
+          field={field}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+        />
+      }
+    >
+      {child}
+    </PickerTrigger>
   );
 });
 
@@ -716,23 +732,24 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
   const {
     cell,
-    fieldID,
-    documentID,
     onFocusNextDocument,
     onStopEditing,
     onStartEditing,
   } = useLeafRowCellContext();
   useNumberFieldKindCellKeyBindings();
+  const handleChange = useFieldValueChangeHandler();
 
   if (cell.state === 'editing') {
     return (
-      <NumberKindValueEdit
-        autoFocus
-        fieldID={fieldID}
-        documentID={documentID}
-        onRequestClose={onStopEditing}
-        onSubmitEditing={onFocusNextDocument}
-      />
+      <InputWrapper>
+        <NumberKindValueInput
+          autoFocus
+          value={value}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+          onSubmitEditing={onFocusNextDocument}
+        />
+      </InputWrapper>
     );
   }
 
@@ -764,23 +781,24 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   const { value, field } = props;
   const {
     cell,
-    documentID,
-    fieldID,
     onStopEditing,
     onFocusNextDocument,
     onStartEditing,
   } = useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
+  const handleChange = useFieldValueChangeHandler();
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit
-        autoFocus
-        fieldID={fieldID}
-        documentID={documentID}
-        onRequestClose={onStopEditing}
-        onSubmitEditing={onFocusNextDocument}
-      />
+      <InputWrapper>
+        <TextKindValueInput
+          autoFocus
+          value={value}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+          onSubmitEditing={onFocusNextDocument}
+        />
+      </InputWrapper>
     );
   }
   const child = (
@@ -814,20 +832,33 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell } = useLeafRowCellContext();
-
+  const { cell, onStopEditing } = useLeafRowCellContext();
+  const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
-  if (cell.state === 'focused') {
-    return (
-      <SingleCollaboratorValueEdit documentID={documentID} fieldID={fieldID} />
-    );
-  }
-
-  return (
+  const child = (
     <View style={styles.cellValueContainer}>
       <SingleCollaboratorValueView value={value} field={field} />
     </View>
+  );
+
+  if (cell.state === 'default') {
+    return child;
+  }
+
+  return (
+    <PickerTrigger
+      content={
+        <SingleCollaboratorPicker
+          value={value}
+          onChange={handleChange}
+          field={field}
+          onRequestClose={onStopEditing}
+        />
+      }
+    >
+      {child}
+    </PickerTrigger>
   );
 });
 
@@ -840,19 +871,9 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   props: SingleDocumentLinkCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell, onStartEditing } = useLeafRowCellContext();
+  const { cell, onStartEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
-
-  if (cell.state === 'editing') {
-    return (
-      <SingleDocumentLinkValueEdit
-        documentID={documentID}
-        fieldID={fieldID}
-        collectionID={field.documentsFromCollectionID}
-      />
-    );
-  }
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -882,23 +903,24 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   const { value, field } = props;
   const {
     cell,
-    documentID,
-    fieldID,
     onStopEditing,
     onStartEditing,
     onFocusNextDocument,
   } = useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
+  const handleChange = useFieldValueChangeHandler();
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit
-        autoFocus
-        fieldID={fieldID}
-        documentID={documentID}
-        onRequestClose={onStopEditing}
-        onSubmitEditing={onFocusNextDocument}
-      />
+      <InputWrapper>
+        <TextKindValueInput
+          autoFocus
+          value={value}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+          onSubmitEditing={onFocusNextDocument}
+        />
+      </InputWrapper>
     );
   }
 
@@ -928,18 +950,33 @@ const SingleOptionCell = memo(function SingleOptionCell(
   props: SingleOptionCellProps,
 ) {
   const { value, field } = props;
-  const { documentID, fieldID, cell } = useLeafRowCellContext();
-
+  const { cell, onStopEditing } = useLeafRowCellContext();
+  const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
-  if (cell.state === 'focused') {
-    return <SingleOptionValueEdit documentID={documentID} fieldID={fieldID} />;
-  }
-
-  return (
+  const child = (
     <View style={styles.cellValueContainer}>
       <SingleOptionValueView value={value} field={field} />
     </View>
+  );
+
+  if (cell.state === 'default') {
+    return child;
+  }
+
+  return (
+    <PickerTrigger
+      content={
+        <SingleOptionPicker
+          value={value}
+          onChange={handleChange}
+          field={field}
+          onRequestClose={onStopEditing}
+        />
+      }
+    >
+      {child}
+    </PickerTrigger>
   );
 });
 
@@ -952,23 +989,24 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value, field } = props;
   const {
     cell,
-    documentID,
-    fieldID,
     onStartEditing,
     onStopEditing,
     onFocusNextDocument,
   } = useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
+  const handleChange = useFieldValueChangeHandler();
 
   if (cell.state === 'editing') {
     return (
-      <TextKindValueEdit
-        autoFocus
-        fieldID={fieldID}
-        documentID={documentID}
-        onRequestClose={onStopEditing}
-        onSubmitEditing={onFocusNextDocument}
-      />
+      <InputWrapper>
+        <TextKindValueInput
+          autoFocus
+          value={value}
+          onChange={handleChange}
+          onRequestClose={onStopEditing}
+          onSubmitEditing={onFocusNextDocument}
+        />
+      </InputWrapper>
     );
   }
 
@@ -1030,6 +1068,89 @@ function useNumberFieldKindCellKeyBindings() {
   useCellKeyBindings({
     onPrintableKey: handlePrintableKey,
   });
+}
+
+function useFieldValueChangeHandler() {
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+  const { documentID, fieldID } = useLeafRowCellContext();
+
+  return useCallback(
+    async (nextValue: FieldValue) => {
+      await updateDocumentFieldValue(documentID, fieldID, nextValue);
+    },
+    [updateDocumentFieldValue, documentID, fieldID],
+  );
+}
+
+interface InputWrapperProps {
+  children: React.ReactNode;
+}
+
+function InputWrapper(props: InputWrapperProps) {
+  const { children } = props;
+  const { onStopEditing } = useLeafRowCellContext();
+
+  return (
+    <View>
+      {children}
+      <View style={styles.inputWrapper}>
+        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
+      </View>
+    </View>
+  );
+}
+
+interface PickerWrapperProps {
+  multi?: boolean;
+  children: React.ReactNode;
+}
+
+function PickerWrapper(props: PickerWrapperProps): JSX.Element {
+  const { children, multi } = props;
+  const { onStopEditing } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+  const { documentID, fieldID } = useLeafRowCellContext();
+
+  const handleClear = useCallback(async () => {
+    const nextValue: FieldValue = multi ? [] : null;
+    await updateDocumentFieldValue(documentID, fieldID, nextValue);
+  }, [updateDocumentFieldValue, documentID, fieldID, multi]);
+
+  return (
+    <View>
+      {children}
+      <Spacer size={16} />
+      <View style={styles.inputWrapper}>
+        <FlatButton onPress={handleClear} title="Clear all" />
+        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
+      </View>
+    </View>
+  );
+}
+
+interface PickerTriggerProps {
+  children: React.ReactNode;
+  content: React.ReactNode;
+}
+
+function PickerTrigger(props: PickerTriggerProps): JSX.Element {
+  const { children, content } = props;
+  const { cell, onStartEditing, onStopEditing } = useLeafRowCellContext();
+  const targetRef = useRef<View>(null);
+
+  return (
+    <View>
+      <Pressable ref={targetRef} onPress={onStartEditing}>
+        {children}
+      </Pressable>
+      <Popover
+        targetRef={targetRef}
+        onRequestClose={onStopEditing}
+        visible={cell.state === 'editing'}
+        content={<PickerWrapper>{content}</PickerWrapper>}
+      />
+    </View>
+  );
 }
 
 interface UseCellKeyBindingsProps {
@@ -1375,6 +1496,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingBottom: 8,
     flexDirection: 'row',
+  },
+  inputWrapper: {
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   dotsMenuWrapper: {
     paddingRight: 8,

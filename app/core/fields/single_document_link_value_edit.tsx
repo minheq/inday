@@ -2,48 +2,39 @@ import React, { useCallback } from 'react';
 import { ListPickerOption } from '../../components/list_picker';
 
 import {
-  assertSingleDocumentLinkField,
-  assertSingleDocumentLinkFieldValue,
-  FieldID,
+  SingleDocumentLinkField,
+  SingleDocumentLinkFieldValue,
 } from '../../../models/fields';
 import { Document, DocumentID } from '../../../models/documents';
-import { SingleSelectKindValueEdit } from './single_select_kind_value_edit';
-import {
-  useCollectionDocumentsQuery,
-  useDocumentFieldValueQuery,
-  useFieldQuery,
-} from '../../store/queries';
+import { SingleSelectKindPicker } from './single_select_kind_value_edit';
+import { useCollectionDocumentsQuery } from '../../store/queries';
 import { DocumentLinkBadge } from './document_link_badge';
-import { CollectionID } from '../../../models/collections';
-import { SingleDocumentLinkValueView } from './single_document_link_value_view';
 
-interface SingleDocumentLinkValueEditProps {
-  fieldID: FieldID;
-  documentID: DocumentID;
-  collectionID: CollectionID;
+interface SingleDocumentLinkPickerProps {
+  value: SingleDocumentLinkFieldValue;
+  onChange: (value: SingleDocumentLinkFieldValue) => void;
+  field: SingleDocumentLinkField;
+  onRequestClose: () => void;
 }
 
-export function SingleDocumentLinkValueEdit(
-  props: SingleDocumentLinkValueEditProps,
+export function SingleDocumentLinkPicker(
+  props: SingleDocumentLinkPickerProps,
 ): JSX.Element {
-  const { fieldID, documentID, collectionID } = props;
+  const { value, onChange, field, onRequestClose } = props;
   const renderDocumentLink = useRenderDocumentLink();
-  const documents = useCollectionDocumentsQuery(collectionID);
+  const documents = useCollectionDocumentsQuery(
+    field.documentsFromCollectionID,
+  );
   const options = useDocumentLinkOptions(documents);
-  const value = useDocumentFieldValueQuery(documentID, fieldID);
-  assertSingleDocumentLinkFieldValue(value);
-  const field = useFieldQuery(fieldID);
-  assertSingleDocumentLinkField(field);
 
   return (
-    <SingleSelectKindValueEdit<DocumentID>
-      fieldID={fieldID}
-      documentID={documentID}
+    <SingleSelectKindPicker<DocumentID>
+      onChange={onChange}
+      value={value}
       renderLabel={renderDocumentLink}
       options={options}
-    >
-      <SingleDocumentLinkValueView value={value} field={field} />
-    </SingleSelectKindValueEdit>
+      onRequestClose={onRequestClose}
+    />
   );
 }
 

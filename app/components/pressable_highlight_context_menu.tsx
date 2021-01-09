@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { PressableHighlightProps } from './pressable_highlight';
 import { ContextMenuView, ContextMenuItem } from './context_menu_view';
-import { PressableHighlightPopover } from './pressable_highlight_popover';
 
 interface PressableHighlightContextMenuProps extends PressableHighlightProps {
   options: ContextMenuItem[];
@@ -13,17 +12,5 @@ export function PressableHighlightContextMenu(
 ): JSX.Element {
   const { width, options, ...pressableHighlightProps } = props;
 
-  return (
-    <PressableHighlightPopover
-      content={({ onRequestClose }) => (
-        <ContextMenuView
-          onPressed={onRequestClose}
-          options={options}
-          width={width}
-        />
-      )}
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      {...pressableHighlightProps}
-    />
-  );
+  return <Fragment />;
 }

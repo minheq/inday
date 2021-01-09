@@ -18,6 +18,7 @@ import { useMediaQuery } from '../lib/media_query';
 import { Modal } from './modal';
 import { CloseButton } from './close_button';
 import { useThemeStyles } from './theme';
+import { PopoverStories } from './popover.stories';
 
 const MENU_WIDTH = 280;
 
@@ -66,6 +67,9 @@ export function Playground(
       break;
     case 'DatePicker':
       content = <DatePickerStories />;
+      break;
+    case 'Popover':
+      content = <PopoverStories />;
       break;
     case 'ContextMenu':
       content = <ContextMenuStories />;
@@ -138,6 +142,7 @@ function Menu() {
         <MenuItem component="Intro" />
         <MenuSection title="COMPONENTS" />
         <MenuItem component="ContextMenu" />
+        <MenuItem component="Popover" />
         <MenuItem component="Picker" />
         <MenuItem component="DatePicker" />
         <MenuItem component="TextInput" />

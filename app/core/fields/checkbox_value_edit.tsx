@@ -4,60 +4,13 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Icon } from '../../components/icon';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import {
-  assertCheckboxFieldValue,
-  CheckboxFieldValue,
-  FieldID,
-} from '../../../models/fields';
-import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
-import { useDocumentFieldValueQuery } from '../../store/queries';
-import { DocumentID } from '../../../models/documents';
-
-interface CheckboxValueEditProps {
-  fieldID: FieldID;
-  documentID: DocumentID;
-}
-
-export function CheckboxValueEdit(props: CheckboxValueEditProps): JSX.Element {
-  const { fieldID, documentID } = props;
-  const value = useDocumentFieldValueQuery(documentID, fieldID);
-  assertCheckboxFieldValue(value);
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
-
-  const handleChange = useCallback(
-    async (nextValue) => {
-      await updateDocumentFieldValue(documentID, fieldID, nextValue);
-    },
-    [updateDocumentFieldValue, documentID, fieldID],
-  );
-
-  return <CheckboxValueInput value={value} onChange={handleChange} />;
-}
-
-interface CheckboxValueInputProps {
-  value: CheckboxFieldValue;
-  onChange: (value: CheckboxFieldValue) => void;
-}
-
-export function CheckboxValueInput(
-  props: CheckboxValueInputProps,
-): JSX.Element {
-  const { onChange, value } = props;
-
-  const handleToggle = useCallback(() => {
-    const checked = !value;
-    onChange(checked);
-  }, [onChange, value]);
-
-  return <Checkbox value={value} onChange={handleToggle} />;
-}
 
 interface CheckboxProps {
   value: boolean;
   onChange: (value: boolean) => void;
 }
 
-function Checkbox(props: CheckboxProps): JSX.Element {
+export function Checkbox(props: CheckboxProps): JSX.Element {
   const { value, onChange } = props;
   const themeStyles = useThemeStyles();
 
@@ -81,7 +34,6 @@ const styles = StyleSheet.create({
     height: 32,
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-
     justifyContent: 'center',
     alignItems: 'center',
   },

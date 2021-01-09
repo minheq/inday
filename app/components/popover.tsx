@@ -1,25 +1,179 @@
-import React, { useCallback } from 'react';
-import { View, StyleSheet, Pressable, Dimensions } from 'react-native';
+import React, { useCallback, useEffect, useReducer, useRef } from 'react';
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Dimensions,
+  Animated,
+} from 'react-native';
 import { tokens } from './tokens';
 import { Modal } from './modal';
+import { assertUnreached } from '../../lib/lang_utils';
+import { usePrevious } from '../hooks/use_previous';
 
-export interface PopoverAnchor {
+export interface PopoverProps {
+  visible: boolean;
+  targetRef: React.RefObject<View>;
+  content: React.ReactNode;
+  onRequestClose: () => void;
+}
+
+interface State {
+  anchor: PopoverOverlayAnchor;
+  ready: boolean;
+  actuallyVisible: boolean;
+  height: number | undefined;
+  tm: PopoverTriggerMeasurements;
+  cm: PopoverContentMeasurements;
+}
+
+type Action =
+  | { type: 'READY'; tm: PopoverTriggerMeasurements }
+  | {
+      type: 'VISIBLE';
+      anchor: PopoverOverlayAnchor;
+      height: number;
+      cm: PopoverContentMeasurements;
+    }
+  | { type: 'CLOSE' };
+
+function reducer(prevState: State, action: Action): State {
+  switch (action.type) {
+    case 'READY':
+      return {
+        ...prevState,
+        ready: true,
+        tm: action.tm,
+      };
+    case 'VISIBLE':
+      return {
+        ...prevState,
+        actuallyVisible: true,
+        anchor: action.anchor,
+        cm: action.cm,
+        height: action.height,
+      };
+    case 'CLOSE':
+      return {
+        ...prevState,
+        ready: false,
+        actuallyVisible: false,
+        height: undefined,
+      };
+    default:
+      assertUnreached(action);
+  }
+}
+
+const initialState: State = {
+  anchor: { x: 0, y: 0 },
+  height: undefined,
+  ready: false,
+  actuallyVisible: false,
+  tm: { pageX: 0, pageY: 0, width: 0, height: 0 },
+  cm: { width: 0, height: 0 },
+};
+
+export function Popover(props: PopoverProps): JSX.Element {
+  const { content, visible, onRequestClose, targetRef } = props;
+  const contentRef = useRef<View>(null);
+  const opacity = useRef(new Animated.Value(0)).current;
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const prevVisible = usePrevious(visible);
+  const { ready, actuallyVisible, anchor, height, tm } = state;
+
+  const handleHide = useCallback(() => {
+    opacity.setValue(0);
+    dispatch({ type: 'CLOSE' });
+  }, [opacity]);
+
+  const handleOpen = useCallback(() => {
+    if (targetRef.current !== null) {
+      targetRef.current.measure((tX, tY, tWidth, tHeight, tPageX, tPageY) => {
+        dispatch({
+          type: 'READY',
+          tm: { width: tWidth, height: tHeight, pageX: tPageX, pageY: tPageY },
+        });
+      });
+    }
+  }, [targetRef]);
+
+  const handleLayout = useCallback(() => {
+    if (ready && !actuallyVisible && contentRef.current !== null) {
+      contentRef.current.measure((cX, cY, cWidth, cHeight) => {
+        const _cm = { width: cWidth, height: cHeight };
+        const [pAnchor, pHeight] = getPopoverAnchorAndHeight(tm, _cm);
+
+        dispatch({
+          type: 'VISIBLE',
+          anchor: pAnchor,
+          height: pHeight,
+          cm: _cm,
+        });
+      });
+    }
+  }, [tm, ready, actuallyVisible]);
+
+  useEffect(() => {
+    if (actuallyVisible) {
+      Animated.spring(opacity, {
+        toValue: 1,
+        bounciness: 0,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [actuallyVisible, opacity]);
+
+  useEffect(() => {
+    if (prevVisible === visible) {
+      return;
+    }
+
+    if (visible) {
+      handleOpen();
+    } else {
+      handleHide();
+    }
+  }, [visible, prevVisible, handleOpen, handleHide]);
+
+  return (
+    <PopoverOverlay
+      anchor={anchor}
+      visible={ready}
+      onRequestClose={onRequestClose}
+    >
+      <Animated.View
+        onLayout={handleLayout}
+        ref={contentRef}
+        style={{ opacity, height }}
+      >
+        {typeof content === 'function' ? content({ onRequestClose }) : content}
+      </Animated.View>
+    </PopoverOverlay>
+  );
+}
+
+interface PopoverOverlayAnchor {
   y: number;
   x: number;
 }
-export interface PopoverCallback {
+
+interface PopoverOverlayCallback {
   onRequestClose: () => void;
 }
-interface PopoverProps {
+
+interface PopoverOverlayProps {
   visible: boolean;
   onRequestClose: () => void;
   onShow?: () => void;
-  children: React.ReactNode | ((callback: PopoverCallback) => React.ReactNode);
-  anchor: PopoverAnchor;
+  children:
+    | React.ReactNode
+    | ((callback: PopoverOverlayCallback) => React.ReactNode);
+  anchor: PopoverOverlayAnchor;
 }
 
-export function Popover(props: PopoverProps): JSX.Element {
-  const { visible = false, onShow, onRequestClose, anchor, children } = props;
+function PopoverOverlay(props: PopoverOverlayProps): JSX.Element {
+  const { visible, onShow, onRequestClose, anchor, children } = props;
 
   const handlePressBackground = useCallback(() => {
     if (onRequestClose !== undefined) {
@@ -84,7 +238,7 @@ export function getPopoverAnchorAndHeight(
   cm: PopoverContentMeasurements,
   triggerOffset = 4,
   windowOffset = 16,
-): [PopoverAnchor, number] {
+): [PopoverOverlayAnchor, number] {
   const windowSize = Dimensions.get('window');
   const triggerBottomY = tm.pageY + tm.height + triggerOffset;
   const triggerTopY = tm.pageY - triggerOffset;

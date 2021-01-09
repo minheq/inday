@@ -118,7 +118,6 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
           value={searchTerm}
           onKeyPress={handleKeyPress}
           onChange={handleSearchTermChange}
-          clearable
           placeholder="Search"
         />
       </View>

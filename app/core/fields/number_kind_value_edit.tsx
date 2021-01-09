@@ -5,67 +5,12 @@ import {
   TextInput,
   StyleSheet,
   Platform,
-  View,
 } from 'react-native';
 import { toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { tokens } from '../../components/tokens';
-import {
-  assertNumberFieldKindValue,
-  FieldID,
-  NumberFieldKindValue,
-} from '../../../models/fields';
+import { NumberFieldKindValue } from '../../../models/fields';
 import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
-import { DocumentID } from '../../../models/documents';
-import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
-import { useDocumentFieldValueQuery } from '../../store/queries';
-import { FlatButton } from '../../components/flat_button';
-
-interface NumberKindValueEditProps {
-  autoFocus: boolean;
-  fieldID: FieldID;
-  documentID: DocumentID;
-  onRequestClose: () => void;
-  onSubmitEditing: () => void;
-}
-
-export function NumberKindValueEdit(
-  props: NumberKindValueEditProps,
-): JSX.Element {
-  const {
-    autoFocus,
-    fieldID,
-    documentID,
-    onRequestClose,
-    onSubmitEditing,
-  } = props;
-
-  const value = useDocumentFieldValueQuery(documentID, fieldID);
-  assertNumberFieldKindValue(value);
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
-
-  const handleChange = useCallback(
-    async (nextValue) => {
-      await updateDocumentFieldValue(documentID, fieldID, nextValue);
-    },
-    [updateDocumentFieldValue, documentID, fieldID],
-  );
-
-  return (
-    <View>
-      <NumberKindValueInput
-        autoFocus={autoFocus}
-        value={value}
-        onChange={handleChange}
-        onRequestClose={onRequestClose}
-        onSubmitEditing={onSubmitEditing}
-      />
-      <View style={styles.actionsWrapper}>
-        <FlatButton onPress={onRequestClose} title="Done" color="primary" />
-      </View>
-    </View>
-  );
-}
 
 interface NumberKindValueInputProps<T extends NumberFieldKindValue> {
   value: T;
@@ -128,10 +73,5 @@ const styles = StyleSheet.create({
         outlineStyle: 'none',
       },
     }),
-  },
-  actionsWrapper: {
-    padding: 8,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
 });

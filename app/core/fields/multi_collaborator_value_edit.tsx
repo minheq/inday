@@ -1,49 +1,39 @@
 import React from 'react';
 import { CollaboratorID } from '../../../models/collaborators';
-import { DocumentID } from '../../../models/documents';
 
 import {
-  assertMultiCollaboratorField,
-  assertMultiCollaboratorFieldValue,
-  FieldID,
+  MultiCollaboratorField,
+  MultiCollaboratorFieldValue,
 } from '../../../models/fields';
-import {
-  useCollaboratorsQuery,
-  useDocumentFieldValueQuery,
-  useFieldQuery,
-} from '../../store/queries';
-import { MultiCollaboratorValueView } from './multi_collaborator_value_view';
-import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
+import { useCollaboratorsQuery } from '../../store/queries';
+import { MultiSelectKindPicker } from './multi_select_kind_value_edit';
 import {
   useGetCollaboratorOptions,
   useRenderCollaborator,
 } from './single_collaborator_value_edit';
 
-interface MultiCollaboratorValueEditProps {
-  fieldID: FieldID;
-  documentID: DocumentID;
+interface MultiCollaboratorPickerProps {
+  value: MultiCollaboratorFieldValue;
+  field: MultiCollaboratorField;
+  onChange: (value: MultiCollaboratorFieldValue) => void;
+  onRequestClose: () => void;
 }
 
-export function MultiCollaboratorValueEdit(
-  props: MultiCollaboratorValueEditProps,
+export function MultiCollaboratorPicker(
+  props: MultiCollaboratorPickerProps,
 ): JSX.Element {
-  const { fieldID, documentID } = props;
+  const { value, onChange, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();
   const renderCollaborator = useRenderCollaborator();
   const options = useGetCollaboratorOptions(collaborators);
-  const value = useDocumentFieldValueQuery(documentID, fieldID);
-  assertMultiCollaboratorFieldValue(value);
-  const field = useFieldQuery(fieldID);
-  assertMultiCollaboratorField(field);
 
   return (
-    <MultiSelectKindValueEdit<CollaboratorID>
-      fieldID={fieldID}
-      documentID={documentID}
+    <MultiSelectKindPicker<CollaboratorID>
+      value={value}
+      onChange={onChange}
       renderLabel={renderCollaborator}
       options={options}
-    >
-      <MultiCollaboratorValueView value={value} field={field} />
-    </MultiSelectKindValueEdit>
+      onRequestClose={onRequestClose}
+    />
   );
 }

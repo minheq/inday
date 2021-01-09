@@ -108,6 +108,7 @@ export const HeaderCell = memo(function HeaderCell(
               (resizeFieldID === null && hovered)) && (
               <Pressable
                 onPressIn={handlePressIn}
+                // @ts-ignore: Available in react-native-web
                 onPressMove={handlePressMove}
                 onPressOut={handlePressOut}
                 style={[

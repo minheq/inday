@@ -1,44 +1,36 @@
 import React from 'react';
-import { DocumentID } from '../../../models/documents';
 
 import {
   SelectOptionID,
-  FieldID,
-  assertMultiOptionField,
-  assertMultiOptionFieldValue,
+  MultiOptionFieldValue,
+  MultiOptionField,
 } from '../../../models/fields';
-import { useDocumentFieldValueQuery, useFieldQuery } from '../../store/queries';
-import { MultiOptionValueView } from './multi_option_value_view';
-import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
+import { MultiSelectKindPicker } from './multi_select_kind_value_edit';
 import {
   useGetOptionOptions,
   useRenderOption,
 } from './single_option_value_edit';
 
-interface MultiOptionValueEditProps {
-  fieldID: FieldID;
-  documentID: DocumentID;
+interface MultiOptionPickerProps {
+  value: MultiOptionFieldValue;
+  field: MultiOptionField;
+  onChange: (value: MultiOptionFieldValue) => void;
+  onRequestClose: () => void;
 }
 
-export function MultiOptionValueEdit(
-  props: MultiOptionValueEditProps,
-): JSX.Element {
-  const { fieldID, documentID } = props;
-  const value = useDocumentFieldValueQuery(documentID, fieldID);
-  assertMultiOptionFieldValue(value);
-  const field = useFieldQuery(fieldID);
-  assertMultiOptionField(field);
+export function MultiOptionPicker(props: MultiOptionPickerProps): JSX.Element {
+  const { value, field, onChange, onRequestClose } = props;
+
   const renderOption = useRenderOption(field.options);
   const options = useGetOptionOptions(field.options);
 
   return (
-    <MultiSelectKindValueEdit<SelectOptionID>
-      fieldID={fieldID}
-      documentID={documentID}
+    <MultiSelectKindPicker<SelectOptionID>
+      value={value}
+      onChange={onChange}
       renderLabel={renderOption}
       options={options}
-    >
-      <MultiOptionValueView value={value} field={field} />
-    </MultiSelectKindValueEdit>
+      onRequestClose={onRequestClose}
+    />
   );
 }

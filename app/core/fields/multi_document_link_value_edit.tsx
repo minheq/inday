@@ -1,50 +1,41 @@
 import React from 'react';
 
 import {
-  assertMultiDocumentLinkField,
-  assertMultiDocumentLinkFieldValue,
-  FieldID,
+  MultiDocumentLinkField,
+  MultiDocumentLinkFieldValue,
 } from '../../../models/fields';
 import { DocumentID } from '../../../models/documents';
-import { MultiSelectKindValueEdit } from './multi_select_kind_value_edit';
-import {
-  useCollectionDocumentsQuery,
-  useDocumentFieldValueQuery,
-  useFieldQuery,
-} from '../../store/queries';
+import { MultiSelectKindPicker } from './multi_select_kind_value_edit';
+import { useCollectionDocumentsQuery } from '../../store/queries';
 import {
   useDocumentLinkOptions,
   useRenderDocumentLink,
 } from './single_document_link_value_edit';
-import { CollectionID } from '../../../models/collections';
-import { MultiDocumentLinkValueView } from './multi_document_link_value_view';
 
-interface MultiDocumentLinkValueEditProps {
-  collectionID: CollectionID;
-  fieldID: FieldID;
-  documentID: DocumentID;
+interface MultiDocumentLinkPickerProps {
+  value: MultiDocumentLinkFieldValue;
+  onChange: (value: MultiDocumentLinkFieldValue) => void;
+  field: MultiDocumentLinkField;
+  onRequestClose: () => void;
 }
 
-export function MultiDocumentLinkValueEdit(
-  props: MultiDocumentLinkValueEditProps,
+export function MultiDocumentLinkPicker(
+  props: MultiDocumentLinkPickerProps,
 ): JSX.Element {
-  const { fieldID, documentID, collectionID } = props;
+  const { value, onChange, field, onRequestClose } = props;
   const renderDocumentLink = useRenderDocumentLink();
-  const documents = useCollectionDocumentsQuery(collectionID);
+  const documents = useCollectionDocumentsQuery(
+    field.documentsFromCollectionID,
+  );
   const options = useDocumentLinkOptions(documents);
-  const value = useDocumentFieldValueQuery(documentID, fieldID);
-  assertMultiDocumentLinkFieldValue(value);
-  const field = useFieldQuery(fieldID);
-  assertMultiDocumentLinkField(field);
 
   return (
-    <MultiSelectKindValueEdit<DocumentID>
-      fieldID={fieldID}
-      documentID={documentID}
+    <MultiSelectKindPicker<DocumentID>
+      onChange={onChange}
+      value={value}
       renderLabel={renderDocumentLink}
       options={options}
-    >
-      <MultiDocumentLinkValueView value={value} field={field} />
-    </MultiSelectKindValueEdit>
+      onRequestClose={onRequestClose}
+    />
   );
 }
