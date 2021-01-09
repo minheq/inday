@@ -29,6 +29,8 @@ import {
 import { assertListView, ViewID } from '../../../models/views';
 import { usePrevious } from '../../hooks/use_previous';
 import { ADD_FIELD_COLUMN_WIDTH } from './list_view_constants';
+import { useMemoCompare } from '../../hooks/useMemoCompare';
+import { useWhatChanged } from '../../hooks/use_what_changed';
 
 interface UseListViewGridProps {
   viewID: ViewID;
@@ -197,20 +199,17 @@ function useListViewData(viewID: ViewID): ListViewData {
   const documentsOrderChanged = useDocumentsOrderChanged(viewID, documents);
   const fieldsOrderChanged = useFieldsOrderChanged(viewID, fields);
 
-  const nodes = useMemo(
-    () => {
-      return grouped
+  const nodes = useMemoCompare(
+    () =>
+      grouped
         ? getGroupedDocumentNodes(
             documents,
             groups,
             sortGetters,
             collapsedGroupsByFieldID,
           )
-        : getFlatDocumentNodes(documents);
-    },
-    // This is intentional so as to calculate nodes only when we intend to
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [documentsOrderChanged],
+        : getFlatDocumentNodes(documents),
+    () => !documentsOrderChanged,
   );
   const columnToFieldIDCache = useMemo(
     () => getColumnToFieldIDCache(fields),
