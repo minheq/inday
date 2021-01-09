@@ -6,21 +6,30 @@ import { useRef } from 'react';
  */
 export function useMemoCompare<T>(
   getValue: () => T,
-  compare: () => boolean,
+  compare: ((previous: T, next: T) => boolean) | boolean,
 ): T {
   // Ref for storing previous value
   const previousRef = useRef(getValue());
   const previous = previousRef.current;
 
-  // Pass previous and next value to compare function
-  // to determine whether to consider them equal.
-  const changed = compare();
+  let next: T | null = null;
+  let changed = false;
+
+  if (typeof compare === 'function') {
+    next = getValue();
+    changed = compare(previous, next);
+  } else {
+    changed = compare;
+  }
 
   if (!changed) {
     return previous;
   }
 
-  const nextValue = getValue();
-  previousRef.current = nextValue;
-  return nextValue;
+  if (!next) {
+    next = getValue();
+  }
+
+  previousRef.current = next;
+  return next;
 }
