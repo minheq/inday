@@ -60,6 +60,7 @@ export type TextColor = keyof TextColors;
  */
 export function Text(props: TextProps): JSX.Element {
   const {
+    multiline,
     align = 'left',
     children,
     color = 'default',

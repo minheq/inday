@@ -89,9 +89,6 @@ import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
 import { SingleOptionPicker } from '../select_options/option_picker';
 import { MultiOptionPicker } from '../select_options/option_multi_picker';
-import { TextKindValueInput } from '../fields/text_kind_value_edit';
-import { NumberKindValueInput } from '../fields/number_kind_value_edit';
-import { MultiLineTextValueInput } from '../fields/multi_line_text_value_edit';
 import { Checkbox } from '../fields/checkbox_value_edit';
 import { EmailValueActions } from '../fields/email_value_actions';
 import { URLValueActions } from '../fields/url_value_actions';
@@ -123,6 +120,8 @@ import {
   parseISODate,
 } from '../../../lib/date_utils';
 import { DatePicker } from '../../components/date_picker';
+import { NumberInput } from '../../components/number_input';
+import { TextInput } from '../../components/text_input';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -490,12 +489,13 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   if (cell.state === 'editing') {
     return (
       <InputWrapper>
-        <NumberKindValueInput
+        <NumberInput
           autoFocus
           value={value}
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onFocusNextDocument}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -587,12 +587,13 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   if (cell.state === 'editing') {
     return (
       <InputWrapper>
-        <TextKindValueInput
+        <TextInput
           autoFocus
           value={value}
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onFocusNextDocument}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -701,12 +702,14 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
 
   if (cell.state === 'editing') {
     return (
-      <MultiLineTextValueInput
+      <TextInput
+        numberOfLines={4}
         autoFocus
         value={value}
         onChange={handleChange}
         onRequestClose={onStopEditing}
         onSubmitEditing={onFocusNextDocument}
+        style={styles.input}
       />
     );
   }
@@ -784,12 +787,13 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   if (cell.state === 'editing') {
     return (
       <InputWrapper>
-        <NumberKindValueInput
+        <NumberInput
           autoFocus
           value={value}
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onFocusNextDocument}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -835,12 +839,13 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   if (cell.state === 'editing') {
     return (
       <InputWrapper>
-        <TextKindValueInput
+        <TextInput
           autoFocus
           value={value}
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onFocusNextDocument}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -956,12 +961,13 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   if (cell.state === 'editing') {
     return (
       <InputWrapper>
-        <TextKindValueInput
+        <TextInput
           autoFocus
           value={value}
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onFocusNextDocument}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -1044,12 +1050,13 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
   if (cell.state === 'editing') {
     return (
       <InputWrapper>
-        <TextKindValueInput
+        <TextInput
           autoFocus
           value={value}
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onFocusNextDocument}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -1538,6 +1545,15 @@ const styles = StyleSheet.create({
     height: LEAF_ROW_HEIGHT,
     justifyContent: 'center',
     paddingHorizontal: 8,
+  },
+  input: {
+    height: 40,
+    paddingHorizontal: 8,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
   },
   actionsWrapper: {
     paddingHorizontal: 8,

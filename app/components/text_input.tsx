@@ -12,14 +12,15 @@ import { tokens } from './tokens';
 import { UIKey } from '../lib/keyboard';
 
 export interface TextInputProps {
-  testID?: string;
   value?: string | null;
-  autoFocus?: boolean;
   onChange?: (value: string) => void;
+  testID?: string;
+  autoFocus?: boolean;
   onKeyPress?: (
     event: NativeSyntheticEvent<TextInputKeyPressEventData>,
   ) => void;
   placeholder?: string;
+  numberOfLines?: number;
   onSubmitEditing?: () => void;
   onRequestClose?: () => void;
   style?: StyleProp<TextStyle>;
@@ -32,6 +33,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
   function TextInput(props, forwardedRef): JSX.Element {
     const {
       testID,
+      numberOfLines,
       autoFocus,
       value,
       placeholder,
@@ -61,6 +63,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
 
     return (
       <RNTextInput
+        multiline={numberOfLines ? numberOfLines > 1 : false}
         ref={forwardedRef}
         testID={testID}
         value={value || ''}
