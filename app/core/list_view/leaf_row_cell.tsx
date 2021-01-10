@@ -89,9 +89,6 @@ import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
 import { SingleOptionPicker } from '../select_options/option_picker';
 import { MultiOptionPicker } from '../select_options/option_multi_picker';
-import { EmailValueActions } from '../fields/email_value_actions';
-import { URLValueActions } from '../fields/url_value_actions';
-import { PhoneNumberValueActions } from '../fields/phone_number_value_actions';
 import { assertUnreached } from '../../../lib/lang_utils';
 import { Slide } from '../../components/slide';
 import { Icon } from '../../components/icon';
@@ -122,6 +119,9 @@ import { DatePicker } from '../../components/date_picker';
 import { NumberInput } from '../../components/number_input';
 import { TextInput } from '../../components/text_input';
 import { CheckboxAlt } from '../../components/checkbox_alt';
+import { EmailLink } from '../../components/email_link';
+import { PhoneNumberLink } from '../../components/phone_number_link';
+import { URLLink } from '../../components/url_link';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -614,7 +614,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
           {child}
         </Pressable>
         <View style={styles.actionsWrapper}>
-          <EmailValueActions value={value} />
+          <EmailLink email={value} text="Send link" />
         </View>
       </View>
     );
@@ -863,7 +863,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
           {child}
         </Pressable>
         <View style={styles.actionsWrapper}>
-          <PhoneNumberValueActions value={value} />
+          <PhoneNumberLink phoneNumber={value} text="Call" />
         </View>
       </View>
     );
@@ -1077,7 +1077,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
           {child}
         </Pressable>
         <View style={styles.actionsWrapper}>
-          <URLValueActions value={value} />
+          <URLLink url={value} text="Open" />
         </View>
       </View>
     );

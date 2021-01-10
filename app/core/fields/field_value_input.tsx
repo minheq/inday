@@ -58,9 +58,6 @@ import { useThemeStyles } from '../../components/theme';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Spacer } from '../../components/spacer';
 import { Row } from '../../components/row';
-import { EmailValueActions } from './email_value_actions';
-import { PhoneNumberValueActions } from './phone_number_value_actions';
-import { URLValueActions } from './url_value_actions';
 import { Icon } from '../../components/icon';
 import { getFieldIcon } from '../views/icon_helpers';
 
@@ -75,30 +72,32 @@ export function DocumentFieldValueEdit(
 ): JSX.Element {
   const { documentID, field, value } = props;
 
-  const renderCell = useCallback((): JSX.Element => {
+  const renderField = useCallback((): JSX.Element => {
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
         return (
-          <CheckboxCell documentID={documentID} field={field} value={value} />
+          <CheckboxField documentID={documentID} field={field} value={value} />
         );
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
         return (
-          <CurrencyCell documentID={documentID} field={field} value={value} />
+          <CurrencyField documentID={documentID} field={field} value={value} />
         );
       case FieldType.Date:
         assertDateFieldValue(value);
-        return <DateCell documentID={documentID} field={field} value={value} />;
+        return (
+          <DateField documentID={documentID} field={field} value={value} />
+        );
       case FieldType.Email:
         assertEmailFieldValue(value);
         return (
-          <EmailCell documentID={documentID} field={field} value={value} />
+          <EmailField documentID={documentID} field={field} value={value} />
         );
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
         return (
-          <MultiCollaboratorCell
+          <MultiCollaboratorField
             documentID={documentID}
             field={field}
             value={value}
@@ -107,7 +106,7 @@ export function DocumentFieldValueEdit(
       case FieldType.MultiDocumentLink:
         assertMultiDocumentLinkFieldValue(value);
         return (
-          <MultiDocumentLinkCell
+          <MultiDocumentLinkField
             documentID={documentID}
             field={field}
             value={value}
@@ -116,7 +115,7 @@ export function DocumentFieldValueEdit(
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return (
-          <MultiLineTextCell
+          <MultiLineTextField
             documentID={documentID}
             field={field}
             value={value}
@@ -125,7 +124,7 @@ export function DocumentFieldValueEdit(
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
         return (
-          <MultiOptionCell
+          <MultiOptionField
             documentID={documentID}
             field={field}
             value={value}
@@ -134,12 +133,12 @@ export function DocumentFieldValueEdit(
       case FieldType.Number:
         assertNumberFieldValue(value);
         return (
-          <NumberCell documentID={documentID} field={field} value={value} />
+          <NumberField documentID={documentID} field={field} value={value} />
         );
       case FieldType.PhoneNumber:
         assertPhoneNumberFieldValue(value);
         return (
-          <PhoneNumberCell
+          <PhoneNumberField
             documentID={documentID}
             field={field}
             value={value}
@@ -148,7 +147,7 @@ export function DocumentFieldValueEdit(
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
         return (
-          <SingleCollaboratorCell
+          <SingleCollaboratorField
             documentID={documentID}
             field={field}
             value={value}
@@ -157,7 +156,7 @@ export function DocumentFieldValueEdit(
       case FieldType.SingleDocumentLink:
         assertSingleDocumentLinkFieldValue(value);
         return (
-          <SingleDocumentLinkCell
+          <SingleDocumentLinkField
             documentID={documentID}
             field={field}
             value={value}
@@ -166,7 +165,7 @@ export function DocumentFieldValueEdit(
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return (
-          <SingleLineTextCell
+          <SingleLineTextField
             documentID={documentID}
             field={field}
             value={value}
@@ -175,7 +174,7 @@ export function DocumentFieldValueEdit(
       case FieldType.SingleOption:
         assertSingleOptionFieldValue(value);
         return (
-          <SingleOptionCell
+          <SingleOptionField
             documentID={documentID}
             field={field}
             value={value}
@@ -183,21 +182,21 @@ export function DocumentFieldValueEdit(
         );
       case FieldType.URL:
         assertURLFieldValue(value);
-        return <URLCell documentID={documentID} field={field} value={value} />;
+        return <URLField documentID={documentID} field={field} value={value} />;
     }
   }, [field, value, documentID]);
 
-  return <FieldWrapper field={field}>{renderCell()}</FieldWrapper>;
+  return <FieldWrapper field={field}>{renderField()}</FieldWrapper>;
 }
 
-interface SingleLineTextCellProps {
+interface SingleLineTextFieldProps {
   documentID: DocumentID;
   value: SingleLineTextFieldValue;
   field: SingleLineTextField;
 }
 
-const SingleLineTextCell = memo(function SingleLineTextCell(
-  props: SingleLineTextCellProps,
+const SingleLineTextField = memo(function SingleLineTextField(
+  props: SingleLineTextFieldProps,
 ) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
@@ -227,13 +226,13 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   );
 });
 
-interface URLCellProps {
+interface URLFieldProps {
   documentID: DocumentID;
   value: URLFieldValue;
   field: URLField;
 }
 
-const URLCell = memo(function URLCell(props: URLCellProps) {
+const URLField = memo(function URLField(props: URLFieldProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const handlePress = useCallback(() => {
@@ -265,13 +264,13 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
   );
 });
 
-interface EmailCellProps {
+interface EmailFieldProps {
   documentID: DocumentID;
   value: EmailFieldValue;
   field: EmailField;
 }
 
-const EmailCell = memo(function EmailCell(props: EmailCellProps) {
+const EmailField = memo(function EmailField(props: EmailFieldProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const handlePress = useCallback(() => {
@@ -304,14 +303,14 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   );
 });
 
-interface MultiLineTextCellProps {
+interface MultiLineTextFieldProps {
   documentID: DocumentID;
   value: MultiLineTextFieldValue;
   field: MultiLineTextField;
 }
 
-const MultiLineTextCell = memo(function MultiLineTextCell(
-  props: MultiLineTextCellProps,
+const MultiLineTextField = memo(function MultiLineTextField(
+  props: MultiLineTextFieldProps,
 ) {
   const { value, field, documentID } = props;
   const themeStyles = useThemeStyles();
@@ -345,14 +344,14 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   );
 });
 
-interface PhoneNumberCellProps {
+interface PhoneNumberFieldProps {
   documentID: DocumentID;
   value: PhoneNumberFieldValue;
   field: PhoneNumberField;
 }
 
-const PhoneNumberCell = memo(function PhoneNumberCell(
-  props: PhoneNumberCellProps,
+const PhoneNumberField = memo(function PhoneNumberField(
+  props: PhoneNumberFieldProps,
 ) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
@@ -386,13 +385,13 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   );
 });
 
-interface NumberCellProps {
+interface NumberFieldProps {
   documentID: DocumentID;
   value: NumberFieldValue;
   field: NumberField;
 }
 
-const NumberCell = memo(function NumberCell(props: NumberCellProps) {
+const NumberField = memo(function NumberField(props: NumberFieldProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const handlePress = useCallback(() => {
@@ -421,13 +420,13 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   );
 });
 
-interface CurrencyCellProps {
+interface CurrencyFieldProps {
   documentID: DocumentID;
   value: CurrencyFieldValue;
   field: CurrencyField;
 }
 
-const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
+const CurrencyField = memo(function CurrencyField(props: CurrencyFieldProps) {
   const { value, field, documentID } = props;
   const [editing, setEditing] = useState(false);
   const handlePress = useCallback(() => {
@@ -456,14 +455,14 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   );
 });
 
-interface MultiCollaboratorCellProps {
+interface MultiCollaboratorFieldProps {
   documentID: DocumentID;
   value: MultiCollaboratorFieldValue;
   field: MultiCollaboratorField;
 }
 
-const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
-  props: MultiCollaboratorCellProps,
+const MultiCollaboratorField = memo(function MultiCollaboratorField(
+  props: MultiCollaboratorFieldProps,
 ) {
   const { field, documentID } = props;
 
@@ -472,28 +471,28 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   );
 });
 
-interface MultiOptionCellProps {
+interface MultiOptionFieldProps {
   documentID: DocumentID;
   value: MultiOptionFieldValue;
   field: MultiOptionField;
 }
 
-const MultiOptionCell = memo(function MultiOptionCell(
-  props: MultiOptionCellProps,
+const MultiOptionField = memo(function MultiOptionField(
+  props: MultiOptionFieldProps,
 ) {
   const { field, documentID } = props;
 
   return <MultiOptionValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
-interface MultiDocumentLinkCellProps {
+interface MultiDocumentLinkFieldProps {
   documentID: DocumentID;
   value: MultiDocumentLinkFieldValue;
   field: MultiDocumentLinkField;
 }
 
-const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
-  props: MultiDocumentLinkCellProps,
+const MultiDocumentLinkField = memo(function MultiDocumentLinkField(
+  props: MultiDocumentLinkFieldProps,
 ) {
   const { field, documentID } = props;
 
@@ -506,14 +505,14 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
   );
 });
 
-interface SingleCollaboratorCellProps {
+interface SingleCollaboratorFieldProps {
   documentID: DocumentID;
   value: SingleCollaboratorFieldValue;
   field: SingleCollaboratorField;
 }
 
-const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
-  props: SingleCollaboratorCellProps,
+const SingleCollaboratorField = memo(function SingleCollaboratorField(
+  props: SingleCollaboratorFieldProps,
 ) {
   const { field, documentID } = props;
 
@@ -522,28 +521,28 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   );
 });
 
-interface SingleOptionCellProps {
+interface SingleOptionFieldProps {
   documentID: DocumentID;
   value: SingleOptionFieldValue;
   field: SingleOptionField;
 }
 
-const SingleOptionCell = memo(function SingleOptionCell(
-  props: SingleOptionCellProps,
+const SingleOptionField = memo(function SingleOptionField(
+  props: SingleOptionFieldProps,
 ) {
   const { field, documentID } = props;
 
   return <SingleOptionValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
-interface SingleDocumentLinkCellProps {
+interface SingleDocumentLinkFieldProps {
   documentID: DocumentID;
   value: SingleDocumentLinkFieldValue;
   field: SingleDocumentLinkField;
 }
 
-const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
-  props: SingleDocumentLinkCellProps,
+const SingleDocumentLinkField = memo(function SingleDocumentLinkField(
+  props: SingleDocumentLinkFieldProps,
 ) {
   const { field, documentID } = props;
 
@@ -556,25 +555,25 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   );
 });
 
-interface CheckboxCellProps {
+interface CheckboxFieldProps {
   documentID: DocumentID;
   value: CheckboxFieldValue;
   field: CheckboxField;
 }
 
-const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
+const CheckboxField = memo(function CheckboxField(props: CheckboxFieldProps) {
   const { field, documentID } = props;
 
   return <CheckboxValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
-interface DateCellProps {
+interface DateFieldProps {
   documentID: DocumentID;
   value: DateFieldValue;
   field: DateField;
 }
 
-const DateCell = memo(function DateCell(props: DateCellProps) {
+const DateField = memo(function DateField(props: DateFieldProps) {
   const { field, documentID } = props;
 
   return <DateValueEdit documentID={documentID} fieldID={field.id} />;

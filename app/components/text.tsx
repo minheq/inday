@@ -4,7 +4,7 @@ import { useThemeStyles } from './theme';
 import { tokens } from './tokens';
 
 export interface TextProps {
-  children?: React.ReactText;
+  children?: string;
   size?: TextSize;
   color?: TextColor;
   customColor?: string;
@@ -60,7 +60,6 @@ export type TextColor = keyof TextColors;
  */
 export function Text(props: TextProps): JSX.Element {
   const {
-    multiline,
     align = 'left',
     children,
     color = 'default',
