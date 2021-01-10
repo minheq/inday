@@ -1,4 +1,11 @@
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   GestureResponderEvent,
   Platform,
@@ -9,10 +16,12 @@ import {
 import { atom, useRecoilState } from 'recoil';
 
 import { ContextMenu } from '../../components/context_menu';
-import { ContextMenuItem } from '../../components/context_menu_view';
+import {
+  ContextMenuItem,
+  ContextMenuView,
+} from '../../components/context_menu_view';
 import { Hoverable } from '../../components/hoverable';
 import { Icon } from '../../components/icon';
-import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
 import { Row } from '../../components/row';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
@@ -21,6 +30,8 @@ import { useFieldQuery } from '../../store/queries';
 import { getFieldIcon } from '../views/icon_helpers';
 import { useListViewViewContext } from './list_view_view';
 import { useUpdateListViewFieldConfigMutation } from '../../store/mutations';
+import { PressableHighlight } from '../../components/pressable_highlight';
+import { Popover } from '../../components/popover';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -58,6 +69,16 @@ export const HeaderCell = memo(function HeaderCell(
   const themeStyles = useThemeStyles();
   const updateListViewFieldConfig = useUpdateListViewFieldConfigMutation();
   const options = useHeaderCellContextMenuOptions();
+  const [visible, setVisible] = useState(false);
+  const targetRef = useRef<View>(null);
+
+  const handlePress = useCallback(() => {
+    setVisible(true);
+  }, []);
+
+  const handleRequestClose = useCallback(() => {
+    setVisible(false);
+  }, []);
 
   const handlePressMove = useCallback(
     async (e: GestureResponderEvent) => {
@@ -89,41 +110,50 @@ export const HeaderCell = memo(function HeaderCell(
   }, [setResizeFieldID]);
 
   return (
-    <Hoverable>
-      {(hovered) => (
-        <PressableHighlightContextMenu
-          options={options}
-          style={[
-            styles.headerCell,
-            themeStyles.border.default,
-            primary && styles.primaryCell,
-          ]}
-        >
-          <ContextMenu options={options}>
-            <Row spacing={4}>
-              <Icon name={getFieldIcon(field.type)} />
-              <Text weight="bold">{field.name}</Text>
-            </Row>
-            {(resizeFieldID === fieldID ||
-              (resizeFieldID === null && hovered)) && (
-              <Pressable
-                onPressIn={handlePressIn}
-                // @ts-ignore: Available in react-native-web
-                onPressMove={handlePressMove}
-                onPressOut={handlePressOut}
-                style={[
-                  styles.resizeHandler,
-                  themeStyles.border.default,
-                  themeStyles.elevation.level1,
-                ]}
-              >
-                <Icon color="primary" size="sm" name="ArrowHorizontal" />
-              </Pressable>
-            )}
-          </ContextMenu>
-        </PressableHighlightContextMenu>
-      )}
-    </Hoverable>
+    <Fragment>
+      <Hoverable>
+        {(hovered) => (
+          <PressableHighlight
+            ref={targetRef}
+            onPress={handlePress}
+            style={[
+              styles.headerCell,
+              themeStyles.border.default,
+              primary && styles.primaryCell,
+            ]}
+          >
+            <ContextMenu options={options}>
+              <Row spacing={4}>
+                <Icon name={getFieldIcon(field.type)} />
+                <Text weight="bold">{field.name}</Text>
+              </Row>
+              {(resizeFieldID === fieldID ||
+                (resizeFieldID === null && hovered)) && (
+                <Pressable
+                  onPressIn={handlePressIn}
+                  // @ts-ignore: Available in react-native-web
+                  onPressMove={handlePressMove}
+                  onPressOut={handlePressOut}
+                  style={[
+                    styles.resizeHandler,
+                    themeStyles.border.default,
+                    themeStyles.elevation.level1,
+                  ]}
+                >
+                  <Icon color="primary" size="sm" name="ArrowHorizontal" />
+                </Pressable>
+              )}
+            </ContextMenu>
+          </PressableHighlight>
+        )}
+      </Hoverable>
+      <Popover
+        visible={visible}
+        targetRef={targetRef}
+        content={<ContextMenuView options={options} />}
+        onRequestClose={handleRequestClose}
+      />
+    </Fragment>
   );
 });
 

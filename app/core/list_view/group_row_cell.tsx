@@ -1,12 +1,14 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { assertUnreached } from '../../../lib/lang_utils';
-import { ContextMenuItem } from '../../components/context_menu_view';
+import {
+  ContextMenuItem,
+  ContextMenuView,
+} from '../../components/context_menu_view';
 
 import { GroupRowCellState } from '../../components/grid_renderer.common';
 import { Icon } from '../../components/icon';
 import { PressableHighlight } from '../../components/pressable_highlight';
-import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
 import { Text } from '../../components/text';
 import { useThemeStyles } from '../../components/theme';
 import {
@@ -46,6 +48,7 @@ import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
 import { SingleOptionValueView } from '../fields/single_option_value_view';
 import { URLValueView } from '../fields/url_value_view';
 import { useListViewViewContext } from './list_view_view';
+import { Popover } from '../../components/popover';
 
 interface GroupRowCellProps {
   state: GroupRowCellState;
@@ -202,14 +205,33 @@ const CollapseToggle = memo(function CollapseToggle(
 
 const DotsMenu = memo(function DotsMenu(): JSX.Element {
   const options = useGroupRowContextMenuOptions();
+  const targetRef = useRef<View>(null);
+  const [visible, setVisible] = useState(false);
+
+  const handlePress = useCallback(() => {
+    setVisible(true);
+  }, []);
+
+  const handleRequestClose = useCallback(() => {
+    setVisible(false);
+  }, []);
 
   return (
-    <PressableHighlightContextMenu
-      options={options}
-      style={styles.dotsMenuButton}
-    >
-      <Icon name="Dots" />
-    </PressableHighlightContextMenu>
+    <View>
+      <PressableHighlight
+        onPress={handlePress}
+        ref={targetRef}
+        style={styles.dotsMenuButton}
+      >
+        <Icon name="Dots" />
+      </PressableHighlight>
+      <Popover
+        visible={visible}
+        targetRef={targetRef}
+        content={<ContextMenuView options={options} />}
+        onRequestClose={handleRequestClose}
+      />
+    </View>
   );
 });
 
@@ -231,16 +253,15 @@ interface GroupRowCellViewProps {
 const GroupRowCellView = memo(function GroupRowCellView(
   _props: GroupRowCellViewProps,
 ) {
-  const options = useGroupRowContextMenuOptions();
   const themeStyles = useThemeStyles();
 
   return (
-    <PressableHighlightContextMenu options={options} style={styles.cellRoot}>
+    <PressableHighlight style={styles.cellRoot}>
       <View
         pointerEvents="none"
         style={[styles.bottomBorder, themeStyles.border.default]}
       />
-    </PressableHighlightContextMenu>
+    </PressableHighlight>
   );
 });
 

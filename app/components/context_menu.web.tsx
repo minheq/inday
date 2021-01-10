@@ -7,13 +7,11 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 
 import { ContextMenuProps } from './context_menu';
 import { ContextMenuView, CONTEXT_MENU_ITEM_HEIGHT } from './context_menu_view';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
-import { useThemeStyles } from './theme';
-import { tokens } from './tokens';
 
 export const ContextMenu = memo(function ContextMenu(
   props: ContextMenuProps,
@@ -78,49 +76,17 @@ export const ContextMenu = memo(function ContextMenu(
     <Fragment>
       <Popover
         onRequestClose={handleRequestClose}
-        anchor={state.anchor}
+        targetRef={ref}
         visible={state.visible}
-      >
-        <PopoverContainer>
+        content={
           <ContextMenuView
             onPressed={handleRequestClose}
             width={width}
             options={options}
           />
-        </PopoverContainer>
-      </Popover>
+        }
+      />
       <View ref={ref}>{children}</View>
     </Fragment>
   );
-});
-
-interface PopoverContainerProps {
-  children: React.ReactNode;
-}
-
-function PopoverContainer(props: PopoverContainerProps): JSX.Element {
-  const { children } = props;
-  const themeStyles = useThemeStyles();
-
-  return (
-    <View
-      style={[
-        styles.popoverContainer,
-        themeStyles.background.content,
-        themeStyles.elevation.level1,
-        themeStyles.border.default,
-      ]}
-    >
-      {children}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  popoverContainer: {
-    flex: 1,
-    padding: 8,
-    borderRadius: tokens.border.radius,
-    borderWidth: 1,
-  },
 });

@@ -5,6 +5,7 @@ import React, {
   useContext,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import {
   View,
@@ -112,7 +113,6 @@ import { URLValueView } from '../fields/url_value_view';
 import { PhoneNumberValueView } from '../fields/phone_number_value_view';
 import { assertUnreached } from '../../../lib/lang_utils';
 import { Slide } from '../../components/slide';
-import { PressableHighlightContextMenu } from '../../components/pressable_highlight_context_menu';
 import { Icon } from '../../components/icon';
 import { CheckboxStatic } from '../../components/checkbox_static';
 import { Spacer } from '../../components/spacer';
@@ -120,6 +120,8 @@ import { LEAF_ROW_HEIGHT } from './list_view_constants';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 import { FlatButton } from '../../components/flat_button';
 import { Popover } from '../../components/popover';
+import { PressableHighlight } from '../../components/pressable_highlight';
+import { ContextMenuView } from '../../components/context_menu_view';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -412,15 +414,32 @@ const SelectCheckbox = memo(function SelectCheckbox(
 
 const DotsMenu = memo(function DotsMenu(): JSX.Element {
   const options = useLeafRowContextMenuOptions();
+  const targetRef = useRef<View>(null);
+  const [visible, setVisible] = useState(false);
+
+  const handlePress = useCallback(() => {
+    setVisible(true);
+  }, []);
+
+  const handleRequestClose = useCallback(() => {
+    setVisible(false);
+  }, []);
 
   return (
     <View style={styles.dotsMenuWrapper}>
-      <PressableHighlightContextMenu
-        options={options}
+      <PressableHighlight
+        onPress={handlePress}
+        ref={targetRef}
         style={styles.dotsMenuButton}
       >
         <Icon name="Dots" />
-      </PressableHighlightContextMenu>
+      </PressableHighlight>
+      <Popover
+        visible={visible}
+        targetRef={targetRef}
+        content={<ContextMenuView options={options} />}
+        onRequestClose={handleRequestClose}
+      />
     </View>
   );
 });
