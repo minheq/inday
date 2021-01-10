@@ -1,13 +1,8 @@
 import React, { useCallback } from 'react';
-import {
-  NativeSyntheticEvent,
-  TextInputKeyPressEventData,
-  StyleSheet,
-  Platform,
-} from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+
 import { toNumber } from '../../../lib/number_utils';
 import { NumberFieldKindValue } from '../../../models/fields';
-import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
 import { TextInput } from '../../components/text_input';
 
 interface NumberKindValueInputProps<T extends NumberFieldKindValue> {
@@ -23,20 +18,6 @@ export function NumberKindValueInput<T extends NumberFieldKindValue>(
 ): JSX.Element {
   const { autoFocus, onChange, value, onRequestClose, onSubmitEditing } = props;
 
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
-
-      if (key === UIKey.Escape) {
-        onRequestClose();
-      }
-      if (key === WhiteSpaceKey.Enter) {
-        onSubmitEditing();
-      }
-    },
-    [onSubmitEditing, onRequestClose],
-  );
-
   const handleChange = useCallback(
     (nextValue: string) => {
       if (nextValue === '') {
@@ -51,7 +32,8 @@ export function NumberKindValueInput<T extends NumberFieldKindValue>(
   return (
     <TextInput
       autoFocus={autoFocus}
-      onKeyPress={handleKeyPress}
+      onRequestClose={onRequestClose}
+      onSubmitEditing={onSubmitEditing}
       onChange={handleChange}
       value={value ? value.toString() : ''}
       style={styles.numberCellInput}

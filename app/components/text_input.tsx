@@ -63,7 +63,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
       <RNTextInput
         ref={forwardedRef}
         testID={testID}
-        value={value !== null ? value : undefined}
+        value={value || ''}
         autoFocus={autoFocus}
         placeholder={placeholder}
         onChangeText={onChange}
