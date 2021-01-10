@@ -1,24 +1,18 @@
 import React, { useCallback, useMemo } from 'react';
 
-import { ListPickerOption } from '../../components/list_picker';
-import {
-  SingleCollaboratorField,
-  SingleCollaboratorFieldValue,
-} from '../../../models/fields';
-import { SingleSelectKindPicker } from './single_select_kind_value_edit';
+import { ListPicker, ListPickerOption } from '../../components/list_picker';
 import { useCollaboratorsQuery } from '../../store/queries';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { Collaborator, CollaboratorID } from '../../../models/collaborators';
 
-interface SingleCollaboratorPickerProps {
-  value: SingleCollaboratorFieldValue;
-  field: SingleCollaboratorField;
-  onChange: (value: SingleCollaboratorFieldValue) => void;
+interface CollaboratorPickerProps {
+  value: CollaboratorID | null;
+  onChange: (value: CollaboratorID) => void;
   onRequestClose: () => void;
 }
 
-export function SingleCollaboratorPicker(
-  props: SingleCollaboratorPickerProps,
+export function CollaboratorPicker(
+  props: CollaboratorPickerProps,
 ): JSX.Element {
   const { value, onChange, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();
@@ -26,11 +20,11 @@ export function SingleCollaboratorPicker(
   const options = useGetCollaboratorOptions(collaborators);
 
   return (
-    <SingleSelectKindPicker<CollaboratorID>
+    <ListPicker<CollaboratorID>
       value={value}
-      onChange={onChange}
-      renderLabel={renderCollaborator}
       options={options}
+      renderLabel={renderCollaborator}
+      onChange={onChange}
       onRequestClose={onRequestClose}
     />
   );
@@ -49,10 +43,12 @@ export function useRenderCollaborator(): (
 export function useGetCollaboratorOptions(
   collaborators: Collaborator[],
 ): ListPickerOption<CollaboratorID>[] {
-  return useMemo(() => {
-    return collaborators.map((collaborator) => ({
-      value: collaborator.id,
-      label: collaborator.name,
-    }));
-  }, [collaborators]);
+  return useMemo(
+    () =>
+      collaborators.map((collaborator) => ({
+        value: collaborator.id,
+        label: collaborator.name,
+      })),
+    [collaborators],
+  );
 }

@@ -87,21 +87,13 @@ import { useThemeStyles } from '../../components/theme';
 import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
 import { DateValueInput } from '../fields/date_value_edit';
-import { MultiCollaboratorPicker } from '../fields/multi_collaborator_value_edit';
-import { SingleCollaboratorPicker } from '../fields/single_collaborator_value_edit';
-import { SingleOptionPicker } from '../fields/single_option_value_edit';
-import { MultiOptionPicker } from '../fields/multi_option_value_edit';
+import { SingleOptionPicker } from '../select_options/option_picker';
+import { MultiOptionPicker } from '../select_options/option_multi_picker';
 import { TextKindValueInput } from '../fields/text_kind_value_edit';
 import { NumberKindValueInput } from '../fields/number_kind_value_edit';
 import { MultiLineTextValueInput } from '../fields/multi_line_text_value_edit';
 import { NumberValueView } from '../fields/number_value_view';
 import { Checkbox } from '../fields/checkbox_value_edit';
-import { SingleOptionValueView } from '../fields/single_option_value_view';
-import { MultiOptionValueView } from '../fields/multi_option_value_view';
-import { MultiCollaboratorValueView } from '../fields/multi_collaborator_value_view';
-import { SingleCollaboratorValueView } from '../fields/single_collaborator_value_view';
-import { SingleDocumentLinkValueView } from '../fields/single_document_link_value_view';
-import { MultiDocumentLinkValueView } from '../fields/multi_document_link_value_view';
 import { CurrencyValueView } from '../fields/currency_value_view';
 import { DateValueView } from '../fields/date_value_view';
 import { EmailValueView } from '../fields/email_value_view';
@@ -122,6 +114,14 @@ import { FlatButton } from '../../components/flat_button';
 import { Popover } from '../../components/popover';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { ContextMenuView } from '../../components/context_menu_view';
+import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
+import { CollaboratorMultiPicker } from '../collaborators/collaborator_multi_picker';
+import { CollaboratorPicker } from '../collaborators/collaborator_picker';
+import { DocumentLinkBadgeList } from '../document_link/document_link_badge_list';
+import { OptionBadgeList } from '../select_options/option_badge_list';
+import { CollaboratorBadge } from '../collaborators/collaborator_badge';
+import { DocumentLinkBadge } from '../document_link/document_link_badge';
+import { OptionBadge } from '../select_options/option_badge';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -607,14 +607,14 @@ interface MultiCollaboratorCellProps {
 const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   props: MultiCollaboratorCellProps,
 ) {
-  const { value, field } = props;
+  const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <MultiCollaboratorValueView value={value} field={field} />
+      <CollaboratorBadgeList collaboratorIDs={value} />
     </View>
   );
 
@@ -625,9 +625,8 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   return (
     <PickerTrigger
       content={
-        <MultiCollaboratorPicker
+        <CollaboratorMultiPicker
           value={value}
-          field={field}
           onChange={handleChange}
           onRequestClose={onStopEditing}
         />
@@ -646,13 +645,13 @@ interface MultiDocumentLinkCellProps {
 const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
   props: MultiDocumentLinkCellProps,
 ) {
-  const { value, field } = props;
+  const { value } = props;
 
   useCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <MultiDocumentLinkValueView value={value} field={field} />
+      <DocumentLinkBadgeList documentIDs={value} />
     </View>
   );
 
@@ -719,9 +718,10 @@ const MultiOptionCell = memo(function MultiOptionCell(
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <MultiOptionValueView value={value} field={field} />
+      <OptionBadgeList optionIDs={value} field={field} />
     </View>
   );
+
   if (cell.state === 'default') {
     return child;
   }
@@ -850,16 +850,16 @@ interface SingleCollaboratorCellProps {
 const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   props: SingleCollaboratorCellProps,
 ) {
-  const { value, field } = props;
+  const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
-  const child = (
+  const child = value ? (
     <View style={styles.cellValueContainer}>
-      <SingleCollaboratorValueView value={value} field={field} />
+      <CollaboratorBadge collaboratorID={value} />
     </View>
-  );
+  ) : null;
 
   if (cell.state === 'default') {
     return child;
@@ -868,10 +868,9 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   return (
     <PickerTrigger
       content={
-        <SingleCollaboratorPicker
+        <CollaboratorPicker
           value={value}
           onChange={handleChange}
-          field={field}
           onRequestClose={onStopEditing}
         />
       }
@@ -889,16 +888,16 @@ interface SingleDocumentLinkCellProps {
 const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   props: SingleDocumentLinkCellProps,
 ) {
-  const { value, field } = props;
+  const { value } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
   useCellKeyBindings();
 
-  const child = (
+  const child = value ? (
     <View style={styles.cellValueContainer}>
-      <SingleDocumentLinkValueView value={value} field={field} />
+      <DocumentLinkBadge documentID={value} />
     </View>
-  );
+  ) : null;
 
   if (cell.state === 'focused') {
     return (
@@ -973,11 +972,13 @@ const SingleOptionCell = memo(function SingleOptionCell(
   const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
-  const child = (
+  const selected = field.options.find((o) => o.id === value);
+
+  const child = selected ? (
     <View style={styles.cellValueContainer}>
-      <SingleOptionValueView value={value} field={field} />
+      <OptionBadge option={selected} />
     </View>
-  );
+  ) : null;
 
   if (cell.state === 'default') {
     return child;

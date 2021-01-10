@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback } from 'react';
 
-import { ListPickerOption } from '../../components/list_picker';
+import { ListPicker, ListPickerOption } from '../../components/list_picker';
 import {
   SelectOption,
   SelectOptionID,
@@ -8,10 +8,9 @@ import {
   SingleOptionFieldValue,
 } from '../../../models/fields';
 import { OptionBadge } from './option_badge';
-import { SingleSelectKindPicker } from './single_select_kind_value_edit';
 
 interface SingleOptionPickerProps {
-  value: SingleOptionFieldValue;
+  value: SelectOptionID | null;
   field: SingleOptionField;
   onChange: (value: SingleOptionFieldValue) => void;
   onRequestClose: () => void;
@@ -25,11 +24,11 @@ export function SingleOptionPicker(
   const options = useGetOptionOptions(field.options);
 
   return (
-    <SingleSelectKindPicker<SelectOptionID>
+    <ListPicker<SelectOptionID>
       value={value}
-      onChange={onChange}
-      renderLabel={renderOption}
       options={options}
+      renderLabel={renderOption}
+      onChange={onChange}
       onRequestClose={onRequestClose}
     />
   );

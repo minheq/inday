@@ -53,21 +53,10 @@ import {
   URLFieldValue,
 } from '../../../models/fields';
 import { DocumentID } from '../../../models/documents';
-import { TextKindValueInput } from './text_kind_value_edit';
-import { NumberKindValueInput } from './number_kind_value_edit';
-import { Checkbox } from './checkbox_value_edit';
-import { MultiCollaboratorPicker } from './multi_collaborator_value_edit';
-import { MultiOptionPicker } from './multi_option_value_edit';
-import { MultiDocumentLinkPicker } from './multi_document_link_value_edit';
-import { SingleCollaboratorPicker } from './single_collaborator_value_edit';
-import { SingleOptionPicker } from './single_option_value_edit';
-import { SingleDocumentLinkPicker } from './single_document_link_value_edit';
-import { DateValueInput } from './date_value_edit';
 import { tokens } from '../../components/tokens';
 import { useThemeStyles } from '../../components/theme';
 import { SingleLineTextValueView } from './single_line_text_value_view';
 import { URLValueView } from './url_value_view';
-import { MultiLineTextValueInput } from './multi_line_text_value_edit';
 import { PhoneNumberValueView } from './phone_number_value_view';
 import { MultiLineTextValueView } from './multi_line_text_value_view';
 import { EmailValueView } from './email_value_view';

@@ -62,6 +62,7 @@ export const activeCellState = atom<StatefulLeafRowCell | null>({
   default: null,
 });
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function ListViewView(props: ListViewViewProps): JSX.Element {
   const {
     view,

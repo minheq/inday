@@ -2,34 +2,29 @@ import React, { Fragment } from 'react';
 import { isEmpty } from '../../../lib/lang_utils';
 import { Row } from '../../components/row';
 
-import {
-  MultiOptionFieldValue,
-  MultiOptionField,
-} from '../../../models/fields';
+import { MultiOptionField, SelectOptionID } from '../../../models/fields';
 import { OptionBadge } from './option_badge';
 
-interface MultiOptionValueViewProps {
+interface OptionBadgeListProps {
   field: MultiOptionField;
-  value: MultiOptionFieldValue;
+  optionIDs: SelectOptionID[];
 }
 
-export function MultiOptionValueView(
-  props: MultiOptionValueViewProps,
-): JSX.Element {
-  const { value, field } = props;
+export function OptionBadgeList(props: OptionBadgeListProps): JSX.Element {
+  const { optionIDs, field } = props;
 
-  if (isEmpty(value)) {
+  if (isEmpty(optionIDs)) {
     return <Fragment />;
   }
 
   return (
     <Row spacing={8}>
-      {value.map((_value) => {
-        const selected = field.options.find((o) => o.id === _value);
+      {optionIDs.map((optionID) => {
+        const selected = field.options.find((o) => o.id === optionID);
 
         if (selected === undefined) {
           throw new Error(
-            `Expected ${_value} to be within field options ${JSON.stringify(
+            `Expected ${optionID} to be within field options ${JSON.stringify(
               field,
             )}`,
           );

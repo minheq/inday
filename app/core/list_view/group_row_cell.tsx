@@ -36,19 +36,19 @@ import { CheckboxValueView } from '../fields/checkbox_value_view';
 import { CurrencyValueView } from '../fields/currency_value_view';
 import { DateValueView } from '../fields/date_value_view';
 import { EmailValueView } from '../fields/email_value_view';
-import { MultiCollaboratorValueView } from '../fields/multi_collaborator_value_view';
-import { MultiDocumentLinkValueView } from '../fields/multi_document_link_value_view';
 import { MultiLineTextValueView } from '../fields/multi_line_text_value_view';
-import { MultiOptionValueView } from '../fields/multi_option_value_view';
 import { NumberValueView } from '../fields/number_value_view';
 import { PhoneNumberValueView } from '../fields/phone_number_value_view';
-import { SingleCollaboratorValueView } from '../fields/single_collaborator_value_view';
-import { SingleDocumentLinkValueView } from '../fields/single_document_link_value_view';
 import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
-import { SingleOptionValueView } from '../fields/single_option_value_view';
 import { URLValueView } from '../fields/url_value_view';
 import { useListViewViewContext } from './list_view_view';
 import { Popover } from '../../components/popover';
+import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
+import { DocumentLinkBadgeList } from '../document_link/document_link_badge_list';
+import { OptionBadgeList } from '../select_options/option_badge_list';
+import { CollaboratorBadge } from '../collaborators/collaborator_badge';
+import { DocumentLinkBadge } from '../document_link/document_link_badge';
+import { OptionBadge } from '../select_options/option_badge';
 
 interface GroupRowCellProps {
   state: GroupRowCellState;
@@ -106,7 +106,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
     onToggleCollapseGroup(field, value, !collapsed);
   }, [onToggleCollapseGroup, field, value, collapsed]);
 
-  const renderValue = useCallback((): JSX.Element => {
+  const renderValue = useCallback((): JSX.Element | null => {
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
@@ -122,16 +122,16 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         return <EmailValueView field={field} value={value} />;
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
-        return <MultiCollaboratorValueView field={field} value={value} />;
+        return <CollaboratorBadgeList collaboratorIDs={value} />;
       case FieldType.MultiDocumentLink:
         assertMultiDocumentLinkFieldValue(value);
-        return <MultiDocumentLinkValueView field={field} value={value} />;
+        return <DocumentLinkBadgeList documentIDs={value} />;
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return <MultiLineTextValueView field={field} value={value} />;
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
-        return <MultiOptionValueView field={field} value={value} />;
+        return <OptionBadgeList field={field} optionIDs={value} />;
       case FieldType.Number:
         assertNumberFieldValue(value);
         return <NumberValueView field={field} value={value} />;
@@ -140,16 +140,18 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         return <PhoneNumberValueView field={field} value={value} />;
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
-        return <SingleCollaboratorValueView field={field} value={value} />;
+        return value ? <CollaboratorBadge collaboratorID={value} /> : null;
       case FieldType.SingleDocumentLink:
         assertSingleDocumentLinkFieldValue(value);
-        return <SingleDocumentLinkValueView field={field} value={value} />;
+        return value ? <DocumentLinkBadge documentID={value} /> : null;
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return <SingleLineTextValueView field={field} value={value} />;
-      case FieldType.SingleOption:
+      case FieldType.SingleOption: {
         assertSingleOptionFieldValue(value);
-        return <SingleOptionValueView field={field} value={value} />;
+        const selected = field.options.find((o) => o.id === value);
+        return selected ? <OptionBadge option={selected} /> : null;
+      }
       case FieldType.URL:
         assertURLFieldValue(value);
         return <URLValueView field={field} value={value} />;

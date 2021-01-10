@@ -5,14 +5,11 @@ import {
   MultiOptionFieldValue,
   MultiOptionField,
 } from '../../../models/fields';
-import { MultiSelectKindPicker } from './multi_select_kind_value_edit';
-import {
-  useGetOptionOptions,
-  useRenderOption,
-} from './single_option_value_edit';
+import { ListMultiPicker } from '../../components/list_multi_picker';
+import { useGetOptionOptions, useRenderOption } from './option_picker';
 
 interface MultiOptionPickerProps {
-  value: MultiOptionFieldValue;
+  value: SelectOptionID[];
   field: MultiOptionField;
   onChange: (value: MultiOptionFieldValue) => void;
   onRequestClose: () => void;
@@ -25,11 +22,11 @@ export function MultiOptionPicker(props: MultiOptionPickerProps): JSX.Element {
   const options = useGetOptionOptions(field.options);
 
   return (
-    <MultiSelectKindPicker<SelectOptionID>
+    <ListMultiPicker<SelectOptionID>
       value={value}
-      onChange={onChange}
-      renderLabel={renderOption}
       options={options}
+      renderLabel={renderOption}
+      onChange={onChange}
       onRequestClose={onRequestClose}
     />
   );

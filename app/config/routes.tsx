@@ -1,9 +1,9 @@
-import { SpaceID } from '../../../models/spaces';
-import { ViewID } from '../../../models/views';
+import { SpaceID } from '../../models/spaces';
+import { ViewID } from '../../models/views';
 import {
   RouterImplementation,
   useNavigationImplementation,
-} from '../../lib/router';
+} from '../lib/router';
 
 // eslint-disable-next-line
 export enum ScreenName {

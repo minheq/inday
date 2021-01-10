@@ -16,7 +16,7 @@ import {
 } from './list_picker';
 import { TextField } from './text_field';
 
-interface MultiListPickerProps<T> {
+interface ListMultiPickerProps<T> {
   value?: T[] | null;
   options: ListPickerOption<NonNullable<T>>[];
   onChange?: (value: T[]) => void;
@@ -25,8 +25,8 @@ interface MultiListPickerProps<T> {
   renderLabel?: (value: NonNullable<T>, selected: boolean) => React.ReactNode;
 }
 
-export function MultiListPicker<T>(
-  props: MultiListPickerProps<T>,
+export function ListMultiPicker<T>(
+  props: ListMultiPickerProps<T>,
 ): JSX.Element {
   const {
     value,

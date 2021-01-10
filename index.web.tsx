@@ -3,11 +3,11 @@ import React, { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 
 import { Text } from './app/components/text';
-import { ErrorBoundary } from './app/core/other/error_boundary';
+import { ErrorBoundary } from './app/config/error_boundary';
 import { SpaceScreen } from './app/screens/space_screen';
 
 import { Playground } from './app/components/playground';
-import { Router, ScreenName } from './app/core/other/routes';
+import { Router, ScreenName } from './app/config/routes';
 import { ThemeProvider } from './app/components/theme';
 
 export function App(): JSX.Element {

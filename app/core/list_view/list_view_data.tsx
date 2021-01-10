@@ -29,7 +29,7 @@ import {
 import { assertListView, ViewID } from '../../../models/views';
 import { usePrevious } from '../../hooks/use_previous';
 import { ADD_FIELD_COLUMN_WIDTH } from './list_view_constants';
-import { useMemoCompare } from '../../hooks/useMemoCompare';
+import { useMemoCompare } from '../../hooks/use_memo_compare';
 import { useWhatChanged } from '../../hooks/use_what_changed';
 
 interface UseListViewGridProps {

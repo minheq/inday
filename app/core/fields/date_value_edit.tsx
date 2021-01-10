@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 
 import { formatISODate, parseISODate } from '../../../lib/date_utils';
-
 import { DateFieldValue } from '../../../models/fields';
 import { DatePicker } from '../../components/date_picker';
 

@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 
-import { MultiListPicker } from './multi_list_picker';
-
-export default {
-  title: 'MultiListPicker',
-  component: MultiListPicker,
-};
+import { ListMultiPicker } from './list_multi_picker';
 
 export function Basic(): JSX.Element {
   const [value, setValue] = useState(['January']);
 
   return (
-    <MultiListPicker
+    <ListMultiPicker
       value={value}
       options={[
         { label: 'January', value: 'January' },

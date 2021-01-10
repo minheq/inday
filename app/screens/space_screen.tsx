@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { ScreenName, ScreenProps, useNavigation } from '../core/other/routes';
+import { ScreenName, ScreenProps, useNavigation } from '../config/routes';
 import {
   useSpaceQuery,
   useViewQuery,
