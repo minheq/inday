@@ -55,3 +55,16 @@ export function formatUnit(
     unit,
   }).format(amount);
 }
+
+export function formatDecimal(
+  amount: number,
+  locale: SupportedLocale,
+  minimumFractionDigits: number,
+  maximumFractionDigits: number,
+): string {
+  return Intl.NumberFormat(locale, {
+    style: 'decimal',
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(amount);
+}

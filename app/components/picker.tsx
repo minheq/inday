@@ -1,16 +1,9 @@
-import React, {
-  useCallback,
-  useState,
-  useRef,
-  Fragment,
-  useEffect,
-} from 'react';
+import React, { useCallback, useState, useRef, Fragment } from 'react';
 
 import {
   View,
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
-  Animated,
   ScrollView,
   Pressable,
   StyleSheet,
@@ -18,9 +11,9 @@ import {
 import { tokens } from './tokens';
 import { Text } from './text';
 import { Icon } from './icon';
-import { Popover, getPopoverAnchorAndHeight } from './popover';
+import { Popover } from './popover';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
-import { useTheme } from './theme';
+import { useTheme, useThemeStyles } from './theme';
 import { TextField } from './text_field';
 
 export interface PickerProps<T> {
@@ -41,6 +34,7 @@ export interface PickerOption<T> {
 const OPTION_HEIGHT = 32;
 const SEARCH_HEIGHT = 56;
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const {
     value,
@@ -51,16 +45,12 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     searchable = false,
   } = props;
   const theme = useTheme();
-  const buttonRef = useRef<View>(null);
+  const targetRef = useRef<View>(null);
   const popoverContentRef = useRef<View>(null);
-  const borderColor = useRef(new Animated.Value(0)).current;
+  const themeStyles = useThemeStyles();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState('');
-  const [picker, setPicker] = useState({
-    anchor: { x: 0, y: 0 },
-    visible: false,
-    buttonWidth: 0,
-  });
+  const [visible, setVisible] = useState(false);
 
   const selected = options.find((o) => o.value === value);
   const filteredOptions =
@@ -70,38 +60,14 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         )
       : options;
 
-  const contentHeight =
-    filteredOptions.length * OPTION_HEIGHT +
-    (searchable ? SEARCH_HEIGHT : 0) +
-    16 + // vertical padding
-    2; // border;
-
-  const [height, setHeight] = useState(contentHeight);
-
   const handleClosePicker = useCallback(() => {
-    setPicker((prevPicker) => ({ ...prevPicker, visible: false }));
+    setVisible(false);
     setSearch('');
   }, []);
 
   const handleOpenPicker = useCallback(() => {
-    if (buttonRef.current !== null) {
-      buttonRef.current.measure((x, y, width, _height, pageX, pageY) => {
-        const measurements = { width, height: _height, pageX, pageY };
-
-        const [anchor, popoverHeight] = getPopoverAnchorAndHeight(
-          measurements,
-          { width, height: contentHeight },
-        );
-
-        setHeight(popoverHeight);
-        setPicker({
-          visible: true,
-          buttonWidth: measurements.width,
-          anchor,
-        });
-      });
-    }
-  }, [buttonRef, contentHeight]);
+    setVisible(true);
+  }, []);
 
   const handleSelectOption = useCallback(
     (option: PickerOption<T>) => {
@@ -128,7 +94,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
       }
     }
 
-    buttonRef.current?.focus?.();
+    targetRef.current?.focus?.();
   }, [activeIndex, options, handleClosePicker, onChange]);
 
   const handleKey = useCallback(
@@ -174,18 +140,10 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     }
   }, [searchable]);
 
-  useEffect(() => {
-    Animated.spring(borderColor, {
-      toValue: picker.visible ? 1 : 0,
-      useNativeDriver: true,
-      bounciness: 0,
-    }).start();
-  }, [borderColor, picker]);
-
   return (
     <Fragment>
       <Pressable
-        ref={buttonRef}
+        ref={targetRef}
         onPress={handleOpenPicker}
         style={[styles.button, { borderColor: theme.border.default }]}
       >
@@ -195,71 +153,68 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         </View>
       </Pressable>
       <Popover
+        targetRef={targetRef}
         onShow={handlePopoverShow}
-        anchor={picker.anchor}
-        visible={picker.visible}
+        visible={visible}
         onRequestClose={handleClosePicker}
-      >
-        <View
-          accessible
-          // @ts-ignore available on the web
-          onKeyDown={handleKeyDown}
-          ref={popoverContentRef}
-          style={[
-            styles.popover,
-            {
-              backgroundColor: theme.background.content,
-              borderColor: theme.border.default,
-              width: picker.buttonWidth + 40, // space for check icon
-              height,
-            },
-          ]}
-        >
-          {searchable === true && (
-            <View style={styles.searchWrapper}>
-              <TextField
-                clearable
-                placeholder="Search option"
-                autoFocus
-                value={search}
-                onChange={handleChangeSearch}
-                onKeyPress={handleKeyPress}
-                onSubmitEditing={handleSubmitEditing}
-              />
-            </View>
-          )}
-          <ScrollView>
-            <View style={styles.optionsContainer}>
-              {filteredOptions.map((o, i) => {
-                const active = i === activeIndex;
+        content={
+          <View
+            accessible
+            // @ts-ignore available on the web
+            onKeyDown={handleKeyDown}
+            ref={popoverContentRef}
+            style={[
+              styles.popover,
+              themeStyles.background.content,
+              themeStyles.border.default,
+            ]}
+          >
+            {searchable === true && (
+              <View style={styles.searchWrapper}>
+                <TextField
+                  clearable
+                  placeholder="Search option"
+                  autoFocus
+                  value={search}
+                  onChange={handleChangeSearch}
+                  onKeyPress={handleKeyPress}
+                  onSubmitEditing={handleSubmitEditing}
+                />
+              </View>
+            )}
+            <ScrollView>
+              <View style={styles.optionsContainer}>
+                {filteredOptions.map((o, i) => {
+                  const active = i === activeIndex;
 
-                return renderOption ? (
-                  renderOption(o, active)
-                ) : (
-                  <Pressable
-                    key={String(o.value)}
-                    onPress={() => handleSelectOption(o)}
-                    style={({ hovered }: any) => [
-                      styles.option,
-                      {
-                        backgroundColor:
-                          active || hovered
-                            ? theme.background.lightPrimary
-                            : theme.background.content,
-                      },
-                    ]}
-                  >
-                    <Text color="default">{o.label}</Text>
-                    {selected && selected.value === o.value && (
-                      <Icon name="CheckThick" color="primary" />
-                    )}
-                  </Pressable>
-                );
-              })}
-            </View>
-          </ScrollView>
-        </View>
-      </Popover>
+                  return renderOption ? (
+                    renderOption(o, active)
+                  ) : (
+                    <Pressable
+                      key={String(o.value)}
+                      onPress={() => handleSelectOption(o)}
+                      style={({ hovered }: any) => [
+                        styles.option,
+                        {
+                          backgroundColor:
+                            active || hovered
+                              ? theme.background.lightPrimary
+                              : theme.background.content,
+                        },
+                      ]}
+                    >
+                      <Text color="default">{o.label}</Text>
+                      {selected && selected.value === o.value && (
+                        <Icon name="CheckThick" color="primary" />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+        }
+      />
     </Fragment>
   );
 }

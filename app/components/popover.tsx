@@ -17,6 +17,7 @@ export interface PopoverProps {
   targetRef: React.RefObject<View>;
   content: React.ReactNode;
   onRequestClose: () => void;
+  onShow?: () => void;
 }
 
 interface State {
@@ -76,7 +77,7 @@ const initialState: State = {
 };
 
 export function Popover(props: PopoverProps): JSX.Element {
-  const { content, visible, onRequestClose, targetRef } = props;
+  const { content, visible, onRequestClose, onShow, targetRef } = props;
   const contentRef = useRef<View>(null);
   const opacity = useRef(new Animated.Value(0)).current;
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -143,6 +144,7 @@ export function Popover(props: PopoverProps): JSX.Element {
       anchor={anchor}
       visible={ready}
       onRequestClose={onRequestClose}
+      onShow={onShow}
     >
       <Animated.View
         onLayout={handleLayout}

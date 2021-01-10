@@ -70,6 +70,7 @@ import {
   assertPhoneNumberFieldValue,
   BooleanFieldKindValue,
   generateFieldID,
+  formatNumberFieldValue,
 } from '../../../models/fields';
 import { DocumentID, generateDocumentID } from '../../../models/documents';
 import { useSetRecoilState } from 'recoil';
@@ -86,23 +87,15 @@ import { isNumberString, toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
-import { DateValueInput } from '../fields/date_value_edit';
 import { SingleOptionPicker } from '../select_options/option_picker';
 import { MultiOptionPicker } from '../select_options/option_multi_picker';
 import { TextKindValueInput } from '../fields/text_kind_value_edit';
 import { NumberKindValueInput } from '../fields/number_kind_value_edit';
 import { MultiLineTextValueInput } from '../fields/multi_line_text_value_edit';
-import { NumberValueView } from '../fields/number_value_view';
 import { Checkbox } from '../fields/checkbox_value_edit';
-import { CurrencyValueView } from '../fields/currency_value_view';
-import { DateValueView } from '../fields/date_value_view';
-import { EmailValueView } from '../fields/email_value_view';
 import { EmailValueActions } from '../fields/email_value_actions';
 import { URLValueActions } from '../fields/url_value_actions';
 import { PhoneNumberValueActions } from '../fields/phone_number_value_actions';
-import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
-import { URLValueView } from '../fields/url_value_view';
-import { PhoneNumberValueView } from '../fields/phone_number_value_view';
 import { assertUnreached } from '../../../lib/lang_utils';
 import { Slide } from '../../components/slide';
 import { Icon } from '../../components/icon';
@@ -122,6 +115,14 @@ import { OptionBadgeList } from '../select_options/option_badge_list';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { DocumentLinkBadge } from '../document_link/document_link_badge';
 import { OptionBadge } from '../select_options/option_badge';
+import { formatCurrency } from '../../../lib/currency';
+import { getSystemLocale } from '../../lib/locale';
+import {
+  formatDate,
+  formatISODate,
+  parseISODate,
+} from '../../../lib/date_utils';
+import { DatePicker } from '../../components/date_picker';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -502,7 +503,11 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <CurrencyValueView value={value} field={field} />
+      {value ? (
+        <Text numberOfLines={1} align="right">
+          {formatCurrency(value, getSystemLocale(), field.currency)}
+        </Text>
+      ) : null}
     </View>
   );
 
@@ -523,14 +528,25 @@ interface DateCellProps {
 }
 
 const DateCell = memo(function DateCell(props: DateCellProps) {
-  const { value, field } = props;
+  const { value } = props;
   const { cell } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
   useCellKeyBindings();
 
+  const handleChangeDate = useCallback(
+    async (date: Date) => {
+      await handleChange(formatISODate(date));
+    },
+    [handleChange],
+  );
+
   const child = (
     <View style={styles.cellValueContainer}>
-      <DateValueView value={value} field={field} />
+      {value ? (
+        <Text numberOfLines={1} align="right">
+          {formatDate(parseISODate(value), getSystemLocale())}
+        </Text>
+      ) : null}
     </View>
   );
 
@@ -540,7 +556,12 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
 
   return (
     <PickerTrigger
-      content={<DateValueInput value={value} onChange={handleChange} />}
+      content={
+        <DatePicker
+          value={value ? parseISODate(value) : null}
+          onChange={handleChangeDate}
+        />
+      }
     >
       {child}
     </PickerTrigger>
@@ -553,7 +574,7 @@ interface EmailCellProps {
 }
 
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
-  const { value, field } = props;
+  const { value } = props;
   const {
     cell,
     onStartEditing,
@@ -579,7 +600,9 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <EmailValueView value={value} field={field} />
+      <Text decoration="underline" numberOfLines={1}>
+        {value}
+      </Text>
     </View>
   );
 
@@ -774,7 +797,9 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <NumberValueView field={field} value={value} />
+      <Text align="right" numberOfLines={1}>
+        {formatNumberFieldValue(value, field)}
+      </Text>
     </View>
   );
 
@@ -797,7 +822,7 @@ interface PhoneNumberCellProps {
 const PhoneNumberCell = memo(function PhoneNumberCell(
   props: PhoneNumberCellProps,
 ) {
-  const { value, field } = props;
+  const { value } = props;
   const {
     cell,
     onStopEditing,
@@ -822,7 +847,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   }
   const child = (
     <View style={styles.cellValueContainer}>
-      <PhoneNumberValueView value={value} field={field} />
+      <Text numberOfLines={1}>{value}</Text>
     </View>
   );
 
@@ -918,7 +943,7 @@ interface SingleLineTextCellProps {
 const SingleLineTextCell = memo(function SingleLineTextCell(
   props: SingleLineTextCellProps,
 ) {
-  const { value, field } = props;
+  const { value } = props;
   const {
     cell,
     onStopEditing,
@@ -944,7 +969,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <SingleLineTextValueView value={value} field={field} />
+      <Text numberOfLines={1}>{value}</Text>
     </View>
   );
 
@@ -1006,7 +1031,7 @@ interface URLCellProps {
 }
 
 const URLCell = memo(function URLCell(props: URLCellProps) {
-  const { value, field } = props;
+  const { value } = props;
   const {
     cell,
     onStartEditing,
@@ -1032,7 +1057,9 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
 
   const child = (
     <View style={styles.cellValueContainer}>
-      <URLValueView value={value} field={field} />
+      <Text decoration="underline" numberOfLines={1}>
+        {value}
+      </Text>
     </View>
   );
 

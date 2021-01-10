@@ -1,4 +1,4 @@
-import { NumberUnit } from '../lib/unit';
+import { formatDecimal, formatUnit, NumberUnit } from '../lib/unit';
 import { generateID, validateID } from '../lib/id';
 import { hasAllOf, keyedBy } from '../lib/array_utils';
 import {
@@ -14,6 +14,7 @@ import { CollaboratorID } from './collaborators';
 import { CollectionID } from './collections';
 import { DocumentFieldValues, DocumentID } from './documents';
 import { assertUnreached, map } from '../lib/lang_utils';
+import { getSystemLocale } from '../app/lib/locale';
 
 export const fieldIDPrefix = 'fld' as const;
 export type FieldID = `${typeof fieldIDPrefix}${string}`;
@@ -1010,4 +1011,27 @@ export function getDefaultDocumentFieldValues(
   const fieldsByID = keyedBy(fields, (field) => field.id);
 
   return map(fieldsByID, getDefaultFieldValue);
+}
+
+export function formatNumberFieldValue(
+  value: NumberFieldValue,
+  field: NumberField,
+): string {
+  if (value !== null) {
+    switch (field.style) {
+      case 'decimal':
+        return formatDecimal(
+          value,
+          getSystemLocale(),
+          field.minimumFractionDigits,
+          field.maximumFractionDigits,
+        );
+      case 'unit':
+        return formatUnit(value, getSystemLocale(), field.unit);
+      case 'integer':
+        return `${value}`;
+    }
+  }
+
+  return '';
 }

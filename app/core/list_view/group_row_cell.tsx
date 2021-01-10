@@ -31,16 +31,9 @@ import {
   FieldID,
   FieldType,
   FieldValue,
+  formatNumberFieldValue,
 } from '../../../models/fields';
 import { CheckboxValueView } from '../fields/checkbox_value_view';
-import { CurrencyValueView } from '../fields/currency_value_view';
-import { DateValueView } from '../fields/date_value_view';
-import { EmailValueView } from '../fields/email_value_view';
-import { MultiLineTextValueView } from '../fields/multi_line_text_value_view';
-import { NumberValueView } from '../fields/number_value_view';
-import { PhoneNumberValueView } from '../fields/phone_number_value_view';
-import { SingleLineTextValueView } from '../fields/single_line_text_value_view';
-import { URLValueView } from '../fields/url_value_view';
 import { useListViewViewContext } from './list_view_view';
 import { Popover } from '../../components/popover';
 import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
@@ -49,6 +42,9 @@ import { OptionBadgeList } from '../select_options/option_badge_list';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { DocumentLinkBadge } from '../document_link/document_link_badge';
 import { OptionBadge } from '../select_options/option_badge';
+import { formatDate, parseISODate } from '../../../lib/date_utils';
+import { getSystemLocale } from '../../lib/locale';
+import { formatCurrency } from '../../../lib/currency';
 
 interface GroupRowCellProps {
   state: GroupRowCellState;
@@ -113,13 +109,25 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         return <CheckboxValueView field={field} value={value} />;
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
-        return <CurrencyValueView field={field} value={value} />;
+        return value ? (
+          <Text numberOfLines={1}>
+            {formatCurrency(value, getSystemLocale(), field.currency)}
+          </Text>
+        ) : null;
       case FieldType.Date:
         assertDateFieldValue(value);
-        return <DateValueView field={field} value={value} />;
+        return value ? (
+          <Text numberOfLines={1}>
+            {formatDate(parseISODate(value), getSystemLocale())}
+          </Text>
+        ) : null;
       case FieldType.Email:
         assertEmailFieldValue(value);
-        return <EmailValueView field={field} value={value} />;
+        return (
+          <Text decoration="underline" numberOfLines={1}>
+            {value}
+          </Text>
+        );
       case FieldType.MultiCollaborator:
         assertMultiCollaboratorFieldValue(value);
         return <CollaboratorBadgeList collaboratorIDs={value} />;
@@ -128,16 +136,18 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         return <DocumentLinkBadgeList documentIDs={value} />;
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
-        return <MultiLineTextValueView field={field} value={value} />;
+        return <Text>{value}</Text>;
       case FieldType.MultiOption:
         assertMultiOptionFieldValue(value);
         return <OptionBadgeList field={field} optionIDs={value} />;
       case FieldType.Number:
         assertNumberFieldValue(value);
-        return <NumberValueView field={field} value={value} />;
+        return (
+          <Text numberOfLines={1}>{formatNumberFieldValue(value, field)}</Text>
+        );
       case FieldType.PhoneNumber:
         assertPhoneNumberFieldValue(value);
-        return <PhoneNumberValueView field={field} value={value} />;
+        return <Text numberOfLines={1}>{value}</Text>;
       case FieldType.SingleCollaborator:
         assertSingleCollaboratorFieldValue(value);
         return value ? <CollaboratorBadge collaboratorID={value} /> : null;
@@ -146,7 +156,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         return value ? <DocumentLinkBadge documentID={value} /> : null;
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
-        return <SingleLineTextValueView field={field} value={value} />;
+        return <Text numberOfLines={1}>{value}</Text>;
       case FieldType.SingleOption: {
         assertSingleOptionFieldValue(value);
         const selected = field.options.find((o) => o.id === value);
@@ -154,7 +164,11 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
       }
       case FieldType.URL:
         assertURLFieldValue(value);
-        return <URLValueView field={field} value={value} />;
+        return (
+          <Text decoration="underline" numberOfLines={1}>
+            {value}
+          </Text>
+        );
       default:
         assertUnreached(field);
     }
