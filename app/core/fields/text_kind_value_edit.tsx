@@ -5,7 +5,6 @@ import {
   TextInputKeyPressEventData,
   Platform,
 } from 'react-native';
-import { useThemeStyles } from '../../components/theme';
 import { TextFieldKindValue } from '../../../models/fields';
 import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
 import { TextInput } from '../../components/text_input';
@@ -22,7 +21,6 @@ export function TextKindValueInput<T extends TextFieldKindValue>(
   props: TextKindValueInputProps<T>,
 ): JSX.Element {
   const { autoFocus, onChange, value, onRequestClose, onSubmitEditing } = props;
-  const themeStyles = useThemeStyles();
 
   const handleKeyPress = useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -51,7 +49,7 @@ export function TextKindValueInput<T extends TextFieldKindValue>(
       onKeyPress={handleKeyPress}
       onChange={handleChange}
       value={value}
-      style={[styles.textCellInput, themeStyles.text.default]}
+      style={styles.textCellInput}
     />
   );
 }

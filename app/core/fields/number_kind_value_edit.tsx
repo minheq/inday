@@ -6,7 +6,6 @@ import {
   Platform,
 } from 'react-native';
 import { toNumber } from '../../../lib/number_utils';
-import { useThemeStyles } from '../../components/theme';
 import { NumberFieldKindValue } from '../../../models/fields';
 import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
 import { TextInput } from '../../components/text_input';
@@ -23,7 +22,6 @@ export function NumberKindValueInput<T extends NumberFieldKindValue>(
   props: NumberKindValueInputProps<T>,
 ): JSX.Element {
   const { autoFocus, onChange, value, onRequestClose, onSubmitEditing } = props;
-  const themeStyles = useThemeStyles();
 
   const handleKeyPress = useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -56,7 +54,7 @@ export function NumberKindValueInput<T extends NumberFieldKindValue>(
       onKeyPress={handleKeyPress}
       onChange={handleChange}
       value={value ? value.toString() : ''}
-      style={[styles.numberCellInput, themeStyles.text.default]}
+      style={styles.numberCellInput}
     />
   );
 }
