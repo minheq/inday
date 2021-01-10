@@ -19,6 +19,7 @@ import { Modal } from './modal';
 import { CloseButton } from './close_button';
 import { useThemeStyles } from './theme';
 import { PopoverStories } from './popover.stories';
+import { CheckboxStories } from './checkbox.stories';
 
 const MENU_WIDTH = 280;
 
@@ -64,6 +65,9 @@ export function Playground(
       break;
     case 'TextInput':
       content = <TextInputStories />;
+      break;
+    case 'Checkbox':
+      content = <CheckboxStories />;
       break;
     case 'DatePicker':
       content = <DatePickerStories />;
@@ -142,6 +146,7 @@ function Menu() {
         <MenuItem component="Intro" />
         <MenuSection title="COMPONENTS" />
         <MenuItem component="ContextMenu" />
+        <MenuItem component="Checkbox" />
         <MenuItem component="Popover" />
         <MenuItem component="Picker" />
         <MenuItem component="DatePicker" />

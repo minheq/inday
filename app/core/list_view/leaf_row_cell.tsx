@@ -96,7 +96,7 @@ import { PhoneNumberValueActions } from '../fields/phone_number_value_actions';
 import { assertUnreached } from '../../../lib/lang_utils';
 import { Slide } from '../../components/slide';
 import { Icon } from '../../components/icon';
-import { CheckboxStatic } from '../../components/checkbox_static';
+import { CheckboxView } from '../../components/checkbox';
 import { Spacer } from '../../components/spacer';
 import { LEAF_ROW_HEIGHT } from './list_view_constants';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
@@ -406,7 +406,7 @@ const SelectCheckbox = memo(function SelectCheckbox(
   return (
     <View style={visible && styles.selectCheckboxWrapper}>
       <Slide visible={visible} width={32}>
-        <CheckboxStatic value={selected} />
+        <CheckboxView value={selected} />
       </Slide>
     </View>
   );
