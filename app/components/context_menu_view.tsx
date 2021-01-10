@@ -2,12 +2,11 @@ import React, { useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { PressableHighlight } from './pressable_highlight';
 import { Icon, IconName } from './icon';
-import { Text, TextColor, TextWeight } from './text';
+import { Text, TextColor } from './text';
 import { tokens } from './tokens';
 
 export interface ContextMenuItem {
   color?: TextColor;
-  weight?: TextWeight;
   onPress?: () => void;
   label: string;
   icon?: IconName;
@@ -46,7 +45,7 @@ interface ContextMenuButtonProps {
 
 function ContextMenuButton(props: ContextMenuButtonProps) {
   const { option, onPressed } = props;
-  const { onPress, weight, color, label, icon } = option;
+  const { onPress, color, label, icon } = option;
 
   const handlePress = useCallback(() => {
     if (onPress !== undefined) {
@@ -60,10 +59,10 @@ function ContextMenuButton(props: ContextMenuButtonProps) {
 
   return (
     <PressableHighlight key={label} onPress={handlePress} style={styles.button}>
+      <View style={styles.labelWrapper}>
+        <Text color={color}>{label}</Text>
+      </View>
       <View style={styles.iconWrapper}>{icon && <Icon name={icon} />}</View>
-      <Text weight={weight} color={color}>
-        {label}
-      </Text>
     </PressableHighlight>
   );
 }
@@ -72,10 +71,13 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
   },
+  labelWrapper: {
+    flex: 1,
+  },
   iconWrapper: {
     height: CONTEXT_MENU_ITEM_HEIGHT,
     width: 32,
-    paddingRight: 8,
+    paddingLeft: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },

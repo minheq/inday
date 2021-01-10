@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   row: {},
 
   headerCell: {
-    height: '100%',
+    flex: 1,
     paddingHorizontal: 8,
     justifyContent: 'center',
     borderBottomWidth: 1,
