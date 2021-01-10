@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { forwardRef, useCallback } from 'react';
 import {
   TextInput as RNTextInput,
   NativeSyntheticEvent,
@@ -25,49 +25,53 @@ export interface TextInputProps {
   style?: StyleProp<TextStyle>;
 }
 
-export function TextInput(props: TextInputProps): JSX.Element {
-  const {
-    testID,
-    autoFocus,
-    value,
-    placeholder,
-    onKeyPress,
-    onChange,
-    onRequestClose,
-    onSubmitEditing,
-    style,
-  } = props;
-  const ref = useRef<RNTextInput>(null);
-  const theme = useTheme();
-  const themeStyles = useThemeStyles();
+/**
+ * `TextInput` is low-level component for keyboard input.
+ */
+export const TextInput = forwardRef<RNTextInput, TextInputProps>(
+  function TextInput(props, forwardedRef): JSX.Element {
+    const {
+      testID,
+      autoFocus,
+      value,
+      placeholder,
+      onKeyPress,
+      onChange,
+      onRequestClose,
+      onSubmitEditing,
+      style,
+    } = props;
+    const theme = useTheme();
+    const themeStyles = useThemeStyles();
 
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      const key = event.nativeEvent.key;
+    const handleKeyPress = useCallback(
+      (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+        const key = event.nativeEvent.key;
 
-      if (onKeyPress) {
-        onKeyPress(event);
-      }
+        if (onKeyPress) {
+          onKeyPress(event);
+        }
 
-      if (onRequestClose && key === UIKey.Escape) {
-        onRequestClose();
-      }
-    },
-    [onRequestClose, onKeyPress],
-  );
+        if (onRequestClose && key === UIKey.Escape) {
+          onRequestClose();
+        }
+      },
+      [onRequestClose, onKeyPress],
+    );
 
-  return (
-    <RNTextInput
-      ref={ref}
-      testID={testID}
-      value={value !== null ? value : undefined}
-      autoFocus={autoFocus}
-      placeholder={placeholder}
-      onChangeText={onChange}
-      onKeyPress={handleKeyPress}
-      onSubmitEditing={onSubmitEditing}
-      placeholderTextColor={theme.text.muted}
-      style={[tokens.text.size.md, themeStyles.text.default, style]}
-    />
-  );
-}
+    return (
+      <RNTextInput
+        ref={forwardedRef}
+        testID={testID}
+        value={value !== null ? value : undefined}
+        autoFocus={autoFocus}
+        placeholder={placeholder}
+        onChangeText={onChange}
+        onKeyPress={handleKeyPress}
+        onSubmitEditing={onSubmitEditing}
+        placeholderTextColor={theme.text.muted}
+        style={[tokens.text.size.md, themeStyles.text.default, style]}
+      />
+    );
+  },
+);

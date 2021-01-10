@@ -2,15 +2,14 @@ import React, { useCallback } from 'react';
 import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
-  TextInput,
   StyleSheet,
   Platform,
 } from 'react-native';
 import { toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
-import { tokens } from '../../components/tokens';
 import { NumberFieldKindValue } from '../../../models/fields';
 import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
+import { TextInput } from '../../components/text_input';
 
 interface NumberKindValueInputProps<T extends NumberFieldKindValue> {
   value: T;
@@ -55,7 +54,7 @@ export function NumberKindValueInput<T extends NumberFieldKindValue>(
     <TextInput
       autoFocus={autoFocus}
       onKeyPress={handleKeyPress}
-      onChangeText={handleChange}
+      onChange={handleChange}
       value={value ? value.toString() : ''}
       style={[styles.numberCellInput, themeStyles.text.default]}
     />
@@ -67,7 +66,6 @@ const styles = StyleSheet.create({
     height: 40,
     paddingHorizontal: 8,
     textAlign: 'right',
-    ...tokens.text.size.md,
     ...Platform.select({
       web: {
         outlineStyle: 'none',

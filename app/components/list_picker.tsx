@@ -10,12 +10,11 @@ import {
 import { Text } from './text';
 import { PressableHighlight } from './pressable_highlight';
 import { tokens } from './tokens';
-
 import { Icon } from './icon';
-import { TextInput } from './text_input';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { SearchEngine } from '../../lib/search';
 import { useTheme } from './theme';
+import { TextField } from './text_field';
 
 export interface ListPickerOption<T> {
   value: T;
@@ -113,11 +112,12 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
   return (
     <View style={styles.base}>
       <View style={styles.searchInputWrapper}>
-        <TextInput
+        <TextField
           autoFocus
           value={searchTerm}
           onKeyPress={handleKeyPress}
           onChange={handleSearchTermChange}
+          clearable
           placeholder="Search"
         />
       </View>

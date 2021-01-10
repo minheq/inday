@@ -18,10 +18,10 @@ import {
 import { tokens } from './tokens';
 import { Text } from './text';
 import { Icon } from './icon';
-import { TextInput } from './text_input';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
 import { useTheme } from './theme';
+import { TextField } from './text_field';
 
 export interface PickerProps<T> {
   value?: T;
@@ -217,7 +217,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         >
           {searchable === true && (
             <View style={styles.searchWrapper}>
-              <TextInput
+              <TextField
                 clearable
                 placeholder="Search option"
                 autoFocus

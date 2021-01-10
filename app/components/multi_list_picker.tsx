@@ -14,7 +14,7 @@ import {
   useListKeyboardNavigation,
   useOptionsSearch,
 } from './list_picker';
-import { TextInput } from './text_input';
+import { TextField } from './text_field';
 
 interface MultiListPickerProps<T> {
   value?: T[] | null;
@@ -128,7 +128,7 @@ export function MultiListPicker<T>(
   return (
     <View style={styles.base}>
       <View style={styles.searchInputWrapper}>
-        <TextInput
+        <TextField
           autoFocus
           value={searchTerm}
           onKeyPress={handleKeyPress}

@@ -60,7 +60,6 @@ export function MultiLineTextValueInput(
 
 const styles = StyleSheet.create({
   multilineTextCellInput: {
-    width: '100%',
     minHeight: 128,
     paddingTop: 8,
     paddingHorizontal: 8,

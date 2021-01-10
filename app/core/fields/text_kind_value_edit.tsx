@@ -3,13 +3,12 @@ import {
   NativeSyntheticEvent,
   StyleSheet,
   TextInputKeyPressEventData,
-  TextInput,
   Platform,
 } from 'react-native';
 import { useThemeStyles } from '../../components/theme';
-import { tokens } from '../../components/tokens';
 import { TextFieldKindValue } from '../../../models/fields';
 import { UIKey, WhiteSpaceKey } from '../../lib/keyboard';
+import { TextInput } from '../../components/text_input';
 
 interface TextKindValueInputProps<T extends TextFieldKindValue> {
   autoFocus: boolean;
@@ -50,7 +49,7 @@ export function TextKindValueInput<T extends TextFieldKindValue>(
     <TextInput
       autoFocus={autoFocus}
       onKeyPress={handleKeyPress}
-      onChangeText={handleChange}
+      onChange={handleChange}
       value={value}
       style={[styles.textCellInput, themeStyles.text.default]}
     />
@@ -61,7 +60,6 @@ const styles = StyleSheet.create({
   textCellInput: {
     height: 40,
     paddingHorizontal: 8,
-    ...tokens.text.size.md,
     ...Platform.select({
       web: {
         outlineStyle: 'none',
