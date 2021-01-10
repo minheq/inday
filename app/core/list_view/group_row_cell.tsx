@@ -33,7 +33,6 @@ import {
   FieldValue,
   formatNumberFieldValue,
 } from '../../../models/fields';
-import { CheckboxValueView } from '../fields/checkbox_value_view';
 import { useListViewViewContext } from './list_view_view';
 import { Popover } from '../../components/popover';
 import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
@@ -45,6 +44,7 @@ import { OptionBadge } from '../select_options/option_badge';
 import { formatDate, parseISODate } from '../../../lib/date_utils';
 import { getSystemLocale } from '../../lib/locale';
 import { formatCurrency } from '../../../lib/currency';
+import { CheckboxAltView } from '../../components/checkbox_alt';
 
 interface GroupRowCellProps {
   state: GroupRowCellState;
@@ -106,7 +106,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
     switch (field.type) {
       case FieldType.Checkbox:
         assertCheckboxFieldValue(value);
-        return <CheckboxValueView field={field} value={value} />;
+        return <CheckboxAltView value={value} />;
       case FieldType.Currency:
         assertCurrencyFieldValue(value);
         return value ? (

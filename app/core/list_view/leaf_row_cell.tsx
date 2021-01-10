@@ -89,7 +89,6 @@ import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
 import { SingleOptionPicker } from '../select_options/option_picker';
 import { MultiOptionPicker } from '../select_options/option_multi_picker';
-import { Checkbox } from '../fields/checkbox_value_edit';
 import { EmailValueActions } from '../fields/email_value_actions';
 import { URLValueActions } from '../fields/url_value_actions';
 import { PhoneNumberValueActions } from '../fields/phone_number_value_actions';
@@ -122,6 +121,7 @@ import {
 import { DatePicker } from '../../components/date_picker';
 import { NumberInput } from '../../components/number_input';
 import { TextInput } from '../../components/text_input';
+import { CheckboxAlt } from '../../components/checkbox_alt';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -465,7 +465,7 @@ const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
 
   return (
     <View style={[styles.cellValueContainer, styles.checkboxCellRoot]}>
-      <Checkbox value={value} onChange={handleToggle} />
+      <CheckboxAlt value={value} onChange={handleToggle} />
     </View>
   );
 });
