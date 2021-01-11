@@ -11,11 +11,11 @@ import { useTheme } from './theme';
 export interface PressableHighlightProps extends PressableProps {
   children?:
     | React.ReactNode
-    | ((callback: PressableHighlightStateCallback) => React.ReactNode);
+    | ((callback: PressableStateCallback) => React.ReactNode);
   style?: StyleProp<ViewStyle>;
 }
 
-interface PressableHighlightStateCallback {
+export interface PressableStateCallback {
   hovered: boolean;
   pressed: boolean;
   focused: boolean;
@@ -49,9 +49,3 @@ export const PressableHighlight = forwardRef<View, PressableHighlightProps>(
     );
   },
 );
-
-interface PressableStateCallback {
-  hovered: boolean;
-  pressed: boolean;
-  focused: boolean;
-}

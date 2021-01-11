@@ -98,7 +98,10 @@ import { LEAF_ROW_HEIGHT } from './list_view_constants';
 import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
 import { FlatButton } from '../../components/flat_button';
 import { Popover } from '../../components/popover';
-import { PressableHighlight } from '../../components/pressable_highlight';
+import {
+  PressableHighlight,
+  PressableStateCallback,
+} from '../../components/pressable_highlight';
 import { ContextMenuView } from '../../components/context_menu_view';
 import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
 import { CollaboratorMultiPicker } from '../collaborators/collaborator_multi_picker';
@@ -353,10 +356,13 @@ const LeafRowCellView = memo(function LeafRowCellView(
   }, [field, value]);
 
   const pressableStyle = useMemo(
-    (): StyleProp<ViewStyle> => [
+    (): (({ hovered }: PressableStateCallback) => StyleProp<ViewStyle>) => ({
+      hovered,
+    }) => [
       styles.leafRowCell,
       themeStyles.border.default,
-      mode === 'edit' && themeStyles.background.content,
+      mode === 'edit' && hovered && themeStyles.button.flatHovered,
+      cell.state !== 'default' && themeStyles.background.content,
       cell.primary && styles.primaryCell,
     ],
     [cell, mode, themeStyles],
@@ -366,6 +372,7 @@ const LeafRowCellView = memo(function LeafRowCellView(
     <Pressable
       accessible={false}
       pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
+      // @ts-ignore: Web supports
       style={pressableStyle}
       onPress={onPress}
     >

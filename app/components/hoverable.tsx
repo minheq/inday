@@ -9,6 +9,49 @@ interface HoverableProps {
 
 export function Hoverable(props: HoverableProps): JSX.Element {
   const { children, onHoverIn, onHoverOut } = props;
+  const { handlers, hovered } = useHoverable({ onHoverIn, onHoverOut });
+  const {
+    onMouseEnter,
+    onMouseLeave,
+    onResponderGrant,
+    onResponderRelease,
+    onPressIn,
+    onPressOut,
+  } = handlers;
+
+  const child = typeof children === 'function' ? children(hovered) : children;
+
+  return React.cloneElement(React.Children.only(child), {
+    onMouseEnter,
+    onMouseLeave,
+    // prevent hover showing while responder
+    onResponderGrant,
+    onResponderRelease,
+    // if child is Pressable
+    onPressIn,
+    onPressOut,
+  });
+}
+
+interface UseHoverableProps {
+  onHoverIn?: () => void;
+  onHoverOut?: () => void;
+}
+
+interface UseHoverableHandlers {
+  handlers: {
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    onResponderGrant: () => void;
+    onResponderRelease: () => void;
+    onPressIn: () => void;
+    onPressOut: () => void;
+  };
+  hovered: boolean;
+}
+
+export function useHoverable(props: UseHoverableProps): UseHoverableHandlers {
+  const { onHoverIn, onHoverOut } = props;
   const [state, setState] = useState({ hovered: false, showHover: true });
   const { hovered, showHover } = state;
 
@@ -45,19 +88,19 @@ export function Hoverable(props: HoverableProps): JSX.Element {
     setState({ showHover: true, hovered });
   }, [hovered]);
 
-  const child =
-    typeof children === 'function' ? children(showHover && hovered) : children;
-
-  return React.cloneElement(React.Children.only(child), {
-    onMouseEnter: handleMouseEnter,
-    onMouseLeave: handleMouseLeave,
-    // prevent hover showing while responder
-    onResponderGrant: handleGrant,
-    onResponderRelease: handleRelease,
-    // if child is Pressable
-    onPressIn: handleGrant,
-    onPressOut: handleRelease,
-  });
+  return {
+    handlers: {
+      onMouseEnter: handleMouseEnter,
+      onMouseLeave: handleMouseLeave,
+      // prevent hover showing while responder
+      onResponderGrant: handleGrant,
+      onResponderRelease: handleRelease,
+      // if child is Pressable
+      onPressIn: handleGrant,
+      onPressOut: handleRelease,
+    },
+    hovered: showHover && hovered,
+  };
 }
 
 let isEnabled = false;
