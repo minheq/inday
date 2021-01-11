@@ -9,17 +9,21 @@ import React, {
 } from 'react';
 import { View } from 'react-native';
 
-import { ContextMenuProps } from './context_menu';
-import { ContextMenuView, CONTEXT_MENU_ITEM_HEIGHT } from './context_menu_view';
+import { ContextMenuViewProps } from './context_menu_view';
+import {
+  ContextMenu,
+  ContextMenuItem,
+  CONTEXT_MENU_ITEM_HEIGHT,
+} from './context_menu';
 import { Popover, getPopoverAnchorAndHeight } from './popover';
 
-export const ContextMenu = memo(function ContextMenu(
-  props: ContextMenuProps,
+export const ContextMenuView = memo(function ContextMenuView(
+  props: ContextMenuViewProps,
 ): JSX.Element {
-  const { options, children, width = 240 } = props;
+  const { menuItems, children, style, width = 240 } = props;
   const contentHeight = useMemo((): number => {
-    return options.length * CONTEXT_MENU_ITEM_HEIGHT;
-  }, [options]);
+    return menuItems.length * CONTEXT_MENU_ITEM_HEIGHT;
+  }, [menuItems]);
   const ref = useRef<View>(null);
   const [state, setState] = useState({
     visible: false,
@@ -79,14 +83,16 @@ export const ContextMenu = memo(function ContextMenu(
         targetRef={ref}
         visible={state.visible}
         content={
-          <ContextMenuView
-            onPressed={handleRequestClose}
+          <ContextMenu
+            onPressMenuItem={handleRequestClose}
             width={width}
-            options={options}
+            menuItems={menuItems}
           />
         }
       />
-      <View ref={ref}>{children}</View>
+      <View style={style} ref={ref}>
+        {children}
+      </View>
     </Fragment>
   );
 });

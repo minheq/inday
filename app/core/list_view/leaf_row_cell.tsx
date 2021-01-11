@@ -86,7 +86,7 @@ import { LeafRowCellState } from '../../components/grid_renderer.common';
 import { isNumberString, toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { activeCellState, useListViewViewContext } from './list_view_view';
-import { useLeafRowContext, useLeafRowContextMenuOptions } from './leaf_row';
+import { useLeafRowContext, useLeafRowContextMenuItems } from './leaf_row';
 import { SingleOptionPicker } from '../select_options/option_picker';
 import { MultiOptionPicker } from '../select_options/option_multi_picker';
 import { assertUnreached } from '../../../lib/lang_utils';
@@ -102,7 +102,7 @@ import {
   PressableHighlight,
   PressableStateCallback,
 } from '../../components/pressable_highlight';
-import { ContextMenuView } from '../../components/context_menu_view';
+import { ContextMenu } from '../../components/context_menu';
 import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
 import { CollaboratorMultiPicker } from '../collaborators/collaborator_multi_picker';
 import { CollaboratorPicker } from '../collaborators/collaborator_picker';
@@ -420,7 +420,7 @@ const SelectCheckbox = memo(function SelectCheckbox(
 });
 
 const DotsMenu = memo(function DotsMenu(): JSX.Element {
-  const options = useLeafRowContextMenuOptions();
+  const menuItems = useLeafRowContextMenuItems();
   const targetRef = useRef<View>(null);
   const [visible, setVisible] = useState(false);
 
@@ -444,7 +444,7 @@ const DotsMenu = memo(function DotsMenu(): JSX.Element {
       <Popover
         visible={visible}
         targetRef={targetRef}
-        content={<ContextMenuView options={options} />}
+        content={<ContextMenu menuItems={menuItems} />}
         onRequestClose={handleRequestClose}
       />
     </View>

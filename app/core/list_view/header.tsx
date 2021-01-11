@@ -15,11 +15,8 @@ import {
 } from 'react-native';
 import { atom, useRecoilState } from 'recoil';
 
-import { ContextMenu } from '../../components/context_menu';
-import {
-  ContextMenuItem,
-  ContextMenuView,
-} from '../../components/context_menu_view';
+import { ContextMenuView } from '../../components/context_menu_view';
+import { ContextMenuItem, ContextMenu } from '../../components/context_menu';
 import { Hoverable } from '../../components/hoverable';
 import { Icon } from '../../components/icon';
 import { Row } from '../../components/row';
@@ -68,7 +65,7 @@ export const HeaderCell = memo(function HeaderCell(
   const anchorRef = useRef(0);
   const themeStyles = useThemeStyles();
   const updateListViewFieldConfig = useUpdateListViewFieldConfigMutation();
-  const options = useHeaderCellContextMenuOptions();
+  const menuItems = useHeaderCellContextMenuItems();
   const [visible, setVisible] = useState(false);
   const targetRef = useRef<View>(null);
 
@@ -122,7 +119,7 @@ export const HeaderCell = memo(function HeaderCell(
               primary && styles.primaryCell,
             ]}
           >
-            <ContextMenu options={options}>
+            <ContextMenuView style={styles.menuView} menuItems={menuItems}>
               <Row spacing={4}>
                 <Icon name={getFieldIcon(field.type)} />
                 <Text weight="bold">{field.name}</Text>
@@ -143,21 +140,21 @@ export const HeaderCell = memo(function HeaderCell(
                   <Icon color="primary" size="sm" name="ArrowHorizontal" />
                 </Pressable>
               )}
-            </ContextMenu>
+            </ContextMenuView>
           </PressableHighlight>
         )}
       </Hoverable>
       <Popover
         visible={visible}
         targetRef={targetRef}
-        content={<ContextMenuView options={options} />}
+        content={<ContextMenu menuItems={menuItems} />}
         onRequestClose={handleRequestClose}
       />
     </Fragment>
   );
 });
 
-function useHeaderCellContextMenuOptions() {
+function useHeaderCellContextMenuItems() {
   return useMemo(
     (): ContextMenuItem[] => [
       { label: 'Edit field type' },
@@ -193,16 +190,18 @@ const styles = StyleSheet.create({
 
   headerCell: {
     flex: 1,
-    paddingHorizontal: 8,
     justifyContent: 'center',
     borderBottomWidth: 1,
+  },
+  menuView: {
+    paddingHorizontal: 8,
   },
   primaryCell: {
     borderRightWidth: 2,
   },
   resizeHandler: {
     position: 'absolute',
-    right: -4,
+    right: 2,
     borderRadius: 999,
     borderWidth: 1,
     ...Platform.select({

@@ -1,10 +1,7 @@
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { assertUnreached } from '../../../lib/lang_utils';
-import {
-  ContextMenuItem,
-  ContextMenuView,
-} from '../../components/context_menu_view';
+import { ContextMenuItem, ContextMenu } from '../../components/context_menu';
 
 import { GroupRowCellState } from '../../components/grid_renderer.common';
 import { Icon } from '../../components/icon';
@@ -220,7 +217,7 @@ const CollapseToggle = memo(function CollapseToggle(
 });
 
 const DotsMenu = memo(function DotsMenu(): JSX.Element {
-  const options = useGroupRowContextMenuOptions();
+  const menuItems = useGroupRowContextMenuItems();
   const targetRef = useRef<View>(null);
   const [visible, setVisible] = useState(false);
 
@@ -244,14 +241,14 @@ const DotsMenu = memo(function DotsMenu(): JSX.Element {
       <Popover
         visible={visible}
         targetRef={targetRef}
-        content={<ContextMenuView options={options} />}
+        content={<ContextMenu menuItems={menuItems} />}
         onRequestClose={handleRequestClose}
       />
     </View>
   );
 });
 
-function useGroupRowContextMenuOptions(): ContextMenuItem[] {
+function useGroupRowContextMenuItems(): ContextMenuItem[] {
   return useMemo(
     (): ContextMenuItem[] => [
       { label: 'Collapse' },

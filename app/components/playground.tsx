@@ -11,7 +11,7 @@ import { tokens } from './tokens';
 import { PickerStories } from './picker.stories';
 import { Spacer } from './spacer';
 import { Row } from './row';
-import { ContextMenuStories } from './context_menu.stories';
+import { ContextMenuStories } from './context_menu_view.stories';
 import { FlatButton } from './flat_button';
 import { Content } from './content';
 import { useMediaQuery } from '../lib/media_query';

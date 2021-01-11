@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { ContextMenu } from '../../components/context_menu';
-import { ContextMenuItem } from '../../components/context_menu_view';
+import { ContextMenuView } from '../../components/context_menu_view';
+import { ContextMenuItem } from '../../components/context_menu';
 import { LeafRowState } from '../../components/grid_renderer.common';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Text } from '../../components/text';
@@ -56,7 +56,7 @@ interface LeafRowViewProps {
 function LeafRowView(props: LeafRowViewProps) {
   const { children } = props;
   const { selected } = useLeafRowContext();
-  const options = useLeafRowContextMenuOptions();
+  const menuItems = useLeafRowContextMenuItems();
   const themeStyles = useThemeStyles();
 
   return (
@@ -67,12 +67,12 @@ function LeafRowView(props: LeafRowViewProps) {
         selected && themeStyles.background.lightPrimary,
       ]}
     >
-      <ContextMenu options={options}>{children}</ContextMenu>
+      <ContextMenuView menuItems={menuItems}>{children}</ContextMenuView>
     </View>
   );
 }
 
-export function useLeafRowContextMenuOptions(): ContextMenuItem[] {
+export function useLeafRowContextMenuItems(): ContextMenuItem[] {
   const { onOpenDocument } = useListViewViewContext();
   const { documentID } = useLeafRowContext();
 
