@@ -538,7 +538,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value } = props;
   const { cell } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useCellKeyBindings();
+  useSingleSelectFieldKindCellKeyBindings();
 
   const handleChangeDate = useCallback(
     async (date: Date) => {
@@ -620,9 +620,11 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
         <Pressable style={styles.cellRoot} onPress={onStartEditing}>
           {child}
         </Pressable>
-        <View style={styles.actionsWrapper}>
-          <EmailLink email={value} text="Send link" />
-        </View>
+        {value && (
+          <View style={styles.actionsWrapper}>
+            <EmailLink email={value} text="Send link" />
+          </View>
+        )}
       </View>
     );
   }
@@ -641,7 +643,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useCellKeyBindings();
+  useMultiSelectFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -678,7 +680,7 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
 ) {
   const { value } = props;
 
-  useCellKeyBindings();
+  useMultiSelectFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -747,7 +749,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
   const { value, field } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useCellKeyBindings();
+  useMultiSelectFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -869,9 +871,11 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
         <Pressable style={styles.cellRoot} onPress={onStartEditing}>
           {child}
         </Pressable>
-        <View style={styles.actionsWrapper}>
-          <PhoneNumberLink phoneNumber={value} text="Call" />
-        </View>
+        {value && (
+          <View style={styles.actionsWrapper}>
+            <PhoneNumberLink phoneNumber={value} text="Call" />
+          </View>
+        )}
       </View>
     );
   }
@@ -890,13 +894,13 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useCellKeyBindings();
+  useSingleSelectFieldKindCellKeyBindings();
 
-  const child = value ? (
+  const child = (
     <View style={styles.cellValueContainer}>
-      <CollaboratorBadge collaboratorID={value} />
+      {value && <CollaboratorBadge collaboratorID={value} />}
     </View>
-  ) : null;
+  );
 
   if (cell.state === 'default') {
     return child;
@@ -928,13 +932,13 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   const { value } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
-  useCellKeyBindings();
+  useSingleSelectFieldKindCellKeyBindings();
 
-  const child = value ? (
+  const child = (
     <View style={styles.cellValueContainer}>
-      <DocumentLinkBadge documentID={value} />
+      {value && <DocumentLinkBadge documentID={value} />}
     </View>
-  ) : null;
+  );
 
   if (cell.state === 'focused') {
     return (
@@ -1008,15 +1012,15 @@ const SingleOptionCell = memo(function SingleOptionCell(
   const { value, field } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useCellKeyBindings();
+  useSingleSelectFieldKindCellKeyBindings();
 
   const selected = field.options.find((o) => o.id === value);
 
-  const child = selected ? (
+  const child = (
     <View style={styles.cellValueContainer}>
-      <OptionBadge option={selected} />
+      {selected && <OptionBadge option={selected} />}
     </View>
-  ) : null;
+  );
 
   if (cell.state === 'default') {
     return child;
@@ -1083,9 +1087,11 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
         <Pressable style={styles.cellRoot} onPress={onStartEditing}>
           {child}
         </Pressable>
-        <View style={styles.actionsWrapper}>
-          <URLLink url={value} text="Open" />
-        </View>
+        {value && (
+          <View style={styles.actionsWrapper}>
+            <URLLink url={value} text="Open" />
+          </View>
+        )}
       </View>
     );
   }
@@ -1105,8 +1111,13 @@ function useTextFieldKindCellKeyBindings() {
     [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
   );
 
+  const handleDeleteKey = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, '');
+  }, [updateDocumentFieldValue, documentID, fieldID]);
+
   useCellKeyBindings({
     onPrintableKey: handlePrintableKey,
+    onDelete: handleDeleteKey,
   });
 }
 
@@ -1126,8 +1137,39 @@ function useNumberFieldKindCellKeyBindings() {
     [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
   );
 
+  const handleDeleteKey = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, null);
+  }, [updateDocumentFieldValue, documentID, fieldID]);
+
   useCellKeyBindings({
     onPrintableKey: handlePrintableKey,
+    onDelete: handleDeleteKey,
+  });
+}
+
+function useSingleSelectFieldKindCellKeyBindings() {
+  const { documentID, fieldID } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+
+  const handleDeleteKey = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, null);
+  }, [updateDocumentFieldValue, documentID, fieldID]);
+
+  useCellKeyBindings({
+    onDelete: handleDeleteKey,
+  });
+}
+
+function useMultiSelectFieldKindCellKeyBindings() {
+  const { documentID, fieldID } = useLeafRowCellContext();
+  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
+
+  const handleDeleteKey = useCallback(async () => {
+    await updateDocumentFieldValue(documentID, fieldID, []);
+  }, [updateDocumentFieldValue, documentID, fieldID]);
+
+  useCellKeyBindings({
+    onDelete: handleDeleteKey,
   });
 }
 
@@ -1224,6 +1266,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const {
     onEnter: onEnterOverride,
     onPrintableKey: onPrintableKeyOverride,
+    onDelete: onDeleteOverride,
   } = props;
   const {
     rowToDocumentIDCache,
@@ -1371,8 +1414,10 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   }, [setActiveCell]);
 
   const onDelete = useCallback(() => {
-    return;
-  }, []);
+    if (onDeleteOverride) {
+      onDeleteOverride();
+    }
+  }, [onDeleteOverride]);
 
   const onPrintableKey = useCallback(
     (key: string) => {
@@ -1541,6 +1586,7 @@ const styles = StyleSheet.create({
   },
   multiLineTextFocused: {
     padding: 8,
+    minHeight: LEAF_ROW_HEIGHT,
     maxHeight: 400,
     overflow: 'hidden',
   },
