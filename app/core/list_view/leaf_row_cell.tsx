@@ -1550,7 +1550,8 @@ const styles = StyleSheet.create({
   },
   cellValueContainer: {
     height: LEAF_ROW_HEIGHT,
-    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 8,
   },
   input: {

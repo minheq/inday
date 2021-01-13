@@ -187,7 +187,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         <Text color="muted" size="xs">
           {field.name}
         </Text>
-        {renderValue()}
+        <View style={styles.valueContainer}>{renderValue()}</View>
       </View>
       <View
         pointerEvents="none"
@@ -291,6 +291,9 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  valueContainer: {
+    flexDirection: 'row',
   },
   primaryCellText: {
     flex: 1,
