@@ -330,13 +330,13 @@ const filterConfigEditComponentByFieldType: {
   [FieldType.MultiCollaborator]: TextFilterRuleInput,
   [FieldType.MultiDocumentLink]: TextFilterRuleInput,
   [FieldType.MultiLineText]: TextFilterRuleInput,
-  [FieldType.MultiOption]: TextFilterRuleInput,
+  [FieldType.MultiSelect]: TextFilterRuleInput,
   [FieldType.Number]: NumberFilterRuleInput,
   [FieldType.PhoneNumber]: TextFilterRuleInput,
   [FieldType.SingleCollaborator]: TextFilterRuleInput,
   [FieldType.SingleDocumentLink]: TextFilterRuleInput,
   [FieldType.SingleLineText]: TextFilterRuleInput,
-  [FieldType.SingleOption]: TextFilterRuleInput,
+  [FieldType.SingleSelect]: TextFilterRuleInput,
   [FieldType.URL]: TextFilterRuleInput,
 };
 

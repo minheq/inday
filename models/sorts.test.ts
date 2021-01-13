@@ -10,8 +10,8 @@ import {
 import {
   FieldType,
   FieldValue,
-  assertMultiOptionField,
-  assertSingleOptionField,
+  assertMultiSelectField,
+  assertSingleSelectField,
 } from './fields';
 import { sortDocuments, SortGetters } from './sorts';
 import { Document, DocumentID } from './documents';
@@ -146,9 +146,9 @@ test('date sort - descending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-function prepareMultiOptionsSort() {
-  const { getters, field } = prepare(FieldType.MultiOption, []);
-  assertMultiOptionField(field);
+function prepareMultiSelectsSort() {
+  const { getters, field } = prepare(FieldType.MultiSelect, []);
+  assertMultiSelectField(field);
   const opt1 = field.options[0];
   const opt2 = field.options[1];
 
@@ -161,7 +161,7 @@ function prepareMultiOptionsSort() {
 }
 
 test('multi options sort - ascending', (t) => {
-  const { documents, field, getters } = prepareMultiOptionsSort();
+  const { documents, field, getters } = prepareMultiSelectsSort();
   const [document1, document2, document3] = documents;
   const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
   const result = sortDocuments([sort], documents, getters);
@@ -172,7 +172,7 @@ test('multi options sort - ascending', (t) => {
 });
 
 test('multi options sort - descending', (t) => {
-  const { documents, field, getters } = prepareMultiOptionsSort();
+  const { documents, field, getters } = prepareMultiSelectsSort();
   const [document1, document2, document3] = documents;
 
   const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
@@ -183,9 +183,9 @@ test('multi options sort - descending', (t) => {
   t.deepEqual(result[2].id, document3.id);
 });
 
-function prepareSingleOptionsSort() {
-  const { getters, field } = prepare(FieldType.SingleOption, []);
-  assertSingleOptionField(field);
+function prepareSingleSelectsSort() {
+  const { getters, field } = prepare(FieldType.SingleSelect, []);
+  assertSingleSelectField(field);
   const opt1 = field.options[0];
   const opt2 = field.options[1];
 
@@ -198,7 +198,7 @@ function prepareSingleOptionsSort() {
 }
 
 test('single option sort - ascending', (t) => {
-  const { documents, field, getters } = prepareSingleOptionsSort();
+  const { documents, field, getters } = prepareSingleSelectsSort();
   const [document1, document2, document3] = documents;
   const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
   const result = sortDocuments([sort], documents, getters);
@@ -209,7 +209,7 @@ test('single option sort - ascending', (t) => {
 });
 
 test('single option sort - descending', (t) => {
-  const { documents, field, getters } = prepareSingleOptionsSort();
+  const { documents, field, getters } = prepareSingleSelectsSort();
   const [document1, document2, document3] = documents;
 
   const sort = makeSort({}, { fieldID: field.id, order: 'descending' });

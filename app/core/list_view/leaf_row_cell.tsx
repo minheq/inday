@@ -27,13 +27,13 @@ import {
   MultiCollaboratorField,
   MultiDocumentLinkField,
   MultiLineTextField,
-  MultiOptionField,
+  MultiSelectField,
   NumberField,
   PhoneNumberField,
   SingleCollaboratorField,
   SingleDocumentLinkField,
   SingleLineTextField,
-  SingleOptionField,
+  SingleSelectField,
   URLField,
   Field,
   CheckboxFieldValue,
@@ -43,13 +43,13 @@ import {
   MultiCollaboratorFieldValue,
   MultiDocumentLinkFieldValue,
   MultiLineTextFieldValue,
-  MultiOptionFieldValue,
+  MultiSelectFieldValue,
   NumberFieldValue,
   PhoneNumberFieldValue,
   SingleCollaboratorFieldValue,
   SingleDocumentLinkFieldValue,
   SingleLineTextFieldValue,
-  SingleOptionFieldValue,
+  SingleSelectFieldValue,
   URLFieldValue,
   FieldValue,
   FieldID,
@@ -60,12 +60,12 @@ import {
   assertMultiCollaboratorFieldValue,
   assertMultiDocumentLinkFieldValue,
   assertMultiLineTextFieldValue,
-  assertMultiOptionFieldValue,
+  assertMultiSelectFieldValue,
   assertNumberFieldValue,
   assertSingleCollaboratorFieldValue,
   assertSingleDocumentLinkFieldValue,
   assertSingleLineTextFieldValue,
-  assertSingleOptionFieldValue,
+  assertSingleSelectFieldValue,
   assertURLFieldValue,
   assertPhoneNumberFieldValue,
   BooleanFieldKindValue,
@@ -87,8 +87,8 @@ import { isNumberString, toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
 import { activeCellState, useListViewViewContext } from './list_view_view';
 import { useLeafRowContext, useLeafRowContextMenuItems } from './leaf_row';
-import { SingleOptionPicker } from '../select_options/option_picker';
-import { MultiOptionPicker } from '../select_options/option_multi_picker';
+import { SingleSelectPicker } from '../select/single_select_picker';
+import { MultiSelectPicker } from '../select/multi_select_picker';
 import { assertUnreached } from '../../../lib/lang_utils';
 import { Slide } from '../../components/slide';
 import { Icon } from '../../components/icon';
@@ -107,10 +107,10 @@ import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list'
 import { CollaboratorMultiPicker } from '../collaborators/collaborator_multi_picker';
 import { CollaboratorPicker } from '../collaborators/collaborator_picker';
 import { DocumentLinkBadgeList } from '../document_link/document_link_badge_list';
-import { OptionBadgeList } from '../select_options/option_badge_list';
+import { OptionBadgeList } from '../select/option_badge_list';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { DocumentLinkBadge } from '../document_link/document_link_badge';
-import { OptionBadge } from '../select_options/option_badge';
+import { OptionBadge } from '../select/option_badge';
 import { formatCurrency } from '../../../lib/currency';
 import { getSystemLocale } from '../../lib/locale';
 import {
@@ -326,9 +326,9 @@ const LeafRowCellView = memo(function LeafRowCellView(
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return <MultiLineTextCell field={field} value={value} />;
-      case FieldType.MultiOption:
-        assertMultiOptionFieldValue(value);
-        return <MultiOptionCell field={field} value={value} />;
+      case FieldType.MultiSelect:
+        assertMultiSelectFieldValue(value);
+        return <MultiSelectCell field={field} value={value} />;
       case FieldType.Number:
         assertNumberFieldValue(value);
         return <NumberCell field={field} value={value} />;
@@ -344,9 +344,9 @@ const LeafRowCellView = memo(function LeafRowCellView(
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return <SingleLineTextCell field={field} value={value} />;
-      case FieldType.SingleOption:
-        assertSingleOptionFieldValue(value);
-        return <SingleOptionCell field={field} value={value} />;
+      case FieldType.SingleSelect:
+        assertSingleSelectFieldValue(value);
+        return <SingleSelectCell field={field} value={value} />;
       case FieldType.URL:
         assertURLFieldValue(value);
         return <URLCell field={field} value={value} />;
@@ -538,7 +538,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
   const { value } = props;
   const { cell } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useSingleSelectFieldKindCellKeyBindings();
+  useSingleOptionFieldKindCellKeyBindings();
 
   const handleChangeDate = useCallback(
     async (date: Date) => {
@@ -643,7 +643,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
   const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useMultiSelectFieldKindCellKeyBindings();
+  useMultiOptionFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -680,7 +680,7 @@ const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
 ) {
   const { value } = props;
 
-  useMultiSelectFieldKindCellKeyBindings();
+  useMultiOptionFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -738,18 +738,18 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   );
 });
 
-interface MultiOptionCellProps {
-  value: MultiOptionFieldValue;
-  field: MultiOptionField;
+interface MultiSelectCellProps {
+  value: MultiSelectFieldValue;
+  field: MultiSelectField;
 }
 
-const MultiOptionCell = memo(function MultiOptionCell(
-  props: MultiOptionCellProps,
+const MultiSelectCell = memo(function MultiSelectCell(
+  props: MultiSelectCellProps,
 ) {
   const { value, field } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useMultiSelectFieldKindCellKeyBindings();
+  useMultiOptionFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -764,7 +764,7 @@ const MultiOptionCell = memo(function MultiOptionCell(
   return (
     <PickerTrigger
       content={
-        <MultiOptionPicker
+        <MultiSelectPicker
           value={value}
           field={field}
           onChange={handleChange}
@@ -894,7 +894,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
   const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useSingleSelectFieldKindCellKeyBindings();
+  useSingleOptionFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -932,7 +932,7 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
   const { value } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
 
-  useSingleSelectFieldKindCellKeyBindings();
+  useSingleOptionFieldKindCellKeyBindings();
 
   const child = (
     <View style={styles.cellValueContainer}>
@@ -1001,18 +1001,18 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   return <View style={styles.cellRoot}>{child}</View>;
 });
 
-interface SingleOptionCellProps {
-  value: SingleOptionFieldValue;
-  field: SingleOptionField;
+interface SingleSelectCellProps {
+  value: SingleSelectFieldValue;
+  field: SingleSelectField;
 }
 
-const SingleOptionCell = memo(function SingleOptionCell(
-  props: SingleOptionCellProps,
+const SingleSelectCell = memo(function SingleSelectCell(
+  props: SingleSelectCellProps,
 ) {
   const { value, field } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
   const handleChange = useFieldValueChangeHandler();
-  useSingleSelectFieldKindCellKeyBindings();
+  useSingleOptionFieldKindCellKeyBindings();
 
   const selected = field.options.find((o) => o.id === value);
 
@@ -1029,7 +1029,7 @@ const SingleOptionCell = memo(function SingleOptionCell(
   return (
     <PickerTrigger
       content={
-        <SingleOptionPicker
+        <SingleSelectPicker
           value={value}
           onChange={handleChange}
           field={field}
@@ -1147,7 +1147,7 @@ function useNumberFieldKindCellKeyBindings() {
   });
 }
 
-function useSingleSelectFieldKindCellKeyBindings() {
+function useSingleOptionFieldKindCellKeyBindings() {
   const { documentID, fieldID } = useLeafRowCellContext();
   const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
 
@@ -1160,7 +1160,7 @@ function useSingleSelectFieldKindCellKeyBindings() {
   });
 }
 
-function useMultiSelectFieldKindCellKeyBindings() {
+function useMultiOptionFieldKindCellKeyBindings() {
   const { documentID, fieldID } = useLeafRowCellContext();
   const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation();
 

@@ -16,13 +16,13 @@ import {
   assertMultiCollaboratorFieldValue,
   assertMultiDocumentLinkFieldValue,
   assertMultiLineTextFieldValue,
-  assertMultiOptionFieldValue,
+  assertMultiSelectFieldValue,
   assertNumberFieldValue,
   assertPhoneNumberFieldValue,
   assertSingleCollaboratorFieldValue,
   assertSingleDocumentLinkFieldValue,
   assertSingleLineTextFieldValue,
-  assertSingleOptionFieldValue,
+  assertSingleSelectFieldValue,
   assertURLFieldValue,
   Field,
   FieldID,
@@ -34,10 +34,10 @@ import { useListViewViewContext } from './list_view_view';
 import { Popover } from '../../components/popover';
 import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
 import { DocumentLinkBadgeList } from '../document_link/document_link_badge_list';
-import { OptionBadgeList } from '../select_options/option_badge_list';
+import { OptionBadgeList } from '../select/option_badge_list';
 import { CollaboratorBadge } from '../collaborators/collaborator_badge';
 import { DocumentLinkBadge } from '../document_link/document_link_badge';
-import { OptionBadge } from '../select_options/option_badge';
+import { OptionBadge } from '../select/option_badge';
 import { formatDate, parseISODate } from '../../../lib/date_utils';
 import { getSystemLocale } from '../../lib/locale';
 import { formatCurrency } from '../../../lib/currency';
@@ -134,8 +134,8 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
       case FieldType.MultiLineText:
         assertMultiLineTextFieldValue(value);
         return <Text>{value}</Text>;
-      case FieldType.MultiOption:
-        assertMultiOptionFieldValue(value);
+      case FieldType.MultiSelect:
+        assertMultiSelectFieldValue(value);
         return <OptionBadgeList field={field} optionIDs={value} />;
       case FieldType.Number:
         assertNumberFieldValue(value);
@@ -154,8 +154,8 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
       case FieldType.SingleLineText:
         assertSingleLineTextFieldValue(value);
         return <Text numberOfLines={1}>{value}</Text>;
-      case FieldType.SingleOption: {
-        assertSingleOptionFieldValue(value);
+      case FieldType.SingleSelect: {
+        assertSingleSelectFieldValue(value);
         const selected = field.options.find((o) => o.id === value);
         return selected ? <OptionBadge option={selected} /> : null;
       }

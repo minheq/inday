@@ -35,13 +35,13 @@ export enum FieldType {
   Email = 'Email',
   MultiCollaborator = 'MultiCollaborator',
   MultiLineText = 'MultiLineText',
-  MultiOption = 'MultiOption',
+  MultiSelect = 'MultiSelect',
   MultiDocumentLink = 'MultiDocumentLink',
   Number = 'Number',
   PhoneNumber = 'PhoneNumber',
   SingleCollaborator = 'SingleCollaborator',
   SingleLineText = 'SingleLineText',
-  SingleOption = 'SingleOption',
+  SingleSelect = 'SingleSelect',
   SingleDocumentLink = 'SingleDocumentLink',
   URL = 'URL',
 }
@@ -89,17 +89,17 @@ export interface SelectOption {
   order: number;
 }
 
-export interface SingleOptionFieldConfig {
-  type: FieldType.SingleOption;
+export interface SingleSelectFieldConfig {
+  type: FieldType.SingleSelect;
   options: SelectOption[];
 }
-export interface SingleOptionField extends BaseField, SingleOptionFieldConfig {}
+export interface SingleSelectField extends BaseField, SingleSelectFieldConfig {}
 
-export interface MultiOptionFieldConfig {
-  type: FieldType.MultiOption;
+export interface MultiSelectFieldConfig {
+  type: FieldType.MultiSelect;
   options: SelectOption[];
 }
-export interface MultiOptionField extends BaseField, MultiOptionFieldConfig {}
+export interface MultiSelectField extends BaseField, MultiSelectFieldConfig {}
 
 export interface SingleCollaboratorFieldConfig {
   type: FieldType.SingleCollaborator;
@@ -206,26 +206,26 @@ export type FieldConfig =
   | MultiCollaboratorFieldConfig
   | MultiDocumentLinkFieldConfig
   | MultiLineTextFieldConfig
-  | MultiOptionFieldConfig
+  | MultiSelectFieldConfig
   | NumberFieldConfig
   | PhoneNumberFieldConfig
   | SingleCollaboratorFieldConfig
   | SingleDocumentLinkFieldConfig
   | SingleLineTextFieldConfig
-  | SingleOptionFieldConfig
+  | SingleSelectFieldConfig
   | URLFieldConfig;
 
 export type BooleanFieldKind = CheckboxField;
 export type DateFieldKind = DateField;
-export type MultiSelectFieldKind =
+export type MultiOptionFieldKind =
   | MultiCollaboratorField
   | MultiDocumentLinkField
-  | MultiOptionField;
+  | MultiSelectField;
 export type NumberFieldKind = CurrencyField | NumberField;
-export type SingleSelectFieldKind =
+export type SingleOptionFieldKind =
   | SingleCollaboratorField
   | SingleDocumentLinkField
-  | SingleOptionField;
+  | SingleSelectField;
 export type TextFieldKind =
   | EmailField
   | MultiLineTextField
@@ -237,9 +237,9 @@ export type PrimaryField = TextFieldKind;
 export type Field =
   | BooleanFieldKind
   | DateFieldKind
-  | MultiSelectFieldKind
+  | MultiOptionFieldKind
   | NumberFieldKind
-  | SingleSelectFieldKind
+  | SingleOptionFieldKind
   | TextFieldKind;
 
 export type CheckboxFieldValue = boolean;
@@ -249,26 +249,26 @@ export type EmailFieldValue = string;
 export type MultiCollaboratorFieldValue = CollaboratorID[];
 export type MultiDocumentLinkFieldValue = DocumentID[];
 export type MultiLineTextFieldValue = string;
-export type MultiOptionFieldValue = SelectOptionID[];
+export type MultiSelectFieldValue = SelectOptionID[];
 export type NumberFieldValue = number | null;
 export type PhoneNumberFieldValue = string;
 export type SingleCollaboratorFieldValue = CollaboratorID | null;
 export type SingleDocumentLinkFieldValue = DocumentID | null;
 export type SingleLineTextFieldValue = string;
-export type SingleOptionFieldValue = SelectOptionID | null;
+export type SingleSelectFieldValue = SelectOptionID | null;
 export type URLFieldValue = string;
 
 export type BooleanFieldKindValue = CheckboxFieldValue;
 export type DateFieldKindValue = DateFieldValue;
-export type MultiSelectFieldKindValue =
+export type MultiOptionFieldKindValue =
   | MultiCollaboratorFieldValue
   | MultiDocumentLinkFieldValue
-  | MultiOptionFieldValue;
+  | MultiSelectFieldValue;
 export type NumberFieldKindValue = CurrencyFieldValue | NumberFieldValue;
-export type SingleSelectFieldKindValue =
+export type SingleOptionFieldKindValue =
   | SingleCollaboratorFieldValue
   | SingleDocumentLinkFieldValue
-  | SingleOptionFieldValue;
+  | SingleSelectFieldValue;
 export type TextFieldKindValue =
   | EmailFieldValue
   | MultiLineTextFieldValue
@@ -280,9 +280,9 @@ export type PrimaryFieldValue = TextFieldKindValue;
 export type FieldValue =
   | BooleanFieldKindValue
   | DateFieldKindValue
-  | MultiSelectFieldKindValue
+  | MultiOptionFieldKindValue
   | NumberFieldKindValue
-  | SingleSelectFieldKindValue
+  | SingleOptionFieldKindValue
   | TextFieldKindValue;
 
 export interface FieldTypeToField {
@@ -292,13 +292,13 @@ export interface FieldTypeToField {
   [FieldType.Email]: EmailField;
   [FieldType.MultiCollaborator]: MultiCollaboratorField;
   [FieldType.MultiLineText]: MultiLineTextField;
-  [FieldType.MultiOption]: MultiOptionField;
+  [FieldType.MultiSelect]: MultiSelectField;
   [FieldType.MultiDocumentLink]: MultiDocumentLinkField;
   [FieldType.Number]: NumberField;
   [FieldType.PhoneNumber]: PhoneNumberField;
   [FieldType.SingleCollaborator]: SingleCollaboratorField;
   [FieldType.SingleLineText]: SingleLineTextField;
-  [FieldType.SingleOption]: SingleOptionField;
+  [FieldType.SingleSelect]: SingleSelectField;
   [FieldType.SingleDocumentLink]: SingleDocumentLinkField;
   [FieldType.URL]: URLField;
 }
@@ -310,13 +310,13 @@ export interface FieldTypeToFieldValue {
   [FieldType.Email]: EmailFieldValue;
   [FieldType.MultiCollaborator]: MultiCollaboratorFieldValue;
   [FieldType.MultiLineText]: MultiLineTextFieldValue;
-  [FieldType.MultiOption]: MultiOptionFieldValue;
+  [FieldType.MultiSelect]: MultiSelectFieldValue;
   [FieldType.MultiDocumentLink]: MultiDocumentLinkFieldValue;
   [FieldType.Number]: NumberFieldValue;
   [FieldType.PhoneNumber]: PhoneNumberFieldValue;
   [FieldType.SingleCollaborator]: SingleCollaboratorFieldValue;
   [FieldType.SingleLineText]: SingleLineTextFieldValue;
-  [FieldType.SingleOption]: SingleOptionFieldValue;
+  [FieldType.SingleSelect]: SingleSelectFieldValue;
   [FieldType.SingleDocumentLink]: SingleDocumentLinkFieldValue;
   [FieldType.URL]: URLFieldValue;
 }
@@ -342,8 +342,8 @@ export function stringifyFieldValue(
       }
 
       return value.toString();
-    case FieldType.MultiOption: {
-      assertMultiOptionFieldValue(value);
+    case FieldType.MultiSelect: {
+      assertMultiSelectFieldValue(value);
       return value
         .map((selectOptionID) => {
           const selected = field.options.find(
@@ -358,8 +358,8 @@ export function stringifyFieldValue(
         })
         .join(', ');
     }
-    case FieldType.SingleOption: {
-      assertSingleOptionFieldValue(value);
+    case FieldType.SingleSelect: {
+      assertSingleSelectFieldValue(value);
       const selected = field.options.find((opt) => opt.id === value);
 
       if (selected === undefined) {
@@ -407,17 +407,17 @@ export function areFieldValuesEqual(
       assertNumberFieldKindValue(b);
       return areNumberFieldKindValueEqual(a, b);
     case FieldType.MultiCollaborator:
-    case FieldType.MultiOption:
+    case FieldType.MultiSelect:
     case FieldType.MultiDocumentLink:
-      assertMultiSelectFieldKindValue(a);
-      assertMultiSelectFieldKindValue(b);
-      return areMultiSelectFieldKindValueEqual(a, b);
+      assertMultiOptionFieldKindValue(a);
+      assertMultiOptionFieldKindValue(b);
+      return areMultiOptionFieldKindValueEqual(a, b);
     case FieldType.SingleCollaborator:
-    case FieldType.SingleOption:
+    case FieldType.SingleSelect:
     case FieldType.SingleDocumentLink:
-      assertSingleSelectFieldKindValue(a);
-      assertSingleSelectFieldKindValue(b);
-      return areSingleSelectFieldKindValueEqual(a, b);
+      assertSingleOptionFieldKindValue(a);
+      assertSingleOptionFieldKindValue(b);
+      return areSingleOptionFieldKindValueEqual(a, b);
     case FieldType.Checkbox:
       assertBooleanFieldKindValue(a);
       assertBooleanFieldKindValue(b);
@@ -445,14 +445,14 @@ function areNumberFieldKindValueEqual(
   return a === b;
 }
 
-function areSingleSelectFieldKindValueEqual(
-  a: SingleSelectFieldKindValue,
-  b: SingleSelectFieldKindValue,
+function areSingleOptionFieldKindValueEqual(
+  a: SingleOptionFieldKindValue,
+  b: SingleOptionFieldKindValue,
 ): boolean {
   return a === b;
 }
 
-function areMultiSelectFieldKindValueEqual(a: string[], b: string[]): boolean {
+function areMultiOptionFieldKindValueEqual(a: string[], b: string[]): boolean {
   return hasAllOf(a, b);
 }
 
@@ -494,22 +494,22 @@ export function assertMultiLineTextField(
   }
 }
 
-export function assertSingleOptionField(
+export function assertSingleSelectField(
   field: Field,
-): asserts field is SingleOptionField {
-  if (field.type !== FieldType.SingleOption) {
+): asserts field is SingleSelectField {
+  if (field.type !== FieldType.SingleSelect) {
     throw new Error(
-      `Expected field to be SingleOptionField. Received ${field.type}`,
+      `Expected field to be SingleSelectField. Received ${field.type}`,
     );
   }
 }
 
-export function assertMultiOptionField(
+export function assertMultiSelectField(
   field: Field,
-): asserts field is MultiOptionField {
-  if (field.type !== FieldType.MultiOption) {
+): asserts field is MultiSelectField {
+  if (field.type !== FieldType.MultiSelect) {
     throw new Error(
-      `Expected field to be MultiOptionField. Received ${field.type}`,
+      `Expected field to be MultiSelectField. Received ${field.type}`,
     );
   }
 }
@@ -647,8 +647,8 @@ export function assertFieldValueType<T extends FieldType>(
     case FieldType.MultiLineText:
       assertMultiLineTextFieldValue(value);
       break;
-    case FieldType.MultiOption:
-      assertMultiOptionFieldValue(value);
+    case FieldType.MultiSelect:
+      assertMultiSelectFieldValue(value);
       break;
     case FieldType.MultiDocumentLink:
       assertMultiDocumentLinkFieldValue(value);
@@ -665,8 +665,8 @@ export function assertFieldValueType<T extends FieldType>(
     case FieldType.SingleLineText:
       assertSingleLineTextFieldValue(value);
       break;
-    case FieldType.SingleOption:
-      assertSingleOptionFieldValue(value);
+    case FieldType.SingleSelect:
+      assertSingleSelectFieldValue(value);
       break;
     case FieldType.SingleDocumentLink:
       assertSingleDocumentLinkFieldValue(value);
@@ -783,16 +783,16 @@ export function assertMultiLineTextFieldValue(
   }
 }
 
-export function assertMultiOptionFieldValue(
+export function assertMultiSelectFieldValue(
   value: FieldValue,
-): asserts value is MultiOptionFieldValue {
+): asserts value is MultiSelectFieldValue {
   if (value === null) {
     return;
   }
 
   if (!Array.isArray(value)) {
     throw new Error(
-      `Expected MultiOptionFieldValue to be string[]. Received "${JSON.stringify(
+      `Expected MultiSelectFieldValue to be string[]. Received "${JSON.stringify(
         value,
       )}"`,
     );
@@ -877,16 +877,16 @@ export function assertSingleLineTextFieldValue(
   }
 }
 
-export function assertSingleOptionFieldValue(
+export function assertSingleSelectFieldValue(
   value: FieldValue,
-): asserts value is SingleOptionFieldValue {
+): asserts value is SingleSelectFieldValue {
   if (value === null) {
     return;
   }
 
   if (typeof value !== 'string') {
     throw new Error(
-      `Expected SingleOptionFieldValue to be string. Received "${JSON.stringify(
+      `Expected SingleSelectFieldValue to be string. Received "${JSON.stringify(
         value,
       )}"`,
     );
@@ -929,12 +929,12 @@ export function assertDateFieldKindValue(
   }
 }
 
-export function assertMultiSelectFieldKindValue(
+export function assertMultiOptionFieldKindValue(
   value: FieldValue,
-): asserts value is MultiSelectFieldKindValue {
+): asserts value is MultiOptionFieldKindValue {
   if (Array.isArray(value) === false) {
     throw new Error(
-      `Expected MultiSelectFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected MultiOptionFieldKindValue. Received ${JSON.stringify(value)}`,
     );
   }
 }
@@ -949,12 +949,12 @@ export function assertNumberFieldKindValue(
   }
 }
 
-export function assertSingleSelectFieldKindValue(
+export function assertSingleOptionFieldKindValue(
   value: FieldValue,
-): asserts value is SingleSelectFieldKindValue {
+): asserts value is SingleOptionFieldKindValue {
   if (value !== null && typeof value !== 'string') {
     throw new Error(
-      `Expected SingleSelectFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected SingleOptionFieldKindValue. Received ${JSON.stringify(value)}`,
     );
   }
 }
@@ -987,7 +987,7 @@ export function getDefaultFieldValue(field: Field): FieldValue {
     case FieldType.Number:
     case FieldType.Date:
     case FieldType.SingleCollaborator:
-    case FieldType.SingleOption:
+    case FieldType.SingleSelect:
     case FieldType.SingleDocumentLink:
       return null;
     case FieldType.PhoneNumber:
@@ -997,7 +997,7 @@ export function getDefaultFieldValue(field: Field): FieldValue {
     case FieldType.SingleLineText:
       return '';
     case FieldType.MultiCollaborator:
-    case FieldType.MultiOption:
+    case FieldType.MultiSelect:
     case FieldType.MultiDocumentLink:
       return [];
     default:

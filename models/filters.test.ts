@@ -28,17 +28,17 @@ import {
   filterByDateFieldKindFilterRuleIsNot,
   filterByDateFieldKindFilterRuleIsEmpty,
   filterByDateFieldKindFilterRuleIsNotEmpty,
-  filterBySingleSelectFieldKindFilterRuleIs,
-  filterBySingleSelectFieldKindFilterRuleIsNot,
-  filterBySingleSelectFieldKindFilterRuleIsAnyOf,
-  filterBySingleSelectFieldKindFilterRuleIsNoneOf,
-  filterBySingleSelectFieldKindFilterRuleIsEmpty,
-  filterBySingleSelectFieldKindFilterRuleIsNotEmpty,
-  filterByMultiSelectFieldKindFilterRuleHasAnyOf,
-  filterByMultiSelectFieldKindFilterRuleHasAllOf,
-  filterByMultiSelectFieldKindFilterRuleHasNoneOf,
-  filterByMultiSelectFieldKindFilterRuleIsEmpty,
-  filterByMultiSelectFieldKindFilterRuleIsNotEmpty,
+  filterBySingleOptionFieldKindFilterRuleIs,
+  filterBySingleOptionFieldKindFilterRuleIsNot,
+  filterBySingleOptionFieldKindFilterRuleIsAnyOf,
+  filterBySingleOptionFieldKindFilterRuleIsNoneOf,
+  filterBySingleOptionFieldKindFilterRuleIsEmpty,
+  filterBySingleOptionFieldKindFilterRuleIsNotEmpty,
+  filterByMultiOptionFieldKindFilterRuleHasAnyOf,
+  filterByMultiOptionFieldKindFilterRuleHasAllOf,
+  filterByMultiOptionFieldKindFilterRuleHasNoneOf,
+  filterByMultiOptionFieldKindFilterRuleIsEmpty,
+  filterByMultiOptionFieldKindFilterRuleIsNotEmpty,
   filterByBooleanFieldKindFilterRuleIs,
 } from './filters';
 
@@ -305,78 +305,78 @@ test('filterByDateFieldKindFilterRuleIsNotEmpty', (t) => {
   t.deepEqual(filter(null), false);
 });
 
-test('filterBySingleSelectFieldKindFilterRuleIs', (t) => {
-  const filter = filterBySingleSelectFieldKindFilterRuleIs;
+test('filterBySingleOptionFieldKindFilterRuleIs', (t) => {
+  const filter = filterBySingleOptionFieldKindFilterRuleIs;
 
   t.deepEqual(filter('opt1', 'opt1'), true);
   t.deepEqual(filter('opt1', 'opt2'), false);
 });
 
-test('filterBySingleSelectFieldKindFilterRuleIsNot', (t) => {
-  const filter = filterBySingleSelectFieldKindFilterRuleIsNot;
+test('filterBySingleOptionFieldKindFilterRuleIsNot', (t) => {
+  const filter = filterBySingleOptionFieldKindFilterRuleIsNot;
 
   t.deepEqual(filter('opt1', 'opt2'), true);
   t.deepEqual(filter('opt1', 'opt1'), false);
 });
 
-test('filterBySingleSelectFieldKindFilterRuleIsAnyOf', (t) => {
-  const filter = filterBySingleSelectFieldKindFilterRuleIsAnyOf;
+test('filterBySingleOptionFieldKindFilterRuleIsAnyOf', (t) => {
+  const filter = filterBySingleOptionFieldKindFilterRuleIsAnyOf;
 
   t.deepEqual(filter('opta', ['opta', 'optb']), true);
   t.deepEqual(filter('opta', ['optb', 'opt']), false);
 });
 
-test('filterBySingleSelectFieldKindFilterRuleIsNoneOf', (t) => {
-  const filter = filterBySingleSelectFieldKindFilterRuleIsNoneOf;
+test('filterBySingleOptionFieldKindFilterRuleIsNoneOf', (t) => {
+  const filter = filterBySingleOptionFieldKindFilterRuleIsNoneOf;
 
   t.deepEqual(filter('opta', ['optb', 'opt']), true);
   t.deepEqual(filter('opta', ['opta', 'optb']), false);
 });
 
-test('filterBySingleSelectFieldKindFilterRuleIsEmpty', (t) => {
-  const filter = filterBySingleSelectFieldKindFilterRuleIsEmpty;
+test('filterBySingleOptionFieldKindFilterRuleIsEmpty', (t) => {
+  const filter = filterBySingleOptionFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter(null), true);
   t.deepEqual(filter('opta'), false);
 });
 
-test('filterBySingleSelectFieldKindFilterRuleIsNotEmpty', (t) => {
-  const filter = filterBySingleSelectFieldKindFilterRuleIsNotEmpty;
+test('filterBySingleOptionFieldKindFilterRuleIsNotEmpty', (t) => {
+  const filter = filterBySingleOptionFieldKindFilterRuleIsNotEmpty;
 
   t.deepEqual(filter('opta'), true);
   t.deepEqual(filter(null), false);
 });
 
-test('filterByMultiSelectFieldKindFilterRuleHasAnyOf', (t) => {
-  const filter = filterByMultiSelectFieldKindFilterRuleHasAnyOf;
+test('filterByMultiOptionFieldKindFilterRuleHasAnyOf', (t) => {
+  const filter = filterByMultiOptionFieldKindFilterRuleHasAnyOf;
 
   t.deepEqual(filter(['opta'], ['opta', 'optb']), true);
   t.deepEqual(filter(['opta'], ['optb', 'opt']), false);
 });
 
-test('filterByMultiSelectFieldKindFilterRuleHasAllOf', (t) => {
-  const filter = filterByMultiSelectFieldKindFilterRuleHasAllOf;
+test('filterByMultiOptionFieldKindFilterRuleHasAllOf', (t) => {
+  const filter = filterByMultiOptionFieldKindFilterRuleHasAllOf;
 
   t.deepEqual(filter(['optb', 'opta'], ['opta', 'optb']), true);
   t.deepEqual(filter(['opta'], ['opta', 'optb']), false);
 });
 
-test('filterByMultiSelectFieldKindFilterRuleHasNoneOf', (t) => {
-  const filter = filterByMultiSelectFieldKindFilterRuleHasNoneOf;
+test('filterByMultiOptionFieldKindFilterRuleHasNoneOf', (t) => {
+  const filter = filterByMultiOptionFieldKindFilterRuleHasNoneOf;
 
   t.deepEqual(filter(['opta'], ['optb', 'opt']), true);
   t.deepEqual(filter(['opta'], ['opta', 'optb']), false);
 });
 
-test('filterByMultiSelectFieldKindFilterRuleIsEmpty', (t) => {
-  const filter = filterByMultiSelectFieldKindFilterRuleIsEmpty;
+test('filterByMultiOptionFieldKindFilterRuleIsEmpty', (t) => {
+  const filter = filterByMultiOptionFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter([]), true);
   t.deepEqual(filter(['opta']), false);
 });
 
-test('filterByMultiSelectFieldKindFilterRuleIsNotEmpty', (t) => {
-  const filter = filterByMultiSelectFieldKindFilterRuleIsNotEmpty;
+test('filterByMultiOptionFieldKindFilterRuleIsNotEmpty', (t) => {
+  const filter = filterByMultiOptionFieldKindFilterRuleIsNotEmpty;
 
   t.deepEqual(filter(['opta']), true);
   t.deepEqual(filter([]), false);

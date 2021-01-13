@@ -4,23 +4,23 @@ import {
   Field,
   FieldType,
   MultiCollaboratorFieldValue,
-  MultiOptionFieldValue,
+  MultiSelectFieldValue,
   MultiDocumentLinkFieldValue,
   SingleCollaboratorFieldValue,
-  SingleOptionFieldValue,
+  SingleSelectFieldValue,
   SingleDocumentLinkFieldValue,
   assertTextFieldKindValue,
   assertNumberFieldKindValue,
   assertDateFieldKindValue,
   assertBooleanFieldKindValue,
-  assertMultiOptionFieldValue,
-  assertSingleOptionFieldValue,
+  assertMultiSelectFieldValue,
+  assertSingleSelectFieldValue,
   assertMultiCollaboratorFieldValue,
   assertSingleCollaboratorFieldValue,
   assertMultiDocumentLinkFieldValue,
   assertSingleDocumentLinkFieldValue,
-  assertMultiOptionField,
-  assertSingleOptionField,
+  assertMultiSelectField,
+  assertSingleSelectField,
   assertMultiDocumentLinkField,
   assertSingleDocumentLinkField,
   FieldValue,
@@ -273,14 +273,14 @@ function sortBy(
       return sortByNumberFieldKind(sort, documents, getters);
     case FieldType.MultiCollaborator:
       return sortByMultiCollaboratorField(sort, documents, getters);
-    case FieldType.MultiOption:
-      return sortByMultiOptionField(sort, documents, getters);
+    case FieldType.MultiSelect:
+      return sortByMultiSelectField(sort, documents, getters);
     case FieldType.MultiDocumentLink:
       return sortByMultiDocumentLinkField(sort, documents, getters);
     case FieldType.SingleCollaborator:
       return sortBySingleCollaboratorField(sort, documents, getters);
-    case FieldType.SingleOption:
-      return sortBySingleOptionField(sort, documents, getters);
+    case FieldType.SingleSelect:
+      return sortBySingleSelectField(sort, documents, getters);
     case FieldType.SingleDocumentLink:
       return sortBySingleDocumentLinkField(sort, documents, getters);
   }
@@ -361,7 +361,7 @@ export function sortByDateFieldKind(
   });
 }
 
-export function sortBySingleOptionField(
+export function sortBySingleSelectField(
   sort: SortConfig,
   documents: Document[],
   getters: SortGetters,
@@ -370,7 +370,7 @@ export function sortBySingleOptionField(
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
-  assertSingleOptionField(field);
+  assertSingleSelectField(field);
 
   const optionsByID = keyedBy(field.options, (item) => item.id);
 
@@ -378,17 +378,17 @@ export function sortBySingleOptionField(
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    assertSingleOptionFieldValue(valA);
-    assertSingleOptionFieldValue(valB);
+    assertSingleSelectFieldValue(valA);
+    assertSingleSelectFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortByAscendingSingleOption(optionsByID, valA, valB);
+      return sortByAscendingSingleSelect(optionsByID, valA, valB);
     }
-    return sortByDescendingSingleOption(optionsByID, valA, valB);
+    return sortByDescendingSingleSelect(optionsByID, valA, valB);
   });
 }
 
-export function sortByMultiOptionField(
+export function sortByMultiSelectField(
   sort: SortConfig,
   documents: Document[],
   getters: SortGetters,
@@ -397,7 +397,7 @@ export function sortByMultiOptionField(
   const { getField } = getters;
 
   const field = getField(sort.fieldID);
-  assertMultiOptionField(field);
+  assertMultiSelectField(field);
 
   const optionsByID = keyedBy(field.options, (item) => item.id);
 
@@ -405,14 +405,14 @@ export function sortByMultiOptionField(
     const valA = a.fields[field.id];
     const valB = b.fields[field.id];
 
-    assertMultiOptionFieldValue(valA);
-    assertMultiOptionFieldValue(valB);
+    assertMultiSelectFieldValue(valA);
+    assertMultiSelectFieldValue(valB);
 
     if (sort.order === 'ascending') {
-      return sortByAscendingMultiOption(optionsByID, valA, valB);
+      return sortByAscendingMultiSelect(optionsByID, valA, valB);
     }
 
-    return sortByDescendingMultiOption(optionsByID, valA, valB);
+    return sortByDescendingMultiSelect(optionsByID, valA, valB);
   });
 }
 
@@ -727,10 +727,10 @@ function sortByDescendingDateFieldKindValue(
   return 0;
 }
 
-function sortByAscendingSingleOption(
+function sortByAscendingSingleSelect(
   optionsByID: { [id: string]: SelectOption },
-  a: SingleOptionFieldValue,
-  b: SingleOptionFieldValue,
+  a: SingleSelectFieldValue,
+  b: SingleSelectFieldValue,
 ) {
   if (a === null && b === null) {
     return 0;
@@ -755,10 +755,10 @@ function sortByAscendingSingleOption(
   return 0;
 }
 
-function sortByDescendingSingleOption(
+function sortByDescendingSingleSelect(
   optionsByID: { [id: string]: SelectOption },
-  a: SingleOptionFieldValue,
-  b: SingleOptionFieldValue,
+  a: SingleSelectFieldValue,
+  b: SingleSelectFieldValue,
 ) {
   if (a === null && b === null) {
     return 0;
@@ -783,10 +783,10 @@ function sortByDescendingSingleOption(
   return 0;
 }
 
-function sortByAscendingMultiOption(
+function sortByAscendingMultiSelect(
   optionsByID: { [id: string]: SelectOption },
-  a: MultiOptionFieldValue,
-  b: MultiOptionFieldValue,
+  a: MultiSelectFieldValue,
+  b: MultiSelectFieldValue,
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -811,10 +811,10 @@ function sortByAscendingMultiOption(
   return 0;
 }
 
-function sortByDescendingMultiOption(
+function sortByDescendingMultiSelect(
   optionsByID: { [id: string]: SelectOption },
-  a: MultiOptionFieldValue,
-  b: MultiOptionFieldValue,
+  a: MultiSelectFieldValue,
+  b: MultiSelectFieldValue,
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;

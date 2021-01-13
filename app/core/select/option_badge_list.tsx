@@ -2,11 +2,11 @@ import React, { Fragment } from 'react';
 import { isEmpty } from '../../../lib/lang_utils';
 import { Row } from '../../components/row';
 
-import { MultiOptionField, SelectOptionID } from '../../../models/fields';
+import { MultiSelectField, SelectOptionID } from '../../../models/fields';
 import { OptionBadge } from './option_badge';
 
 interface OptionBadgeListProps {
-  field: MultiOptionField;
+  field: MultiSelectField;
   optionIDs: SelectOptionID[];
 }
 

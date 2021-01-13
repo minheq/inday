@@ -2,20 +2,20 @@ import React from 'react';
 
 import {
   SelectOptionID,
-  MultiOptionFieldValue,
-  MultiOptionField,
+  MultiSelectFieldValue,
+  MultiSelectField,
 } from '../../../models/fields';
 import { ListMultiPicker } from '../../components/list_multi_picker';
-import { useGetOptionOptions, useRenderOption } from './option_picker';
+import { useGetOptionOptions, useRenderOption } from './single_select_picker';
 
-interface MultiOptionPickerProps {
+interface MultiSelectPickerProps {
   value: SelectOptionID[];
-  field: MultiOptionField;
-  onChange: (value: MultiOptionFieldValue) => void;
+  field: MultiSelectField;
+  onChange: (value: MultiSelectFieldValue) => void;
   onRequestClose: () => void;
 }
 
-export function MultiOptionPicker(props: MultiOptionPickerProps): JSX.Element {
+export function MultiSelectPicker(props: MultiSelectPickerProps): JSX.Element {
   const { value, field, onChange, onRequestClose } = props;
 
   const renderOption = useRenderOption(field.options);

@@ -63,7 +63,7 @@ const col1Field7 = makeField({
 });
 
 const col1Field8 = makeField({
-  type: FieldType.MultiOption,
+  type: FieldType.MultiSelect,
   collectionID: collection1.id,
 });
 
@@ -94,7 +94,7 @@ const col1Field13 = makeField({
 });
 
 const col1Field14 = makeField({
-  type: FieldType.SingleOption,
+  type: FieldType.SingleSelect,
   collectionID: collection1.id,
 });
 

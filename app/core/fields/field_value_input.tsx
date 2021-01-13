@@ -9,13 +9,13 @@ import {
   assertEmailFieldValue,
   assertMultiCollaboratorFieldValue,
   assertMultiLineTextFieldValue,
-  assertMultiOptionFieldValue,
+  assertMultiSelectFieldValue,
   assertMultiDocumentLinkFieldValue,
   assertNumberFieldValue,
   assertPhoneNumberFieldValue,
   assertSingleCollaboratorFieldValue,
   assertSingleLineTextFieldValue,
-  assertSingleOptionFieldValue,
+  assertSingleSelectFieldValue,
   assertSingleDocumentLinkFieldValue,
   assertURLFieldValue,
   CheckboxField,
@@ -33,8 +33,8 @@ import {
   MultiCollaboratorFieldValue,
   MultiLineTextField,
   MultiLineTextFieldValue,
-  MultiOptionField,
-  MultiOptionFieldValue,
+  MultiSelectField,
+  MultiSelectFieldValue,
   MultiDocumentLinkField,
   MultiDocumentLinkFieldValue,
   NumberField,
@@ -45,8 +45,8 @@ import {
   SingleCollaboratorFieldValue,
   SingleLineTextField,
   SingleLineTextFieldValue,
-  SingleOptionField,
-  SingleOptionFieldValue,
+  SingleSelectField,
+  SingleSelectFieldValue,
   SingleDocumentLinkField,
   SingleDocumentLinkFieldValue,
   URLField,
@@ -121,10 +121,10 @@ export function DocumentFieldValueEdit(
             value={value}
           />
         );
-      case FieldType.MultiOption:
-        assertMultiOptionFieldValue(value);
+      case FieldType.MultiSelect:
+        assertMultiSelectFieldValue(value);
         return (
-          <MultiOptionField
+          <MultiSelectField
             documentID={documentID}
             field={field}
             value={value}
@@ -171,10 +171,10 @@ export function DocumentFieldValueEdit(
             value={value}
           />
         );
-      case FieldType.SingleOption:
-        assertSingleOptionFieldValue(value);
+      case FieldType.SingleSelect:
+        assertSingleSelectFieldValue(value);
         return (
-          <SingleOptionField
+          <SingleSelectField
             documentID={documentID}
             field={field}
             value={value}
@@ -471,18 +471,18 @@ const MultiCollaboratorField = memo(function MultiCollaboratorField(
   );
 });
 
-interface MultiOptionFieldProps {
+interface MultiSelectFieldProps {
   documentID: DocumentID;
-  value: MultiOptionFieldValue;
-  field: MultiOptionField;
+  value: MultiSelectFieldValue;
+  field: MultiSelectField;
 }
 
-const MultiOptionField = memo(function MultiOptionField(
-  props: MultiOptionFieldProps,
+const MultiSelectField = memo(function MultiSelectField(
+  props: MultiSelectFieldProps,
 ) {
   const { field, documentID } = props;
 
-  return <MultiOptionValueEdit documentID={documentID} fieldID={field.id} />;
+  return <MultiSelectValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
 interface MultiDocumentLinkFieldProps {
@@ -521,18 +521,18 @@ const SingleCollaboratorField = memo(function SingleCollaboratorField(
   );
 });
 
-interface SingleOptionFieldProps {
+interface SingleSelectFieldProps {
   documentID: DocumentID;
-  value: SingleOptionFieldValue;
-  field: SingleOptionField;
+  value: SingleSelectFieldValue;
+  field: SingleSelectField;
 }
 
-const SingleOptionField = memo(function SingleOptionField(
-  props: SingleOptionFieldProps,
+const SingleSelectField = memo(function SingleSelectField(
+  props: SingleSelectFieldProps,
 ) {
   const { field, documentID } = props;
 
-  return <SingleOptionValueEdit documentID={documentID} fieldID={field.id} />;
+  return <SingleSelectValueEdit documentID={documentID} fieldID={field.id} />;
 });
 
 interface SingleDocumentLinkFieldProps {

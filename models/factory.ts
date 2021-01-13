@@ -7,20 +7,20 @@ import {
   Field,
   MultiDocumentLinkField,
   assertSingleCollaboratorField,
-  assertMultiOptionField,
-  assertSingleOptionField,
+  assertMultiSelectField,
+  assertSingleSelectField,
   assertMultiCollaboratorField,
   NumberField,
   PhoneNumberField,
   SingleCollaboratorField,
-  MultiOptionField,
+  MultiSelectField,
   MultiLineTextField,
   DateField,
   CurrencyField,
   CheckboxField,
   SingleDocumentLinkField,
   SingleLineTextField,
-  SingleOptionField,
+  SingleSelectField,
   URLField,
   SelectOption,
   generateFieldID,
@@ -156,10 +156,10 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.MultiOption]: (field): MultiOptionField => {
+  [FieldType.MultiSelect]: (field): MultiSelectField => {
     const base = makeBaseField(field);
     return {
-      type: FieldType.MultiOption,
+      type: FieldType.MultiSelect,
       options: [
         {
           id: generateSelectOptionID(),
@@ -226,10 +226,10 @@ const makeFieldByType: {
       ...base,
     };
   },
-  [FieldType.SingleOption]: (field): SingleOptionField => {
+  [FieldType.SingleSelect]: (field): SingleSelectField => {
     const base = makeBaseField(field);
     return {
-      type: FieldType.SingleOption,
+      type: FieldType.SingleSelect,
       options: [
         {
           id: generateSelectOptionID(),
@@ -428,8 +428,8 @@ const fakeFieldValuesByFieldType: {
   [FieldType.MultiLineText]: () => {
     return fakeWords(50);
   },
-  [FieldType.MultiOption]: (field) => {
-    assertMultiOptionField(field);
+  [FieldType.MultiSelect]: (field) => {
+    assertMultiSelectField(field);
 
     return [sample(field.options).id];
   },
@@ -470,8 +470,8 @@ const fakeFieldValuesByFieldType: {
   [FieldType.SingleLineText]: () => {
     return fakeWords(2);
   },
-  [FieldType.SingleOption]: (field) => {
-    assertSingleOptionField(field);
+  [FieldType.SingleSelect]: (field) => {
+    assertSingleSelectField(field);
 
     return sample(field.options).id;
   },

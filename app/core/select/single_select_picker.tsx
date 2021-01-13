@@ -4,20 +4,20 @@ import { ListPicker, ListPickerOption } from '../../components/list_picker';
 import {
   SelectOption,
   SelectOptionID,
-  SingleOptionField,
-  SingleOptionFieldValue,
+  SingleSelectField,
+  SingleSelectFieldValue,
 } from '../../../models/fields';
 import { OptionBadge } from './option_badge';
 
-interface SingleOptionPickerProps {
+interface SingleSelectPickerProps {
   value: SelectOptionID | null;
-  field: SingleOptionField;
-  onChange: (value: SingleOptionFieldValue) => void;
+  field: SingleSelectField;
+  onChange: (value: SingleSelectFieldValue) => void;
   onRequestClose: () => void;
 }
 
-export function SingleOptionPicker(
-  props: SingleOptionPickerProps,
+export function SingleSelectPicker(
+  props: SingleSelectPickerProps,
 ): JSX.Element {
   const { value, field, onChange, onRequestClose } = props;
   const renderOption = useRenderOption(field.options);
