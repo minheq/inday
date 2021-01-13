@@ -123,7 +123,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const fieldID = columnToFieldIDCache[_props.column];
       const documentID = rowToDocumentIDCache.get([..._props.path, _props.row]);
       const primary = _props.column === 1;
-      const level = _props.level;
+      const level = grouped ? _props.level : 0;
 
       return (
         <LeafRowCell
@@ -139,7 +139,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         />
       );
     },
-    [columnToFieldIDCache, rowToDocumentIDCache],
+    [columnToFieldIDCache, rowToDocumentIDCache, grouped],
   );
 
   const renderGroupRowCell = useCallback(
