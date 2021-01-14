@@ -1,4 +1,4 @@
-import { formatDecimal, formatUnit, NumberUnit } from '../lib/unit';
+import { formatDecimal, formatUnit, Unit } from '../lib/unit';
 import { generateID, validateID } from '../lib/id';
 import { hasAllOf, keyedBy } from '../lib/array_utils';
 import {
@@ -167,7 +167,7 @@ export interface UnitFieldConfig {
   type: FieldType.Number;
   default: number;
   style: 'unit';
-  unit: NumberUnit;
+  unit: Unit;
 }
 export interface DecimalFieldConfig {
   type: FieldType.Number;

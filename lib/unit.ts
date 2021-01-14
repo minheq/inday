@@ -1,6 +1,6 @@
 import { SupportedLocale } from './locale';
 
-export type NumberUnit =
+export type Unit =
   | 'acre'
   | 'bit'
   | 'byte'
@@ -48,7 +48,7 @@ export type NumberUnit =
 export function formatUnit(
   amount: number,
   locale: SupportedLocale,
-  unit: NumberUnit,
+  unit: Unit,
 ): string {
   return new Intl.NumberFormat(locale, {
     style: 'unit',
