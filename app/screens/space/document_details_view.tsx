@@ -930,8 +930,7 @@ const styles = StyleSheet.create({
   },
   cellValueContainer: {
     height: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 8,
   },
   inputWrapper: {

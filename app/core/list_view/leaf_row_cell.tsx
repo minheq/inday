@@ -1596,8 +1596,7 @@ const styles = StyleSheet.create({
   },
   cellValueContainer: {
     height: LEAF_ROW_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 8,
   },
   input: {
