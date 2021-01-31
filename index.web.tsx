@@ -4,7 +4,7 @@ import { RecoilRoot } from 'recoil';
 
 import { Text } from './app/components/text';
 import { ErrorBoundary } from './app/config/error_boundary';
-import { SpaceScreen } from './app/screens/space_screen';
+import { SpaceScreen } from './app/screens/space/space_screen';
 
 import { Playground } from './app/components/playground';
 import { Router, ScreenName } from './app/config/routes';

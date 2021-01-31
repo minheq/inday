@@ -8,45 +8,38 @@ import React, {
 } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { ScreenName, ScreenProps, useNavigation } from '../config/routes';
+import { ScreenName, ScreenProps, useNavigation } from '../../config/routes';
 import {
   useSpaceQuery,
   useViewQuery,
   useSpaceCollectionsQuery,
-  useDocumentPrimaryFieldValueQuery,
-  useDocumentQuery,
-  useDocumentFieldValuesEntriesQuery,
-} from '../store/queries';
-import { useCreateDocumentMutation } from '../store/mutations';
-import { Slide } from '../components/slide';
-import { OrganizeView } from '../core/organize/organize_view';
-import { ViewList } from '../core/views/view_list';
-import { AutoSizer } from '../lib/autosizer';
-import { ViewID, ViewType } from '../../models/views';
-import { ListViewView } from '../core/list_view/list_view_view';
+} from '../../store/queries';
+import { useCreateDocumentMutation } from '../../store/mutations';
+import { Slide } from '../../components/slide';
+import { OrganizeView } from '../../core/organize/organize_view';
+import { ViewList } from '../../core/views/view_list';
+import { AutoSizer } from '../../lib/autosizer';
+import { ViewID, ViewType } from '../../../models/views';
+import { ListViewView } from '../../core/list_view/list_view_view';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { Document, DocumentID } from '../../models/documents';
-import { CollectionID } from '../../models/collections';
-import { SpaceID } from '../../models/spaces';
-import { useThemeStyles } from '../components/theme';
-import { Screen } from '../components/screen';
-import { Row } from '../components/row';
-import { BackButton } from '../components/back_button';
-import { Text } from '../components/text';
-import { IconButton } from '../components/icon_button';
-import { FlatButton } from '../components/flat_button';
-import { tokens } from '../components/tokens';
-import { isEmpty } from '../../lib/lang_utils';
-import { Field, FieldValue, stringifyFieldValue } from '../../models/fields';
-import { CloseButton } from '../components/close_button';
-import { Spacer } from '../components/spacer';
-import { Column } from '../components/column';
-import { DocumentFieldValueEdit } from '../core/fields/field_value_input';
-import { CollectionsTabs } from '../core/collections/collection_tabs';
-import { Delay } from '../components/delay';
-import { Fade } from '../components/fade';
-import { ViewButton } from '../core/views/view_button';
-import { matchPathname } from '../../lib/pathname';
+import { Document, DocumentID } from '../../../models/documents';
+import { CollectionID } from '../../../models/collections';
+import { SpaceID } from '../../../models/spaces';
+import { useThemeStyles } from '../../components/theme';
+import { Screen } from '../../components/screen';
+import { Row } from '../../components/row';
+import { BackButton } from '../../components/back_button';
+import { Text } from '../../components/text';
+import { IconButton } from '../../components/icon_button';
+import { FlatButton } from '../../components/flat_button';
+import { tokens } from '../../components/tokens';
+import { isEmpty } from '../../../lib/lang_utils';
+import { CollectionsTabs } from '../../core/collections/collection_tabs';
+import { Delay } from '../../components/delay';
+import { Fade } from '../../components/fade';
+import { ViewButton } from '../../core/views/view_button';
+import { matchPathname } from '../../../lib/pathname';
+import { DocumentDetailsView } from './document_details_view';
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -460,6 +453,11 @@ const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
 ) {
   const { documentID } = props;
   const themeStyles = useThemeStyles();
+  const [, setOpenDocument] = useRecoilState(openDocumentState);
+
+  const handleClose = useCallback(() => {
+    setOpenDocument(null);
+  }, [setOpenDocument]);
 
   return (
     <View
@@ -472,94 +470,18 @@ const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
       <AutoSizer>
         {({ height }) => (
           <View style={{ width: RECORD_VIEW_WIDTH, height }}>
-            {documentID && <DocumentDetailsView documentID={documentID} />}
+            {documentID && (
+              <DocumentDetailsView
+                onClose={handleClose}
+                documentID={documentID}
+              />
+            )}
           </View>
         )}
       </AutoSizer>
     </View>
   );
 });
-
-interface DocumentDetailsViewProps {
-  documentID: DocumentID;
-}
-
-function DocumentDetailsView(props: DocumentDetailsViewProps): JSX.Element {
-  const { documentID } = props;
-  const document = useDocumentQuery(documentID);
-  const [primaryField, primaryFieldValue] = useDocumentPrimaryFieldValueQuery(
-    document.id,
-  );
-  const [, setOpenDocument] = useRecoilState(openDocumentState);
-
-  const handleClose = useCallback(() => {
-    setOpenDocument(null);
-  }, [setOpenDocument]);
-
-  return (
-    <View style={styles.documentDetailsWrapper}>
-      <View style={styles.documentDetailsHeader}>
-        <CloseButton onPress={handleClose} />
-        <Spacer direction="row" size={16} />
-        <Text size="xl">
-          {stringifyFieldValue(primaryField, primaryFieldValue)}
-        </Text>
-      </View>
-      <ScrollView>
-        <View style={styles.documentDetailsView}>
-          <Delay config={tokens.animation.fast}>
-            <Fade config={tokens.animation.fast}>
-              <DocumentFieldValues document={document} />
-            </Fade>
-          </Delay>
-        </View>
-      </ScrollView>
-    </View>
-  );
-}
-
-interface DocumentFieldValuesProps {
-  document: Document;
-}
-
-function DocumentFieldValues(props: DocumentFieldValuesProps) {
-  const { document } = props;
-  const documentFieldsEntries = useDocumentFieldValuesEntriesQuery(document.id);
-
-  return (
-    <View>
-      <Spacer size={24} />
-      <Column spacing={16}>
-        {documentFieldsEntries.map(([field, value]) => (
-          <FieldInputRenderer
-            document={document}
-            key={field.id}
-            field={field}
-            value={value}
-          />
-        ))}
-      </Column>
-    </View>
-  );
-}
-
-interface FieldInputRendererProps {
-  document: Document;
-  field: Field;
-  value: FieldValue;
-}
-
-function FieldInputRenderer(props: FieldInputRendererProps) {
-  const { document, field, value } = props;
-
-  return (
-    <DocumentFieldValueEdit
-      documentID={document.id}
-      field={field}
-      value={value}
-    />
-  );
-}
 
 const styles = StyleSheet.create({
   mainContentRoot: {
@@ -574,21 +496,9 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     flex: 1,
   },
-  documentDetailsView: {
-    padding: 8,
-  },
   rightPanel: {
     flex: 1,
     borderLeftWidth: 1,
-  },
-  documentDetailsWrapper: {
-    flex: 1,
-  },
-  documentDetailsHeader: {
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   header: {
     height: 56,
