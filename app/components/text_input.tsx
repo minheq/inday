@@ -61,6 +61,9 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
       [onRequestClose, onKeyPress],
     );
 
+    const height =
+      numberOfLines && numberOfLines > 1 ? numberOfLines * 18 : undefined;
+
     return (
       <RNTextInput
         multiline={numberOfLines ? numberOfLines > 1 : false}
@@ -73,7 +76,12 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
         onKeyPress={handleKeyPress}
         onSubmitEditing={onSubmitEditing}
         placeholderTextColor={theme.text.muted}
-        style={[tokens.text.size.md, themeStyles.text.default, style]}
+        style={[
+          { height },
+          tokens.text.size.md,
+          themeStyles.text.default,
+          style,
+        ]}
       />
     );
   },
