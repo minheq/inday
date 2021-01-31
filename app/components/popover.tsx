@@ -182,7 +182,7 @@ interface PopoverOverlayProps {
   anchor: PopoverOverlayAnchor;
 }
 
-function PopoverOverlay(props: PopoverOverlayProps): JSX.Element {
+export function PopoverOverlay(props: PopoverOverlayProps): JSX.Element {
   const { visible, onShow, onRequestClose, anchor, children } = props;
 
   const handlePressBackground = useCallback(() => {
