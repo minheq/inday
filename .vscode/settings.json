@@ -1,4 +1,13 @@
 {
-  "cSpell.words": ["autosizer", "overscan", "pressable", "sonarjs"],
+  "cSpell.words": [
+    "MURs",
+    "NPRs",
+    "PKRs",
+    "SLRs",
+    "autosizer",
+    "overscan",
+    "pressable",
+    "sonarjs"
+  ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }
