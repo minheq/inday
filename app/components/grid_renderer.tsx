@@ -16,7 +16,7 @@ import {
   useGridTransformer,
   GridGroup,
   StatefulCell,
-  SelectedRow,
+  LeafRow,
   LeafRowCell,
   LeafRowState,
   LeafRowCellState,
@@ -26,7 +26,7 @@ import {
 
 export interface GridRendererProps {
   activeCell?: StatefulCell | null;
-  selectedRows?: SelectedRow[] | null;
+  selectedRows?: LeafRow[] | null;
   height: number;
   width: number;
   footerHeight?: number;

@@ -5,9 +5,9 @@ import {
   getColumns,
   getRows,
   GridGroup,
-  Row,
+  GridRow,
+  GridColumn,
   recycleItems,
-  Column,
 } from './grid_renderer.common';
 
 test('getVisibleIndexRange', (t) => {
@@ -180,7 +180,7 @@ test('recycleItems - with changed other value', (t) => {
 test('getColumns', (t) => {
   const result = getColumns([100, 200, 100, 200, 100, 200]);
 
-  const expected: Column[] = [
+  const expected: GridColumn[] = [
     { column: 1, width: 100, x: 0 },
     { column: 2, width: 200, x: 100 },
     { column: 3, width: 100, x: 300 },
@@ -203,10 +203,26 @@ test('getRows - single flat group', (t) => {
 
   const rows = getRows(groups, 0, 40, 72, [], 0);
 
-  const expected: Row[] = [
-    { type: 'group', height: 0, y: 0, path: [0], collapsed: false },
-    { type: 'leaf', height: 40, y: 0, path: [0], row: 1, last: false },
-    { type: 'leaf', height: 40, y: 40, path: [0], row: 2, last: true },
+  const expected: GridRow[] = [
+    { type: 'group', height: 0, y: 0, path: [0], level: 1, collapsed: false },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 0,
+      path: [0],
+      level: 1,
+      row: 1,
+      last: false,
+    },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 40,
+      path: [0],
+      level: 1,
+      row: 2,
+      last: true,
+    },
     { type: 'spacer', height: 72, y: 80 },
   ];
 
@@ -246,19 +262,95 @@ test('getRows - nested with leaf rows', (t) => {
 
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
-  const expected: Row[] = [
-    { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
-    { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: false },
-    { type: 'leaf', height: 40, y: 112, path: [0, 0], row: 1, last: false },
-    { type: 'leaf', height: 40, y: 152, path: [0, 0], row: 2, last: true },
+  const expected: GridRow[] = [
+    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: false },
+    {
+      type: 'group',
+      height: 56,
+      y: 56,
+      path: [0, 0],
+      level: 1,
+      collapsed: false,
+    },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 112,
+      path: [0, 0],
+      level: 1,
+      row: 1,
+      last: false,
+    },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 152,
+      path: [0, 0],
+      level: 1,
+      row: 2,
+      last: true,
+    },
     { type: 'spacer', height: 72, y: 192 },
-    { type: 'group', height: 56, y: 264, path: [1], collapsed: false },
-    { type: 'group', height: 56, y: 320, path: [1, 0], collapsed: false },
-    { type: 'leaf', height: 40, y: 376, path: [1, 0], row: 1, last: false },
-    { type: 'leaf', height: 40, y: 416, path: [1, 0], row: 2, last: true },
-    { type: 'group', height: 56, y: 456, path: [1, 1], collapsed: false },
-    { type: 'leaf', height: 40, y: 512, path: [1, 1], row: 1, last: false },
-    { type: 'leaf', height: 40, y: 552, path: [1, 1], row: 2, last: true },
+    {
+      type: 'group',
+      height: 56,
+      y: 264,
+      path: [1],
+      level: 1,
+      collapsed: false,
+    },
+    {
+      type: 'group',
+      height: 56,
+      y: 320,
+      path: [1, 0],
+      level: 1,
+      collapsed: false,
+    },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 376,
+      path: [1, 0],
+      level: 1,
+      row: 1,
+      last: false,
+    },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 416,
+      path: [1, 0],
+      level: 1,
+      row: 2,
+      last: true,
+    },
+    {
+      type: 'group',
+      height: 56,
+      y: 456,
+      path: [1, 1],
+      level: 1,
+      collapsed: false,
+    },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 512,
+      path: [1, 1],
+      level: 1,
+      row: 1,
+      last: false,
+    },
+    {
+      type: 'leaf',
+      height: 40,
+      y: 552,
+      path: [1, 1],
+      level: 1,
+      row: 2,
+      last: true,
+    },
     { type: 'spacer', height: 72, y: 592 },
   ];
 
@@ -282,9 +374,16 @@ test('getRows - nested with empty leaf rows', (t) => {
 
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
-  const expected: Row[] = [
-    { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
-    { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: false },
+  const expected: GridRow[] = [
+    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: false },
+    {
+      type: 'group',
+      height: 56,
+      y: 56,
+      path: [0, 0],
+      level: 1,
+      collapsed: false,
+    },
     { type: 'spacer', height: 72, y: 112 },
   ];
 
@@ -308,8 +407,8 @@ test('getRows - nested with collapsed ancestor', (t) => {
 
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
-  const expected: Row[] = [
-    { type: 'group', height: 56, y: 0, path: [0], collapsed: true },
+  const expected: GridRow[] = [
+    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: true },
     { type: 'spacer', height: 72, y: 56 },
   ];
 
@@ -333,9 +432,16 @@ test('getRows - nested collapsed child', (t) => {
 
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
-  const expected: Row[] = [
-    { type: 'group', height: 56, y: 0, path: [0], collapsed: false },
-    { type: 'group', height: 56, y: 56, path: [0, 0], collapsed: true },
+  const expected: GridRow[] = [
+    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: false },
+    {
+      type: 'group',
+      height: 56,
+      y: 56,
+      path: [0, 0],
+      level: 1,
+      collapsed: true,
+    },
     { type: 'spacer', height: 72, y: 112 },
   ];
 

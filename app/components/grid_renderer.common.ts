@@ -16,50 +16,54 @@ interface UseGridTransformerProps {
 interface GridTransformerData {
   contentHeight: number;
   contentWidth: number;
-  leftPaneColumns: Column[];
+  leftPaneColumns: GridColumn[];
   leftPaneContentWidth: number;
-  rightPaneColumns: Column[];
+  rightPaneColumns: GridColumn[];
   rightPaneContentWidth: number;
-  rows: Row[];
+  rows: GridRow[];
 }
 
 export interface Column {
-  width: number;
-  x: number;
   column: number;
 }
 
+export interface GridColumn extends Column {
+  width: number;
+  x: number;
+}
+
 export interface LeafRow {
+  path: number[];
+  row: number;
+}
+
+export interface GridLeafRow extends LeafRow {
   type: 'leaf';
   height: number;
   y: number;
-  path: number[];
-  row: number;
   level: number;
   last: boolean;
 }
 
-export interface SelectedRow {
+export interface GroupRow {
   path: number[];
-  row: number;
 }
 
-export interface GroupRow {
+export interface GridGroupRow extends GroupRow {
   type: 'group';
   height: number;
   y: number;
-  path: number[];
   level: number;
   collapsed: boolean;
 }
 
-export interface SpacerRow {
+export interface GridSpacerRow {
   type: 'spacer';
   y: number;
   height: number;
 }
 
-export type Row = LeafRow | GroupRow | SpacerRow;
+export type GridRow = GridLeafRow | GridGroupRow | GridSpacerRow;
 
 export function useGridTransformer(
   props: UseGridTransformerProps,
@@ -133,12 +137,12 @@ export function getRows(
   spacerHeight: number,
   prevPath: number[],
   prevOffset: number,
-): Row[] {
+): GridRow[] {
   if (isEmpty(groups)) {
     return [];
   }
 
-  let rows: Row[] = [];
+  let rows: GridRow[] = [];
   let offset = prevOffset;
 
   for (let i = 0; i < groups.length; i++) {
@@ -196,8 +200,8 @@ function getLeafRows(
   leafRowHeight: number,
   path: number[],
   offset: number,
-): LeafRow[] {
-  const leafRows: LeafRow[] = [];
+): GridLeafRow[] {
+  const leafRows: GridLeafRow[] = [];
 
   for (let i = 0; i < rowCount; i++) {
     leafRows.push({
@@ -222,19 +226,19 @@ function isLeafGroup(group: GridGroup): group is LeafGridGroup {
   return false;
 }
 
-export function getRowsHeight(rows: Row[]): number {
+export function getRowsHeight(rows: GridRow[]): number {
   return sumBy(rows, (row) => row.height);
 }
 
-export interface RecycledLeafRow extends LeafRow {
+export interface RecycledLeafRow extends GridLeafRow {
   key: number;
 }
 
-export interface RecycledGroupRow extends GroupRow {
+export interface RecycledGroupRow extends GridGroupRow {
   key: number;
 }
 
-export interface RecycledSpacerRow extends SpacerRow {
+export interface RecycledSpacerRow extends GridSpacerRow {
   key: number;
 }
 
@@ -243,14 +247,14 @@ export type RecycledRow =
   | RecycledGroupRow
   | RecycledSpacerRow;
 
-export interface RecycledColumn extends Column {
+export interface RecycledColumn extends GridColumn {
   key: number;
 }
 
 export interface UseColumnsRecyclerProps {
   scrollViewWidth: number;
   scrollX: number;
-  columns: Column[];
+  columns: GridColumn[];
 }
 
 export function useColumnsRecycler(
@@ -325,7 +329,7 @@ export function recycleItems<T, K extends T>(
 export interface UseRowsRecyclerProps {
   scrollViewHeight: number;
   scrollY: number;
-  rows: Row[];
+  rows: GridRow[];
 }
 
 export function useRowsRecycler(props: UseRowsRecyclerProps): RecycledRow[] {
@@ -360,7 +364,7 @@ export function useRowsRecycler(props: UseRowsRecyclerProps): RecycledRow[] {
 }
 
 interface RecycleRowsParams {
-  rows: Row[];
+  rows: GridRow[];
   prevRows: RecycledRow[];
   startIndex: number;
   endIndex: number;
@@ -384,7 +388,7 @@ function recycleRows(params: RecycleRowsParams) {
 }
 
 interface RecycleColumnsParams {
-  columns: Column[];
+  columns: GridColumn[];
   prevColumns: RecycledColumn[];
   startIndex: number;
   endIndex: number;
@@ -465,8 +469,8 @@ export function getVisibleIndexRange<T>(
   return [startIndex, endIndex];
 }
 
-export function getColumns(columnWidths: number[], offset = 0): Column[] {
-  const result: Column[] = [];
+export function getColumns(columnWidths: number[], offset = 0): GridColumn[] {
+  const result: GridColumn[] = [];
 
   for (let i = 0; i < columnWidths.length; i++) {
     const width = columnWidths[i];
@@ -487,7 +491,7 @@ export function getColumns(columnWidths: number[], offset = 0): Column[] {
 }
 
 interface GetVisibleColumnsIndexRangeParams {
-  columns: Column[];
+  columns: GridColumn[];
   scrollX: number;
   scrollViewWidth: number;
 }
@@ -507,7 +511,7 @@ function getVisibleColumnsIndexRange(
 }
 
 interface GetVisibleRowsIndexRangeParams {
-  rows: Row[];
+  rows: GridRow[];
   scrollY: number;
   scrollViewHeight: number;
 }
@@ -529,20 +533,15 @@ function getVisibleRowsIndexRange(
 interface UseGetStatefulRowsProps {
   rows: RecycledRow[];
   activeCell: StatefulCell | null;
-  selectedRows: SelectedRow[] | null;
+  selectedRows: LeafRow[] | null;
 }
 
-export interface GroupRowCell {
+export interface GroupRowCell extends GroupRow, Column {
   type: 'group';
-  path: number[];
-  column: number;
 }
 
-export interface LeafRowCell {
+export interface LeafRowCell extends LeafRow, Column {
   type: 'leaf';
-  path: number[];
-  row: number;
-  column: number;
   last: boolean;
 }
 
@@ -645,7 +644,7 @@ export function useGetStatefulRows(
   }, [rows, activeCell, selectedRowsCache]);
 }
 
-function isLeafRow(row: Row): row is LeafRow {
+function isLeafRow(row: GridRow): row is GridLeafRow {
   if (row.type === 'leaf') {
     return true;
   }
@@ -653,7 +652,7 @@ function isLeafRow(row: Row): row is LeafRow {
   return false;
 }
 
-function isSpacerRow(row: Row): row is SpacerRow {
+function isSpacerRow(row: GridRow): row is GridSpacerRow {
   if (row.type === 'spacer') {
     return true;
   }
@@ -735,8 +734,8 @@ interface UseGridGetScrollToCellOffsetProps {
   scrollX: number;
   scrollY: number;
   fixedColumnCount: number;
-  columns: Column[];
-  rows: Row[];
+  columns: GridColumn[];
+  rows: GridRow[];
   padding?: number;
 }
 
@@ -755,7 +754,7 @@ export function useGridGetScrollToCellOffset(
   } = props;
 
   const leafRowsCache = useMemo(() => {
-    const cache = FlatObject<LeafRow, number>();
+    const cache = FlatObject<GridLeafRow, number>();
 
     if (isEmpty(rows)) {
       return cache;
@@ -773,7 +772,7 @@ export function useGridGetScrollToCellOffset(
   }, [rows]);
 
   const getLeafRow = useCallback(
-    (path?: number[], row?: number): LeafRow | undefined => {
+    (path?: number[], row?: number): GridLeafRow | undefined => {
       if (path !== undefined && row !== undefined) {
         return leafRowsCache.get([...path, row]);
       }
@@ -791,7 +790,7 @@ export function useGridGetScrollToCellOffset(
   );
 
   const getScrollToRowOffset = useCallback(
-    (row?: LeafRow) => {
+    (row?: GridLeafRow) => {
       if (row === undefined) {
         return;
       }

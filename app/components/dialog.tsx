@@ -16,6 +16,7 @@ interface DialogProps extends ModalProps {
   style?: StyleProp<ViewStyle>;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function Dialog(props: DialogProps): JSX.Element {
   const {
     visible,
@@ -62,6 +63,12 @@ export function Dialog(props: DialogProps): JSX.Element {
     onRequestClose,
   ]);
 
+  const onAnimationEndResult = useCallback((result: Animated.EndResult) => {
+    if (result.finished) {
+      setInternalVisible(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (animationType !== 'fade') {
       return;
@@ -94,11 +101,7 @@ export function Dialog(props: DialogProps): JSX.Element {
           bounciness: 0,
           useNativeDriver: true,
         }),
-      ]).start((animation) => {
-        if (animation.finished) {
-          setInternalVisible(false);
-        }
-      });
+      ]).start(onAnimationEndResult);
     }
   }, [
     animationType,
@@ -109,6 +112,7 @@ export function Dialog(props: DialogProps): JSX.Element {
     slide,
     height,
     onRequestClose,
+    onAnimationEndResult,
   ]);
 
   useEffect(() => {
@@ -141,11 +145,7 @@ export function Dialog(props: DialogProps): JSX.Element {
           bounciness: 0,
           useNativeDriver: true,
         }),
-      ]).start((animation) => {
-        if (animation.finished) {
-          setInternalVisible(false);
-        }
-      });
+      ]).start(onAnimationEndResult);
     }
   }, [
     animationType,
@@ -155,6 +155,7 @@ export function Dialog(props: DialogProps): JSX.Element {
     slide,
     height,
     onRequestClose,
+    onAnimationEndResult,
   ]);
 
   const handlePressBackground = useCallback(() => {
