@@ -94,8 +94,10 @@ export function Dialog(props: DialogProps): JSX.Element {
           bounciness: 0,
           useNativeDriver: true,
         }),
-      ]).start(() => {
-        setInternalVisible(false);
+      ]).start((animation) => {
+        if (animation.finished) {
+          setInternalVisible(false);
+        }
       });
     }
   }, [
@@ -139,8 +141,10 @@ export function Dialog(props: DialogProps): JSX.Element {
           bounciness: 0,
           useNativeDriver: true,
         }),
-      ]).start(() => {
-        setInternalVisible(false);
+      ]).start((animation) => {
+        if (animation.finished) {
+          setInternalVisible(false);
+        }
       });
     }
   }, [

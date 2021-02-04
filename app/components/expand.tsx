@@ -36,11 +36,13 @@ export function Expand(props: ExpandProps): JSX.Element {
         speed,
         useNativeDriver: false,
       }),
-    ]).start(() => {
-      if (open && onExpanded !== undefined) {
-        onExpanded();
-      } else if (onCollapsed !== undefined) {
-        onCollapsed();
+    ]).start((animation) => {
+      if (animation.finished) {
+        if (open && onExpanded !== undefined) {
+          onExpanded();
+        } else if (onCollapsed !== undefined) {
+          onCollapsed();
+        }
       }
     });
   }, [

@@ -24,8 +24,10 @@ export function Delay(props: DelayProps): JSX.Element {
       bounciness,
       speed,
       useNativeDriver: true,
-    }).start(() => {
-      setShow(true);
+    }).start((animation) => {
+      if (animation.finished) {
+        setShow(true);
+      }
     });
   }, [placeholder, bounciness, speed]);
 

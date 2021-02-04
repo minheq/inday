@@ -49,8 +49,10 @@ export function Modal(props: ModalProps): JSX.Element {
         toValue: 1,
         bounciness: 0,
         useNativeDriver: true,
-      }).start(() => {
-        setInternalIsOpen(false);
+      }).start((animation) => {
+        if (animation.finished) {
+          setInternalIsOpen(false);
+        }
       });
     }
   }, [
@@ -80,8 +82,10 @@ export function Modal(props: ModalProps): JSX.Element {
         toValue: height,
         bounciness: 0,
         useNativeDriver: true,
-      }).start(() => {
-        setInternalIsOpen(false);
+      }).start((animation) => {
+        if (animation.finished) {
+          setInternalIsOpen(false);
+        }
       });
     }
   }, [

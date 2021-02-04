@@ -40,11 +40,13 @@ export const Slide = memo(function Slide(props: SlideProps): JSX.Element {
         bounciness,
         useNativeDriver: false,
       }),
-    ]).start(() => {
-      if (visible && onSlide !== undefined) {
-        onSlide();
-      } else if (onCollapsed !== undefined) {
-        onCollapsed();
+    ]).start((animation) => {
+      if (animation.finished) {
+        if (visible && onSlide !== undefined) {
+          onSlide();
+        } else if (onCollapsed !== undefined) {
+          onCollapsed();
+        }
       }
     });
   }, [speed, bounciness, width, opacity, visible, intrinsicWidth, onSlide, onCollapsed]);
