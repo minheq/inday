@@ -580,7 +580,7 @@ export function useGetStatefulRows(
   const { rows, activeCell, selectedRows } = props;
 
   const selectedRowsCache = useMemo(() => {
-    const cache = FlatObject<boolean, number>();
+    const cache = FlatObject<number, boolean>();
 
     if (selectedRows === null || isEmpty(selectedRows)) {
       return cache;
@@ -673,7 +673,7 @@ function getLeafRowCell(
 function getLeafRowState(
   activeCell: StatefulLeafRowCell | null,
   row: RecycledLeafRow,
-  selectedRowsCache: FlatObject<boolean, number>,
+  selectedRowsCache: FlatObject<number, boolean>,
 ): LeafRowState {
   if (activeCell !== null && activeCell.state === 'hovered') {
     return 'hovered';
@@ -719,7 +719,7 @@ export function useGridGetScrollToCellOffset(
   } = props;
 
   const leafRowsCache = useMemo(() => {
-    const cache = FlatObject<GridLeafRow, number>();
+    const cache = FlatObject<number, GridLeafRow>();
 
     if (isEmpty(rows)) {
       return cache;
