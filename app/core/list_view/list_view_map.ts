@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { splitLast } from '../../../lib/array_utils';
+import { first, last, splitLast } from '../../../lib/array_utils';
 import { FlatObject } from '../../../lib/flat_object';
 import { isEmpty } from '../../../lib/lang_utils';
 import { DocumentID } from '../../../models/documents';
@@ -28,6 +28,18 @@ export interface ListViewMap {
   documentIDToLeafRow: DocumentIDToLeafRowCache;
   fieldIDToColumn: FieldIDToColumnCache;
 }
+
+export const defaultListViewMap: ListViewMap = {
+  grouped: false,
+  leafRows: [],
+  nodes: [],
+  fields: [],
+  groupRowToGroupRowCellData: FlatObject(),
+  leafRowToDocumentID: FlatObject(),
+  columnToFieldID: FlatObject(),
+  documentIDToLeafRow: FlatObject(),
+  fieldIDToColumn: FlatObject(),
+};
 
 /**
  * Provides mapping between cells, rows and columns to fields and documents
@@ -312,71 +324,77 @@ export function getColumn(listViewMap: ListViewMap, fieldID: FieldID): Column {
 export function getLeafRowCellTopMost(
   listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
+): LeafRowCell {
+  const firstLeafRow = first(listViewMap.leafRows);
+  if (!firstLeafRow) {
+    throw new Error('Leaf row does not exist');
+  }
+
+  return {
+    column: cell.column,
+    path: firstLeafRow.path,
+    row: firstLeafRow.row,
+  };
+}
 
 export function getLeafRowCellBottomMost(
   listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
+): LeafRowCell {
+  const lastLeafRow = last(listViewMap.leafRows);
+  if (!lastLeafRow) {
+    throw new Error('Leaf row does not exist');
+  }
+
+  return { column: cell.column, path: lastLeafRow.path, row: lastLeafRow.row };
+}
 
 export function getLeafRowCellLeftMost(
-  listViewMap: ListViewMap,
+  _listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
+): LeafRowCell {
+  return { column: 1, path: cell.path, row: cell.row };
+}
 
 export function getLeafRowCellRightMost(
   listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
+): LeafRowCell {
+  return { column: listViewMap.fields.length, path: cell.path, row: cell.row };
+}
 
 export function getLeafRowCellBelow(
   listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
+): LeafRowCell | false {
+  return false;
+}
 
 export function getLeafRowCellAbove(
   listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
+): LeafRowCell | false {}
 
 export function getLeafRowCellRight(
   listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
+): LeafRowCell | false {
+  const hasNextColumn = listViewMap.fields[cell.column];
+  if (!hasNextColumn) {
+    return false;
+  }
+
+  return { column: cell.column + 1, path: cell.path, row: cell.row };
+}
 
 export function getLeafRowCellLeft(
   listViewMap: ListViewMap,
   cell: LeafRowCell,
-): LeafRowCell {}
-
-export function getNextLeafRow(
-  listViewMap: ListViewMap,
-  row: LeafRow,
-): LeafRow {}
-export function getPreviousLeafRow(
-  listViewMap: ListViewMap,
-  row: LeafRow,
-): LeafRow {}
-export function getFirstLeafRow(listViewMap: ListViewMap): LeafRow {}
-export function getLastLeafRow(listViewMap: ListViewMap): LeafRow {}
-
-export function getNextColumn(
-  listViewMap: ListViewMap,
-  column: Column,
-): Column {}
-
-export function getPreviousColumn(
-  listViewMap: ListViewMap,
-  column: Column,
-): Column {}
-
-export function getFirstColumn(listViewMap: ListViewMap): Column {
-  if (isEmpty(listViewMap.fields)) {
-    throw new Error('Fields cannot be empty');
+): LeafRowCell | false {
+  const hasColumnLeft = listViewMap.fields[cell.column - 2];
+  if (!hasColumnLeft) {
+    return false;
   }
 
-  return { column: 1 };
-}
-export function getLastColumn(listViewMap: ListViewMap): Column {
-  return { column: listViewMap.fields.length };
+  return { column: cell.column - 1, path: cell.path, row: cell.row };
 }

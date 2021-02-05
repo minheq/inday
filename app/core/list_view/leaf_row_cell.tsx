@@ -199,6 +199,10 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
   const handleFocusNextDocument = useCallback(() => {
     const nextCell = getLeafRowCellBelow(listViewMap, cell);
 
+    if (!nextCell) {
+      return;
+    }
+
     setActiveCell({ ...nextCell, state: 'focused' });
   }, [setActiveCell, cell, listViewMap]);
 
@@ -1282,11 +1286,19 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const onArrowDown = useCallback(() => {
     const cellBelow = getLeafRowCellBelow(listViewMap, cell);
 
+    if (!cellBelow) {
+      return;
+    }
+
     setActiveCell({ ...cellBelow, state: 'focused' });
   }, [cell, setActiveCell, listViewMap]);
 
   const onArrowUp = useCallback(() => {
     const cellAbove = getLeafRowCellAbove(listViewMap, cell);
+
+    if (!cellAbove) {
+      return;
+    }
 
     setActiveCell({ ...cellAbove, state: 'focused' });
   }, [cell, setActiveCell, listViewMap]);
@@ -1294,11 +1306,19 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const onArrowLeft = useCallback(() => {
     const cellLeft = getLeafRowCellLeft(listViewMap, cell);
 
+    if (!cellLeft) {
+      return;
+    }
+
     setActiveCell({ ...cellLeft, state: 'focused' });
   }, [cell, setActiveCell, listViewMap]);
 
   const onArrowRight = useCallback(() => {
     const cellRight = getLeafRowCellRight(listViewMap, cell);
+
+    if (!cellRight) {
+      return;
+    }
 
     setActiveCell({ ...cellRight, state: 'focused' });
   }, [cell, setActiveCell, listViewMap]);

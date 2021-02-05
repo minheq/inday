@@ -44,6 +44,7 @@ import {
 } from './list_view_grid';
 import { useListViewNodes, useToggleCollapseGroup } from './list_view_nodes';
 import {
+  defaultListViewMap,
   getDocumentID,
   getFieldID,
   getGroupRowCellData,
@@ -270,7 +271,7 @@ interface ListViewViewContext {
 
 export const ListViewViewContext = createContext<ListViewViewContext>({
   viewID: 'viw',
-  listViewMap: {},
+  listViewMap: defaultListViewMap,
   mode: 'edit',
   onOpenDocument: () => {
     return;
