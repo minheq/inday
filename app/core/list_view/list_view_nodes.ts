@@ -240,7 +240,7 @@ function useDocumentsOrderChanged(
   ]);
 }
 
-function useFieldsOrderChanged(viewID: ViewID, fields: Field[]): boolean {
+function useFieldsOrderChanged(_viewID: ViewID, fields: Field[]): boolean {
   const prevFields = usePrevious(fields);
 
   return useMemo(() => {

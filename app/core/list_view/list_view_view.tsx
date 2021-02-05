@@ -157,7 +157,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           path={_props.path}
           column={_props.column}
           last={_props.last}
-          state={_props.state}
           collapsed={_props.collapsed}
           columnFieldID={fieldID}
           field={group.field}
