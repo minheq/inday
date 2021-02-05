@@ -546,13 +546,6 @@ export interface GroupRowCell extends GroupRow, Column {}
 export interface GridGroupRowCell extends GroupRowCell {
   type: 'group';
 }
-export type GroupRowCellState = 'editing' | 'hovered' | 'default';
-export interface StatefulGroupRowCell extends GroupRowCell {
-  state: GroupRowCellState;
-}
-export interface GridStatefulGroupRowCell extends StatefulGroupRowCell {
-  type: 'group';
-}
 
 export type LeafRowState = 'selected' | 'hovered' | 'default';
 
@@ -580,7 +573,6 @@ export type StatefulRow =
   | RecycledSpacerRow;
 
 export type GridCell = GridGroupRowCell | GridLeafRowCell;
-export type StatefulCell = StatefulLeafRowCell | StatefulGroupRowCell;
 
 export function useGetStatefulRows(
   props: UseGetStatefulRowsProps,

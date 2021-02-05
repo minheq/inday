@@ -19,7 +19,6 @@ import {
   LeafRowCell,
   LeafRowState,
   LeafRowCellState,
-  GroupRowCellState,
   GroupRowState,
   StatefulLeafRowCell,
 } from './grid_renderer.common';
@@ -60,7 +59,6 @@ export interface RenderGroupRowCellProps {
   level: number;
   collapsed: boolean;
   last: boolean;
-  state: GroupRowCellState;
 }
 
 export interface RenderHeaderCellProps {

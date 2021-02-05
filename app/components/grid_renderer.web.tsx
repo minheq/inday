@@ -19,8 +19,6 @@ import {
   LeafRowState,
   LeafRowCellState,
   GroupRowState,
-  StatefulGroupRowCell,
-  GroupRowCellState,
   useRowsRecycler,
   useColumnsRecycler,
 } from './grid_renderer.common';
@@ -223,7 +221,6 @@ export const GridRenderer = memo(
                   collapsed={row.collapsed}
                   state={row.state}
                   pane={pane}
-                  activeCell={row.activeCell}
                   width={_width}
                   columns={_columns}
                   columnCount={columnCount}
@@ -587,7 +584,6 @@ interface GroupRowContainerProps {
   renderGroupRow: (props: RenderGroupRowProps) => React.ReactNode;
   columns: RecycledColumn[];
   state: GroupRowState;
-  activeCell: StatefulGroupRowCell | null;
 }
 
 const GroupRowContainer = memo(function GroupRowContainer(
@@ -602,7 +598,6 @@ const GroupRowContainer = memo(function GroupRowContainer(
     collapsed,
     path,
     columns,
-    activeCell,
     state,
     pane,
     renderGroupRow,
@@ -625,9 +620,6 @@ const GroupRowContainer = memo(function GroupRowContainer(
       <div style={rowStyle}>
         {columns.map((columnData) => {
           const { key, width: columnWidth, column, x } = columnData;
-          const cellState =
-            activeCell?.column === column ? activeCell.state : 'default';
-
           return (
             <GroupRowCellContainer
               column={column}
@@ -636,7 +628,6 @@ const GroupRowContainer = memo(function GroupRowContainer(
               path={path}
               level={level}
               renderGroupRowCell={renderGroupRowCell}
-              state={cellState}
               width={columnWidth}
               collapsed={collapsed}
               x={x}
@@ -647,7 +638,6 @@ const GroupRowContainer = memo(function GroupRowContainer(
       </div>
     ),
     [
-      activeCell,
       rowStyle,
       columns,
       height,
@@ -798,7 +788,6 @@ interface GroupRowCellContainerProps {
   column: number;
   level: number;
   path: number[];
-  state: GroupRowCellState;
   collapsed: boolean;
   last: boolean;
 }
@@ -813,21 +802,16 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
     width,
     height,
     level,
-    state = 'default',
     last,
     collapsed,
     renderGroupRowCell,
   } = props;
 
-  const style = useMemo(
-    () =>
-      styles(
-        'cell',
-        { left: x, width, height },
-        (state === 'editing' || state === 'hovered') && 'active',
-      ),
-    [x, width, height, state],
-  );
+  const style = useMemo(() => styles('cell', { left: x, width, height }), [
+    x,
+    width,
+    height,
+  ]);
 
   return (
     <div style={style}>
@@ -836,7 +820,6 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
         column,
         width,
         height,
-        state,
         last,
         level,
         collapsed,

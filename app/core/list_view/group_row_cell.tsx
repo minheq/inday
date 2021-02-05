@@ -2,8 +2,6 @@ import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { assertUnreached } from '../../../lib/lang_utils';
 import { ContextMenuItem, ContextMenu } from '../../components/context_menu';
-
-import { GroupRowCellState } from '../../components/grid_renderer.common';
 import { Icon } from '../../components/icon';
 import { PressableHighlight } from '../../components/pressable_highlight';
 import { Text } from '../../components/text';
@@ -44,7 +42,6 @@ import { formatCurrency } from '../../../lib/currency';
 import { CheckboxAltView } from '../../components/checkbox_alt';
 
 interface GroupRowCellProps {
-  state: GroupRowCellState;
   primary: boolean;
   path: number[];
   column: number;
