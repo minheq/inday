@@ -216,7 +216,7 @@ const ViewSettingsView = memo(function ViewSettingsView(
 
 function SelectMenu() {
   const [, setMode] = useRecoilState(modeState);
-  const [selectedDocuments, setSelectedDocuments] = useRecoilState(
+  const [selectedDocumentIDs, setSelectedDocuments] = useRecoilState(
     selectedDocumentsState,
   );
 
@@ -225,7 +225,7 @@ function SelectMenu() {
     setSelectedDocuments([]);
   }, [setMode, setSelectedDocuments]);
 
-  if (isEmpty(selectedDocuments)) {
+  if (isEmpty(selectedDocumentIDs)) {
     return (
       <Row spacing={4} alignItems="center">
         <Text color="muted">Press on documents to select</Text>
@@ -236,7 +236,7 @@ function SelectMenu() {
 
   return (
     <Row spacing={4} alignItems="center">
-      <Text weight="bold">{`${selectedDocuments.length} Selected`}</Text>
+      <Text weight="bold">{`${selectedDocumentIDs.length} Selected`}</Text>
       <FlatButton title="Share" />
       <FlatButton title="Copy" />
       <FlatButton title="Delete" color="error" />
@@ -287,7 +287,7 @@ function MainContent() {
   const space = useSpaceQuery(spaceID);
   const view = useViewQuery(viewID);
   const mode = useRecoilValue(modeState);
-  const [selectedDocuments, setSelectedDocuments] = useRecoilState(
+  const [selectedDocumentIDs, setSelectedDocuments] = useRecoilState(
     selectedDocumentsState,
   );
   const createDocument = useCreateDocumentMutation();
@@ -337,7 +337,7 @@ function MainContent() {
           <ListViewView
             mode={mode}
             view={view}
-            selectedDocuments={selectedDocuments}
+            selectedDocumentIDs={selectedDocumentIDs}
             onOpenDocument={handleOpenDocument}
             onSelectDocument={handleSelectDocument}
             onAddDocument={handleAddDocument}
@@ -350,7 +350,7 @@ function MainContent() {
     mode,
     view,
     handleOpenDocument,
-    selectedDocuments,
+    selectedDocumentIDs,
     handleSelectDocument,
     handleAddDocument,
   ]);

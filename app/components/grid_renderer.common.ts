@@ -532,32 +532,26 @@ function getVisibleRowsIndexRange(
 
 interface UseGetStatefulRowsProps {
   rows: RecycledRow[];
-  activeCell: StatefulCell | null;
+  activeCell: StatefulLeafRowCell | null;
   selectedRows: LeafRow[] | null;
 }
-
-export interface GroupRowCell extends GroupRow, Column {
-  type: 'group';
-}
-
-export interface LeafRowCell extends LeafRow, Column {
-  type: 'leaf';
-  last: boolean;
-}
-
-export type Cell = GroupRowCell | LeafRowCell;
 
 export type GroupRowState = 'hovered' | 'default';
 
 interface StatefulGroupRow extends RecycledGroupRow {
-  activeCell: StatefulGroupRowCell | null;
   state: GroupRowState;
 }
 
+export interface GroupRowCell extends GroupRow, Column {}
+export interface GridGroupRowCell extends GroupRowCell {
+  type: 'group';
+}
 export type GroupRowCellState = 'editing' | 'hovered' | 'default';
-
 export interface StatefulGroupRowCell extends GroupRowCell {
   state: GroupRowCellState;
+}
+export interface GridStatefulGroupRowCell extends StatefulGroupRowCell {
+  type: 'group';
 }
 
 export type LeafRowState = 'selected' | 'hovered' | 'default';
@@ -567,16 +561,25 @@ interface StatefulLeafRow extends RecycledLeafRow {
   state: LeafRowState;
 }
 
+export interface LeafRowCell extends LeafRow, Column {}
 export type LeafRowCellState = 'focused' | 'editing' | 'hovered' | 'default';
-
 export interface StatefulLeafRowCell extends LeafRowCell {
   state: LeafRowCellState;
+}
+export interface GridLeafRowCell extends LeafRowCell {
+  type: 'leaf';
+  last: boolean;
+}
+export interface GridStatefulLeafRowCell extends StatefulLeafRowCell {
+  type: 'leaf';
 }
 
 export type StatefulRow =
   | StatefulLeafRow
   | StatefulGroupRow
   | RecycledSpacerRow;
+
+export type GridCell = GridGroupRowCell | GridLeafRowCell;
 export type StatefulCell = StatefulLeafRowCell | StatefulGroupRowCell;
 
 export function useGetStatefulRows(
@@ -627,8 +630,6 @@ export function useGetStatefulRows(
         };
       }
 
-      const groupRowCell = getGroupRowCell(activeCell, row);
-
       return {
         key: row.key,
         type: row.type,
@@ -638,7 +639,6 @@ export function useGetStatefulRows(
         level: row.level,
         state: 'default',
         collapsed: row.collapsed,
-        activeCell: groupRowCell,
       };
     });
   }, [rows, activeCell, selectedRowsCache]);
@@ -661,14 +661,10 @@ function isSpacerRow(row: GridRow): row is GridSpacerRow {
 }
 
 function getLeafRowCell(
-  activeCell: StatefulCell | null,
+  activeCell: StatefulLeafRowCell | null,
   row: RecycledLeafRow,
 ): StatefulLeafRowCell | null {
   if (activeCell === null) {
-    return null;
-  }
-
-  if (activeCell.type === 'group') {
     return null;
   }
 
@@ -682,35 +678,12 @@ function getLeafRowCell(
   return activeCell;
 }
 
-function getGroupRowCell(
-  activeCell: StatefulCell | null,
-  row: RecycledGroupRow,
-): StatefulGroupRowCell | null {
-  if (activeCell === null) {
-    return null;
-  }
-
-  if (activeCell.type === 'leaf') {
-    return null;
-  }
-
-  if (isEqual(activeCell.path, row.path) === false) {
-    return null;
-  }
-
-  return activeCell;
-}
-
 function getLeafRowState(
   activeCell: StatefulLeafRowCell | null,
   row: RecycledLeafRow,
   selectedRowsCache: FlatObject<boolean, number>,
 ): LeafRowState {
-  if (
-    activeCell !== null &&
-    activeCell.type === 'leaf' &&
-    activeCell.state === 'hovered'
-  ) {
+  if (activeCell !== null && activeCell.state === 'hovered') {
     return 'hovered';
   }
 

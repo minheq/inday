@@ -125,6 +125,17 @@ import { CheckboxAlt } from '../../components/checkbox_alt';
 import { EmailLink } from '../../components/email_link';
 import { PhoneNumberLink } from '../../components/phone_number_link';
 import { URLLink } from '../../components/url_link';
+import {
+  getDocumentID,
+  getLeafRowCellAbove,
+  getLeafRowCellBelow,
+  getLeafRowCellLeft,
+  getLeafRowCellRight,
+  getLeafRowCellBottomMost,
+  getLeafRowCellTopMost,
+  getLeafRowCellLeftMost,
+  getLeafRowCellRightMost,
+} from './list_view_map';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -163,40 +174,33 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
   );
   const field = useFieldQuery(fieldID);
   const value = useDocumentFieldValueQuery(documentID, fieldID);
-  const {
-    mode,
-    onSelectDocument,
-    rowToDocumentIDCache,
-  } = useListViewViewContext();
+  const { mode, onSelectDocument, listViewMap } = useListViewViewContext();
   const setActiveCell = useSetRecoilState(activeCellState);
   const { selected } = useLeafRowContext();
 
   const handleFocus = useCallback(() => {
     if (cell.state === 'default') {
-      setActiveCell({ ...cell, type: 'leaf', state: 'focused' });
+      setActiveCell({ ...cell, state: 'focused' });
     }
   }, [setActiveCell, cell]);
 
   const handleStartEditing = useCallback(() => {
     if (cell.state === 'focused') {
-      setActiveCell({ ...cell, type: 'leaf', state: 'editing' });
+      setActiveCell({ ...cell, state: 'editing' });
     }
   }, [setActiveCell, cell]);
 
   const handleStopEditing = useCallback(() => {
     if (cell.state === 'editing') {
-      setActiveCell({ ...cell, type: 'leaf', state: 'focused' });
+      setActiveCell({ ...cell, state: 'focused' });
     }
   }, [setActiveCell, cell]);
 
   const handleFocusNextDocument = useCallback(() => {
-    const nextRow = cell.row + 1;
-    if (rowToDocumentIDCache.get([...cell.path, nextRow]) === undefined) {
-      return;
-    }
+    const nextCell = getLeafRowCellBelow(listViewMap, cell);
 
-    setActiveCell({ ...cell, type: 'leaf', row: nextRow, state: 'focused' });
-  }, [setActiveCell, cell, rowToDocumentIDCache]);
+    setActiveCell({ ...nextCell, state: 'focused' });
+  }, [setActiveCell, cell, listViewMap]);
 
   const handlePress = useCallback(() => {
     if (mode === 'edit') {
@@ -1268,13 +1272,7 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
     onPrintableKey: onPrintableKeyOverride,
     onDelete: onDeleteOverride,
   } = props;
-  const {
-    rowToDocumentIDCache,
-    columnToFieldIDCache,
-    lastFocusableRow,
-    lastFocusableColumn,
-    onOpenDocument,
-  } = useListViewViewContext();
+  const { listViewMap, onOpenDocument } = useListViewViewContext();
   const { cell } = useLeafRowCellContext();
   const setActiveCell = useSetRecoilState(activeCellState);
 
@@ -1282,132 +1280,48 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   const active = cell !== null && cell.state === 'focused';
 
   const onArrowDown = useCallback(() => {
-    const { row, column, path, last } = cell;
-    const nextRow = row + 1;
-    const next = rowToDocumentIDCache.get([...cell.path, nextRow]);
+    const cellBelow = getLeafRowCellBelow(listViewMap, cell);
 
-    if (next === undefined) {
-      return;
-    }
-
-    setActiveCell({
-      type: 'leaf',
-      row: nextRow,
-      column,
-      path,
-      state: 'focused',
-      last,
-    });
-  }, [cell, setActiveCell, rowToDocumentIDCache]);
+    setActiveCell({ ...cellBelow, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onArrowUp = useCallback(() => {
-    const { row, column, path, last } = cell;
-    const prevRow = row - 1;
-    const prev = rowToDocumentIDCache.get([...cell.path, prevRow]);
+    const cellAbove = getLeafRowCellAbove(listViewMap, cell);
 
-    if (prev === undefined) {
-      return;
-    }
-
-    setActiveCell({
-      type: 'leaf',
-      row: prevRow,
-      column,
-      path,
-      state: 'focused',
-      last,
-    });
-  }, [cell, setActiveCell, rowToDocumentIDCache]);
+    setActiveCell({ ...cellAbove, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onArrowLeft = useCallback(() => {
-    const { row, column, path, last } = cell;
-    const prevColumn = column - 1;
-    if (columnToFieldIDCache[prevColumn] === undefined) {
-      return;
-    }
+    const cellLeft = getLeafRowCellLeft(listViewMap, cell);
 
-    setActiveCell({
-      type: 'leaf',
-      row,
-      column: prevColumn,
-      path,
-      state: 'focused',
-      last,
-    });
-  }, [cell, setActiveCell, columnToFieldIDCache]);
+    setActiveCell({ ...cellLeft, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onArrowRight = useCallback(() => {
-    const { row, column, path, last } = cell;
-    const nextColumn = column + 1;
-    if (columnToFieldIDCache[nextColumn] === undefined) {
-      return;
-    }
+    const cellRight = getLeafRowCellRight(listViewMap, cell);
 
-    setActiveCell({
-      type: 'leaf',
-      row,
-      column: nextColumn,
-      path,
-      state: 'focused',
-      last,
-    });
-  }, [cell, setActiveCell, columnToFieldIDCache]);
+    setActiveCell({ ...cellRight, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowDown = useCallback(() => {
-    const { column, last } = cell;
-
-    if (lastFocusableRow !== undefined) {
-      setActiveCell({
-        type: 'leaf',
-        row: lastFocusableRow.row,
-        column,
-        path: lastFocusableRow.path,
-        state: 'focused',
-        last,
-      });
-    }
-  }, [cell, setActiveCell, lastFocusableRow]);
+    const cellBottomMost = getLeafRowCellBottomMost(listViewMap, cell);
+    setActiveCell({ ...cellBottomMost, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowUp = useCallback(() => {
-    const { column, last } = cell;
-
-    setActiveCell({
-      type: 'leaf',
-      row: 1,
-      column,
-      path: [0],
-      state: 'focused',
-      last,
-    });
-  }, [cell, setActiveCell]);
+    const cellTopMost = getLeafRowCellTopMost(listViewMap, cell);
+    setActiveCell({ ...cellTopMost, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowLeft = useCallback(() => {
-    const { row, path, last } = cell;
-    const prevColumn = 1;
-
-    setActiveCell({
-      type: 'leaf',
-      row,
-      column: prevColumn,
-      path,
-      state: 'focused',
-      last,
-    });
-  }, [cell, setActiveCell]);
+    const cellLeftMost = getLeafRowCellLeftMost(listViewMap, cell);
+    setActiveCell({ ...cellLeftMost, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowRight = useCallback(() => {
-    const { row, path, last } = cell;
-    const nextColumn = lastFocusableColumn;
-
-    setActiveCell({
-      type: 'leaf',
-      row,
-      column: nextColumn,
-      path,
-      state: 'focused',
-      last,
-    });
-  }, [cell, setActiveCell, lastFocusableColumn]);
+    const cellRightMost = getLeafRowCellRightMost(listViewMap, cell);
+    setActiveCell({ ...cellRightMost, state: 'focused' });
+  }, [cell, setActiveCell, listViewMap]);
 
   const onEscape = useCallback(() => {
     setActiveCell(null);
@@ -1429,33 +1343,19 @@ function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
   );
 
   const onEnter = useCallback(() => {
-    const { row, column, path, last } = cell;
-
     if (onEnterOverride !== undefined) {
       onEnterOverride();
       return;
     }
 
-    setActiveCell({
-      type: 'leaf',
-      row,
-      column,
-      path,
-      state: 'editing',
-      last,
-    });
+    setActiveCell({ ...cell, state: 'editing' });
   }, [cell, setActiveCell, onEnterOverride]);
 
   const onSpace = useCallback(() => {
-    const { row, path } = cell;
-    const documentID = rowToDocumentIDCache.get([...path, row]);
-
-    if (documentID === undefined) {
-      throw new Error('onSpace called on faulty row path');
-    }
+    const documentID = getDocumentID(listViewMap, cell);
 
     onOpenDocument(documentID);
-  }, [cell, onOpenDocument, rowToDocumentIDCache]);
+  }, [cell, onOpenDocument, listViewMap]);
 
   const focusedCellKeyBindings = useMemo((): KeyBinding[] => {
     return [
