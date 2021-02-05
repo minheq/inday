@@ -119,11 +119,8 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return <LastLeafRowCell />;
       }
 
-      const fieldID = getFieldID(listViewMap, { column: _props.column });
-      const documentID = getDocumentID(listViewMap, {
-        row: _props.row,
-        path: _props.path,
-      });
+      const fieldID = getFieldID(listViewMap, _props);
+      const documentID = getDocumentID(listViewMap, _props);
       const primary = _props.column === 1;
       const level = grouped ? _props.level : 0;
 
@@ -150,7 +147,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return <LastLeafRowCell />;
       }
 
-      const fieldID = getFieldID(listViewMap, { column: _props.column });
+      const fieldID = getFieldID(listViewMap, _props);
       const group = getGroupRowCellData(listViewMap, _props);
       const primary = _props.column === 1;
 
@@ -178,7 +175,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return <LastHeaderCell />;
       }
 
-      const fieldID = getFieldID(listViewMap, { column: _props.column });
+      const fieldID = getFieldID(listViewMap, _props);
       const primary = _props.column === 1;
 
       return (
@@ -221,16 +218,12 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (mode === 'select' && activeCell !== null) {
+    if (mode === 'select' && activeCell) {
       setActiveCell(null);
     }
   }, [mode, activeCell, setActiveCell]);
 
-  if (
-    gridRef.current !== null &&
-    activeCell !== null &&
-    activeCell !== prevActiveCell
-  ) {
+  if (gridRef.current && activeCell && activeCell !== prevActiveCell) {
     gridRef.current.scrollToCell(activeCell);
   }
 
