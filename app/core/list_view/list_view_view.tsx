@@ -29,7 +29,6 @@ import { LastLeafRowCell, LeafRowCell } from './leaf_row_cell';
 import { Header, HeaderCell, LastHeaderCell } from './header';
 import { Footer } from './footer';
 import { GroupRow } from './group_row';
-import { FlatObject } from '../../../lib/flat_object';
 import { LastLeafRow, LeafRow } from './leaf_row';
 import { GroupRowCell } from './group_row_cell';
 import {
@@ -39,19 +38,28 @@ import {
   SPACER_ROW_HEIGHT,
 } from './list_view_constants';
 import {
-  ColumnToFieldIDCache,
-  LeafRowPath,
-  RowToDocumentIDCache,
-  useToggleCollapseGroup,
-  useListViewGrid,
-} from './list_view_data';
+  useListViewGridColumns,
+  useListViewGridGroups,
+  useListViewGridSelectedRows,
+} from './list_view_grid';
+import { useListViewNodes, useToggleCollapseGroup } from './list_view_nodes';
+import {
+  defaultListViewMap,
+  getDocumentID,
+  getFieldID,
+  getGroupRowCellData,
+  isGrouped,
+  ListViewMap,
+  useListViewMap,
+} from './list_view_map';
+import { useSortedFieldsWithListViewConfigQuery } from '../../store/queries';
 
 export type ViewMode = 'edit' | 'select';
 
 interface ListViewViewProps {
   view: ListView;
   mode: ViewMode;
-  selectedDocuments: DocumentID[];
+  selectedDocumentIDs: DocumentID[];
   onOpenDocument: (documentID: DocumentID) => void;
   onSelectDocument: (documentID: DocumentID, selected: boolean) => void;
   onAddDocument: () => Document;
@@ -67,36 +75,31 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const {
     view,
     mode,
-    selectedDocuments,
+    selectedDocumentIDs,
     onOpenDocument,
     onAddDocument,
     onSelectDocument,
   } = props;
   const viewID = view.id;
   const [activeCell, setActiveCell] = useRecoilState(activeCellState);
-  const {
-    grouped,
-    lastFocusableColumn,
-    lastFocusableRow,
-    rowToDocumentIDCache,
-    columnToFieldIDCache,
-    pathToGroupCache,
-    fixedFieldCount,
-    columns,
-    gridGroups,
-    selectedRows,
-  } = useListViewGrid({ viewID, selectedDocuments });
+  const fixedFieldCount = view.fixedFieldCount;
+  const fields = useSortedFieldsWithListViewConfigQuery(viewID);
+  const nodes = useListViewNodes(viewID);
+  const listViewMap = useListViewMap(nodes, fields);
+  const gridGroups = useListViewGridGroups(nodes);
+  const gridColumns = useListViewGridColumns(fields);
+  const gridSelectedRows = useListViewGridSelectedRows(
+    listViewMap,
+    selectedDocumentIDs,
+  );
   const prevActiveCell = usePrevious(activeCell);
   const gridRef = useRef<GridRendererRef>(null);
   const handleToggleCollapseGroup = useToggleCollapseGroup(viewID);
-
+  const grouped = useMemo(() => isGrouped(listViewMap), [listViewMap]);
   const context = useMemo((): ListViewViewContext => {
     return {
       viewID,
-      rowToDocumentIDCache,
-      columnToFieldIDCache,
-      lastFocusableColumn,
-      lastFocusableRow,
+      listViewMap,
       mode,
       onOpenDocument,
       onSelectDocument,
@@ -104,10 +107,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
     };
   }, [
     viewID,
-    rowToDocumentIDCache,
-    columnToFieldIDCache,
-    lastFocusableColumn,
-    lastFocusableRow,
+    listViewMap,
     mode,
     onOpenDocument,
     onSelectDocument,
@@ -120,8 +120,8 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return <LastLeafRowCell />;
       }
 
-      const fieldID = columnToFieldIDCache[_props.column];
-      const documentID = rowToDocumentIDCache.get([..._props.path, _props.row]);
+      const fieldID = getFieldID(listViewMap, _props);
+      const documentID = getDocumentID(listViewMap, _props);
       const primary = _props.column === 1;
       const level = grouped ? _props.level : 0;
 
@@ -139,7 +139,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         />
       );
     },
-    [columnToFieldIDCache, rowToDocumentIDCache, grouped],
+    [listViewMap, grouped],
   );
 
   const renderGroupRowCell = useCallback(
@@ -148,8 +148,8 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return <LastLeafRowCell />;
       }
 
-      const fieldID = columnToFieldIDCache[_props.column];
-      const group = pathToGroupCache.get(_props.path);
+      const fieldID = getFieldID(listViewMap, _props);
+      const group = getGroupRowCellData(listViewMap, _props);
       const primary = _props.column === 1;
 
       return (
@@ -158,7 +158,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           path={_props.path}
           column={_props.column}
           last={_props.last}
-          state={_props.state}
           collapsed={_props.collapsed}
           columnFieldID={fieldID}
           field={group.field}
@@ -167,7 +166,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         />
       );
     },
-    [columnToFieldIDCache, pathToGroupCache, handleToggleCollapseGroup],
+    [listViewMap, handleToggleCollapseGroup],
   );
 
   const renderHeaderCell = useCallback(
@@ -176,14 +175,14 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return <LastHeaderCell />;
       }
 
-      const fieldID = columnToFieldIDCache[_props.column];
+      const fieldID = getFieldID(listViewMap, _props);
       const primary = _props.column === 1;
 
       return (
         <HeaderCell fieldID={fieldID} primary={primary} width={_props.width} />
       );
     },
-    [columnToFieldIDCache],
+    [listViewMap],
   );
 
   const renderLeafRow = useCallback(
@@ -192,7 +191,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return row.pane === 'left' ? <LastLeafRow /> : null;
       }
 
-      const documentID = rowToDocumentIDCache.get([...row.path, row.row]);
+      const documentID = getDocumentID(listViewMap, row);
 
       return (
         <LeafRow documentID={documentID} state={row.state}>
@@ -200,7 +199,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         </LeafRow>
       );
     },
-    [rowToDocumentIDCache],
+    [listViewMap],
   );
 
   const renderGroupRow = useCallback(
@@ -219,16 +218,12 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (mode === 'select' && activeCell !== null) {
+    if (mode === 'select' && activeCell) {
       setActiveCell(null);
     }
   }, [mode, activeCell, setActiveCell]);
 
-  if (
-    gridRef.current !== null &&
-    activeCell !== null &&
-    activeCell !== prevActiveCell
-  ) {
+  if (gridRef.current && activeCell && activeCell !== prevActiveCell) {
     gridRef.current.scrollToCell(activeCell);
   }
 
@@ -241,9 +236,9 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
               ref={gridRef}
               width={width}
               height={height}
-              selectedRows={selectedRows}
+              selectedRows={gridSelectedRows}
               groups={gridGroups}
-              columns={columns}
+              columns={gridColumns}
               fixedColumnCount={fixedFieldCount}
               renderLeafRow={renderLeafRow}
               renderGroupRow={renderGroupRow}
@@ -267,10 +262,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
 interface ListViewViewContext {
   viewID: ViewID;
-  rowToDocumentIDCache: RowToDocumentIDCache;
-  columnToFieldIDCache: ColumnToFieldIDCache;
-  lastFocusableColumn: number;
-  lastFocusableRow: LeafRowPath | undefined;
+  listViewMap: ListViewMap;
   mode: ViewMode;
   onOpenDocument: (documentID: DocumentID) => void;
   onSelectDocument: (documentID: DocumentID, selected: boolean) => void;
@@ -279,14 +271,7 @@ interface ListViewViewContext {
 
 export const ListViewViewContext = createContext<ListViewViewContext>({
   viewID: 'viw',
-  rowToDocumentIDCache: FlatObject(),
-  columnToFieldIDCache: {},
-  lastFocusableColumn: 0,
-  lastFocusableRow: {
-    documentID: 'doc',
-    row: 1,
-    path: [],
-  },
+  listViewMap: defaultListViewMap,
   mode: 'edit',
   onOpenDocument: () => {
     return;

@@ -1,7 +1,7 @@
 import { isEmpty } from './lang_utils';
 import { isNumberString, toNumber } from './number_utils';
 
-export type FlatObject<T, K extends string | number> = {
+export type FlatObject<K extends string | number, T> = {
   get: (arr: K[]) => T;
   set: (arr: K[], value: T) => void;
   keysOf: () => K[][];
@@ -11,9 +11,9 @@ export type FlatObject<T, K extends string | number> = {
 /**
  * An Object where setters and getters use array of keys
  */
-export function FlatObject<T, K extends string | number>(
+export function FlatObject<K extends string | number, T>(
   init: { [key: string]: T } = {},
-): FlatObject<T, K> {
+): FlatObject<K, T> {
   const obj: { [key: string]: T } = init;
 
   function makeKey(arr: K[]) {
@@ -26,13 +26,16 @@ export function FlatObject<T, K extends string | number>(
   }
 
   function toKeyArray(arrString: string): K[] {
-    return arrString.split('.').map((i) => {
-      if (isNumberString(i)) {
-        return toNumber(i) as K;
-      }
+    return arrString
+      .split('.')
+      .filter((i) => i !== '')
+      .map((i) => {
+        if (isNumberString(i)) {
+          return toNumber(i) as K;
+        }
 
-      return i as K;
-    });
+        return i as K;
+      });
   }
 
   return {
