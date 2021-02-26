@@ -22,7 +22,8 @@ export interface ListViewMap {
   leafRows: ListViewLeafRow[];
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[];
   fields: FieldWithListViewConfig[];
-  groupRowCache: GroupRowCellCache;
+  groupRowCellCache: GroupRowCellCache;
+  groupRowCache: GroupRowCache;
   leafRowCache: LeafRowCache;
   columnToFieldID: ColumnToFieldIDCache;
   documentIDToLeafRow: DocumentIDToLeafRowCache;
@@ -34,6 +35,7 @@ export const defaultListViewMap: ListViewMap = {
   leafRows: [],
   nodes: [],
   fields: [],
+  groupRowCellCache: FlatObject(),
   groupRowCache: FlatObject(),
   leafRowCache: FlatObject(),
   columnToFieldID: FlatObject(),
@@ -51,20 +53,26 @@ export function useListViewMap(
   const grouped = useMemo((): boolean => {
     return isGroupedListViewDocumentNodes(nodes);
   }, [nodes]);
-  const groupRowCache = useMemo((): GroupRowCellCache => {
+  const groupRows = useMemo((): ListViewGroupRow[] => {
     if (isGroupedListViewDocumentNodes(nodes)) {
-      return getGroupRowToGroupRowCellDataCache(nodes);
+      return getGroupRowPaths(nodes, []);
     }
-
-    return FlatObject();
+    return [];
   }, [nodes]);
+  const groupRowCache = useMemo((): GroupRowCache => {
+    return getGroupRowCache(groupRows);
+  }, [groupRows]);
+  const groupRowCellCache = useMemo((): GroupRowCellCache => {
+    return getGroupRowCellCache(groupRows);
+  }, [groupRows]);
   const leafRows = useMemo(
     (): ListViewLeafRow[] => getListViewLeafRows(nodes, []),
     [nodes],
   );
-  const leafRowCache = useMemo((): LeafRowCache => getLeafRowCache(leafRows), [
-    leafRows,
-  ]);
+  const leafRowCache = useMemo(
+    (): LeafRowCache => getLeafRowCache(leafRows, groupRowCache),
+    [leafRows, groupRowCache],
+  );
   const columnToFieldID = useMemo(
     (): ColumnToFieldIDCache => getColumnToFieldIDCache(fields),
     [fields],
@@ -84,6 +92,7 @@ export function useListViewMap(
       leafRows,
       nodes,
       fields,
+      groupRowCellCache,
       groupRowCache,
       leafRowCache,
       columnToFieldID,
@@ -95,6 +104,7 @@ export function useListViewMap(
       leafRows,
       nodes,
       fields,
+      groupRowCellCache,
       groupRowCache,
       leafRowCache,
       columnToFieldID,
@@ -160,7 +170,10 @@ interface LeafRowData {
 
 type LeafRowCache = FlatObject<number, LeafRowData>;
 
-function getLeafRowCache(rows: ListViewLeafRow[]): LeafRowCache {
+function getLeafRowCache(
+  rows: ListViewLeafRow[],
+  groupRowCache: GroupRowCache,
+): LeafRowCache {
   const cache = FlatObject<number, LeafRowData>();
 
   if (isEmpty(rows)) {
@@ -172,10 +185,20 @@ function getLeafRowCache(rows: ListViewLeafRow[]): LeafRowCache {
     const prevRow = rows[i - 1];
     const nextRow = rows[i + 1];
 
+    let prev = null;
+    let next = null;
+
+    if (prevRow && !groupRowCache.get(prevRow.path).collapsed) {
+      prev = prevRow;
+    }
+    if (nextRow && !groupRowCache.get(nextRow.path).collapsed) {
+      next = nextRow;
+    }
+
     const data: LeafRowData = {
       documentID: row.documentID,
-      prev: prevRow || null,
-      next: nextRow || null,
+      prev,
+      next,
     };
 
     cache.set([...row.path, row.row], data);
@@ -191,17 +214,8 @@ interface GroupRowCellData {
 
 type GroupRowCellCache = FlatObject<number, GroupRowCellData>;
 
-interface ListViewGroupRow {
-  field: Field;
-  value: FieldValue;
-  path: number[];
-}
-
-function getGroupRowToGroupRowCellDataCache(
-  nodes: GroupedListViewDocumentNode[],
-): GroupRowCellCache {
+function getGroupRowCellCache(rows: ListViewGroupRow[]): GroupRowCellCache {
   const cache = FlatObject<number, GroupRowCellData>();
-  const rows = getGroupRowPaths(nodes, []);
 
   if (isEmpty(rows)) {
     return cache;
@@ -219,6 +233,39 @@ function getGroupRowToGroupRowCellDataCache(
   return cache;
 }
 
+interface GroupRowData {
+  path: number[];
+  collapsed: boolean;
+}
+
+type GroupRowCache = FlatObject<number, GroupRowData>;
+
+function getGroupRowCache(rows: ListViewGroupRow[]): GroupRowCache {
+  const cache = FlatObject<number, GroupRowData>();
+
+  if (isEmpty(rows)) {
+    return cache;
+  }
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const data: GroupRowData = {
+      path: row.path,
+      collapsed: row.collapsed,
+    };
+    cache.set(row.path, data);
+  }
+
+  return cache;
+}
+
+interface ListViewGroupRow {
+  field: Field;
+  value: FieldValue;
+  path: number[];
+  collapsed: boolean;
+}
+
 function getGroupRowPaths(
   nodes: GroupedListViewDocumentNode[],
   prevPath: number[],
@@ -234,6 +281,7 @@ function getGroupRowPaths(
         path,
         field: group.field,
         value: group.value,
+        collapsed: group.collapsed,
       });
     } else {
       const { children } = group;
@@ -326,7 +374,7 @@ export function getGroupRowCellData(
   listViewMap: ListViewMap,
   groupRowCell: GroupRowCell,
 ): GroupRowCellData {
-  return listViewMap.groupRowCache.get(groupRowCell.path);
+  return listViewMap.groupRowCellCache.get(groupRowCell.path);
 }
 
 export function getColumn(listViewMap: ListViewMap, fieldID: FieldID): Column {
