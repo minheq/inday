@@ -74,14 +74,7 @@ import {
 } from '../../../models/fields';
 import { DocumentID, generateDocumentID } from '../../../models/documents';
 import { useSetRecoilState } from 'recoil';
-import {
-  NavigationKey,
-  KeyBinding,
-  WhiteSpaceKey,
-  EditingKey,
-  UIKey,
-  useKeyboard,
-} from '../../lib/keyboard';
+
 import { LeafRowCellState } from '../../components/grid_renderer.common';
 import { isNumberString, toNumber } from '../../../lib/number_utils';
 import { useThemeStyles } from '../../components/theme';
@@ -125,17 +118,8 @@ import { CheckboxAlt } from '../../components/checkbox_alt';
 import { EmailLink } from '../../components/email_link';
 import { PhoneNumberLink } from '../../components/phone_number_link';
 import { URLLink } from '../../components/url_link';
-import {
-  getDocumentID,
-  getLeafRowCellAbove,
-  getLeafRowCellBelow,
-  getLeafRowCellLeft,
-  getLeafRowCellRight,
-  getLeafRowCellBottomMost,
-  getLeafRowCellTopMost,
-  getLeafRowCellLeftMost,
-  getLeafRowCellRightMost,
-} from './list_view_map';
+import { getLeafRowCellBottom } from './list_view_map';
+import { useCellKeyBindings } from './use_cell_keybindings';
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -197,7 +181,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
   }, [setActiveCell, cell]);
 
   const handleFocusNextDocument = useCallback(() => {
-    const nextCell = getLeafRowCellBelow(listViewMap, cell);
+    const nextCell = getLeafRowCellBottom(listViewMap, cell);
 
     if (!nextCell) {
       return;
@@ -291,7 +275,7 @@ const LeafRowCellContext = createContext<LeafRowCellContext>({
   },
 });
 
-function useLeafRowCellContext(): LeafRowCellContext {
+export function useLeafRowCellContext(): LeafRowCellContext {
   return useContext(LeafRowCellContext);
 }
 
@@ -1262,201 +1246,6 @@ function PickerTrigger(props: PickerTriggerProps): JSX.Element {
       />
     </View>
   );
-}
-
-interface UseCellKeyBindingsProps {
-  onDelete?: () => void;
-  onPrintableKey?: (key: string) => void;
-  onEnter?: () => void;
-}
-
-function useCellKeyBindings(props: UseCellKeyBindingsProps = {}) {
-  const {
-    onEnter: onEnterOverride,
-    onPrintableKey: onPrintableKeyOverride,
-    onDelete: onDeleteOverride,
-  } = props;
-  const { listViewMap, onOpenDocument } = useListViewViewContext();
-  const { cell } = useLeafRowCellContext();
-  const setActiveCell = useSetRecoilState(activeCellState);
-
-  // Listen for keyboard strokes only when the cell is focused
-  const active = cell !== null && cell.state === 'focused';
-
-  const onArrowDown = useCallback(() => {
-    const cellBelow = getLeafRowCellBelow(listViewMap, cell);
-
-    if (!cellBelow) {
-      return;
-    }
-
-    setActiveCell({ ...cellBelow, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onArrowUp = useCallback(() => {
-    const cellAbove = getLeafRowCellAbove(listViewMap, cell);
-
-    if (!cellAbove) {
-      return;
-    }
-
-    setActiveCell({ ...cellAbove, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onArrowLeft = useCallback(() => {
-    const cellLeft = getLeafRowCellLeft(listViewMap, cell);
-
-    if (!cellLeft) {
-      return;
-    }
-
-    setActiveCell({ ...cellLeft, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onArrowRight = useCallback(() => {
-    const cellRight = getLeafRowCellRight(listViewMap, cell);
-
-    if (!cellRight) {
-      return;
-    }
-
-    setActiveCell({ ...cellRight, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onMetaArrowDown = useCallback(() => {
-    const cellBottomMost = getLeafRowCellBottomMost(listViewMap, cell);
-    setActiveCell({ ...cellBottomMost, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onMetaArrowUp = useCallback(() => {
-    const cellTopMost = getLeafRowCellTopMost(listViewMap, cell);
-    setActiveCell({ ...cellTopMost, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onMetaArrowLeft = useCallback(() => {
-    const cellLeftMost = getLeafRowCellLeftMost(listViewMap, cell);
-    setActiveCell({ ...cellLeftMost, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onMetaArrowRight = useCallback(() => {
-    const cellRightMost = getLeafRowCellRightMost(listViewMap, cell);
-    setActiveCell({ ...cellRightMost, state: 'focused' });
-  }, [cell, setActiveCell, listViewMap]);
-
-  const onEscape = useCallback(() => {
-    setActiveCell(null);
-  }, [setActiveCell]);
-
-  const onDelete = useCallback(() => {
-    if (onDeleteOverride) {
-      onDeleteOverride();
-    }
-  }, [onDeleteOverride]);
-
-  const onPrintableKey = useCallback(
-    (key: string) => {
-      if (onPrintableKeyOverride !== undefined) {
-        onPrintableKeyOverride(key);
-      }
-    },
-    [onPrintableKeyOverride],
-  );
-
-  const onEnter = useCallback(() => {
-    if (onEnterOverride !== undefined) {
-      onEnterOverride();
-      return;
-    }
-
-    setActiveCell({ ...cell, state: 'editing' });
-  }, [cell, setActiveCell, onEnterOverride]);
-
-  const onSpace = useCallback(() => {
-    const documentID = getDocumentID(listViewMap, cell);
-
-    onOpenDocument(documentID);
-  }, [cell, onOpenDocument, listViewMap]);
-
-  const focusedCellKeyBindings = useMemo((): KeyBinding[] => {
-    return [
-      {
-        key: NavigationKey.ArrowDown,
-        handler: onArrowDown,
-      },
-      {
-        key: NavigationKey.ArrowUp,
-        handler: onArrowUp,
-      },
-      {
-        key: NavigationKey.ArrowLeft,
-        handler: onArrowLeft,
-      },
-      {
-        key: NavigationKey.ArrowRight,
-        handler: onArrowRight,
-      },
-      {
-        key: NavigationKey.ArrowDown,
-        meta: true,
-        handler: onMetaArrowDown,
-      },
-      {
-        key: NavigationKey.ArrowUp,
-        meta: true,
-        handler: onMetaArrowUp,
-      },
-      {
-        key: NavigationKey.ArrowLeft,
-        meta: true,
-        handler: onMetaArrowLeft,
-      },
-      {
-        key: NavigationKey.ArrowRight,
-        meta: true,
-        handler: onMetaArrowRight,
-      },
-      {
-        key: UIKey.Escape,
-        handler: onEscape,
-      },
-      {
-        key: WhiteSpaceKey.Enter,
-        handler: onEnter,
-      },
-      {
-        key: WhiteSpaceKey.Space,
-        handler: onSpace,
-      },
-      {
-        key: EditingKey.Backspace,
-        handler: onDelete,
-      },
-      {
-        key: EditingKey.Delete,
-        handler: onDelete,
-      },
-      {
-        key: 'PrintableKey',
-        handler: onPrintableKey,
-      },
-    ];
-  }, [
-    onArrowDown,
-    onArrowUp,
-    onArrowLeft,
-    onArrowRight,
-    onMetaArrowDown,
-    onMetaArrowUp,
-    onMetaArrowLeft,
-    onMetaArrowRight,
-    onEscape,
-    onEnter,
-    onSpace,
-    onDelete,
-    onPrintableKey,
-  ]);
-
-  useKeyboard(focusedCellKeyBindings, active);
 }
 
 export function LastLeafRowCell(): JSX.Element {

@@ -26,13 +26,16 @@ export function FlatObject<K extends string | number, T>(
   }
 
   function toKeyArray(arrString: string): K[] {
-    return arrString.split('.').map((i) => {
-      if (isNumberString(i)) {
-        return toNumber(i) as K;
-      }
+    return arrString
+      .split('.')
+      .filter((i) => i !== '')
+      .map((i) => {
+        if (isNumberString(i)) {
+          return toNumber(i) as K;
+        }
 
-      return i as K;
-    });
+        return i as K;
+      });
   }
 
   return {
