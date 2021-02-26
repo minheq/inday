@@ -7,6 +7,7 @@ import { Field, FieldID, FieldValue } from '../../../models/fields';
 import { FieldWithListViewConfig } from '../../../models/views';
 import {
   Column,
+  GroupRow,
   GroupRowCell,
   LeafRow,
   LeafRowCell,
@@ -66,13 +67,12 @@ export function useListViewMap(
     return getGroupRowCellCache(groupRows);
   }, [groupRows]);
   const leafRows = useMemo(
-    (): ListViewLeafRow[] => getListViewLeafRows(nodes, []),
+    (): ListViewLeafRow[] => getListViewLeafRows(nodes, [], 0),
     [nodes],
   );
-  const leafRowCache = useMemo(
-    (): LeafRowCache => getLeafRowCache(leafRows, groupRowCache),
-    [leafRows, groupRowCache],
-  );
+  const leafRowCache = useMemo((): LeafRowCache => getLeafRowCache(leafRows), [
+    leafRows,
+  ]);
   const columnToFieldID = useMemo(
     (): ColumnToFieldIDCache => getColumnToFieldIDCache(fields),
     [fields],
@@ -129,19 +129,26 @@ function getColumnToFieldIDCache(fields: Field[]): ColumnToFieldIDCache {
 
 interface ListViewLeafRow extends LeafRow {
   documentID: DocumentID;
+  index: number;
 }
 
 function getListViewLeafRows(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
   prevPath: number[],
+  prevIndex: number,
 ): ListViewLeafRow[] {
   let rows: ListViewLeafRow[] = [];
+  let currentIndex = prevIndex;
 
   for (let i = 0; i < nodes.length; i++) {
     const group = nodes[i];
     const path = [...prevPath, i];
 
     if (group.type === 'leaf' || group.type === 'flat') {
+      if (group.type === 'leaf' && group.collapsed) {
+        continue;
+      }
+
       for (let j = 0; j < group.children.length; j++) {
         const document = group.children[j];
 
@@ -149,11 +156,14 @@ function getListViewLeafRows(
           path,
           row: j + 1,
           documentID: document.id,
+          index: currentIndex,
         });
+
+        currentIndex++;
       }
     } else {
       const { children } = group;
-      const groupRows = getListViewLeafRows(children, path);
+      const groupRows = getListViewLeafRows(children, path, currentIndex);
 
       rows = rows.concat(groupRows);
     }
@@ -164,16 +174,13 @@ function getListViewLeafRows(
 
 interface LeafRowData {
   documentID: DocumentID;
-  prev: LeafRow | null;
-  next: LeafRow | null;
+  /** Helps with finding next/prev index of visible leaf row */
+  index: number;
 }
 
 type LeafRowCache = FlatObject<number, LeafRowData>;
 
-function getLeafRowCache(
-  rows: ListViewLeafRow[],
-  groupRowCache: GroupRowCache,
-): LeafRowCache {
+function getLeafRowCache(rows: ListViewLeafRow[]): LeafRowCache {
   const cache = FlatObject<number, LeafRowData>();
 
   if (isEmpty(rows)) {
@@ -182,23 +189,10 @@ function getLeafRowCache(
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const prevRow = rows[i - 1];
-    const nextRow = rows[i + 1];
-
-    let prev = null;
-    let next = null;
-
-    if (prevRow && !groupRowCache.get(prevRow.path).collapsed) {
-      prev = prevRow;
-    }
-    if (nextRow && !groupRowCache.get(nextRow.path).collapsed) {
-      next = nextRow;
-    }
 
     const data: LeafRowData = {
       documentID: row.documentID,
-      prev,
-      next,
+      index: row.index,
     };
 
     cache.set([...row.path, row.row], data);
@@ -249,6 +243,7 @@ function getGroupRowCache(rows: ListViewGroupRow[]): GroupRowCache {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
+
     const data: GroupRowData = {
       path: row.path,
       collapsed: row.collapsed,
@@ -429,15 +424,18 @@ export function getLeafRowCellBottom(
 ): LeafRowCell | false {
   const leafRowData = listViewMap.leafRowCache.get([...cell.path, cell.row]);
 
-  if (leafRowData.next) {
-    return {
-      row: leafRowData.next.row,
-      path: leafRowData.next.path,
-      column: cell.column,
-    };
+  const nextIndex = leafRowData.index + 1;
+  const nextRow = listViewMap.leafRows[nextIndex];
+
+  if (!nextRow) {
+    return false;
   }
 
-  return false;
+  return {
+    row: nextRow.row,
+    path: nextRow.path,
+    column: cell.column,
+  };
 }
 
 export function getLeafRowCellTop(
@@ -446,15 +444,18 @@ export function getLeafRowCellTop(
 ): LeafRowCell | false {
   const leafRowData = listViewMap.leafRowCache.get([...cell.path, cell.row]);
 
-  if (leafRowData.prev) {
-    return {
-      row: leafRowData.prev.row,
-      path: leafRowData.prev.path,
-      column: cell.column,
-    };
+  const prevIndex = leafRowData.index - 1;
+  const prevRow = listViewMap.leafRows[prevIndex];
+
+  if (!prevRow) {
+    return false;
   }
 
-  return false;
+  return {
+    row: prevRow.row,
+    path: prevRow.path,
+    column: cell.column,
+  };
 }
 
 export function getLeafRowCellRight(

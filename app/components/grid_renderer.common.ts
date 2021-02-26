@@ -47,6 +47,7 @@ export interface GridLeafRow extends LeafRow {
 
 export interface GroupRow {
   path: number[];
+  collapsed: boolean;
 }
 
 export interface GridGroupRow extends GroupRow {
@@ -54,7 +55,6 @@ export interface GridGroupRow extends GroupRow {
   height: number;
   y: number;
   level: number;
-  collapsed: boolean;
 }
 
 export interface GridSpacerRow {
