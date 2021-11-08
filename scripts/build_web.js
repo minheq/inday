@@ -19,7 +19,7 @@ const options = {
   ],
   minify: nodeEnv === 'production',
   sourcemap: true,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
+  target: ['chrome58', 'firefox57', 'safari11', 'edge18'],
   define: {
     ['process.env.NODE_ENV']: `"${nodeEnv}"`,
     ['global']: 'window',
@@ -32,7 +32,7 @@ build(options)
     console.timeEnd('build time');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error(`Failed to build: ${error.message}`);
     process.exit(1);
   });
