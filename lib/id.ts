@@ -7,7 +7,7 @@ const alphabet =
 const nanoid = customAlphabet(alphabet, idLength);
 
 export function generateID<T extends string>(prefix: T): `${T}${string}` {
-  return `${prefix}${nanoid()}` as `${T}${string}`;
+  return `${prefix}${nanoid()}`;
 }
 
 export function validateID<T extends string>(prefix: T, id: string): void {

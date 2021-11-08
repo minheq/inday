@@ -19,7 +19,7 @@
     "@react-native-community/async-storage": "^1.12.1",
     "date-fns": "^2.16.1",
     "fuse.js": "^6.4.3",
-    "nanoid": "^3.1.20",
+    "nanoid": "^3.1.30",
     "pg": "^8.5.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -27,8 +27,7 @@
     "react-native": "0.63.3",
     "react-native-svg": "^12.1.0",
     "react-native-web": "^0.17.5",
-    "recoil": "^0.1.2",
-    "recoilize": "^1.0.0"
+    "recoil": "^0.5.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -38,11 +37,10 @@
     "@types/react-dom": "^17.0.0",
     "@types/react-modal": "^3.10.6",
     "@types/react-native": "^0.63.37",
-    "@types/recoilize": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "^4.11.1",
     "@typescript-eslint/parser": "^4.11.1",
     "electron": "^11.0.3",
-    "esbuild": "^0.8.17",
+    "esbuild": "^0.13.12",
     "eslint": "^7.17.0",
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-react": "^7.22.0",
