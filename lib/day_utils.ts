@@ -23,15 +23,15 @@ export type DayInterval = {
 
 export function toDateInterval(interval: DayInterval): DateInterval {
   return {
-    start: toDate(interval.start),
-    end: toDate(interval.end),
+    start: parseDay(interval.start),
+    end: parseDay(interval.end),
   };
 }
 
 export function fromDateInterval(interval: DateInterval): DayInterval {
   return {
-    start: fromDate(interval.start),
-    end: fromDate(interval.end),
+    start: toDay(interval.start),
+    end: toDay(interval.end),
   };
 }
 
@@ -54,7 +54,7 @@ export function getDays(interval: DayInterval, step = 1): Day[] {
 export type Day = string;
 
 export function setSameDate(date: Date, day: Day): Date {
-  const newDate = toDate(day);
+  const newDate = parseDay(day);
 
   date = setYear(date, newDate.getFullYear());
   date = setMonth(date, newDate.getMonth());
@@ -64,14 +64,14 @@ export function setSameDate(date: Date, day: Day): Date {
 }
 
 export function isWithinDayInterval(day: Day, interval: DayInterval): boolean {
-  return isWithinInterval(toDate(day), {
-    start: toDate(interval.start),
-    end: toDate(interval.end),
+  return isWithinInterval(parseDay(day), {
+    start: parseDay(interval.start),
+    end: parseDay(interval.end),
   });
 }
 
 export function today(): Day {
-  return fromDate(new Date());
+  return toDay(new Date());
 }
 
 export function isSameDay(dayLeft: Day, dayRight: Day): boolean {
@@ -79,33 +79,33 @@ export function isSameDay(dayLeft: Day, dayRight: Day): boolean {
 }
 
 export function isAfter(dayLeft: Day, dayRight: Day): boolean {
-  return dateFnsIsAfter(toDate(dayLeft), toDate(dayRight));
+  return dateFnsIsAfter(parseDay(dayLeft), parseDay(dayRight));
 }
 
 export function isBefore(dayLeft: Day, dayRight: Day): boolean {
-  return dateFnsIsBefore(toDate(dayLeft), toDate(dayRight));
+  return dateFnsIsBefore(parseDay(dayLeft), parseDay(dayRight));
 }
 
 export function addDays(day: Day, amount: number): Day {
-  return fromDate(dateFnsAddDays(toDate(day), amount));
+  return toDay(dateFnsAddDays(parseDay(day), amount));
 }
 
 export function subDays(day: Day, amount: number): Day {
-  return fromDate(dateFnsSubDays(toDate(day), amount));
+  return toDay(dateFnsSubDays(parseDay(day), amount));
 }
 
 export function addMonths(day: Day, amount: number): Day {
-  return fromDate(dateFnsAddMonths(toDate(day), amount));
+  return toDay(dateFnsAddMonths(parseDay(day), amount));
 }
 
 export function subMonths(day: Day, amount: number): Day {
-  return fromDate(dateFnsSubMonths(toDate(day), amount));
+  return toDay(dateFnsSubMonths(parseDay(day), amount));
 }
 
-function toDate(day: Day): Date {
+export function parseDay(day: Day): Date {
   return parseISO(day);
 }
 
-function fromDate(date: Date): Day {
+export function toDay(date: Date): Day {
   return format(date, DAY_FORMAT);
 }

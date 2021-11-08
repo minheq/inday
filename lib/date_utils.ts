@@ -362,6 +362,14 @@ export function getLastDateOfWeek(date: Date, firstDayOfWeek: DayOfWeek): Date {
   return addDays(firstDateOfTheWeek, 6);
 }
 
+export function setSameDate(date: Date, toDate: Date): Date {
+  date = setYear(date, toDate.getFullYear());
+  date = setMonth(date, toDate.getMonth());
+  date = setDate(date, toDate.getDate());
+
+  return date;
+}
+
 // eslint-disable-next-line
 export enum WeekDay {
   Monday = 1,

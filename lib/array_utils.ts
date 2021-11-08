@@ -6,7 +6,7 @@ export function range(max: number): number[];
 export function range(arg0: number, arg1?: number, arg2?: number): number[] {
   const arr: number[] = [];
 
-  if (!arg1) {
+  if (arg1 === undefined) {
     for (let i = 0; i < arg0; i++) {
       arr.push(i);
     }
