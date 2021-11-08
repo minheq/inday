@@ -165,8 +165,9 @@ interface MenuItemProps {
 function MenuItem(props: MenuItemProps) {
   const { component } = props;
   const { push } = useNavigation();
-  const { component: currentComponent, onCloseMenu } =
-    useContext(PlaygroundContext);
+  const { component: currentComponent, onCloseMenu } = useContext(
+    PlaygroundContext,
+  );
   const active = currentComponent === component;
 
   const handlePress = useCallback(() => {
