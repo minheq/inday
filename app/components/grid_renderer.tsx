@@ -244,7 +244,7 @@ export const GridRenderer = memo(
     );
 
     return (
-      <View style={[{ height }]}>
+      <View style={{ height }}>
         <ScrollView
           bounces={false}
           ref={verticalScrollViewRef}
@@ -536,3 +536,13 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 });
+function useGridRecycler(arg0: {
+  rows: import('./grid_renderer.common').GridRow[];
+  columns: import('./grid_renderer.common').GridColumn[];
+  scrollViewHeight: number;
+  scrollViewWidth: number;
+  scrollX: number;
+  scrollY: number;
+}): { recycledRows: any; recycledColumns: any } {
+  throw new Error('Function not implemented.');
+}

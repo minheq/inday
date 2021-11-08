@@ -99,25 +99,8 @@ function Flat(): JSX.Element {
   ];
 
   const columns = [
-    100,
-    150,
-    100,
-    200,
-    100,
-    100,
-    100,
-    140,
-    100,
-    300,
-    100,
-    200,
-    150,
-    140,
-    100,
-    300,
-    100,
-    200,
-    150,
+    100, 150, 100, 200, 100, 100, 100, 140, 100, 300, 100, 200, 150, 140, 100,
+    300, 100, 200, 150,
   ];
 
   return (
@@ -192,25 +175,8 @@ function Grouped(): JSX.Element {
   ];
 
   const columns = [
-    100,
-    150,
-    100,
-    200,
-    100,
-    100,
-    100,
-    140,
-    100,
-    300,
-    100,
-    200,
-    150,
-    140,
-    100,
-    300,
-    100,
-    200,
-    150,
+    100, 150, 100, 200, 100, 100, 100, 140, 100, 300, 100, 200, 150, 140, 100,
+    300, 100, 200, 150,
   ];
 
   return (
@@ -287,9 +253,11 @@ function ScrollToCell(props: ScrollToCellProps) {
   const [column, setColumn] = useState<number>();
 
   const rowOptions = useMemo(() => {
-    return (getRows(groups, 0, 0, 0, [], 0).filter(
-      (r) => r.type === 'leaf',
-    ) as LeafRow[]).map((row) => ({
+    return (
+      getRows(groups, 0, 0, 0, [], 0).filter(
+        (r) => r.type === 'leaf',
+      ) as LeafRow[]
+    ).map((row) => ({
       value: [...row.path, row.row].join(','),
       label: `Row (${row.path.join(',')} - ${row.row})`,
     }));

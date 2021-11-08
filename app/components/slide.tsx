@@ -22,8 +22,9 @@ export const Slide = memo(function Slide(props: SlideProps): JSX.Element {
     onCollapsed,
   } = props;
   const { speed, bounciness } = config || tokens.animation.default;
-  const width = useRef(new Animated.Value(visible ? intrinsicWidth : 0))
-    .current;
+  const width = useRef(
+    new Animated.Value(visible ? intrinsicWidth : 0),
+  ).current;
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
 
   useEffect(() => {

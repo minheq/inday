@@ -34,25 +34,29 @@ export const workspaceQuery = selector<WorkspaceState>({
 
 export const spaceQuery = selectorFamily<Space, SpaceID>({
   key: 'SpaceQuery',
-  get: (spaceID: SpaceID) => ({ get }) => {
-    const spacesByID = get(spacesByIDState);
-    const space = spacesByID[spaceID];
+  get:
+    (spaceID: SpaceID) =>
+    ({ get }) => {
+      const spacesByID = get(spacesByIDState);
+      const space = spacesByID[spaceID];
 
-    if (space === undefined) {
-      throw new Error('Space not found');
-    }
+      if (space === undefined) {
+        throw new Error('Space not found');
+      }
 
-    return space;
-  },
+      return space;
+    },
 });
 
 export const spaceCollectionsQuery = selectorFamily<Collection[], SpaceID>({
   key: 'SpaceCollectionsQuery',
-  get: (spaceID: SpaceID) => ({ get }) => {
-    const collections = get(collectionsQuery);
+  get:
+    (spaceID: SpaceID) =>
+    ({ get }) => {
+      const collections = get(collectionsQuery);
 
-    return collections.filter((c) => c.spaceID === spaceID);
-  },
+      return collections.filter((c) => c.spaceID === spaceID);
+    },
 });
 
 export const spacesQuery = selector<Space[]>({
@@ -75,16 +79,18 @@ export const documentsQuery = selector<Document[]>({
 
 export const documentQuery = selectorFamily<Document, DocumentID>({
   key: 'DocumentQuery',
-  get: (documentID: DocumentID) => ({ get }) => {
-    const documentsByID = get(documentsByIDState);
-    const document = documentsByID[documentID];
+  get:
+    (documentID: DocumentID) =>
+    ({ get }) => {
+      const documentsByID = get(documentsByIDState);
+      const document = documentsByID[documentID];
 
-    if (document === undefined) {
-      throw new Error('Document not found');
-    }
+      if (document === undefined) {
+        throw new Error('Document not found');
+      }
 
-    return document;
-  },
+      return document;
+    },
 });
 
 export const collectionDocumentsQuery = selectorFamily<
@@ -92,13 +98,15 @@ export const collectionDocumentsQuery = selectorFamily<
   CollectionID
 >({
   key: 'CollectionDocumentsQuery',
-  get: (collectionID: CollectionID) => ({ get }) => {
-    const documents = get(documentsQuery);
+  get:
+    (collectionID: CollectionID) =>
+    ({ get }) => {
+      const documents = get(documentsQuery);
 
-    return documents.filter(
-      (document) => document.collectionID === collectionID,
-    );
-  },
+      return documents.filter(
+        (document) => document.collectionID === collectionID,
+      );
+    },
 });
 
 export const collectionsQuery = selector<Collection[]>({
@@ -112,16 +120,18 @@ export const collectionsQuery = selector<Collection[]>({
 
 export const collectionQuery = selectorFamily<Collection, CollectionID>({
   key: 'CollectionQuery',
-  get: (collectionID: CollectionID) => ({ get }) => {
-    const collectionsByID = get(collectionsByIDState);
-    const collection = collectionsByID[collectionID];
+  get:
+    (collectionID: CollectionID) =>
+    ({ get }) => {
+      const collectionsByID = get(collectionsByIDState);
+      const collection = collectionsByID[collectionID];
 
-    if (collection === undefined) {
-      throw new Error('Collection not found');
-    }
+      if (collection === undefined) {
+        throw new Error('Collection not found');
+      }
 
-    return collection;
-  },
+      return collection;
+    },
 });
 
 export const fieldsQuery = selector<Field[]>({
@@ -135,17 +145,19 @@ export const fieldsQuery = selector<Field[]>({
 
 export const fieldQuery = selectorFamily<Field, FieldID>({
   key: 'FieldQuery',
-  get: (fieldID: FieldID) => ({ get }) => {
-    const fieldsByID = get(fieldsByIDState);
+  get:
+    (fieldID: FieldID) =>
+    ({ get }) => {
+      const fieldsByID = get(fieldsByIDState);
 
-    const field = fieldsByID[fieldID];
+      const field = fieldsByID[fieldID];
 
-    if (field === undefined) {
-      throw new Error('Field not found');
-    }
+      if (field === undefined) {
+        throw new Error('Field not found');
+      }
 
-    return field;
-  },
+      return field;
+    },
 });
 
 export const collectionFieldsByIDQuery = selectorFamily<
@@ -153,28 +165,32 @@ export const collectionFieldsByIDQuery = selectorFamily<
   CollectionID
 >({
   key: 'CollectionFieldsByIDQuery',
-  get: (collectionID: CollectionID) => ({ get }) => {
-    const fields = get(fieldsQuery);
+  get:
+    (collectionID: CollectionID) =>
+    ({ get }) => {
+      const fields = get(fieldsQuery);
 
-    const fieldsByID: { [fieldID: string]: Field } = {};
+      const fieldsByID: { [fieldID: string]: Field } = {};
 
-    for (const field of fields) {
-      if (field.collectionID === collectionID) {
-        fieldsByID[field.id] = field;
+      for (const field of fields) {
+        if (field.collectionID === collectionID) {
+          fieldsByID[field.id] = field;
+        }
       }
-    }
 
-    return fieldsByID;
-  },
+      return fieldsByID;
+    },
 });
 
 export const collectionFieldsQuery = selectorFamily<Field[], CollectionID>({
   key: 'CollectionFieldsQuery',
-  get: (collectionID: CollectionID) => ({ get }) => {
-    const fields = get(fieldsQuery);
+  get:
+    (collectionID: CollectionID) =>
+    ({ get }) => {
+      const fields = get(fieldsQuery);
 
-    return fields.filter((f) => f.collectionID === collectionID);
-  },
+      return fields.filter((f) => f.collectionID === collectionID);
+    },
 });
 
 export const filtersQuery = selector<Filter[]>({
@@ -188,17 +204,19 @@ export const filtersQuery = selector<Filter[]>({
 
 export const filterQuery = selectorFamily<Filter, FilterID>({
   key: 'FilterQuery',
-  get: (filterID: FilterID) => ({ get }) => {
-    const filtersByID = get(filtersByIDState);
+  get:
+    (filterID: FilterID) =>
+    ({ get }) => {
+      const filtersByID = get(filtersByIDState);
 
-    const filter = filtersByID[filterID];
+      const filter = filtersByID[filterID];
 
-    if (filter === undefined) {
-      throw new Error('Filter not found');
-    }
+      if (filter === undefined) {
+        throw new Error('Filter not found');
+      }
 
-    return filter;
-  },
+      return filter;
+    },
 });
 
 export const sortsQuery = selector<Sort[]>({
@@ -212,17 +230,19 @@ export const sortsQuery = selector<Sort[]>({
 
 export const sortQuery = selectorFamily<Sort, SortID>({
   key: 'SortQuery',
-  get: (sortID: SortID) => ({ get }) => {
-    const sortsByID = get(sortsByIDState);
+  get:
+    (sortID: SortID) =>
+    ({ get }) => {
+      const sortsByID = get(sortsByIDState);
 
-    const sort = sortsByID[sortID];
+      const sort = sortsByID[sortID];
 
-    if (sort === undefined) {
-      throw new Error('Sort not found');
-    }
+      if (sort === undefined) {
+        throw new Error('Sort not found');
+      }
 
-    return sort;
-  },
+      return sort;
+    },
 });
 
 export const groupsQuery = selector<Group[]>({
@@ -236,17 +256,19 @@ export const groupsQuery = selector<Group[]>({
 
 export const groupQuery = selectorFamily<Group, GroupID>({
   key: 'GroupQuery',
-  get: (groupID: GroupID) => ({ get }) => {
-    const groupsByID = get(groupsByIDState);
+  get:
+    (groupID: GroupID) =>
+    ({ get }) => {
+      const groupsByID = get(groupsByIDState);
 
-    const group = groupsByID[groupID];
+      const group = groupsByID[groupID];
 
-    if (group === undefined) {
-      throw new Error('Sort not found');
-    }
+      if (group === undefined) {
+        throw new Error('Sort not found');
+      }
 
-    return group;
-  },
+      return group;
+    },
 });
 
 export const viewsQuery = selector<View[]>({
@@ -260,124 +282,142 @@ export const viewsQuery = selector<View[]>({
 
 export const viewQuery = selectorFamily<View, ViewID>({
   key: 'ViewQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const viewsByID = get(viewsByIDState);
-    const view = viewsByID[viewID];
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const viewsByID = get(viewsByIDState);
+      const view = viewsByID[viewID];
 
-    if (view === undefined) {
-      throw new Error('View not found');
-    }
+      if (view === undefined) {
+        throw new Error('View not found');
+      }
 
-    return view;
-  },
+      return view;
+    },
 });
 
 export const viewFiltersQuery = selectorFamily<Filter[], ViewID>({
   key: 'ViewFiltersQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const filters = get(filtersQuery);
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const filters = get(filtersQuery);
 
-    return filters
-      .slice(0)
-      .filter((f) => f.viewID === viewID)
-      .sort((a, b) => a.group - b.group);
-  },
+      return filters
+        .slice(0)
+        .filter((f) => f.viewID === viewID)
+        .sort((a, b) => a.group - b.group);
+    },
 });
 
 export const viewSortsQuery = selectorFamily<Sort[], ViewID>({
   key: 'ViewSortsQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const sorts = get(sortsQuery);
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const sorts = get(sortsQuery);
 
-    return sorts
-      .slice(0)
-      .filter((f) => f.viewID === viewID)
-      .sort((a, b) => a.sequence - b.sequence);
-  },
+      return sorts
+        .slice(0)
+        .filter((f) => f.viewID === viewID)
+        .sort((a, b) => a.sequence - b.sequence);
+    },
 });
 
 export const viewGroupsQuery = selectorFamily<Group[], ViewID>({
   key: 'ViewGroupsQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const groups = get(groupsQuery);
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const groups = get(groupsQuery);
 
-    return groups
-      .slice(0)
-      .filter((f) => f.viewID === viewID)
-      .sort((a, b) => a.sequence - b.sequence);
-  },
+      return groups
+        .slice(0)
+        .filter((f) => f.viewID === viewID)
+        .sort((a, b) => a.sequence - b.sequence);
+    },
 });
 
 export const viewFilterGroupsQuery = selectorFamily<FilterGroup[], ViewID>({
   key: 'ViewFilterGroupsQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const filters = get(viewFiltersQuery(viewID));
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const filters = get(viewFiltersQuery(viewID));
 
-    const filterGroups: Filter[][] = [];
+      const filterGroups: Filter[][] = [];
 
-    let currentGroup = 1;
+      let currentGroup = 1;
 
-    for (const filter of filters) {
-      if (filter.group === currentGroup && filterGroups[currentGroup - 1]) {
-        filterGroups[currentGroup - 1].push(filter);
-      } else {
-        filterGroups.push([filter]);
-        currentGroup++;
+      for (const filter of filters) {
+        if (filter.group === currentGroup && filterGroups[currentGroup - 1]) {
+          filterGroups[currentGroup - 1].push(filter);
+        } else {
+          filterGroups.push([filter]);
+          currentGroup++;
+        }
       }
-    }
 
-    return filterGroups;
-  },
+      return filterGroups;
+    },
 });
 
 export const viewFiltersGroupMaxQuery = selectorFamily<number, ViewID>({
   key: 'ViewFiltersGroupMaxQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const filterGroups = get(viewFilterGroupsQuery(viewID));
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const filterGroups = get(viewFilterGroupsQuery(viewID));
 
-    const lastFilterGroup = last(filterGroups);
+      const lastFilterGroup = last(filterGroups);
 
-    if (lastFilterGroup === undefined) {
-      return 0;
-    }
+      if (lastFilterGroup === undefined) {
+        return 0;
+      }
 
-    return lastFilterGroup[0].group;
-  },
+      return lastFilterGroup[0].group;
+    },
 });
 
 export const viewSortsSequenceMaxQuery = selectorFamily<number, ViewID>({
   key: 'ViewSortsSequenceMaxQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const sorts = get(viewSortsQuery(viewID));
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const sorts = get(viewSortsQuery(viewID));
 
-    if (isEmpty(sorts)) {
-      return 0;
-    }
+      if (isEmpty(sorts)) {
+        return 0;
+      }
 
-    return Math.max(...sorts.map((s) => s.sequence));
-  },
+      return Math.max(...sorts.map((s) => s.sequence));
+    },
 });
 
 export const viewGroupsSequenceMaxQuery = selectorFamily<number, ViewID>({
   key: 'ViewGroupsSequenceMaxQuery',
-  get: (viewID: ViewID) => ({ get }) => {
-    const group = get(viewGroupsQuery(viewID));
+  get:
+    (viewID: ViewID) =>
+    ({ get }) => {
+      const group = get(viewGroupsQuery(viewID));
 
-    if (isEmpty(group)) {
-      return 0;
-    }
+      if (isEmpty(group)) {
+        return 0;
+      }
 
-    return Math.max(...group.map((s) => s.sequence));
-  },
+      return Math.max(...group.map((s) => s.sequence));
+    },
 });
 
 export const collectionViewsQuery = selectorFamily<View[], CollectionID>({
   key: 'CollectionViewsQuery',
-  get: (collectionID: CollectionID) => ({ get }) => {
-    const views = get(viewsQuery);
+  get:
+    (collectionID: CollectionID) =>
+    ({ get }) => {
+      const views = get(viewsQuery);
 
-    return views.filter((v) => v.collectionID === collectionID);
-  },
+      return views.filter((v) => v.collectionID === collectionID);
+    },
 });
 
 export const collectionDocumentsByIDQuery = selectorFamily<
@@ -385,29 +425,33 @@ export const collectionDocumentsByIDQuery = selectorFamily<
   CollectionID
 >({
   key: 'CollectionDocumentsByIDQuery',
-  get: (collectionID: CollectionID) => ({ get }) => {
-    const documents = get(documentsQuery);
+  get:
+    (collectionID: CollectionID) =>
+    ({ get }) => {
+      const documents = get(documentsQuery);
 
-    const collectionDocuments = documents.filter(
-      (r) => r.collectionID === collectionID,
-    );
+      const collectionDocuments = documents.filter(
+        (r) => r.collectionID === collectionID,
+      );
 
-    return keyedBy(collectionDocuments, (r) => r.id);
-  },
+      return keyedBy(collectionDocuments, (r) => r.id);
+    },
 });
 
 export const collaboratorQuery = selectorFamily<Collaborator, CollaboratorID>({
   key: 'CollaboratorQuery',
-  get: (collaboratorID: CollaboratorID) => ({ get }) => {
-    const collaboratorsByID = get(collaboratorsByIDState);
-    const collaborator = collaboratorsByID[collaboratorID];
+  get:
+    (collaboratorID: CollaboratorID) =>
+    ({ get }) => {
+      const collaboratorsByID = get(collaboratorsByIDState);
+      const collaborator = collaboratorsByID[collaboratorID];
 
-    if (collaborator === undefined) {
-      throw new Error('Collaborator not found');
-    }
+      if (collaborator === undefined) {
+        throw new Error('Collaborator not found');
+      }
 
-    return collaborator;
-  },
+      return collaborator;
+    },
 });
 
 export const collaboratorsQuery = selector<Collaborator[]>({
@@ -424,16 +468,18 @@ export const documentFieldValueQuery = selectorFamily<
   { documentID: DocumentID; fieldID: FieldID }
 >({
   key: 'DocumentFieldValueQuery',
-  get: ({ documentID, fieldID }) => ({ get }) => {
-    const documentsByID = get(documentsByIDState);
-    const document = documentsByID[documentID];
+  get:
+    ({ documentID, fieldID }) =>
+    ({ get }) => {
+      const documentsByID = get(documentsByIDState);
+      const document = documentsByID[documentID];
 
-    if (document === undefined) {
-      throw new Error('Document not found');
-    }
+      if (document === undefined) {
+        throw new Error('Document not found');
+      }
 
-    return document.fields[fieldID];
-  },
+      return document.fields[fieldID];
+    },
 });
 
 export const documentFieldsEntriesQuery = selectorFamily<
@@ -441,16 +487,18 @@ export const documentFieldsEntriesQuery = selectorFamily<
   DocumentID
 >({
   key: 'DocumentFieldsEntriesQuery',
-  get: (documentID: DocumentID) => ({ get }) => {
-    const document = get(documentQuery(documentID));
+  get:
+    (documentID: DocumentID) =>
+    ({ get }) => {
+      const document = get(documentQuery(documentID));
 
-    const fieldIDs = Object.keys(document.fields) as FieldID[];
-    const fields = fieldIDs.map((fieldID) => get(fieldQuery(fieldID)));
+      const fieldIDs = Object.keys(document.fields) as FieldID[];
+      const fields = fieldIDs.map((fieldID) => get(fieldQuery(fieldID)));
 
-    return fields.map((field) => {
-      const value = document.fields[field.id];
+      return fields.map((field) => {
+        const value = document.fields[field.id];
 
-      return [field, value];
-    });
-  },
+        return [field, value];
+      });
+    },
 });

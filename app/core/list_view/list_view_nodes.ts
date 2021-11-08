@@ -76,9 +76,8 @@ export function isGroupedListViewDocumentNodes(
 export function useToggleCollapseGroup(
   viewID: ViewID,
 ): (field: Field, value: FieldValue, collapsed: boolean) => void {
-  const [collapsedGroupsByViewID, setCollapsedGroupsByViewID] = useRecoilState(
-    collapsedGroupsState,
-  );
+  const [collapsedGroupsByViewID, setCollapsedGroupsByViewID] =
+    useRecoilState(collapsedGroupsState);
 
   return useCallback(
     (field: Field, value: FieldValue, collapsed: boolean) => {
@@ -203,10 +202,10 @@ function useDocumentsOrderChanged(
   documents: Document[],
 ): boolean {
   const collapsedGroupsByViewID = useRecoilValue(collapsedGroupsState);
-  const collapsedGroups = useMemo(() => collapsedGroupsByViewID[viewID], [
-    collapsedGroupsByViewID,
-    viewID,
-  ]);
+  const collapsedGroups = useMemo(
+    () => collapsedGroupsByViewID[viewID],
+    [collapsedGroupsByViewID, viewID],
+  );
   const documentsLength = documents.length;
   const filters = useViewFiltersQuery(viewID);
   const sorts = useViewSortsQuery(viewID);

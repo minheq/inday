@@ -149,14 +149,8 @@ export interface ListPickerItemProps<T> {
 }
 
 export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
-  const {
-    active,
-    selected,
-    option,
-    onSelect,
-    renderLabel,
-    renderCheck,
-  } = props;
+  const { active, selected, option, onSelect, renderLabel, renderCheck } =
+    props;
   const theme = useTheme();
 
   const handlePress = useCallback(() => {

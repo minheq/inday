@@ -666,10 +666,10 @@ const SpacerRowContainer = memo(function SpacerRowContainer(
 ) {
   const { height, y } = props;
 
-  const style = useMemo(() => styles('spacer', { height, top: y }), [
-    y,
-    height,
-  ]);
+  const style = useMemo(
+    () => styles('spacer', { height, top: y }),
+    [y, height],
+  );
 
   return <div style={style} />;
 });
@@ -688,11 +688,10 @@ const HeaderCellContainer = memo(function HeaderCellContainer(
 ) {
   const { x, column, width, height, last, renderHeaderCell } = props;
 
-  const style = useMemo(() => styles('cell', { left: x, width, height }), [
-    x,
-    width,
-    height,
-  ]);
+  const style = useMemo(
+    () => styles('cell', { left: x, width, height }),
+    [x, width, height],
+  );
 
   return (
     <div style={style}>{renderHeaderCell({ column, width, height, last })}</div>
@@ -713,11 +712,10 @@ const FooterCellContainer = memo(function FooterCellContainer(
 ) {
   const { x, column, width, height, last, renderFooterCell } = props;
 
-  const style = useMemo(() => styles('cell', { left: x, width, height }), [
-    x,
-    width,
-    height,
-  ]);
+  const style = useMemo(
+    () => styles('cell', { left: x, width, height }),
+    [x, width, height],
+  );
 
   return (
     <div style={style}>{renderFooterCell({ column, width, height, last })}</div>
@@ -807,11 +805,10 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
     renderGroupRowCell,
   } = props;
 
-  const style = useMemo(() => styles('cell', { left: x, width, height }), [
-    x,
-    width,
-    height,
-  ]);
+  const style = useMemo(
+    () => styles('cell', { left: x, width, height }),
+    [x, width, height],
+  );
 
   return (
     <div style={style}>

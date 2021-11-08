@@ -735,7 +735,8 @@ function CheckboxField(props: CheckboxFieldProps) {
   const { value } = props;
 
   const { documentID, fieldID } = useDocumentFieldContext();
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
+  const updateDocumentFieldValue =
+    useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
 
   const handleToggle = useCallback(async () => {
     const checked = !value;

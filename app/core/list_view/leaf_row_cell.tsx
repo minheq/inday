@@ -348,15 +348,15 @@ const LeafRowCellView = memo(function LeafRowCellView(
   }, [field, value]);
 
   const pressableStyle = useMemo(
-    (): (({ hovered }: PressableStateCallback) => StyleProp<ViewStyle>) => ({
-      hovered,
-    }) => [
-      styles.leafRowCell,
-      themeStyles.border.default,
-      mode === 'edit' && hovered && themeStyles.button.flatHovered,
-      cell.state !== 'default' && themeStyles.background.content,
-      cell.primary && styles.primaryCell,
-    ],
+    (): (({ hovered }: PressableStateCallback) => StyleProp<ViewStyle>) =>
+      ({ hovered }) =>
+        [
+          styles.leafRowCell,
+          themeStyles.border.default,
+          mode === 'edit' && hovered && themeStyles.button.flatHovered,
+          cell.state !== 'default' && themeStyles.background.content,
+          cell.primary && styles.primaryCell,
+        ],
     [cell, mode, themeStyles],
   );
 
@@ -451,7 +451,8 @@ interface CheckboxCellProps {
 const CheckboxCell = memo(function CheckboxCell(props: CheckboxCellProps) {
   const { value } = props;
   const { documentID, fieldID } = useLeafRowCellContext();
-  const updateDocumentFieldValue = useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
+  const updateDocumentFieldValue =
+    useUpdateDocumentFieldValueMutation<BooleanFieldKindValue>();
 
   const handleToggle = useCallback(async () => {
     const checked = !value;
@@ -476,12 +477,8 @@ interface CurrencyCellProps {
 
 const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   const { value, field } = props;
-  const {
-    cell,
-    onFocusNextDocument,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { cell, onFocusNextDocument, onStartEditing, onStopEditing } =
+    useLeafRowCellContext();
   useNumberFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
@@ -574,12 +571,8 @@ interface EmailCellProps {
 
 const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   const { value } = props;
-  const {
-    cell,
-    onStartEditing,
-    onStopEditing,
-    onFocusNextDocument,
-  } = useLeafRowCellContext();
+  const { cell, onStartEditing, onStopEditing, onFocusNextDocument } =
+    useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
@@ -692,12 +685,8 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   props: MultiLineTextCellProps,
 ) {
   const { value } = props;
-  const {
-    cell,
-    onFocusNextDocument,
-    onStartEditing,
-    onStopEditing,
-  } = useLeafRowCellContext();
+  const { cell, onFocusNextDocument, onStartEditing, onStopEditing } =
+    useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
@@ -776,12 +765,8 @@ interface NumberCellProps {
 
 const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   const { value, field } = props;
-  const {
-    cell,
-    onFocusNextDocument,
-    onStopEditing,
-    onStartEditing,
-  } = useLeafRowCellContext();
+  const { cell, onFocusNextDocument, onStopEditing, onStartEditing } =
+    useLeafRowCellContext();
   useNumberFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
@@ -828,12 +813,8 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   props: PhoneNumberCellProps,
 ) {
   const { value } = props;
-  const {
-    cell,
-    onStopEditing,
-    onFocusNextDocument,
-    onStartEditing,
-  } = useLeafRowCellContext();
+  const { cell, onStopEditing, onFocusNextDocument, onStartEditing } =
+    useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
@@ -952,12 +933,8 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   props: SingleLineTextCellProps,
 ) {
   const { value } = props;
-  const {
-    cell,
-    onStopEditing,
-    onStartEditing,
-    onFocusNextDocument,
-  } = useLeafRowCellContext();
+  const { cell, onStopEditing, onStartEditing, onFocusNextDocument } =
+    useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
@@ -1041,12 +1018,8 @@ interface URLCellProps {
 
 const URLCell = memo(function URLCell(props: URLCellProps) {
   const { value } = props;
-  const {
-    cell,
-    onStartEditing,
-    onStopEditing,
-    onFocusNextDocument,
-  } = useLeafRowCellContext();
+  const { cell, onStartEditing, onStopEditing, onFocusNextDocument } =
+    useLeafRowCellContext();
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 

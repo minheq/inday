@@ -81,19 +81,22 @@ export function useGridTransformer(
     () => columns.slice(0, fixedColumnCount),
     [columns, fixedColumnCount],
   );
-  const rightPaneColumnWidths = useMemo(() => columns.slice(fixedColumnCount), [
-    columns,
-    fixedColumnCount,
-  ]);
-  const leftPaneContentWidth = useMemo(() => sum(leftPaneColumnWidths), [
-    leftPaneColumnWidths,
-  ]);
-  const rightPaneContentWidth = useMemo(() => sum(rightPaneColumnWidths), [
-    rightPaneColumnWidths,
-  ]);
-  const leftPaneColumns = useMemo(() => getColumns(leftPaneColumnWidths), [
-    leftPaneColumnWidths,
-  ]);
+  const rightPaneColumnWidths = useMemo(
+    () => columns.slice(fixedColumnCount),
+    [columns, fixedColumnCount],
+  );
+  const leftPaneContentWidth = useMemo(
+    () => sum(leftPaneColumnWidths),
+    [leftPaneColumnWidths],
+  );
+  const rightPaneContentWidth = useMemo(
+    () => sum(rightPaneColumnWidths),
+    [rightPaneColumnWidths],
+  );
+  const leftPaneColumns = useMemo(
+    () => getColumns(leftPaneColumnWidths),
+    [leftPaneColumnWidths],
+  );
   const rightPaneColumns = useMemo(
     () => getColumns(rightPaneColumnWidths, fixedColumnCount),
     [rightPaneColumnWidths, fixedColumnCount],

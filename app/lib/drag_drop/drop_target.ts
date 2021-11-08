@@ -38,10 +38,8 @@ export class DropTarget {
   onAccept: <T>(draggable: Draggable<T>) => void = () => {};
   onLeave: <T>(draggable: Draggable<T>) => void = () => {};
   onEnter: <T>(draggable: Draggable<T>) => void = () => {};
-  onHover: <T>(
-    draggable: Draggable<T>,
-    dragState: DragState,
-  ) => void = () => {};
+  onHover: <T>(draggable: Draggable<T>, dragState: DragState) => void =
+    () => {};
   onWillAccept: <T>(draggable: Draggable<T>) => boolean = () => true;
 
   constructor(props: DropTargetProps) {

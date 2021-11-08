@@ -13,8 +13,6 @@ module.exports = {
         'plugin:react-native/all',
         'plugin:react-hooks/recommended',
         'prettier',
-        'prettier/@typescript-eslint',
-        'prettier/react',
       ],
       parserOptions: {
         project: `./tsconfig.json`,
@@ -51,8 +49,6 @@ module.exports = {
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
         'plugin:sonarjs/recommended',
         'prettier',
-        'prettier/@typescript-eslint',
-        'prettier/react',
       ],
       parserOptions: {
         project: `./tsconfig.json`,
@@ -95,12 +91,7 @@ module.exports = {
         ecmaVersion: 10,
         sourceType: 'module',
       },
-      extends: [
-        'eslint:recommended',
-        'plugin:sonarjs/recommended',
-        'prettier',
-        'prettier/react',
-      ],
+      extends: ['eslint:recommended', 'plugin:sonarjs/recommended', 'prettier'],
       plugins: ['sonarjs'],
       rules: {
         'no-shadow': 2,

@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 
 export function Circle(props: React.SVGProps<SVGCircleElement>): JSX.Element {

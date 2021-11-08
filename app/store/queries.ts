@@ -139,9 +139,7 @@ export function useCollectionDocumentsQuery(
   return useRecoilValue(collectionDocumentsQuery(collectionID));
 }
 
-export function useCollectionFieldsByIDQuery(
-  collectionID: CollectionID,
-): {
+export function useCollectionFieldsByIDQuery(collectionID: CollectionID): {
   [fieldID: string]: Field;
 } {
   return useRecoilValue(collectionFieldsByIDQuery(collectionID));
@@ -396,10 +394,10 @@ export function useDocumentFieldValueQuery(
   documentID: DocumentID,
   fieldID: FieldID,
 ): FieldValue {
-  const params = useMemo(() => ({ documentID, fieldID }), [
-    documentID,
-    fieldID,
-  ]);
+  const params = useMemo(
+    () => ({ documentID, fieldID }),
+    [documentID, fieldID],
+  );
 
   return useRecoilValue(documentFieldValueQuery(params));
 }

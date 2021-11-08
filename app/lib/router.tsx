@@ -202,9 +202,8 @@ interface HistoryState {
 }
 
 function BrowserHistorySync(): JSX.Element {
-  const { lastAction, pathMap, name, params, browserUpdate } = useContext(
-    RouterContext,
-  );
+  const { lastAction, pathMap, name, params, browserUpdate } =
+    useContext(RouterContext);
 
   const handleBrowserPopState = useCallback(
     (event: PopStateEvent) => {

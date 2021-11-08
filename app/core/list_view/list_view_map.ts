@@ -7,7 +7,6 @@ import { Field, FieldID, FieldValue } from '../../../models/fields';
 import { FieldWithListViewConfig } from '../../../models/views';
 import {
   Column,
-  GroupRow,
   GroupRowCell,
   LeafRow,
   LeafRowCell,
