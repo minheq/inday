@@ -50,6 +50,6 @@
     "metro-react-native-babel-preset": "^0.58.0",
     "postgrator": "^4.0.1",
     "prettier": "^2.2.1",
-    "typescript": "v4.2.0-dev.20201230"
+    "typescript": "^4.4.4"
   }
 }

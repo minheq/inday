@@ -22,7 +22,6 @@ import {
   SingleLineTextField,
   SingleSelectField,
   URLField,
-  SelectOption,
   generateFieldID,
   generateSelectOptionID,
 } from './fields';
@@ -41,7 +40,7 @@ import {
   fakeWord,
   fakeWords,
 } from '../lib/faker';
-import { generateWorkspaceID, Workspace } from './workspace';
+import { generateWorkspaceID } from './workspace';
 import { keyedBy, range, sample } from '../lib/array_utils';
 import { isEmpty } from '../lib/lang_utils';
 import { formatISODate } from '../lib/date_utils';
@@ -416,7 +415,7 @@ const fakeFieldValuesByFieldType: {
   },
   [FieldType.MultiDocumentLink]: (field, documentsByFieldID) => {
     if (documentsByFieldID === undefined) {
-      throw new Error('Expected collaborators list to be passed in');
+      throw new Error('Expected document link list to be passed in');
     }
 
     if (isEmpty(documentsByFieldID[field.id])) {
@@ -458,7 +457,7 @@ const fakeFieldValuesByFieldType: {
   },
   [FieldType.SingleDocumentLink]: (field, documentsByFieldID) => {
     if (documentsByFieldID === undefined) {
-      throw new Error('Expected collaborators list to be passed in');
+      throw new Error('Expected document link list to be passed in');
     }
 
     if (isEmpty(documentsByFieldID[field.id])) {
