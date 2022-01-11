@@ -5,7 +5,6 @@ import { GridStories } from './grid_renderer.stories';
 import { DatePickerStories } from './date_picker.stories';
 import { TextInputStories } from './text_input.stories';
 import { Text } from './text';
-import { ScreenName, ScreenProps, useNavigation } from '../config/routes';
 import { PressableHighlight } from './pressable_highlight';
 import { tokens } from './tokens';
 import { PickerStories } from './picker.stories';
@@ -20,11 +19,16 @@ import { CloseButton } from './close_button';
 import { useThemeStyles } from './theme';
 import { PopoverStories } from './popover.stories';
 import { CheckboxStories } from './checkbox.stories';
+import { FlatButtonStories } from './flat_button.stories';
+import { BadgeStories } from './badge.stories';
+import { IconButtonStories } from './icon_button.stories';
+import { ListItemStories } from './list_item.stories';
 
 const MENU_WIDTH = 280;
 
 interface PlaygroundContext {
   component: string;
+  onSelectComponent: (component: string) => void;
   onCloseMenu: () => void;
 }
 
@@ -33,14 +37,13 @@ const PlaygroundContext = createContext<PlaygroundContext>({
   onCloseMenu: () => {
     return;
   },
+  onSelectComponent: () => {
+    return;
+  },
 });
 
-export function Playground(
-  props: ScreenProps<ScreenName.Playground>,
-): JSX.Element {
-  const {
-    params: { component },
-  } = props;
+export function Playground(): JSX.Element {
+  const [component, setComponent] = useState('Intro');
   const mq = useMediaQuery();
   const themeStyles = useThemeStyles();
   const [open, setOpen] = useState(false);
@@ -48,11 +51,26 @@ export function Playground(
   const handleCloseMenu = useCallback(() => {
     setOpen(false);
   }, []);
+  const handleSelectComponent = useCallback((c: string) => {
+    setComponent(c);
+  }, []);
   let content: React.ReactNode = null;
 
   switch (component) {
     case 'Intro':
       content = <Intro />;
+      break;
+    case 'FlatButton':
+      content = <FlatButtonStories />;
+      break;
+    case 'IconButton':
+      content = <IconButtonStories />;
+      break;
+    case 'ListItem':
+      content = <ListItemStories />;
+      break;
+    case 'Badge':
+      content = <BadgeStories />;
       break;
     case 'Dialog':
       content = <DialogStories />;
@@ -87,7 +105,11 @@ export function Playground(
 
   return (
     <PlaygroundContext.Provider
-      value={{ component, onCloseMenu: handleCloseMenu }}
+      value={{
+        component,
+        onSelectComponent: handleSelectComponent,
+        onCloseMenu: handleCloseMenu,
+      }}
     >
       <View style={styles.base}>
         {mq.sizeQuery.lgAndUp ? (
@@ -147,6 +169,10 @@ function Menu() {
         <MenuSection title="COMPONENTS" />
         <MenuItem component="ContextMenu" />
         <MenuItem component="Checkbox" />
+        <MenuItem component="FlatButton" />
+        <MenuItem component="IconButton" />
+        <MenuItem component="ListItem" />
+        <MenuItem component="Badge" />
         <MenuItem component="Popover" />
         <MenuItem component="Picker" />
         <MenuItem component="DatePicker" />
@@ -164,19 +190,21 @@ interface MenuItemProps {
 
 function MenuItem(props: MenuItemProps) {
   const { component } = props;
-  const { push } = useNavigation();
-  const { component: currentComponent, onCloseMenu } = useContext(
-    PlaygroundContext,
-  );
+  const {
+    component: currentComponent,
+    onCloseMenu,
+    onSelectComponent,
+  } = useContext(PlaygroundContext);
   const active = currentComponent === component;
 
   const handlePress = useCallback(() => {
     if (active === true) {
       return;
     }
-    push(ScreenName.Playground, { component });
+
+    onSelectComponent(component);
     onCloseMenu();
-  }, [active, push, component, onCloseMenu]);
+  }, [active, component, onSelectComponent, onCloseMenu]);
 
   return (
     <View style={styles.menuItem}>
