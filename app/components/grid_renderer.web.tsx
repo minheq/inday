@@ -180,7 +180,7 @@ export const GridRenderer = memo(
       (_columns: RecycledColumn[], _width: number, pane: Pane) => {
         const _rows: React.ReactNode[] = [];
 
-        statefulRows.map((row) => {
+        statefulRows.forEach((row) => {
           switch (row.type) {
             case "leaf":
               _rows.push(
