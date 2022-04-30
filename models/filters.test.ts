@@ -1,4 +1,3 @@
-import { test } from "../lib/testing";
 import {
   Filter,
   updateFilterGroup,
@@ -50,17 +49,16 @@ import {
   makeFilter,
 } from "./factory";
 import { FieldType, FieldValue } from "./fields";
-import {} from "../lib/date_utils";
 
-test("no filter", (t) => {
+test("no filter", () => {
   const values = ["AWord", "BWord"];
   const { documents, getters } = prepare(FieldType.SingleLineText, values);
   const result = filterDocuments([], documents, getters);
 
-  t.deepEqual(result.length, values.length);
+  expect(result.length).toEqual(values.length);
 });
 
-test("filter text - contains same case", (t) => {
+test("filter text - contains same case", () => {
   const values = ["AWord", "BWord"];
   const { documents, getters, field } = prepare(
     FieldType.SingleLineText,
@@ -77,10 +75,10 @@ test("filter text - contains same case", (t) => {
   );
   const result = filterDocuments([[filter]], documents, getters);
 
-  t.deepEqual(result.length, values.length);
+  expect(result.length).toEqual(values.length);
 });
 
-test("filter text - one word different case", (t) => {
+test("filter text - one word different case", () => {
   const values = ["AWord", "BWord"];
   const { documents, getters, field } = prepare(
     FieldType.SingleLineText,
@@ -96,10 +94,10 @@ test("filter text - one word different case", (t) => {
   );
   const result = filterDocuments([[filter]], documents, getters);
 
-  t.deepEqual(result.length, 1);
+  expect(result.length).toEqual(1);
 });
 
-test("filter text - 2 for one", (t) => {
+test("filter text - 2 for one", () => {
   const values = ["AWord", "BWord"];
   const { documents, getters, field } = prepare(
     FieldType.SingleLineText,
@@ -123,270 +121,268 @@ test("filter text - 2 for one", (t) => {
   );
   const result = filterDocuments([[filter1, filter2]], documents, getters);
 
-  t.deepEqual(result.length, 1);
+  expect(result.length).toEqual(1);
 });
 
-test("filterByTextFieldKindFilterRuleContains", (t) => {
+test("filterByTextFieldKindFilterRuleContains", () => {
   const filter = filterByTextFieldKindFilterRuleContains;
 
-  t.deepEqual(filter("abc", "a"), true);
-  t.deepEqual(filter("abc", "A"), true);
-  t.deepEqual(filter("abc", "d"), false);
+  expect(filter("abc", "a")).toBeTruthy();
+  expect(filter("abc", "A")).toBeTruthy();
+  expect(filter("abc", "d")).toBeFalsy();
 });
 
-test("filterByTextFieldKindFilterRuleDoesNotContain", (t) => {
+test("filterByTextFieldKindFilterRuleDoesNotContain", () => {
   const filter = filterByTextFieldKindFilterRuleDoesNotContain;
 
-  t.deepEqual(filter("abc", "d"), true);
-  t.deepEqual(filter("abc", "a"), false);
+  expect(filter("abc", "d")).toBeTruthy();
+  expect(filter("abc", "a")).toBeFalsy();
 });
 
-test("filterByTextFieldKindFilterRuleIs", (t) => {
+test("filterByTextFieldKindFilterRuleIs", () => {
   const filter = filterByTextFieldKindFilterRuleIs;
 
-  t.deepEqual(filter("abc", "abc"), true);
-  t.deepEqual(filter("abc", "b"), false);
+  expect(filter("abc", "abc")).toBeTruthy();
+  expect(filter("abc", "b")).toBeFalsy();
 });
 
-test("filterByTextFieldKindFilterRuleIsNot", (t) => {
+test("filterByTextFieldKindFilterRuleIsNot", () => {
   const filter = filterByTextFieldKindFilterRuleIsNot;
 
-  t.deepEqual(filter("abc", "b"), true);
-  t.deepEqual(filter("abc", "abc"), false);
+  expect(filter("abc", "b")).toBeTruthy();
+  expect(filter("abc", "abc")).toBeFalsy();
 });
 
-test("filterByTextFieldKindFilterRuleIsEmpty", (t) => {
+test("filterByTextFieldKindFilterRuleIsEmpty", () => {
   const filter = filterByTextFieldKindFilterRuleIsEmpty;
 
-  t.deepEqual(filter(""), true);
-  t.deepEqual(filter("abc"), false);
+  expect(filter("")).toBeTruthy();
+  expect(filter("abc")).toBeFalsy();
 });
 
-test("filterByTextFieldKindFilterRuleIsNotEmpty", (t) => {
+test("filterByTextFieldKindFilterRuleIsNotEmpty", () => {
   const filter = filterByTextFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter("abc"), true);
-  t.deepEqual(filter(""), false);
+  expect(filter("abc")).toBeTruthy();
+  expect(filter("")).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleEqual", (t) => {
+test("filterByNumberFieldKindFilterRuleEqual", () => {
   const filter = filterByNumberFieldKindFilterRuleEqual;
 
-  t.deepEqual(filter(1, 1), true);
-  t.deepEqual(filter(1, 2), false);
+  expect(filter(1, 1)).toBeTruthy();
+  expect(filter(1, 2)).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleNotEqual", (t) => {
+test("filterByNumberFieldKindFilterRuleNotEqual", () => {
   const filter = filterByNumberFieldKindFilterRuleNotEqual;
 
-  t.deepEqual(filter(1, 2), true);
-  t.deepEqual(filter(1, 1), false);
+  expect(filter(1, 2)).toBeTruthy();
+  expect(filter(1, 1)).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleLessThan", (t) => {
+test("filterByNumberFieldKindFilterRuleLessThan", () => {
   const filter = filterByNumberFieldKindFilterRuleLessThan;
 
-  t.deepEqual(filter(1, 2), true);
-  t.deepEqual(filter(2, 1), false);
+  expect(filter(1, 2)).toBeTruthy();
+  expect(filter(2, 1)).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleGreaterThan", (t) => {
+test("filterByNumberFieldKindFilterRuleGreaterThan", () => {
   const filter = filterByNumberFieldKindFilterRuleGreaterThan;
 
-  t.deepEqual(filter(2, 1), true);
-  t.deepEqual(filter(1, 2), false);
+  expect(filter(2, 1)).toBeTruthy();
+  expect(filter(1, 2)).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleLessThanOrEqual", (t) => {
+test("filterByNumberFieldKindFilterRuleLessThanOrEqual", () => {
   const filter = filterByNumberFieldKindFilterRuleLessThanOrEqual;
 
-  t.deepEqual(filter(1, 2), true);
-  t.deepEqual(filter(2, 2), true);
-  t.deepEqual(filter(2, 1), false);
+  expect(filter(1, 2)).toBeTruthy();
+  expect(filter(2, 2)).toBeTruthy();
+  expect(filter(2, 1)).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleGreaterThanOrEqual", (t) => {
+test("filterByNumberFieldKindFilterRuleGreaterThanOrEqual", () => {
   const filter = filterByNumberFieldKindFilterRuleGreaterThanOrEqual;
 
-  t.deepEqual(filter(2, 1), true);
-  t.deepEqual(filter(2, 2), true);
-  t.deepEqual(filter(1, 2), false);
+  expect(filter(2, 1)).toBeTruthy();
+  expect(filter(2, 2)).toBeTruthy();
+  expect(filter(1, 2)).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleIsEmpty", (t) => {
+test("filterByNumberFieldKindFilterRuleIsEmpty", () => {
   const filter = filterByNumberFieldKindFilterRuleIsEmpty;
 
-  t.deepEqual(filter(null), true);
-  t.deepEqual(filter(1), false);
+  expect(filter(null)).toBeTruthy();
+  expect(filter(1)).toBeFalsy();
 });
 
-test("filterByNumberFieldKindFilterRuleIsNotEmpty", (t) => {
+test("filterByNumberFieldKindFilterRuleIsNotEmpty", () => {
   const filter = filterByNumberFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter(1), true);
-  t.deepEqual(filter(null), false);
+  expect(filter(1)).toBeTruthy();
+  expect(filter(null)).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIs", (t) => {
+test("filterByDateFieldKindFilterRuleIs", () => {
   const filter = filterByDateFieldKindFilterRuleIs;
 
-  t.deepEqual(filter("2020-08-03", "2020-08-03"), true);
-  t.deepEqual(filter("2020-08-03", "2020-08-04"), false);
+  expect(filter("2020-08-03", "2020-08-03")).toBeTruthy();
+  expect(filter("2020-08-03", "2020-08-04")).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsWithin", (t) => {
+test("filterByDateFieldKindFilterRuleIsWithin", () => {
   const filter = filterByDateFieldKindFilterRuleIsWithin;
 
-  t.deepEqual(
+  expect(
     filter("2020-08-03", {
       start: "2020-08-02",
       end: "2020-08-04",
-    }),
-    true
-  );
+    })
+  ).toBeTruthy();
 
-  t.deepEqual(
+  expect(
     filter("2020-08-05", {
       start: "2020-08-02",
       end: "2020-08-04",
-    }),
-    false
-  );
+    })
+  ).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsBefore", (t) => {
+test("filterByDateFieldKindFilterRuleIsBefore", () => {
   const filter = filterByDateFieldKindFilterRuleIsBefore;
 
-  t.deepEqual(filter("2020-08-03", "2020-08-04"), true);
-  t.deepEqual(filter("2020-08-05", "2020-08-04"), false);
+  expect(filter("2020-08-03", "2020-08-04")).toBeTruthy();
+  expect(filter("2020-08-05", "2020-08-04")).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsAfter", (t) => {
+test("filterByDateFieldKindFilterRuleIsAfter", () => {
   const filter = filterByDateFieldKindFilterRuleIsAfter;
 
-  t.deepEqual(filter("2020-08-05", "2020-08-04"), true);
-  t.deepEqual(filter("2020-08-03", "2020-08-04"), false);
+  expect(filter("2020-08-05", "2020-08-04")).toBeTruthy();
+  expect(filter("2020-08-03", "2020-08-04")).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsOnOrBefore", (t) => {
+test("filterByDateFieldKindFilterRuleIsOnOrBefore", () => {
   const filter = filterByDateFieldKindFilterRuleIsOnOrBefore;
 
-  t.deepEqual(filter("2020-08-03", "2020-08-04"), true);
-  t.deepEqual(filter("2020-08-04", "2020-08-04"), true);
-  t.deepEqual(filter("2020-08-05", "2020-08-04"), false);
+  expect(filter("2020-08-03", "2020-08-04")).toBeTruthy();
+  expect(filter("2020-08-04", "2020-08-04")).toBeTruthy();
+  expect(filter("2020-08-05", "2020-08-04")).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsOnOrAfter", (t) => {
+test("filterByDateFieldKindFilterRuleIsOnOrAfter", () => {
   const filter = filterByDateFieldKindFilterRuleIsOnOrAfter;
 
-  t.deepEqual(filter("2020-08-05", "2020-08-04"), true);
-  t.deepEqual(filter("2020-08-04", "2020-08-04"), true);
-  t.deepEqual(filter("2020-08-03", "2020-08-04"), false);
+  expect(filter("2020-08-05", "2020-08-04")).toBeTruthy();
+  expect(filter("2020-08-04", "2020-08-04")).toBeTruthy();
+  expect(filter("2020-08-03", "2020-08-04")).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsNot", (t) => {
+test("filterByDateFieldKindFilterRuleIsNot", () => {
   const filter = filterByDateFieldKindFilterRuleIsNot;
 
-  t.deepEqual(filter("2020-08-05", "2020-08-04"), true);
-  t.deepEqual(filter("2020-08-04", "2020-08-04"), false);
+  expect(filter("2020-08-05", "2020-08-04")).toBeTruthy();
+  expect(filter("2020-08-04", "2020-08-04")).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsEmpty", (t) => {
+test("filterByDateFieldKindFilterRuleIsEmpty", () => {
   const filter = filterByDateFieldKindFilterRuleIsEmpty;
 
-  t.deepEqual(filter(null), true);
-  t.deepEqual(filter("2020-08-04"), false);
+  expect(filter(null)).toBeTruthy();
+  expect(filter("2020-08-04")).toBeFalsy();
 });
 
-test("filterByDateFieldKindFilterRuleIsNotEmpty", (t) => {
+test("filterByDateFieldKindFilterRuleIsNotEmpty", () => {
   const filter = filterByDateFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter("2020-08-04"), true);
-  t.deepEqual(filter(null), false);
+  expect(filter("2020-08-04")).toBeTruthy();
+  expect(filter(null)).toBeFalsy();
 });
 
-test("filterBySingleOptionFieldKindFilterRuleIs", (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIs", () => {
   const filter = filterBySingleOptionFieldKindFilterRuleIs;
 
-  t.deepEqual(filter("opt1", "opt1"), true);
-  t.deepEqual(filter("opt1", "opt2"), false);
+  expect(filter("opt1", "opt1")).toBeTruthy();
+  expect(filter("opt1", "opt2")).toBeFalsy();
 });
 
-test("filterBySingleOptionFieldKindFilterRuleIsNot", (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsNot", () => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsNot;
 
-  t.deepEqual(filter("opt1", "opt2"), true);
-  t.deepEqual(filter("opt1", "opt1"), false);
+  expect(filter("opt1", "opt2")).toBeTruthy();
+  expect(filter("opt1", "opt1")).toBeFalsy();
 });
 
-test("filterBySingleOptionFieldKindFilterRuleIsAnyOf", (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsAnyOf", () => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsAnyOf;
 
-  t.deepEqual(filter("opta", ["opta", "optb"]), true);
-  t.deepEqual(filter("opta", ["optb", "opt"]), false);
+  expect(filter("opta", ["opta", "optb"])).toBeTruthy();
+  expect(filter("opta", ["optb", "opt"])).toBeFalsy();
 });
 
-test("filterBySingleOptionFieldKindFilterRuleIsNoneOf", (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsNoneOf", () => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsNoneOf;
 
-  t.deepEqual(filter("opta", ["optb", "opt"]), true);
-  t.deepEqual(filter("opta", ["opta", "optb"]), false);
+  expect(filter("opta", ["optb", "opt"])).toBeTruthy();
+  expect(filter("opta", ["opta", "optb"])).toBeFalsy();
 });
 
-test("filterBySingleOptionFieldKindFilterRuleIsEmpty", (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsEmpty", () => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsEmpty;
 
-  t.deepEqual(filter(null), true);
-  t.deepEqual(filter("opta"), false);
+  expect(filter(null)).toBeTruthy();
+  expect(filter("opta")).toBeFalsy();
 });
 
-test("filterBySingleOptionFieldKindFilterRuleIsNotEmpty", (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsNotEmpty", () => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter("opta"), true);
-  t.deepEqual(filter(null), false);
+  expect(filter("opta")).toBeTruthy();
+  expect(filter(null)).toBeFalsy();
 });
 
-test("filterByMultiOptionFieldKindFilterRuleHasAnyOf", (t) => {
+test("filterByMultiOptionFieldKindFilterRuleHasAnyOf", () => {
   const filter = filterByMultiOptionFieldKindFilterRuleHasAnyOf;
 
-  t.deepEqual(filter(["opta"], ["opta", "optb"]), true);
-  t.deepEqual(filter(["opta"], ["optb", "opt"]), false);
+  expect(filter(["opta"], ["opta", "optb"])).toBeTruthy();
+  expect(filter(["opta"], ["optb", "opt"])).toBeFalsy();
 });
 
-test("filterByMultiOptionFieldKindFilterRuleHasAllOf", (t) => {
+test("filterByMultiOptionFieldKindFilterRuleHasAllOf", () => {
   const filter = filterByMultiOptionFieldKindFilterRuleHasAllOf;
 
-  t.deepEqual(filter(["optb", "opta"], ["opta", "optb"]), true);
-  t.deepEqual(filter(["opta"], ["opta", "optb"]), false);
+  expect(filter(["optb", "opta"], ["opta", "optb"])).toBeTruthy();
+  expect(filter(["opta"], ["opta", "optb"])).toBeFalsy();
 });
 
-test("filterByMultiOptionFieldKindFilterRuleHasNoneOf", (t) => {
+test("filterByMultiOptionFieldKindFilterRuleHasNoneOf", () => {
   const filter = filterByMultiOptionFieldKindFilterRuleHasNoneOf;
 
-  t.deepEqual(filter(["opta"], ["optb", "opt"]), true);
-  t.deepEqual(filter(["opta"], ["opta", "optb"]), false);
+  expect(filter(["opta"], ["optb", "opt"])).toBeTruthy();
+  expect(filter(["opta"], ["opta", "optb"])).toBeFalsy();
 });
 
-test("filterByMultiOptionFieldKindFilterRuleIsEmpty", (t) => {
+test("filterByMultiOptionFieldKindFilterRuleIsEmpty", () => {
   const filter = filterByMultiOptionFieldKindFilterRuleIsEmpty;
 
-  t.deepEqual(filter([]), true);
-  t.deepEqual(filter(["opta"]), false);
+  expect(filter([])).toBeTruthy();
+  expect(filter(["opta"])).toBeFalsy();
 });
 
-test("filterByMultiOptionFieldKindFilterRuleIsNotEmpty", (t) => {
+test("filterByMultiOptionFieldKindFilterRuleIsNotEmpty", () => {
   const filter = filterByMultiOptionFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter(["opta"]), true);
-  t.deepEqual(filter([]), false);
+  expect(filter(["opta"])).toBeTruthy();
+  expect(filter([])).toBeFalsy();
 });
 
-test("filterByBooleanFieldKindFilterRuleIs", (t) => {
+test("filterByBooleanFieldKindFilterRuleIs", () => {
   const filter = filterByBooleanFieldKindFilterRuleIs;
 
-  t.deepEqual(filter(true, true), true);
-  t.deepEqual(filter(true, false), false);
+  expect(filter(true, true)).toBeTruthy();
+  expect(filter(true, false)).toBeFalsy();
 });
 
 function getOrFilters() {
@@ -420,7 +416,7 @@ function getOrFilters() {
   return [filter1, filter2, filter3];
 }
 
-test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
+test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', () => {
   const filters = getOrFilters();
   const [, filter2, filter3] = filters;
 
@@ -429,18 +425,18 @@ test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
   const updatedFilter2 = updatedFilters[filter2.id];
   const updatedFilter3 = updatedFilters[filter3.id];
 
-  t.deepEqual(updatedFilter2.group, 1);
-  t.deepEqual(updatedFilter3.group, 2);
+  expect(updatedFilter2.group).toEqual(1);
+  expect(updatedFilter3.group).toEqual(2);
 });
 
-test('updateFilterGroup - 3 "OR" filters to f1 OR f2 AND f3', (t) => {
+test('updateFilterGroup - 3 "OR" filters to f1 OR f2 AND f3', () => {
   const filters = getOrFilters();
   const [, , filter3] = filters;
 
   const updatedFilters = updateFilterGroup(filter3, "and", filters);
   const updatedFilter3 = updatedFilters[filter3.id];
 
-  t.deepEqual(updatedFilter3.group, 2);
+  expect(updatedFilter3.group).toEqual(2);
 });
 
 function getAndFilters() {
@@ -474,7 +470,7 @@ function getAndFilters() {
   return [filter1, filter2, filter3];
 }
 
-test('updateFilterGroup - 3 "AND" filters - f1 and f2 or f3', (t) => {
+test('updateFilterGroup - 3 "AND" filters - f1 and f2 or f3', () => {
   const filters = getAndFilters();
   const [, , filter3] = filters;
 
@@ -482,10 +478,10 @@ test('updateFilterGroup - 3 "AND" filters - f1 and f2 or f3', (t) => {
 
   const updatedFilter3 = updatedFilters[filter3.id];
 
-  t.deepEqual(updatedFilter3.group, 2);
+  expect(updatedFilter3.group).toEqual(2);
 });
 
-test('updateFilterGroup - 3 "AND" filters - f1 or f2 and f3', (t) => {
+test('updateFilterGroup - 3 "AND" filters - f1 or f2 and f3', () => {
   const filters = getAndFilters();
   const [, filter2, filter3] = filters;
 
@@ -493,8 +489,8 @@ test('updateFilterGroup - 3 "AND" filters - f1 or f2 and f3', (t) => {
   const updatedFilter2 = updatedFilters[filter2.id];
   const updatedFilter3 = updatedFilters[filter3.id];
 
-  t.deepEqual(updatedFilter2.group, 2);
-  t.deepEqual(updatedFilter3.group, 2);
+  expect(updatedFilter2.group).toEqual(2);
+  expect(updatedFilter3.group).toEqual(2);
 });
 
 function prepare(fieldType: FieldType, values: FieldValue[]) {

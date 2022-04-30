@@ -1,4 +1,3 @@
-import { test } from "../lib/testing";
 import {
   addFieldsToCollection,
   makeCollection,
@@ -17,7 +16,7 @@ import { sortDocuments, SortGetters } from "./sorts";
 import { Document, DocumentID } from "./documents";
 import { CollaboratorID } from "./collaborators";
 
-test("no sort", (t) => {
+test("no sort", () => {
   const values = ["BWord", "Aword"];
   const { getters, documents, getValue } = prepare(
     FieldType.SingleLineText,
@@ -26,11 +25,11 @@ test("no sort", (t) => {
 
   const result = sortDocuments([], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[0]);
-  t.deepEqual(getValue(result[1]), values[1]);
+  expect(getValue(result[0])).toEqual(values[0]);
+  expect(getValue(result[1])).toEqual(values[1]);
 });
 
-test("text sort - ascending", (t) => {
+test("text sort - ascending", () => {
   const values = ["BWord", "Aword"];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleLineText,
@@ -40,11 +39,11 @@ test("text sort - ascending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[1]);
-  t.deepEqual(getValue(result[1]), values[0]);
+  expect(getValue(result[0])).toEqual(values[1]);
+  expect(getValue(result[1])).toEqual(values[0]);
 });
 
-test("text sort - descending", (t) => {
+test("text sort - descending", () => {
   const values = ["AWord", "Bword"];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleLineText,
@@ -54,11 +53,11 @@ test("text sort - descending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[1]);
-  t.deepEqual(getValue(result[1]), values[0]);
+  expect(getValue(result[0])).toEqual(values[1]);
+  expect(getValue(result[1])).toEqual(values[0]);
 });
 
-test("number sort - ascending", (t) => {
+test("number sort - ascending", () => {
   const values = [2, 1, null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Number,
@@ -68,12 +67,12 @@ test("number sort - ascending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("number sort - descending", (t) => {
+test("number sort - descending", () => {
   const values = [1, 2, null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Number,
@@ -83,12 +82,12 @@ test("number sort - descending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[1]);
-  t.deepEqual(getValue(result[1]), values[0]);
-  t.deepEqual(getValue(result[2]), values[2]);
+  expect(getValue(result[0])).toEqual(values[1]);
+  expect(getValue(result[1])).toEqual(values[0]);
+  expect(getValue(result[2])).toEqual(values[2]);
 });
 
-test("boolean sort - ascending", (t) => {
+test("boolean sort - ascending", () => {
   const values = [true, false];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Checkbox,
@@ -98,11 +97,11 @@ test("boolean sort - ascending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[1]);
-  t.deepEqual(getValue(result[1]), values[0]);
+  expect(getValue(result[0])).toEqual(values[1]);
+  expect(getValue(result[1])).toEqual(values[0]);
 });
 
-test("boolean sort - descending", (t) => {
+test("boolean sort - descending", () => {
   const values = [false, true];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Checkbox,
@@ -112,11 +111,11 @@ test("boolean sort - descending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[1]);
-  t.deepEqual(getValue(result[1]), values[0]);
+  expect(getValue(result[0])).toEqual(values[1]);
+  expect(getValue(result[1])).toEqual(values[0]);
 });
 
-test("date sort - ascending", (t) => {
+test("date sort - ascending", () => {
   const values = ["2020-1-2", "2020-1-1", null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Date,
@@ -126,12 +125,12 @@ test("date sort - ascending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("date sort - descending", (t) => {
+test("date sort - descending", () => {
   const values = [null, "2020-1-1", "2020-1-2"];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Date,
@@ -141,9 +140,9 @@ test("date sort - descending", (t) => {
 
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
 function prepareMultiSelectsSort() {
@@ -160,27 +159,27 @@ function prepareMultiSelectsSort() {
   return { getters, documents, field };
 }
 
-test("multi options sort - ascending", (t) => {
+test("multi options sort - ascending", () => {
   const { documents, field, getters } = prepareMultiSelectsSort();
   const [document1, document2, document3] = documents;
   const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(result[0].id, document3.id);
-  t.deepEqual(result[1].id, document2.id);
-  t.deepEqual(result[2].id, document1.id);
+  expect(result[0].id).toEqual(document3.id);
+  expect(result[1].id).toEqual(document2.id);
+  expect(result[2].id).toEqual(document1.id);
 });
 
-test("multi options sort - descending", (t) => {
+test("multi options sort - descending", () => {
   const { documents, field, getters } = prepareMultiSelectsSort();
   const [document1, document2, document3] = documents;
 
   const sort = makeSort({}, { fieldID: field.id, order: "descending" });
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(result[0].id, document1.id);
-  t.deepEqual(result[1].id, document2.id);
-  t.deepEqual(result[2].id, document3.id);
+  expect(result[0].id).toEqual(document1.id);
+  expect(result[1].id).toEqual(document2.id);
+  expect(result[2].id).toEqual(document3.id);
 });
 
 function prepareSingleSelectsSort() {
@@ -197,27 +196,27 @@ function prepareSingleSelectsSort() {
   return { documents, getters, field };
 }
 
-test("single option sort - ascending", (t) => {
+test("single option sort - ascending", () => {
   const { documents, field, getters } = prepareSingleSelectsSort();
   const [document1, document2, document3] = documents;
   const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(result[0].id, document3.id);
-  t.deepEqual(result[1].id, document2.id);
-  t.deepEqual(result[2].id, document1.id);
+  expect(result[0].id).toEqual(document3.id);
+  expect(result[1].id).toEqual(document2.id);
+  expect(result[2].id).toEqual(document1.id);
 });
 
-test("single option sort - descending", (t) => {
+test("single option sort - descending", () => {
   const { documents, field, getters } = prepareSingleSelectsSort();
   const [document1, document2, document3] = documents;
 
   const sort = makeSort({}, { fieldID: field.id, order: "descending" });
   const result = sortDocuments([sort], documents, getters);
 
-  t.deepEqual(result[0].id, document1.id);
-  t.deepEqual(result[1].id, document2.id);
-  t.deepEqual(result[2].id, document3.id);
+  expect(result[0].id).toEqual(document1.id);
+  expect(result[1].id).toEqual(document2.id);
+  expect(result[2].id).toEqual(document3.id);
 });
 
 function prepareCollaboratorSort() {
@@ -237,7 +236,7 @@ function prepareCollaboratorSort() {
   return { collaborators, getCollaborator };
 }
 
-test("multi collaborator sort - ascending", (t) => {
+test("multi collaborator sort - ascending", () => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
@@ -253,12 +252,12 @@ test("multi collaborator sort - ascending", (t) => {
     getCollaborator,
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("multi collaborator sort - descending", (t) => {
+test("multi collaborator sort - descending", () => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
@@ -274,12 +273,12 @@ test("multi collaborator sort - descending", (t) => {
     getCollaborator,
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("single collaborator sort - ascending", (t) => {
+test("single collaborator sort - ascending", () => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
@@ -295,12 +294,12 @@ test("single collaborator sort - ascending", (t) => {
     getCollaborator,
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("single collaborator sort - descending", (t) => {
+test("single collaborator sort - descending", () => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
@@ -316,9 +315,9 @@ test("single collaborator sort - descending", (t) => {
     getCollaborator,
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
 function prepareDocumentsSort() {
@@ -359,7 +358,7 @@ function prepareDocumentsSort() {
   return { documents, otherField, getCollection, getDocument };
 }
 
-test("multi document sort - ascending", (t) => {
+test("multi document sort - ascending", () => {
   const {
     otherField,
     documents: outerDocuments,
@@ -388,12 +387,12 @@ test("multi document sort - ascending", (t) => {
     },
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("multi document sort - descending", (t) => {
+test("multi document sort - descending", () => {
   const {
     otherField,
     documents: outerDocuments,
@@ -422,12 +421,12 @@ test("multi document sort - descending", (t) => {
     },
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("single document sort - ascending", (t) => {
+test("single document sort - ascending", () => {
   const {
     otherField,
     documents: outerDocuments,
@@ -456,12 +455,12 @@ test("single document sort - ascending", (t) => {
     },
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("single document sort - descending", (t) => {
+test("single document sort - descending", () => {
   const {
     otherField,
     documents: outerDocuments,
@@ -490,12 +489,12 @@ test("single document sort - descending", (t) => {
     },
   });
 
-  t.deepEqual(getValue(result[0]), values[2]);
-  t.deepEqual(getValue(result[1]), values[1]);
-  t.deepEqual(getValue(result[2]), values[0]);
+  expect(getValue(result[0])).toEqual(values[2]);
+  expect(getValue(result[1])).toEqual(values[1]);
+  expect(getValue(result[2])).toEqual(values[0]);
 });
 
-test("ascending number then descending text sort", (t) => {
+test("ascending number then descending text sort", () => {
   const collection = makeCollection({});
   const numberField = makeField({
     type: FieldType.Number,
@@ -562,10 +561,10 @@ test("ascending number then descending text sort", (t) => {
 
   const result = sortDocuments([numberSort, textSort], documents, getters);
 
-  t.deepEqual(result[0].id, document3.id);
-  t.deepEqual(result[1].id, document4.id);
-  t.deepEqual(result[2].id, document2.id);
-  t.deepEqual(result[3].id, document1.id);
+  expect(result[0].id).toEqual(document3.id);
+  expect(result[1].id).toEqual(document4.id);
+  expect(result[2].id).toEqual(document2.id);
+  expect(result[3].id).toEqual(document1.id);
 });
 
 function prepare(fieldType: FieldType, values: FieldValue[]) {

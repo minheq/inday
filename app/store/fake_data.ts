@@ -133,7 +133,11 @@ const col1View1 = makeView(
   collection1WithFields
 );
 const col1View2 = makeView(
-  { id: "viw2", name: "Grouped list", collectionID: collection1.id },
+  { id: "viw2", name: "1 Level nested list", collectionID: collection1.id },
+  collection1WithFields
+);
+const col1View3 = makeView(
+  { id: "viw3", name: "2 Level nested list", collectionID: collection1.id },
   collection1WithFields
 );
 
@@ -187,6 +191,7 @@ export const collectionsByIDFixtures: { [collectionID: string]: Collection } = {
 export const viewsByIDFixtures: { [viewID: string]: View } = {
   [col1View1.id]: col1View1,
   [col1View2.id]: col1View2,
+  [col1View3.id]: col1View3,
   [col2View1.id]: col2View1,
 };
 
@@ -207,8 +212,20 @@ const col1View2Group1 = makeGroup(
   { fieldID: col1Field14.id, order: "ascending" }
 );
 
+const col1View3Group1 = makeGroup(
+  { viewID: col1View3.id, sequence: 1 },
+  { fieldID: col1Field14.id, order: "ascending" }
+);
+
+const col1View3Group2 = makeGroup(
+  { viewID: col1View3.id, sequence: 2 },
+  { fieldID: col1Field11.id, order: "ascending" }
+);
+
 export const groupsByIDFixtures: {
   [groupID: string]: Group;
 } = {
   [col1View2Group1.id]: col1View2Group1,
+  [col1View3Group1.id]: col1View3Group1,
+  [col1View3Group2.id]: col1View3Group2,
 };

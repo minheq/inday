@@ -68,6 +68,10 @@ module.exports = {
         'sonarjs/no-duplicate-string': 0,
         'sonarjs/no-identical-functions': 0,
       },
+      "env": {
+        "jest/globals": true
+      },
+      "plugins": ["jest"]
     },
     {
       files: ['scripts/*.js', '*.js'],

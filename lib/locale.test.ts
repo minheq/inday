@@ -1,14 +1,12 @@
-import { test } from "./testing";
-
 import { defaultLocale, getSupportedLocale, SupportedLocale } from "./locale";
 
-test("uses default locale", (t) => {
+test("uses default locale", () => {
   const locale = getSupportedLocale(["vi vi", "fun", "useless"]);
 
-  t.deepEqual(locale, defaultLocale);
+  expect(locale).toEqual(defaultLocale);
 });
 
-test("case insensitive", (t) => {
+test("case insensitive", () => {
   const table = [
     [getSupportedLocale("vi-VN"), SupportedLocale.viVN],
     [getSupportedLocale("vi-vn"), SupportedLocale.viVN],
@@ -22,6 +20,6 @@ test("case insensitive", (t) => {
   for (const data of table) {
     const [locale, want] = data;
 
-    t.deepEqual(locale, want);
+    expect(locale).toEqual(want);
   }
 });

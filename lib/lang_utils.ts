@@ -1,5 +1,6 @@
 import { isObject } from "./object_utils";
 
+// TODO: Has bugs
 export function isEqual(a: unknown, b: unknown): boolean {
   if (a === b) {
     return true;
@@ -68,6 +69,10 @@ function isObjectEqual(
     const subB = b[key];
 
     if (isObject(subA) && isObject(subB) && !!isObjectEqual(subA, subB)) {
+      return false;
+    }
+
+    if (subA !== subB) {
       return false;
     }
   }
