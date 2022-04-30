@@ -8,34 +8,31 @@ import { SpaceScreen } from "./app/screens/space/space_screen";
 
 import { Playground } from "./app/components/playground";
 import { Router, ScreenName } from "./app/config/routes";
-import { ThemeProvider } from "./app/components/theme";
 
 export function App(): JSX.Element {
   return (
     <RecoilRoot>
       <ErrorBoundary>
-        <ThemeProvider>
-          <Suspense fallback={<Text>Loading...</Text>}>
-            <Router
-              pathMap={{
-                Space: {
-                  path: "/s/:spaceID/:viewID",
-                  component: SpaceScreen,
-                },
-                Playground: {
-                  path: "/playground/:component",
-                  component: Playground,
-                },
-              }}
-              fallback={
-                <SpaceScreen
-                  name={ScreenName.Space}
-                  params={{ viewID: "viw1", spaceID: "spc1" }}
-                />
-              }
-            />
-          </Suspense>
-        </ThemeProvider>
+        <Suspense fallback={<Text>Loading...</Text>}>
+          <Router
+            pathMap={{
+              Space: {
+                path: "/s/:spaceID/:viewID",
+                component: SpaceScreen,
+              },
+              Playground: {
+                path: "/playground/:component",
+                component: Playground,
+              },
+            }}
+            fallback={
+              <SpaceScreen
+                name={ScreenName.Space}
+                params={{ viewID: "viw1", spaceID: "spc1" }}
+              />
+            }
+          />
+        </Suspense>
       </ErrorBoundary>
     </RecoilRoot>
   );

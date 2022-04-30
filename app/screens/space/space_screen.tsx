@@ -25,7 +25,6 @@ import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { Document, DocumentID } from "../../../models/documents";
 import { CollectionID } from "../../../models/collections";
 import { SpaceID } from "../../../models/spaces";
-import { useThemeStyles } from "../../components/theme";
 import { Screen } from "../../components/screen";
 import { Row } from "../../components/row";
 import { BackButton } from "../../components/back_button";
@@ -40,6 +39,7 @@ import { Fade } from "../../components/fade";
 import { ViewButton } from "../../core/views/view_button";
 import { matchPathname } from "../../../lib/pathname";
 import { DocumentDetailsView } from "./document_details_view";
+import { theme } from "../../components/theme";
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -197,10 +197,9 @@ const ViewSettingsView = memo(function ViewSettingsView(
   props: ViewSettingsViewProps
 ) {
   const { onToggleView, mode, viewID, name, type } = props;
-  const themeStyles = useThemeStyles();
 
   return (
-    <View style={[styles.viewSettingsRoot, themeStyles.elevation.level1]}>
+    <View style={styles.viewSettingsRoot}>
       <Row justifyContent="space-between">
         <ViewButton
           viewID={viewID}
@@ -387,7 +386,6 @@ const ViewListContainer = memo(function ViewListContainer(
 ) {
   const { spaceID, viewID } = props;
   const navigation = useNavigation();
-  const themeStyles = useThemeStyles();
 
   const handleSelect = useCallback(
     (id: ViewID) => {
@@ -397,7 +395,7 @@ const ViewListContainer = memo(function ViewListContainer(
   );
 
   return (
-    <View style={[styles.leftPanel, themeStyles.border.default]}>
+    <View style={styles.leftPanel}>
       <Delay config={tokens.animation.fast}>
         <Fade config={tokens.animation.fast}>
           <ViewList onSelect={handleSelect} spaceID={spaceID} viewID={viewID} />
@@ -417,16 +415,9 @@ const OrganizeViewContainer = memo(function OrganizeViewContainer(
   props: OrganizeViewContainerProps
 ) {
   const { spaceID, viewID, collectionID } = props;
-  const themeStyles = useThemeStyles();
 
   return (
-    <View
-      style={[
-        styles.rightPanel,
-        themeStyles.background.content,
-        themeStyles.border.default,
-      ]}
-    >
+    <View style={styles.rightPanel}>
       <AutoSizer>
         {({ height }) => (
           <View style={{ width: ORGANIZE_VIEW_WIDTH, height }}>
@@ -452,7 +443,6 @@ const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
   props: DocumentDetailsContainerProps
 ) {
   const { documentID } = props;
-  const themeStyles = useThemeStyles();
   const [, setOpenDocument] = useRecoilState(openDocumentState);
 
   const handleClose = useCallback(() => {
@@ -460,13 +450,7 @@ const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
   }, [setOpenDocument]);
 
   return (
-    <View
-      style={[
-        styles.rightPanel,
-        themeStyles.background.content,
-        themeStyles.border.default,
-      ]}
-    >
+    <View style={styles.rightPanel}>
       <AutoSizer>
         {({ height }) => (
           <View style={{ width: RECORD_VIEW_WIDTH, height }}>
@@ -491,6 +475,7 @@ const styles = StyleSheet.create({
   leftPanel: {
     flex: 1,
     borderRightWidth: 1,
+    borderColor: theme.neutral.light,
   },
   viewContainer: {
     paddingTop: 16,
@@ -499,6 +484,8 @@ const styles = StyleSheet.create({
   rightPanel: {
     flex: 1,
     borderLeftWidth: 1,
+    borderColor: theme.neutral.light,
+    backgroundColor: theme.base.default,
   },
   header: {
     height: 56,
@@ -508,5 +495,6 @@ const styles = StyleSheet.create({
   viewSettingsRoot: {
     paddingVertical: 4,
     zIndex: 1,
+    ...theme.elevation.level1,
   },
 });

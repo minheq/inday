@@ -77,7 +77,6 @@ import { useSetRecoilState } from "recoil";
 
 import { LeafRowCellState } from "../../components/grid_renderer.common";
 import { isNumberString, toNumber } from "../../../lib/number_utils";
-import { useThemeStyles } from "../../components/theme";
 import { activeCellState, useListViewViewContext } from "./list_view_view";
 import { useLeafRowContext, useLeafRowContextMenuItems } from "./leaf_row";
 import { SingleSelectPicker } from "../select/single_select_picker";
@@ -120,6 +119,7 @@ import { PhoneNumberLink } from "../../components/phone_number_link";
 import { URLLink } from "../../components/url_link";
 import { getLeafRowCellBottom } from "./list_view_map";
 import { useCellKeyBindings } from "./use_cell_keybindings";
+import { theme } from "../../components/theme";
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -293,7 +293,6 @@ const LeafRowCellView = memo(function LeafRowCellView(
   const { mode } = useListViewViewContext();
   const { selected } = useLeafRowContext();
   const { cell, onPress } = useLeafRowCellContext();
-  const themeStyles = useThemeStyles();
 
   const renderCell = useCallback((): JSX.Element => {
     switch (field.type) {
@@ -352,12 +351,11 @@ const LeafRowCellView = memo(function LeafRowCellView(
       ({ hovered }) =>
         [
           styles.leafRowCell,
-          themeStyles.border.default,
-          mode === "edit" && hovered && themeStyles.button.flatHovered,
-          cell.state !== "default" && themeStyles.background.content,
+          mode === "edit" && hovered && styles.hovered,
+          cell.state !== "default" && styles.nonDefaultState,
           cell.primary && styles.primaryCell,
         ],
-    [cell, mode, themeStyles]
+    [cell, mode]
   );
 
   return (
@@ -377,16 +375,10 @@ const LeafRowCellView = memo(function LeafRowCellView(
         <DotsMenu />
       )}
       {cell.state === "default" && (
-        <View
-          pointerEvents="none"
-          style={[styles.bottomBorder, themeStyles.border.default]}
-        />
+        <View pointerEvents="none" style={styles.bottomBorder} />
       )}
       {cell.state !== "default" && (
-        <View
-          pointerEvents="none"
-          style={[styles.focused, themeStyles.border.focused]}
-        />
+        <View pointerEvents="none" style={styles.focused} />
       )}
     </Pressable>
   );
@@ -1222,15 +1214,14 @@ function PickerTrigger(props: PickerTriggerProps): JSX.Element {
 }
 
 export function LastLeafRowCell(): JSX.Element {
-  const themeStyles = useThemeStyles();
-
-  return <View style={[styles.lastLeafRowCell, themeStyles.border.default]} />;
+  return <View style={styles.lastLeafRowCell} />;
 }
 
 const styles = StyleSheet.create({
   leafRowCell: {
     flexDirection: "row",
     alignItems: "center",
+    borderColor: theme.neutral.light,
     ...Platform.select({
       web: {
         outlineStyle: "none",
@@ -1240,6 +1231,7 @@ const styles = StyleSheet.create({
   bottomBorder: {
     borderBottomWidth: 1,
     position: "absolute",
+    borderColor: theme.neutral.light,
     bottom: 0,
     left: 0,
     right: 0,
@@ -1247,6 +1239,7 @@ const styles = StyleSheet.create({
   },
   focused: {
     borderRadius: tokens.border.radius,
+    borderColor: theme.primary.default,
     position: "absolute",
     top: -1,
     left: 0,
@@ -1258,6 +1251,7 @@ const styles = StyleSheet.create({
   lastLeafRowCell: {
     height: LEAF_ROW_HEIGHT,
     borderLeftWidth: 1,
+    borderColor: theme.neutral.light,
   },
   primaryCell: {
     borderRightWidth: 2,
@@ -1309,5 +1303,9 @@ const styles = StyleSheet.create({
   },
   selectCheckboxWrapper: {
     paddingLeft: 8,
+  },
+  hovered: {},
+  nonDefaultState: {
+    backgroundColor: theme.base.default,
   },
 });

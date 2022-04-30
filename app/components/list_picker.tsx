@@ -13,8 +13,8 @@ import { tokens } from "./tokens";
 import { Icon } from "./icon";
 import { NavigationKey, UIKey, WhiteSpaceKey } from "../lib/keyboard";
 import { SearchEngine } from "../../lib/search";
-import { useTheme } from "./theme";
 import { TextField } from "./text_field";
+import { theme } from "./theme";
 
 export interface ListPickerOption<T> {
   value: T;
@@ -151,7 +151,6 @@ export interface ListPickerItemProps<T> {
 export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
   const { active, selected, option, onSelect, renderLabel, renderCheck } =
     props;
-  const theme = useTheme();
 
   const handlePress = useCallback(() => {
     onSelect(option.value, selected);
@@ -159,10 +158,7 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
 
   return (
     <PressableHighlight
-      style={[
-        styles.listItem,
-        active && { backgroundColor: theme.background.lightPrimary },
-      ]}
+      style={[styles.listItem, active && styles.activeListItem]}
       onPress={handlePress}
     >
       {renderLabel ? (
@@ -255,5 +251,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  activeListItem: {
+    backgroundColor: theme.primary.light,
   },
 });

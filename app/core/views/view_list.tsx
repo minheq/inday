@@ -6,9 +6,9 @@ import { Spacer } from "../../components/spacer";
 import { Text } from "../../components/text";
 import { SpaceID } from "../../../models/spaces";
 import { ViewID } from "../../../models/views";
-import { useThemeStyles } from "../../components/theme";
 import { Column } from "../../components/column";
 import { ViewButton } from "./view_button";
+import { theme } from "../../components/theme";
 
 interface ViewListProps {
   spaceID: SpaceID;
@@ -21,10 +21,8 @@ export function ViewList(props: ViewListProps): JSX.Element {
   const activeView = useViewQuery(viewID);
   const views = useCollectionViewsQuery(activeView.collectionID);
 
-  const themeStyles = useThemeStyles();
-
   return (
-    <View style={[styles.root, themeStyles.background.content]}>
+    <View style={styles.root}>
       <Text color="muted" size="sm" weight="bold">
         TEAM VIEWS
       </Text>
@@ -52,5 +50,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     padding: 8,
+    backgroundColor: theme.base.default,
   },
 });

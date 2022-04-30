@@ -1,7 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-
-import { useThemeStyles } from "../../components/theme";
+import { theme } from "../../components/theme";
 
 interface FooterProps {
   children: React.ReactNode;
@@ -9,13 +8,12 @@ interface FooterProps {
 
 export function Footer(props: FooterProps): JSX.Element {
   const { children } = props;
-  const themeStyles = useThemeStyles();
 
-  return (
-    <View style={[styles.row, themeStyles.background.content]}>{children}</View>
-  );
+  return <View style={styles.row}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
-  row: {},
+  row: {
+    backgroundColor: theme.base.default,
+  },
 });

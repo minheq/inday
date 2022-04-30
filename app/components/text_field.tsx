@@ -11,8 +11,8 @@ import {
 import { Icon, IconName } from "./icon";
 import { PressableHighlight } from "./pressable_highlight";
 import { TextInput } from "./text_input";
+import { theme } from "./theme";
 
-import { useThemeStyles } from "./theme";
 import { tokens } from "./tokens";
 
 export interface TextFieldProps {
@@ -49,7 +49,6 @@ export function TextField(props: TextFieldProps): JSX.Element {
     onSubmitEditing,
     style,
   } = props;
-  const themeStyles = useThemeStyles();
   const ref = useRef<RNTextInput>(null);
 
   const handleClear = useCallback(() => {
@@ -63,7 +62,7 @@ export function TextField(props: TextFieldProps): JSX.Element {
   }, [onChange]);
 
   return (
-    <View style={[styles.base, themeStyles.background.content]}>
+    <View style={styles.base}>
       {icon && (
         <View style={styles.icon}>
           <Icon name={icon} color="muted" />
@@ -78,12 +77,7 @@ export function TextField(props: TextFieldProps): JSX.Element {
         onKeyPress={onKeyPress}
         onRequestClose={onRequestClose}
         onSubmitEditing={onSubmitEditing}
-        style={[
-          styles.input,
-          themeStyles.border.default,
-          !!icon && styles.hasIcon,
-          style,
-        ]}
+        style={[styles.input, !!icon && styles.hasIcon, style]}
       />
       {clearable && value !== undefined && value !== null && value !== "" && (
         <PressableHighlight onPress={handleClear} style={styles.clearButton}>
@@ -99,6 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: tokens.border.radius,
     alignItems: "center",
+    backgroundColor: theme.base.default,
   },
   icon: {
     paddingHorizontal: 8,
@@ -120,6 +115,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     paddingRight: 40,
     borderRadius: tokens.border.radius,
+    borderColor: theme.neutral.light,
     flex: 1,
   },
 });

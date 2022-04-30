@@ -4,7 +4,6 @@ import { StyleSheet } from "react-native";
 import { Spacer } from "../../components/spacer";
 import { Text } from "../../components/text";
 import { ViewID, ViewType } from "../../../models/views";
-import { useTheme } from "../../components/theme";
 import { PressableHighlight } from "../../components/pressable_highlight";
 import { Icon } from "../../components/icon";
 import { getViewIcon, getViewIconColor } from "./icon_helpers";
@@ -19,7 +18,6 @@ export interface ViewButtonProps {
 
 export function ViewButton(props: ViewButtonProps): JSX.Element {
   const { viewID, name, type, onPress } = props;
-  const theme = useTheme();
 
   const handlePress = useCallback(() => {
     onPress(viewID);
@@ -27,10 +25,7 @@ export function ViewButton(props: ViewButtonProps): JSX.Element {
 
   return (
     <PressableHighlight onPress={handlePress} style={styles.button}>
-      <Icon
-        name={getViewIcon(type)}
-        customColor={getViewIconColor(type, theme.colorScheme)}
-      />
+      <Icon name={getViewIcon(type)} customColor={getViewIconColor(type)} />
       <Spacer direction="row" size={4} />
       <Text>{name}</Text>
     </PressableHighlight>

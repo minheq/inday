@@ -13,7 +13,7 @@ import { Text } from "./text";
 import { Icon } from "./icon";
 import { Popover } from "./popover";
 import { NavigationKey, UIKey, WhiteSpaceKey } from "../lib/keyboard";
-import { useTheme, useThemeStyles } from "./theme";
+import { theme } from "./theme";
 import { TextField } from "./text_field";
 
 export interface PickerProps<T> {
@@ -44,10 +44,8 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
     onChange,
     searchable = false,
   } = props;
-  const theme = useTheme();
   const targetRef = useRef<View>(null);
   const popoverContentRef = useRef<View>(null);
-  const themeStyles = useThemeStyles();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(false);
@@ -145,7 +143,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
       <Pressable
         ref={targetRef}
         onPress={handleOpenPicker}
-        style={[styles.button, { borderColor: theme.border.default }]}
+        style={styles.button}
       >
         <Text>{selected ? selected.label : placeholder}</Text>
         <View style={styles.caretWrapper}>
@@ -163,11 +161,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
             // @ts-ignore available on the web
             onKeyDown={handleKeyDown}
             ref={popoverContentRef}
-            style={[
-              styles.popover,
-              themeStyles.background.content,
-              themeStyles.border.default,
-            ]}
+            style={styles.popover}
           >
             {searchable === true && (
               <View style={styles.searchWrapper}>
@@ -195,12 +189,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
                       onPress={() => handleSelectOption(o)}
                       style={({ hovered }: any) => [
                         styles.option,
-                        {
-                          backgroundColor:
-                            active || hovered
-                              ? theme.background.lightPrimary
-                              : theme.background.content,
-                        },
+                        !!(active || hovered) && styles.selectedOption,
                       ]}
                     >
                       <Text color="default">{o.label}</Text>
@@ -228,10 +217,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingLeft: 8,
     paddingRight: 24,
+    borderColor: theme.neutral.light,
   },
   popover: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
+    borderColor: theme.primary.light,
+    backgroundColor: theme.primary.light,
   },
   searchWrapper: {
     height: SEARCH_HEIGHT,
@@ -251,5 +243,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    backgroundColor: theme.base.default,
+  },
+  selectedOption: {
+    backgroundColor: theme.primary.light,
   },
 });

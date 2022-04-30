@@ -6,9 +6,9 @@ import { ContextMenuItem } from "../../components/context_menu";
 import { LeafRowState } from "../../components/grid_renderer.common";
 import { PressableHighlight } from "../../components/pressable_highlight";
 import { Text } from "../../components/text";
-import { useThemeStyles } from "../../components/theme";
 import { DocumentID } from "../../../models/documents";
 import { useListViewViewContext } from "./list_view_view";
+import { theme } from "../../components/theme";
 
 interface LeafRowProps {
   documentID: DocumentID;
@@ -57,16 +57,9 @@ function LeafRowView(props: LeafRowViewProps) {
   const { children } = props;
   const { selected } = useLeafRowContext();
   const menuItems = useLeafRowContextMenuItems();
-  const themeStyles = useThemeStyles();
 
   return (
-    <View
-      style={[
-        styles.row,
-        themeStyles.background.content,
-        selected && themeStyles.background.lightPrimary,
-      ]}
-    >
+    <View style={[styles.row, selected && styles.selected]}>
       <ContextMenuView menuItems={menuItems}>{children}</ContextMenuView>
     </View>
   );
@@ -95,24 +88,26 @@ export function useLeafRowContextMenuItems(): ContextMenuItem[] {
 
 export function LastLeafRow(): JSX.Element {
   const { onAddDocument } = useListViewViewContext();
-  const themeStyles = useThemeStyles();
 
   return (
-    <PressableHighlight
-      style={[styles.addDocument, themeStyles.border.default]}
-      onPress={onAddDocument}
-    >
+    <PressableHighlight style={styles.addDocument} onPress={onAddDocument}>
       <Text color="muted">Add document</Text>
     </PressableHighlight>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {},
+  row: {
+    backgroundColor: theme.base.default,
+  },
+  selected: {
+    backgroundColor: theme.primary.light,
+  },
   addDocument: {
     height: 40,
     paddingHorizontal: 8,
     flexDirection: "row",
     alignItems: "center",
+    borderColor: theme.neutral.light,
   },
 });

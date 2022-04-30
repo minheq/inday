@@ -21,7 +21,6 @@ import { Hoverable } from "../../components/hoverable";
 import { Icon } from "../../components/icon";
 import { Row } from "../../components/row";
 import { Text } from "../../components/text";
-import { useThemeStyles } from "../../components/theme";
 import { FieldID } from "../../../models/fields";
 import { useFieldQuery } from "../../store/queries";
 import { getFieldIcon } from "../views/icon_helpers";
@@ -29,6 +28,7 @@ import { useListViewViewContext } from "./list_view_view";
 import { useUpdateListViewFieldConfigMutation } from "../../store/mutations";
 import { PressableHighlight } from "../../components/pressable_highlight";
 import { Popover } from "../../components/popover";
+import { theme } from "../../components/theme";
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -36,11 +36,8 @@ interface HeaderProps {
 
 export function Header(props: HeaderProps): JSX.Element {
   const { children } = props;
-  const themeStyles = useThemeStyles();
 
-  return (
-    <View style={[styles.row, themeStyles.background.content]}>{children}</View>
-  );
+  return <View style={styles.row}>{children}</View>;
 }
 
 const resizeFieldIDState = atom<FieldID | null>({
@@ -63,7 +60,6 @@ export const HeaderCell = memo(function HeaderCell(
   const field = useFieldQuery(fieldID);
   const widthRef = useRef(width);
   const anchorRef = useRef(0);
-  const themeStyles = useThemeStyles();
   const updateListViewFieldConfig = useUpdateListViewFieldConfigMutation();
   const menuItems = useHeaderCellContextMenuItems();
   const [visible, setVisible] = useState(false);
@@ -113,11 +109,7 @@ export const HeaderCell = memo(function HeaderCell(
           <PressableHighlight
             ref={targetRef}
             onPress={handlePress}
-            style={[
-              styles.headerCell,
-              themeStyles.border.default,
-              primary && styles.primaryCell,
-            ]}
+            style={[styles.headerCell, primary && styles.primaryCell]}
           >
             <ContextMenuView style={styles.menuView} menuItems={menuItems}>
               <Row spacing={4}>
@@ -131,11 +123,7 @@ export const HeaderCell = memo(function HeaderCell(
                   // @ts-ignore: Available in react-native-web
                   onPressMove={handlePressMove}
                   onPressOut={handlePressOut}
-                  style={[
-                    styles.resizeHandler,
-                    themeStyles.border.default,
-                    themeStyles.elevation.level1,
-                  ]}
+                  style={styles.resizeHandler}
                 >
                   <Icon color="primary" size="sm" name="ArrowHorizontal" />
                 </Pressable>
@@ -176,22 +164,23 @@ function useHeaderCellContextMenuItems() {
 }
 
 export const LastHeaderCell = memo(function LastHeaderCell(): JSX.Element {
-  const themeStyles = useThemeStyles();
-
   return (
-    <View style={[styles.headerCell, themeStyles.border.default]}>
+    <View style={styles.headerCell}>
       <Text>Add field</Text>
     </View>
   );
 });
 
 const styles = StyleSheet.create({
-  row: {},
+  row: {
+    backgroundColor: theme.base.default,
+  },
 
   headerCell: {
     flex: 1,
     justifyContent: "center",
     borderBottomWidth: 1,
+    borderColor: theme.neutral.light,
   },
   menuView: {
     paddingHorizontal: 8,
@@ -204,6 +193,8 @@ const styles = StyleSheet.create({
     right: 2,
     borderRadius: 999,
     borderWidth: 1,
+    borderColor: theme.neutral.light,
+    ...theme.elevation.level1,
     ...Platform.select({
       web: {
         cursor: "grab",

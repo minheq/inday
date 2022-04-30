@@ -2,7 +2,7 @@ import React from "react";
 import { View, Image, StyleSheet } from "react-native";
 import { take } from "../../lib/array_utils";
 import { Text, TextSize } from "./text";
-import { useThemeStyles } from "./theme";
+import { theme } from "./theme";
 
 export type AvatarSize = "sm" | "md" | "lg";
 
@@ -14,11 +14,10 @@ interface AvatarProps {
 
 export function Avatar(props: AvatarProps): JSX.Element {
   const { sourceURI, size = "md", name } = props;
-  const themeStyles = useThemeStyles();
 
   if (sourceURI === undefined) {
     return (
-      <View style={[themeStyles.background.tint, styles.base, styles[size]]}>
+      <View style={[styles.base, styles[size]]}>
         <Text size={getTextSize(size)}>{getInitials(name, size)}</Text>
       </View>
     );
@@ -72,6 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: theme.neutral.light,
   },
   // eslint-disable-next-line react-native/no-unused-styles
   sm: {

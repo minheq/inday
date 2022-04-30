@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Text } from "./text";
-import { useTheme } from "./theme";
+import { theme } from "./theme";
 import { tokens } from "./tokens";
 
 interface BadgeProps {
@@ -12,11 +12,10 @@ interface BadgeProps {
 
 export function Badge(props: BadgeProps): JSX.Element {
   const { title, color, textColor } = props;
-  const theme = useTheme();
 
   return (
     <View
-      style={[styles.base, { backgroundColor: color ?? theme.background.tint }]}
+      style={[styles.base, { backgroundColor: color ?? theme.neutral.light }]}
     >
       <Text customColor={textColor} numberOfLines={1}>
         {title}

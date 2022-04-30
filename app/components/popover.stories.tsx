@@ -3,12 +3,10 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Popover } from "./popover";
 import { Text } from "./text";
-import { useThemeStyles } from "./theme";
 
 function Basic(): JSX.Element {
   const [visible, setVisible] = useState(false);
   const targetRef = useRef<View>(null);
-  const themeStyles = useThemeStyles();
 
   return (
     <View>
@@ -20,7 +18,7 @@ function Basic(): JSX.Element {
         onRequestClose={() => setVisible(false)}
         visible={visible}
         content={
-          <View style={[styles.popoverContent, themeStyles.background.primary]}>
+          <View style={styles.popoverContent}>
             <Text></Text>
           </View>
         }

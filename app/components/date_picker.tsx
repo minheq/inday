@@ -28,7 +28,7 @@ import {
   getLastDateOfWeek,
 } from "../../lib/date_utils";
 import { subMonths } from "date-fns";
-import { useThemeStyles } from "./theme";
+import { theme } from "./theme";
 
 interface DatePickerProps {
   value?: Date | null;
@@ -48,7 +48,6 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
     isBlocked,
     firstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
   } = props;
-  const themeStyles = useThemeStyles();
   const selectedInterval = useMemo((): DateInterval | null => {
     if (value === null || value === undefined) {
       return null;
@@ -191,16 +190,13 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
         </View>
         <View style={styles.monthArrowsWrapper}>
           <Pressable
-            style={[styles.arrowWrapper, themeStyles.background.tint]}
+            style={styles.arrowWrapper}
             onPress={handlePressPreviousMonth}
           >
             <Icon name="ChevronLeft" />
           </Pressable>
           <Spacer direction="row" size={8} />
-          <Pressable
-            style={[styles.arrowWrapper, themeStyles.background.tint]}
-            onPress={handlePressNextMonth}
-          >
+          <Pressable style={styles.arrowWrapper} onPress={handlePressNextMonth}>
             <Icon name="ChevronRight" />
           </Pressable>
         </View>
@@ -246,7 +242,7 @@ function DayDisplay(props: DayDisplayProps) {
     blocked,
     onSelect,
   } = props;
-  const themeStyles = useThemeStyles();
+
   if (outsideRange || blocked) {
     return (
       <View style={styles.dayRoot}>
@@ -262,12 +258,7 @@ function DayDisplay(props: DayDisplayProps) {
   }
 
   return (
-    <View
-      style={[
-        styles.dayRoot,
-        withinSelected && themeStyles.background.lightPrimary,
-      ]}
-    >
+    <View style={[styles.dayRoot, withinSelected && styles.withinSelected]}>
       <Pressable onPress={() => onSelect(day)} style={styles.dayButton}>
         {({ hovered }: { hovered: boolean }) => (
           <Fragment>
@@ -275,8 +266,8 @@ function DayDisplay(props: DayDisplayProps) {
               <View
                 style={[
                   styles.selectedEdge,
-                  themeStyles.background.lightPrimary,
                   styles.selectedStart,
+                  styles.withinSelected,
                 ]}
               />
             )}
@@ -284,8 +275,8 @@ function DayDisplay(props: DayDisplayProps) {
               <View
                 style={[
                   styles.selectedEdge,
-                  themeStyles.background.lightPrimary,
                   styles.selectedEnd,
+                  styles.withinSelected,
                 ]}
               />
             )}
@@ -293,8 +284,8 @@ function DayDisplay(props: DayDisplayProps) {
               style={[
                 styles.dayWrapper,
                 today && styles.todayWrapper,
-                hovered && themeStyles.background.lightPrimary,
-                selected && themeStyles.background.primary,
+                hovered && styles.withinSelected,
+                selected && styles.selected,
               ]}
             >
               <Text color={!selected && today ? "primary" : "default"}>
@@ -317,14 +308,13 @@ interface OtherMonthDayProps {
 
 function OtherMonthDay(props: OtherMonthDayProps) {
   const { withinSelected, day } = props;
-  const themeStyles = useThemeStyles();
 
   return (
     <View
       style={[
         styles.dayRoot,
         styles.otherDay,
-        withinSelected && themeStyles.background.lightPrimary,
+        withinSelected && styles.withinSelected,
       ]}
     >
       <Text color="muted">
@@ -417,6 +407,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     height: 32,
     width: 32,
+    backgroundColor: theme.neutral.light,
   },
   todayWrapper: {},
   selectedEdge: {
@@ -448,6 +439,12 @@ const styles = StyleSheet.create({
   },
   otherDay: {
     opacity: 0.5,
+  },
+  withinSelected: {
+    backgroundColor: theme.primary.light,
+  },
+  selected: {
+    backgroundColor: theme.primary.default,
   },
   weekDatesWrapper: {
     flexDirection: "row",

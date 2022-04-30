@@ -16,7 +16,6 @@ import { Content } from "./content";
 import { useMediaQuery } from "../lib/media_query";
 import { Modal } from "./modal";
 import { CloseButton } from "./close_button";
-import { useThemeStyles } from "./theme";
 import { PopoverStories } from "./popover.stories";
 import { CheckboxStories } from "./checkbox.stories";
 import { FlatButtonStories } from "./flat_button.stories";
@@ -45,7 +44,6 @@ const PlaygroundContext = createContext<PlaygroundContext>({
 export function Playground(): JSX.Element {
   const [component, setComponent] = useState("Intro");
   const mq = useMediaQuery();
-  const themeStyles = useThemeStyles();
   const [open, setOpen] = useState(false);
 
   const handleCloseMenu = useCallback(() => {
@@ -113,7 +111,7 @@ export function Playground(): JSX.Element {
     >
       <View style={styles.base}>
         {mq.sizeQuery.lgAndUp ? (
-          <View style={[{ width: MENU_WIDTH }, themeStyles.elevation.level1]}>
+          <View style={{ width: MENU_WIDTH }}>
             <Menu />
           </View>
         ) : (
@@ -137,7 +135,7 @@ export function Playground(): JSX.Element {
             />
           </View>
         )}
-        <View style={[styles.contentWrapper, themeStyles.background.content]}>
+        <View style={styles.contentWrapper}>
           <Content>
             <ScrollView>
               <Text weight="bold" size="xl">
@@ -154,10 +152,8 @@ export function Playground(): JSX.Element {
 }
 
 function Menu() {
-  const themeStyles = useThemeStyles();
-
   return (
-    <View style={[styles.menu, themeStyles.background.content]}>
+    <View style={styles.menu}>
       <View style={styles.menuTitleWrapper}>
         <Text weight="600" size="lg">
           Inday Playground
@@ -226,10 +222,9 @@ interface MenuSectionProps {
 
 function MenuSection(props: MenuSectionProps) {
   const { title } = props;
-  const themeStyles = useThemeStyles();
 
   return (
-    <View style={[styles.menuSection, themeStyles.background.content]}>
+    <View style={styles.menuSection}>
       <Text color="muted" weight="bold">
         {title}
       </Text>

@@ -5,7 +5,6 @@ import { PressableHighlight } from "../../components/pressable_highlight";
 import { Icon } from "../../components/icon";
 import { Row } from "../../components/row";
 import { Text } from "../../components/text";
-import { useThemeStyles } from "../../components/theme";
 import { tokens } from "../../components/tokens";
 import { Collection, CollectionID } from "../../../models/collections";
 
@@ -16,6 +15,7 @@ import {
 } from "../../store/queries";
 import { ViewID } from "../../../models/views";
 import { SpaceID } from "../../../models/spaces";
+import { theme } from "../../components/theme";
 
 interface CollectionsTabsProps {
   spaceID: SpaceID;
@@ -52,9 +52,9 @@ const CollectionTabsView = memo(function CollectionTabsView(
   props: CollectionTabsViewProps
 ) {
   const { collections, activeCollectionID } = props;
-  const themeStyles = useThemeStyles();
+
   return (
-    <View style={[styles.collectionTabsRoot, themeStyles.border.default]}>
+    <View style={styles.collectionTabsRoot}>
       <Row spacing={2}>
         <PressableHighlight
           style={[styles.collectionItem, styles.addCollectionItem]}
@@ -84,7 +84,6 @@ interface CollectionItemProps {
 
 function CollectionItem(props: CollectionItemProps) {
   const { active, collection, onPress } = props;
-  const themeStyles = useThemeStyles();
 
   const handlePress = useCallback(() => {
     onPress(collection.id);
@@ -93,11 +92,7 @@ function CollectionItem(props: CollectionItemProps) {
   return (
     <PressableHighlight
       onPress={handlePress}
-      style={[
-        styles.collectionItem,
-        active && styles.activeCollectionItem,
-        themeStyles.border.primary,
-      ]}
+      style={[styles.collectionItem, active && styles.activeCollectionItem]}
     >
       <Text
         weight={active ? "bold" : "normal"}
@@ -124,9 +119,11 @@ const styles = StyleSheet.create({
   },
   activeCollectionItem: {
     borderBottomWidth: 2,
+    borderColor: theme.primary.default,
   },
   collectionTabsRoot: {
     zIndex: 2,
     borderBottomWidth: 1,
+    borderColor: theme.neutral.light,
   },
 });

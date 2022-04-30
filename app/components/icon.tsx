@@ -1,7 +1,7 @@
 import React from "react";
 import Svg, { G, Path, Defs, ClipPath } from "./svg";
 import { TextColor } from "./text";
-import { useTheme } from "./theme";
+import { theme } from "./theme";
 
 type IconSize = "sm" | "md" | "lg";
 interface IconProps {
@@ -17,12 +17,37 @@ interface IconProps {
 
 export function Icon(props: IconProps): JSX.Element {
   const { name, size = "md", color = "default", customColor } = props;
-  const theme = useTheme();
   const TheIcon = iconMap[name];
 
   return (
-    <TheIcon size={sizeMap[size]} color={customColor ?? theme.text[color]} />
+    <TheIcon size={sizeMap[size]} color={customColor ?? getIconColor(color)} />
   );
+}
+
+function getIconColor(color: TextColor): string {
+  switch (color) {
+    case "default":
+      return theme.neutral.dark;
+
+    // eslint-disable-next-line react-native/no-unused-styles
+    case "success":
+      return theme.success.default;
+
+    // eslint-disable-next-line react-native/no-unused-styles
+    case "primary":
+      return theme.primary.dark;
+
+    // eslint-disable-next-line react-native/no-unused-styles
+    case "muted":
+      return theme.neutral.default;
+
+    // eslint-disable-next-line react-native/no-unused-styles
+    case "error":
+      return theme.danger.default;
+
+    default:
+      return theme.neutral.dark;
+  }
 }
 
 export type IconName =

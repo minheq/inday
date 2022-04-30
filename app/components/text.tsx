@@ -1,6 +1,6 @@
 import React from "react";
 import { Text as RNText, TextStyle, StyleSheet } from "react-native";
-import { useThemeStyles } from "./theme";
+import { theme } from "./theme";
 import { tokens } from "./tokens";
 
 export interface TextProps {
@@ -50,7 +50,6 @@ interface TextColors {
   primary: string;
   muted: string;
   error: string;
-  contrast: string;
 }
 
 export type TextColor = keyof TextColors;
@@ -72,7 +71,6 @@ export function Text(props: TextProps): JSX.Element {
     transform = "none",
     weight = "normal",
   } = props;
-  const themeStyles = useThemeStyles();
 
   return (
     <RNText
@@ -80,7 +78,7 @@ export function Text(props: TextProps): JSX.Element {
       style={[
         styles[align],
         styles[size],
-        themeStyles.text[color],
+        styles[color],
         {
           ...(customColor !== undefined && {
             color: customColor,
@@ -120,5 +118,26 @@ const styles = StyleSheet.create({
   // eslint-disable-next-line react-native/no-unused-styles
   center: {
     textAlign: "center",
+  },
+
+  // eslint-disable-next-line react-native/no-unused-styles
+  default: {
+    color: theme.neutral.dark,
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  success: {
+    color: theme.success.default,
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  primary: {
+    color: theme.primary.dark,
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  muted: {
+    color: theme.neutral.default,
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  error: {
+    color: theme.danger.default,
   },
 });

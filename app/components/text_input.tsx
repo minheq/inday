@@ -5,11 +5,12 @@ import {
   TextInputKeyPressEventData,
   StyleProp,
   TextStyle,
+  StyleSheet,
 } from "react-native";
 
-import { useTheme, useThemeStyles } from "./theme";
 import { tokens } from "./tokens";
 import { UIKey } from "../lib/keyboard";
+import { theme } from "./theme";
 
 export interface TextInputProps {
   value?: string | null;
@@ -43,8 +44,6 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
       onSubmitEditing,
       style,
     } = props;
-    const theme = useTheme();
-    const themeStyles = useThemeStyles();
 
     const handleKeyPress = useCallback(
       (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -75,14 +74,16 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
         onChangeText={onChange}
         onKeyPress={handleKeyPress}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.text.muted}
-        style={[
-          { height },
-          tokens.text.size.md,
-          themeStyles.text.default,
-          style,
-        ]}
+        placeholderTextColor={theme.neutral.light}
+        style={[{ height }, styles.input, style]}
       />
     );
   }
 );
+
+const styles = StyleSheet.create({
+  input: {
+    ...tokens.text.size.md,
+    color: theme.neutral.default,
+  },
+});

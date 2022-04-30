@@ -1,14 +1,12 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { useTheme } from "./theme";
+import { theme } from "./theme";
 
 /**
  * Visual separator between components.
  */
 export function Divider(): JSX.Element {
-  const theme = useTheme();
-
-  return <View style={[styles.base, { borderColor: theme.border.default }]} />;
+  return <View style={[styles.base, { borderColor: theme.neutral.light }]} />;
 }
 
 const styles = StyleSheet.create({

@@ -5,7 +5,7 @@ import { ContextMenuItem, ContextMenu } from "../../components/context_menu";
 import { Icon } from "../../components/icon";
 import { PressableHighlight } from "../../components/pressable_highlight";
 import { Text } from "../../components/text";
-import { useThemeStyles } from "../../components/theme";
+
 import {
   assertCheckboxFieldValue,
   assertCurrencyFieldValue,
@@ -40,6 +40,7 @@ import { formatDate, parseISODate } from "../../../lib/date_utils";
 import { getSystemLocale } from "../../lib/locale";
 import { formatCurrency } from "../../../lib/currency";
 import { CheckboxAltView } from "../../components/checkbox_alt";
+import { theme } from "../../components/theme";
 
 interface GroupRowCellProps {
   primary: boolean;
@@ -90,7 +91,6 @@ interface PrimaryGroupRowCellViewProps {
 function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
   const { field, value, collapsed, onToggleCollapseGroup } = props;
   const { mode } = useListViewViewContext();
-  const themeStyles = useThemeStyles();
 
   const handlePressCollapseGroup = useCallback(() => {
     onToggleCollapseGroup(field, value, !collapsed);
@@ -169,13 +169,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
   }, [field, value]);
 
   return (
-    <View
-      style={[
-        styles.primaryCell,
-        themeStyles.border.default,
-        themeStyles.background.content,
-      ]}
-    >
+    <View style={styles.primaryCell}>
       <CollapseToggle
         collapsed={collapsed}
         onToggle={handlePressCollapseGroup}
@@ -186,10 +180,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         </Text>
         <View style={styles.valueContainer}>{renderValue()}</View>
       </View>
-      <View
-        pointerEvents="none"
-        style={[styles.bottomBorder, themeStyles.border.default]}
-      />
+      <View pointerEvents="none" style={styles.bottomBorder} />
       {mode === "edit" && <DotsMenu />}
     </View>
   );
@@ -263,14 +254,9 @@ interface GroupRowCellViewProps {
 const GroupRowCellView = memo(function GroupRowCellView(
   _props: GroupRowCellViewProps
 ) {
-  const themeStyles = useThemeStyles();
-
   return (
     <PressableHighlight style={styles.cellRoot}>
-      <View
-        pointerEvents="none"
-        style={[styles.bottomBorder, themeStyles.border.default]}
-      />
+      <View pointerEvents="none" style={styles.bottomBorder} />
     </PressableHighlight>
   );
 });
@@ -288,6 +274,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     flexDirection: "row",
     alignItems: "center",
+    borderColor: theme.neutral.light,
+    backgroundColor: theme.base.default,
   },
   valueContainer: {
     flexDirection: "row",
@@ -297,6 +285,7 @@ const styles = StyleSheet.create({
   },
   bottomBorder: {
     borderBottomWidth: 1,
+    borderColor: theme.neutral.light,
     position: "absolute",
     bottom: 0,
     left: 0,

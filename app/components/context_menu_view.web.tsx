@@ -13,13 +13,12 @@ import { ContextMenuViewProps } from "./context_menu_view";
 import { ContextMenu, CONTEXT_MENU_ITEM_HEIGHT } from "./context_menu";
 import { PopoverOverlay, getPopoverAnchorAndHeight } from "./popover";
 import { tokens } from "./tokens";
-import { useThemeStyles } from "./theme";
+import { theme } from "./theme";
 
 export const ContextMenuView = memo(function ContextMenuView(
   props: ContextMenuViewProps
 ): JSX.Element {
   const { menuItems, children, style, width = 240 } = props;
-  const themeStyles = useThemeStyles();
   const contentHeight = useMemo((): number => {
     return menuItems.length * CONTEXT_MENU_ITEM_HEIGHT;
   }, [menuItems]);
@@ -82,15 +81,7 @@ export const ContextMenuView = memo(function ContextMenuView(
         onRequestClose={handleRequestClose}
         visible={state.visible}
       >
-        <View
-          style={[
-            styles.popoverContainer,
-            themeStyles.background.content,
-            themeStyles.border.default,
-            themeStyles.elevation.level1,
-            { height: state.height },
-          ]}
-        >
+        <View style={[styles.popoverContainer, { height: state.height }]}>
           <ContextMenu
             onPressMenuItem={handleRequestClose}
             width={width}
@@ -110,5 +101,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 8,
     borderRadius: tokens.border.radius,
+    borderColor: theme.neutral.light,
+    backgroundColor: theme.base.default,
+    ...theme.elevation.level1,
   },
 });

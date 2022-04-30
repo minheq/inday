@@ -113,7 +113,7 @@ import {
   parseISODate,
 } from "../../../lib/date_utils";
 import { PressableHighlight } from "../../components/pressable_highlight";
-import { useThemeStyles } from "../../components/theme";
+import { theme } from "../../components/theme";
 
 export interface DocumentDetailsViewProps {
   documentID: DocumentID;
@@ -288,7 +288,6 @@ function SingleLineTextField(props: SingleLineTextFieldProps) {
   const { value } = props;
   const { onStartEditing, onStopEditing, editing } = useDocumentFieldContext();
   const handleChange = useFieldValueChangeHandler();
-  const themeStyles = useThemeStyles();
 
   if (editing) {
     return (
@@ -299,17 +298,14 @@ function SingleLineTextField(props: SingleLineTextFieldProps) {
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onStopEditing}
-          style={[styles.input, themeStyles.border.default]}
+          style={styles.input}
         />
       </InputWrapper>
     );
   }
 
   return (
-    <PressableHighlight
-      style={[styles.borderWrapper, themeStyles.border.default]}
-      onPress={onStartEditing}
-    >
+    <PressableHighlight style={styles.borderWrapper} onPress={onStartEditing}>
       <View style={styles.cellValueContainer}>
         <Text numberOfLines={1}>{value}</Text>
       </View>
@@ -326,7 +322,6 @@ function URLField(props: URLFieldProps) {
   const { value } = props;
   const { editing, onStartEditing, onStopEditing } = useDocumentFieldContext();
   const handleChange = useFieldValueChangeHandler();
-  const themeStyles = useThemeStyles();
 
   if (editing) {
     return (
@@ -337,7 +332,7 @@ function URLField(props: URLFieldProps) {
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onStopEditing}
-          style={[styles.input, themeStyles.border.default]}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -345,10 +340,7 @@ function URLField(props: URLFieldProps) {
 
   return (
     <View>
-      <PressableHighlight
-        style={[styles.borderWrapper, themeStyles.border.default]}
-        onPress={onStartEditing}
-      >
+      <PressableHighlight style={styles.borderWrapper} onPress={onStartEditing}>
         <View style={styles.cellValueContainer}>
           <Text decoration="underline" numberOfLines={1}>
             {value}
@@ -373,7 +365,6 @@ function EmailField(props: EmailFieldProps) {
   const { value } = props;
   const { editing, onStartEditing, onStopEditing } = useDocumentFieldContext();
   const handleChange = useFieldValueChangeHandler();
-  const themeStyles = useThemeStyles();
 
   if (editing) {
     return (
@@ -384,7 +375,7 @@ function EmailField(props: EmailFieldProps) {
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onStopEditing}
-          style={[styles.input, themeStyles.border.default]}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -392,10 +383,7 @@ function EmailField(props: EmailFieldProps) {
 
   return (
     <View>
-      <PressableHighlight
-        style={[styles.borderWrapper, themeStyles.border.default]}
-        onPress={onStartEditing}
-      >
+      <PressableHighlight style={styles.borderWrapper} onPress={onStartEditing}>
         <View style={styles.cellValueContainer}>
           <Text decoration="underline" numberOfLines={1}>
             {value}
@@ -420,7 +408,6 @@ function MultiLineTextField(props: MultiLineTextFieldProps) {
   const { value } = props;
   const { editing, onStartEditing, onStopEditing } = useDocumentFieldContext();
   const handleChange = useFieldValueChangeHandler();
-  const themeStyles = useThemeStyles();
 
   if (editing) {
     return (
@@ -439,11 +426,7 @@ function MultiLineTextField(props: MultiLineTextFieldProps) {
 
   return (
     <PressableHighlight
-      style={[
-        styles.multiLineTextFocused,
-        styles.borderWrapper,
-        themeStyles.border.default,
-      ]}
+      style={[styles.multiLineTextFocused, styles.borderWrapper]}
       onPress={onStartEditing}
     >
       <Text>{value}</Text>
@@ -460,7 +443,6 @@ function PhoneNumberField(props: PhoneNumberFieldProps) {
   const { value } = props;
   const { editing, onStartEditing, onStopEditing } = useDocumentFieldContext();
   const handleChange = useFieldValueChangeHandler();
-  const themeStyles = useThemeStyles();
 
   if (editing === true) {
     return (
@@ -471,7 +453,7 @@ function PhoneNumberField(props: PhoneNumberFieldProps) {
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onStopEditing}
-          style={[styles.input, themeStyles.border.default]}
+          style={styles.input}
         />
       </InputWrapper>
     );
@@ -479,10 +461,7 @@ function PhoneNumberField(props: PhoneNumberFieldProps) {
 
   return (
     <View>
-      <PressableHighlight
-        style={[styles.borderWrapper, themeStyles.border.default]}
-        onPress={onStartEditing}
-      >
+      <PressableHighlight style={styles.borderWrapper} onPress={onStartEditing}>
         <View style={styles.cellValueContainer}>
           <Text decoration="underline" numberOfLines={1}>
             {value}
@@ -507,7 +486,6 @@ function NumberField(props: NumberFieldProps) {
   const { value, field } = props;
   const { editing, onStartEditing, onStopEditing } = useDocumentFieldContext();
   const handleChange = useFieldValueChangeHandler();
-  const themeStyles = useThemeStyles();
 
   if (editing === true) {
     return (
@@ -518,17 +496,14 @@ function NumberField(props: NumberFieldProps) {
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onStopEditing}
-          style={[styles.input, themeStyles.border.default]}
+          style={styles.input}
         />
       </InputWrapper>
     );
   }
 
   return (
-    <PressableHighlight
-      style={[styles.borderWrapper, themeStyles.border.default]}
-      onPress={onStartEditing}
-    >
+    <PressableHighlight style={styles.borderWrapper} onPress={onStartEditing}>
       <View style={styles.cellValueContainer}>
         <Text numberOfLines={1}>{formatNumberFieldValue(value, field)}</Text>
       </View>
@@ -545,7 +520,6 @@ function CurrencyField(props: CurrencyFieldProps) {
   const { value, field } = props;
   const { editing, onStartEditing, onStopEditing } = useDocumentFieldContext();
   const handleChange = useFieldValueChangeHandler();
-  const themeStyles = useThemeStyles();
 
   if (editing === true) {
     return (
@@ -556,17 +530,14 @@ function CurrencyField(props: CurrencyFieldProps) {
           onChange={handleChange}
           onRequestClose={onStopEditing}
           onSubmitEditing={onStopEditing}
-          style={[styles.input, themeStyles.border.default]}
+          style={styles.input}
         />
       </InputWrapper>
     );
   }
 
   return (
-    <PressableHighlight
-      style={[styles.borderWrapper, themeStyles.border.default]}
-      onPress={onStartEditing}
-    >
+    <PressableHighlight style={styles.borderWrapper} onPress={onStartEditing}>
       <View style={styles.cellValueContainer}>
         {value ? (
           <Text numberOfLines={1} align="right">
@@ -640,10 +611,9 @@ interface MultiDocumentLinkFieldProps {
 
 function MultiDocumentLinkField(props: MultiDocumentLinkFieldProps) {
   const { value } = props;
-  const themeStyles = useThemeStyles();
 
   return (
-    <View style={[styles.borderWrapper, themeStyles.border.default]}>
+    <View style={styles.borderWrapper}>
       <View style={styles.cellValueContainer}>
         <DocumentLinkBadgeList documentIDs={value} />
       </View>
@@ -715,10 +685,9 @@ interface SingleDocumentLinkFieldProps {
 
 function SingleDocumentLinkField(props: SingleDocumentLinkFieldProps) {
   const { value } = props;
-  const themeStyles = useThemeStyles();
 
   return (
-    <View style={[styles.borderWrapper, themeStyles.border.default]}>
+    <View style={styles.borderWrapper}>
       <View style={styles.cellValueContainer}>
         {value && <DocumentLinkBadge documentID={value} />}
       </View>
@@ -872,12 +841,11 @@ function PickerTrigger(props: PickerTriggerProps): JSX.Element {
   const { children, content } = props;
   const { editing, onStartEditing, onStopEditing } = useDocumentFieldContext();
   const targetRef = useRef<View>(null);
-  const themeStyles = useThemeStyles();
 
   return (
     <View>
       <PressableHighlight
-        style={[styles.borderWrapper, themeStyles.border.default]}
+        style={styles.borderWrapper}
         ref={targetRef}
         onPress={onStartEditing}
       >
@@ -920,6 +888,7 @@ const styles = StyleSheet.create({
     paddingTop: 1,
     paddingHorizontal: 8,
     borderWidth: 1,
+    borderColor: theme.neutral.light,
     borderRadius: tokens.border.radius,
   },
   multiline: {
@@ -927,6 +896,7 @@ const styles = StyleSheet.create({
   },
   borderWrapper: {
     borderRadius: tokens.border.radius,
+    borderColor: theme.neutral.light,
     borderWidth: 1,
   },
   cellValueContainer: {

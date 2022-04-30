@@ -6,7 +6,6 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useTheme } from "./theme";
 
 export interface PressableHighlightProps extends PressableProps {
   children?:
@@ -24,22 +23,21 @@ export interface PressableStateCallback {
 export const PressableHighlight = forwardRef<View, PressableHighlightProps>(
   function PressableHighlight(props, ref): JSX.Element {
     const { children, style, ...restProps } = props;
-    const theme = useTheme();
 
     return (
       <Pressable
         ref={ref}
         style={(state) => {
           const { hovered, pressed } = state as PressableStateCallback;
-          let backgroundColor = theme.button.flatDefault;
+          // let backgroundColor = theme.button.flatDefault;
 
-          if (hovered) {
-            backgroundColor = theme.button.flatHovered;
-          } else if (pressed) {
-            backgroundColor = theme.button.flatPressed;
-          }
+          // if (hovered) {
+          //   backgroundColor = theme.button.flatHovered;
+          // } else if (pressed) {
+          //   backgroundColor = theme.button.flatPressed;
+          // }
 
-          return [{ backgroundColor }, style];
+          return [style];
         }}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...restProps}
