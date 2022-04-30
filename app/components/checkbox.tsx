@@ -1,8 +1,8 @@
-import React, { memo, useCallback } from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
+import React, { memo, useCallback } from "react";
+import { View, Pressable, StyleSheet } from "react-native";
 
-import { Icon } from './icon';
-import { useThemeStyles } from './theme';
+import { Icon } from "./icon";
+import { useThemeStyles } from "./theme";
 
 interface CheckboxProps {
   value?: boolean;
@@ -30,7 +30,7 @@ interface CheckboxViewProps {
 }
 
 export const CheckboxView = memo(function CheckboxView(
-  props: CheckboxViewProps,
+  props: CheckboxViewProps
 ) {
   const { value } = props;
   const themeStyles = useThemeStyles();
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

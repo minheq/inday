@@ -1,20 +1,20 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState } from "react";
 import {
   NativeSyntheticEvent,
   ScrollView,
   TextInputKeyPressEventData,
   View,
   StyleSheet,
-} from 'react-native';
-import { UIKey, WhiteSpaceKey } from '../lib/keyboard';
-import { Checkbox } from './checkbox';
+} from "react-native";
+import { UIKey, WhiteSpaceKey } from "../lib/keyboard";
+import { Checkbox } from "./checkbox";
 import {
   ListPickerItem,
   ListPickerOption,
   useListKeyboardNavigation,
   useOptionsSearch,
-} from './list_picker';
-import { TextField } from './text_field';
+} from "./list_picker";
+import { TextField } from "./text_field";
 
 interface ListMultiPickerProps<T> {
   value?: T[] | null;
@@ -26,7 +26,7 @@ interface ListMultiPickerProps<T> {
 }
 
 export function ListMultiPicker<T>(
-  props: ListMultiPickerProps<T>,
+  props: ListMultiPickerProps<T>
 ): JSX.Element {
   const {
     value,
@@ -36,12 +36,12 @@ export function ListMultiPicker<T>(
     renderLabel,
   } = props;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const options = useOptionsSearch(initialOptions, searchTerm);
   const handleNavigation = useListKeyboardNavigation(
     activeIndex,
     setActiveIndex,
-    options,
+    options
   );
 
   const handleSelect = useCallback(
@@ -60,7 +60,7 @@ export function ListMultiPicker<T>(
         }
       }
     },
-    [value, onChange],
+    [value, onChange]
   );
 
   const handleSearchTermChange = useCallback((nextSearchTerm: string) => {
@@ -76,7 +76,7 @@ export function ListMultiPicker<T>(
         setActiveIndex(index);
       }
     },
-    [options],
+    [options]
   );
 
   const handleKeyPress = useCallback(
@@ -118,7 +118,7 @@ export function ListMultiPicker<T>(
       activeIndex,
       handleSelect,
       options,
-    ],
+    ]
   );
 
   const renderCheck = useCallback((_value: T, selected: boolean) => {

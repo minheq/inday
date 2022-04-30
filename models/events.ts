@@ -1,12 +1,12 @@
-import { Workspace } from './workspace';
-import { Space, SpaceID } from './spaces';
-import { Collection, CollectionID } from './collections';
-import { View, ListView, ViewID } from './views';
-import { Field, FieldID, FieldValue } from './fields';
-import { Document, DocumentID } from './documents';
-import { Filter, FilterID } from './filters';
-import { Sort, SortID } from './sorts';
-import { Group, GroupID } from './groups';
+import { Workspace } from "./workspace";
+import { Space, SpaceID } from "./spaces";
+import { Collection, CollectionID } from "./collections";
+import { View, ListView, ViewID } from "./views";
+import { Field, FieldID, FieldValue } from "./fields";
+import { Document, DocumentID } from "./documents";
+import { Filter, FilterID } from "./filters";
+import { Sort, SortID } from "./sorts";
+import { Group, GroupID } from "./groups";
 
 export interface BaseEvent {
   createdAt: Date;
@@ -14,7 +14,7 @@ export interface BaseEvent {
 }
 
 export interface WorkspaceCreatedEventConfig {
-  name: 'WorkspaceCreated';
+  name: "WorkspaceCreated";
   workspace: Workspace;
 }
 export interface WorkspaceCreatedEvent
@@ -22,19 +22,19 @@ export interface WorkspaceCreatedEvent
     WorkspaceCreatedEventConfig {}
 
 export interface SpaceCreatedEventConfig {
-  name: 'SpaceCreated';
+  name: "SpaceCreated";
   space: Space;
 }
 export interface SpaceCreatedEvent extends BaseEvent, SpaceCreatedEventConfig {}
 
 export interface SpaceDeletedEventConfig {
-  name: 'SpaceDeleted';
+  name: "SpaceDeleted";
   spaceID: SpaceID;
 }
 export interface SpaceDeletedEvent extends BaseEvent, SpaceDeletedEventConfig {}
 
 export interface SpaceNameUpdatedEventConfig {
-  name: 'SpaceNameUpdated';
+  name: "SpaceNameUpdated";
   spaceID: SpaceID;
   prevName: string;
   nextName: string;
@@ -44,7 +44,7 @@ export interface SpaceNameUpdatedEvent
     SpaceNameUpdatedEventConfig {}
 
 export interface CollectionCreatedEventConfig {
-  name: 'CollectionCreated';
+  name: "CollectionCreated";
   collection: Collection;
 }
 export interface CollectionCreatedEvent
@@ -52,7 +52,7 @@ export interface CollectionCreatedEvent
     CollectionCreatedEventConfig {}
 
 export interface CollectionNameUpdatedEventConfig {
-  name: 'CollectionNameUpdated';
+  name: "CollectionNameUpdated";
   collectionID: CollectionID;
   prevName: string;
   nextName: string;
@@ -62,7 +62,7 @@ export interface CollectionNameUpdatedEvent
     CollectionNameUpdatedEventConfig {}
 
 export interface CollectionDeletedEventConfig {
-  name: 'CollectionDeleted';
+  name: "CollectionDeleted";
   collectionID: CollectionID;
 }
 export interface CollectionDeletedEvent
@@ -70,13 +70,13 @@ export interface CollectionDeletedEvent
     CollectionDeletedEventConfig {}
 
 export interface ViewCreatedEventConfig {
-  name: 'ViewCreated';
+  name: "ViewCreated";
   view: View;
 }
 export interface ViewCreatedEvent extends BaseEvent, ViewCreatedEventConfig {}
 
 export interface ViewNameUpdatedEventConfig {
-  name: 'ViewNameUpdated';
+  name: "ViewNameUpdated";
   prevView: View;
   nextView: View;
 }
@@ -85,19 +85,19 @@ export interface ViewNameUpdatedEvent
     ViewNameUpdatedEventConfig {}
 
 export interface ViewDeletedEventConfig {
-  name: 'ViewDeleted';
+  name: "ViewDeleted";
   viewID: ViewID;
 }
 export interface ViewDeletedEvent extends BaseEvent, ViewDeletedEventConfig {}
 
 export interface FieldCreatedEventConfig {
-  name: 'FieldCreated';
+  name: "FieldCreated";
   field: Field;
 }
 export interface FieldCreatedEvent extends BaseEvent, FieldCreatedEventConfig {}
 
 export interface FieldNameUpdatedEventConfig {
-  name: 'FieldNameUpdated';
+  name: "FieldNameUpdated";
   prevField: Field;
   nextField: Field;
 }
@@ -106,13 +106,13 @@ export interface FieldNameUpdatedEvent
     FieldNameUpdatedEventConfig {}
 
 export interface FieldDeletedEventConfig {
-  name: 'FieldDeleted';
+  name: "FieldDeleted";
   fieldID: FieldID;
 }
 export interface FieldDeletedEvent extends BaseEvent, FieldDeletedEventConfig {}
 
 export interface DocumentCreatedEventConfig {
-  name: 'DocumentCreated';
+  name: "DocumentCreated";
   document: Document;
 }
 export interface DocumentCreatedEvent
@@ -120,7 +120,7 @@ export interface DocumentCreatedEvent
     DocumentCreatedEventConfig {}
 
 export interface DocumentNameUpdatedEventConfig {
-  name: 'DocumentNameUpdated';
+  name: "DocumentNameUpdated";
   prevDocument: Document;
   nextDocument: Document;
 }
@@ -129,7 +129,7 @@ export interface DocumentNameUpdatedEvent
     DocumentNameUpdatedEventConfig {}
 
 export interface DocumentFieldValueUpdatedEventConfig {
-  name: 'DocumentFieldValueUpdated';
+  name: "DocumentFieldValueUpdated";
   fieldID: FieldID;
   prevValue: FieldValue;
   nextValue: FieldValue;
@@ -139,7 +139,7 @@ export interface DocumentFieldValueUpdatedEvent
     DocumentFieldValueUpdatedEventConfig {}
 
 export interface DocumentDeletedEventConfig {
-  name: 'DocumentDeleted';
+  name: "DocumentDeleted";
   documentID: DocumentID;
 }
 export interface DocumentDeletedEvent
@@ -147,7 +147,7 @@ export interface DocumentDeletedEvent
     DocumentDeletedEventConfig {}
 
 export interface FilterCreatedEventConfig {
-  name: 'FilterCreated';
+  name: "FilterCreated";
   filter: Filter;
 }
 export interface FilterCreatedEvent
@@ -155,7 +155,7 @@ export interface FilterCreatedEvent
     FilterCreatedEventConfig {}
 
 export interface FilterConfigUpdatedEventConfig {
-  name: 'FilterConfigUpdated';
+  name: "FilterConfigUpdated";
   prevFilter: Filter;
   nextFilter: Filter;
 }
@@ -164,7 +164,7 @@ export interface FilterConfigUpdatedEvent
     FilterConfigUpdatedEventConfig {}
 
 export interface FilterGroupUpdatedEventConfig {
-  name: 'FilterGroupUpdated';
+  name: "FilterGroupUpdated";
   prevFilters: Filter[];
   nextFilters: Filter[];
 }
@@ -173,7 +173,7 @@ export interface FilterGroupUpdatedEvent
     FilterGroupUpdatedEventConfig {}
 
 export interface FilterDeletedEventConfig {
-  name: 'FilterDeleted';
+  name: "FilterDeleted";
   filterID: FilterID;
 }
 export interface FilterDeletedEvent
@@ -181,13 +181,13 @@ export interface FilterDeletedEvent
     FilterDeletedEventConfig {}
 
 export interface SortCreatedEventConfig {
-  name: 'SortCreated';
+  name: "SortCreated";
   sort: Sort;
 }
 export interface SortCreatedEvent extends BaseEvent, SortCreatedEventConfig {}
 
 export interface SortConfigUpdatedEventConfig {
-  name: 'SortConfigUpdated';
+  name: "SortConfigUpdated";
   prevSort: Sort;
   nextSort: Sort;
 }
@@ -196,19 +196,19 @@ export interface SortConfigUpdatedEvent
     SortConfigUpdatedEventConfig {}
 
 export interface SortDeletedEventConfig {
-  name: 'SortDeleted';
+  name: "SortDeleted";
   sortID: SortID;
 }
 export interface SortDeletedEvent extends BaseEvent, SortDeletedEventConfig {}
 
 export interface GroupCreatedEventConfig {
-  name: 'GroupCreated';
+  name: "GroupCreated";
   group: Group;
 }
 export interface GroupCreatedEvent extends BaseEvent, GroupCreatedEventConfig {}
 
 export interface GroupConfigUpdatedEventConfig {
-  name: 'GroupConfigUpdated';
+  name: "GroupConfigUpdated";
   prevGroup: Group;
   nextGroup: Group;
 }
@@ -217,13 +217,13 @@ export interface GroupConfigUpdatedEvent
     GroupConfigUpdatedEventConfig {}
 
 export interface GroupDeletedEventConfig {
-  name: 'GroupDeleted';
+  name: "GroupDeleted";
   groupID: GroupID;
 }
 export interface GroupDeletedEvent extends BaseEvent, GroupDeletedEventConfig {}
 
 export interface ListViewFieldConfigUpdatedEventConfig {
-  name: 'ListViewFieldConfigUpdated';
+  name: "ListViewFieldConfigUpdated";
   prevView: ListView;
   nextView: ListView;
 }

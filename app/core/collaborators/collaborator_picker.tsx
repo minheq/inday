@@ -1,9 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from "react";
 
-import { ListPicker, ListPickerOption } from '../../components/list_picker';
-import { useCollaboratorsQuery } from '../../store/queries';
-import { CollaboratorBadge } from '../collaborators/collaborator_badge';
-import { Collaborator, CollaboratorID } from '../../../models/collaborators';
+import { ListPicker, ListPickerOption } from "../../components/list_picker";
+import { useCollaboratorsQuery } from "../../store/queries";
+import { CollaboratorBadge } from "../collaborators/collaborator_badge";
+import { Collaborator, CollaboratorID } from "../../../models/collaborators";
 
 interface CollaboratorPickerProps {
   value: CollaboratorID | null;
@@ -12,7 +12,7 @@ interface CollaboratorPickerProps {
 }
 
 export function CollaboratorPicker(
-  props: CollaboratorPickerProps,
+  props: CollaboratorPickerProps
 ): JSX.Element {
   const { value, onChange, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();
@@ -31,7 +31,7 @@ export function CollaboratorPicker(
 }
 
 export function useRenderCollaborator(): (
-  collaboratorID: CollaboratorID,
+  collaboratorID: CollaboratorID
 ) => JSX.Element {
   return useCallback((collaboratorID: CollaboratorID) => {
     return (
@@ -41,7 +41,7 @@ export function useRenderCollaborator(): (
 }
 
 export function useGetCollaboratorOptions(
-  collaborators: Collaborator[],
+  collaborators: Collaborator[]
 ): ListPickerOption<CollaboratorID>[] {
   return useMemo(
     () =>
@@ -49,6 +49,6 @@ export function useGetCollaboratorOptions(
         value: collaborator.id,
         label: collaborator.name,
       })),
-    [collaborators],
+    [collaborators]
   );
 }

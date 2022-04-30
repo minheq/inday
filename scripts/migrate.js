@@ -1,7 +1,7 @@
-const Postgrator = require('postgrator');
+const Postgrator = require("postgrator");
 
 const postgrator = new Postgrator({
-  driver: 'pg',
+  driver: "pg",
   connectionString: process.env.DATABASE_URL,
 });
 

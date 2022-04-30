@@ -5,9 +5,9 @@ import React, {
   Fragment,
   useEffect,
   createContext,
-} from 'react';
-import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { Pressable, ScrollView, View } from 'react-native';
+} from "react";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
+import { Pressable, ScrollView, View } from "react-native";
 
 import {
   NumberFieldKindFilterRule,
@@ -18,38 +18,38 @@ import {
   FilterConfig,
   assertNumberFilterConfig,
   assertTextFilterConfig,
-} from '../../../models/filters';
-import { Row } from '../../components/row';
-import { Spacer } from '../../components/spacer';
-import { Text } from '../../components/text';
-import { tokens } from '../../components/tokens';
-import { Picker, PickerOption } from '../../components/picker';
-import { PressableHighlight } from '../../components/pressable_highlight';
-import { TextInput } from '../../components/text_input';
+} from "../../../models/filters";
+import { Row } from "../../components/row";
+import { Spacer } from "../../components/spacer";
+import { Text } from "../../components/text";
+import { tokens } from "../../components/tokens";
+import { Picker, PickerOption } from "../../components/picker";
+import { PressableHighlight } from "../../components/pressable_highlight";
+import { TextInput } from "../../components/text_input";
 
 import {
   useViewFiltersQuery,
   useFieldQuery,
   useFiltersGroupMaxQuery,
   useCollectionFieldsQuery,
-} from '../../store/queries';
+} from "../../store/queries";
 import {
   useCreateFilterMutation,
   useDeleteFilterMutation,
   useUpdateFilterConfigMutation,
   useUpdateFilterGroupMutation,
-} from '../../store/mutations';
-import { first } from '../../../lib/array_utils';
-import { FieldID, FieldType } from '../../../models/fields';
-import { FieldPicker } from '../fields/field_picker';
+} from "../../store/mutations";
+import { first } from "../../../lib/array_utils";
+import { FieldID, FieldType } from "../../../models/fields";
+import { FieldPicker } from "../fields/field_picker";
 const filterEditIDState = atom<FilterID>({
-  key: 'FilterMenuFilterEditID',
-  default: '',
+  key: "FilterMenuFilterEditID",
+  default: "",
 });
 
 const FilterMenuContext = createContext({
-  viewID: '',
-  collectionID: '',
+  viewID: "",
+  collectionID: "",
 });
 
 interface FilterMenuProps {
@@ -107,24 +107,24 @@ function FilterListItem(props: FilterListItemProps) {
   }, [setFilterEditID, filter]);
 
   const handlePressCancel = useCallback(() => {
-    setFilterEditID('');
+    setFilterEditID("");
   }, [setFilterEditID]);
 
   const handlePressRemove = useCallback(() => {
     deleteFilter(filter);
-    setFilterEditID('');
+    setFilterEditID("");
   }, [deleteFilter, setFilterEditID, filter]);
 
   const handleChangeFilterGroup = useCallback(
-    (value: 'and' | 'or') => {
+    (value: "and" | "or") => {
       updateFilterGroup(filter.id, value);
     },
-    [filter, updateFilterGroup],
+    [filter, updateFilterGroup]
   );
 
   const handleSubmit = useCallback(() => {
     updateFilterConfig(filter.id, filter.group, filterConfig);
-    setFilterEditID('');
+    setFilterEditID("");
   }, [updateFilterConfig, setFilterEditID, filter, filterConfig]);
 
   useEffect(() => {
@@ -179,11 +179,11 @@ function FilterListItem(props: FilterListItemProps) {
         <Fragment>
           <Spacer size={16} />
           <Picker
-            value={prevFilter.group === filter.group ? 'and' : 'or'}
+            value={prevFilter.group === filter.group ? "and" : "or"}
             onChange={handleChangeFilterGroup}
             options={[
-              { label: 'And', value: 'and' },
-              { label: 'Or', value: 'or' },
+              { label: "And", value: "and" },
+              { label: "Or", value: "or" },
             ]}
           />
           <Spacer size={16} />
@@ -208,7 +208,7 @@ function FilterNew() {
 
   if (firstField === null) {
     throw new Error(
-      'Fields are empty. They may not have been loaded properly.',
+      "Fields are empty. They may not have been loaded properly."
     );
   }
 
@@ -232,7 +232,7 @@ function FilterNew() {
   }, [handleClose, createFilter, context, filterConfig, groupMax]);
 
   useEffect(() => {
-    if (filterEditID !== '') {
+    if (filterEditID !== "") {
       setOpen(false);
     }
   }, [filterEditID]);
@@ -292,7 +292,7 @@ function FilterEdit(props: FilterEditProps) {
         fieldID,
       });
     },
-    [onChange],
+    [onChange]
   );
 
   const FilterConfigEdit = filterConfigEditComponentByFieldType[field.type];
@@ -351,11 +351,11 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
     (newRule: TextFieldKindFilterRule) => {
       onChange({
         rule: newRule,
-        value: '',
+        value: "",
         fieldID,
       });
     },
-    [onChange, fieldID],
+    [onChange, fieldID]
   );
 
   const handleChangeValue = useCallback(
@@ -366,16 +366,16 @@ function TextFilterRuleInput(props: FilterRuleInputProps) {
         fieldID,
       });
     },
-    [onChange, rule, fieldID],
+    [onChange, rule, fieldID]
   );
 
   const options: Option<TextFieldKindFilterRule>[] = [
-    { value: 'contains', label: 'contains' },
-    { value: 'doesNotContain', label: 'does not contain' },
-    { value: 'is', label: 'is' },
-    { value: 'isNot', label: 'is not' },
-    { value: 'isEmpty', label: 'is empty' },
-    { value: 'isNotEmpty', label: 'is not empty' },
+    { value: "contains", label: "contains" },
+    { value: "doesNotContain", label: "does not contain" },
+    { value: "is", label: "is" },
+    { value: "isNot", label: "is not" },
+    { value: "isEmpty", label: "is empty" },
+    { value: "isNotEmpty", label: "is not empty" },
   ];
 
   return (
@@ -405,7 +405,7 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
         fieldID,
       });
     },
-    [onChange, fieldID],
+    [onChange, fieldID]
   );
 
   const handleChangeValue = useCallback(
@@ -416,18 +416,18 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
         fieldID,
       });
     },
-    [onChange, rule, fieldID],
+    [onChange, rule, fieldID]
   );
 
   const options: PickerOption<NumberFieldKindFilterRule>[] = [
-    { value: 'equal', label: 'equal' },
-    { value: 'notEqual', label: 'not equal' },
-    { value: 'lessThan', label: 'less than' },
-    { value: 'greaterThan', label: 'greater than' },
-    { value: 'lessThanOrEqual', label: 'less than or equal' },
-    { value: 'greaterThanOrEqual', label: 'greater than or equal' },
-    { value: 'isEmpty', label: 'is empty' },
-    { value: 'isNotEmpty', label: 'is not empty' },
+    { value: "equal", label: "equal" },
+    { value: "notEqual", label: "not equal" },
+    { value: "lessThan", label: "less than" },
+    { value: "greaterThan", label: "greater than" },
+    { value: "lessThanOrEqual", label: "less than or equal" },
+    { value: "greaterThanOrEqual", label: "greater than or equal" },
+    { value: "isEmpty", label: "is empty" },
+    { value: "isNotEmpty", label: "is not empty" },
   ];
 
   return (
@@ -436,7 +436,7 @@ function NumberFilterRuleInput(props: FilterRuleInputProps) {
       <Spacer size={4} />
       <TextInput
         onSubmitEditing={onSubmit}
-        value={value ? `${value}` : ''}
+        value={value ? `${value}` : ""}
         onChange={handleChangeValue}
       />
     </View>

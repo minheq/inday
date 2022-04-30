@@ -1,21 +1,21 @@
-import React, { memo, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { memo, useCallback } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { PressableHighlight } from '../../components/pressable_highlight';
-import { Icon } from '../../components/icon';
-import { Row } from '../../components/row';
-import { Text } from '../../components/text';
-import { useThemeStyles } from '../../components/theme';
-import { tokens } from '../../components/tokens';
-import { Collection, CollectionID } from '../../../models/collections';
+import { PressableHighlight } from "../../components/pressable_highlight";
+import { Icon } from "../../components/icon";
+import { Row } from "../../components/row";
+import { Text } from "../../components/text";
+import { useThemeStyles } from "../../components/theme";
+import { tokens } from "../../components/tokens";
+import { Collection, CollectionID } from "../../../models/collections";
 
 import {
   useSpaceQuery,
   useSpaceCollectionsQuery,
   useViewQuery,
-} from '../../store/queries';
-import { ViewID } from '../../../models/views';
-import { SpaceID } from '../../../models/spaces';
+} from "../../store/queries";
+import { ViewID } from "../../../models/views";
+import { SpaceID } from "../../../models/spaces";
 
 interface CollectionsTabsProps {
   spaceID: SpaceID;
@@ -31,7 +31,7 @@ export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
 
   if (activeCollection === undefined) {
     throw new Error(
-      `Active collection not found. Expected to find collectionID=${view.collectionID} in viewID=${view.id}`,
+      `Active collection not found. Expected to find collectionID=${view.collectionID} in viewID=${view.id}`
     );
   }
 
@@ -49,7 +49,7 @@ interface CollectionTabsViewProps {
 }
 
 const CollectionTabsView = memo(function CollectionTabsView(
-  props: CollectionTabsViewProps,
+  props: CollectionTabsViewProps
 ) {
   const { collections, activeCollectionID } = props;
   const themeStyles = useThemeStyles();
@@ -100,8 +100,8 @@ function CollectionItem(props: CollectionItemProps) {
       ]}
     >
       <Text
-        weight={active ? 'bold' : 'normal'}
-        color={active ? 'primary' : 'muted'}
+        weight={active ? "bold" : "normal"}
+        color={active ? "primary" : "muted"}
       >
         {collection.name}
       </Text>
@@ -118,8 +118,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: tokens.border.radius,
     minWidth: 40,
     height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 16,
   },
   activeCollectionItem: {

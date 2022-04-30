@@ -1,9 +1,9 @@
-import { useRecoilValue } from 'recoil';
-import { Collaborator, CollaboratorID } from '../../models/collaborators';
-import { Collection, CollectionID } from '../../models/collections';
-import { Space, SpaceID } from '../../models/spaces';
-import { Workspace } from '../../models/workspace';
-import { Field, FieldID, FieldValue, FieldConfig } from '../../models/fields';
+import { useRecoilValue } from "recoil";
+import { Collaborator, CollaboratorID } from "../../models/collaborators";
+import { Collection, CollectionID } from "../../models/collections";
+import { Space, SpaceID } from "../../models/spaces";
+import { Workspace } from "../../models/workspace";
+import { Field, FieldID, FieldValue, FieldConfig } from "../../models/fields";
 import {
   collaboratorsByIDState,
   CollaboratorsByIDState,
@@ -17,7 +17,7 @@ import {
   filtersByIDState,
   spacesByIDState,
   SpacesByIDState,
-} from './atoms';
+} from "./atoms";
 import {
   collaboratorQuery,
   collaboratorsQuery,
@@ -45,25 +45,25 @@ import {
   viewSortsQuery,
   viewSortsSequenceMaxQuery,
   workspaceQuery,
-} from './selectors';
-import { Document, DocumentID } from '../../models/documents';
+} from "./selectors";
+import { Document, DocumentID } from "../../models/documents";
 import {
   assertListView,
   FieldWithListViewConfig,
   ListViewFieldConfig,
   View,
   ViewID,
-} from '../../models/views';
-import { Sort, sortDocuments, SortGetters, SortID } from '../../models/sorts';
-import { Group, GroupID } from '../../models/groups';
-import { useCallback, useMemo } from 'react';
+} from "../../models/views";
+import { Sort, sortDocuments, SortGetters, SortID } from "../../models/sorts";
+import { Group, GroupID } from "../../models/groups";
+import { useCallback, useMemo } from "react";
 import {
   Filter,
   filterDocuments,
   FilterGetters,
   FilterGroup,
   FilterID,
-} from '../../models/filters';
+} from "../../models/filters";
 
 export function useSpacesByIDQuery(): SpacesByIDState {
   return useRecoilValue(spacesByIDState);
@@ -73,7 +73,7 @@ export function useSpaceQuery(spaceID: SpaceID): Space {
   const space = useRecoilValue(spaceQuery(spaceID));
 
   if (space === null) {
-    throw new Error('Space not found');
+    throw new Error("Space not found");
   }
 
   return space;
@@ -87,7 +87,7 @@ export function useWorkspaceQuery(): Workspace {
   const workspace = useRecoilValue(workspaceQuery);
 
   if (workspace === null) {
-    throw new Error('Workspace not found');
+    throw new Error("Workspace not found");
   }
 
   return workspace;
@@ -102,7 +102,7 @@ export function useCollaboratorsQuery(): Collaborator[] {
 }
 
 export function useCollaboratorQuery(
-  collaboratorID: CollaboratorID,
+  collaboratorID: CollaboratorID
 ): Collaborator {
   return useRecoilValue(collaboratorQuery(collaboratorID));
 }
@@ -123,7 +123,7 @@ export function useCollectionQuery(collectionID: CollectionID): Collection {
   const collection = useRecoilValue(collectionQuery(collectionID));
 
   if (collection === null) {
-    throw new Error('Collection not found');
+    throw new Error("Collection not found");
   }
 
   return collection;
@@ -134,7 +134,7 @@ export function useCollectionFieldsQuery(collectionID: CollectionID): Field[] {
 }
 
 export function useCollectionDocumentsQuery(
-  collectionID: CollectionID,
+  collectionID: CollectionID
 ): Document[] {
   return useRecoilValue(collectionDocumentsQuery(collectionID));
 }
@@ -166,7 +166,7 @@ function useFieldQueryCallback() {
 
       return field;
     },
-    [fieldsByID],
+    [fieldsByID]
   );
 }
 
@@ -182,7 +182,7 @@ function useDocumentQueryCallback() {
 
       return document;
     },
-    [documentsByID],
+    [documentsByID]
   );
 }
 
@@ -195,18 +195,18 @@ function useCollaboratorQueryCallback() {
 
       if (collaborator === undefined) {
         throw new Error(
-          `Collaborator not found for collaboratorID=${collaboratorID}`,
+          `Collaborator not found for collaboratorID=${collaboratorID}`
         );
       }
 
       return collaborator;
     },
-    [collaboratorsByID],
+    [collaboratorsByID]
   );
 }
 
 export function useDocumentPrimaryFieldValueQuery(
-  documentID: DocumentID,
+  documentID: DocumentID
 ): [field: Field, value: FieldValue] {
   const document = useDocumentQuery(documentID);
   const collection = useCollectionQuery(document.collectionID);
@@ -224,13 +224,13 @@ function useCollectionQueryCallback() {
 
       if (collection === undefined) {
         throw new Error(
-          `Collection not found for collectionID=${collectionID}`,
+          `Collection not found for collectionID=${collectionID}`
         );
       }
 
       return collection;
     },
-    [collectionsByID],
+    [collectionsByID]
   );
 }
 
@@ -273,7 +273,7 @@ export function useViewDocumentsQuery(viewID: ViewID): Document[] {
 }
 
 export function useCollectionDocumentsByIDQuery(
-  collectionID: CollectionID,
+  collectionID: CollectionID
 ): DocumentsByIDState {
   return useRecoilValue(collectionDocumentsByIDQuery(collectionID));
 }
@@ -295,7 +295,7 @@ export function useViewFiltersQuery(viewID: ViewID): Filter[] {
 }
 
 export function useDocumentFieldValuesEntriesQuery(
-  documentID: DocumentID,
+  documentID: DocumentID
 ): [Field, FieldValue][] {
   return useRecoilValue(documentFieldsEntriesQuery(documentID));
 }
@@ -326,7 +326,7 @@ export function useGroupsSequenceMaxQuery(viewID: ViewID): number {
 
 export function useListViewFieldConfigQuery(
   viewID: ViewID,
-  fieldID: FieldID,
+  fieldID: FieldID
 ): ListViewFieldConfig {
   const view = useViewQuery(viewID);
 
@@ -336,7 +336,7 @@ export function useListViewFieldConfigQuery(
 }
 
 export function useSortedFieldsWithListViewConfigQuery(
-  viewID: ViewID,
+  viewID: ViewID
 ): FieldWithListViewConfig[] {
   const view = useViewQuery(viewID);
 
@@ -374,7 +374,7 @@ export function useFieldQuery(fieldID: FieldID): Field {
   const field = useRecoilValue(fieldQuery(fieldID));
 
   if (field === null) {
-    throw new Error('Field not found');
+    throw new Error("Field not found");
   }
 
   return field;
@@ -384,7 +384,7 @@ export function useFieldConfigQuery(fieldID: FieldID): FieldConfig {
   const field = useRecoilValue(fieldQuery(fieldID));
 
   if (field === null) {
-    throw new Error('Field config not found');
+    throw new Error("Field config not found");
   }
 
   return field;
@@ -392,11 +392,11 @@ export function useFieldConfigQuery(fieldID: FieldID): FieldConfig {
 
 export function useDocumentFieldValueQuery(
   documentID: DocumentID,
-  fieldID: FieldID,
+  fieldID: FieldID
 ): FieldValue {
   const params = useMemo(
     () => ({ documentID, fieldID }),
-    [documentID, fieldID],
+    [documentID, fieldID]
   );
 
   return useRecoilValue(documentFieldValueQuery(params));
@@ -406,7 +406,7 @@ export function useDocumentQuery(documentID: DocumentID): Document {
   const document = useRecoilValue(documentQuery(documentID));
 
   if (document === null) {
-    throw new Error('Document not found');
+    throw new Error("Document not found");
   }
 
   return document;

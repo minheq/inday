@@ -1,15 +1,15 @@
-import React, { Fragment, createContext, useCallback, useContext } from 'react';
-import { ScrollView, View } from 'react-native';
-import { Row } from '../../components/row';
-import { Spacer } from '../../components/spacer';
-import { Switch } from '../../components/switch';
-import { Text } from '../../components/text';
-import { tokens } from '../../components/tokens';
-import { CollectionID } from '../../../models/collections';
+import React, { Fragment, createContext, useCallback, useContext } from "react";
+import { ScrollView, View } from "react-native";
+import { Row } from "../../components/row";
+import { Spacer } from "../../components/spacer";
+import { Switch } from "../../components/switch";
+import { Text } from "../../components/text";
+import { tokens } from "../../components/tokens";
+import { CollectionID } from "../../../models/collections";
 
-import { useSortedFieldsWithListViewConfigQuery } from '../../store/queries';
-import { FieldWithListViewConfig, ViewID } from '../../../models/views';
-import { useUpdateListViewFieldConfigMutation } from '../../store/mutations';
+import { useSortedFieldsWithListViewConfigQuery } from "../../store/queries";
+import { FieldWithListViewConfig, ViewID } from "../../../models/views";
+import { useUpdateListViewFieldConfigMutation } from "../../store/mutations";
 
 interface FieldMenuContext {
   viewID: ViewID;
@@ -17,8 +17,8 @@ interface FieldMenuContext {
 }
 
 const FieldMenuContext = createContext<FieldMenuContext>({
-  viewID: 'viw',
-  collectionID: 'col',
+  viewID: "viw",
+  collectionID: "col",
 });
 
 interface FieldMenuProps {
@@ -65,7 +65,7 @@ function FieldListItem(props: FieldListItemProps) {
         visible: value,
       });
     },
-    [updateListViewFieldConfig, viewID, field],
+    [updateListViewFieldConfig, viewID, field]
   );
 
   return (

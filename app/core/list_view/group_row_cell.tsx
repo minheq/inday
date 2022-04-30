@@ -1,11 +1,11 @@
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { assertUnreached } from '../../../lib/lang_utils';
-import { ContextMenuItem, ContextMenu } from '../../components/context_menu';
-import { Icon } from '../../components/icon';
-import { PressableHighlight } from '../../components/pressable_highlight';
-import { Text } from '../../components/text';
-import { useThemeStyles } from '../../components/theme';
+import React, { memo, useCallback, useMemo, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { assertUnreached } from "../../../lib/lang_utils";
+import { ContextMenuItem, ContextMenu } from "../../components/context_menu";
+import { Icon } from "../../components/icon";
+import { PressableHighlight } from "../../components/pressable_highlight";
+import { Text } from "../../components/text";
+import { useThemeStyles } from "../../components/theme";
 import {
   assertCheckboxFieldValue,
   assertCurrencyFieldValue,
@@ -27,19 +27,19 @@ import {
   FieldType,
   FieldValue,
   formatNumberFieldValue,
-} from '../../../models/fields';
-import { useListViewViewContext } from './list_view_view';
-import { Popover } from '../../components/popover';
-import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
-import { DocumentLinkBadgeList } from '../document_link/document_link_badge_list';
-import { OptionBadgeList } from '../select/option_badge_list';
-import { CollaboratorBadge } from '../collaborators/collaborator_badge';
-import { DocumentLinkBadge } from '../document_link/document_link_badge';
-import { OptionBadge } from '../select/option_badge';
-import { formatDate, parseISODate } from '../../../lib/date_utils';
-import { getSystemLocale } from '../../lib/locale';
-import { formatCurrency } from '../../../lib/currency';
-import { CheckboxAltView } from '../../components/checkbox_alt';
+} from "../../../models/fields";
+import { useListViewViewContext } from "./list_view_view";
+import { Popover } from "../../components/popover";
+import { CollaboratorBadgeList } from "../collaborators/collaborator_badge_list";
+import { DocumentLinkBadgeList } from "../document_link/document_link_badge_list";
+import { OptionBadgeList } from "../select/option_badge_list";
+import { CollaboratorBadge } from "../collaborators/collaborator_badge";
+import { DocumentLinkBadge } from "../document_link/document_link_badge";
+import { OptionBadge } from "../select/option_badge";
+import { formatDate, parseISODate } from "../../../lib/date_utils";
+import { getSystemLocale } from "../../lib/locale";
+import { formatCurrency } from "../../../lib/currency";
+import { CheckboxAltView } from "../../components/checkbox_alt";
 
 interface GroupRowCellProps {
   primary: boolean;
@@ -55,7 +55,7 @@ interface GroupRowCellProps {
   onToggleCollapseGroup: (
     field: Field,
     value: FieldValue,
-    collapsed: boolean,
+    collapsed: boolean
   ) => void;
 }
 
@@ -83,7 +83,7 @@ interface PrimaryGroupRowCellViewProps {
   onToggleCollapseGroup: (
     field: Field,
     value: FieldValue,
-    collapsed: boolean,
+    collapsed: boolean
   ) => void;
 }
 
@@ -190,7 +190,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
         pointerEvents="none"
         style={[styles.bottomBorder, themeStyles.border.default]}
       />
-      {mode === 'edit' && <DotsMenu />}
+      {mode === "edit" && <DotsMenu />}
     </View>
   );
 }
@@ -201,13 +201,13 @@ interface CollapseToggleProps {
 }
 
 const CollapseToggle = memo(function CollapseToggle(
-  props: CollapseToggleProps,
+  props: CollapseToggleProps
 ): JSX.Element {
   const { collapsed, onToggle } = props;
   return (
     <View style={styles.collapseToggleWrapper}>
       <PressableHighlight onPress={onToggle} style={styles.dotsMenuButton}>
-        <Icon name={collapsed ? 'CaretRight' : 'CaretDown'} />
+        <Icon name={collapsed ? "CaretRight" : "CaretDown"} />
       </PressableHighlight>
     </View>
   );
@@ -248,11 +248,11 @@ const DotsMenu = memo(function DotsMenu(): JSX.Element {
 function useGroupRowContextMenuItems(): ContextMenuItem[] {
   return useMemo(
     (): ContextMenuItem[] => [
-      { label: 'Collapse' },
-      { label: 'Expand subgroups' },
-      { label: 'Collapse subgroups' },
+      { label: "Collapse" },
+      { label: "Expand subgroups" },
+      { label: "Collapse subgroups" },
     ],
-    [],
+    []
   );
 }
 
@@ -261,7 +261,7 @@ interface GroupRowCellViewProps {
 }
 
 const GroupRowCellView = memo(function GroupRowCellView(
-  _props: GroupRowCellViewProps,
+  _props: GroupRowCellViewProps
 ) {
   const themeStyles = useThemeStyles();
 
@@ -277,27 +277,27 @@ const GroupRowCellView = memo(function GroupRowCellView(
 
 const styles = StyleSheet.create({
   cellRoot: {
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    height: "100%",
+    flexDirection: "row",
+    alignItems: "center",
   },
   primaryCell: {
     flex: 1,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRightWidth: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   valueContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   primaryCellText: {
     flex: 1,
   },
   bottomBorder: {
     borderBottomWidth: 1,
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,

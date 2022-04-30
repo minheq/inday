@@ -1,5 +1,5 @@
-import { isEmpty } from './lang_utils';
-import { random } from './number_utils';
+import { isEmpty } from "./lang_utils";
+import { random } from "./number_utils";
 
 export function range(min: number, max: number, step?: number): number[];
 export function range(max: number): number[];
@@ -47,7 +47,7 @@ export function isNotEmpty<T>(arr: T[]): boolean {
 
 export function uniqueBy<T>(
   arr: T[],
-  getValue: (item: T) => string | number,
+  getValue: (item: T) => string | number
 ): T[] {
   const map: { [key: string]: true } = {};
   const result: T[] = [];
@@ -125,7 +125,7 @@ export function intersectBy<T, K>(
   a: T[],
   b: K[],
   getValue: (item: T | K) => string | number,
-  merge = false,
+  merge = false
 ): T[] {
   const bMap: { [key: string]: K } = {};
 
@@ -158,7 +158,7 @@ export function intersectBy<T, K>(
 export function differenceBy<T, K>(
   a: T[],
   b: K[],
-  getValue: (item: T | K) => string | number,
+  getValue: (item: T | K) => string | number
 ): T[] {
   const bMap: { [key: string]: K } = {};
 
@@ -204,7 +204,7 @@ type KeyedBy<T> = { [key: string]: T };
  */
 export function keyedBy<T>(
   items: T[],
-  getKey: (item: T) => string,
+  getKey: (item: T) => string
 ): KeyedBy<T> {
   const result: KeyedBy<T> = {};
 
@@ -235,7 +235,7 @@ export function splitLast<T>(items: T[]): [T[], T] {
  */
 export function groupBy<T>(
   items: T[],
-  getKey: (item: T) => string,
+  getKey: (item: T) => string
 ): { [key: string]: T[] } {
   const grouped: { [key: string]: T[] } = {};
 
@@ -272,7 +272,7 @@ export function isEqualBy<T>(
   a: T[],
   b: T[],
   getValue: (item: T) => string | number,
-  order = false,
+  order = false
 ): boolean {
   if (order === true) {
     for (let i = 0; i < a.length; i++) {

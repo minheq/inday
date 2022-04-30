@@ -1,6 +1,6 @@
-import { ViewID } from './views';
-import { generateID, validateID } from '../lib/id';
-import { SortConfig } from './sorts';
+import { ViewID } from "./views";
+import { generateID, validateID } from "../lib/id";
+import { SortConfig } from "./sorts";
 
 export const groupIDPrefix = `grp`;
 export type GroupID = `${typeof groupIDPrefix}${string}`;
@@ -23,7 +23,7 @@ export interface Group extends BaseGroup, SortConfig {}
 
 export function deleteGroup(
   group: Group,
-  groups: Group[],
+  groups: Group[]
 ): { [groupID: string]: Group } {
   const updatedGroups: { [groupID: string]: Group } = {};
   const groupIndex = groups.findIndex((f) => f.id === group.id);

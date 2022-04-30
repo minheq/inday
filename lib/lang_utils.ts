@@ -1,4 +1,4 @@
-import { isObject } from './object_utils';
+import { isObject } from "./object_utils";
 
 export function isEqual(a: unknown, b: unknown): boolean {
   if (a === b) {
@@ -35,7 +35,7 @@ function isArrayEqual<T>(a: T[], b: T[]): boolean {
 
 function isObjectEqual(
   a: Record<string, unknown>,
-  b: Record<string, unknown>,
+  b: Record<string, unknown>
 ): boolean {
   if (a.constructor !== b.constructor) {
     return false;
@@ -90,13 +90,13 @@ export function assertUnreached(p: unknown, message?: string): never {
   if (message !== undefined) {
     throw new Error(message);
   } else {
-    throw new Error('Unknown value' + JSON.stringify(p));
+    throw new Error("Unknown value" + JSON.stringify(p));
   }
 }
 
 export function map<T, K>(
   obj: Record<string, T>,
-  callback: (value: T) => K,
+  callback: (value: T) => K
 ): Record<string, K> {
   const keys = Object.keys(obj);
   const result: Record<string, K> = {};

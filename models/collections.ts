@@ -1,6 +1,6 @@
-import { generateID, validateID } from '../lib/id';
-import { FieldID } from './fields';
-import { SpaceID } from './spaces';
+import { generateID, validateID } from "../lib/id";
+import { FieldID } from "./fields";
+import { SpaceID } from "./spaces";
 
 export const collectionIDPrefix = `col` as const;
 export type CollectionID = `${typeof collectionIDPrefix}${string}`;

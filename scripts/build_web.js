@@ -1,38 +1,38 @@
-const { build } = require('esbuild');
+const { build } = require("esbuild");
 
-const nodeEnv = process.env.NODE_ENV || 'development';
+const nodeEnv = process.env.NODE_ENV || "development";
 
 const options = {
-  entryPoints: ['index.web.tsx'],
+  entryPoints: ["index.web.tsx"],
   bundle: true,
-  outdir: 'public',
+  outdir: "public",
   resolveExtensions: [
-    '.web.tsx',
-    '.web.ts',
-    '.tsx',
-    '.ts',
-    '.web.jsx',
-    '.web.js',
-    '.jsx',
-    '.js',
-    '.json',
+    ".web.tsx",
+    ".web.ts",
+    ".tsx",
+    ".ts",
+    ".web.jsx",
+    ".web.js",
+    ".jsx",
+    ".js",
+    ".json",
   ],
-  minify: nodeEnv === 'production',
+  minify: nodeEnv === "production",
   sourcemap: true,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge18'],
+  target: ["chrome58", "firefox57", "safari11", "edge18"],
   define: {
-    ['process.env.NODE_ENV']: `"${nodeEnv}"`,
-    ['global']: 'window',
+    ["process.env.NODE_ENV"]: `"${nodeEnv}"`,
+    ["global"]: "window",
   },
 };
 
-console.time('build time');
+console.time("build time");
 build(options)
   .then(() => {
-    console.timeEnd('build time');
+    console.timeEnd("build time");
     process.exit(0);
   })
-  .catch(error => {
+  .catch((error) => {
     console.error(`Failed to build: ${error.message}`);
     process.exit(1);
   });

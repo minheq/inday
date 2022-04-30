@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from "react";
 
 export function useDebouncedCallback<TArgs extends (number | string)[]>(
   callback: (...args: TArgs) => void,
-  wait = 500,
+  wait = 500
 ): (...args: TArgs) => void {
   // track args & timeout handle between calls
   const argsRef = useRef<TArgs>();
@@ -33,6 +33,6 @@ export function useDebouncedCallback<TArgs extends (number | string)[]>(
         }
       }, wait);
     },
-    [callback, wait],
+    [callback, wait]
   );
 }

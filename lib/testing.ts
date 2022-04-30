@@ -1,4 +1,4 @@
-import { isEqual } from './lang_utils';
+import { isEqual } from "./lang_utils";
 
 type DeepEqualFn = <T>(valA: T, valB: T, description?: string) => void;
 type FailFn = (description?: string) => void;
@@ -13,12 +13,12 @@ type Spec = (assert: Assert) => Promise<void> | void;
 export function test(description: string, spec: Spec): void {
   const deepEqual: DeepEqualFn = (valA, valB, d) => {
     if (isEqual(valA, valB) === false) {
-      throw new Error(`${description}${d ? `- ${d}` : ''}`);
+      throw new Error(`${description}${d ? `- ${d}` : ""}`);
     }
   };
 
   const fail: FailFn = (d) => {
-    throw new Error(`${description}${d ? `- ${d}` : ''}`);
+    throw new Error(`${description}${d ? `- ${d}` : ""}`);
   };
 
   const assert: Assert = {

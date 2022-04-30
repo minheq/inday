@@ -6,32 +6,32 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+} from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import {
   Document,
   DocumentID,
   generateDocumentID,
-} from '../../../models/documents';
+} from "../../../models/documents";
 import {
   BooleanFieldKindValue,
   FieldID,
   formatNumberFieldValue,
   generateFieldID,
   stringifyFieldValue,
-} from '../../../models/fields';
-import { CloseButton } from '../../components/close_button';
-import { Column } from '../../components/column';
-import { Delay } from '../../components/delay';
-import { Fade } from '../../components/fade';
-import { Spacer } from '../../components/spacer';
-import { Text } from '../../components/text';
-import { tokens } from '../../components/tokens';
+} from "../../../models/fields";
+import { CloseButton } from "../../components/close_button";
+import { Column } from "../../components/column";
+import { Delay } from "../../components/delay";
+import { Fade } from "../../components/fade";
+import { Spacer } from "../../components/spacer";
+import { Text } from "../../components/text";
+import { tokens } from "../../components/tokens";
 import {
   useDocumentFieldValuesEntriesQuery,
   useDocumentPrimaryFieldValueQuery,
   useDocumentQuery,
-} from '../../store/queries';
+} from "../../store/queries";
 import {
   assertCheckboxFieldValue,
   assertCurrencyFieldValue,
@@ -81,39 +81,39 @@ import {
   SingleDocumentLinkFieldValue,
   URLField,
   URLFieldValue,
-} from '../../../models/fields';
-import { Row } from '../../components/row';
-import { Icon } from '../../components/icon';
-import { getFieldIcon } from '../../core/views/icon_helpers';
-import { TextInput } from '../../components/text_input';
-import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
-import { FlatButton } from '../../components/flat_button';
-import { URLLink } from '../../components/url_link';
-import { EmailLink } from '../../components/email_link';
-import { PhoneNumberLink } from '../../components/phone_number_link';
-import { NumberInput } from '../../components/number_input';
-import { formatCurrency } from '../../../lib/currency';
-import { getSystemLocale } from '../../lib/locale';
-import { CollaboratorMultiPicker } from '../../core/collaborators/collaborator_multi_picker';
-import { CollaboratorBadgeList } from '../../core/collaborators/collaborator_badge_list';
-import { Popover } from '../../components/popover';
-import { MultiSelectPicker } from '../../core/select/multi_select_picker';
-import { OptionBadgeList } from '../../core/select/option_badge_list';
-import { DocumentLinkBadgeList } from '../../core/document_link/document_link_badge_list';
-import { CollaboratorPicker } from '../../core/collaborators/collaborator_picker';
-import { CollaboratorBadge } from '../../core/collaborators/collaborator_badge';
-import { SingleSelectPicker } from '../../core/select/single_select_picker';
-import { OptionBadge } from '../../core/select/option_badge';
-import { DocumentLinkBadge } from '../../core/document_link/document_link_badge';
-import { CheckboxAlt } from '../../components/checkbox_alt';
-import { DatePicker } from '../../components/date_picker';
+} from "../../../models/fields";
+import { Row } from "../../components/row";
+import { Icon } from "../../components/icon";
+import { getFieldIcon } from "../../core/views/icon_helpers";
+import { TextInput } from "../../components/text_input";
+import { useUpdateDocumentFieldValueMutation } from "../../store/mutations";
+import { FlatButton } from "../../components/flat_button";
+import { URLLink } from "../../components/url_link";
+import { EmailLink } from "../../components/email_link";
+import { PhoneNumberLink } from "../../components/phone_number_link";
+import { NumberInput } from "../../components/number_input";
+import { formatCurrency } from "../../../lib/currency";
+import { getSystemLocale } from "../../lib/locale";
+import { CollaboratorMultiPicker } from "../../core/collaborators/collaborator_multi_picker";
+import { CollaboratorBadgeList } from "../../core/collaborators/collaborator_badge_list";
+import { Popover } from "../../components/popover";
+import { MultiSelectPicker } from "../../core/select/multi_select_picker";
+import { OptionBadgeList } from "../../core/select/option_badge_list";
+import { DocumentLinkBadgeList } from "../../core/document_link/document_link_badge_list";
+import { CollaboratorPicker } from "../../core/collaborators/collaborator_picker";
+import { CollaboratorBadge } from "../../core/collaborators/collaborator_badge";
+import { SingleSelectPicker } from "../../core/select/single_select_picker";
+import { OptionBadge } from "../../core/select/option_badge";
+import { DocumentLinkBadge } from "../../core/document_link/document_link_badge";
+import { CheckboxAlt } from "../../components/checkbox_alt";
+import { DatePicker } from "../../components/date_picker";
 import {
   formatDate,
   formatISODate,
   parseISODate,
-} from '../../../lib/date_utils';
-import { PressableHighlight } from '../../components/pressable_highlight';
-import { useThemeStyles } from '../../components/theme';
+} from "../../../lib/date_utils";
+import { PressableHighlight } from "../../components/pressable_highlight";
+import { useThemeStyles } from "../../components/theme";
 
 export interface DocumentDetailsViewProps {
   documentID: DocumentID;
@@ -121,12 +121,12 @@ export interface DocumentDetailsViewProps {
 }
 
 export function DocumentDetailsView(
-  props: DocumentDetailsViewProps,
+  props: DocumentDetailsViewProps
 ): JSX.Element {
   const { documentID, onClose } = props;
   const document = useDocumentQuery(documentID);
   const [primaryField, primaryFieldValue] = useDocumentPrimaryFieldValueQuery(
-    document.id,
+    document.id
   );
 
   return (
@@ -183,7 +183,7 @@ interface DocumentFieldProps {
 }
 
 const DocumentField = memo(function DocumentField(
-  props: DocumentFieldProps,
+  props: DocumentFieldProps
 ): JSX.Element {
   const { documentID, field, value } = props;
   const [editing, setEditing] = useState(false);
@@ -763,7 +763,7 @@ function DateField(props: DateFieldProps) {
     async (date: Date) => {
       await handleChange(formatISODate(date));
     },
-    [handleChange],
+    [handleChange]
   );
 
   return (
@@ -794,7 +794,7 @@ function useFieldValueChangeHandler() {
     async (nextValue: FieldValue) => {
       await updateDocumentFieldValue(documentID, fieldID, nextValue);
     },
-    [updateDocumentFieldValue, documentID, fieldID],
+    [updateDocumentFieldValue, documentID, fieldID]
   );
 }
 
@@ -903,8 +903,8 @@ const styles = StyleSheet.create({
   documentDetailsHeader: {
     paddingHorizontal: 8,
     paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   fieldWrapper: {
     paddingBottom: 32,
@@ -913,7 +913,7 @@ const styles = StyleSheet.create({
     padding: 8,
     minHeight: 40,
     maxHeight: 400,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   input: {
     height: 40,
@@ -931,16 +931,16 @@ const styles = StyleSheet.create({
   },
   cellValueContainer: {
     height: 40,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 8,
   },
   inputWrapper: {
     padding: 8,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
   actionsWrapper: {
     padding: 8,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
 });

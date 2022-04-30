@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyleProp, View, ViewStyle } from 'react-native';
-import { ContextMenuProps } from './context_menu';
+import React from "react";
+import { StyleProp, View, ViewStyle } from "react-native";
+import { ContextMenuProps } from "./context_menu";
 
 export interface ContextMenuViewProps extends ContextMenuProps {
   children: React.ReactNode;

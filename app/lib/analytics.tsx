@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export interface AnalyticsContext {
   group(groupID: string, traits?: GroupTraits): void;
@@ -109,8 +109,6 @@ export interface TrackProperties {
   category?: string;
   /* Useful for categorizing events (e.g. 'Fall Campaign') */
   label?: string;
-  /* Any possible property */
-  [key: string]: any;
 }
 
 export interface ScreenProperties {
@@ -170,46 +168,46 @@ export interface GroupTraits {
 
 export type EcommerceEvent =
   /* Browsing Overview */
-  | 'Products Searched' // User searched for products
-  | 'Product List Viewed' // User viewed a product list or category
-  | 'Product List Filtered' // User filtered a product list or category
+  | "Products Searched" // User searched for products
+  | "Product List Viewed" // User viewed a product list or category
+  | "Product List Filtered" // User filtered a product list or category
 
   /* Promotions Overview */
-  | 'Promotion Viewed' // User viewed promotion
-  | 'Promotion Clicked' // User clicked on promotion
+  | "Promotion Viewed" // User viewed promotion
+  | "Promotion Clicked" // User clicked on promotion
 
   /* Core Ordering Overview */
-  | 'Product Clicked' // User clicked on a product
-  | 'Product Viewed' // User viewed a product details
-  | 'Product Added' // User added a product to their shopping cart
-  | 'Product Removed' // User removed a product from their shopping cart
-  | 'Cart Viewed' // User viewed their shopping cart
-  | 'Checkout Started' // User initiated the order process (a transaction is created)
-  | 'Checkout Step Viewed' // User viewed a checkout step
-  | 'Checkout Step Completed' // User completed a checkout step
-  | 'Payment Info Entered' // User added payment information
-  | 'Order Completed' // User completed the order
-  | 'Order Updated' // User updated the order
-  | 'Order Refunded' // User refunded the order
-  | 'Order Cancelled' // User cancelled the order
+  | "Product Clicked" // User clicked on a product
+  | "Product Viewed" // User viewed a product details
+  | "Product Added" // User added a product to their shopping cart
+  | "Product Removed" // User removed a product from their shopping cart
+  | "Cart Viewed" // User viewed their shopping cart
+  | "Checkout Started" // User initiated the order process (a transaction is created)
+  | "Checkout Step Viewed" // User viewed a checkout step
+  | "Checkout Step Completed" // User completed a checkout step
+  | "Payment Info Entered" // User added payment information
+  | "Order Completed" // User completed the order
+  | "Order Updated" // User updated the order
+  | "Order Refunded" // User refunded the order
+  | "Order Cancelled" // User cancelled the order
 
   /* Coupons Overview */
-  | 'Coupon Entered' // User entered a coupon on a shopping cart or order
-  | 'Coupon Applied' // Coupon was applied on a user’s shopping cart or order
-  | 'Coupon Denied' // Coupon was denied from a user’s shopping cart or order
-  | 'Coupon Removed' // User removed a coupon from a cart or order
+  | "Coupon Entered" // User entered a coupon on a shopping cart or order
+  | "Coupon Applied" // Coupon was applied on a user’s shopping cart or order
+  | "Coupon Denied" // Coupon was denied from a user’s shopping cart or order
+  | "Coupon Removed" // User removed a coupon from a cart or order
 
   /* Wishlisting Overview */
-  | 'Product Added to Wishlist' // User added a product to the wish list
-  | 'Product Removed from Wishlist' // User removed a product from the wish list
-  | 'Wishlist Product Added to Cart' // User added a wishlist product to the cart
+  | "Product Added to Wishlist" // User added a product to the wish list
+  | "Product Removed from Wishlist" // User removed a product from the wish list
+  | "Wishlist Product Added to Cart" // User added a wishlist product to the cart
 
   /* Sharing Overview */
-  | 'Product Shared' // Shared a product with one or more friends
-  | 'Cart Shared' // Shared the cart with one or more friends
+  | "Product Shared" // Shared a product with one or more friends
+  | "Cart Shared" // Shared the cart with one or more friends
 
   /* Reviewing Overview */
-  | 'Product Reviewed'; // User reviewed a product
+  | "Product Reviewed"; // User reviewed a product
 
 export interface Context {
   /* Whether a user is active. This is usually used to flag an .identify() call to just update the traits but not “last seen.”*/

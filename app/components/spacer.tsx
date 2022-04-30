@@ -1,10 +1,10 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useParentContainer } from './container';
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { useParentContainer } from "./container";
 
 interface SpacerProps {
   size?: number;
-  direction?: 'column' | 'row';
+  direction?: "column" | "row";
 }
 
 /**
@@ -21,7 +21,7 @@ export function Spacer(props: SpacerProps): JSX.Element {
       style={
         size !== 0 &&
         (size !== undefined
-          ? effectiveDirection === 'row'
+          ? effectiveDirection === "row"
             ? { width: size }
             : { height: size }
           : styles.base)

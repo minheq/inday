@@ -6,9 +6,9 @@ import React, {
   useEffect,
   useMemo,
   useReducer,
-} from 'react';
-import { compilePathname, matchPathname } from '../../lib/pathname';
-import { keysOf } from '../../lib/object_utils';
+} from "react";
+import { compilePathname, matchPathname } from "../../lib/pathname";
+import { keysOf } from "../../lib/object_utils";
 
 interface UseNavigation {
   setParams: (params: Params) => void;
@@ -34,7 +34,7 @@ interface RouterContext {
 }
 
 const RouterContext = createContext<RouterContext>({
-  name: '',
+  name: "",
   params: {},
   pathMap: {},
   lastAction: null,
@@ -70,40 +70,40 @@ type PathMap = {
 };
 
 type Action =
-  | { type: 'PUSH'; name: string; params: Params }
-  | { type: 'BACK' }
-  | { type: 'SET_PARAMS'; params: Params }
-  | { type: 'BROWSER_UPDATE'; name: string; params: Params };
+  | { type: "PUSH"; name: string; params: Params }
+  | { type: "BACK" }
+  | { type: "SET_PARAMS"; params: Params }
+  | { type: "BROWSER_UPDATE"; name: string; params: Params };
 
 function reducer(prevState: State, action: Action): State {
   switch (action.type) {
-    case 'PUSH':
+    case "PUSH":
       return {
         ...prevState,
         name: action.name,
         params: action.params,
         lastAction: action,
       };
-    case 'SET_PARAMS':
+    case "SET_PARAMS":
       return {
         ...prevState,
         params: action.params,
         lastAction: action,
       };
-    case 'BROWSER_UPDATE':
+    case "BROWSER_UPDATE":
       return {
         ...prevState,
         name: action.name,
         params: action.params,
         lastAction: null,
       };
-    case 'BACK':
+    case "BACK":
       return {
         ...prevState,
         lastAction: action,
       };
-    default:
-      console.error(action); // it should be never
+    default: // it should be never
+      console.error(action);
       throw new Error(`Action not handled`);
   }
 }
@@ -114,7 +114,7 @@ interface RouterProps {
 }
 
 function getInitialState(pathMap: PathMap): State {
-  let name = '';
+  let name = "";
   let params: Params = {};
 
   const screens = keysOf(pathMap) as string[];
@@ -143,25 +143,25 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
   const { lastAction, name, params } = state;
 
   const handleGoBack = useCallback(() => {
-    dispatch({ type: 'BACK' });
+    dispatch({ type: "BACK" });
   }, []);
 
   const handleNavigate = useCallback((nextName: string, nextParams: Params) => {
-    dispatch({ type: 'PUSH', name: nextName, params: nextParams });
+    dispatch({ type: "PUSH", name: nextName, params: nextParams });
   }, []);
 
   const handleSetParams = useCallback((nextParams: Params) => {
-    dispatch({ type: 'SET_PARAMS', params: nextParams });
+    dispatch({ type: "SET_PARAMS", params: nextParams });
   }, []);
 
   const handleBrowserUpdate = useCallback(
     (nextName: string, nextParams: Params) => {
-      dispatch({ type: 'BROWSER_UPDATE', name: nextName, params: nextParams });
+      dispatch({ type: "BROWSER_UPDATE", name: nextName, params: nextParams });
     },
-    [],
+    []
   );
 
-  const Screen = name !== '' ? pathMap[name].component : null;
+  const Screen = name !== "" ? pathMap[name].component : null;
   const child =
     Screen !== null ? <Screen name={name} params={params} /> : fallback;
 
@@ -185,7 +185,7 @@ export function RouterImplementation(props: RouterProps): JSX.Element {
       handleGoBack,
       handleNavigate,
       handleSetParams,
-    ],
+    ]
   );
 
   return (
@@ -215,14 +215,14 @@ function BrowserHistorySync(): JSX.Element {
         browserUpdate(nextName, nextParams);
       }
     },
-    [browserUpdate],
+    [browserUpdate]
   );
 
   useEffect(() => {
-    window.addEventListener('popstate', handleBrowserPopState);
+    window.addEventListener("popstate", handleBrowserPopState);
 
     return () => {
-      window.removeEventListener('popstate', handleBrowserPopState);
+      window.removeEventListener("popstate", handleBrowserPopState);
     };
   }, [handleBrowserPopState]);
 
@@ -233,19 +233,19 @@ function BrowserHistorySync(): JSX.Element {
 
     const state: HistoryState = { name, params };
 
-    if (lastAction.type === 'PUSH') {
+    if (lastAction.type === "PUSH") {
       history.pushState(
         state,
         name,
-        compilePathname(pathMap[name].path, params),
+        compilePathname(pathMap[name].path, params)
       );
-    } else if (lastAction.type === 'SET_PARAMS') {
+    } else if (lastAction.type === "SET_PARAMS") {
       history.replaceState(
         state,
         name,
-        compilePathname(pathMap[name].path, params),
+        compilePathname(pathMap[name].path, params)
       );
-    } else if (lastAction.type === 'BACK') {
+    } else if (lastAction.type === "BACK") {
       history.back();
     }
   }, [lastAction, name, params, pathMap]);

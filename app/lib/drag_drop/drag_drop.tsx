@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useRef } from 'react';
-import { Draggable, DragState } from './draggable';
-import { DropTarget } from './drop_target';
+import React, { createContext, useContext, useRef } from "react";
+import { Draggable, DragState } from "./draggable";
+import { DropTarget } from "./drop_target";
 
 export interface DragDropHandlers {
   registerDraggable: <T>(draggable: Draggable<T>) => void;
@@ -41,7 +41,7 @@ export class DragDrop implements DragDropHandlers {
         }
       } else {
         throw new Error(
-          `DragDrop: dropTarget(${dropTarget.key}) has not been provided measurements`,
+          `DragDrop: dropTarget(${dropTarget.key}) has not been provided measurements`
         );
       }
     }
@@ -101,7 +101,7 @@ export class DragDrop implements DragDropHandlers {
     draggable.addDragStartListener(() => this._handleDragStart(draggable));
 
     draggable.addDragListener((dragState) =>
-      this._handleDrag(draggable, dragState),
+      this._handleDrag(draggable, dragState)
     );
 
     draggable.addDragEndListener(() => this._handleDragEnd(draggable));

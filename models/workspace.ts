@@ -1,6 +1,6 @@
-import { generateID, validateID } from '../lib/id';
+import { generateID, validateID } from "../lib/id";
 
-export const workspaceIDPrefix = 'wrk' as const;
+export const workspaceIDPrefix = "wrk" as const;
 export type WorkspaceID = `${typeof workspaceIDPrefix}${string}`;
 
 export interface Workspace {

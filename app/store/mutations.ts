@@ -1,20 +1,20 @@
-import { useRecoilCallback } from 'recoil';
+import { useRecoilCallback } from "recoil";
 
-import { EventConfig, Event } from '../../models/events';
+import { EventConfig, Event } from "../../models/events";
 import {
   Collection,
   CollectionID,
   generateCollectionID,
-} from '../../models/collections';
+} from "../../models/collections";
 
-import { generateSpaceID, Space, SpaceID } from '../../models/spaces';
+import { generateSpaceID, Space, SpaceID } from "../../models/spaces";
 import {
   View,
   ViewID,
   assertListView,
   ListViewFieldConfig,
   generateViewID,
-} from '../../models/views';
+} from "../../models/views";
 import {
   Field,
   FieldConfig,
@@ -22,13 +22,13 @@ import {
   FieldValue,
   generateFieldID,
   getDefaultDocumentFieldValues,
-} from '../../models/fields';
+} from "../../models/fields";
 import {
   Document,
   DocumentFieldValues,
   DocumentID,
   generateDocumentID,
-} from '../../models/documents';
+} from "../../models/documents";
 import {
   Filter,
   FilterConfig,
@@ -36,8 +36,8 @@ import {
   FilterID,
   deleteFilter,
   generateFilterID,
-} from '../../models/filters';
-import { useLogger } from '../../lib/logger';
+} from "../../models/filters";
+import { useLogger } from "../../lib/logger";
 import {
   spacesByIDState,
   collectionsByIDState,
@@ -51,22 +51,22 @@ import {
   SortsByIDState,
   groupsByIDState,
   GroupsByIDState,
-} from './atoms';
+} from "./atoms";
 import {
   SortConfig,
   Sort,
   SortID,
   deleteSort,
   generateSortID,
-} from '../../models/sorts';
+} from "../../models/sorts";
 import {
   Group,
   GroupID,
   deleteGroup,
   generateGroupID,
-} from '../../models/groups';
-import { EventEmitter } from '../../lib/event_emitter';
-import { useWorkspaceQuery } from './queries';
+} from "../../models/groups";
+import { EventEmitter } from "../../lib/event_emitter";
+import { useWorkspaceQuery } from "./queries";
 import {
   collectionFieldsQuery,
   collectionQuery,
@@ -80,7 +80,7 @@ import {
   viewQuery,
   viewSortsQuery,
   workspaceQuery,
-} from './selectors';
+} from "./selectors";
 
 export const eventEmitter = new EventEmitter<Event>();
 
@@ -99,11 +99,11 @@ export function useEmitEvent(): (eventConfig: EventConfig) => void {
 
         set(eventsState, (prevEvents) => [...prevEvents, event]);
 
-        logger.debug('Emit event', event);
+        logger.debug("Emit event", event);
 
         eventEmitter.emit(event);
       },
-    [workspace, logger],
+    [workspace, logger]
   );
 }
 
@@ -117,12 +117,12 @@ export function useCreateSpaceMutation(): () => Promise<Space> {
         const workspace = await snapshot.getPromise(workspaceQuery);
 
         if (workspace === null) {
-          throw new Error('');
+          throw new Error("");
         }
 
         const newSpace: Space = {
           id: generateSpaceID(),
-          name: '',
+          name: "",
           workspaceID: workspace.id,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -134,7 +134,7 @@ export function useCreateSpaceMutation(): () => Promise<Space> {
         }));
 
         emitEvent({
-          name: 'SpaceCreated',
+          name: "SpaceCreated",
           space: newSpace,
         });
 
@@ -142,7 +142,7 @@ export function useCreateSpaceMutation(): () => Promise<Space> {
 
         return newSpace;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -161,11 +161,11 @@ export function useDeleteSpaceMutation(): (spaceID: SpaceID) => void {
         });
 
         emitEvent({
-          name: 'SpaceDeleted',
+          name: "SpaceDeleted",
           spaceID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -175,7 +175,7 @@ export interface UpdateSpaceNameInput {
 
 export function useUpdateSpaceNameMutation(): (
   spaceID: SpaceID,
-  input: UpdateSpaceNameInput,
+  input: UpdateSpaceNameInput
 ) => Promise<void> {
   const emitEvent = useEmitEvent();
 
@@ -197,18 +197,18 @@ export function useUpdateSpaceNameMutation(): (
         }));
 
         emitEvent({
-          name: 'SpaceNameUpdated',
+          name: "SpaceNameUpdated",
           spaceID,
           prevName: prevSpace.name,
           nextName: nextSpace.name,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useCreateCollectionMutation(): (
-  spaceID: SpaceID,
+  spaceID: SpaceID
 ) => Collection {
   const emitEvent = useEmitEvent();
   const createView = useCreateViewMutation();
@@ -218,7 +218,7 @@ export function useCreateCollectionMutation(): (
       (spaceID) => {
         const newCollection: Collection = {
           id: generateCollectionID(),
-          name: '',
+          name: "",
           primaryFieldID: generateFieldID(),
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -231,7 +231,7 @@ export function useCreateCollectionMutation(): (
         }));
 
         emitEvent({
-          name: 'CollectionCreated',
+          name: "CollectionCreated",
           collection: newCollection,
         });
 
@@ -239,14 +239,14 @@ export function useCreateCollectionMutation(): (
 
         return newCollection;
       },
-    [emitEvent, createView],
+    [emitEvent, createView]
   );
 }
 
 export function useUpdateDocumentFieldValueMutation<T extends FieldValue>(): (
   documentID: DocumentID,
   fieldID: FieldID,
-  nextValue: T,
+  nextValue: T
 ) => Promise<void> {
   const emitEvent = useEmitEvent();
 
@@ -254,7 +254,7 @@ export function useUpdateDocumentFieldValueMutation<T extends FieldValue>(): (
     ({ snapshot, set }) =>
       async (documentID, fieldID, nextValue) => {
         const prevDocument = await snapshot.getPromise(
-          documentQuery(documentID),
+          documentQuery(documentID)
         );
         const prevValue = prevDocument.fields[fieldID];
 
@@ -272,18 +272,18 @@ export function useUpdateDocumentFieldValueMutation<T extends FieldValue>(): (
         }));
 
         emitEvent({
-          name: 'DocumentFieldValueUpdated',
+          name: "DocumentFieldValueUpdated",
           fieldID,
           prevValue,
           nextValue,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useDeleteCollectionMutation(): (
-  collectionID: CollectionID,
+  collectionID: CollectionID
 ) => void {
   const emitEvent = useEmitEvent();
 
@@ -299,11 +299,11 @@ export function useDeleteCollectionMutation(): (
         });
 
         emitEvent({
-          name: 'CollectionDeleted',
+          name: "CollectionDeleted",
           collectionID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -313,7 +313,7 @@ export interface UpdateCollectionNameInput {
 
 export function useUpdateCollectionNameMutation(): (
   collectionID: CollectionID,
-  input: UpdateCollectionNameInput,
+  input: UpdateCollectionNameInput
 ) => Promise<Collection> {
   const emitEvent = useEmitEvent();
 
@@ -321,7 +321,7 @@ export function useUpdateCollectionNameMutation(): (
     ({ snapshot, set }) =>
       async (collectionID, input) => {
         const prevCollection = await snapshot.getPromise(
-          collectionQuery(collectionID),
+          collectionQuery(collectionID)
         );
         const { name } = input;
 
@@ -336,7 +336,7 @@ export function useUpdateCollectionNameMutation(): (
         }));
 
         emitEvent({
-          name: 'CollectionNameUpdated',
+          name: "CollectionNameUpdated",
           collectionID,
           prevName: prevCollection.name,
           nextName: nextCollection.name,
@@ -344,14 +344,14 @@ export function useUpdateCollectionNameMutation(): (
 
         return nextCollection;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useCreateFilterMutation(): (
   viewID: ViewID,
   group: number,
-  filterConfig: FilterConfig,
+  filterConfig: FilterConfig
 ) => Filter {
   const emitEvent = useEmitEvent();
 
@@ -371,20 +371,20 @@ export function useCreateFilterMutation(): (
         }));
 
         emitEvent({
-          name: 'FilterCreated',
+          name: "FilterCreated",
           filter: newFilter,
         });
 
         return newFilter;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useUpdateFilterConfigMutation(): (
   filterID: FilterID,
   group: number,
-  filterConfig: FilterConfig,
+  filterConfig: FilterConfig
 ) => Promise<Filter> {
   const emitEvent = useEmitEvent();
 
@@ -405,20 +405,20 @@ export function useUpdateFilterConfigMutation(): (
         }));
 
         emitEvent({
-          name: 'FilterConfigUpdated',
+          name: "FilterConfigUpdated",
           prevFilter,
           nextFilter,
         });
 
         return nextFilter;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useUpdateFilterGroupMutation(): (
   filterID: FilterID,
-  value: 'and' | 'or',
+  value: "and" | "or"
 ) => Promise<Filter> {
   const emitEvent = useEmitEvent();
 
@@ -427,7 +427,7 @@ export function useUpdateFilterGroupMutation(): (
       async (filterID, value) => {
         const prevFilter = await snapshot.getPromise(filterQuery(filterID));
         const prevFilters = await snapshot.getPromise(
-          viewFiltersQuery(prevFilter.viewID),
+          viewFiltersQuery(prevFilter.viewID)
         );
         const nextFilters = updateFilterGroup(prevFilter, value, prevFilters);
 
@@ -437,19 +437,19 @@ export function useUpdateFilterGroupMutation(): (
         }));
 
         emitEvent({
-          name: 'FilterGroupUpdated',
+          name: "FilterGroupUpdated",
           prevFilters,
           nextFilters: Object.values(nextFilters),
         });
 
         return nextFilters[filterID];
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useDeleteFilterMutation(): (
-  filterID: FilterID,
+  filterID: FilterID
 ) => Promise<void> {
   const emitEvent = useEmitEvent();
 
@@ -458,7 +458,7 @@ export function useDeleteFilterMutation(): (
       async (filterID) => {
         const prevFilter = await snapshot.getPromise(filterQuery(filterID));
         const prevFilters = await snapshot.getPromise(
-          viewFiltersQuery(prevFilter.viewID),
+          viewFiltersQuery(prevFilter.viewID)
         );
         const nextFilters = deleteFilter(prevFilter, prevFilters);
 
@@ -476,18 +476,18 @@ export function useDeleteFilterMutation(): (
         });
 
         emitEvent({
-          name: 'FilterDeleted',
+          name: "FilterDeleted",
           filterID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useCreateSortMutation(): (
   viewID: ViewID,
   sequence: number,
-  sortConfig: SortConfig,
+  sortConfig: SortConfig
 ) => Sort {
   const emitEvent = useEmitEvent();
 
@@ -507,19 +507,19 @@ export function useCreateSortMutation(): (
         }));
 
         emitEvent({
-          name: 'SortCreated',
+          name: "SortCreated",
           sort: newSort,
         });
 
         return newSort;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useUpdateSortConfigMutation(): (
   sortID: SortID,
-  sortConfig: SortConfig,
+  sortConfig: SortConfig
 ) => Promise<Sort> {
   const emitEvent = useEmitEvent();
 
@@ -538,14 +538,14 @@ export function useUpdateSortConfigMutation(): (
         }));
 
         emitEvent({
-          name: 'SortConfigUpdated',
+          name: "SortConfigUpdated",
           prevSort,
           nextSort,
         });
 
         return nextSort;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -557,7 +557,7 @@ export function useDeleteSortMutation(): (sortID: SortID) => Promise<void> {
       async (sortID) => {
         const prevSort = await snapshot.getPromise(sortQuery(sortID));
         const prevSorts = await snapshot.getPromise(
-          viewSortsQuery(prevSort.viewID),
+          viewSortsQuery(prevSort.viewID)
         );
         const nextSorts = deleteSort(prevSort, prevSorts);
 
@@ -575,18 +575,18 @@ export function useDeleteSortMutation(): (sortID: SortID) => Promise<void> {
         });
 
         emitEvent({
-          name: 'SortDeleted',
+          name: "SortDeleted",
           sortID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useCreateGroupMutation(): (
   viewID: ViewID,
   sequence: number,
-  sortConfig: SortConfig,
+  sortConfig: SortConfig
 ) => Group {
   const emitEvent = useEmitEvent();
 
@@ -606,19 +606,19 @@ export function useCreateGroupMutation(): (
         }));
 
         emitEvent({
-          name: 'GroupCreated',
+          name: "GroupCreated",
           group: newGroup,
         });
 
         return newGroup;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useUpdateGroupSortConfigMutation(): (
   groupID: GroupID,
-  sortConfig: SortConfig,
+  sortConfig: SortConfig
 ) => Promise<Group> {
   const emitEvent = useEmitEvent();
 
@@ -637,14 +637,14 @@ export function useUpdateGroupSortConfigMutation(): (
         }));
 
         emitEvent({
-          name: 'GroupConfigUpdated',
+          name: "GroupConfigUpdated",
           prevGroup,
           nextGroup,
         });
 
         return nextGroup;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -656,7 +656,7 @@ export function useDeleteGroupMutation(): (groupID: GroupID) => Promise<void> {
       async (groupID) => {
         const prevGroup = await snapshot.getPromise(groupQuery(groupID));
         const prevGroups = await snapshot.getPromise(
-          viewGroupsQuery(prevGroup.viewID),
+          viewGroupsQuery(prevGroup.viewID)
         );
         const nextGroups = deleteGroup(prevGroup, prevGroups);
 
@@ -674,18 +674,18 @@ export function useDeleteGroupMutation(): (groupID: GroupID) => Promise<void> {
         });
 
         emitEvent({
-          name: 'GroupDeleted',
+          name: "GroupDeleted",
           groupID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useUpdateListViewFieldConfigMutation(): (
   viewID: ViewID,
   fieldID: FieldID,
-  config: Partial<ListViewFieldConfig>,
+  config: Partial<ListViewFieldConfig>
 ) => Promise<void> {
   const emitEvent = useEmitEvent();
 
@@ -715,12 +715,12 @@ export function useUpdateListViewFieldConfigMutation(): (
         }));
 
         emitEvent({
-          name: 'ListViewFieldConfigUpdated',
+          name: "ListViewFieldConfigUpdated",
           prevView,
           nextView,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -732,8 +732,8 @@ export function useCreateViewMutation(): (collectionID: CollectionID) => View {
       (collectionID: CollectionID) => {
         const newView: View = {
           id: generateViewID(),
-          name: '',
-          type: 'list',
+          name: "",
+          type: "list",
           fixedFieldCount: 1,
           fieldsConfig: {},
           createdAt: new Date(),
@@ -747,13 +747,13 @@ export function useCreateViewMutation(): (collectionID: CollectionID) => View {
         }));
 
         emitEvent({
-          name: 'ViewCreated',
+          name: "ViewCreated",
           view: newView,
         });
 
         return newView;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -772,11 +772,11 @@ export function useDeleteViewMutation(): (viewID: ViewID) => void {
         });
 
         emitEvent({
-          name: 'ViewDeleted',
+          name: "ViewDeleted",
           viewID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -786,7 +786,7 @@ export interface UpdateViewNameInput {
 
 export function useUpdateViewNameMutation(): (
   viewID: ViewID,
-  input: UpdateViewNameInput,
+  input: UpdateViewNameInput
 ) => Promise<View> {
   const emitEvent = useEmitEvent();
 
@@ -807,14 +807,14 @@ export function useUpdateViewNameMutation(): (
         }));
 
         emitEvent({
-          name: 'ViewNameUpdated',
+          name: "ViewNameUpdated",
           prevView,
           nextView,
         });
 
         return nextView;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -822,7 +822,7 @@ export function useCreateFieldMutation(): (
   collectionID: CollectionID,
   name: string,
   description: string,
-  fieldConfig: FieldConfig,
+  fieldConfig: FieldConfig
 ) => Field {
   const emitEvent = useEmitEvent();
 
@@ -832,7 +832,7 @@ export function useCreateFieldMutation(): (
         collectionID: CollectionID,
         name: string,
         description: string,
-        fieldConfig: FieldConfig,
+        fieldConfig: FieldConfig
       ) => {
         const newField: Field = {
           id: generateFieldID(),
@@ -850,13 +850,13 @@ export function useCreateFieldMutation(): (
         }));
 
         emitEvent({
-          name: 'FieldCreated',
+          name: "FieldCreated",
           field: newField,
         });
 
         return newField;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -875,17 +875,17 @@ export function useDeleteFieldMutation(): (fieldID: FieldID) => void {
         });
 
         emitEvent({
-          name: 'FieldDeleted',
+          name: "FieldDeleted",
           fieldID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
 export function useCreateDocumentMutation(): (
   collectionID: CollectionID,
-  values?: DocumentFieldValues,
+  values?: DocumentFieldValues
 ) => Document {
   const emitEvent = useEmitEvent();
 
@@ -913,13 +913,13 @@ export function useCreateDocumentMutation(): (
         }));
 
         emitEvent({
-          name: 'DocumentCreated',
+          name: "DocumentCreated",
           document: newDocument,
         });
 
         return newDocument;
       },
-    [emitEvent],
+    [emitEvent]
   );
 }
 
@@ -938,10 +938,10 @@ export function useDeleteDocument(): (documentID: DocumentID) => void {
         });
 
         emitEvent({
-          name: 'DocumentDeleted',
+          name: "DocumentDeleted",
           documentID,
         });
       },
-    [emitEvent],
+    [emitEvent]
   );
 }

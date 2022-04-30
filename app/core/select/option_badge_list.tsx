@@ -1,9 +1,9 @@
-import React, { Fragment } from 'react';
-import { isEmpty } from '../../../lib/lang_utils';
-import { Row } from '../../components/row';
+import React, { Fragment } from "react";
+import { isEmpty } from "../../../lib/lang_utils";
+import { Row } from "../../components/row";
 
-import { MultiSelectField, SelectOptionID } from '../../../models/fields';
-import { OptionBadge } from './option_badge';
+import { MultiSelectField, SelectOptionID } from "../../../models/fields";
+import { OptionBadge } from "./option_badge";
 
 interface OptionBadgeListProps {
   field: MultiSelectField;
@@ -25,8 +25,8 @@ export function OptionBadgeList(props: OptionBadgeListProps): JSX.Element {
         if (selected === undefined) {
           throw new Error(
             `Expected ${optionID} to be within field options ${JSON.stringify(
-              field,
-            )}`,
+              field
+            )}`
           );
         }
 

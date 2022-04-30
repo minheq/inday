@@ -11,10 +11,10 @@ import {
   subDays as dateFnsSubDays,
   addMonths as dateFnsAddMonths,
   subMonths as dateFnsSubMonths,
-} from 'date-fns';
-import { DateInterval } from './date_utils';
+} from "date-fns";
+import { DateInterval } from "./date_utils";
 
-export const DAY_FORMAT = 'yyyy-MM-dd';
+export const DAY_FORMAT = "yyyy-MM-dd";
 
 export type DayInterval = {
   start: Day;

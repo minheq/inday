@@ -1,15 +1,15 @@
 // Value must be in lowercase separated by hyphen
 export enum SupportedLocale {
-  vi = 'vi',
-  viVN = 'vi-vn',
-  en = 'en',
-  enUS = 'en-us',
+  vi = "vi",
+  viVN = "vi-vn",
+  en = "en",
+  enUS = "en-us",
 }
 
 export const defaultLocale = SupportedLocale.enUS;
 
 export function isSupportedLocale(
-  language: string,
+  language: string
 ): language is SupportedLocale {
   if (Object.values<string>(SupportedLocale).includes(language)) {
     return true;
@@ -25,11 +25,11 @@ export function isSupportedLocale(
  * en-us -> en-us
  */
 function normalizeLanguage(language: string) {
-  return language.toLowerCase().replace('_', '-');
+  return language.toLowerCase().replace("_", "-");
 }
 
 export function getSupportedLocale(
-  languages: readonly string[] | string,
+  languages: readonly string[] | string
 ): SupportedLocale {
   if (Array.isArray(languages)) {
     for (const language of languages) {
@@ -38,7 +38,7 @@ export function getSupportedLocale(
         return normalizedLanguage;
       }
     }
-  } else if (typeof languages === 'string') {
+  } else if (typeof languages === "string") {
     const normalizedLanguage = normalizeLanguage(languages);
 
     if (isSupportedLocale(normalizedLanguage)) {

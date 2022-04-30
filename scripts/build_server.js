@@ -1,17 +1,17 @@
-const { build } = require('esbuild');
+const { build } = require("esbuild");
 
-const nodeEnv = process.env.NODE_ENV || 'development';
+const nodeEnv = process.env.NODE_ENV || "development";
 
 const options = {
-  entryPoints: ['server.ts'],
+  entryPoints: ["server.ts"],
   bundle: true,
-  platform: 'node',
-  outfile: 'server.js',
+  platform: "node",
+  outfile: "server.js",
   sourcemap: true,
   define: {
-    ['process.env.NODE_ENV']: `"${nodeEnv}"`,
+    ["process.env.NODE_ENV"]: `"${nodeEnv}"`,
   },
-  external: ['pg-native'],
+  external: ["pg-native"],
 };
 
 build(options).catch((error) => {

@@ -9,7 +9,7 @@ export const css = {
         if (key === false || key === undefined || key === null) {
           continue;
         }
-        if (typeof key === 'object') {
+        if (typeof key === "object") {
           Object.assign(style, key);
           continue;
         }

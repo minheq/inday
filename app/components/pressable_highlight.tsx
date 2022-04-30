@@ -1,12 +1,12 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef } from "react";
 import {
   Pressable,
   PressableProps,
   StyleProp,
   View,
   ViewStyle,
-} from 'react-native';
-import { useTheme } from './theme';
+} from "react-native";
+import { useTheme } from "./theme";
 
 export interface PressableHighlightProps extends PressableProps {
   children?:
@@ -47,5 +47,5 @@ export const PressableHighlight = forwardRef<View, PressableHighlightProps>(
         {children}
       </Pressable>
     );
-  },
+  }
 );

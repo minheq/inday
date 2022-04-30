@@ -1,6 +1,6 @@
-import React from 'react';
-import { Picker } from '../../components/picker';
-import { Field, FieldID } from '../../../models/fields';
+import React from "react";
+import { Picker } from "../../components/picker";
+import { Field, FieldID } from "../../../models/fields";
 
 interface FieldPickerProps {
   value?: FieldID;

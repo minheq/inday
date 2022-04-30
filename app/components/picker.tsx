@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, Fragment } from 'react';
+import React, { useCallback, useState, useRef, Fragment } from "react";
 
 import {
   View,
@@ -7,14 +7,14 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-} from 'react-native';
-import { tokens } from './tokens';
-import { Text } from './text';
-import { Icon } from './icon';
-import { Popover } from './popover';
-import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
-import { useTheme, useThemeStyles } from './theme';
-import { TextField } from './text_field';
+} from "react-native";
+import { tokens } from "./tokens";
+import { Text } from "./text";
+import { Icon } from "./icon";
+import { Popover } from "./popover";
+import { NavigationKey, UIKey, WhiteSpaceKey } from "../lib/keyboard";
+import { useTheme, useThemeStyles } from "./theme";
+import { TextField } from "./text_field";
 
 export interface PickerProps<T> {
   value?: T;
@@ -38,7 +38,7 @@ const SEARCH_HEIGHT = 56;
 export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const {
     value,
-    placeholder = '',
+    placeholder = "",
     options,
     renderOption,
     onChange,
@@ -49,20 +49,20 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
   const popoverContentRef = useRef<View>(null);
   const themeStyles = useThemeStyles();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(false);
 
   const selected = options.find((o) => o.value === value);
   const filteredOptions =
-    search !== ''
+    search !== ""
       ? options.filter((o) =>
-          o.label.toLowerCase().includes(search.toLowerCase()),
+          o.label.toLowerCase().includes(search.toLowerCase())
         )
       : options;
 
   const handleClosePicker = useCallback(() => {
     setVisible(false);
-    setSearch('');
+    setSearch("");
   }, []);
 
   const handleOpenPicker = useCallback(() => {
@@ -77,7 +77,7 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         onChange(option.value);
       }
     },
-    [onChange, handleClosePicker],
+    [onChange, handleClosePicker]
   );
 
   const handleChangeSearch = useCallback((text: string) => {
@@ -117,21 +117,21 @@ export function Picker<T>(props: PickerProps<T>): JSX.Element {
         handleSubmitEditing();
       }
     },
-    [activeIndex, options, handleClosePicker, handleSubmitEditing],
+    [activeIndex, options, handleClosePicker, handleSubmitEditing]
   );
 
   const handleKeyPress = useCallback(
     (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
       handleKey(event.nativeEvent.key);
     },
-    [handleKey],
+    [handleKey]
   );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       handleKey(event.nativeEvent.key);
     },
-    [handleKey],
+    [handleKey]
   );
 
   const handlePopoverShow = useCallback(() => {
@@ -223,9 +223,9 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: tokens.border.radius,
     borderWidth: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
     height: 40,
-    alignItems: 'center',
+    alignItems: "center",
     paddingLeft: 8,
     paddingRight: 24,
   },
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   caretWrapper: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
   },
   optionsContainer: {
@@ -248,8 +248,8 @@ const styles = StyleSheet.create({
     borderRadius: tokens.border.radius,
     height: OPTION_HEIGHT,
     paddingHorizontal: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });

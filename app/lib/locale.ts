@@ -1,22 +1,22 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules, Platform } from "react-native";
 import {
   defaultLocale,
   getSupportedLocale,
   SupportedLocale,
-} from '../../lib/locale';
-import { canUseDOM } from './execution_environment';
+} from "../../lib/locale";
+import { canUseDOM } from "./execution_environment";
 
 export function getSystemLocale(): SupportedLocale {
   // TODO: Remove this
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== "production") {
     return SupportedLocale.viVN;
   }
 
-  if (Platform.OS === 'ios') {
+  if (Platform.OS === "ios") {
     return getSystemLocaleIOS();
-  } else if (Platform.OS === 'android' && NativeModules.I18nManager) {
+  } else if (Platform.OS === "android" && NativeModules.I18nManager) {
     return getSystemLocaleAndroid();
-  } else if (Platform.OS === 'web' && canUseDOM) {
+  } else if (Platform.OS === "web" && canUseDOM) {
     return getSystemLocaleWeb();
   }
 

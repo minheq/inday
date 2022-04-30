@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { View } from 'react-native';
-import { useDragDrop } from './drag_drop';
+import React, { useEffect, useRef } from "react";
+import { View } from "react-native";
+import { useDragDrop } from "./drag_drop";
 
 interface DraggableMeasurements {
   x: number;
@@ -124,7 +124,7 @@ export class Draggable<T> {
 }
 
 export function useDraggable<T, K extends View>(
-  props: DraggableProps<T>,
+  props: DraggableProps<T>
 ): [Draggable<T>, React.RefObject<K>] {
   const { onStart, onEnd, onCancel, onComplete, item } = props;
 
@@ -137,7 +137,7 @@ export function useDraggable<T, K extends View>(
       onEnd,
       onCancel,
       onComplete,
-    }),
+    })
   ).current;
 
   useEffect(() => {

@@ -1,9 +1,9 @@
-import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useRef, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
-import { Popover } from './popover';
-import { Text } from './text';
-import { useThemeStyles } from './theme';
+import { Popover } from "./popover";
+import { Text } from "./text";
+import { useThemeStyles } from "./theme";
 
 function Basic(): JSX.Element {
   const [visible, setVisible] = useState(false);

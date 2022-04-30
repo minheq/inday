@@ -1,4 +1,4 @@
-import { test } from '../lib/testing';
+import { test } from "../lib/testing";
 import {
   Filter,
   updateFilterGroup,
@@ -40,7 +40,7 @@ import {
   filterByMultiOptionFieldKindFilterRuleIsEmpty,
   filterByMultiOptionFieldKindFilterRuleIsNotEmpty,
   filterByBooleanFieldKindFilterRuleIs,
-} from './filters';
+} from "./filters";
 
 import {
   makeCollection,
@@ -48,156 +48,156 @@ import {
   addFieldsToCollection,
   makeDocument,
   makeFilter,
-} from './factory';
-import { FieldType, FieldValue } from './fields';
-import {} from '../lib/date_utils';
+} from "./factory";
+import { FieldType, FieldValue } from "./fields";
+import {} from "../lib/date_utils";
 
-test('no filter', (t) => {
-  const values = ['AWord', 'BWord'];
+test("no filter", (t) => {
+  const values = ["AWord", "BWord"];
   const { documents, getters } = prepare(FieldType.SingleLineText, values);
   const result = filterDocuments([], documents, getters);
 
   t.deepEqual(result.length, values.length);
 });
 
-test('filter text - contains same case', (t) => {
-  const values = ['AWord', 'BWord'];
+test("filter text - contains same case", (t) => {
+  const values = ["AWord", "BWord"];
   const { documents, getters, field } = prepare(
     FieldType.SingleLineText,
-    values,
+    values
   );
 
   const filter = makeFilter(
     {},
     {
       rule: TextFieldKindFilterRule.Contains,
-      value: 'Word',
+      value: "Word",
       fieldID: field.id,
-    },
+    }
   );
   const result = filterDocuments([[filter]], documents, getters);
 
   t.deepEqual(result.length, values.length);
 });
 
-test('filter text - one word different case', (t) => {
-  const values = ['AWord', 'BWord'];
+test("filter text - one word different case", (t) => {
+  const values = ["AWord", "BWord"];
   const { documents, getters, field } = prepare(
     FieldType.SingleLineText,
-    values,
+    values
   );
   const filter = makeFilter(
     {},
     {
       rule: TextFieldKindFilterRule.Contains,
-      value: 'aword',
+      value: "aword",
       fieldID: field.id,
-    },
+    }
   );
   const result = filterDocuments([[filter]], documents, getters);
 
   t.deepEqual(result.length, 1);
 });
 
-test('filter text - 2 for one', (t) => {
-  const values = ['AWord', 'BWord'];
+test("filter text - 2 for one", (t) => {
+  const values = ["AWord", "BWord"];
   const { documents, getters, field } = prepare(
     FieldType.SingleLineText,
-    values,
+    values
   );
   const filter1 = makeFilter(
     {},
     {
       rule: TextFieldKindFilterRule.Contains,
-      value: 'word',
+      value: "word",
       fieldID: field.id,
-    },
+    }
   );
   const filter2 = makeFilter(
     {},
     {
       rule: TextFieldKindFilterRule.Contains,
-      value: 'a',
+      value: "a",
       fieldID: field.id,
-    },
+    }
   );
   const result = filterDocuments([[filter1, filter2]], documents, getters);
 
   t.deepEqual(result.length, 1);
 });
 
-test('filterByTextFieldKindFilterRuleContains', (t) => {
+test("filterByTextFieldKindFilterRuleContains", (t) => {
   const filter = filterByTextFieldKindFilterRuleContains;
 
-  t.deepEqual(filter('abc', 'a'), true);
-  t.deepEqual(filter('abc', 'A'), true);
-  t.deepEqual(filter('abc', 'd'), false);
+  t.deepEqual(filter("abc", "a"), true);
+  t.deepEqual(filter("abc", "A"), true);
+  t.deepEqual(filter("abc", "d"), false);
 });
 
-test('filterByTextFieldKindFilterRuleDoesNotContain', (t) => {
+test("filterByTextFieldKindFilterRuleDoesNotContain", (t) => {
   const filter = filterByTextFieldKindFilterRuleDoesNotContain;
 
-  t.deepEqual(filter('abc', 'd'), true);
-  t.deepEqual(filter('abc', 'a'), false);
+  t.deepEqual(filter("abc", "d"), true);
+  t.deepEqual(filter("abc", "a"), false);
 });
 
-test('filterByTextFieldKindFilterRuleIs', (t) => {
+test("filterByTextFieldKindFilterRuleIs", (t) => {
   const filter = filterByTextFieldKindFilterRuleIs;
 
-  t.deepEqual(filter('abc', 'abc'), true);
-  t.deepEqual(filter('abc', 'b'), false);
+  t.deepEqual(filter("abc", "abc"), true);
+  t.deepEqual(filter("abc", "b"), false);
 });
 
-test('filterByTextFieldKindFilterRuleIsNot', (t) => {
+test("filterByTextFieldKindFilterRuleIsNot", (t) => {
   const filter = filterByTextFieldKindFilterRuleIsNot;
 
-  t.deepEqual(filter('abc', 'b'), true);
-  t.deepEqual(filter('abc', 'abc'), false);
+  t.deepEqual(filter("abc", "b"), true);
+  t.deepEqual(filter("abc", "abc"), false);
 });
 
-test('filterByTextFieldKindFilterRuleIsEmpty', (t) => {
+test("filterByTextFieldKindFilterRuleIsEmpty", (t) => {
   const filter = filterByTextFieldKindFilterRuleIsEmpty;
 
-  t.deepEqual(filter(''), true);
-  t.deepEqual(filter('abc'), false);
+  t.deepEqual(filter(""), true);
+  t.deepEqual(filter("abc"), false);
 });
 
-test('filterByTextFieldKindFilterRuleIsNotEmpty', (t) => {
+test("filterByTextFieldKindFilterRuleIsNotEmpty", (t) => {
   const filter = filterByTextFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter('abc'), true);
-  t.deepEqual(filter(''), false);
+  t.deepEqual(filter("abc"), true);
+  t.deepEqual(filter(""), false);
 });
 
-test('filterByNumberFieldKindFilterRuleEqual', (t) => {
+test("filterByNumberFieldKindFilterRuleEqual", (t) => {
   const filter = filterByNumberFieldKindFilterRuleEqual;
 
   t.deepEqual(filter(1, 1), true);
   t.deepEqual(filter(1, 2), false);
 });
 
-test('filterByNumberFieldKindFilterRuleNotEqual', (t) => {
+test("filterByNumberFieldKindFilterRuleNotEqual", (t) => {
   const filter = filterByNumberFieldKindFilterRuleNotEqual;
 
   t.deepEqual(filter(1, 2), true);
   t.deepEqual(filter(1, 1), false);
 });
 
-test('filterByNumberFieldKindFilterRuleLessThan', (t) => {
+test("filterByNumberFieldKindFilterRuleLessThan", (t) => {
   const filter = filterByNumberFieldKindFilterRuleLessThan;
 
   t.deepEqual(filter(1, 2), true);
   t.deepEqual(filter(2, 1), false);
 });
 
-test('filterByNumberFieldKindFilterRuleGreaterThan', (t) => {
+test("filterByNumberFieldKindFilterRuleGreaterThan", (t) => {
   const filter = filterByNumberFieldKindFilterRuleGreaterThan;
 
   t.deepEqual(filter(2, 1), true);
   t.deepEqual(filter(1, 2), false);
 });
 
-test('filterByNumberFieldKindFilterRuleLessThanOrEqual', (t) => {
+test("filterByNumberFieldKindFilterRuleLessThanOrEqual", (t) => {
   const filter = filterByNumberFieldKindFilterRuleLessThanOrEqual;
 
   t.deepEqual(filter(1, 2), true);
@@ -205,7 +205,7 @@ test('filterByNumberFieldKindFilterRuleLessThanOrEqual', (t) => {
   t.deepEqual(filter(2, 1), false);
 });
 
-test('filterByNumberFieldKindFilterRuleGreaterThanOrEqual', (t) => {
+test("filterByNumberFieldKindFilterRuleGreaterThanOrEqual", (t) => {
   const filter = filterByNumberFieldKindFilterRuleGreaterThanOrEqual;
 
   t.deepEqual(filter(2, 1), true);
@@ -213,176 +213,176 @@ test('filterByNumberFieldKindFilterRuleGreaterThanOrEqual', (t) => {
   t.deepEqual(filter(1, 2), false);
 });
 
-test('filterByNumberFieldKindFilterRuleIsEmpty', (t) => {
+test("filterByNumberFieldKindFilterRuleIsEmpty", (t) => {
   const filter = filterByNumberFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter(null), true);
   t.deepEqual(filter(1), false);
 });
 
-test('filterByNumberFieldKindFilterRuleIsNotEmpty', (t) => {
+test("filterByNumberFieldKindFilterRuleIsNotEmpty", (t) => {
   const filter = filterByNumberFieldKindFilterRuleIsNotEmpty;
 
   t.deepEqual(filter(1), true);
   t.deepEqual(filter(null), false);
 });
 
-test('filterByDateFieldKindFilterRuleIs', (t) => {
+test("filterByDateFieldKindFilterRuleIs", (t) => {
   const filter = filterByDateFieldKindFilterRuleIs;
 
-  t.deepEqual(filter('2020-08-03', '2020-08-03'), true);
-  t.deepEqual(filter('2020-08-03', '2020-08-04'), false);
+  t.deepEqual(filter("2020-08-03", "2020-08-03"), true);
+  t.deepEqual(filter("2020-08-03", "2020-08-04"), false);
 });
 
-test('filterByDateFieldKindFilterRuleIsWithin', (t) => {
+test("filterByDateFieldKindFilterRuleIsWithin", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsWithin;
 
   t.deepEqual(
-    filter('2020-08-03', {
-      start: '2020-08-02',
-      end: '2020-08-04',
+    filter("2020-08-03", {
+      start: "2020-08-02",
+      end: "2020-08-04",
     }),
-    true,
+    true
   );
 
   t.deepEqual(
-    filter('2020-08-05', {
-      start: '2020-08-02',
-      end: '2020-08-04',
+    filter("2020-08-05", {
+      start: "2020-08-02",
+      end: "2020-08-04",
     }),
-    false,
+    false
   );
 });
 
-test('filterByDateFieldKindFilterRuleIsBefore', (t) => {
+test("filterByDateFieldKindFilterRuleIsBefore", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsBefore;
 
-  t.deepEqual(filter('2020-08-03', '2020-08-04'), true);
-  t.deepEqual(filter('2020-08-05', '2020-08-04'), false);
+  t.deepEqual(filter("2020-08-03", "2020-08-04"), true);
+  t.deepEqual(filter("2020-08-05", "2020-08-04"), false);
 });
 
-test('filterByDateFieldKindFilterRuleIsAfter', (t) => {
+test("filterByDateFieldKindFilterRuleIsAfter", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsAfter;
 
-  t.deepEqual(filter('2020-08-05', '2020-08-04'), true);
-  t.deepEqual(filter('2020-08-03', '2020-08-04'), false);
+  t.deepEqual(filter("2020-08-05", "2020-08-04"), true);
+  t.deepEqual(filter("2020-08-03", "2020-08-04"), false);
 });
 
-test('filterByDateFieldKindFilterRuleIsOnOrBefore', (t) => {
+test("filterByDateFieldKindFilterRuleIsOnOrBefore", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsOnOrBefore;
 
-  t.deepEqual(filter('2020-08-03', '2020-08-04'), true);
-  t.deepEqual(filter('2020-08-04', '2020-08-04'), true);
-  t.deepEqual(filter('2020-08-05', '2020-08-04'), false);
+  t.deepEqual(filter("2020-08-03", "2020-08-04"), true);
+  t.deepEqual(filter("2020-08-04", "2020-08-04"), true);
+  t.deepEqual(filter("2020-08-05", "2020-08-04"), false);
 });
 
-test('filterByDateFieldKindFilterRuleIsOnOrAfter', (t) => {
+test("filterByDateFieldKindFilterRuleIsOnOrAfter", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsOnOrAfter;
 
-  t.deepEqual(filter('2020-08-05', '2020-08-04'), true);
-  t.deepEqual(filter('2020-08-04', '2020-08-04'), true);
-  t.deepEqual(filter('2020-08-03', '2020-08-04'), false);
+  t.deepEqual(filter("2020-08-05", "2020-08-04"), true);
+  t.deepEqual(filter("2020-08-04", "2020-08-04"), true);
+  t.deepEqual(filter("2020-08-03", "2020-08-04"), false);
 });
 
-test('filterByDateFieldKindFilterRuleIsNot', (t) => {
+test("filterByDateFieldKindFilterRuleIsNot", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsNot;
 
-  t.deepEqual(filter('2020-08-05', '2020-08-04'), true);
-  t.deepEqual(filter('2020-08-04', '2020-08-04'), false);
+  t.deepEqual(filter("2020-08-05", "2020-08-04"), true);
+  t.deepEqual(filter("2020-08-04", "2020-08-04"), false);
 });
 
-test('filterByDateFieldKindFilterRuleIsEmpty', (t) => {
+test("filterByDateFieldKindFilterRuleIsEmpty", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter(null), true);
-  t.deepEqual(filter('2020-08-04'), false);
+  t.deepEqual(filter("2020-08-04"), false);
 });
 
-test('filterByDateFieldKindFilterRuleIsNotEmpty', (t) => {
+test("filterByDateFieldKindFilterRuleIsNotEmpty", (t) => {
   const filter = filterByDateFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter('2020-08-04'), true);
+  t.deepEqual(filter("2020-08-04"), true);
   t.deepEqual(filter(null), false);
 });
 
-test('filterBySingleOptionFieldKindFilterRuleIs', (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIs", (t) => {
   const filter = filterBySingleOptionFieldKindFilterRuleIs;
 
-  t.deepEqual(filter('opt1', 'opt1'), true);
-  t.deepEqual(filter('opt1', 'opt2'), false);
+  t.deepEqual(filter("opt1", "opt1"), true);
+  t.deepEqual(filter("opt1", "opt2"), false);
 });
 
-test('filterBySingleOptionFieldKindFilterRuleIsNot', (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsNot", (t) => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsNot;
 
-  t.deepEqual(filter('opt1', 'opt2'), true);
-  t.deepEqual(filter('opt1', 'opt1'), false);
+  t.deepEqual(filter("opt1", "opt2"), true);
+  t.deepEqual(filter("opt1", "opt1"), false);
 });
 
-test('filterBySingleOptionFieldKindFilterRuleIsAnyOf', (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsAnyOf", (t) => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsAnyOf;
 
-  t.deepEqual(filter('opta', ['opta', 'optb']), true);
-  t.deepEqual(filter('opta', ['optb', 'opt']), false);
+  t.deepEqual(filter("opta", ["opta", "optb"]), true);
+  t.deepEqual(filter("opta", ["optb", "opt"]), false);
 });
 
-test('filterBySingleOptionFieldKindFilterRuleIsNoneOf', (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsNoneOf", (t) => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsNoneOf;
 
-  t.deepEqual(filter('opta', ['optb', 'opt']), true);
-  t.deepEqual(filter('opta', ['opta', 'optb']), false);
+  t.deepEqual(filter("opta", ["optb", "opt"]), true);
+  t.deepEqual(filter("opta", ["opta", "optb"]), false);
 });
 
-test('filterBySingleOptionFieldKindFilterRuleIsEmpty', (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsEmpty", (t) => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter(null), true);
-  t.deepEqual(filter('opta'), false);
+  t.deepEqual(filter("opta"), false);
 });
 
-test('filterBySingleOptionFieldKindFilterRuleIsNotEmpty', (t) => {
+test("filterBySingleOptionFieldKindFilterRuleIsNotEmpty", (t) => {
   const filter = filterBySingleOptionFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter('opta'), true);
+  t.deepEqual(filter("opta"), true);
   t.deepEqual(filter(null), false);
 });
 
-test('filterByMultiOptionFieldKindFilterRuleHasAnyOf', (t) => {
+test("filterByMultiOptionFieldKindFilterRuleHasAnyOf", (t) => {
   const filter = filterByMultiOptionFieldKindFilterRuleHasAnyOf;
 
-  t.deepEqual(filter(['opta'], ['opta', 'optb']), true);
-  t.deepEqual(filter(['opta'], ['optb', 'opt']), false);
+  t.deepEqual(filter(["opta"], ["opta", "optb"]), true);
+  t.deepEqual(filter(["opta"], ["optb", "opt"]), false);
 });
 
-test('filterByMultiOptionFieldKindFilterRuleHasAllOf', (t) => {
+test("filterByMultiOptionFieldKindFilterRuleHasAllOf", (t) => {
   const filter = filterByMultiOptionFieldKindFilterRuleHasAllOf;
 
-  t.deepEqual(filter(['optb', 'opta'], ['opta', 'optb']), true);
-  t.deepEqual(filter(['opta'], ['opta', 'optb']), false);
+  t.deepEqual(filter(["optb", "opta"], ["opta", "optb"]), true);
+  t.deepEqual(filter(["opta"], ["opta", "optb"]), false);
 });
 
-test('filterByMultiOptionFieldKindFilterRuleHasNoneOf', (t) => {
+test("filterByMultiOptionFieldKindFilterRuleHasNoneOf", (t) => {
   const filter = filterByMultiOptionFieldKindFilterRuleHasNoneOf;
 
-  t.deepEqual(filter(['opta'], ['optb', 'opt']), true);
-  t.deepEqual(filter(['opta'], ['opta', 'optb']), false);
+  t.deepEqual(filter(["opta"], ["optb", "opt"]), true);
+  t.deepEqual(filter(["opta"], ["opta", "optb"]), false);
 });
 
-test('filterByMultiOptionFieldKindFilterRuleIsEmpty', (t) => {
+test("filterByMultiOptionFieldKindFilterRuleIsEmpty", (t) => {
   const filter = filterByMultiOptionFieldKindFilterRuleIsEmpty;
 
   t.deepEqual(filter([]), true);
-  t.deepEqual(filter(['opta']), false);
+  t.deepEqual(filter(["opta"]), false);
 });
 
-test('filterByMultiOptionFieldKindFilterRuleIsNotEmpty', (t) => {
+test("filterByMultiOptionFieldKindFilterRuleIsNotEmpty", (t) => {
   const filter = filterByMultiOptionFieldKindFilterRuleIsNotEmpty;
 
-  t.deepEqual(filter(['opta']), true);
+  t.deepEqual(filter(["opta"]), true);
   t.deepEqual(filter([]), false);
 });
 
-test('filterByBooleanFieldKindFilterRuleIs', (t) => {
+test("filterByBooleanFieldKindFilterRuleIs", (t) => {
   const filter = filterByBooleanFieldKindFilterRuleIs;
 
   t.deepEqual(filter(true, true), true);
@@ -391,30 +391,30 @@ test('filterByBooleanFieldKindFilterRuleIs', (t) => {
 
 function getOrFilters() {
   const filter1: Filter = {
-    id: 'fil1',
-    viewID: 'viw1',
+    id: "fil1",
+    viewID: "viw1",
     group: 1,
-    fieldID: 'fld1',
+    fieldID: "fld1",
     rule: TextFieldKindFilterRule.Contains,
-    value: 's',
+    value: "s",
   };
 
   const filter2: Filter = {
-    id: 'fil2',
-    viewID: 'viw1',
+    id: "fil2",
+    viewID: "viw1",
     group: 2,
-    fieldID: 'fld1',
+    fieldID: "fld1",
     rule: TextFieldKindFilterRule.Contains,
-    value: 's',
+    value: "s",
   };
 
   const filter3: Filter = {
-    id: 'fil3',
-    viewID: 'viw1',
+    id: "fil3",
+    viewID: "viw1",
     group: 3,
-    fieldID: 'fld1',
+    fieldID: "fld1",
     rule: TextFieldKindFilterRule.Contains,
-    value: 's',
+    value: "s",
   };
 
   return [filter1, filter2, filter3];
@@ -424,7 +424,7 @@ test('updateFilterGroup - 3 "OR" filters to f1 AND f2 OR f3', (t) => {
   const filters = getOrFilters();
   const [, filter2, filter3] = filters;
 
-  const updatedFilters = updateFilterGroup(filter2, 'and', filters);
+  const updatedFilters = updateFilterGroup(filter2, "and", filters);
 
   const updatedFilter2 = updatedFilters[filter2.id];
   const updatedFilter3 = updatedFilters[filter3.id];
@@ -437,7 +437,7 @@ test('updateFilterGroup - 3 "OR" filters to f1 OR f2 AND f3', (t) => {
   const filters = getOrFilters();
   const [, , filter3] = filters;
 
-  const updatedFilters = updateFilterGroup(filter3, 'and', filters);
+  const updatedFilters = updateFilterGroup(filter3, "and", filters);
   const updatedFilter3 = updatedFilters[filter3.id];
 
   t.deepEqual(updatedFilter3.group, 2);
@@ -445,30 +445,30 @@ test('updateFilterGroup - 3 "OR" filters to f1 OR f2 AND f3', (t) => {
 
 function getAndFilters() {
   const filter1: Filter = {
-    id: 'fil1',
-    viewID: 'viw1',
+    id: "fil1",
+    viewID: "viw1",
     group: 1,
-    fieldID: 'fld1',
+    fieldID: "fld1",
     rule: TextFieldKindFilterRule.Contains,
-    value: 's',
+    value: "s",
   };
 
   const filter2: Filter = {
-    id: 'fil2',
-    viewID: 'viw1',
+    id: "fil2",
+    viewID: "viw1",
     group: 1,
-    fieldID: 'fld1',
+    fieldID: "fld1",
     rule: TextFieldKindFilterRule.Contains,
-    value: 's',
+    value: "s",
   };
 
   const filter3: Filter = {
-    id: 'fil3',
-    viewID: 'viw1',
+    id: "fil3",
+    viewID: "viw1",
     group: 1,
-    fieldID: 'fld1',
+    fieldID: "fld1",
     rule: TextFieldKindFilterRule.Contains,
-    value: 's',
+    value: "s",
   };
 
   return [filter1, filter2, filter3];
@@ -478,7 +478,7 @@ test('updateFilterGroup - 3 "AND" filters - f1 and f2 or f3', (t) => {
   const filters = getAndFilters();
   const [, , filter3] = filters;
 
-  const updatedFilters = updateFilterGroup(filter3, 'or', filters);
+  const updatedFilters = updateFilterGroup(filter3, "or", filters);
 
   const updatedFilter3 = updatedFilters[filter3.id];
 
@@ -489,7 +489,7 @@ test('updateFilterGroup - 3 "AND" filters - f1 or f2 and f3', (t) => {
   const filters = getAndFilters();
   const [, filter2, filter3] = filters;
 
-  const updatedFilters = updateFilterGroup(filter2, 'or', filters);
+  const updatedFilters = updateFilterGroup(filter2, "or", filters);
   const updatedFilter2 = updatedFilters[filter2.id];
   const updatedFilter3 = updatedFilters[filter3.id];
 
@@ -505,7 +505,7 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
   const documents = values.map((value) => {
     return makeDocument(
       { fields: { [field.id]: value } },
-      collectionWithFields,
+      collectionWithFields
     );
   });
 

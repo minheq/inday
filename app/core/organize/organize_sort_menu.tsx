@@ -6,41 +6,41 @@ import React, {
   useEffect,
   createContext,
   useMemo,
-} from 'react';
-import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView, Pressable } from 'react-native';
+} from "react";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
+import { ScrollView, Pressable } from "react-native";
 
-import { FlatButton } from '../../components/flat_button';
-import { Row } from '../../components/row';
-import { Spacer } from '../../components/spacer';
-import { Text } from '../../components/text';
-import { tokens } from '../../components/tokens';
+import { FlatButton } from "../../components/flat_button";
+import { Row } from "../../components/row";
+import { Spacer } from "../../components/spacer";
+import { Text } from "../../components/text";
+import { tokens } from "../../components/tokens";
 import {
   useCollectionFieldsQuery,
   useFieldQuery,
   useViewSortsQuery,
   useSortsSequenceMaxQuery,
-} from '../../store/queries';
+} from "../../store/queries";
 import {
   useUpdateSortConfigMutation,
   useDeleteSortMutation,
   useCreateSortMutation,
-} from '../../store/mutations';
-import { first } from '../../../lib/array_utils';
-import { isEmpty } from '../../../lib/lang_utils';
-import { FieldID } from '../../../models/fields';
-import { FieldPicker } from '../fields/field_picker';
-import { SortID, Sort, SortConfig, SortOrder } from '../../../models/sorts';
-import { SegmentedControl } from '../../components/segmented_control';
+} from "../../store/mutations";
+import { first } from "../../../lib/array_utils";
+import { isEmpty } from "../../../lib/lang_utils";
+import { FieldID } from "../../../models/fields";
+import { FieldPicker } from "../fields/field_picker";
+import { SortID, Sort, SortConfig, SortOrder } from "../../../models/sorts";
+import { SegmentedControl } from "../../components/segmented_control";
 
 const sortEditIDState = atom<SortID>({
-  key: 'SortMenuSortEditID',
-  default: '',
+  key: "SortMenuSortEditID",
+  default: "",
 });
 
 const SortMenuContext = createContext({
-  viewID: '',
-  collectionID: '',
+  viewID: "",
+  collectionID: "",
 });
 
 interface SortMenuProps {
@@ -93,17 +93,17 @@ function SortListItem(props: SortListItemProps) {
   }, [setSortEditID, sort]);
 
   const handlePressCancel = useCallback(() => {
-    setSortEditID('');
+    setSortEditID("");
   }, [setSortEditID]);
 
   const handlePressRemove = useCallback(() => {
     deleteSort(sort);
-    setSortEditID('');
+    setSortEditID("");
   }, [deleteSort, setSortEditID, sort]);
 
   const handleSubmit = useCallback(() => {
     updateSortConfig(sort.id, sortConfig);
-    setSortEditID('');
+    setSortEditID("");
   }, [updateSortConfig, setSortEditID, sort, sortConfig]);
 
   useEffect(() => {
@@ -166,16 +166,16 @@ function SortNew() {
 
   if (isEmpty(fields)) {
     throw new Error(
-      'Fields are empty. They may not have been loaded properly.',
+      "Fields are empty. They may not have been loaded properly."
     );
   }
 
   const defaultSortConfig = useMemo(
     (): SortConfig => ({
       fieldID: firstField.id,
-      order: 'ascending',
+      order: "ascending",
     }),
-    [firstField],
+    [firstField]
   );
 
   const [sortConfig, setSortConfig] = useState<SortConfig>(defaultSortConfig);
@@ -197,7 +197,7 @@ function SortNew() {
   }, [handleClose, createSort, context, sortConfig, sequenceMax]);
 
   useEffect(() => {
-    if (sortEditID !== '') {
+    if (sortEditID !== "") {
       setOpen(false);
     }
   }, [sortEditID]);
@@ -239,11 +239,11 @@ function SortEdit(props: SortEditProps) {
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {
       onChange({
-        order: 'ascending',
+        order: "ascending",
         fieldID,
       });
     },
-    [onChange],
+    [onChange]
   );
 
   const handleChangeOrder = useCallback(
@@ -253,7 +253,7 @@ function SortEdit(props: SortEditProps) {
         fieldID: field.id,
       });
     },
-    [onChange, field],
+    [onChange, field]
   );
 
   return (
@@ -268,8 +268,8 @@ function SortEdit(props: SortEditProps) {
         value={sortConfig.order}
         onChange={handleChangeOrder}
         options={[
-          { label: 'Ascending', value: 'ascending' },
-          { label: 'Descending', value: 'descending' },
+          { label: "Ascending", value: "ascending" },
+          { label: "Descending", value: "descending" },
         ]}
       />
     </Fragment>

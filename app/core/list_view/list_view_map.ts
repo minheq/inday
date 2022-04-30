@@ -1,21 +1,21 @@
-import { useMemo } from 'react';
-import { first, last, splitLast } from '../../../lib/array_utils';
-import { FlatObject } from '../../../lib/flat_object';
-import { isEmpty } from '../../../lib/lang_utils';
-import { DocumentID } from '../../../models/documents';
-import { Field, FieldID, FieldValue } from '../../../models/fields';
-import { FieldWithListViewConfig } from '../../../models/views';
+import { useMemo } from "react";
+import { first, last, splitLast } from "../../../lib/array_utils";
+import { FlatObject } from "../../../lib/flat_object";
+import { isEmpty } from "../../../lib/lang_utils";
+import { DocumentID } from "../../../models/documents";
+import { Field, FieldID, FieldValue } from "../../../models/fields";
+import { FieldWithListViewConfig } from "../../../models/views";
 import {
   Column,
   GroupRowCell,
   LeafRow,
   LeafRowCell,
-} from '../../components/grid_renderer.common';
+} from "../../components/grid_renderer.common";
 import {
   FlatListViewDocumentNode,
   GroupedListViewDocumentNode,
   isGroupedListViewDocumentNodes,
-} from './list_view_nodes';
+} from "./list_view_nodes";
 
 export interface ListViewMap {
   grouped: boolean;
@@ -48,7 +48,7 @@ export const defaultListViewMap: ListViewMap = {
  */
 export function useListViewMap(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
-  fields: FieldWithListViewConfig[],
+  fields: FieldWithListViewConfig[]
 ): ListViewMap {
   const grouped = useMemo((): boolean => {
     return isGroupedListViewDocumentNodes(nodes);
@@ -67,22 +67,23 @@ export function useListViewMap(
   }, [groupRows]);
   const leafRows = useMemo(
     (): ListViewLeafRow[] => getListViewLeafRows(nodes, [], 0),
-    [nodes],
+    [nodes]
   );
-  const leafRowCache = useMemo((): LeafRowCache => getLeafRowCache(leafRows), [
-    leafRows,
-  ]);
+  const leafRowCache = useMemo(
+    (): LeafRowCache => getLeafRowCache(leafRows),
+    [leafRows]
+  );
   const columnToFieldID = useMemo(
     (): ColumnToFieldIDCache => getColumnToFieldIDCache(fields),
-    [fields],
+    [fields]
   );
   const documentIDToLeafRow = useMemo(
     (): DocumentIDToLeafRowCache => getDocumentIDToLeafRowCache(leafRowCache),
-    [leafRowCache],
+    [leafRowCache]
   );
   const fieldIDToColumn = useMemo(
     (): FieldIDToColumnCache => getFieldIDToColumnCache(columnToFieldID),
-    [columnToFieldID],
+    [columnToFieldID]
   );
 
   return useMemo(
@@ -109,7 +110,7 @@ export function useListViewMap(
       columnToFieldID,
       documentIDToLeafRow,
       fieldIDToColumn,
-    ],
+    ]
   );
 }
 
@@ -134,7 +135,7 @@ interface ListViewLeafRow extends LeafRow {
 function getListViewLeafRows(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
   prevPath: number[],
-  prevIndex: number,
+  prevIndex: number
 ): ListViewLeafRow[] {
   let rows: ListViewLeafRow[] = [];
   let currentIndex = prevIndex;
@@ -143,8 +144,8 @@ function getListViewLeafRows(
     const group = nodes[i];
     const path = [...prevPath, i];
 
-    if (group.type === 'leaf' || group.type === 'flat') {
-      if (group.type === 'leaf' && group.collapsed) {
+    if (group.type === "leaf" || group.type === "flat") {
+      if (group.type === "leaf" && group.collapsed) {
         continue;
       }
 
@@ -262,7 +263,7 @@ interface ListViewGroupRow {
 
 function getGroupRowPaths(
   nodes: GroupedListViewDocumentNode[],
-  prevPath: number[],
+  prevPath: number[]
 ): ListViewGroupRow[] {
   let rows: ListViewGroupRow[] = [];
 
@@ -270,7 +271,7 @@ function getGroupRowPaths(
     const group = nodes[i];
     const path = [...prevPath, i];
 
-    if (group.type === 'leaf') {
+    if (group.type === "leaf") {
       rows = rows.concat({
         path,
         field: group.field,
@@ -291,7 +292,7 @@ function getGroupRowPaths(
 type DocumentIDToLeafRowCache = FlatObject<DocumentID, LeafRow>;
 
 function getDocumentIDToLeafRowCache(
-  leafRowCache: LeafRowCache,
+  leafRowCache: LeafRowCache
 ): DocumentIDToLeafRowCache {
   const cache = FlatObject<DocumentID, LeafRow>();
 
@@ -306,7 +307,7 @@ function getDocumentIDToLeafRowCache(
 type FieldIDToColumnCache = FlatObject<FieldID, Column>;
 
 function getFieldIDToColumnCache(
-  columnToFieldIDCache: ColumnToFieldIDCache,
+  columnToFieldIDCache: ColumnToFieldIDCache
 ): FieldIDToColumnCache {
   const cache = FlatObject<FieldID, Column>();
 
@@ -323,7 +324,7 @@ export function isGrouped(listViewMap: ListViewMap): boolean {
 
 export function getDocumentID(
   listViewMap: ListViewMap,
-  row: LeafRow,
+  row: LeafRow
 ): DocumentID {
   const data = listViewMap.leafRowCache.get([...row.path, row.row]);
 
@@ -336,20 +337,20 @@ export function getFieldID(listViewMap: ListViewMap, column: Column): FieldID {
 
 export function getLeafRow(
   listViewMap: ListViewMap,
-  documentID: DocumentID,
+  documentID: DocumentID
 ): LeafRow {
   return listViewMap.documentIDToLeafRow.get([documentID]);
 }
 
 export function getLeafRows(
   listViewMap: ListViewMap,
-  documentIDs: DocumentID[],
+  documentIDs: DocumentID[]
 ): LeafRow[] {
   const rows: LeafRow[] = [];
 
   for (const row of listViewMap.leafRows) {
     const found = documentIDs.find(
-      (documentID) => documentID === row.documentID,
+      (documentID) => documentID === row.documentID
     );
 
     if (found !== undefined) {
@@ -366,7 +367,7 @@ export function getLeafRows(
 
 export function getGroupRowCellData(
   listViewMap: ListViewMap,
-  groupRowCell: GroupRowCell,
+  groupRowCell: GroupRowCell
 ): GroupRowCellData {
   return listViewMap.groupRowCellCache.get(groupRowCell.path);
 }
@@ -377,11 +378,11 @@ export function getColumn(listViewMap: ListViewMap, fieldID: FieldID): Column {
 
 export function getLeafRowCellTopMost(
   listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell {
   const firstLeafRow = first(listViewMap.leafRows);
   if (!firstLeafRow) {
-    throw new Error('Leaf row does not exist');
+    throw new Error("Leaf row does not exist");
   }
 
   return {
@@ -393,11 +394,11 @@ export function getLeafRowCellTopMost(
 
 export function getLeafRowCellBottomMost(
   listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell {
   const lastLeafRow = last(listViewMap.leafRows);
   if (!lastLeafRow) {
-    throw new Error('Leaf row does not exist');
+    throw new Error("Leaf row does not exist");
   }
 
   return { column: cell.column, path: lastLeafRow.path, row: lastLeafRow.row };
@@ -405,21 +406,21 @@ export function getLeafRowCellBottomMost(
 
 export function getLeafRowCellLeftMost(
   _listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell {
   return { column: 1, path: cell.path, row: cell.row };
 }
 
 export function getLeafRowCellRightMost(
   listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell {
   return { column: listViewMap.fields.length, path: cell.path, row: cell.row };
 }
 
 export function getLeafRowCellBottom(
   listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell | false {
   const leafRowData = listViewMap.leafRowCache.get([...cell.path, cell.row]);
 
@@ -439,7 +440,7 @@ export function getLeafRowCellBottom(
 
 export function getLeafRowCellTop(
   listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell | false {
   const leafRowData = listViewMap.leafRowCache.get([...cell.path, cell.row]);
 
@@ -459,7 +460,7 @@ export function getLeafRowCellTop(
 
 export function getLeafRowCellRight(
   listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell | false {
   const hasNextColumn = listViewMap.fields[cell.column];
   if (!hasNextColumn) {
@@ -471,7 +472,7 @@ export function getLeafRowCellRight(
 
 export function getLeafRowCellLeft(
   listViewMap: ListViewMap,
-  cell: LeafRowCell,
+  cell: LeafRowCell
 ): LeafRowCell | false {
   const hasColumnLeft = listViewMap.fields[cell.column - 2];
   if (!hasColumnLeft) {

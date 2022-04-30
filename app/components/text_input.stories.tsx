@@ -1,7 +1,7 @@
-import React from 'react';
-import { View } from 'react-native';
+import React from "react";
+import { View } from "react-native";
 
-import { TextInput } from './text_input';
+import { TextInput } from "./text_input";
 
 function Basic(): JSX.Element {
   return <TextInput />;

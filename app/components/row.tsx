@@ -1,13 +1,13 @@
-import React, { Fragment } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ContainerProvider } from './container';
-import { Spacer } from './spacer';
+import React, { Fragment } from "react";
+import { View, StyleSheet } from "react-native";
+import { ContainerProvider } from "./container";
+import { Spacer } from "./spacer";
 
 interface RowProps {
   flex?: number;
   children?: React.ReactNode;
-  justifyContent?: 'flex-start' | 'flex-end' | 'space-between' | 'center';
-  alignItems?: 'flex-start' | 'flex-end' | 'center';
+  justifyContent?: "flex-start" | "flex-end" | "space-between" | "center";
+  alignItems?: "flex-start" | "flex-end" | "center";
   spacing?: number;
 }
 
@@ -44,7 +44,7 @@ export function Row(props: RowProps): JSX.Element {
 
 const styles = StyleSheet.create({
   root: {
-    display: 'flex',
-    flexDirection: 'row',
+    display: "flex",
+    flexDirection: "row",
   },
 });

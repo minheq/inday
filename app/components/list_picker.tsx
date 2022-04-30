@@ -1,20 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
   ScrollView,
   TextInputKeyPressEventData,
   View,
   StyleSheet,
-} from 'react-native';
+} from "react-native";
 
-import { Text } from './text';
-import { PressableHighlight } from './pressable_highlight';
-import { tokens } from './tokens';
-import { Icon } from './icon';
-import { NavigationKey, UIKey, WhiteSpaceKey } from '../lib/keyboard';
-import { SearchEngine } from '../../lib/search';
-import { useTheme } from './theme';
-import { TextField } from './text_field';
+import { Text } from "./text";
+import { PressableHighlight } from "./pressable_highlight";
+import { tokens } from "./tokens";
+import { Icon } from "./icon";
+import { NavigationKey, UIKey, WhiteSpaceKey } from "../lib/keyboard";
+import { SearchEngine } from "../../lib/search";
+import { useTheme } from "./theme";
+import { TextField } from "./text_field";
 
 export interface ListPickerOption<T> {
   value: T;
@@ -41,12 +41,12 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
   } = props;
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const options = useOptionsSearch(initialOptions, searchTerm);
   const handleNavigation = useListKeyboardNavigation(
     activeIndex,
     setActiveIndex,
-    options,
+    options
   );
 
   const handleSearchTermChange = useCallback((nextSearchTerm: string) => {
@@ -60,7 +60,7 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
         onChange(newVal);
       }
     },
-    [onChange],
+    [onChange]
   );
 
   const handleHoverChange = useCallback(
@@ -71,7 +71,7 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
         setActiveIndex(index);
       }
     },
-    [options],
+    [options]
   );
 
   const handleKeyPress = useCallback(
@@ -106,7 +106,7 @@ export function ListPicker<T>(props: ListPickerProps<T>): JSX.Element {
         onRequestClose();
       }
     },
-    [onRequestClose, handleNavigation, activeIndex, onChange, options],
+    [onRequestClose, handleNavigation, activeIndex, onChange, options]
   );
 
   return (
@@ -186,7 +186,7 @@ export function ListPickerItem<T>(props: ListPickerItemProps<T>): JSX.Element {
 export function useListKeyboardNavigation<T>(
   activeIndex: number | null,
   setActiveIndex: (index: number) => void,
-  options: ListPickerOption<T>[],
+  options: ListPickerOption<T>[]
 ): (key: string) => boolean {
   return useCallback(
     (key: string): boolean => {
@@ -210,23 +210,23 @@ export function useListKeyboardNavigation<T>(
           return false;
       }
     },
-    [activeIndex, setActiveIndex, options],
+    [activeIndex, setActiveIndex, options]
   );
 }
 
 export function useOptionsSearch<T>(
   options: ListPickerOption<T>[],
-  searchTerm: string,
+  searchTerm: string
 ): ListPickerOption<T>[] {
   const searchEngine = useRef(
-    new SearchEngine(options, { keys: ['label'], shouldSort: false }),
+    new SearchEngine(options, { keys: ["label"], shouldSort: false })
   ).current;
 
   useEffect(() => {
     searchEngine.setCollection(options);
   }, [searchEngine, options]);
 
-  if (searchTerm === '') {
+  if (searchTerm === "") {
     return options;
   }
 
@@ -252,8 +252,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: tokens.border.radius,
     paddingHorizontal: 8,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });

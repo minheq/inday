@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React from "react";
+import { StyleSheet, View } from "react-native";
 
 interface ContentProps {
   children?: React.ReactNode;
@@ -20,12 +20,12 @@ export function Content(props: ContentProps): JSX.Element {
 
 const styles = StyleSheet.create({
   root: {
-    width: '100%',
+    width: "100%",
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   inner: {
-    width: '100%',
+    width: "100%",
     flex: 1,
     maxWidth: 1280,
     padding: 16,

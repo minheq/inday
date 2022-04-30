@@ -1,4 +1,4 @@
-import { test } from '../../lib/testing';
+import { test } from "../../lib/testing";
 
 import {
   getVisibleIndexRange,
@@ -8,9 +8,9 @@ import {
   GridRow,
   GridColumn,
   recycleItems,
-} from './grid_renderer.common';
+} from "./grid_renderer.common";
 
-test('getVisibleIndexRange', (t) => {
+test("getVisibleIndexRange", (t) => {
   const items = [
     { size: 100, offset: 0 },
     { size: 200, offset: 100 },
@@ -63,7 +63,7 @@ function recycle(items: Item[], prevItems: RecycledItem[]) {
   });
 }
 
-test('recycleItems - with empty previous items', (t) => {
+test("recycleItems - with empty previous items", (t) => {
   const items: Item[] = [{ value: 1 }, { value: 2 }, { value: 3 }];
 
   const expected: RecycledItem[] = [
@@ -75,7 +75,7 @@ test('recycleItems - with empty previous items', (t) => {
   t.deepEqual(recycle(items, []), expected);
 });
 
-test('recycleItems - with previous items, in middle', (t) => {
+test("recycleItems - with previous items, in middle", (t) => {
   const items: Item[] = [{ value: 2 }, { value: 3 }, { value: 4 }];
 
   const prevItems: RecycledItem[] = [
@@ -93,7 +93,7 @@ test('recycleItems - with previous items, in middle', (t) => {
   t.deepEqual(recycle(items, prevItems), expected);
 });
 
-test('recycleItems - with previous items, at the end', (t) => {
+test("recycleItems - with previous items, at the end", (t) => {
   const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
   const prevItems: RecycledItem[] = [
@@ -111,7 +111,7 @@ test('recycleItems - with previous items, at the end', (t) => {
   t.deepEqual(recycle(items, prevItems), expected);
 });
 
-test('recycleItems - with no matching prev items', (t) => {
+test("recycleItems - with no matching prev items", (t) => {
   const items: Item[] = [{ value: 4 }, { value: 5 }];
 
   const prevItems: RecycledItem[] = [
@@ -128,7 +128,7 @@ test('recycleItems - with no matching prev items', (t) => {
   t.deepEqual(recycle(items, prevItems), expected);
 });
 
-test('recycleItems - more than previous', (t) => {
+test("recycleItems - more than previous", (t) => {
   const items: Item[] = [{ value: 3 }, { value: 4 }, { value: 5 }];
 
   const prevItems: RecycledItem[] = [
@@ -153,7 +153,7 @@ interface OtherRecycledItem extends RecycledItem {
   other: number;
 }
 
-test('recycleItems - with changed other value', (t) => {
+test("recycleItems - with changed other value", (t) => {
   const items: OtherItem[] = [
     { value: 2, other: 2 },
     { value: 3, other: 2 },
@@ -177,7 +177,7 @@ test('recycleItems - with changed other value', (t) => {
   t.deepEqual(result, expected);
 });
 
-test('getColumns', (t) => {
+test("getColumns", (t) => {
   const result = getColumns([100, 200, 100, 200, 100, 200]);
 
   const expected: GridColumn[] = [
@@ -192,10 +192,10 @@ test('getColumns', (t) => {
   t.deepEqual(result, expected);
 });
 
-test('getRows - single flat group', (t) => {
+test("getRows - single flat group", (t) => {
   const groups: GridGroup[] = [
     {
-      type: 'leaf',
+      type: "leaf",
       collapsed: false,
       rowCount: 2,
     },
@@ -204,9 +204,9 @@ test('getRows - single flat group', (t) => {
   const rows = getRows(groups, 0, 40, 72, [], 0);
 
   const expected: GridRow[] = [
-    { type: 'group', height: 0, y: 0, path: [0], level: 1, collapsed: false },
+    { type: "group", height: 0, y: 0, path: [0], level: 1, collapsed: false },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 0,
       path: [0],
@@ -215,7 +215,7 @@ test('getRows - single flat group', (t) => {
       last: false,
     },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 40,
       path: [0],
@@ -223,36 +223,36 @@ test('getRows - single flat group', (t) => {
       row: 2,
       last: true,
     },
-    { type: 'spacer', height: 72, y: 80 },
+    { type: "spacer", height: 72, y: 80 },
   ];
 
   t.deepEqual(rows, expected);
 });
 
-test('getRows - nested with leaf rows', (t) => {
+test("getRows - nested with leaf rows", (t) => {
   const groups: GridGroup[] = [
     {
-      type: 'ancestor',
+      type: "ancestor",
       collapsed: false,
       children: [
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 2,
         },
       ],
     },
     {
-      type: 'ancestor',
+      type: "ancestor",
       collapsed: false,
       children: [
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 2,
         },
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 2,
         },
@@ -263,9 +263,9 @@ test('getRows - nested with leaf rows', (t) => {
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
   const expected: GridRow[] = [
-    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: false },
+    { type: "group", height: 56, y: 0, path: [0], level: 1, collapsed: false },
     {
-      type: 'group',
+      type: "group",
       height: 56,
       y: 56,
       path: [0, 0],
@@ -273,7 +273,7 @@ test('getRows - nested with leaf rows', (t) => {
       collapsed: false,
     },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 112,
       path: [0, 0],
@@ -282,7 +282,7 @@ test('getRows - nested with leaf rows', (t) => {
       last: false,
     },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 152,
       path: [0, 0],
@@ -290,9 +290,9 @@ test('getRows - nested with leaf rows', (t) => {
       row: 2,
       last: true,
     },
-    { type: 'spacer', height: 72, y: 192 },
+    { type: "spacer", height: 72, y: 192 },
     {
-      type: 'group',
+      type: "group",
       height: 56,
       y: 264,
       path: [1],
@@ -300,7 +300,7 @@ test('getRows - nested with leaf rows', (t) => {
       collapsed: false,
     },
     {
-      type: 'group',
+      type: "group",
       height: 56,
       y: 320,
       path: [1, 0],
@@ -308,7 +308,7 @@ test('getRows - nested with leaf rows', (t) => {
       collapsed: false,
     },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 376,
       path: [1, 0],
@@ -317,7 +317,7 @@ test('getRows - nested with leaf rows', (t) => {
       last: false,
     },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 416,
       path: [1, 0],
@@ -326,7 +326,7 @@ test('getRows - nested with leaf rows', (t) => {
       last: true,
     },
     {
-      type: 'group',
+      type: "group",
       height: 56,
       y: 456,
       path: [1, 1],
@@ -334,7 +334,7 @@ test('getRows - nested with leaf rows', (t) => {
       collapsed: false,
     },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 512,
       path: [1, 1],
@@ -343,7 +343,7 @@ test('getRows - nested with leaf rows', (t) => {
       last: false,
     },
     {
-      type: 'leaf',
+      type: "leaf",
       height: 40,
       y: 552,
       path: [1, 1],
@@ -351,20 +351,20 @@ test('getRows - nested with leaf rows', (t) => {
       row: 2,
       last: true,
     },
-    { type: 'spacer', height: 72, y: 592 },
+    { type: "spacer", height: 72, y: 592 },
   ];
 
   t.deepEqual(rows, expected);
 });
 
-test('getRows - nested with empty leaf rows', (t) => {
+test("getRows - nested with empty leaf rows", (t) => {
   const groups: GridGroup[] = [
     {
-      type: 'ancestor',
+      type: "ancestor",
       collapsed: false,
       children: [
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 0,
         },
@@ -375,29 +375,29 @@ test('getRows - nested with empty leaf rows', (t) => {
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
   const expected: GridRow[] = [
-    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: false },
+    { type: "group", height: 56, y: 0, path: [0], level: 1, collapsed: false },
     {
-      type: 'group',
+      type: "group",
       height: 56,
       y: 56,
       path: [0, 0],
       level: 1,
       collapsed: false,
     },
-    { type: 'spacer', height: 72, y: 112 },
+    { type: "spacer", height: 72, y: 112 },
   ];
 
   t.deepEqual(rows, expected);
 });
 
-test('getRows - nested with collapsed ancestor', (t) => {
+test("getRows - nested with collapsed ancestor", (t) => {
   const groups: GridGroup[] = [
     {
-      type: 'ancestor',
+      type: "ancestor",
       collapsed: true,
       children: [
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 1,
         },
@@ -408,21 +408,21 @@ test('getRows - nested with collapsed ancestor', (t) => {
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
   const expected: GridRow[] = [
-    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: true },
-    { type: 'spacer', height: 72, y: 56 },
+    { type: "group", height: 56, y: 0, path: [0], level: 1, collapsed: true },
+    { type: "spacer", height: 72, y: 56 },
   ];
 
   t.deepEqual(rows, expected);
 });
 
-test('getRows - nested collapsed child', (t) => {
+test("getRows - nested collapsed child", (t) => {
   const groups: GridGroup[] = [
     {
-      type: 'ancestor',
+      type: "ancestor",
       collapsed: false,
       children: [
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: true,
           rowCount: 5,
         },
@@ -433,16 +433,16 @@ test('getRows - nested collapsed child', (t) => {
   const rows = getRows(groups, 56, 40, 72, [], 0);
 
   const expected: GridRow[] = [
-    { type: 'group', height: 56, y: 0, path: [0], level: 1, collapsed: false },
+    { type: "group", height: 56, y: 0, path: [0], level: 1, collapsed: false },
     {
-      type: 'group',
+      type: "group",
       height: 56,
       y: 56,
       path: [0, 0],
       level: 1,
       collapsed: true,
     },
-    { type: 'spacer', height: 72, y: 112 },
+    { type: "spacer", height: 72, y: 112 },
   ];
 
   t.deepEqual(rows, expected);

@@ -1,4 +1,4 @@
-import { test } from '../lib/testing';
+import { test } from "../lib/testing";
 import {
   addFieldsToCollection,
   makeCollection,
@@ -6,22 +6,22 @@ import {
   makeDocument,
   makeSort,
   makeCollaborator,
-} from './factory';
+} from "./factory";
 import {
   FieldType,
   FieldValue,
   assertMultiSelectField,
   assertSingleSelectField,
-} from './fields';
-import { sortDocuments, SortGetters } from './sorts';
-import { Document, DocumentID } from './documents';
-import { CollaboratorID } from './collaborators';
+} from "./fields";
+import { sortDocuments, SortGetters } from "./sorts";
+import { Document, DocumentID } from "./documents";
+import { CollaboratorID } from "./collaborators";
 
-test('no sort', (t) => {
-  const values = ['BWord', 'Aword'];
+test("no sort", (t) => {
+  const values = ["BWord", "Aword"];
   const { getters, documents, getValue } = prepare(
     FieldType.SingleLineText,
-    values,
+    values
   );
 
   const result = sortDocuments([], documents, getters);
@@ -30,13 +30,13 @@ test('no sort', (t) => {
   t.deepEqual(getValue(result[1]), values[1]);
 });
 
-test('text sort - ascending', (t) => {
-  const values = ['BWord', 'Aword'];
+test("text sort - ascending", (t) => {
+  const values = ["BWord", "Aword"];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleLineText,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -44,13 +44,13 @@ test('text sort - ascending', (t) => {
   t.deepEqual(getValue(result[1]), values[0]);
 });
 
-test('text sort - descending', (t) => {
-  const values = ['AWord', 'Bword'];
+test("text sort - descending", (t) => {
+  const values = ["AWord", "Bword"];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleLineText,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -58,13 +58,13 @@ test('text sort - descending', (t) => {
   t.deepEqual(getValue(result[1]), values[0]);
 });
 
-test('number sort - ascending', (t) => {
+test("number sort - ascending", (t) => {
   const values = [2, 1, null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Number,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -73,13 +73,13 @@ test('number sort - ascending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('number sort - descending', (t) => {
+test("number sort - descending", (t) => {
   const values = [1, 2, null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Number,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -88,13 +88,13 @@ test('number sort - descending', (t) => {
   t.deepEqual(getValue(result[2]), values[2]);
 });
 
-test('boolean sort - ascending', (t) => {
+test("boolean sort - ascending", (t) => {
   const values = [true, false];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Checkbox,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -102,13 +102,13 @@ test('boolean sort - ascending', (t) => {
   t.deepEqual(getValue(result[1]), values[0]);
 });
 
-test('boolean sort - descending', (t) => {
+test("boolean sort - descending", (t) => {
   const values = [false, true];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Checkbox,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -116,13 +116,13 @@ test('boolean sort - descending', (t) => {
   t.deepEqual(getValue(result[1]), values[0]);
 });
 
-test('date sort - ascending', (t) => {
-  const values = ['2020-1-2', '2020-1-1', null];
+test("date sort - ascending", (t) => {
+  const values = ["2020-1-2", "2020-1-1", null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Date,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -131,13 +131,13 @@ test('date sort - ascending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('date sort - descending', (t) => {
-  const values = [null, '2020-1-1', '2020-1-2'];
+test("date sort - descending", (t) => {
+  const values = [null, "2020-1-1", "2020-1-2"];
   const { getters, documents, field, getValue } = prepare(
     FieldType.Date,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, getters);
 
@@ -160,10 +160,10 @@ function prepareMultiSelectsSort() {
   return { getters, documents, field };
 }
 
-test('multi options sort - ascending', (t) => {
+test("multi options sort - ascending", (t) => {
   const { documents, field, getters } = prepareMultiSelectsSort();
   const [document1, document2, document3] = documents;
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
   const result = sortDocuments([sort], documents, getters);
 
   t.deepEqual(result[0].id, document3.id);
@@ -171,11 +171,11 @@ test('multi options sort - ascending', (t) => {
   t.deepEqual(result[2].id, document1.id);
 });
 
-test('multi options sort - descending', (t) => {
+test("multi options sort - descending", (t) => {
   const { documents, field, getters } = prepareMultiSelectsSort();
   const [document1, document2, document3] = documents;
 
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
   const result = sortDocuments([sort], documents, getters);
 
   t.deepEqual(result[0].id, document1.id);
@@ -197,10 +197,10 @@ function prepareSingleSelectsSort() {
   return { documents, getters, field };
 }
 
-test('single option sort - ascending', (t) => {
+test("single option sort - ascending", (t) => {
   const { documents, field, getters } = prepareSingleSelectsSort();
   const [document1, document2, document3] = documents;
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
   const result = sortDocuments([sort], documents, getters);
 
   t.deepEqual(result[0].id, document3.id);
@@ -208,11 +208,11 @@ test('single option sort - ascending', (t) => {
   t.deepEqual(result[2].id, document1.id);
 });
 
-test('single option sort - descending', (t) => {
+test("single option sort - descending", (t) => {
   const { documents, field, getters } = prepareSingleSelectsSort();
   const [document1, document2, document3] = documents;
 
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
   const result = sortDocuments([sort], documents, getters);
 
   t.deepEqual(result[0].id, document1.id);
@@ -221,8 +221,8 @@ test('single option sort - descending', (t) => {
 });
 
 function prepareCollaboratorSort() {
-  const collaborator1 = makeCollaborator({ name: 'BName' });
-  const collaborator2 = makeCollaborator({ name: 'AName' });
+  const collaborator1 = makeCollaborator({ name: "BName" });
+  const collaborator2 = makeCollaborator({ name: "AName" });
 
   const getCollaborator = (collaboratorID: CollaboratorID) => {
     if (collaboratorID === collaborator1.id) {
@@ -237,16 +237,16 @@ function prepareCollaboratorSort() {
   return { collaborators, getCollaborator };
 }
 
-test('multi collaborator sort - ascending', (t) => {
+test("multi collaborator sort - ascending", (t) => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
   const values = [[collaborator1.id], [collaborator2.id], []];
   const { getters, documents, field, getValue } = prepare(
     FieldType.MultiCollaborator,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -258,16 +258,16 @@ test('multi collaborator sort - ascending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('multi collaborator sort - descending', (t) => {
+test("multi collaborator sort - descending", (t) => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
   const values = [[], [collaborator2.id], [collaborator1.id]];
   const { getters, documents, field, getValue } = prepare(
     FieldType.MultiCollaborator,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -279,16 +279,16 @@ test('multi collaborator sort - descending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('single collaborator sort - ascending', (t) => {
+test("single collaborator sort - ascending", (t) => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
   const values = [collaborator1.id, collaborator2.id, null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleCollaborator,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -300,16 +300,16 @@ test('single collaborator sort - ascending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('single collaborator sort - descending', (t) => {
+test("single collaborator sort - descending", (t) => {
   const { collaborators, getCollaborator } = prepareCollaboratorSort();
   const [collaborator1, collaborator2] = collaborators;
 
   const values = [null, collaborator2.id, collaborator1.id];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleCollaborator,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -323,7 +323,7 @@ test('single collaborator sort - descending', (t) => {
 
 function prepareDocumentsSort() {
   const otherCollection = makeCollection({
-    name: 'other collection',
+    name: "other collection",
   });
   const otherField = makeField({
     type: FieldType.SingleLineText,
@@ -334,12 +334,12 @@ function prepareDocumentsSort() {
     otherField,
   ]);
   const document1 = makeDocument(
-    { fields: { [otherField.id]: 'BName' } },
-    collectionWithFields,
+    { fields: { [otherField.id]: "BName" } },
+    collectionWithFields
   );
   const document2 = makeDocument(
-    { fields: { [otherField.id]: 'AName' } },
-    collectionWithFields,
+    { fields: { [otherField.id]: "AName" } },
+    collectionWithFields
   );
 
   const getDocument = (documentID: DocumentID) => {
@@ -359,7 +359,7 @@ function prepareDocumentsSort() {
   return { documents, otherField, getCollection, getDocument };
 }
 
-test('multi document sort - ascending', (t) => {
+test("multi document sort - ascending", (t) => {
   const {
     otherField,
     documents: outerDocuments,
@@ -371,9 +371,9 @@ test('multi document sort - ascending', (t) => {
   const values = [[document1.id], [document2.id], []];
   const { getters, documents, field, getValue } = prepare(
     FieldType.MultiDocumentLink,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -393,7 +393,7 @@ test('multi document sort - ascending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('multi document sort - descending', (t) => {
+test("multi document sort - descending", (t) => {
   const {
     otherField,
     documents: outerDocuments,
@@ -405,9 +405,9 @@ test('multi document sort - descending', (t) => {
   const values = [[], [document2.id], [document1.id]];
   const { getters, documents, field, getValue } = prepare(
     FieldType.MultiDocumentLink,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -427,7 +427,7 @@ test('multi document sort - descending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('single document sort - ascending', (t) => {
+test("single document sort - ascending", (t) => {
   const {
     otherField,
     documents: outerDocuments,
@@ -439,9 +439,9 @@ test('single document sort - ascending', (t) => {
   const values = [document1.id, document2.id, null];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleDocumentLink,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'ascending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "ascending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -461,7 +461,7 @@ test('single document sort - ascending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('single document sort - descending', (t) => {
+test("single document sort - descending", (t) => {
   const {
     otherField,
     documents: outerDocuments,
@@ -473,9 +473,9 @@ test('single document sort - descending', (t) => {
   const values = [null, document2.id, document1.id];
   const { getters, documents, field, getValue } = prepare(
     FieldType.SingleDocumentLink,
-    values,
+    values
   );
-  const sort = makeSort({}, { fieldID: field.id, order: 'descending' });
+  const sort = makeSort({}, { fieldID: field.id, order: "descending" });
 
   const result = sortDocuments([sort], documents, {
     ...getters,
@@ -495,7 +495,7 @@ test('single document sort - descending', (t) => {
   t.deepEqual(getValue(result[2]), values[0]);
 });
 
-test('ascending number then descending text sort', (t) => {
+test("ascending number then descending text sort", (t) => {
   const collection = makeCollection({});
   const numberField = makeField({
     type: FieldType.Number,
@@ -511,20 +511,20 @@ test('ascending number then descending text sort', (t) => {
   ]);
 
   const document1 = makeDocument(
-    { fields: { [numberField.id]: 2, [textField.id]: 'AWord' } },
-    collectionWithFields,
+    { fields: { [numberField.id]: 2, [textField.id]: "AWord" } },
+    collectionWithFields
   );
   const document2 = makeDocument(
-    { fields: { [numberField.id]: 2, [textField.id]: 'BWord' } },
-    collectionWithFields,
+    { fields: { [numberField.id]: 2, [textField.id]: "BWord" } },
+    collectionWithFields
   );
   const document3 = makeDocument(
-    { fields: { [numberField.id]: 1, [textField.id]: 'BWord' } },
-    collectionWithFields,
+    { fields: { [numberField.id]: 1, [textField.id]: "BWord" } },
+    collectionWithFields
   );
   const document4 = makeDocument(
-    { fields: { [numberField.id]: 1, [textField.id]: 'AWord' } },
-    collectionWithFields,
+    { fields: { [numberField.id]: 1, [textField.id]: "AWord" } },
+    collectionWithFields
   );
   const fields = [numberField, textField];
   const documents = [document1, document2, document3, document4];
@@ -536,7 +536,7 @@ test('ascending number then descending text sort', (t) => {
       const field = fields.find((d) => d.id === fieldID);
 
       if (field === undefined) {
-        throw new Error('Document not found');
+        throw new Error("Document not found");
       }
 
       return field;
@@ -545,7 +545,7 @@ test('ascending number then descending text sort', (t) => {
       const document = documents.find((d) => d.id === documentID);
 
       if (document === undefined) {
-        throw new Error('Document not found');
+        throw new Error("Document not found");
       }
 
       return document;
@@ -556,9 +556,9 @@ test('ascending number then descending text sort', (t) => {
 
   const numberSort = makeSort(
     {},
-    { fieldID: numberField.id, order: 'ascending' },
+    { fieldID: numberField.id, order: "ascending" }
   );
-  const textSort = makeSort({}, { fieldID: textField.id, order: 'descending' });
+  const textSort = makeSort({}, { fieldID: textField.id, order: "descending" });
 
   const result = sortDocuments([numberSort, textSort], documents, getters);
 
@@ -576,7 +576,7 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
   const documents = values.map((value) => {
     return makeDocument(
       { fields: { [field.id]: value } },
-      collectionWithFields,
+      collectionWithFields
     );
   });
 
@@ -588,7 +588,7 @@ function prepare(fieldType: FieldType, values: FieldValue[]) {
       const document = documents.find((d) => d.id === documentID);
 
       if (document === undefined) {
-        throw new Error('Document not found');
+        throw new Error("Document not found");
       }
 
       return document;

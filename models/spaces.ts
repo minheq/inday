@@ -1,6 +1,6 @@
-import { generateID, validateID } from '../lib/id';
+import { generateID, validateID } from "../lib/id";
 
-export const spaceIDPrefix = 'spc' as const;
+export const spaceIDPrefix = "spc" as const;
 export type SpaceID = `${typeof spaceIDPrefix}${string}`;
 
 export function generateSpaceID(): SpaceID {

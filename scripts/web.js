@@ -1,41 +1,41 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const { serve } = require('esbuild');
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const { serve } = require("esbuild");
 
 const options = {
-  entryPoints: ['index.web.tsx'],
+  entryPoints: ["index.web.tsx"],
   bundle: true,
-  outdir: 'public',
+  outdir: "public",
   resolveExtensions: [
-    '.web.tsx',
-    '.web.ts',
-    '.tsx',
-    '.ts',
-    '.web.jsx',
-    '.web.js',
-    '.jsx',
-    '.js',
-    '.json',
+    ".web.tsx",
+    ".web.ts",
+    ".tsx",
+    ".ts",
+    ".web.jsx",
+    ".web.js",
+    ".jsx",
+    ".js",
+    ".json",
   ],
   sourcemap: true,
   define: {
-    ['process.env.NODE_ENV']: `"development"`,
-    ['global']: 'window',
+    ["process.env.NODE_ENV"]: `"development"`,
+    ["global"]: "window",
   },
 };
 
 const BUILD_PORT = 8000;
 const WEB_PORT = 8080;
 
-fs.readFile(path.resolve(__dirname, '../index.html'), (err, contents) => {
+fs.readFile(path.resolve(__dirname, "../index.html"), (err, contents) => {
   if (err !== null) {
     process.exit(1);
   }
 
   const html = contents
     .toString()
-    .replace('/public', `http://localhost:${BUILD_PORT}`);
+    .replace("/public", `http://localhost:${BUILD_PORT}`);
 
   serve({ port: BUILD_PORT }, options)
     .then(() => {
@@ -44,7 +44,7 @@ fs.readFile(path.resolve(__dirname, '../index.html'), (err, contents) => {
         res.end(html);
       });
 
-      server.listen(WEB_PORT, 'localhost', () => {
+      server.listen(WEB_PORT, "localhost", () => {
         console.log(`Web is running on http://localhost:${WEB_PORT}`);
       });
     })

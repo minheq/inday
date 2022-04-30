@@ -1,10 +1,10 @@
-import { DocumentID } from '../../../models/documents';
-import { useCollectionQuery, useDocumentQuery } from '../../store/queries';
-import React from 'react';
-import { Badge } from '../../components/badge';
-import { assertPrimaryFieldValue } from '../../../models/fields';
-import { useTheme } from '../../components/theme';
-import { palette } from '../../components/palette';
+import { DocumentID } from "../../../models/documents";
+import { useCollectionQuery, useDocumentQuery } from "../../store/queries";
+import React from "react";
+import { Badge } from "../../components/badge";
+import { assertPrimaryFieldValue } from "../../../models/fields";
+import { useTheme } from "../../components/theme";
+import { palette } from "../../components/palette";
 
 interface DocumentLinkBadgeProps {
   documentID: DocumentID;
@@ -22,7 +22,7 @@ export function DocumentLinkBadge(props: DocumentLinkBadgeProps): JSX.Element {
   return (
     <Badge
       color={
-        theme.colorScheme === 'dark' ? palette.purple[900] : palette.purple[50]
+        theme.colorScheme === "dark" ? palette.purple[900] : palette.purple[50]
       }
       title={primaryFieldValue}
     />

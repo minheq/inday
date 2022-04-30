@@ -11,11 +11,11 @@ export type EmptyObject = {
 };
 
 export function isObject(o: unknown): o is Record<string, unknown> {
-  if (typeof o == 'object') {
+  if (typeof o == "object") {
     return (
       (o === null ||
         Array.isArray(o) ||
-        typeof o == 'function' ||
+        typeof o == "function" ||
         o.constructor === Date) === false
     );
   }
@@ -25,7 +25,7 @@ export function isObject(o: unknown): o is Record<string, unknown> {
 
 export function get<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
-  key: K,
+  key: K
 ): T[K] {
   return obj[key];
 }

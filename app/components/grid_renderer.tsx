@@ -7,8 +7,8 @@ import React, {
   useImperativeHandle,
   useCallback,
   Fragment,
-} from 'react';
-import { Animated, ScrollView, StyleSheet, View } from 'react-native';
+} from "react";
+import { Animated, ScrollView, StyleSheet, View } from "react-native";
 import {
   ContentOffset,
   useGetStatefulRows,
@@ -21,7 +21,7 @@ import {
   LeafRowCellState,
   GroupRowState,
   StatefulLeafRowCell,
-} from './grid_renderer.common';
+} from "./grid_renderer.common";
 
 export interface GridRendererProps {
   activeCell?: StatefulLeafRowCell | null;
@@ -105,7 +105,7 @@ export interface RenderLeafRowProps {
   children: React.ReactNode;
 }
 
-export type Pane = 'left' | 'right';
+export type Pane = "left" | "right";
 
 export interface RenderHeaderProps {
   pane: Pane;
@@ -136,7 +136,7 @@ export interface GridRendererRef {
 export const GridRenderer = memo(
   forwardRef<GridRendererRef, GridRendererProps>(function GridRenderer(
     props,
-    ref,
+    ref
   ) {
     const {
       focusedCell,
@@ -170,7 +170,7 @@ export const GridRenderer = memo(
           horizontalScrollViewRef.current.scrollTo(params);
         }
       },
-      [verticalScrollViewRef, horizontalScrollViewRef],
+      [verticalScrollViewRef, horizontalScrollViewRef]
     );
 
     // Set up scroll listeners
@@ -240,7 +240,7 @@ export const GridRenderer = memo(
             handleScrollToOffset(getScrollToCellOffset(cell)),
         };
       },
-      [handleScrollToOffset, getScrollToCellOffset],
+      [handleScrollToOffset, getScrollToCellOffset]
     );
 
     return (
@@ -259,7 +259,7 @@ export const GridRenderer = memo(
                 },
               },
             ],
-            { useNativeDriver: false },
+            { useNativeDriver: false }
           )}
           contentContainerStyle={{ height: contentHeight }}
           scrollEventThrottle={16}
@@ -279,7 +279,7 @@ export const GridRenderer = memo(
                   },
                 },
               ],
-              { useNativeDriver: false },
+              { useNativeDriver: false }
             )}
             contentContainerStyle={{ width: contentWidth }}
             scrollEventThrottle={16}
@@ -312,13 +312,13 @@ export const GridRenderer = memo(
                   selected={selected}
                   focusedCell={focusedCell}
                 />
-              ),
+              )
             )}
           </ScrollView>
         </ScrollView>
       </View>
     );
-  }),
+  })
 );
 
 interface RowContainerProps {
@@ -465,7 +465,7 @@ interface HeaderContainerProps {
 }
 
 const HeaderContainer = memo(function HeaderContainer(
-  props: HeaderContainerProps,
+  props: HeaderContainerProps
 ) {
   const {
     height,
@@ -510,39 +510,39 @@ const HeaderContainer = memo(function HeaderContainer(
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   leftPaneWrapper: {
-    flexDirection: 'row',
-    position: 'absolute',
+    flexDirection: "row",
+    position: "absolute",
   },
   rightPaneWrapper: {
-    flexDirection: 'row',
-    position: 'absolute',
+    flexDirection: "row",
+    position: "absolute",
   },
   row: {
-    flexDirection: 'row',
-    position: 'absolute',
-    overflow: 'hidden',
+    flexDirection: "row",
+    position: "absolute",
+    overflow: "hidden",
   },
   header: {
-    flexDirection: 'row',
-    position: 'absolute',
+    flexDirection: "row",
+    position: "absolute",
   },
   cell: {
-    position: 'absolute',
+    position: "absolute",
   },
   selected: {
     zIndex: 1,
   },
 });
 function useGridRecycler(arg0: {
-  rows: import('./grid_renderer.common').GridRow[];
-  columns: import('./grid_renderer.common').GridColumn[];
+  rows: import("./grid_renderer.common").GridRow[];
+  columns: import("./grid_renderer.common").GridColumn[];
   scrollViewHeight: number;
   scrollViewWidth: number;
   scrollX: number;
   scrollY: number;
 }): { recycledRows: any; recycledColumns: any } {
-  throw new Error('Function not implemented.');
+  throw new Error("Function not implemented.");
 }

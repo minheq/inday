@@ -1,5 +1,5 @@
-import React from 'react';
-import { FlatButton } from './flat_button';
+import React from "react";
+import { FlatButton } from "./flat_button";
 
 interface BackButtonProps {
   onPress?: () => void;

@@ -1,4 +1,4 @@
-import { ViewID } from './views';
+import { ViewID } from "./views";
 import {
   FieldID,
   Field,
@@ -33,17 +33,17 @@ import {
   assertPrimaryField,
   PrimaryField,
   assertPrimaryFieldValue,
-} from './fields';
-import { Document, DocumentID } from './documents';
+} from "./fields";
+import { Document, DocumentID } from "./documents";
 
-import { Collaborator, CollaboratorID } from './collaborators';
-import { CollectionID, Collection } from './collections';
-import { generateID, validateID } from '../lib/id';
-import { isEmpty } from '../lib/lang_utils';
-import { first, keyedBy } from '../lib/array_utils';
-import { isBefore, isAfter, isISODate, parseISODate } from '../lib/date_utils';
+import { Collaborator, CollaboratorID } from "./collaborators";
+import { CollectionID, Collection } from "./collections";
+import { generateID, validateID } from "../lib/id";
+import { isEmpty } from "../lib/lang_utils";
+import { first, keyedBy } from "../lib/array_utils";
+import { isBefore, isAfter, isISODate, parseISODate } from "../lib/date_utils";
 
-export const sortIDPrefix = 'srt' as const;
+export const sortIDPrefix = "srt" as const;
 export type SortID = `${typeof sortIDPrefix}${string}`;
 
 export function generateSortID(): SortID {
@@ -56,7 +56,7 @@ export function validateSortID(id: string): void {
 
 export function deleteSort(
   sort: Sort,
-  sorts: Sort[],
+  sorts: Sort[]
 ): { [sortID: string]: Sort } {
   const updatedSorts: { [sortID: string]: Sort } = {};
   const sortIndex = sorts.findIndex((f) => f.id === sort.id);
@@ -75,7 +75,7 @@ export function deleteSort(
   return updatedSorts;
 }
 
-export type SortOrder = 'ascending' | 'descending';
+export type SortOrder = "ascending" | "descending";
 
 export interface BaseSort {
   id: SortID;
@@ -100,7 +100,7 @@ export interface SortGetters {
 export function sortDocuments(
   sorts: SortConfig[],
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   if (isEmpty(sorts)) {
     return documents;
@@ -111,15 +111,15 @@ export function sortDocuments(
 }
 
 function isLeafDocumentNode(
-  nodes: DocumentNode[],
+  nodes: DocumentNode[]
 ): nodes is LeafDocumentNode[] {
   const firstNode = first(nodes);
 
   if (firstNode === undefined) {
-    throw new Error('Nodes are empty');
+    throw new Error("Nodes are empty");
   }
 
-  return firstNode.type === 'leaf';
+  return firstNode.type === "leaf";
 }
 
 function toDocuments(nodes: DocumentNode[]): Document[] {
@@ -151,14 +151,14 @@ function flattenLeafDocumentNode(leafNodes: LeafDocumentNode[]): Document[] {
 }
 
 interface AncestorDocumentNode {
-  type: 'ancestor';
+  type: "ancestor";
   field: Field;
   value: FieldValue;
   children: DocumentNode[];
 }
 
 interface LeafDocumentNode {
-  type: 'leaf';
+  type: "leaf";
   field: Field;
   value: FieldValue;
   children: Document[];
@@ -169,7 +169,7 @@ export type DocumentNode = AncestorDocumentNode | LeafDocumentNode;
 export function makeDocumentNodes(
   sorts: SortConfig[],
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): DocumentNode[] {
   if (isEmpty(documents)) {
     return [];
@@ -180,7 +180,7 @@ export function makeDocumentNodes(
 
   if (sort === undefined) {
     throw new Error(
-      'Empty sorts. There should be at least one sort to make a tree',
+      "Empty sorts. There should be at least one sort to make a tree"
     );
   }
 
@@ -194,7 +194,7 @@ export function makeDocumentNodes(
 
   for (const leafNode of leafNodes) {
     nodes.push({
-      type: 'ancestor',
+      type: "ancestor",
       field: leafNode.field,
       value: leafNode.value,
       children: makeDocumentNodes(nextSorts, leafNode.children, getters),
@@ -207,7 +207,7 @@ export function makeDocumentNodes(
 function makeLeafNodes(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): LeafDocumentNode[] {
   const { getField } = getters;
   const field = getField(sort.fieldID);
@@ -216,11 +216,11 @@ function makeLeafNodes(
   const firstDocument = first(sorted);
 
   if (firstDocument === undefined) {
-    throw new Error('documents empty');
+    throw new Error("documents empty");
   }
 
   let currentNode: LeafDocumentNode = {
-    type: 'leaf',
+    type: "leaf",
     field,
     value: firstDocument.fields[field.id],
     children: [firstDocument],
@@ -234,12 +234,12 @@ function makeLeafNodes(
     if (
       areFieldValuesEqual(field, document.fields[field.id], currentNode.value)
     ) {
-      if (currentNode.type === 'leaf') {
+      if (currentNode.type === "leaf") {
         currentNode.children.push(document);
       }
     } else {
       currentNode = {
-        type: 'leaf',
+        type: "leaf",
         field,
         value: document.fields[field.id],
         children: [document],
@@ -255,7 +255,7 @@ function sortBy(
   field: Field,
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   switch (field.type) {
     case FieldType.SingleLineText:
@@ -289,7 +289,7 @@ function sortBy(
 export function sortByTextFieldKind(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField } = getters;
@@ -303,7 +303,7 @@ export function sortByTextFieldKind(
     assertTextFieldKindValue(valA);
     assertTextFieldKindValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return ascendingTextFieldKindValueSort(valA, valB);
     }
 
@@ -314,7 +314,7 @@ export function sortByTextFieldKind(
 export function sortByNumberFieldKind(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField } = getters;
@@ -328,7 +328,7 @@ export function sortByNumberFieldKind(
     assertNumberFieldKindValue(valA);
     assertNumberFieldKindValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingNumberFieldKindValue(valA, valB);
     }
 
@@ -339,7 +339,7 @@ export function sortByNumberFieldKind(
 export function sortByDateFieldKind(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField } = getters;
@@ -353,7 +353,7 @@ export function sortByDateFieldKind(
     assertDateFieldKindValue(valA);
     assertDateFieldKindValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingDateFieldKindValue(valA, valB);
     }
 
@@ -364,7 +364,7 @@ export function sortByDateFieldKind(
 export function sortBySingleSelectField(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField } = getters;
@@ -381,7 +381,7 @@ export function sortBySingleSelectField(
     assertSingleSelectFieldValue(valA);
     assertSingleSelectFieldValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingSingleSelect(optionsByID, valA, valB);
     }
     return sortByDescendingSingleSelect(optionsByID, valA, valB);
@@ -391,7 +391,7 @@ export function sortBySingleSelectField(
 export function sortByMultiSelectField(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField } = getters;
@@ -408,7 +408,7 @@ export function sortByMultiSelectField(
     assertMultiSelectFieldValue(valA);
     assertMultiSelectFieldValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingMultiSelect(optionsByID, valA, valB);
     }
 
@@ -419,7 +419,7 @@ export function sortByMultiSelectField(
 export function sortBySingleCollaboratorField(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getCollaborator } = getters;
@@ -431,7 +431,7 @@ export function sortBySingleCollaboratorField(
     assertSingleCollaboratorFieldValue(valA);
     assertSingleCollaboratorFieldValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingSingleCollaborator(getCollaborator, valA, valB);
     }
 
@@ -442,7 +442,7 @@ export function sortBySingleCollaboratorField(
 export function sortByMultiCollaboratorField(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField, getCollaborator } = getters;
@@ -456,7 +456,7 @@ export function sortByMultiCollaboratorField(
     assertMultiCollaboratorFieldValue(valA);
     assertMultiCollaboratorFieldValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingMultiCollaborator(getCollaborator, valA, valB);
     }
 
@@ -467,7 +467,7 @@ export function sortByMultiCollaboratorField(
 export function sortBySingleDocumentLinkField(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField, getDocument, getCollection } = getters;
@@ -487,12 +487,12 @@ export function sortBySingleDocumentLinkField(
     assertSingleDocumentLinkFieldValue(valA);
     assertSingleDocumentLinkFieldValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingSingleDocumentLink(
         primaryField,
         getDocument,
         valA,
-        valB,
+        valB
       );
     }
 
@@ -500,7 +500,7 @@ export function sortBySingleDocumentLinkField(
       primaryField,
       getDocument,
       valA,
-      valB,
+      valB
     );
   });
 }
@@ -508,7 +508,7 @@ export function sortBySingleDocumentLinkField(
 export function sortByMultiDocumentLinkField(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField, getDocument, getCollection } = getters;
@@ -527,12 +527,12 @@ export function sortByMultiDocumentLinkField(
     assertMultiDocumentLinkFieldValue(valA);
     assertMultiDocumentLinkFieldValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return sortByAscendingMultiDocumentLink(
         primaryField,
         getDocument,
         valA,
-        valB,
+        valB
       );
     }
 
@@ -540,7 +540,7 @@ export function sortByMultiDocumentLinkField(
       primaryField,
       getDocument,
       valA,
-      valB,
+      valB
     );
   });
 }
@@ -548,7 +548,7 @@ export function sortByMultiDocumentLinkField(
 export function sortByBooleanFieldKind(
   sort: SortConfig,
   documents: Document[],
-  getters: SortGetters,
+  getters: SortGetters
 ): Document[] {
   const documentsClone = documents.slice(0);
   const { getField } = getters;
@@ -562,7 +562,7 @@ export function sortByBooleanFieldKind(
     assertBooleanFieldKindValue(valA);
     assertBooleanFieldKindValue(valB);
 
-    if (sort.order === 'ascending') {
+    if (sort.order === "ascending") {
       return ascendingBooleanFieldKindValueSort(valA, valB);
     }
     return descendingBooleanFieldKindValueSort(valA, valB);
@@ -580,7 +580,7 @@ function ascendingBooleanFieldKindValueSort(a: FieldValue, b: FieldValue) {
 
 function ascendingTextFieldKindValueSort(
   a: TextFieldKindValue,
-  b: TextFieldKindValue,
+  b: TextFieldKindValue
 ) {
   if (a < b) {
     return -1;
@@ -592,7 +592,7 @@ function ascendingTextFieldKindValueSort(
 
 function sortByAscendingNumberFieldKindValue(
   a: NumberFieldKindValue,
-  b: NumberFieldKindValue,
+  b: NumberFieldKindValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -616,7 +616,7 @@ function sortByAscendingNumberFieldKindValue(
 
 function sortByAscendingDateFieldKindValue(
   a: DateFieldKindValue,
-  b: DateFieldKindValue,
+  b: DateFieldKindValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -648,7 +648,7 @@ function sortByAscendingDateFieldKindValue(
 
 function descendingBooleanFieldKindValueSort(
   a: BooleanFieldKindValue,
-  b: BooleanFieldKindValue,
+  b: BooleanFieldKindValue
 ) {
   if (a === true && b === false) {
     return -1;
@@ -661,7 +661,7 @@ function descendingBooleanFieldKindValueSort(
 
 function descendingTextFieldKindValueSort(
   a: TextFieldKindValue,
-  b: TextFieldKindValue,
+  b: TextFieldKindValue
 ) {
   if (a > b) {
     return -1;
@@ -673,7 +673,7 @@ function descendingTextFieldKindValueSort(
 
 function sortByDescendingNumberFieldKindValue(
   a: NumberFieldKindValue,
-  b: NumberFieldKindValue,
+  b: NumberFieldKindValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -697,7 +697,7 @@ function sortByDescendingNumberFieldKindValue(
 
 function sortByDescendingDateFieldKindValue(
   a: DateFieldKindValue,
-  b: DateFieldKindValue,
+  b: DateFieldKindValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -730,7 +730,7 @@ function sortByDescendingDateFieldKindValue(
 function sortByAscendingSingleSelect(
   optionsByID: { [id: string]: SelectOption },
   a: SingleSelectFieldValue,
-  b: SingleSelectFieldValue,
+  b: SingleSelectFieldValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -758,7 +758,7 @@ function sortByAscendingSingleSelect(
 function sortByDescendingSingleSelect(
   optionsByID: { [id: string]: SelectOption },
   a: SingleSelectFieldValue,
-  b: SingleSelectFieldValue,
+  b: SingleSelectFieldValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -786,7 +786,7 @@ function sortByDescendingSingleSelect(
 function sortByAscendingMultiSelect(
   optionsByID: { [id: string]: SelectOption },
   a: MultiSelectFieldValue,
-  b: MultiSelectFieldValue,
+  b: MultiSelectFieldValue
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -814,7 +814,7 @@ function sortByAscendingMultiSelect(
 function sortByDescendingMultiSelect(
   optionsByID: { [id: string]: SelectOption },
   a: MultiSelectFieldValue,
-  b: MultiSelectFieldValue,
+  b: MultiSelectFieldValue
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -842,7 +842,7 @@ function sortByDescendingMultiSelect(
 function sortByAscendingSingleCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: SingleCollaboratorFieldValue,
-  b: SingleCollaboratorFieldValue,
+  b: SingleCollaboratorFieldValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -870,7 +870,7 @@ function sortByAscendingSingleCollaborator(
 function sortByDescendingSingleCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: SingleCollaboratorFieldValue,
-  b: SingleCollaboratorFieldValue,
+  b: SingleCollaboratorFieldValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -898,7 +898,7 @@ function sortByDescendingSingleCollaborator(
 function sortByAscendingMultiCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: MultiCollaboratorFieldValue,
-  b: MultiCollaboratorFieldValue,
+  b: MultiCollaboratorFieldValue
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -926,7 +926,7 @@ function sortByAscendingMultiCollaborator(
 function sortByDescendingMultiCollaborator(
   getCollaborator: (collaboratorID: CollaboratorID) => Collaborator,
   a: MultiCollaboratorFieldValue,
-  b: MultiCollaboratorFieldValue,
+  b: MultiCollaboratorFieldValue
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -955,7 +955,7 @@ function sortByAscendingSingleDocumentLink(
   primaryField: PrimaryField,
   getDocument: (documentID: DocumentID) => Document,
   a: SingleDocumentLinkFieldValue,
-  b: SingleDocumentLinkFieldValue,
+  b: SingleDocumentLinkFieldValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -980,7 +980,7 @@ function sortByAscendingSingleDocumentLink(
 
   return ascendingTextFieldKindValueSort(
     documentAPrimaryFieldValue,
-    documentBPrimaryFieldValue,
+    documentBPrimaryFieldValue
   );
 }
 
@@ -988,7 +988,7 @@ function sortByDescendingSingleDocumentLink(
   primaryField: PrimaryField,
   getDocument: (documentID: DocumentID) => Document,
   a: SingleDocumentLinkFieldValue,
-  b: SingleDocumentLinkFieldValue,
+  b: SingleDocumentLinkFieldValue
 ) {
   if (a === null && b === null) {
     return 0;
@@ -1013,7 +1013,7 @@ function sortByDescendingSingleDocumentLink(
 
   return descendingTextFieldKindValueSort(
     documentAPrimaryFieldValue,
-    documentBPrimaryFieldValue,
+    documentBPrimaryFieldValue
   );
 }
 
@@ -1021,7 +1021,7 @@ function sortByAscendingMultiDocumentLink(
   primaryField: PrimaryField,
   getDocument: (documentID: DocumentID) => Document,
   a: MultiDocumentLinkFieldValue,
-  b: MultiDocumentLinkFieldValue,
+  b: MultiDocumentLinkFieldValue
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -1046,7 +1046,7 @@ function sortByAscendingMultiDocumentLink(
 
   return ascendingTextFieldKindValueSort(
     documentAPrimaryFieldValue,
-    documentBPrimaryFieldValue,
+    documentBPrimaryFieldValue
   );
 }
 
@@ -1054,7 +1054,7 @@ function sortByDescendingMultiDocumentLink(
   primaryField: PrimaryField,
   getDocument: (documentID: DocumentID) => Document,
   a: MultiDocumentLinkFieldValue,
-  b: MultiDocumentLinkFieldValue,
+  b: MultiDocumentLinkFieldValue
 ) {
   if (isEmpty(a) && isEmpty(b)) {
     return 0;
@@ -1079,6 +1079,6 @@ function sortByDescendingMultiDocumentLink(
 
   return descendingTextFieldKindValueSort(
     documentAPrimaryFieldValue,
-    documentBPrimaryFieldValue,
+    documentBPrimaryFieldValue
   );
 }

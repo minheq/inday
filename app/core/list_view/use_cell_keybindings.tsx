@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useCallback, useMemo } from "react";
+import { useSetRecoilState } from "recoil";
 import {
   EditingKey,
   KeyBinding,
@@ -7,7 +7,7 @@ import {
   UIKey,
   useKeyboard,
   WhiteSpaceKey,
-} from '../../lib/keyboard';
+} from "../../lib/keyboard";
 import {
   getDocumentID,
   getLeafRowCellTop,
@@ -18,9 +18,9 @@ import {
   getLeafRowCellRight,
   getLeafRowCellRightMost,
   getLeafRowCellTopMost,
-} from './list_view_map';
-import { activeCellState, useListViewViewContext } from './list_view_view';
-import { useLeafRowCellContext } from './leaf_row_cell';
+} from "./list_view_map";
+import { activeCellState, useListViewViewContext } from "./list_view_view";
+import { useLeafRowCellContext } from "./leaf_row_cell";
 
 interface UseCellKeyBindingsProps {
   onDelete?: () => void;
@@ -39,7 +39,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
   const setActiveCell = useSetRecoilState(activeCellState);
 
   // Listen for keyboard strokes only when the cell is focused
-  const active = cell !== null && cell.state === 'focused';
+  const active = cell !== null && cell.state === "focused";
 
   const onArrowDown = useCallback(() => {
     const cellBelow = getLeafRowCellBottom(listViewMap, cell);
@@ -48,7 +48,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
       return;
     }
 
-    setActiveCell({ ...cellBelow, state: 'focused' });
+    setActiveCell({ ...cellBelow, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onArrowUp = useCallback(() => {
@@ -58,7 +58,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
       return;
     }
 
-    setActiveCell({ ...cellAbove, state: 'focused' });
+    setActiveCell({ ...cellAbove, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onArrowLeft = useCallback(() => {
@@ -68,7 +68,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
       return;
     }
 
-    setActiveCell({ ...cellLeft, state: 'focused' });
+    setActiveCell({ ...cellLeft, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onArrowRight = useCallback(() => {
@@ -78,27 +78,27 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
       return;
     }
 
-    setActiveCell({ ...cellRight, state: 'focused' });
+    setActiveCell({ ...cellRight, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowDown = useCallback(() => {
     const cellBottomMost = getLeafRowCellBottomMost(listViewMap, cell);
-    setActiveCell({ ...cellBottomMost, state: 'focused' });
+    setActiveCell({ ...cellBottomMost, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowUp = useCallback(() => {
     const cellTopMost = getLeafRowCellTopMost(listViewMap, cell);
-    setActiveCell({ ...cellTopMost, state: 'focused' });
+    setActiveCell({ ...cellTopMost, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowLeft = useCallback(() => {
     const cellLeftMost = getLeafRowCellLeftMost(listViewMap, cell);
-    setActiveCell({ ...cellLeftMost, state: 'focused' });
+    setActiveCell({ ...cellLeftMost, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onMetaArrowRight = useCallback(() => {
     const cellRightMost = getLeafRowCellRightMost(listViewMap, cell);
-    setActiveCell({ ...cellRightMost, state: 'focused' });
+    setActiveCell({ ...cellRightMost, state: "focused" });
   }, [cell, setActiveCell, listViewMap]);
 
   const onEscape = useCallback(() => {
@@ -117,7 +117,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
         onPrintableKeyOverride(key);
       }
     },
-    [onPrintableKeyOverride],
+    [onPrintableKeyOverride]
   );
 
   const onEnter = useCallback(() => {
@@ -126,7 +126,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
       return;
     }
 
-    setActiveCell({ ...cell, state: 'editing' });
+    setActiveCell({ ...cell, state: "editing" });
   }, [cell, setActiveCell, onEnterOverride]);
 
   const onSpace = useCallback(() => {
@@ -194,7 +194,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
         handler: onDelete,
       },
       {
-        key: 'PrintableKey',
+        key: "PrintableKey",
         handler: onPrintableKey,
       },
     ];

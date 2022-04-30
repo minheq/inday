@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { Pressable, Animated, StyleSheet } from 'react-native';
-import { useTheme, useThemeStyles } from './theme';
+import React, { useCallback, useEffect, useRef } from "react";
+import { Pressable, Animated, StyleSheet } from "react-native";
+import { useTheme, useThemeStyles } from "./theme";
 
 interface SwitchProps {
   value?: boolean;
@@ -73,17 +73,17 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     borderRadius: 999,
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+    position: "absolute",
+    width: "100%",
+    height: "100%",
   },
   slider: {
     borderRadius: 999,
     top: 2,
     width: 26,
     height: 26,
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

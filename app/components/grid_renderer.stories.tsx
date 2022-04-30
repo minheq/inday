@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useRef, useState } from "react";
 
 import {
   GridRenderer,
@@ -11,13 +11,13 @@ import {
   RenderLeafRowProps,
   RenderHeaderProps,
   RenderFooterProps,
-} from './grid_renderer';
-import { AutoSizer } from '../lib/autosizer';
-import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
-import { FlatButton } from './flat_button';
-import { Picker } from './picker';
-import { GridGroup, getRows, LeafRow } from './grid_renderer.common';
-import { splitLast } from '../../lib/array_utils';
+} from "./grid_renderer";
+import { AutoSizer } from "../lib/autosizer";
+import { StyleSheet, View, Text, SafeAreaView } from "react-native";
+import { FlatButton } from "./flat_button";
+import { Picker } from "./picker";
+import { GridGroup, getRows, LeafRow } from "./grid_renderer.common";
+import { splitLast } from "../../lib/array_utils";
 
 function renderLeafRowCell(props: RenderLeafRowCellProps) {
   const { row, column } = props;
@@ -92,7 +92,7 @@ function Flat(): JSX.Element {
 
   const groups: GridGroup[] = [
     {
-      type: 'leaf',
+      type: "leaf",
       collapsed: false,
       rowCount: 100,
     },
@@ -146,27 +146,27 @@ function Grouped(): JSX.Element {
 
   const groups: GridGroup[] = [
     {
-      type: 'ancestor',
+      type: "ancestor",
       collapsed: false,
       children: [
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 50,
         },
       ],
     },
     {
-      type: 'ancestor',
+      type: "ancestor",
       collapsed: false,
       children: [
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 25,
         },
         {
-          type: 'leaf',
+          type: "leaf",
           collapsed: false,
           rowCount: 25,
         },
@@ -237,7 +237,7 @@ function useScrollToCell(gridRef: React.RefObject<GridRendererRef>) {
         });
       }
     },
-    [gridRef],
+    [gridRef]
   );
 }
 
@@ -255,11 +255,11 @@ function ScrollToCell(props: ScrollToCellProps) {
   const rowOptions = useMemo(() => {
     return (
       getRows(groups, 0, 0, 0, [], 0).filter(
-        (r) => r.type === 'leaf',
+        (r) => r.type === "leaf"
       ) as LeafRow[]
     ).map((row) => ({
-      value: [...row.path, row.row].join(','),
-      label: `Row (${row.path.join(',')} - ${row.row})`,
+      value: [...row.path, row.row].join(","),
+      label: `Row (${row.path.join(",")} - ${row.row})`,
     }));
   }, [groups]);
 
@@ -270,10 +270,10 @@ function ScrollToCell(props: ScrollToCellProps) {
   return (
     <View style={styles.scrollToCell}>
       <Picker<string>
-        value={leafRow ? [...leafRow.path, leafRow.row].join(',') : undefined}
+        value={leafRow ? [...leafRow.path, leafRow.row].join(",") : undefined}
         options={rowOptions}
         onChange={(p1) => {
-          const [path, row] = splitLast(p1.split(',').map((p2) => Number(p2)));
+          const [path, row] = splitLast(p1.split(",").map((p2) => Number(p2)));
 
           setLeafRow({ path, row });
         }}
@@ -296,30 +296,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   leafRowCell: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   groupRow: {},
   leafRow: {},
   header: {},
   footer: {},
   groupRowCell: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   headerCell: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderBottomWidth: 1,
   },
   footerCell: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   scrollToCell: {
     borderRadius: 8,
     width: 200,
-    position: 'absolute',
+    position: "absolute",
     bottom: 64,
     right: 16,
   },

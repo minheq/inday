@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
-import { SpringConfig } from './animation';
-import { tokens } from './tokens';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Animated, StyleSheet, LayoutChangeEvent } from "react-native";
+import { SpringConfig } from "./animation";
+import { tokens } from "./tokens";
 
 interface ExpandProps {
   open?: boolean;
@@ -70,6 +70,6 @@ export function Expand(props: ExpandProps): JSX.Element {
 
 const styles = StyleSheet.create({
   base: {
-    overflow: 'hidden',
+    overflow: "hidden",
   },
 });

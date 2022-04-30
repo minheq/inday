@@ -7,8 +7,8 @@ import React, {
   useImperativeHandle,
   useCallback,
   useMemo,
-} from 'react';
-import { css } from '../lib/css';
+} from "react";
+import { css } from "../lib/css";
 import {
   useGetStatefulRows,
   useGridGetScrollToCellOffset,
@@ -21,7 +21,7 @@ import {
   GroupRowState,
   useRowsRecycler,
   useColumnsRecycler,
-} from './grid_renderer.common';
+} from "./grid_renderer.common";
 import {
   GridRendererRef,
   GridRendererProps,
@@ -35,14 +35,14 @@ import {
   RenderHeaderProps,
   RenderFooterProps,
   Pane,
-} from './grid_renderer';
+} from "./grid_renderer";
 
 // False positive  https://github.com/yannickcr/eslint-plugin-react/issues/2269
 // eslint-disable-next-line
 export const GridRenderer = memo(
   forwardRef<GridRendererRef, GridRendererProps>(function GridRenderer(
     props,
-    ref,
+    ref
   ) {
     const {
       activeCell = null,
@@ -70,7 +70,7 @@ export const GridRenderer = memo(
     } = props;
     const scrollViewRef = useRef<HTMLDivElement>(null);
     const [scrollPosition, setScrollPosition] = useState<ContentOffset>(
-      contentOffset || { x: 0, y: 0 },
+      contentOffset || { x: 0, y: 0 }
     );
 
     const handleScrollToOffset = useCallback(
@@ -85,7 +85,7 @@ export const GridRenderer = memo(
           });
         }
       },
-      [scrollViewRef],
+      [scrollViewRef]
     );
 
     const handleOnScroll = useCallback(
@@ -95,7 +95,7 @@ export const GridRenderer = memo(
           x: event.currentTarget.scrollLeft,
         });
       },
-      [],
+      []
     );
 
     useEffect(() => {
@@ -173,7 +173,7 @@ export const GridRenderer = memo(
             handleScrollToOffset(getScrollToCellOffset(params)),
         };
       },
-      [handleScrollToOffset, getScrollToCellOffset],
+      [handleScrollToOffset, getScrollToCellOffset]
     );
 
     const renderRows = useCallback(
@@ -182,7 +182,7 @@ export const GridRenderer = memo(
 
         statefulRows.map((row) => {
           switch (row.type) {
-            case 'leaf':
+            case "leaf":
               _rows.push(
                 <LeafRowContainer
                   key={row.key}
@@ -200,10 +200,10 @@ export const GridRenderer = memo(
                   columnCount={columnCount}
                   renderLeafRow={renderLeafRow}
                   renderLeafRowCell={renderLeafRowCell}
-                />,
+                />
               );
               break;
-            case 'group':
+            case "group":
               if (
                 renderGroupRowCell === undefined ||
                 renderGroupRow === undefined
@@ -226,16 +226,16 @@ export const GridRenderer = memo(
                   columnCount={columnCount}
                   renderGroupRow={renderGroupRow}
                   renderGroupRowCell={renderGroupRowCell}
-                />,
+                />
               );
               break;
-            case 'spacer':
+            case "spacer":
               _rows.push(
                 <SpacerRowContainer
                   key={row.key}
                   y={row.y}
                   height={row.height}
-                />,
+                />
               );
               break;
           }
@@ -250,7 +250,7 @@ export const GridRenderer = memo(
         renderGroupRow,
         statefulRows,
         columnCount,
-      ],
+      ]
     );
 
     const _renderHeader = useCallback(
@@ -275,7 +275,7 @@ export const GridRenderer = memo(
           />
         );
       },
-      [headerHeight, renderHeaderCell, renderHeader, columnCount],
+      [headerHeight, renderHeaderCell, renderHeader, columnCount]
     );
 
     const _renderFooter = useCallback(
@@ -308,61 +308,61 @@ export const GridRenderer = memo(
         renderFooterCell,
         renderFooter,
         columnCount,
-      ],
+      ]
     );
 
     return (
-      <div ref={scrollViewRef} style={styles('root')} onScroll={handleOnScroll}>
+      <div ref={scrollViewRef} style={styles("root")} onScroll={handleOnScroll}>
         <div
-          style={styles('content', {
+          style={styles("content", {
             width: contentWidth,
             height: totalHeight,
           })}
         >
           <div
-            style={styles('leftPaneColumns', { width: leftPaneContentWidth })}
+            style={styles("leftPaneColumns", { width: leftPaneContentWidth })}
           >
             {_renderHeader(
               recycledLeftPaneColumns,
               leftPaneContentWidth,
-              'left',
+              "left"
             )}
-            <div style={styles('rowsWrapper', { top: headerHeight })}>
+            <div style={styles("rowsWrapper", { top: headerHeight })}>
               {renderRows(
                 recycledLeftPaneColumns,
                 leftPaneContentWidth,
-                'left',
+                "left"
               )}
             </div>
             {_renderFooter(
               recycledLeftPaneColumns,
               leftPaneContentWidth,
-              'left',
+              "left"
             )}
           </div>
-          <div style={styles('rightPaneColumns')}>
+          <div style={styles("rightPaneColumns")}>
             {_renderHeader(
               recycledRightPaneColumns,
               rightPaneContentWidth,
-              'right',
+              "right"
             )}
-            <div style={styles('rowsWrapper', { top: headerHeight })}>
+            <div style={styles("rowsWrapper", { top: headerHeight })}>
               {renderRows(
                 recycledRightPaneColumns,
                 rightPaneContentWidth,
-                'right',
+                "right"
               )}
             </div>
             {_renderFooter(
               recycledRightPaneColumns,
               rightPaneContentWidth,
-              'right',
+              "right"
             )}
           </div>
         </div>
       </div>
     );
-  }),
+  })
 );
 
 interface HeaderContainerProps {
@@ -376,7 +376,7 @@ interface HeaderContainerProps {
 }
 
 const HeaderContainer = memo(function HeaderContainer(
-  props: HeaderContainerProps,
+  props: HeaderContainerProps
 ) {
   const {
     height,
@@ -389,10 +389,10 @@ const HeaderContainer = memo(function HeaderContainer(
   } = props;
 
   const wrapperStyle = useMemo(
-    () => styles('headerWrapper', { width, height }),
-    [height, width],
+    () => styles("headerWrapper", { width, height }),
+    [height, width]
   );
-  const rowStyle = useMemo(() => styles('row', { height }), [height]);
+  const rowStyle = useMemo(() => styles("row", { height }), [height]);
 
   const children = useMemo(
     () => (
@@ -414,7 +414,7 @@ const HeaderContainer = memo(function HeaderContainer(
         })}
       </div>
     ),
-    [columns, rowStyle, renderHeaderCell, height, columnCount],
+    [columns, rowStyle, renderHeaderCell, height, columnCount]
   );
 
   return <div style={wrapperStyle}>{renderHeader({ children, pane })}</div>;
@@ -432,7 +432,7 @@ interface FooterContainerProps {
 }
 
 const FooterContainer = memo(function FooterContainer(
-  props: FooterContainerProps,
+  props: FooterContainerProps
 ) {
   const {
     y,
@@ -446,10 +446,10 @@ const FooterContainer = memo(function FooterContainer(
   } = props;
 
   const wrapperStyle = useMemo(
-    () => styles('footerWrapper', { top: y, width, height }),
-    [height, width, y],
+    () => styles("footerWrapper", { top: y, width, height }),
+    [height, width, y]
   );
-  const rowStyle = useMemo(() => styles('row', { height }), [height]);
+  const rowStyle = useMemo(() => styles("row", { height }), [height]);
 
   const children = useMemo(
     () => (
@@ -471,7 +471,7 @@ const FooterContainer = memo(function FooterContainer(
         })}
       </div>
     ),
-    [columns, rowStyle, renderFooterCell, height, columnCount],
+    [columns, rowStyle, renderFooterCell, height, columnCount]
   );
 
   return <div style={wrapperStyle}>{renderFooter({ children, pane })}</div>;
@@ -495,7 +495,7 @@ interface LeafRowContainerProps {
 }
 
 const LeafRowContainer = memo(function LeafRowContainer(
-  props: LeafRowContainerProps,
+  props: LeafRowContainerProps
 ) {
   const {
     width,
@@ -517,13 +517,13 @@ const LeafRowContainer = memo(function LeafRowContainer(
   const wrapperStyle = useMemo(
     () =>
       styles(
-        'rowWrapper',
+        "rowWrapper",
         { height, width, top: y },
-        activeCell !== null && 'active',
+        activeCell !== null && "active"
       ),
-    [height, width, y, activeCell],
+    [height, width, y, activeCell]
   );
-  const rowStyle = useMemo(() => styles('row', { height }), [height]);
+  const rowStyle = useMemo(() => styles("row", { height }), [height]);
 
   const children = useMemo(
     () => (
@@ -531,7 +531,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
         {columns.map((columnData) => {
           const { key, width: columnWidth, column, x } = columnData;
           const cellState =
-            activeCell?.column === column ? activeCell.state : 'default';
+            activeCell?.column === column ? activeCell.state : "default";
 
           return (
             <LeafRowCellContainer
@@ -561,7 +561,7 @@ const LeafRowContainer = memo(function LeafRowContainer(
       renderLeafRowCell,
       row,
       columnCount,
-    ],
+    ]
   );
 
   return (
@@ -587,7 +587,7 @@ interface GroupRowContainerProps {
 }
 
 const GroupRowContainer = memo(function GroupRowContainer(
-  props: GroupRowContainerProps,
+  props: GroupRowContainerProps
 ) {
   const {
     width,
@@ -607,13 +607,13 @@ const GroupRowContainer = memo(function GroupRowContainer(
   const wrapperStyle = useMemo(
     () =>
       styles(
-        'rowWrapper',
+        "rowWrapper",
         { height, width, top: y },
-        state === 'hovered' && 'active',
+        state === "hovered" && "active"
       ),
-    [height, state, width, y],
+    [height, state, width, y]
   );
-  const rowStyle = useMemo(() => styles('row', { height }), [height]);
+  const rowStyle = useMemo(() => styles("row", { height }), [height]);
 
   const children = useMemo(
     () => (
@@ -646,7 +646,7 @@ const GroupRowContainer = memo(function GroupRowContainer(
       collapsed,
       renderGroupRowCell,
       columnCount,
-    ],
+    ]
   );
 
   return (
@@ -662,13 +662,13 @@ interface SpacerRowContainerProps {
 }
 
 const SpacerRowContainer = memo(function SpacerRowContainer(
-  props: SpacerRowContainerProps,
+  props: SpacerRowContainerProps
 ) {
   const { height, y } = props;
 
   const style = useMemo(
-    () => styles('spacer', { height, top: y }),
-    [y, height],
+    () => styles("spacer", { height, top: y }),
+    [y, height]
   );
 
   return <div style={style} />;
@@ -684,13 +684,13 @@ interface HeaderCellContainerProps {
 }
 
 const HeaderCellContainer = memo(function HeaderCellContainer(
-  props: HeaderCellContainerProps,
+  props: HeaderCellContainerProps
 ) {
   const { x, column, width, height, last, renderHeaderCell } = props;
 
   const style = useMemo(
-    () => styles('cell', { left: x, width, height }),
-    [x, width, height],
+    () => styles("cell", { left: x, width, height }),
+    [x, width, height]
   );
 
   return (
@@ -708,13 +708,13 @@ interface FooterCellContainerProps {
 }
 
 const FooterCellContainer = memo(function FooterCellContainer(
-  props: FooterCellContainerProps,
+  props: FooterCellContainerProps
 ) {
   const { x, column, width, height, last, renderFooterCell } = props;
 
   const style = useMemo(
-    () => styles('cell', { left: x, width, height }),
-    [x, width, height],
+    () => styles("cell", { left: x, width, height }),
+    [x, width, height]
   );
 
   return (
@@ -736,7 +736,7 @@ interface LeafRowCellContainerProps {
 }
 
 const LeafRowCellContainer = memo(function LeafRowCellContainer(
-  props: LeafRowCellContainerProps,
+  props: LeafRowCellContainerProps
 ) {
   const {
     x,
@@ -747,19 +747,19 @@ const LeafRowCellContainer = memo(function LeafRowCellContainer(
     width,
     height,
     last,
-    state = 'default',
+    state = "default",
     renderLeafRowCell,
   } = props;
 
   const style = useMemo(
     () =>
       styles(
-        'cell',
+        "cell",
         { left: x, width, height },
-        (state === 'editing' || state === 'focused' || state === 'hovered') &&
-          'active',
+        (state === "editing" || state === "focused" || state === "hovered") &&
+          "active"
       ),
-    [x, width, height, state],
+    [x, width, height, state]
   );
 
   return (
@@ -791,7 +791,7 @@ interface GroupRowCellContainerProps {
 }
 
 const GroupRowCellContainer = memo(function GroupRowCellContainer(
-  props: GroupRowCellContainerProps,
+  props: GroupRowCellContainerProps
 ) {
   const {
     x,
@@ -806,8 +806,8 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
   } = props;
 
   const style = useMemo(
-    () => styles('cell', { left: x, width, height }),
-    [x, width, height],
+    () => styles("cell", { left: x, width, height }),
+    [x, width, height]
   );
 
   return (
@@ -827,55 +827,55 @@ const GroupRowCellContainer = memo(function GroupRowCellContainer(
 
 const styles = css.create({
   root: {
-    position: 'relative',
-    overflow: 'scroll',
+    position: "relative",
+    overflow: "scroll",
   },
   content: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'row',
+    position: "relative",
+    display: "flex",
+    flexDirection: "row",
   },
   rowsWrapper: {
-    position: 'absolute',
+    position: "absolute",
   },
   rowWrapper: {
-    position: 'absolute',
+    position: "absolute",
   },
   row: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'row',
+    position: "relative",
+    display: "flex",
+    flexDirection: "row",
   },
   cell: {
-    position: 'absolute',
-    display: 'flex',
-    flexDirection: 'column',
+    position: "absolute",
+    display: "flex",
+    flexDirection: "column",
   },
   headerWrapper: {
     zIndex: 2,
-    position: 'sticky',
+    position: "sticky",
     top: 0,
   },
   footerWrapper: {
     zIndex: 2,
-    position: 'sticky',
+    position: "sticky",
     bottom: 0,
   },
   leftPaneColumns: {
     zIndex: 3,
-    position: 'sticky',
+    position: "sticky",
     left: 0,
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
   },
   rightPaneColumns: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
   },
   spacer: {
-    position: 'absolute',
-    width: '100%',
+    position: "absolute",
+    width: "100%",
   },
   active: {
     zIndex: 1,

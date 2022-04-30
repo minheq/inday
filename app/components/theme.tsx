@@ -1,12 +1,12 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext } from "react";
 import {
   ColorSchemeName,
   StyleSheet,
   TextStyle,
   useColorScheme,
   ViewStyle,
-} from 'react-native';
-import { palette } from './palette';
+} from "react-native";
+import { palette } from "./palette";
 
 /* eslint-disable react-native/no-color-literals */
 
@@ -46,7 +46,7 @@ export interface Theme {
 }
 
 const lightTheme: Theme = {
-  colorScheme: 'light',
+  colorScheme: "light",
   button: {
     primaryDefault: palette.blue[700],
     primaryHovered: palette.blue[800],
@@ -75,12 +75,12 @@ const lightTheme: Theme = {
     focused: palette.blue[800],
   },
   elevation: {
-    level1: 'rgba(63, 63, 70, 0.08)',
+    level1: "rgba(63, 63, 70, 0.08)",
   },
 };
 
 const darkTheme: Theme = {
-  colorScheme: 'dark',
+  colorScheme: "dark",
   button: {
     primaryDefault: palette.blue[50],
     primaryHovered: palette.blue[100],
@@ -109,7 +109,7 @@ const darkTheme: Theme = {
     focused: palette.blue[500],
   },
   elevation: {
-    level1: 'rgba(255, 255, 255, 0.08)',
+    level1: "rgba(255, 255, 255, 0.08)",
   },
 };
 
@@ -285,7 +285,7 @@ export interface ThemeStyles {
 }
 
 const darkThemeStyles: ThemeStyles = {
-  colorScheme: 'dark',
+  colorScheme: "dark",
   button: {
     primaryDefault: darkStyles.buttonPrimaryDefault,
     primaryHovered: darkStyles.buttonPrimaryHovered,
@@ -319,7 +319,7 @@ const darkThemeStyles: ThemeStyles = {
 };
 
 const lightThemeStyles: ThemeStyles = {
-  colorScheme: 'light',
+  colorScheme: "light",
   button: {
     primaryDefault: lightStyles.buttonPrimaryDefault,
     primaryHovered: lightStyles.buttonPrimaryHovered,
@@ -368,7 +368,7 @@ export function ThemeProvider(props: ThemeProviderProps): JSX.Element {
 
   return (
     <ThemeContext.Provider
-      value={colorScheme === 'dark' ? darkTheme : lightTheme}
+      value={colorScheme === "dark" ? darkTheme : lightTheme}
     >
       <ThemeStylesProvider>{children}</ThemeStylesProvider>
     </ThemeContext.Provider>
@@ -386,14 +386,14 @@ export function useThemeStyles(): ThemeStyles {
 }
 
 export function ThemeStylesProvider(
-  props: ThemeStylesProviderProps,
+  props: ThemeStylesProviderProps
 ): JSX.Element {
   const { children } = props;
   const colorScheme = useColorScheme();
 
   return (
     <ThemeStylesContext.Provider
-      value={colorScheme === 'dark' ? darkThemeStyles : lightThemeStyles}
+      value={colorScheme === "dark" ? darkThemeStyles : lightThemeStyles}
     >
       {children}
     </ThemeStylesContext.Provider>

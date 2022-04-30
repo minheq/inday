@@ -1,12 +1,12 @@
-import React from 'react';
-import { Modal as RNModal } from 'react-native';
+import React from "react";
+import { Modal as RNModal } from "react-native";
 
 export interface ModalProps {
   visible: boolean;
   onRequestClose?: () => void;
   children?: React.ReactNode;
   transparent?: boolean;
-  animationType?: 'none' | 'slide' | 'fade';
+  animationType?: "none" | "slide" | "fade";
   onShow?: () => void;
   onDismiss?: () => void;
 }

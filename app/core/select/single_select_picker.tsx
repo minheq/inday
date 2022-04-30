@@ -1,13 +1,13 @@
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment, useCallback } from "react";
 
-import { ListPicker, ListPickerOption } from '../../components/list_picker';
+import { ListPicker, ListPickerOption } from "../../components/list_picker";
 import {
   SelectOption,
   SelectOptionID,
   SingleSelectField,
   SingleSelectFieldValue,
-} from '../../../models/fields';
-import { OptionBadge } from './option_badge';
+} from "../../../models/fields";
+import { OptionBadge } from "./option_badge";
 
 interface SingleSelectPickerProps {
   value: SelectOptionID | null;
@@ -17,7 +17,7 @@ interface SingleSelectPickerProps {
 }
 
 export function SingleSelectPicker(
-  props: SingleSelectPickerProps,
+  props: SingleSelectPickerProps
 ): JSX.Element {
   const { value, field, onChange, onRequestClose } = props;
   const renderOption = useRenderOption(field.options);
@@ -35,7 +35,7 @@ export function SingleSelectPicker(
 }
 
 export function useRenderOption(
-  options: SelectOption[],
+  options: SelectOption[]
 ): (id: SelectOptionID) => JSX.Element {
   return useCallback(
     (id: SelectOptionID) => {
@@ -47,12 +47,12 @@ export function useRenderOption(
 
       return <OptionBadge option={option} key={option.id} />;
     },
-    [options],
+    [options]
   );
 }
 
 export function useGetOptionOptions(
-  options: SelectOption[],
+  options: SelectOption[]
 ): ListPickerOption<SelectOptionID>[] {
   return options.map((option) => ({
     value: option.id,

@@ -1,7 +1,7 @@
-import React, { memo, useEffect, useRef } from 'react';
-import { Animated } from 'react-native';
-import { SpringConfig } from './animation';
-import { tokens } from './tokens';
+import React, { memo, useEffect, useRef } from "react";
+import { Animated } from "react-native";
+import { SpringConfig } from "./animation";
+import { tokens } from "./tokens";
 
 interface SlideProps {
   width: number;
@@ -23,7 +23,7 @@ export const Slide = memo(function Slide(props: SlideProps): JSX.Element {
   } = props;
   const { speed, bounciness } = config || tokens.animation.default;
   const width = useRef(
-    new Animated.Value(visible ? intrinsicWidth : 0),
+    new Animated.Value(visible ? intrinsicWidth : 0)
   ).current;
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
 

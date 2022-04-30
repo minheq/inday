@@ -1,4 +1,4 @@
-import fastify from 'fastify';
+import fastify from "fastify";
 
 import {
   addContext,
@@ -24,108 +24,108 @@ import {
   handleGetField,
   handleDeleteField,
   handleDuplicateField,
-} from './handlers';
+} from "./handlers";
 import {
   ValidationError,
   NotFoundError,
   BadRequestError,
   UnauthorizedError,
   AuthenticationError,
-} from './errors';
+} from "./errors";
 
 export function createAPI() {
   const api = fastify();
 
   api.post(
-    '/v0/workspaces/:workspaceID/create',
-    addContext(ensureAuthenticated(handleCreateWorkspace)),
+    "/v0/workspaces/:workspaceID/create",
+    addContext(ensureAuthenticated(handleCreateWorkspace))
   );
   api.post(
-    '/v0/workspaces/:workspaceID/updateName',
-    addContext(ensureAuthenticated(handleUpdateWorkspaceName)),
+    "/v0/workspaces/:workspaceID/updateName",
+    addContext(ensureAuthenticated(handleUpdateWorkspaceName))
   );
   api.post(
-    '/v0/workspaces/:workspaceID/delete',
-    addContext(ensureAuthenticated(handleDeleteWorkspace)),
+    "/v0/workspaces/:workspaceID/delete",
+    addContext(ensureAuthenticated(handleDeleteWorkspace))
   );
   api.get(
-    '/v0/workspaces/:workspaceID',
-    addContext(ensureAuthenticated(handleGetWorkspace)),
+    "/v0/workspaces/:workspaceID",
+    addContext(ensureAuthenticated(handleGetWorkspace))
   );
 
   api.post(
-    '/v0/spaces/:spaceID/create',
-    addContext(ensureAuthenticated(handleCreateSpace)),
+    "/v0/spaces/:spaceID/create",
+    addContext(ensureAuthenticated(handleCreateSpace))
   );
   api.post(
-    '/v0/spaces/:spaceID/updateName',
-    addContext(ensureAuthenticated(handleUpdateSpaceName)),
+    "/v0/spaces/:spaceID/updateName",
+    addContext(ensureAuthenticated(handleUpdateSpaceName))
   );
   api.post(
-    '/v0/spaces/:spaceID/delete',
-    addContext(ensureAuthenticated(handleDeleteSpace)),
+    "/v0/spaces/:spaceID/delete",
+    addContext(ensureAuthenticated(handleDeleteSpace))
   );
   api.get(
-    '/v0/spaces/:spaceID',
-    addContext(ensureAuthenticated(handleGetSpace)),
+    "/v0/spaces/:spaceID",
+    addContext(ensureAuthenticated(handleGetSpace))
   );
 
   api.post(
-    '/v0/collections/:collectionID/create',
-    addContext(ensureAuthenticated(handleCreateCollection)),
+    "/v0/collections/:collectionID/create",
+    addContext(ensureAuthenticated(handleCreateCollection))
   );
   api.post(
-    '/v0/collections/:collectionID/updateName',
-    addContext(ensureAuthenticated(handleUpdateCollectionName)),
+    "/v0/collections/:collectionID/updateName",
+    addContext(ensureAuthenticated(handleUpdateCollectionName))
   );
   api.post(
-    '/v0/collections/:collectionID/delete',
-    addContext(ensureAuthenticated(handleDeleteCollection)),
+    "/v0/collections/:collectionID/delete",
+    addContext(ensureAuthenticated(handleDeleteCollection))
   );
   api.get(
-    '/v0/collections/:collectionID',
-    addContext(ensureAuthenticated(handleGetCollection)),
+    "/v0/collections/:collectionID",
+    addContext(ensureAuthenticated(handleGetCollection))
   );
 
   api.post(
-    '/v0/views/:viewID/create',
-    addContext(ensureAuthenticated(handleCreateView)),
+    "/v0/views/:viewID/create",
+    addContext(ensureAuthenticated(handleCreateView))
   );
   api.post(
-    '/v0/views/:viewID/updateName',
-    addContext(ensureAuthenticated(handleUpdateViewName)),
+    "/v0/views/:viewID/updateName",
+    addContext(ensureAuthenticated(handleUpdateViewName))
   );
-  api.get('/v0/views/:viewID', addContext(ensureAuthenticated(handleGetView)));
+  api.get("/v0/views/:viewID", addContext(ensureAuthenticated(handleGetView)));
   api.post(
-    '/v0/views/:viewID/delete',
-    addContext(ensureAuthenticated(handleDeleteView)),
+    "/v0/views/:viewID/delete",
+    addContext(ensureAuthenticated(handleDeleteView))
   );
 
   api.post(
-    '/v0/fields/:fieldID/create',
-    addContext(ensureAuthenticated(handleCreateField)),
+    "/v0/fields/:fieldID/create",
+    addContext(ensureAuthenticated(handleCreateField))
   );
   api.post(
-    '/v0/fields/:fieldID/duplicate',
-    addContext(ensureAuthenticated(handleDuplicateField)),
+    "/v0/fields/:fieldID/duplicate",
+    addContext(ensureAuthenticated(handleDuplicateField))
   );
   api.post(
-    '/v0/fields/:fieldID/updateName',
-    addContext(ensureAuthenticated(handleUpdateFieldName)),
+    "/v0/fields/:fieldID/updateName",
+    addContext(ensureAuthenticated(handleUpdateFieldName))
   );
   api.get(
-    '/v0/fields/:fieldID',
-    addContext(ensureAuthenticated(handleGetField)),
+    "/v0/fields/:fieldID",
+    addContext(ensureAuthenticated(handleGetField))
   );
   api.post(
-    '/v0/fields/:fieldID/delete',
-    addContext(ensureAuthenticated(handleDeleteField)),
+    "/v0/fields/:fieldID/delete",
+    addContext(ensureAuthenticated(handleDeleteField))
   );
 
   api.setErrorHandler((err, req, res) => {
     if (err instanceof ValidationError) {
       res.status(400).send({
-        message: 'invalid input',
+        message: "invalid input",
         fields: err.fields,
       });
     } else if (err instanceof NotFoundError) {

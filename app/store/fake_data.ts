@@ -1,9 +1,9 @@
-import { Document } from '../../models/documents';
-import { Collection } from '../../models/collections';
-import { Space } from '../../models/spaces';
-import { Field, FieldType } from '../../models/fields';
-import { View } from '../../models/views';
-import { Collaborator } from '../../models/collaborators';
+import { Document } from "../../models/documents";
+import { Collection } from "../../models/collections";
+import { Space } from "../../models/spaces";
+import { Field, FieldType } from "../../models/fields";
+import { View } from "../../models/views";
+import { Collaborator } from "../../models/collaborators";
 import {
   makeSpace,
   makeCollaborator,
@@ -13,12 +13,12 @@ import {
   addFieldsToCollection,
   makeManyDocuments,
   makeGroup,
-} from '../../models/factory';
-import { keyedBy } from '../../lib/array_utils';
-import { Group } from '../../models/groups';
+} from "../../models/factory";
+import { keyedBy } from "../../lib/array_utils";
+import { Group } from "../../models/groups";
 
 const space1 = makeSpace({
-  id: 'spc1',
+  id: "spc1",
 });
 const collaborator1 = makeCollaborator({ spaceID: space1.id });
 const collaborator2 = makeCollaborator({ spaceID: space1.id });
@@ -129,12 +129,12 @@ const col1Fields = [
 const collection1WithFields = addFieldsToCollection(collection1, col1Fields);
 
 const col1View1 = makeView(
-  { id: 'viw1', name: 'Flat list', collectionID: collection1.id },
-  collection1WithFields,
+  { id: "viw1", name: "Flat list", collectionID: collection1.id },
+  collection1WithFields
 );
 const col1View2 = makeView(
-  { id: 'viw2', name: 'Grouped list', collectionID: collection1.id },
-  collection1WithFields,
+  { id: "viw2", name: "Grouped list", collectionID: collection1.id },
+  collection1WithFields
 );
 
 const col2Field1 = makeField({
@@ -165,7 +165,7 @@ const col1Documents = makeManyDocuments(
     [col1Field6.id]: col2Documents,
     [col1Field12.id]: col2Documents,
   },
-  [collaborator1, collaborator2],
+  [collaborator1, collaborator2]
 );
 
 export const spacesByIDFixtures: { [spaceID: string]: Space } = {
@@ -191,20 +191,20 @@ export const viewsByIDFixtures: { [viewID: string]: View } = {
 };
 
 export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
-  ...keyedBy(col1Fields, field => field.id),
-  ...keyedBy(col2Fields, field => field.id),
+  ...keyedBy(col1Fields, (field) => field.id),
+  ...keyedBy(col2Fields, (field) => field.id),
 };
 
 export const documentsByIDFixtures: {
   [documentID: string]: Document;
 } = {
-  ...keyedBy(col1Documents, field => field.id),
-  ...keyedBy(col2Documents, field => field.id),
+  ...keyedBy(col1Documents, (field) => field.id),
+  ...keyedBy(col2Documents, (field) => field.id),
 };
 
 const col1View2Group1 = makeGroup(
   { viewID: col1View2.id },
-  { fieldID: col1Field14.id, order: 'ascending' },
+  { fieldID: col1Field14.id, order: "ascending" }
 );
 
 export const groupsByIDFixtures: {

@@ -1,16 +1,16 @@
-import React, { Fragment } from 'react';
+import React, { Fragment } from "react";
 
-import { isEmpty } from '../../../lib/lang_utils';
-import { Row } from '../../components/row';
-import { CollaboratorBadge } from './collaborator_badge';
-import { CollaboratorID } from '../../../models/collaborators';
+import { isEmpty } from "../../../lib/lang_utils";
+import { Row } from "../../components/row";
+import { CollaboratorBadge } from "./collaborator_badge";
+import { CollaboratorID } from "../../../models/collaborators";
 
 interface CollaboratorBadgeListProps {
   collaboratorIDs: CollaboratorID[];
 }
 
 export function CollaboratorBadgeList(
-  props: CollaboratorBadgeListProps,
+  props: CollaboratorBadgeListProps
 ): JSX.Element {
   const { collaboratorIDs } = props;
 

@@ -1,8 +1,8 @@
-import React from 'react';
-import { View } from 'react-native';
+import React from "react";
+import { View } from "react-native";
 
-import { PressableHighlight } from './pressable_highlight';
-import { Text } from './text';
+import { PressableHighlight } from "./pressable_highlight";
+import { Text } from "./text";
 
 function Basic(): JSX.Element {
   return (

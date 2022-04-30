@@ -1,10 +1,10 @@
-import React, { memo, useCallback } from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
+import React, { memo, useCallback } from "react";
+import { View, Pressable, StyleSheet } from "react-native";
 
-import { Icon, IconName } from './icon';
-import { TextColor } from './text';
-import { useThemeStyles } from './theme';
-import { tokens } from './tokens';
+import { Icon, IconName } from "./icon";
+import { TextColor } from "./text";
+import { useThemeStyles } from "./theme";
+import { tokens } from "./tokens";
 
 interface CheckboxAltProps extends CheckboxAltViewProps {
   value?: boolean;
@@ -34,9 +34,9 @@ interface CheckboxAltViewProps {
 }
 
 export const CheckboxAltView = memo(function CheckboxAltView(
-  props: CheckboxAltViewProps,
+  props: CheckboxAltViewProps
 ) {
-  const { value, icon = 'CheckThick', color = 'success' } = props;
+  const { value, icon = "CheckThick", color = "success" } = props;
   const themeStyles = useThemeStyles();
 
   return (
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

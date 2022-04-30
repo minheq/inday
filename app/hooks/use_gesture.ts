@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import {
   GestureResponderEvent,
   Platform,
@@ -6,8 +6,8 @@ import {
   PanResponderGestureState,
   PanResponder,
   GestureResponderHandlers,
-} from 'react-native';
-import { isHoverEnabled } from '../lib/execution_environment';
+} from "react-native";
+import { isHoverEnabled } from "../lib/execution_environment";
 
 export type Rect = {
   bottom?: number;
@@ -23,7 +23,7 @@ export function createSquare(size: number): Rect {
 }
 
 export function normalizeRect(rectOrSize?: RectOrSize): Rect | undefined {
-  return typeof rectOrSize === 'number' ? createSquare(rectOrSize) : rectOrSize;
+  return typeof rectOrSize === "number" ? createSquare(rectOrSize) : rectOrSize;
 }
 
 type FocusEvent = React.FocusEvent;
@@ -112,7 +112,7 @@ export type GestureConfig = {
    */
   onDragStart?: (
     event: GestureResponderEvent,
-    gestureState: PanResponderGestureState,
+    gestureState: PanResponderGestureState
   ) => void;
 
   /**
@@ -120,7 +120,7 @@ export type GestureConfig = {
    */
   onDragMove?: (
     event: GestureResponderEvent,
-    gestureState: PanResponderGestureState,
+    gestureState: PanResponderGestureState
   ) => void;
 
   /**
@@ -128,7 +128,7 @@ export type GestureConfig = {
    */
   onDragEnd?: (
     event: GestureResponderEvent,
-    gestureState: PanResponderGestureState,
+    gestureState: PanResponderGestureState
   ) => void;
 
   /**
@@ -155,26 +155,26 @@ export interface EventHandlers extends GestureResponderHandlers {
 }
 
 enum TouchState {
-  NotResponder = 'NOT_RESPONDER',
-  ResponderInactivePressIn = 'RESPONDER_INACTIVE_PRESS_IN',
-  ResponderInactivePressOut = 'RESPONDER_INACTIVE_PRESS_OUT',
-  ResponderActivePressIn = 'RESPONDER_ACTIVE_PRESS_IN',
-  ResponderActivePressOut = 'RESPONDER_ACTIVE_PRESS_OUT',
-  ResponderActiveLongPressIn = 'RESPONDER_ACTIVE_LONG_PRESS_IN',
-  ResponderActiveLongPressOut = 'RESPONDER_ACTIVE_LONG_PRESS_OUT',
-  ResponderActiveDrag = 'RESPONDER_ACTIVE_DRAG',
-  Error = 'ERROR',
+  NotResponder = "NOT_RESPONDER",
+  ResponderInactivePressIn = "RESPONDER_INACTIVE_PRESS_IN",
+  ResponderInactivePressOut = "RESPONDER_INACTIVE_PRESS_OUT",
+  ResponderActivePressIn = "RESPONDER_ACTIVE_PRESS_IN",
+  ResponderActivePressOut = "RESPONDER_ACTIVE_PRESS_OUT",
+  ResponderActiveLongPressIn = "RESPONDER_ACTIVE_LONG_PRESS_IN",
+  ResponderActiveLongPressOut = "RESPONDER_ACTIVE_LONG_PRESS_OUT",
+  ResponderActiveDrag = "RESPONDER_ACTIVE_DRAG",
+  Error = "ERROR",
 }
 
 enum TouchSignal {
-  Delay = 'DELAY',
-  ResponderGrant = 'RESPONDER_GRANT',
-  ResponderRelease = 'RESPONDER_RELEASE',
-  ResponderTerminated = 'RESPONDER_TERMINATED',
-  EnterPressRect = 'ENTER_PRESS_RECT',
-  LeavePressRect = 'LEAVE_PRESS_RECT',
-  LongPressDetected = 'LONG_PRESS_DETECTED',
-  DragDetected = 'DRAG_DETECTED',
+  Delay = "DELAY",
+  ResponderGrant = "RESPONDER_GRANT",
+  ResponderRelease = "RESPONDER_RELEASE",
+  ResponderTerminated = "RESPONDER_TERMINATED",
+  EnterPressRect = "ENTER_PRESS_RECT",
+  LeavePressRect = "LEAVE_PRESS_RECT",
+  LongPressDetected = "LONG_PRESS_DETECTED",
+  DragDetected = "DRAG_DETECTED",
 }
 
 const Transitions: {
@@ -376,7 +376,7 @@ export class Gesture {
 
       onPanResponderGrant: (
         event: GestureResponderEvent,
-        state: PanResponderGestureState,
+        state: PanResponderGestureState
       ): void => {
         event.persist();
 
@@ -389,7 +389,7 @@ export class Gesture {
         const delayPressIn = normalizeDelay(
           this._config.delayPressIn,
           0,
-          DEFAULT_PRESS_DELAY_MS,
+          DEFAULT_PRESS_DELAY_MS
         );
 
         if (delayPressIn > 0) {
@@ -403,7 +403,7 @@ export class Gesture {
         const delayLongPress = normalizeDelay(
           this._config.delayLongPress,
           10,
-          DEFAULT_LONG_PRESS_DELAY_MS,
+          DEFAULT_LONG_PRESS_DELAY_MS
         );
         this._longPressDelayTimeout = setTimeout(() => {
           this._handleLongPress(event, state);
@@ -412,7 +412,7 @@ export class Gesture {
 
       onPanResponderMove: (
         event: GestureResponderEvent,
-        state: PanResponderGestureState,
+        state: PanResponderGestureState
       ): void => {
         if (this._config.onPressMove != null) {
           this._config.onPressMove(event);
@@ -467,14 +467,14 @@ export class Gesture {
 
       onPanResponderRelease: (
         event: GestureResponderEvent,
-        state: PanResponderGestureState,
+        state: PanResponderGestureState
       ): void => {
         this._receiveSignal(TouchSignal.ResponderRelease, event, state);
       },
 
       onPanResponderTerminate: (
         event: GestureResponderEvent,
-        state: PanResponderGestureState,
+        state: PanResponderGestureState
       ): void => {
         this._receiveSignal(TouchSignal.ResponderTerminated, event, state);
       },
@@ -492,7 +492,7 @@ export class Gesture {
     });
 
     const mouseEventHandlers =
-      Platform.OS === 'ios' || Platform.OS === 'android'
+      Platform.OS === "ios" || Platform.OS === "android"
         ? null
         : {
             onMouseEnter: (event: MouseEvent): void => {
@@ -502,7 +502,7 @@ export class Gesture {
                 const { onHoverIn } = this._config;
                 if (onHoverIn != null) {
                   const delayHoverIn = normalizeDelay(
-                    this._config.delayHoverIn,
+                    this._config.delayHoverIn
                   );
                   if (delayHoverIn > 0) {
                     this._hoverInDelayTimeout = setTimeout(() => {
@@ -522,7 +522,7 @@ export class Gesture {
                 const { onHoverOut } = this._config;
                 if (onHoverOut != null) {
                   const delayHoverOut = normalizeDelay(
-                    this._config.delayHoverOut,
+                    this._config.delayHoverOut
                   );
                   if (delayHoverOut > 0) {
                     this._hoverInDelayTimeout = setTimeout(() => {
@@ -550,7 +550,7 @@ export class Gesture {
   _receiveSignal(
     signal: TouchSignal,
     event: GestureResponderEvent,
-    state: PanResponderGestureState,
+    state: PanResponderGestureState
   ): void {
     const prevState = this._touchState;
     const nextState = Transitions[prevState][signal];
@@ -562,10 +562,10 @@ export class Gesture {
     if (nextState === null || nextState === TouchState.Error) {
       throw new Error(
         `Gesture: Invalid signal '${signal}' for state '${prevState}' on responder: ${
-          typeof this._responderID === 'number'
+          typeof this._responderID === "number"
             ? this._responderID
-            : '<<host component>>'
-        }`,
+            : "<<host component>>"
+        }`
       );
     }
 
@@ -575,7 +575,7 @@ export class Gesture {
         nextState,
         signal,
         event,
-        state,
+        state
       );
       this._touchState = nextState;
     }
@@ -590,7 +590,7 @@ export class Gesture {
     nextState: TouchState,
     signal: TouchSignal,
     event: GestureResponderEvent,
-    state: PanResponderGestureState,
+    state: PanResponderGestureState
   ): void {
     if (isTerminalSignal(signal)) {
       this._touchActivatePosition = null;
@@ -706,7 +706,7 @@ export class Gesture {
     width: number,
     height: number,
     pageX: number,
-    pageY: number,
+    pageY: number
   ) => {
     if (!left && !top && !width && !height && !pageX && !pageY) {
       return;
@@ -720,13 +720,13 @@ export class Gesture {
   };
 
   _isTouchWithinResponderRegion(
-    touch: GestureResponderEvent['nativeEvent'],
+    touch: GestureResponderEvent["nativeEvent"],
     responderRegion: {
       bottom: number;
       left: number;
       right: number;
       top: number;
-    },
+    }
   ): boolean {
     const hitSlop = normalizeRect(this._config.hitSlop);
     const pressRectOffset = normalizeRect(this._config.pressRectOffset);
@@ -767,7 +767,7 @@ export class Gesture {
 
   _handleLongPress(
     event: GestureResponderEvent,
-    state: PanResponderGestureState,
+    state: PanResponderGestureState
   ): void {
     if (
       this._touchState === TouchState.ResponderActivePressIn ||

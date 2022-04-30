@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Animated } from 'react-native';
-import { tokens } from './tokens';
+import React, { Fragment, useEffect, useRef, useState } from "react";
+import { Animated } from "react-native";
+import { tokens } from "./tokens";
 
 interface SpringConfig {
   speed?: number;

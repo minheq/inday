@@ -1,7 +1,7 @@
-import React from 'react';
-import { StyleSheet, Pressable, View } from 'react-native';
-import { Text } from './text';
-import { tokens } from './tokens';
+import React from "react";
+import { StyleSheet, Pressable, View } from "react-native";
+import { Text } from "./text";
+import { tokens } from "./tokens";
 
 interface ListItemProps {
   onPress?: () => void;
@@ -33,23 +33,23 @@ const styles = StyleSheet.create({
     borderRadius: tokens.border.radius,
     paddingVertical: 8,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   leading: {
     paddingRight: 8,
   },
   content: {
     flex: 1,
-    height: '100%',
-    flexDirection: 'row',
+    height: "100%",
+    flexDirection: "row",
   },
   text: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   actions: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
     paddingTop: 8,
   },
 });

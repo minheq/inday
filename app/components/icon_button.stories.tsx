@@ -1,8 +1,8 @@
-import React from 'react';
-import { View } from 'react-native';
+import React from "react";
+import { View } from "react-native";
 
-import { IconButton } from './icon_button';
-import { Row } from './row';
+import { IconButton } from "./icon_button";
+import { Row } from "./row";
 
 function Basic(): JSX.Element {
   return (

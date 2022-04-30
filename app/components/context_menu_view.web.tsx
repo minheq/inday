@@ -6,17 +6,17 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { View, StyleSheet } from 'react-native';
+} from "react";
+import { View, StyleSheet } from "react-native";
 
-import { ContextMenuViewProps } from './context_menu_view';
-import { ContextMenu, CONTEXT_MENU_ITEM_HEIGHT } from './context_menu';
-import { PopoverOverlay, getPopoverAnchorAndHeight } from './popover';
-import { tokens } from './tokens';
-import { useThemeStyles } from './theme';
+import { ContextMenuViewProps } from "./context_menu_view";
+import { ContextMenu, CONTEXT_MENU_ITEM_HEIGHT } from "./context_menu";
+import { PopoverOverlay, getPopoverAnchorAndHeight } from "./popover";
+import { tokens } from "./tokens";
+import { useThemeStyles } from "./theme";
 
 export const ContextMenuView = memo(function ContextMenuView(
-  props: ContextMenuViewProps,
+  props: ContextMenuViewProps
 ): JSX.Element {
   const { menuItems, children, style, width = 240 } = props;
   const themeStyles = useThemeStyles();
@@ -51,19 +51,19 @@ export const ContextMenuView = memo(function ContextMenuView(
         height: popoverHeight,
       });
     },
-    [contentHeight, width],
+    [contentHeight, width]
   );
 
   useEffect(() => {
     // @ts-ignore: View implementation uses `div`
     const node = ref.current as HTMLDivElement;
     if (node !== null) {
-      node.addEventListener('contextmenu', handleOpenContextMenu);
+      node.addEventListener("contextmenu", handleOpenContextMenu);
     }
 
     return () => {
       if (node !== null) {
-        node.removeEventListener('contextmenu', handleOpenContextMenu);
+        node.removeEventListener("contextmenu", handleOpenContextMenu);
       }
     };
   }, [handleOpenContextMenu]);

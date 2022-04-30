@@ -1,8 +1,8 @@
-import { customAlphabet } from 'nanoid';
+import { customAlphabet } from "nanoid";
 
 const idLength = 15;
 const alphabet =
-  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const nanoid = customAlphabet(alphabet, idLength);
 
@@ -17,18 +17,18 @@ export function validateID<T extends string>(prefix: T, id: string): void {
   const extractedID = id.substr(prefixLength);
 
   if (extractedPrefix !== prefix) {
-    throw new Error('Wrong prefix for ID');
+    throw new Error("Wrong prefix for ID");
   }
 
   if (extractedID.length !== idLength) {
-    throw new Error('Wrong ID length');
+    throw new Error("Wrong ID length");
   }
 
-  const containsInvalidChar = extractedID.split('').some((char) => {
+  const containsInvalidChar = extractedID.split("").some((char) => {
     return !alphabet.includes(char);
   });
 
   if (containsInvalidChar) {
-    throw new Error('Wrong ID alphabet');
+    throw new Error("Wrong ID alphabet");
   }
 }

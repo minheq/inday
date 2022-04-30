@@ -1,38 +1,38 @@
-import React from 'react';
-import { Text as RNText, TextStyle, StyleSheet } from 'react-native';
-import { useThemeStyles } from './theme';
-import { tokens } from './tokens';
+import React from "react";
+import { Text as RNText, TextStyle, StyleSheet } from "react-native";
+import { useThemeStyles } from "./theme";
+import { tokens } from "./tokens";
 
 export interface TextProps {
   children?: string;
   size?: TextSize;
   color?: TextColor;
   customColor?: string;
-  align?: 'left' | 'right' | 'center';
+  align?: "left" | "right" | "center";
   weight?: TextWeight;
   selectable?: boolean;
   testID?: string;
   numberOfLines?: number;
   decoration?: TextDecorationLine;
-  transform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  transform?: "none" | "uppercase" | "lowercase" | "capitalize";
 }
 
 type TextDecorationLine =
-  | 'none'
-  | 'underline'
-  | 'line-through'
-  | 'underline line-through';
+  | "none"
+  | "underline"
+  | "line-through"
+  | "underline line-through";
 
 export type TextWeight =
-  | 'normal'
-  | 'bold'
-  | '300'
-  | '400'
-  | '500'
-  | '600'
-  | '700'
-  | '800'
-  | '900';
+  | "normal"
+  | "bold"
+  | "300"
+  | "400"
+  | "500"
+  | "600"
+  | "700"
+  | "800"
+  | "900";
 
 interface TextSizes {
   xl: TextStyle;
@@ -60,17 +60,17 @@ export type TextColor = keyof TextColors;
  */
 export function Text(props: TextProps): JSX.Element {
   const {
-    align = 'left',
+    align = "left",
     children,
-    color = 'default',
+    color = "default",
     customColor,
-    size = 'md',
+    size = "md",
     selectable = false,
     testID,
     numberOfLines,
-    decoration = 'none',
-    transform = 'none',
-    weight = 'normal',
+    decoration = "none",
+    transform = "none",
+    weight = "normal",
   } = props;
   const themeStyles = useThemeStyles();
 
@@ -111,14 +111,14 @@ const styles = StyleSheet.create({
   xs: tokens.text.size.xs,
   // eslint-disable-next-line react-native/no-unused-styles
   left: {
-    textAlign: 'left',
+    textAlign: "left",
   },
   // eslint-disable-next-line react-native/no-unused-styles
   right: {
-    textAlign: 'right',
+    textAlign: "right",
   },
   // eslint-disable-next-line react-native/no-unused-styles
   center: {
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

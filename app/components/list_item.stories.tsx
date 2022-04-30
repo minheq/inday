@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 
-import { ListItem } from './list_item';
-import { Column } from './column';
-import { View } from 'react-native';
+import { ListItem } from "./list_item";
+import { Column } from "./column";
+import { View } from "react-native";
 
 function Basic(): JSX.Element {
   return (

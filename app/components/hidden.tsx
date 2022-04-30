@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React from "react";
+import { StyleSheet, View } from "react-native";
 
 interface HiddenProps {
   hidden: boolean;
@@ -16,9 +16,9 @@ export function Hidden(props: HiddenProps): JSX.Element {
 
 const styles = StyleSheet.create({
   visible: {
-    display: 'flex',
+    display: "flex",
   },
   hidden: {
-    display: 'none',
+    display: "none",
   },
 });

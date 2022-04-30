@@ -1,14 +1,14 @@
-const util = require('util');
-const child_process = require('child_process');
-const os = require('os');
-const glob = util.promisify(require('glob'));
-const { mapConcurrent } = require('./utils');
+const util = require("util");
+const child_process = require("child_process");
+const os = require("os");
+const glob = util.promisify(require("glob"));
+const { mapConcurrent } = require("./utils");
 
 const numCPUs = os.cpus().length;
 
 async function main() {
   const start = new Date();
-  const testFiles = await glob('test/**/*.test.js');
+  const testFiles = await glob("test/**/*.test.js");
   const results = await mapConcurrent(testFiles, test, {
     concurrency: numCPUs,
   });
@@ -18,20 +18,20 @@ async function main() {
   for (const result of results) {
     if (result.ok) {
       console.log(
-        '\x1b[42m\x1b[30m',
-        'PASS',
-        '\x1b[0m',
+        "\x1b[42m\x1b[30m",
+        "PASS",
+        "\x1b[0m",
         result.file,
-        `\x1b[0m\x1b[33m${result.time}ms`,
+        `\x1b[0m\x1b[33m${result.time}ms`
       );
     } else {
       failed = true;
       console.log(
-        '\x1b[41m\x1b[30m',
-        'FAIL',
-        '\x1b[0m',
+        "\x1b[41m\x1b[30m",
+        "FAIL",
+        "\x1b[0m",
         result.file,
-        `\x1b[0m\x1b[33m${result.time}ms`,
+        `\x1b[0m\x1b[33m${result.time}ms`
       );
     }
   }
@@ -40,7 +40,7 @@ async function main() {
 
   console.log(`\x1b[0mDone in \x1b[33m${end}ms`);
   if (failed) {
-    throw new Error('');
+    throw new Error("");
   }
 }
 
@@ -50,7 +50,7 @@ function test(file) {
 
     const child = child_process.fork(file);
 
-    child.on('close', (code) => {
+    child.on("close", (code) => {
       const end = new Date() - start;
 
       resolve({

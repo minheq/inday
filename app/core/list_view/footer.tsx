@@ -1,7 +1,7 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React from "react";
+import { StyleSheet, View } from "react-native";
 
-import { useThemeStyles } from '../../components/theme';
+import { useThemeStyles } from "../../components/theme";
 
 interface FooterProps {
   children: React.ReactNode;

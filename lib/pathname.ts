@@ -1,14 +1,14 @@
 export function matchPathname<T extends Record<string, string>>(
   pathname: string,
-  str: string,
+  str: string
 ): T | false {
   pathname = trimTrailingSlash(pathname);
   str = trimTrailingSlash(str);
 
   // From /p/p2/:id/:id2 to ['p', 'p2', ':id', 'id2']
-  const paths = pathname.split('/');
+  const paths = pathname.split("/");
   // From /p/p2/1/2 to ['p', 'p2', '1', '2']
-  const strs = str.split('/');
+  const strs = str.split("/");
 
   const params: Record<string, string> = {};
 
@@ -20,7 +20,7 @@ export function matchPathname<T extends Record<string, string>>(
       return false;
     }
 
-    if (p.includes(':') === false) {
+    if (p.includes(":") === false) {
       if (p.toLowerCase() === s.toLowerCase()) {
         continue;
       }
@@ -37,17 +37,17 @@ export function matchPathname<T extends Record<string, string>>(
 
 export function compilePathname<T extends Record<string, string>>(
   pathname: string,
-  params: T,
+  params: T
 ): string {
   pathname = trimTrailingSlash(pathname);
 
-  const paths = pathname.split('/');
+  const paths = pathname.split("/");
   const s: string[] = [];
 
   for (let i = 0; i < paths.length; i++) {
     const p = paths[i];
 
-    if (p.includes(':') === false) {
+    if (p.includes(":") === false) {
       s.push(p);
       continue;
     }
@@ -61,12 +61,12 @@ export function compilePathname<T extends Record<string, string>>(
     s.push(params[param]);
   }
 
-  return '/' + s.join('/');
+  return "/" + s.join("/");
 }
 
 function trimTrailingSlash(str: string) {
-  str = str.endsWith('/') ? str.slice(0, -1) : str;
-  str = str.startsWith('/') ? str.slice(1) : str;
+  str = str.endsWith("/") ? str.slice(0, -1) : str;
+  str = str.startsWith("/") ? str.slice(1) : str;
 
   return str;
 }

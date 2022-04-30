@@ -6,8 +6,8 @@ import {
   startOfDay,
   endOfDay,
   Interval,
-} from 'date-fns';
-import { Day } from './day_utils';
+} from "date-fns";
+import { Day } from "./day_utils";
 
 export const DEFAULT_FIRST_DAY_OF_WEEK = 1;
 
@@ -30,13 +30,13 @@ export interface Week {
 
 export function getWeekDaysOptions(): { value: WeekDay; label: string }[] {
   return [
-    { value: WeekDay.Monday, label: 'Monday' },
-    { value: WeekDay.Tuesday, label: 'Tuesday' },
-    { value: WeekDay.Wednesday, label: 'Wednesday' },
-    { value: WeekDay.Thursday, label: 'Thursday' },
-    { value: WeekDay.Friday, label: 'Friday' },
-    { value: WeekDay.Saturday, label: 'Saturday' },
-    { value: WeekDay.Sunday, label: 'Sunday' },
+    { value: WeekDay.Monday, label: "Monday" },
+    { value: WeekDay.Tuesday, label: "Tuesday" },
+    { value: WeekDay.Wednesday, label: "Wednesday" },
+    { value: WeekDay.Thursday, label: "Thursday" },
+    { value: WeekDay.Friday, label: "Friday" },
+    { value: WeekDay.Saturday, label: "Saturday" },
+    { value: WeekDay.Sunday, label: "Sunday" },
   ];
 }
 
@@ -44,7 +44,7 @@ export type FirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export const getFirstDateOfWeek = (
   date: Date,
-  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
+  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK
 ): Date => {
   const day = getDay(date);
   const diffDays = day - firstDayOfWeek;
@@ -56,7 +56,7 @@ export const getFirstDateOfWeek = (
 
 export const getLastDateOfWeek = (
   date: Date,
-  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
+  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK
 ): Date => {
   const firstDateOfTheWeek = getFirstDateOfWeek(date, firstDayOfWeek);
 
@@ -65,7 +65,7 @@ export const getLastDateOfWeek = (
 
 export const getWeekInterval = (
   date: Date,
-  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
+  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK
 ): Interval => {
   return {
     start: startOfDay(getFirstDateOfWeek(date, firstDayOfWeek)),
@@ -75,7 +75,7 @@ export const getWeekInterval = (
 
 export const eachDayOfWeek = (
   date = new Date(),
-  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK,
+  firstDayOfWeek: FirstDayOfWeek = DEFAULT_FIRST_DAY_OF_WEEK
 ): Date[] => {
   return eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
 };

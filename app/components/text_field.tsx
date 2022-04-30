@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from "react";
 import {
   TextInput as RNTextInput,
   NativeSyntheticEvent,
@@ -7,13 +7,13 @@ import {
   StyleSheet,
   TextStyle,
   View,
-} from 'react-native';
-import { Icon, IconName } from './icon';
-import { PressableHighlight } from './pressable_highlight';
-import { TextInput } from './text_input';
+} from "react-native";
+import { Icon, IconName } from "./icon";
+import { PressableHighlight } from "./pressable_highlight";
+import { TextInput } from "./text_input";
 
-import { useThemeStyles } from './theme';
-import { tokens } from './tokens';
+import { useThemeStyles } from "./theme";
+import { tokens } from "./tokens";
 
 export interface TextFieldProps {
   icon?: IconName;
@@ -23,7 +23,7 @@ export interface TextFieldProps {
   clearable?: boolean;
   onChange?: (value: string) => void;
   onKeyPress?: (
-    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    event: NativeSyntheticEvent<TextInputKeyPressEventData>
   ) => void;
   placeholder?: string;
   onSubmitEditing?: () => void;
@@ -58,7 +58,7 @@ export function TextField(props: TextFieldProps): JSX.Element {
     }
 
     if (onChange !== undefined) {
-      onChange('');
+      onChange("");
     }
   }, [onChange]);
 
@@ -85,7 +85,7 @@ export function TextField(props: TextFieldProps): JSX.Element {
           style,
         ]}
       />
-      {clearable && value !== undefined && value !== null && value !== '' && (
+      {clearable && value !== undefined && value !== null && value !== "" && (
         <PressableHighlight onPress={handleClear} style={styles.clearButton}>
           <Icon name="X" />
         </PressableHighlight>
@@ -96,9 +96,9 @@ export function TextField(props: TextFieldProps): JSX.Element {
 
 const styles = StyleSheet.create({
   base: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderRadius: tokens.border.radius,
-    alignItems: 'center',
+    alignItems: "center",
   },
   icon: {
     paddingHorizontal: 8,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   clearButton: {
     width: 24,
     height: 24,
-    position: 'absolute',
+    position: "absolute",
     right: 8,
     top: 8,
     borderRadius: tokens.border.radius,

@@ -1,14 +1,14 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React from "react";
+import { StyleSheet, View } from "react-native";
 
-import { useViewQuery, useCollectionViewsQuery } from '../../store/queries';
-import { Spacer } from '../../components/spacer';
-import { Text } from '../../components/text';
-import { SpaceID } from '../../../models/spaces';
-import { ViewID } from '../../../models/views';
-import { useThemeStyles } from '../../components/theme';
-import { Column } from '../../components/column';
-import { ViewButton } from './view_button';
+import { useViewQuery, useCollectionViewsQuery } from "../../store/queries";
+import { Spacer } from "../../components/spacer";
+import { Text } from "../../components/text";
+import { SpaceID } from "../../../models/spaces";
+import { ViewID } from "../../../models/views";
+import { useThemeStyles } from "../../components/theme";
+import { Column } from "../../components/column";
+import { ViewButton } from "./view_button";
 
 interface ViewListProps {
   spaceID: SpaceID;

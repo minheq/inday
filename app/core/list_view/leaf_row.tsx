@@ -1,14 +1,14 @@
-import React, { createContext, useCallback, useContext, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { createContext, useCallback, useContext, useMemo } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { ContextMenuView } from '../../components/context_menu_view';
-import { ContextMenuItem } from '../../components/context_menu';
-import { LeafRowState } from '../../components/grid_renderer.common';
-import { PressableHighlight } from '../../components/pressable_highlight';
-import { Text } from '../../components/text';
-import { useThemeStyles } from '../../components/theme';
-import { DocumentID } from '../../../models/documents';
-import { useListViewViewContext } from './list_view_view';
+import { ContextMenuView } from "../../components/context_menu_view";
+import { ContextMenuItem } from "../../components/context_menu";
+import { LeafRowState } from "../../components/grid_renderer.common";
+import { PressableHighlight } from "../../components/pressable_highlight";
+import { Text } from "../../components/text";
+import { useThemeStyles } from "../../components/theme";
+import { DocumentID } from "../../../models/documents";
+import { useListViewViewContext } from "./list_view_view";
 
 interface LeafRowProps {
   documentID: DocumentID;
@@ -19,7 +19,7 @@ interface LeafRowProps {
 export function LeafRow(props: LeafRowProps): JSX.Element {
   const { children, state, documentID } = props;
 
-  const selected = state === 'selected';
+  const selected = state === "selected";
 
   const value = useMemo((): LeafRowContext => {
     return {
@@ -42,7 +42,7 @@ interface LeafRowContext {
 
 const LeafRowContext = createContext<LeafRowContext>({
   selected: false,
-  documentID: 'doc',
+  documentID: "doc",
 });
 
 export function useLeafRowContext(): LeafRowContext {
@@ -82,14 +82,14 @@ export function useLeafRowContextMenuItems(): ContextMenuItem[] {
 
   return useMemo(
     (): ContextMenuItem[] => [
-      { label: 'Open', icon: 'Archive', onPress: handleOpen },
-      { label: 'Insert document below' },
-      { label: 'Insert document above' },
-      { label: 'Duplicate' },
-      { label: 'Share' },
-      { label: 'Delete', icon: 'Archive' },
+      { label: "Open", icon: "Archive", onPress: handleOpen },
+      { label: "Insert document below" },
+      { label: "Insert document above" },
+      { label: "Duplicate" },
+      { label: "Share" },
+      { label: "Delete", icon: "Archive" },
     ],
-    [handleOpen],
+    [handleOpen]
   );
 }
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   addDocument: {
     height: 40,
     paddingHorizontal: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

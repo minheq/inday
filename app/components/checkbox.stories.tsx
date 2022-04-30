@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
+import React, { useState } from "react";
+import { View } from "react-native";
 
-import { Checkbox } from './checkbox';
+import { Checkbox } from "./checkbox";
 
 function Basic(): JSX.Element {
   const [value, setValue] = useState(false);

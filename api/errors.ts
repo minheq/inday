@@ -11,7 +11,7 @@ export class NotFoundError extends Error {
 
 export class AuthenticationError extends Error {
   constructor() {
-    super('not authenticated');
+    super("not authenticated");
   }
 }
 
@@ -30,6 +30,6 @@ export class BadRequestError extends Error {}
 
 export class UnauthorizedError extends Error {
   constructor() {
-    super('not authorized');
+    super("not authorized");
   }
 }

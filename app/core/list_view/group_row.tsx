@@ -1,7 +1,7 @@
-import React from 'react';
-import { View } from 'react-native';
+import React from "react";
+import { View } from "react-native";
 
-import { GroupRowState } from '../../components/grid_renderer.common';
+import { GroupRowState } from "../../components/grid_renderer.common";
 
 interface GroupRowProps {
   state: GroupRowState;

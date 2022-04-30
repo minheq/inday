@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import { SpaceID } from '../../../models/spaces';
-import { ViewID } from '../../../models/views';
-import { CollectionID } from '../../../models/collections';
-import { FilterMenu } from './organize_filter_menu';
-import { SortMenu } from './organize_sort_menu';
-import { GroupMenu } from './organize_group_menu';
-import { FieldMenu } from './organize_field_menu';
-import { SegmentedControl } from '../../components/segmented_control';
-import { Spacer } from '../../components/spacer';
-import { View } from 'react-native';
+import { SpaceID } from "../../../models/spaces";
+import { ViewID } from "../../../models/views";
+import { CollectionID } from "../../../models/collections";
+import { FilterMenu } from "./organize_filter_menu";
+import { SortMenu } from "./organize_sort_menu";
+import { GroupMenu } from "./organize_group_menu";
+import { FieldMenu } from "./organize_field_menu";
+import { SegmentedControl } from "../../components/segmented_control";
+import { Spacer } from "../../components/spacer";
+import { View } from "react-native";
 
 interface OrganizeViewProps {
   spaceID: SpaceID;
@@ -29,10 +29,10 @@ export function OrganizeView(props: OrganizeViewProps): JSX.Element {
           onChange={setTab}
           value={tab}
           options={[
-            { label: 'Fields', value: 1 },
-            { label: 'Filter', value: 2 },
-            { label: 'Sort', value: 3 },
-            { label: 'Group', value: 4 },
+            { label: "Fields", value: 1 },
+            { label: "Filter", value: 2 },
+            { label: "Sort", value: 3 },
+            { label: "Group", value: 4 },
           ]}
         />
       </View>

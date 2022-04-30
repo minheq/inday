@@ -1,5 +1,5 @@
 export const canUseDOM = !!(
-  typeof window !== 'undefined' &&
+  typeof window !== "undefined" &&
   window.document &&
   window.document.createElement
 );
@@ -32,9 +32,9 @@ function disableHover() {
 }
 
 if (canUseDOM) {
-  document.addEventListener('touchstart', disableHover, true);
-  document.addEventListener('touchmove', disableHover, true);
-  document.addEventListener('mousemove', enableHover, true);
+  document.addEventListener("touchstart", disableHover, true);
+  document.addEventListener("touchmove", disableHover, true);
+  document.addEventListener("mousemove", enableHover, true);
 }
 
 export function isHoverEnabled(): boolean {

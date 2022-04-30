@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useRef } from 'react';
-import { intersectBy, differenceBy } from '../../lib/array_utils';
-import { isEmpty, isEqual } from '../../lib/lang_utils';
-import { sum, sumBy, maxBy, max, min } from '../../lib/math_utils';
-import { FlatObject } from '../../lib/flat_object';
+import { useCallback, useMemo, useRef } from "react";
+import { intersectBy, differenceBy } from "../../lib/array_utils";
+import { isEmpty, isEqual } from "../../lib/lang_utils";
+import { sum, sumBy, maxBy, max, min } from "../../lib/math_utils";
+import { FlatObject } from "../../lib/flat_object";
 
 interface UseGridTransformerProps {
   groups: GridGroup[];
@@ -38,7 +38,7 @@ export interface LeafRow {
 }
 
 export interface GridLeafRow extends LeafRow {
-  type: 'leaf';
+  type: "leaf";
   height: number;
   y: number;
   level: number;
@@ -51,14 +51,14 @@ export interface GroupRow {
 }
 
 export interface GridGroupRow extends GroupRow {
-  type: 'group';
+  type: "group";
   height: number;
   y: number;
   level: number;
 }
 
 export interface GridSpacerRow {
-  type: 'spacer';
+  type: "spacer";
   y: number;
   height: number;
 }
@@ -66,7 +66,7 @@ export interface GridSpacerRow {
 export type GridRow = GridLeafRow | GridGroupRow | GridSpacerRow;
 
 export function useGridTransformer(
-  props: UseGridTransformerProps,
+  props: UseGridTransformerProps
 ): GridTransformerData {
   const {
     columns,
@@ -79,31 +79,31 @@ export function useGridTransformer(
 
   const leftPaneColumnWidths = useMemo(
     () => columns.slice(0, fixedColumnCount),
-    [columns, fixedColumnCount],
+    [columns, fixedColumnCount]
   );
   const rightPaneColumnWidths = useMemo(
     () => columns.slice(fixedColumnCount),
-    [columns, fixedColumnCount],
+    [columns, fixedColumnCount]
   );
   const leftPaneContentWidth = useMemo(
     () => sum(leftPaneColumnWidths),
-    [leftPaneColumnWidths],
+    [leftPaneColumnWidths]
   );
   const rightPaneContentWidth = useMemo(
     () => sum(rightPaneColumnWidths),
-    [rightPaneColumnWidths],
+    [rightPaneColumnWidths]
   );
   const leftPaneColumns = useMemo(
     () => getColumns(leftPaneColumnWidths),
-    [leftPaneColumnWidths],
+    [leftPaneColumnWidths]
   );
   const rightPaneColumns = useMemo(
     () => getColumns(rightPaneColumnWidths, fixedColumnCount),
-    [rightPaneColumnWidths, fixedColumnCount],
+    [rightPaneColumnWidths, fixedColumnCount]
   );
   const rows = useMemo(
     () => getRows(groups, groupRowHeight, leafRowHeight, spacerHeight, [], 0),
-    [groups, groupRowHeight, leafRowHeight, spacerHeight],
+    [groups, groupRowHeight, leafRowHeight, spacerHeight]
   );
   const contentHeight = useMemo(() => getRowsHeight(rows), [rows]);
   const contentWidth = leftPaneContentWidth + rightPaneContentWidth;
@@ -120,13 +120,13 @@ export function useGridTransformer(
 }
 
 export interface LeafGridGroup {
-  type: 'leaf';
+  type: "leaf";
   collapsed: boolean;
   rowCount: number;
 }
 
 export interface AncestorGridGroup {
-  type: 'ancestor';
+  type: "ancestor";
   collapsed: boolean;
   children: GridGroup[];
 }
@@ -139,7 +139,7 @@ export function getRows(
   leafRowHeight: number,
   spacerHeight: number,
   prevPath: number[],
-  prevOffset: number,
+  prevOffset: number
 ): GridRow[] {
   if (isEmpty(groups)) {
     return [];
@@ -154,7 +154,7 @@ export function getRows(
     const path = [...prevPath, i];
 
     rows = rows.concat({
-      type: 'group',
+      type: "group",
       height: groupRowHeight,
       y: offset,
       level: path.length,
@@ -178,7 +178,7 @@ export function getRows(
           leafRowHeight,
           spacerHeight,
           path,
-          offset,
+          offset
         );
         offset += getRowsHeight(groupRows);
         rows = rows.concat(groupRows);
@@ -187,7 +187,7 @@ export function getRows(
 
     if (path.length === 1) {
       rows = rows.concat({
-        type: 'spacer',
+        type: "spacer",
         y: offset,
         height: spacerHeight,
       });
@@ -202,13 +202,13 @@ function getLeafRows(
   rowCount: number,
   leafRowHeight: number,
   path: number[],
-  offset: number,
+  offset: number
 ): GridLeafRow[] {
   const leafRows: GridLeafRow[] = [];
 
   for (let i = 0; i < rowCount; i++) {
     leafRows.push({
-      type: 'leaf',
+      type: "leaf",
       height: leafRowHeight,
       y: offset + i * leafRowHeight,
       path,
@@ -222,7 +222,7 @@ function getLeafRows(
 }
 
 function isLeafGroup(group: GridGroup): group is LeafGridGroup {
-  if (group.type === 'leaf') {
+  if (group.type === "leaf") {
     return true;
   }
 
@@ -261,7 +261,7 @@ export interface UseColumnsRecyclerProps {
 }
 
 export function useColumnsRecycler(
-  props: UseColumnsRecyclerProps,
+  props: UseColumnsRecyclerProps
 ): RecycledColumn[] {
   const { columns, scrollViewWidth, scrollX } = props;
 
@@ -274,7 +274,7 @@ export function useColumnsRecycler(
         scrollX,
         scrollViewWidth,
       }),
-    [scrollX, scrollViewWidth, columns],
+    [scrollX, scrollViewWidth, columns]
   );
 
   const recycledColumns = useMemo(
@@ -285,7 +285,7 @@ export function useColumnsRecycler(
         startIndex: columnStartIndex,
         endIndex: columnEndIndex,
       }),
-    [columns, columnStartIndex, columnEndIndex],
+    [columns, columnStartIndex, columnEndIndex]
   );
 
   prevRecycledColumnsRef.current = recycledColumns;
@@ -303,7 +303,7 @@ interface RecycleItemsParams<T, K extends T> {
 }
 
 export function recycleItems<T, K extends T>(
-  params: RecycleItemsParams<T, K>,
+  params: RecycleItemsParams<T, K>
 ): K[] {
   const { items, prevItems, getValue, toRecycledItem, getKey } = params;
 
@@ -347,7 +347,7 @@ export function useRowsRecycler(props: UseRowsRecyclerProps): RecycledRow[] {
         scrollY,
         scrollViewHeight,
       }),
-    [rows, scrollY, scrollViewHeight],
+    [rows, scrollY, scrollViewHeight]
   );
 
   const recycledRows = useMemo(
@@ -358,7 +358,7 @@ export function useRowsRecycler(props: UseRowsRecyclerProps): RecycledRow[] {
         startIndex: rowStartIndex,
         endIndex: rowEndIndex,
       }),
-    [rows, rowStartIndex, rowEndIndex],
+    [rows, rowStartIndex, rowEndIndex]
   );
 
   prevRecycledRowsRef.current = recycledRows;
@@ -426,7 +426,7 @@ interface GetVisibleIndexRangeParams<T> {
 type VisibleIndexRange = [startIndex: number, endIndex: number];
 
 export function getVisibleIndexRange<T>(
-  params: GetVisibleIndexRangeParams<T>,
+  params: GetVisibleIndexRangeParams<T>
 ): VisibleIndexRange {
   const {
     items,
@@ -500,7 +500,7 @@ interface GetVisibleColumnsIndexRangeParams {
 }
 
 function getVisibleColumnsIndexRange(
-  params: GetVisibleColumnsIndexRangeParams,
+  params: GetVisibleColumnsIndexRangeParams
 ): VisibleIndexRange {
   const { columns, scrollX, scrollViewWidth } = params;
 
@@ -520,7 +520,7 @@ interface GetVisibleRowsIndexRangeParams {
 }
 
 function getVisibleRowsIndexRange(
-  params: GetVisibleRowsIndexRangeParams,
+  params: GetVisibleRowsIndexRangeParams
 ): VisibleIndexRange {
   const { rows, scrollY, scrollViewHeight } = params;
 
@@ -539,7 +539,7 @@ interface UseGetStatefulRowsProps {
   selectedRows: LeafRow[] | null;
 }
 
-export type GroupRowState = 'hovered' | 'default';
+export type GroupRowState = "hovered" | "default";
 
 interface StatefulGroupRow extends RecycledGroupRow {
   state: GroupRowState;
@@ -547,10 +547,10 @@ interface StatefulGroupRow extends RecycledGroupRow {
 
 export interface GroupRowCell extends GroupRow, Column {}
 export interface GridGroupRowCell extends GroupRowCell {
-  type: 'group';
+  type: "group";
 }
 
-export type LeafRowState = 'selected' | 'hovered' | 'default';
+export type LeafRowState = "selected" | "hovered" | "default";
 
 interface StatefulLeafRow extends RecycledLeafRow {
   activeCell: StatefulLeafRowCell | null;
@@ -558,16 +558,16 @@ interface StatefulLeafRow extends RecycledLeafRow {
 }
 
 export interface LeafRowCell extends LeafRow, Column {}
-export type LeafRowCellState = 'focused' | 'editing' | 'hovered' | 'default';
+export type LeafRowCellState = "focused" | "editing" | "hovered" | "default";
 export interface StatefulLeafRowCell extends LeafRowCell {
   state: LeafRowCellState;
 }
 export interface GridLeafRowCell extends LeafRowCell {
-  type: 'leaf';
+  type: "leaf";
   last: boolean;
 }
 export interface GridStatefulLeafRowCell extends StatefulLeafRowCell {
-  type: 'leaf';
+  type: "leaf";
 }
 
 export type StatefulRow =
@@ -578,7 +578,7 @@ export type StatefulRow =
 export type GridCell = GridGroupRowCell | GridLeafRowCell;
 
 export function useGetStatefulRows(
-  props: UseGetStatefulRowsProps,
+  props: UseGetStatefulRowsProps
 ): StatefulRow[] {
   const { rows, activeCell, selectedRows } = props;
 
@@ -632,7 +632,7 @@ export function useGetStatefulRows(
         y: row.y,
         path: row.path,
         level: row.level,
-        state: 'default',
+        state: "default",
         collapsed: row.collapsed,
       };
     });
@@ -640,7 +640,7 @@ export function useGetStatefulRows(
 }
 
 function isLeafRow(row: GridRow): row is GridLeafRow {
-  if (row.type === 'leaf') {
+  if (row.type === "leaf") {
     return true;
   }
 
@@ -648,7 +648,7 @@ function isLeafRow(row: GridRow): row is GridLeafRow {
 }
 
 function isSpacerRow(row: GridRow): row is GridSpacerRow {
-  if (row.type === 'spacer') {
+  if (row.type === "spacer") {
     return true;
   }
 
@@ -657,7 +657,7 @@ function isSpacerRow(row: GridRow): row is GridSpacerRow {
 
 function getLeafRowCell(
   activeCell: StatefulLeafRowCell | null,
-  row: RecycledLeafRow,
+  row: RecycledLeafRow
 ): StatefulLeafRowCell | null {
   if (activeCell === null) {
     return null;
@@ -676,19 +676,19 @@ function getLeafRowCell(
 function getLeafRowState(
   activeCell: StatefulLeafRowCell | null,
   row: RecycledLeafRow,
-  selectedRowsCache: FlatObject<number, boolean>,
+  selectedRowsCache: FlatObject<number, boolean>
 ): LeafRowState {
-  if (activeCell !== null && activeCell.state === 'hovered') {
-    return 'hovered';
+  if (activeCell !== null && activeCell.state === "hovered") {
+    return "hovered";
   }
 
   const selected = selectedRowsCache.get([...row.path, row.row]);
 
   if (selected === true) {
-    return 'selected';
+    return "selected";
   }
 
-  return 'default';
+  return "default";
 }
 
 export interface ContentOffset {
@@ -708,7 +708,7 @@ interface UseGridGetScrollToCellOffsetProps {
 }
 
 export function useGridGetScrollToCellOffset(
-  props: UseGridGetScrollToCellOffsetProps,
+  props: UseGridGetScrollToCellOffsetProps
 ): (cell: Partial<LeafRowCell>) => Partial<ContentOffset> {
   const {
     columns,
@@ -750,11 +750,11 @@ export function useGridGetScrollToCellOffset(
         (row === undefined && path !== undefined)
       ) {
         throw new Error(
-          'getLeafRow required either both `path` and `row` to be present, or neither.',
+          "getLeafRow required either both `path` and `row` to be present, or neither."
         );
       }
     },
-    [leafRowsCache],
+    [leafRowsCache]
   );
 
   const getScrollToRowOffset = useCallback(
@@ -774,7 +774,7 @@ export function useGridGetScrollToCellOffset(
         return y + height - scrollViewHeight + padding;
       }
     },
-    [scrollY, scrollViewHeight, padding],
+    [scrollY, scrollViewHeight, padding]
   );
 
   const getScrollToColumnOffset = useCallback(
@@ -798,7 +798,7 @@ export function useGridGetScrollToCellOffset(
         return x + width - scrollViewWidth + padding;
       }
     },
-    [scrollX, columns, fixedColumnCount, scrollViewWidth, padding],
+    [scrollX, columns, fixedColumnCount, scrollViewWidth, padding]
   );
 
   return useCallback(
@@ -810,6 +810,6 @@ export function useGridGetScrollToCellOffset(
         x: getScrollToColumnOffset(column),
       };
     },
-    [getScrollToRowOffset, getScrollToColumnOffset, getLeafRow],
+    [getScrollToRowOffset, getScrollToColumnOffset, getLeafRow]
   );
 }

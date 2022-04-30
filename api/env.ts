@@ -12,21 +12,21 @@ function toNumber(value: string): number {
 }
 
 function toBool(value: string): boolean {
-  return value === 'true';
+  return value === "true";
 }
 
 export const env = {
-  isProduction: toBool(getOsEnv('NODE_ENV')),
+  isProduction: toBool(getOsEnv("NODE_ENV")),
   database: {
-    host: getOsEnv('DATABASE_HOST'),
-    name: getOsEnv('DATABASE_NAME'),
-    username: getOsEnv('DATABASE_USERNAME'),
-    password: getOsEnv('DATABASE_PASSWORD'),
-    port: toNumber(getOsEnv('DATABASE_PORT')),
+    host: getOsEnv("DATABASE_HOST"),
+    name: getOsEnv("DATABASE_NAME"),
+    username: getOsEnv("DATABASE_USERNAME"),
+    password: getOsEnv("DATABASE_PASSWORD"),
+    port: toNumber(getOsEnv("DATABASE_PORT")),
   },
   logger: {
-    level: getOsEnv('LOGGER_LEVEL'),
+    level: getOsEnv("LOGGER_LEVEL"),
   },
-  port: toNumber(getOsEnv('PORT')),
-  nodeEnv: getOsEnv('NODE_ENV'),
+  port: toNumber(getOsEnv("PORT")),
+  nodeEnv: getOsEnv("NODE_ENV"),
 };

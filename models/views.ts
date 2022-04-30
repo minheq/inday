@@ -1,8 +1,8 @@
-import { generateID, validateID } from '../lib/id';
-import { CollectionID } from './collections';
-import { FieldID, Field } from './fields';
+import { generateID, validateID } from "../lib/id";
+import { CollectionID } from "./collections";
+import { FieldID, Field } from "./fields";
 
-export const viewIDPrefix = 'viw' as const;
+export const viewIDPrefix = "viw" as const;
 export type ViewID = `${typeof viewIDPrefix}${string}`;
 
 export function generateViewID(): ViewID {
@@ -28,7 +28,7 @@ export interface ListViewFieldConfig {
 }
 
 interface ListViewConfig {
-  type: 'list';
+  type: "list";
   fixedFieldCount: number;
   fieldsConfig: ListViewFieldsConfig;
 }
@@ -45,23 +45,23 @@ export type FieldWithListViewConfig = Field & {
 export interface ListView extends BaseView, ListViewConfig {}
 
 interface BoardViewConfig {
-  type: 'board';
+  type: "board";
   stackedByFieldID: FieldID;
 }
 
 export interface BoardView extends BaseView, BoardViewConfig {}
 
 export type View = ListView | BoardView;
-export type ViewType = View['type'];
+export type ViewType = View["type"];
 
 export function assertListView(view: View): asserts view is ListView {
-  if (view.type !== 'list') {
+  if (view.type !== "list") {
     throw new Error(`Expected view to be list. Received ${view.type}`);
   }
 }
 
 export function assertBoardView(view: View): asserts view is ListView {
-  if (view.type !== 'board') {
+  if (view.type !== "board") {
     throw new Error(`Expected view to be board. Received ${view.type}`);
   }
 }

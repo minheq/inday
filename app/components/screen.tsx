@@ -1,6 +1,6 @@
-import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
-import { useThemeStyles } from './theme';
+import React from "react";
+import { SafeAreaView, StyleSheet } from "react-native";
+import { useThemeStyles } from "./theme";
 
 interface ScreenProps {
   children?: React.ReactNode;

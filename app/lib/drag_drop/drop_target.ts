@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { useDragDrop } from './drag_drop';
+import React, { useEffect, useRef } from "react";
+import { useDragDrop } from "./drag_drop";
 
-import { Draggable, DragState } from './draggable';
+import { Draggable, DragState } from "./draggable";
 
 interface DropTargetMeasurements {
   x: number;
@@ -61,7 +61,7 @@ export class DropTarget {
 }
 
 export function useDropTarget<T>(
-  props: DropTargetProps,
+  props: DropTargetProps
 ): [DropTarget, React.RefObject<T>] {
   const {
     onEnter,
@@ -80,7 +80,7 @@ export function useDropTarget<T>(
       onHover,
       onLeave,
       onWillAccept,
-    }),
+    })
   ).current;
 
   useEffect(() => {

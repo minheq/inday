@@ -1,8 +1,8 @@
-import { test } from './testing';
+import { test } from "./testing";
 
-import { differenceBy, intersectBy } from './array_utils';
+import { differenceBy, intersectBy } from "./array_utils";
 
-test('intersectBy', (t) => {
+test("intersectBy", (t) => {
   const a = [{ x: 1 }, { x: 2 }, { x: 3 }];
   const b = [{ x: 2 }, { x: 3 }, { x: 4 }];
   const result = intersectBy(a, b, (i) => i.x);
@@ -10,7 +10,7 @@ test('intersectBy', (t) => {
   t.deepEqual(result, [{ x: 2 }, { x: 3 }]);
 });
 
-test('differenceBy', (t) => {
+test("differenceBy", (t) => {
   const a = [{ x: 1 }, { x: 2 }, { x: 3 }];
   const b = [{ x: 2 }, { x: 3 }, { x: 4 }];
   const result = differenceBy(a, b, (i) => i.x);

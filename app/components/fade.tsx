@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated } from 'react-native';
-import { SpringConfig } from './animation';
-import { tokens } from './tokens';
+import React, { useEffect, useRef } from "react";
+import { Animated } from "react-native";
+import { SpringConfig } from "./animation";
+import { tokens } from "./tokens";
 
 interface FadeProps {
   children?: React.ReactNode;

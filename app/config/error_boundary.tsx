@@ -1,5 +1,5 @@
-import React from 'react';
-import { Text } from '../components/text';
+import React from "react";
+import { Text } from "../components/text";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -16,12 +16,12 @@ export class ErrorBoundary extends React.Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, eventId: '' };
+    this.state = { hasError: false, eventId: "" };
   }
 
   static getDerivedStateFromError(_error: Error): ErrorBoundaryState {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true, eventId: '' };
+    return { hasError: true, eventId: "" };
   }
 
   componentDidCatch(error: Error, _errorInfo: React.ErrorInfo): void {

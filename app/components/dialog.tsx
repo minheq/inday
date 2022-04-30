@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   useWindowDimensions,
@@ -6,9 +6,9 @@ import {
   StyleProp,
   Pressable,
   StyleSheet,
-} from 'react-native';
-import { Modal, ModalProps } from './modal';
-import { tokens } from './tokens';
+} from "react-native";
+import { Modal, ModalProps } from "./modal";
+import { tokens } from "./tokens";
 
 const OFFSET_TOP = 64;
 
@@ -23,22 +23,22 @@ export function Dialog(props: DialogProps): JSX.Element {
     onRequestClose,
     onShow,
     onDismiss,
-    animationType = 'none',
+    animationType = "none",
     style,
     children,
   } = props;
   const { height } = useWindowDimensions();
   const [internalVisible, setInternalVisible] = useState(visible);
   const slide = useRef(
-    new Animated.Value(animationType === 'slide' ? height : OFFSET_TOP),
+    new Animated.Value(animationType === "slide" ? height : OFFSET_TOP)
   ).current;
   const overlayFade = useRef(new Animated.Value(visible ? 1 : 0)).current;
   const opacity = useRef(
-    new Animated.Value(animationType === 'fade' ? (visible ? 1 : 0) : 1),
+    new Animated.Value(animationType === "fade" ? (visible ? 1 : 0) : 1)
   ).current;
 
   useEffect(() => {
-    if (animationType !== 'none') {
+    if (animationType !== "none") {
       return;
     }
 
@@ -70,7 +70,7 @@ export function Dialog(props: DialogProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (animationType !== 'fade') {
+    if (animationType !== "fade") {
       return;
     }
 
@@ -116,7 +116,7 @@ export function Dialog(props: DialogProps): JSX.Element {
   ]);
 
   useEffect(() => {
-    if (animationType !== 'slide') {
+    if (animationType !== "slide") {
       return;
     }
     if (visible) {
@@ -169,7 +169,7 @@ export function Dialog(props: DialogProps): JSX.Element {
       visible={visible}
       onRequestClose={onRequestClose}
       onShow={onShow}
-      animationType={animationType === 'none' ? 'none' : 'fade'}
+      animationType={animationType === "none" ? "none" : "fade"}
       transparent
       onDismiss={onDismiss}
     >
@@ -179,7 +179,7 @@ export function Dialog(props: DialogProps): JSX.Element {
           {
             backgroundColor: overlayFade.interpolate({
               inputRange: [0, 1],
-              outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.3)'],
+              outputRange: ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.3)"],
             }),
           },
         ]}
@@ -208,18 +208,18 @@ export function Dialog(props: DialogProps): JSX.Element {
 
 const styles = StyleSheet.create({
   base: {
-    height: '100%',
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
   },
   dialog: {
-    maxHeight: '80%',
-    maxWidth: '90%',
+    maxHeight: "80%",
+    maxWidth: "90%",
     borderRadius: tokens.border.radius,
   },
   background: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,

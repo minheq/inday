@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { PressableHighlight } from './pressable_highlight';
-import { Icon, IconName } from './icon';
-import { Text, TextColor } from './text';
-import { tokens } from './tokens';
+import React, { useCallback } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { PressableHighlight } from "./pressable_highlight";
+import { Icon, IconName } from "./icon";
+import { Text, TextColor } from "./text";
+import { tokens } from "./tokens";
 
 export interface ContextMenuProps {
   menuItems: ContextMenuItem[];
@@ -78,13 +78,13 @@ const styles = StyleSheet.create({
     height: CONTEXT_MENU_ITEM_HEIGHT,
     width: 32,
     paddingLeft: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     borderRadius: tokens.border.radius,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     height: CONTEXT_MENU_ITEM_HEIGHT,
     paddingHorizontal: 8,
   },

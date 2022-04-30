@@ -1,15 +1,15 @@
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback } from "react";
 import {
   TextInput as RNTextInput,
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   StyleProp,
   TextStyle,
-} from 'react-native';
+} from "react-native";
 
-import { useTheme, useThemeStyles } from './theme';
-import { tokens } from './tokens';
-import { UIKey } from '../lib/keyboard';
+import { useTheme, useThemeStyles } from "./theme";
+import { tokens } from "./tokens";
+import { UIKey } from "../lib/keyboard";
 
 export interface TextInputProps {
   value?: string | null;
@@ -17,7 +17,7 @@ export interface TextInputProps {
   testID?: string;
   autoFocus?: boolean;
   onKeyPress?: (
-    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    event: NativeSyntheticEvent<TextInputKeyPressEventData>
   ) => void;
   placeholder?: string;
   numberOfLines?: number;
@@ -58,7 +58,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
           onRequestClose();
         }
       },
-      [onRequestClose, onKeyPress],
+      [onRequestClose, onKeyPress]
     );
 
     const height =
@@ -69,7 +69,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
         multiline={numberOfLines ? numberOfLines > 1 : false}
         ref={forwardedRef}
         testID={testID}
-        value={value || ''}
+        value={value || ""}
         autoFocus={autoFocus}
         placeholder={placeholder}
         onChangeText={onChange}
@@ -84,5 +84,5 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
         ]}
       />
     );
-  },
+  }
 );

@@ -1,11 +1,11 @@
-import React, { Fragment, useCallback } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import React, { Fragment, useCallback } from "react";
+import { Pressable, StyleSheet } from "react-native";
 
-import { Spacer } from './spacer';
-import { Row } from './row';
-import { Text } from './text';
-import { tokens } from './tokens';
-import { useThemeStyles } from './theme';
+import { Spacer } from "./spacer";
+import { Row } from "./row";
+import { Text } from "./text";
+import { tokens } from "./tokens";
+import { useThemeStyles } from "./theme";
 
 interface Option<T> {
   label: string;
@@ -19,7 +19,7 @@ interface SegmentedControlProps<T> {
 }
 
 export function SegmentedControl<T>(
-  props: SegmentedControlProps<T>,
+  props: SegmentedControlProps<T>
 ): JSX.Element {
   const { value, onChange, options = [] } = props;
 
@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
   control: {
     flex: 1,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: tokens.border.radius,
   },
 });

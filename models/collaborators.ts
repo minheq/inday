@@ -1,5 +1,5 @@
-import { generateID, validateID } from '../lib/id';
-import { UserID } from './user';
+import { generateID, validateID } from "../lib/id";
+import { UserID } from "./user";
 
 export interface Collaborator {
   id: CollaboratorID;
@@ -12,7 +12,7 @@ export interface Collaborator {
   spaceID: string;
 }
 
-export const collaboratorIDPrefix = 'clb' as const;
+export const collaboratorIDPrefix = "clb" as const;
 export type CollaboratorID = `${typeof collaboratorIDPrefix}${string}`;
 
 export function generateCollaboratorID(): CollaboratorID {

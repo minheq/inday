@@ -1,14 +1,14 @@
-import { AppRegistry } from 'react-native';
-import React, { Suspense } from 'react';
-import { RecoilRoot } from 'recoil';
+import { AppRegistry } from "react-native";
+import React, { Suspense } from "react";
+import { RecoilRoot } from "recoil";
 
-import { Text } from './app/components/text';
-import { ErrorBoundary } from './app/config/error_boundary';
-import { SpaceScreen } from './app/screens/space/space_screen';
+import { Text } from "./app/components/text";
+import { ErrorBoundary } from "./app/config/error_boundary";
+import { SpaceScreen } from "./app/screens/space/space_screen";
 
-import { Playground } from './app/components/playground';
-import { Router, ScreenName } from './app/config/routes';
-import { ThemeProvider } from './app/components/theme';
+import { Playground } from "./app/components/playground";
+import { Router, ScreenName } from "./app/config/routes";
+import { ThemeProvider } from "./app/components/theme";
 
 export function App(): JSX.Element {
   return (
@@ -19,18 +19,18 @@ export function App(): JSX.Element {
             <Router
               pathMap={{
                 Space: {
-                  path: '/s/:spaceID/:viewID',
+                  path: "/s/:spaceID/:viewID",
                   component: SpaceScreen,
                 },
                 Playground: {
-                  path: '/playground/:component',
+                  path: "/playground/:component",
                   component: Playground,
                 },
               }}
               fallback={
                 <SpaceScreen
                   name={ScreenName.Space}
-                  params={{ viewID: 'viw1', spaceID: 'spc1' }}
+                  params={{ viewID: "viw1", spaceID: "spc1" }}
                 />
               }
             />
@@ -41,8 +41,8 @@ export function App(): JSX.Element {
   );
 }
 
-AppRegistry.registerComponent('App', () => App);
+AppRegistry.registerComponent("App", () => App);
 
-AppRegistry.runApplication('App', {
-  rootTag: document.getElementById('root'),
+AppRegistry.runApplication("App", {
+  rootTag: document.getElementById("root"),
 });

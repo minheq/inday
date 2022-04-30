@@ -1,5 +1,5 @@
-import { generateSpaceID, Space } from './spaces';
-import { Collaborator, generateCollaboratorID } from './collaborators';
+import { generateSpaceID, Space } from "./spaces";
+import { Collaborator, generateCollaboratorID } from "./collaborators";
 import {
   FieldType,
   FieldValue,
@@ -24,12 +24,12 @@ import {
   URLField,
   generateFieldID,
   generateSelectOptionID,
-} from './fields';
-import { BaseView, generateViewID, View } from './views';
-import { Collection, generateCollectionID } from './collections';
-import { Document, generateDocumentID } from './documents';
-import { Filter, FilterConfig, generateFilterID } from './filters';
-import { generateSortID, Sort, SortConfig } from './sorts';
+} from "./fields";
+import { BaseView, generateViewID, View } from "./views";
+import { Collection, generateCollectionID } from "./collections";
+import { Document, generateDocumentID } from "./documents";
+import { Filter, FilterConfig, generateFilterID } from "./filters";
+import { generateSortID, Sort, SortConfig } from "./sorts";
 import {
   fakeBoolean,
   fakeDate,
@@ -39,13 +39,13 @@ import {
   fakeURL,
   fakeWord,
   fakeWords,
-} from '../lib/faker';
-import { generateWorkspaceID } from './workspace';
-import { keyedBy, range, sample } from '../lib/array_utils';
-import { isEmpty } from '../lib/lang_utils';
-import { formatISODate } from '../lib/date_utils';
-import { palette } from '../app/components/palette';
-import { generateGroupID, Group } from './groups';
+} from "../lib/faker";
+import { generateWorkspaceID } from "./workspace";
+import { keyedBy, range, sample } from "../lib/array_utils";
+import { isEmpty } from "../lib/lang_utils";
+import { formatISODate } from "../lib/date_utils";
+import { palette } from "../app/components/palette";
+import { generateGroupID, Group } from "./groups";
 
 export function makeSpace(space: Partial<Space>): Space {
   return {
@@ -58,12 +58,12 @@ export function makeSpace(space: Partial<Space>): Space {
 }
 
 export function makeCollaborator(
-  collaborator: Partial<Collaborator>,
+  collaborator: Partial<Collaborator>
 ): Collaborator {
   return {
     id: collaborator.id ?? generateCollaboratorID(),
     userID: collaborator.userID ?? generateCollaboratorID(),
-    profileImageID: collaborator.profileImageID ?? 'someID',
+    profileImageID: collaborator.profileImageID ?? "someID",
     name: collaborator.name ?? fakeWords(2),
     email: collaborator.email ?? fakeEmail(),
     spaceID: collaborator.spaceID ?? generateSpaceID(),
@@ -105,7 +105,7 @@ const makeFieldByType: {
     const base = makeBaseField(field);
     return {
       type: FieldType.Currency,
-      currency: 'USD',
+      currency: "USD",
       ...base,
     };
   },
@@ -115,9 +115,9 @@ const makeFieldByType: {
       type: FieldType.Date,
       includeTime: false,
       format: {
-        day: 'numeric',
-        year: 'numeric',
-        month: 'numeric',
+        day: "numeric",
+        year: "numeric",
+        month: "numeric",
       },
       ...base,
     };
@@ -186,7 +186,7 @@ const makeFieldByType: {
     const base = makeBaseField(field);
     return {
       type: FieldType.Number,
-      style: 'decimal',
+      style: "decimal",
       default: null,
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
@@ -221,7 +221,7 @@ const makeFieldByType: {
     const base = makeBaseField(field);
     return {
       type: FieldType.SingleLineText,
-      default: '',
+      default: "",
       ...base,
     };
   },
@@ -282,7 +282,7 @@ interface CollectionWithFields extends Collection {
 
 export function addFieldsToCollection(
   collection: Collection,
-  fields: Field[],
+  fields: Field[]
 ): CollectionWithFields {
   return {
     ...collection,
@@ -292,7 +292,7 @@ export function addFieldsToCollection(
 
 export function makeView(
   view: Partial<View>,
-  collection: CollectionWithFields,
+  collection: CollectionWithFields
 ): View {
   const baseView: BaseView = {
     id: view.id ?? generateViewID(),
@@ -302,17 +302,17 @@ export function makeView(
     createdAt: view.createdAt ?? new Date(),
   };
 
-  if (view.type === 'board') {
+  if (view.type === "board") {
     return {
       ...baseView,
-      type: 'board',
+      type: "board",
       stackedByFieldID: collection.fields[0].id,
     };
   }
 
   return {
     ...baseView,
-    type: 'list',
+    type: "list",
     fixedFieldCount: 1,
     fieldsConfig: keyedBy(
       collection.fields.map((f, i) => ({
@@ -321,7 +321,7 @@ export function makeView(
         width: i === 0 ? 240 : 180,
         order: i,
       })),
-      (field) => field.id,
+      (field) => field.id
     ),
   };
 }
@@ -332,7 +332,7 @@ export function makeManyDocuments(
   documentsByFieldID?: {
     [fieldID: string]: Document[];
   },
-  collaborators?: Collaborator[],
+  collaborators?: Collaborator[]
 ): Document[] {
   return range(0, count).map(() => {
     return makeDocument({}, collection, documentsByFieldID, collaborators);
@@ -345,7 +345,7 @@ export function makeDocument(
   documentsByFieldID?: {
     [fieldID: string]: Document[];
   },
-  collaborators?: Collaborator[],
+  collaborators?: Collaborator[]
 ): Document {
   const fields: { [fieldID: string]: FieldValue } = {
     ...document.fields,
@@ -360,7 +360,7 @@ export function makeDocument(
       fields[field.id] = fakeFieldValuesByFieldType[field.type](
         field,
         documentsByFieldID,
-        collaborators,
+        collaborators
       );
     }
   }
@@ -381,7 +381,7 @@ const fakeFieldValuesByFieldType: {
     documentsByFieldID?: {
       [fieldID: string]: Document[];
     },
-    collaborators?: Collaborator[],
+    collaborators?: Collaborator[]
   ) => FieldValue;
 } = {
   [FieldType.Checkbox]: () => {
@@ -399,12 +399,12 @@ const fakeFieldValuesByFieldType: {
   [FieldType.MultiCollaborator]: (
     field,
     _documentsByFieldID,
-    collaborators,
+    collaborators
   ) => {
     assertMultiCollaboratorField(field);
 
     if (collaborators === undefined) {
-      throw new Error('Expected collaborators list to be passed in');
+      throw new Error("Expected collaborators list to be passed in");
     }
 
     if (isEmpty(collaborators)) {
@@ -415,7 +415,7 @@ const fakeFieldValuesByFieldType: {
   },
   [FieldType.MultiDocumentLink]: (field, documentsByFieldID) => {
     if (documentsByFieldID === undefined) {
-      throw new Error('Expected document link list to be passed in');
+      throw new Error("Expected document link list to be passed in");
     }
 
     if (isEmpty(documentsByFieldID[field.id])) {
@@ -441,12 +441,12 @@ const fakeFieldValuesByFieldType: {
   [FieldType.SingleCollaborator]: (
     field,
     documentsByFieldID,
-    collaborators,
+    collaborators
   ) => {
     assertSingleCollaboratorField(field);
 
     if (collaborators === undefined) {
-      throw new Error('Expected collaborators list to be passed in');
+      throw new Error("Expected collaborators list to be passed in");
     }
 
     if (isEmpty(collaborators)) {
@@ -457,7 +457,7 @@ const fakeFieldValuesByFieldType: {
   },
   [FieldType.SingleDocumentLink]: (field, documentsByFieldID) => {
     if (documentsByFieldID === undefined) {
-      throw new Error('Expected document link list to be passed in');
+      throw new Error("Expected document link list to be passed in");
     }
 
     if (isEmpty(documentsByFieldID[field.id])) {
@@ -481,7 +481,7 @@ const fakeFieldValuesByFieldType: {
 
 export function makeFilter(
   filter: Partial<Filter>,
-  config: FilterConfig,
+  config: FilterConfig
 ): Filter {
   return {
     id: filter.id ?? generateFilterID(),

@@ -1,64 +1,64 @@
-import { sample } from './array_utils';
-import { random } from './number_utils';
+import { sample } from "./array_utils";
+import { random } from "./number_utils";
 
 const loremIpsum = [
-  'Lorem',
-  'ipsum',
-  'dolor',
-  'sit',
-  'amet',
-  'consectetur',
-  'adipiscing',
-  'elit',
-  'Integer',
-  'imperdiet',
-  'eget',
-  'tellus',
-  'sed',
-  'sollicitudin',
-  'Aenean',
-  'facilisis',
-  'lacus',
-  'et',
-  'magna',
-  'congue',
-  'quis',
-  'convallis',
-  'tellus',
-  'volutpat',
-  'Sed',
-  'suscipit',
-  'odio',
-  'a',
-  'lectus',
-  'eleifend',
-  'quis',
-  'placerat',
-  'velit',
-  'malesuada',
-  'Aliquam',
-  'suscipit',
-  'magna',
-  'ut',
-  'ultrices',
-  'pulvinar',
-  'Integer',
-  'non',
-  'efficitur',
-  'magna',
-  'Aenean',
-  'tempor',
-  'augue',
-  'neque',
-  'Morbi',
-  'fringilla',
-  'libero',
-  'elit',
-  'ut',
-  'efficitur',
-  'velit',
-  'ullamcorper',
-  'quis',
+  "Lorem",
+  "ipsum",
+  "dolor",
+  "sit",
+  "amet",
+  "consectetur",
+  "adipiscing",
+  "elit",
+  "Integer",
+  "imperdiet",
+  "eget",
+  "tellus",
+  "sed",
+  "sollicitudin",
+  "Aenean",
+  "facilisis",
+  "lacus",
+  "et",
+  "magna",
+  "congue",
+  "quis",
+  "convallis",
+  "tellus",
+  "volutpat",
+  "Sed",
+  "suscipit",
+  "odio",
+  "a",
+  "lectus",
+  "eleifend",
+  "quis",
+  "placerat",
+  "velit",
+  "malesuada",
+  "Aliquam",
+  "suscipit",
+  "magna",
+  "ut",
+  "ultrices",
+  "pulvinar",
+  "Integer",
+  "non",
+  "efficitur",
+  "magna",
+  "Aenean",
+  "tempor",
+  "augue",
+  "neque",
+  "Morbi",
+  "fringilla",
+  "libero",
+  "elit",
+  "ut",
+  "efficitur",
+  "velit",
+  "ullamcorper",
+  "quis",
 ];
 
 export function fakeEmail(): string {
@@ -82,7 +82,7 @@ export function fakeDate(): Date {
     random(2020, 2030),
     random(0, 11),
     random(1, 28),
-    random(1, 23),
+    random(1, 23)
   );
 }
 
@@ -95,13 +95,13 @@ export function fakeBoolean(): boolean {
 }
 
 export function fakeWords(size = 5): string {
-  let result = '';
+  let result = "";
 
   for (let i = 0; i < size; i++) {
     result += sample(loremIpsum);
 
     if (i !== size - 1) {
-      result += ' ';
+      result += " ";
     }
   }
 

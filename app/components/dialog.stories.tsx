@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { Dialog } from './dialog';
-import { FlatButton } from './flat_button';
+import { Dialog } from "./dialog";
+import { FlatButton } from "./flat_button";
 
 interface DialogBaseProps {
-  animationType: 'fade' | 'slide' | 'none';
+  animationType: "fade" | "slide" | "none";
 }
 
 function DialogBase(props: DialogBaseProps) {

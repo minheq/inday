@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef } from "react";
 
 /**
  * This hook is similar to useMemo, but instead of passing an array of dependencies we pass a custom compare function that receives the previous and new value.
@@ -6,7 +6,7 @@ import { useRef } from 'react';
  */
 export function useMemoCompare<T>(
   getValue: () => T,
-  compare: ((previous: T, next: T) => boolean) | boolean,
+  compare: ((previous: T, next: T) => boolean) | boolean
 ): T {
   // Ref for storing previous value
   const previousRef = useRef(getValue());
@@ -15,7 +15,7 @@ export function useMemoCompare<T>(
   let next: T | null = null;
   let changed = false;
 
-  if (typeof compare === 'function') {
+  if (typeof compare === "function") {
     next = getValue();
     changed = compare(previous, next);
   } else {

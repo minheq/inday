@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyReply, FastifyRequest } from "fastify";
 
 import {
   DB,
@@ -29,11 +29,11 @@ import {
   getFieldByID,
   deleteField,
   duplicateField,
-} from './db';
-import { AuthenticationError, UnauthorizedError } from './errors';
-import { ViewType } from '../models/views';
-import { FieldType } from '../app/store/fields';
-import { validateID } from '../lib/id';
+} from "./db";
+import { AuthenticationError, UnauthorizedError } from "./errors";
+import { ViewType } from "../models/views";
+import { FieldType } from "../app/store/fields";
+import { validateID } from "../lib/id";
 
 type Request = FastifyRequest;
 type Response = FastifyReply;
@@ -61,14 +61,14 @@ type H = (ctx: Context, req: Request, res: Response) => Promise<void>;
 type AH = (
   ctx: AuthenticatedContext,
   req: Request,
-  res: Response,
+  res: Response
 ) => Promise<void>;
 
 export function addContext(handler: H) {
   return async (req: Request, res: Response) => {
     await wrapInTx(async (db) => {
       const ctx: Context = {
-        userID: '1',
+        userID: "1",
         db,
       };
 
@@ -78,7 +78,7 @@ export function addContext(handler: H) {
 }
 
 function assertAuthenticated(
-  ctx: Context,
+  ctx: Context
 ): asserts ctx is AuthenticatedContext {
   if (ctx.userID === undefined) {
     throw new AuthenticationError();
@@ -116,7 +116,7 @@ export const handleCreateWorkspace: AH = async (ctx, req, res) => {
     ctx.db,
     workspaceID,
     name,
-    currentUserID,
+    currentUserID
   );
 
   res.send(workspace);
@@ -224,7 +224,7 @@ export const handleCreateCollection: AH = async (ctx, req, res) => {
     ctx.db,
     collectionID,
     name,
-    spaceID,
+    spaceID
   );
 
   res.send(collection);
@@ -322,7 +322,7 @@ export interface CreateViewInput {
   collectionID: string;
 }
 
-const viewTypes: ViewType[] = ['list', 'board'];
+const viewTypes: ViewType[] = ["list", "board"];
 
 export const handleCreateView: AH = async (ctx, req, res) => {
   validateID(req.params.viewID);
@@ -363,21 +363,21 @@ export const handleDeleteView: AH = async (ctx, req, res) => {
 };
 
 const fieldTypes: FieldType[] = [
-  'singleLineText',
-  'multiLineText',
-  'singleSelect',
-  'multiSelect',
-  'singleCollaborator',
-  'multiCollaborator',
-  'singleDocumentLink',
-  'multiDocumentLink',
-  'date',
-  'phoneNumber',
-  'email',
-  'url',
-  'number',
-  'currency',
-  'checkbox',
+  "singleLineText",
+  "multiLineText",
+  "singleSelect",
+  "multiSelect",
+  "singleCollaborator",
+  "multiCollaborator",
+  "singleDocumentLink",
+  "multiDocumentLink",
+  "date",
+  "phoneNumber",
+  "email",
+  "url",
+  "number",
+  "currency",
+  "checkbox",
 ];
 
 interface FieldIDParams {
@@ -414,7 +414,7 @@ export const handleDuplicateField: AH = async (ctx, req, res) => {
     ctx.db,
     fieldID,
     fromFieldID,
-    duplicateDocumentFieldValues,
+    duplicateDocumentFieldValues
   );
 
   res.send(field);

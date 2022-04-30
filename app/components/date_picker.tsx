@@ -1,17 +1,17 @@
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
+import React, { Fragment, useCallback, useMemo, useState } from "react";
+import { View, Pressable, StyleSheet } from "react-native";
 
-import { Text } from './text';
-import { Spacer } from './spacer';
-import { Icon } from './icon';
+import { Text } from "./text";
+import { Spacer } from "./spacer";
+import { Icon } from "./icon";
 import {
   MonthRenderer,
   RenderDayProps,
   RenderOtherMonthProps,
   RenderWeekProps,
-} from './month_renderer';
-import { Picker, PickerOption } from './picker';
-import { getSystemLocale } from '../lib/locale';
+} from "./month_renderer";
+import { Picker, PickerOption } from "./picker";
+import { getSystemLocale } from "../lib/locale";
 import {
   DayOfWeek,
   eachDayOfInterval,
@@ -26,9 +26,9 @@ import {
   DateInterval,
   getFirstDateOfWeek,
   getLastDateOfWeek,
-} from '../../lib/date_utils';
-import { subMonths } from 'date-fns';
-import { useThemeStyles } from './theme';
+} from "../../lib/date_utils";
+import { subMonths } from "date-fns";
+import { useThemeStyles } from "./theme";
 
 interface DatePickerProps {
   value?: Date | null;
@@ -58,9 +58,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
   }, [value]);
 
   const [month, setMonth] = useState(
-    selectedInterval
-      ? selectedInterval.start.getMonth()
-      : new Date().getMonth(),
+    selectedInterval ? selectedInterval.start.getMonth() : new Date().getMonth()
   );
 
   const [year, setYear] = useState(new Date().getFullYear());
@@ -74,7 +72,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
     }).map((_year) => ({
       value: _year.getFullYear(),
       label: formatDate(_year, getSystemLocale(), {
-        year: 'numeric',
+        year: "numeric",
       }),
     }));
   }, [minYear, maxYear, month]);
@@ -86,7 +84,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
     }).map((_month) => ({
       value: _month.getMonth(),
       label: formatDate(_month, getSystemLocale(), {
-        month: 'long',
+        month: "long",
       }),
     }));
   }, []);
@@ -99,7 +97,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
 
       onChange(day);
     },
-    [onChange],
+    [onChange]
   );
 
   const handleChangeMonth = useCallback((_month: number) => {
@@ -159,7 +157,7 @@ export function DatePicker(props: DatePickerProps): JSX.Element {
         />
       );
     },
-    [handleSelectDay],
+    [handleSelectDay]
   );
 
   const renderOtherMonthDay = useCallback((p: RenderOtherMonthProps) => {
@@ -255,7 +253,7 @@ function DayDisplay(props: DayDisplayProps) {
         <View style={styles.dayWrapper}>
           <Text decoration="line-through" color="muted">
             {formatDate(day, getSystemLocale(), {
-              day: 'numeric',
+              day: "numeric",
             })}
           </Text>
         </View>
@@ -299,9 +297,9 @@ function DayDisplay(props: DayDisplayProps) {
                 selected && themeStyles.background.primary,
               ]}
             >
-              <Text color={!selected && today ? 'primary' : 'default'}>
+              <Text color={!selected && today ? "primary" : "default"}>
                 {formatDate(day, getSystemLocale(), {
-                  day: 'numeric',
+                  day: "numeric",
                 })}
               </Text>
             </View>
@@ -331,7 +329,7 @@ function OtherMonthDay(props: OtherMonthDayProps) {
     >
       <Text color="muted">
         {formatDate(day, getSystemLocale(), {
-          day: 'numeric',
+          day: "numeric",
         })}
       </Text>
     </View>
@@ -361,7 +359,7 @@ function WeekDates(props: WeekDatesProps) {
       {dates.map((d) => (
         <View key={d.toISOString()} style={styles.dateWrapper}>
           <Text size="sm">
-            {formatDate(d, getSystemLocale(), { weekday: 'narrow' })}
+            {formatDate(d, getSystemLocale(), { weekday: "narrow" })}
           </Text>
         </View>
       ))}
@@ -371,7 +369,7 @@ function WeekDates(props: WeekDatesProps) {
 
 const getWeekInterval = (
   date: Date,
-  firstDayOfWeek: DayOfWeek,
+  firstDayOfWeek: DayOfWeek
 ): DateInterval => {
   return {
     start: startOfDay(getFirstDateOfWeek(date, firstDayOfWeek)),
@@ -381,7 +379,7 @@ const getWeekInterval = (
 
 const eachDateOfWeek = (
   date = new Date(),
-  firstDayOfWeek: DayOfWeek,
+  firstDayOfWeek: DayOfWeek
 ): Date[] => {
   return eachDayOfInterval(getWeekInterval(date, firstDayOfWeek));
 };
@@ -390,43 +388,43 @@ const styles = StyleSheet.create({
   root: {},
   dayRoot: {
     flex: 1,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   dayButton: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "100%",
     padding: 0,
   },
   dayWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
     borderRadius: 999,
-    justifyContent: 'center',
-    textAlign: 'center',
+    justifyContent: "center",
+    textAlign: "center",
     height: 40,
     width: 40,
   },
   arrowWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 999,
-    textAlign: 'center',
+    textAlign: "center",
     height: 32,
     width: 32,
   },
   todayWrapper: {},
   selectedEdge: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: -1,
-    width: '50%',
+    width: "50%",
     right: 0,
-    height: '100%',
+    height: "100%",
   },
   selectedStart: {
     right: 0,
@@ -435,14 +433,14 @@ const styles = StyleSheet.create({
     left: 0,
   },
   monthNavigatorWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
   },
   monthArrowsWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
   },
   week: {
     paddingTop: 2,
@@ -452,23 +450,23 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   weekDatesWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   monthPickerWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   firstMonthPickerWrapper: {
     paddingRight: 8,
   },
   dateWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 1,
   },
 });

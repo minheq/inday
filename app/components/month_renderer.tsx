@@ -1,5 +1,5 @@
-import React, { Fragment, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { Fragment, useMemo } from "react";
+import { View, StyleSheet } from "react-native";
 import {
   isBefore,
   isAfter,
@@ -17,8 +17,8 @@ import {
   isWithinDateInterval,
   getLastDateOfWeek,
   getFirstDateOfWeek,
-} from '../../lib/date_utils';
-import { chunk } from '../../lib/array_utils';
+} from "../../lib/date_utils";
+import { chunk } from "../../lib/array_utils";
 
 interface MonthRendererProps {
   /** Date with which we infer the month from */
@@ -287,8 +287,8 @@ function OtherMonthDayContainer(props: OtherMonthDayContainerProps) {
 
 const styles = StyleSheet.create({
   weekWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
+    display: "flex",
+    flexDirection: "row",
   },
 });
 

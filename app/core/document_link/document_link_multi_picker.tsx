@@ -1,9 +1,9 @@
-import React, { Fragment } from 'react';
+import React, { Fragment } from "react";
 
 import {
   MultiDocumentLinkField,
   MultiDocumentLinkFieldValue,
-} from '../../../models/fields';
+} from "../../../models/fields";
 
 interface DocumentLinkMultiPickerProps {
   value: MultiDocumentLinkFieldValue;
@@ -13,7 +13,7 @@ interface DocumentLinkMultiPickerProps {
 }
 
 export function DocumentLinkMultiPicker(
-  props: DocumentLinkMultiPickerProps,
+  props: DocumentLinkMultiPickerProps
 ): JSX.Element {
   return <Fragment />;
 }

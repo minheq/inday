@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
+} from "react";
 import {
   View,
   Pressable,
@@ -14,10 +14,10 @@ import {
   StyleProp,
   ViewStyle,
   Platform,
-} from 'react-native';
-import { Text } from '../../components/text';
-import { tokens } from '../../components/tokens';
-import { useFieldQuery, useDocumentFieldValueQuery } from '../../store/queries';
+} from "react-native";
+import { Text } from "../../components/text";
+import { tokens } from "../../components/tokens";
+import { useFieldQuery, useDocumentFieldValueQuery } from "../../store/queries";
 import {
   FieldType,
   CheckboxField,
@@ -71,55 +71,55 @@ import {
   BooleanFieldKindValue,
   generateFieldID,
   formatNumberFieldValue,
-} from '../../../models/fields';
-import { DocumentID, generateDocumentID } from '../../../models/documents';
-import { useSetRecoilState } from 'recoil';
+} from "../../../models/fields";
+import { DocumentID, generateDocumentID } from "../../../models/documents";
+import { useSetRecoilState } from "recoil";
 
-import { LeafRowCellState } from '../../components/grid_renderer.common';
-import { isNumberString, toNumber } from '../../../lib/number_utils';
-import { useThemeStyles } from '../../components/theme';
-import { activeCellState, useListViewViewContext } from './list_view_view';
-import { useLeafRowContext, useLeafRowContextMenuItems } from './leaf_row';
-import { SingleSelectPicker } from '../select/single_select_picker';
-import { MultiSelectPicker } from '../select/multi_select_picker';
-import { assertUnreached } from '../../../lib/lang_utils';
-import { Slide } from '../../components/slide';
-import { Icon } from '../../components/icon';
-import { CheckboxView } from '../../components/checkbox';
-import { Spacer } from '../../components/spacer';
-import { LEAF_ROW_HEIGHT } from './list_view_constants';
-import { useUpdateDocumentFieldValueMutation } from '../../store/mutations';
-import { FlatButton } from '../../components/flat_button';
-import { Popover } from '../../components/popover';
+import { LeafRowCellState } from "../../components/grid_renderer.common";
+import { isNumberString, toNumber } from "../../../lib/number_utils";
+import { useThemeStyles } from "../../components/theme";
+import { activeCellState, useListViewViewContext } from "./list_view_view";
+import { useLeafRowContext, useLeafRowContextMenuItems } from "./leaf_row";
+import { SingleSelectPicker } from "../select/single_select_picker";
+import { MultiSelectPicker } from "../select/multi_select_picker";
+import { assertUnreached } from "../../../lib/lang_utils";
+import { Slide } from "../../components/slide";
+import { Icon } from "../../components/icon";
+import { CheckboxView } from "../../components/checkbox";
+import { Spacer } from "../../components/spacer";
+import { LEAF_ROW_HEIGHT } from "./list_view_constants";
+import { useUpdateDocumentFieldValueMutation } from "../../store/mutations";
+import { FlatButton } from "../../components/flat_button";
+import { Popover } from "../../components/popover";
 import {
   PressableHighlight,
   PressableStateCallback,
-} from '../../components/pressable_highlight';
-import { ContextMenu } from '../../components/context_menu';
-import { CollaboratorBadgeList } from '../collaborators/collaborator_badge_list';
-import { CollaboratorMultiPicker } from '../collaborators/collaborator_multi_picker';
-import { CollaboratorPicker } from '../collaborators/collaborator_picker';
-import { DocumentLinkBadgeList } from '../document_link/document_link_badge_list';
-import { OptionBadgeList } from '../select/option_badge_list';
-import { CollaboratorBadge } from '../collaborators/collaborator_badge';
-import { DocumentLinkBadge } from '../document_link/document_link_badge';
-import { OptionBadge } from '../select/option_badge';
-import { formatCurrency } from '../../../lib/currency';
-import { getSystemLocale } from '../../lib/locale';
+} from "../../components/pressable_highlight";
+import { ContextMenu } from "../../components/context_menu";
+import { CollaboratorBadgeList } from "../collaborators/collaborator_badge_list";
+import { CollaboratorMultiPicker } from "../collaborators/collaborator_multi_picker";
+import { CollaboratorPicker } from "../collaborators/collaborator_picker";
+import { DocumentLinkBadgeList } from "../document_link/document_link_badge_list";
+import { OptionBadgeList } from "../select/option_badge_list";
+import { CollaboratorBadge } from "../collaborators/collaborator_badge";
+import { DocumentLinkBadge } from "../document_link/document_link_badge";
+import { OptionBadge } from "../select/option_badge";
+import { formatCurrency } from "../../../lib/currency";
+import { getSystemLocale } from "../../lib/locale";
 import {
   formatDate,
   formatISODate,
   parseISODate,
-} from '../../../lib/date_utils';
-import { DatePicker } from '../../components/date_picker';
-import { NumberInput } from '../../components/number_input';
-import { TextInput } from '../../components/text_input';
-import { CheckboxAlt } from '../../components/checkbox_alt';
-import { EmailLink } from '../../components/email_link';
-import { PhoneNumberLink } from '../../components/phone_number_link';
-import { URLLink } from '../../components/url_link';
-import { getLeafRowCellBottom } from './list_view_map';
-import { useCellKeyBindings } from './use_cell_keybindings';
+} from "../../../lib/date_utils";
+import { DatePicker } from "../../components/date_picker";
+import { NumberInput } from "../../components/number_input";
+import { TextInput } from "../../components/text_input";
+import { CheckboxAlt } from "../../components/checkbox_alt";
+import { EmailLink } from "../../components/email_link";
+import { PhoneNumberLink } from "../../components/phone_number_link";
+import { URLLink } from "../../components/url_link";
+import { getLeafRowCellBottom } from "./list_view_map";
+import { useCellKeyBindings } from "./use_cell_keybindings";
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -154,7 +154,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
       last,
       state,
     }),
-    [primary, path, row, column, last, state],
+    [primary, path, row, column, last, state]
   );
   const field = useFieldQuery(fieldID);
   const value = useDocumentFieldValueQuery(documentID, fieldID);
@@ -163,20 +163,20 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
   const { selected } = useLeafRowContext();
 
   const handleFocus = useCallback(() => {
-    if (cell.state === 'default') {
-      setActiveCell({ ...cell, state: 'focused' });
+    if (cell.state === "default") {
+      setActiveCell({ ...cell, state: "focused" });
     }
   }, [setActiveCell, cell]);
 
   const handleStartEditing = useCallback(() => {
-    if (cell.state === 'focused') {
-      setActiveCell({ ...cell, state: 'editing' });
+    if (cell.state === "focused") {
+      setActiveCell({ ...cell, state: "editing" });
     }
   }, [setActiveCell, cell]);
 
   const handleStopEditing = useCallback(() => {
-    if (cell.state === 'editing') {
-      setActiveCell({ ...cell, state: 'focused' });
+    if (cell.state === "editing") {
+      setActiveCell({ ...cell, state: "focused" });
     }
   }, [setActiveCell, cell]);
 
@@ -187,11 +187,11 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
       return;
     }
 
-    setActiveCell({ ...nextCell, state: 'focused' });
+    setActiveCell({ ...nextCell, state: "focused" });
   }, [setActiveCell, cell, listViewMap]);
 
   const handlePress = useCallback(() => {
-    if (mode === 'edit') {
+    if (mode === "edit") {
       handleFocus();
     } else {
       onSelectDocument(documentID, !selected);
@@ -253,7 +253,7 @@ const LeafRowCellContext = createContext<LeafRowCellContext>({
     path: [],
     row: 0,
     column: 0,
-    state: 'default',
+    state: "default",
     last: false,
   },
   documentID: generateDocumentID(),
@@ -287,7 +287,7 @@ interface LeafRowCellViewProps {
 }
 
 const LeafRowCellView = memo(function LeafRowCellView(
-  props: LeafRowCellViewProps,
+  props: LeafRowCellViewProps
 ) {
   const { field, value, level } = props;
   const { mode } = useListViewViewContext();
@@ -353,36 +353,36 @@ const LeafRowCellView = memo(function LeafRowCellView(
         [
           styles.leafRowCell,
           themeStyles.border.default,
-          mode === 'edit' && hovered && themeStyles.button.flatHovered,
-          cell.state !== 'default' && themeStyles.background.content,
+          mode === "edit" && hovered && themeStyles.button.flatHovered,
+          cell.state !== "default" && themeStyles.background.content,
           cell.primary && styles.primaryCell,
         ],
-    [cell, mode, themeStyles],
+    [cell, mode, themeStyles]
   );
 
   return (
     <Pressable
       accessible={false}
-      pointerEvents={cell.state === 'default' ? 'auto' : 'box-none'}
+      pointerEvents={cell.state === "default" ? "auto" : "box-none"}
       // @ts-ignore: Web supports
       style={pressableStyle}
       onPress={onPress}
     >
       {cell.primary === true && (
-        <SelectCheckbox visible={mode === 'select'} selected={selected} />
+        <SelectCheckbox visible={mode === "select"} selected={selected} />
       )}
       {cell.primary && <Spacer direction="row" size={level * 32} />}
       <View style={styles.cellRoot}>{renderCell()}</View>
-      {cell.primary === true && mode === 'edit' && cell.state !== 'editing' && (
+      {cell.primary === true && mode === "edit" && cell.state !== "editing" && (
         <DotsMenu />
       )}
-      {cell.state === 'default' && (
+      {cell.state === "default" && (
         <View
           pointerEvents="none"
           style={[styles.bottomBorder, themeStyles.border.default]}
         />
       )}
-      {cell.state !== 'default' && (
+      {cell.state !== "default" && (
         <View
           pointerEvents="none"
           style={[styles.focused, themeStyles.border.focused]}
@@ -398,7 +398,7 @@ interface SelectCheckboxProps {
 }
 
 const SelectCheckbox = memo(function SelectCheckbox(
-  props: SelectCheckboxProps,
+  props: SelectCheckboxProps
 ): JSX.Element {
   const { visible, selected } = props;
 
@@ -482,7 +482,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
   useNumberFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
-  if (cell.state === 'editing') {
+  if (cell.state === "editing") {
     return (
       <InputWrapper>
         <NumberInput
@@ -507,7 +507,7 @@ const CurrencyCell = memo(function CurrencyCell(props: CurrencyCellProps) {
     </View>
   );
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
@@ -533,7 +533,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
     async (date: Date) => {
       await handleChange(formatISODate(date));
     },
-    [handleChange],
+    [handleChange]
   );
 
   const child = (
@@ -546,7 +546,7 @@ const DateCell = memo(function DateCell(props: DateCellProps) {
     </View>
   );
 
-  if (cell.state === 'default') {
+  if (cell.state === "default") {
     return child;
   }
 
@@ -576,7 +576,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
-  if (cell.state === 'editing') {
+  if (cell.state === "editing") {
     return (
       <InputWrapper>
         <TextInput
@@ -599,7 +599,7 @@ const EmailCell = memo(function EmailCell(props: EmailCellProps) {
     </View>
   );
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <View style={styles.cellRoot}>
         <Pressable style={styles.cellRoot} onPress={onStartEditing}>
@@ -623,7 +623,7 @@ interface MultiCollaboratorCellProps {
 }
 
 const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
-  props: MultiCollaboratorCellProps,
+  props: MultiCollaboratorCellProps
 ) {
   const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
@@ -636,7 +636,7 @@ const MultiCollaboratorCell = memo(function MultiCollaboratorCell(
     </View>
   );
 
-  if (cell.state === 'default') {
+  if (cell.state === "default") {
     return child;
   }
 
@@ -661,7 +661,7 @@ interface MultiDocumentLinkCellProps {
 }
 
 const MultiDocumentLinkCell = memo(function MultiDocumentLinkCell(
-  props: MultiDocumentLinkCellProps,
+  props: MultiDocumentLinkCellProps
 ) {
   const { value } = props;
 
@@ -682,7 +682,7 @@ interface MultiLineTextCellProps {
 }
 
 const MultiLineTextCell = memo(function MultiLineTextCell(
-  props: MultiLineTextCellProps,
+  props: MultiLineTextCellProps
 ) {
   const { value } = props;
   const { cell, onFocusNextDocument, onStartEditing, onStopEditing } =
@@ -690,7 +690,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
-  if (cell.state === 'editing') {
+  if (cell.state === "editing") {
     return (
       <TextInput
         numberOfLines={4}
@@ -704,7 +704,7 @@ const MultiLineTextCell = memo(function MultiLineTextCell(
     );
   }
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <Pressable style={styles.multiLineTextFocused} onPress={onStartEditing}>
         <Text>{value}</Text>
@@ -725,7 +725,7 @@ interface MultiSelectCellProps {
 }
 
 const MultiSelectCell = memo(function MultiSelectCell(
-  props: MultiSelectCellProps,
+  props: MultiSelectCellProps
 ) {
   const { value, field } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
@@ -738,7 +738,7 @@ const MultiSelectCell = memo(function MultiSelectCell(
     </View>
   );
 
-  if (cell.state === 'default') {
+  if (cell.state === "default") {
     return child;
   }
 
@@ -770,7 +770,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
   useNumberFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
-  if (cell.state === 'editing') {
+  if (cell.state === "editing") {
     return (
       <InputWrapper>
         <NumberInput
@@ -793,7 +793,7 @@ const NumberCell = memo(function NumberCell(props: NumberCellProps) {
     </View>
   );
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
@@ -810,7 +810,7 @@ interface PhoneNumberCellProps {
 }
 
 const PhoneNumberCell = memo(function PhoneNumberCell(
-  props: PhoneNumberCellProps,
+  props: PhoneNumberCellProps
 ) {
   const { value } = props;
   const { cell, onStopEditing, onFocusNextDocument, onStartEditing } =
@@ -818,7 +818,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
-  if (cell.state === 'editing') {
+  if (cell.state === "editing") {
     return (
       <InputWrapper>
         <TextInput
@@ -838,7 +838,7 @@ const PhoneNumberCell = memo(function PhoneNumberCell(
     </View>
   );
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <View style={styles.cellRoot}>
         <Pressable style={styles.cellRoot} onPress={onStartEditing}>
@@ -862,7 +862,7 @@ interface SingleCollaboratorCellProps {
 }
 
 const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
-  props: SingleCollaboratorCellProps,
+  props: SingleCollaboratorCellProps
 ) {
   const { value } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
@@ -875,7 +875,7 @@ const SingleCollaboratorCell = memo(function SingleCollaboratorCell(
     </View>
   );
 
-  if (cell.state === 'default') {
+  if (cell.state === "default") {
     return child;
   }
 
@@ -900,7 +900,7 @@ interface SingleDocumentLinkCellProps {
 }
 
 const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
-  props: SingleDocumentLinkCellProps,
+  props: SingleDocumentLinkCellProps
 ) {
   const { value } = props;
   const { cell, onStartEditing } = useLeafRowCellContext();
@@ -913,7 +913,7 @@ const SingleDocumentLinkCell = memo(function SingleDocumentLinkCell(
     </View>
   );
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
@@ -930,7 +930,7 @@ interface SingleLineTextCellProps {
 }
 
 const SingleLineTextCell = memo(function SingleLineTextCell(
-  props: SingleLineTextCellProps,
+  props: SingleLineTextCellProps
 ) {
   const { value } = props;
   const { cell, onStopEditing, onStartEditing, onFocusNextDocument } =
@@ -938,7 +938,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
-  if (cell.state === 'editing') {
+  if (cell.state === "editing") {
     return (
       <InputWrapper>
         <TextInput
@@ -959,7 +959,7 @@ const SingleLineTextCell = memo(function SingleLineTextCell(
     </View>
   );
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <Pressable style={styles.cellRoot} onPress={onStartEditing}>
         {child}
@@ -976,7 +976,7 @@ interface SingleSelectCellProps {
 }
 
 const SingleSelectCell = memo(function SingleSelectCell(
-  props: SingleSelectCellProps,
+  props: SingleSelectCellProps
 ) {
   const { value, field } = props;
   const { cell, onStopEditing } = useLeafRowCellContext();
@@ -991,7 +991,7 @@ const SingleSelectCell = memo(function SingleSelectCell(
     </View>
   );
 
-  if (cell.state === 'default') {
+  if (cell.state === "default") {
     return child;
   }
 
@@ -1023,7 +1023,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
   useTextFieldKindCellKeyBindings();
   const handleChange = useFieldValueChangeHandler();
 
-  if (cell.state === 'editing') {
+  if (cell.state === "editing") {
     return (
       <InputWrapper>
         <TextInput
@@ -1046,7 +1046,7 @@ const URLCell = memo(function URLCell(props: URLCellProps) {
     </View>
   );
 
-  if (cell.state === 'focused') {
+  if (cell.state === "focused") {
     return (
       <View style={styles.cellRoot}>
         <Pressable style={styles.cellRoot} onPress={onStartEditing}>
@@ -1073,11 +1073,11 @@ function useTextFieldKindCellKeyBindings() {
       await updateDocumentFieldValue(documentID, fieldID, key);
       onStartEditing();
     },
-    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
+    [onStartEditing, updateDocumentFieldValue, documentID, fieldID]
   );
 
   const handleDeleteKey = useCallback(async () => {
-    await updateDocumentFieldValue(documentID, fieldID, '');
+    await updateDocumentFieldValue(documentID, fieldID, "");
   }, [updateDocumentFieldValue, documentID, fieldID]);
 
   useCellKeyBindings({
@@ -1099,7 +1099,7 @@ function useNumberFieldKindCellKeyBindings() {
       await updateDocumentFieldValue(documentID, fieldID, toNumber(key));
       onStartEditing();
     },
-    [onStartEditing, updateDocumentFieldValue, documentID, fieldID],
+    [onStartEditing, updateDocumentFieldValue, documentID, fieldID]
   );
 
   const handleDeleteKey = useCallback(async () => {
@@ -1146,7 +1146,7 @@ function useFieldValueChangeHandler() {
     async (nextValue: FieldValue) => {
       await updateDocumentFieldValue(documentID, fieldID, nextValue);
     },
-    [updateDocumentFieldValue, documentID, fieldID],
+    [updateDocumentFieldValue, documentID, fieldID]
   );
 }
 
@@ -1214,7 +1214,7 @@ function PickerTrigger(props: PickerTriggerProps): JSX.Element {
       <Popover
         targetRef={targetRef}
         onRequestClose={onStopEditing}
-        visible={cell.state === 'editing'}
+        visible={cell.state === "editing"}
         content={<PickerWrapper>{content}</PickerWrapper>}
       />
     </View>
@@ -1229,17 +1229,17 @@ export function LastLeafRowCell(): JSX.Element {
 
 const styles = StyleSheet.create({
   leafRowCell: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     ...Platform.select({
       web: {
-        outlineStyle: 'none',
+        outlineStyle: "none",
       },
     }),
   },
   bottomBorder: {
     borderBottomWidth: 1,
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -1247,7 +1247,7 @@ const styles = StyleSheet.create({
   },
   focused: {
     borderRadius: tokens.border.radius,
-    position: 'absolute',
+    position: "absolute",
     top: -1,
     left: 0,
     right: 0,
@@ -1263,22 +1263,22 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
   },
   checkboxCellRoot: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   multiLineTextFocused: {
     padding: 8,
     minHeight: LEAF_ROW_HEIGHT,
     maxHeight: 400,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   cellRoot: {
     flex: 1,
-    overflowX: 'hidden',
+    overflowX: "hidden",
   },
   cellValueContainer: {
     height: LEAF_ROW_HEIGHT,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 8,
   },
   input: {
@@ -1286,20 +1286,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     ...Platform.select({
       web: {
-        outlineStyle: 'none',
+        outlineStyle: "none",
       },
     }),
   },
   actionsWrapper: {
     paddingHorizontal: 8,
     paddingBottom: 8,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   inputWrapper: {
     paddingHorizontal: 8,
     paddingBottom: 8,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
   dotsMenuWrapper: {
     paddingRight: 8,

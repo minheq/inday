@@ -1,8 +1,8 @@
-import React from 'react';
-import { View } from 'react-native';
+import React from "react";
+import { View } from "react-native";
 
-import { FlatButton } from './flat_button';
-import { Row } from './row';
+import { FlatButton } from "./flat_button";
+import { Row } from "./row";
 
 function Basic(): JSX.Element {
   return (

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { DatePicker } from './date_picker';
+import { DatePicker } from "./date_picker";
 
 function Basic(): JSX.Element {
   const [value, setValue] = useState<Date | null>(null);

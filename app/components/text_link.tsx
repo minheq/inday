@@ -1,6 +1,6 @@
-import React from 'react';
-import { Pressable } from 'react-native';
-import { Text } from './text';
+import React from "react";
+import { Pressable } from "react-native";
+import { Text } from "./text";
 
 interface TextLinkProps {
   text: string;

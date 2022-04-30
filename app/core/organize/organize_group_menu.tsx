@@ -6,42 +6,42 @@ import React, {
   useEffect,
   createContext,
   useMemo,
-} from 'react';
-import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { ScrollView, Pressable } from 'react-native';
+} from "react";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
+import { ScrollView, Pressable } from "react-native";
 
-import { Row } from '../../components/row';
-import { Spacer } from '../../components/spacer';
-import { Text } from '../../components/text';
-import { tokens } from '../../components/tokens';
+import { Row } from "../../components/row";
+import { Spacer } from "../../components/spacer";
+import { Text } from "../../components/text";
+import { tokens } from "../../components/tokens";
 import {
   useCollectionFieldsQuery,
   useFieldQuery,
   useViewGroupsQuery,
   useGroupsSequenceMaxQuery,
-} from '../../store/queries';
+} from "../../store/queries";
 import {
   useDeleteGroupMutation,
   useUpdateGroupSortConfigMutation,
   useCreateGroupMutation,
-} from '../../store/mutations';
-import { first } from '../../../lib/array_utils';
-import { isEmpty } from '../../../lib/lang_utils';
-import { FieldID } from '../../../models/fields';
-import { FieldPicker } from '../fields/field_picker';
-import { GroupID, Group } from '../../../models/groups';
-import { SegmentedControl } from '../../components/segmented_control';
-import { ViewID } from '../../../models/views';
-import { SortConfig, SortOrder } from '../../../models/sorts';
+} from "../../store/mutations";
+import { first } from "../../../lib/array_utils";
+import { isEmpty } from "../../../lib/lang_utils";
+import { FieldID } from "../../../models/fields";
+import { FieldPicker } from "../fields/field_picker";
+import { GroupID, Group } from "../../../models/groups";
+import { SegmentedControl } from "../../components/segmented_control";
+import { ViewID } from "../../../models/views";
+import { SortConfig, SortOrder } from "../../../models/sorts";
 
 const groupEditIDState = atom<GroupID>({
-  key: 'GroupMenuGroupEditID',
-  default: '',
+  key: "GroupMenuGroupEditID",
+  default: "",
 });
 
 const GroupMenuContext = createContext({
-  viewID: '',
-  collectionID: '',
+  viewID: "",
+  collectionID: "",
 });
 
 interface GroupMenuProps {
@@ -94,20 +94,20 @@ function GroupListItem(props: GroupListItemProps) {
   }, [setGroupEditID, group]);
 
   const handlePressCancel = useCallback(() => {
-    setGroupEditID('');
+    setGroupEditID("");
   }, [setGroupEditID]);
 
   const handlePressRemove = useCallback(() => {
     deleteGroup(group)
       .then(() => {
-        setGroupEditID('');
+        setGroupEditID("");
       })
       .catch((e) => {});
   }, [deleteGroup, setGroupEditID, group]);
 
   const handleSubmit = useCallback(() => {
     updateSortConfig(group.id, groupConfig);
-    setGroupEditID('');
+    setGroupEditID("");
   }, [updateSortConfig, setGroupEditID, group, groupConfig]);
 
   useEffect(() => {
@@ -173,14 +173,14 @@ function GroupNew() {
 
   if (isEmpty(fields)) {
     throw new Error(
-      'Fields are empty. They may not have been loaded properly.',
+      "Fields are empty. They may not have been loaded properly."
     );
   }
 
   const defaultSortConfig: SortConfig = useMemo(() => {
     return {
       fieldID: firstField.id,
-      order: 'ascending',
+      order: "ascending",
     };
   }, [firstField]);
 
@@ -203,7 +203,7 @@ function GroupNew() {
   }, [handleClose, createGroup, context, groupConfig, sequenceMax]);
 
   useEffect(() => {
-    if (groupEditID !== '') {
+    if (groupEditID !== "") {
       setOpen(false);
     }
   }, [groupEditID]);
@@ -247,11 +247,11 @@ function GroupEdit(props: GroupEditProps) {
   const handleChangeField = useCallback(
     (fieldID: FieldID) => {
       onChange({
-        order: 'ascending',
+        order: "ascending",
         fieldID,
       });
     },
-    [onChange],
+    [onChange]
   );
 
   const handleChangeOrder = useCallback(
@@ -261,7 +261,7 @@ function GroupEdit(props: GroupEditProps) {
         fieldID: field.id,
       });
     },
-    [onChange, field],
+    [onChange, field]
   );
 
   return (
@@ -276,8 +276,8 @@ function GroupEdit(props: GroupEditProps) {
         value={groupConfig.order}
         onChange={handleChangeOrder}
         options={[
-          { label: 'Ascending', value: 'ascending' },
-          { label: 'Descending', value: 'descending' },
+          { label: "Ascending", value: "ascending" },
+          { label: "Descending", value: "descending" },
         ]}
       />
     </Fragment>

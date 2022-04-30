@@ -1,16 +1,16 @@
-import React, { useCallback, useEffect, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef } from "react";
 import {
   View,
   StyleSheet,
   Pressable,
   Dimensions,
   Animated,
-} from 'react-native';
-import { tokens } from './tokens';
-import { Modal } from './modal';
-import { assertUnreached } from '../../lib/lang_utils';
-import { usePrevious } from '../hooks/use_previous';
-import { useThemeStyles } from './theme';
+} from "react-native";
+import { tokens } from "./tokens";
+import { Modal } from "./modal";
+import { assertUnreached } from "../../lib/lang_utils";
+import { usePrevious } from "../hooks/use_previous";
+import { useThemeStyles } from "./theme";
 
 export interface PopoverProps {
   visible: boolean;
@@ -30,24 +30,24 @@ interface State {
 }
 
 type Action =
-  | { type: 'READY'; tm: PopoverTriggerMeasurements }
+  | { type: "READY"; tm: PopoverTriggerMeasurements }
   | {
-      type: 'VISIBLE';
+      type: "VISIBLE";
       anchor: PopoverOverlayAnchor;
       height: number;
       cm: PopoverContentMeasurements;
     }
-  | { type: 'CLOSE' };
+  | { type: "CLOSE" };
 
 function reducer(prevState: State, action: Action): State {
   switch (action.type) {
-    case 'READY':
+    case "READY":
       return {
         ...prevState,
         ready: true,
         tm: action.tm,
       };
-    case 'VISIBLE':
+    case "VISIBLE":
       return {
         ...prevState,
         actuallyVisible: true,
@@ -55,7 +55,7 @@ function reducer(prevState: State, action: Action): State {
         cm: action.cm,
         height: action.height,
       };
-    case 'CLOSE':
+    case "CLOSE":
       return {
         ...prevState,
         ready: false,
@@ -87,14 +87,14 @@ export function Popover(props: PopoverProps): JSX.Element {
 
   const handleHide = useCallback(() => {
     opacity.setValue(0);
-    dispatch({ type: 'CLOSE' });
+    dispatch({ type: "CLOSE" });
   }, [opacity]);
 
   const handleOpen = useCallback(() => {
     if (targetRef.current !== null) {
       targetRef.current.measure((tX, tY, tWidth, tHeight, tPageX, tPageY) => {
         dispatch({
-          type: 'READY',
+          type: "READY",
           tm: { width: tWidth, height: tHeight, pageX: tPageX, pageY: tPageY },
         });
       });
@@ -108,7 +108,7 @@ export function Popover(props: PopoverProps): JSX.Element {
         const [pAnchor, pHeight] = getPopoverAnchorAndHeight(tm, _cm);
 
         dispatch({
-          type: 'VISIBLE',
+          type: "VISIBLE",
           anchor: pAnchor,
           height: pHeight,
           cm: _cm,
@@ -157,7 +157,7 @@ export function Popover(props: PopoverProps): JSX.Element {
           { opacity, height },
         ]}
       >
-        {typeof content === 'function' ? content({ onRequestClose }) : content}
+        {typeof content === "function" ? content({ onRequestClose }) : content}
       </Animated.View>
     </PopoverOverlay>
   );
@@ -214,7 +214,7 @@ export function PopoverOverlay(props: PopoverOverlayProps): JSX.Element {
             },
           ]}
         >
-          {typeof children === 'function'
+          {typeof children === "function"
             ? children({ onRequestClose })
             : children}
         </View>
@@ -247,9 +247,9 @@ export function getPopoverAnchorAndHeight(
   tm: PopoverTriggerMeasurements,
   cm: PopoverContentMeasurements,
   triggerOffset = 4,
-  windowOffset = 16,
+  windowOffset = 16
 ): [PopoverOverlayAnchor, number] {
-  const windowSize = Dimensions.get('window');
+  const windowSize = Dimensions.get("window");
   const triggerBottomY = tm.pageY + tm.height + triggerOffset;
   const triggerTopY = tm.pageY - triggerOffset;
 
@@ -291,13 +291,13 @@ export function getPopoverAnchorAndHeight(
 
 const styles = StyleSheet.create({
   base: {
-    height: '100%',
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
   },
   popover: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: 1,
     borderRadius: tokens.border.radius,
   },
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: tokens.border.radius,
   },
   background: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,

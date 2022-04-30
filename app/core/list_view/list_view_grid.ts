@@ -1,22 +1,22 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
-import { GridGroup, LeafRow } from '../../components/grid_renderer.common';
-import { DocumentID } from '../../../models/documents';
-import { FieldWithListViewConfig } from '../../../models/views';
-import { ADD_FIELD_COLUMN_WIDTH } from './list_view_constants';
-import { getLeafRows, ListViewMap } from './list_view_map';
+import { GridGroup, LeafRow } from "../../components/grid_renderer.common";
+import { DocumentID } from "../../../models/documents";
+import { FieldWithListViewConfig } from "../../../models/views";
+import { ADD_FIELD_COLUMN_WIDTH } from "./list_view_constants";
+import { getLeafRows, ListViewMap } from "./list_view_map";
 import {
   isGroupedListViewDocumentNodes,
   FlatListViewDocumentNode,
   GroupedListViewDocumentNode,
-} from './list_view_nodes';
+} from "./list_view_nodes";
 
 /**
  * Transforms nodes to grid groups
  * @param nodes
  */
 export function useListViewGridGroups(
-  nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
+  nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[]
 ): GridGroup[] {
   return useMemo((): GridGroup[] => {
     if (isGroupedListViewDocumentNodes(nodes)) {
@@ -28,20 +28,20 @@ export function useListViewGridGroups(
 }
 
 function toGroupedGridGroups(
-  nodes: GroupedListViewDocumentNode[],
+  nodes: GroupedListViewDocumentNode[]
 ): GridGroup[] {
   let groups: GridGroup[] = [];
 
   for (const node of nodes) {
-    if (node.type === 'leaf') {
+    if (node.type === "leaf") {
       groups = groups.concat({
-        type: 'leaf',
+        type: "leaf",
         collapsed: node.collapsed,
         rowCount: node.children.length + 1, // + 1 adds a row for `Add document`
       });
     } else {
       groups = groups.concat({
-        type: 'ancestor',
+        type: "ancestor",
         collapsed: node.collapsed,
         children: toGroupedGridGroups(node.children),
       });
@@ -56,7 +56,7 @@ function toFlatGridGroups(nodes: FlatListViewDocumentNode[]): GridGroup[] {
 
   for (const node of nodes) {
     groups = groups.concat({
-      type: 'leaf',
+      type: "leaf",
       collapsed: false,
       rowCount: node.children.length + 1, // + 1 adds a row for `Add document`
     });
@@ -66,21 +66,21 @@ function toFlatGridGroups(nodes: FlatListViewDocumentNode[]): GridGroup[] {
 }
 
 export function useListViewGridColumns(
-  fields: FieldWithListViewConfig[],
+  fields: FieldWithListViewConfig[]
 ): number[] {
   return useMemo(
     (): number[] =>
       fields.map((field) => field.config.width).concat(ADD_FIELD_COLUMN_WIDTH),
-    [fields],
+    [fields]
   );
 }
 
 export function useListViewGridSelectedRows(
   listViewMap: ListViewMap,
-  selectedDocumentIDs: DocumentID[],
+  selectedDocumentIDs: DocumentID[]
 ): LeafRow[] {
   return useMemo(
     (): LeafRow[] => getLeafRows(listViewMap, selectedDocumentIDs),
-    [selectedDocumentIDs, listViewMap],
+    [selectedDocumentIDs, listViewMap]
   );
 }

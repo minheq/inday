@@ -1,12 +1,12 @@
-import React, { Fragment, useCallback } from 'react';
-import { ListPickerOption } from '../../components/list_picker';
+import React, { Fragment, useCallback } from "react";
+import { ListPickerOption } from "../../components/list_picker";
 
 import {
   SingleDocumentLinkField,
   SingleDocumentLinkFieldValue,
-} from '../../../models/fields';
-import { Document, DocumentID } from '../../../models/documents';
-import { DocumentLinkBadge } from './document_link_badge';
+} from "../../../models/fields";
+import { Document, DocumentID } from "../../../models/documents";
+import { DocumentLinkBadge } from "./document_link_badge";
 
 interface SingleDocumentLinkPickerProps {
   value: SingleDocumentLinkFieldValue;
@@ -16,13 +16,13 @@ interface SingleDocumentLinkPickerProps {
 }
 
 export function SingleDocumentLinkPicker(
-  props: SingleDocumentLinkPickerProps,
+  props: SingleDocumentLinkPickerProps
 ): JSX.Element {
   return <Fragment />;
 }
 
 export function useRenderDocumentLink(): (
-  documentID: DocumentID,
+  documentID: DocumentID
 ) => JSX.Element {
   return useCallback((documentID: DocumentID) => {
     return <DocumentLinkBadge documentID={documentID} key={documentID} />;
@@ -30,7 +30,7 @@ export function useRenderDocumentLink(): (
 }
 
 export function useDocumentLinkOptions(
-  documents: Document[],
+  documents: Document[]
 ): ListPickerOption<DocumentID>[] {
   // TODO
   return [];

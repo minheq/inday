@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { canUseDOM } from '../lib/execution_environment';
+import React, { useCallback, useState } from "react";
+import { canUseDOM } from "../lib/execution_environment";
 
 interface HoverableProps {
   children: React.ReactElement | ((hovered: boolean) => React.ReactElement);
@@ -19,7 +19,7 @@ export function Hoverable(props: HoverableProps): JSX.Element {
     onPressOut,
   } = handlers;
 
-  const child = typeof children === 'function' ? children(hovered) : children;
+  const child = typeof children === "function" ? children(hovered) : children;
 
   return React.cloneElement(React.Children.only(child), {
     onMouseEnter,
@@ -131,9 +131,9 @@ function disableHover() {
 }
 
 if (canUseDOM) {
-  document.addEventListener('touchstart', disableHover, true);
-  document.addEventListener('touchmove', disableHover, true);
-  document.addEventListener('mousemove', enableHover, true);
+  document.addEventListener("touchstart", disableHover, true);
+  document.addEventListener("touchmove", disableHover, true);
+  document.addEventListener("mousemove", enableHover, true);
 }
 
 function isHoverEnabled(): boolean {

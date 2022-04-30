@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import RModal from 'react-modal';
-import type { ModalProps } from './modal';
-import { Animated, StyleSheet, useWindowDimensions } from 'react-native';
-import { usePrevious } from '../hooks/use_previous';
+import React, { useEffect, useRef, useState } from "react";
+import RModal from "react-modal";
+import type { ModalProps } from "./modal";
+import { Animated, StyleSheet, useWindowDimensions } from "react-native";
+import { usePrevious } from "../hooks/use_previous";
 
-RModal.setAppElement('#root');
+RModal.setAppElement("#root");
 
 export function Modal(props: ModalProps): JSX.Element {
   const {
-    animationType = 'none',
+    animationType = "none",
     visible,
     onRequestClose,
     children,
@@ -20,12 +20,12 @@ export function Modal(props: ModalProps): JSX.Element {
   const [internalVisible, setInternalIsOpen] = useState(visible);
   const { height } = useWindowDimensions();
   const slide = useRef(
-    new Animated.Value(animationType === 'slide' ? height : 0),
+    new Animated.Value(animationType === "slide" ? height : 0)
   ).current;
   const fade = useRef(new Animated.Value(visible ? 1 : 0)).current;
 
   useEffect(() => {
-    if (animationType !== 'none') {
+    if (animationType !== "none") {
       return;
     }
 
@@ -33,7 +33,7 @@ export function Modal(props: ModalProps): JSX.Element {
   }, [visible, internalVisible, fade, height, animationType, onRequestClose]);
 
   useEffect(() => {
-    if (animationType !== 'fade' || prevVisible === visible) {
+    if (animationType !== "fade" || prevVisible === visible) {
       return;
     }
 
@@ -66,7 +66,7 @@ export function Modal(props: ModalProps): JSX.Element {
   ]);
 
   useEffect(() => {
-    if (animationType !== 'slide' || prevVisible === visible) {
+    if (animationType !== "slide" || prevVisible === visible) {
       return;
     }
 
@@ -129,21 +129,21 @@ const webStyles = {
     left: 0,
     right: 0,
     bottom: 0,
-    border: 'none',
-    overflow: 'auto',
+    border: "none",
+    overflow: "auto",
     borderRadius: 0,
     padding: 0,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   overlay: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
 };
 
 const styles = StyleSheet.create({
   modal: {
-    height: '100%',
-    width: '100%',
+    height: "100%",
+    width: "100%",
   },
   transparent: {},
 });

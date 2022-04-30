@@ -1,13 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext } from "react";
 
-type Direction = 'column' | 'row';
+type Direction = "column" | "row";
 
 interface ContainerContext {
   direction: Direction;
 }
 
 const ContainerContext = React.createContext<ContainerContext>({
-  direction: 'column',
+  direction: "column",
 });
 
 interface ContainerProviderProps {

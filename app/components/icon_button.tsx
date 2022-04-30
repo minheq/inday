@@ -1,10 +1,10 @@
-import React, { Fragment } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { tokens } from './tokens';
-import { Icon, IconName } from './icon';
-import { Spacer } from './spacer';
-import { Text } from './text';
-import { PressableHighlight } from './pressable_highlight';
+import React, { Fragment } from "react";
+import { StyleSheet, View } from "react-native";
+import { tokens } from "./tokens";
+import { Icon, IconName } from "./icon";
+import { Spacer } from "./spacer";
+import { Text } from "./text";
+import { PressableHighlight } from "./pressable_highlight";
 
 interface IconButtonProps {
   onPress?: () => void;
@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
     borderRadius: tokens.border.radius,
     minWidth: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 8,
   },
   button: {

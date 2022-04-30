@@ -1,4 +1,4 @@
-type Level = 'fatal' | 'error' | 'warn' | 'info' | 'debug';
+type Level = "fatal" | "error" | "warn" | "info" | "debug";
 
 const levelValueMap: { [level in Level]: number } = {
   fatal: 50,
@@ -16,7 +16,7 @@ class Logger {
   private level: Level;
 
   constructor(options: Options) {
-    const { level = 'info' } = options;
+    const { level = "info" } = options;
     this.level = level;
   }
 
@@ -27,28 +27,28 @@ class Logger {
   }
 
   public fatal(message: string, data?: unknown) {
-    this.log('error', message, data);
+    this.log("error", message, data);
   }
 
   public error(message: string, data?: unknown) {
-    this.log('error', message, data);
+    this.log("error", message, data);
   }
 
   public warn(message: string, data?: unknown) {
-    this.log('warn', message, data);
+    this.log("warn", message, data);
   }
 
   public info(message: string, data?: unknown) {
-    this.log('info', message, data);
+    this.log("info", message, data);
   }
 
   public debug(message: string, data?: unknown) {
-    this.log('debug', message, data);
+    this.log("debug", message, data);
   }
 }
 
 const logger = new Logger({
-  level: 'info',
+  level: "info",
 });
 
 export function useLogger(): Logger {

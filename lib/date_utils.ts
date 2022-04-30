@@ -37,7 +37,7 @@ import {
   setDate as dateFnsSetDate,
   isWithinInterval as dateFnsIsWithinInterval,
   getDate as dateFnsGetDate,
-} from 'date-fns';
+} from "date-fns";
 
 export function isValidDate(date: unknown): boolean {
   return dateFnsIsValid(date);
@@ -181,7 +181,7 @@ export function setDate(date: Date, dayOfMonth: number): Date {
 
 export function isWithinDateInterval(
   date: Date,
-  interval: DateInterval,
+  interval: DateInterval
 ): boolean {
   return dateFnsIsWithinInterval(date, interval);
 }
@@ -201,20 +201,20 @@ export function isDate(value: unknown): value is Date {
 
 // https://tc39.es/ecma402/#datetimeformat-objects
 export interface DateTimeFormatOptions {
-  weekday?: 'narrow' | 'short' | 'long';
-  year?: '2-digit' | 'numeric';
-  month?: '2-digit' | 'numeric' | 'narrow' | 'short' | 'long';
-  day?: '2-digit' | 'numeric';
-  hour?: '2-digit' | 'numeric';
-  minute?: '2-digit' | 'numeric';
-  second?: '2-digit' | 'numeric';
+  weekday?: "narrow" | "short" | "long";
+  year?: "2-digit" | "numeric";
+  month?: "2-digit" | "numeric" | "narrow" | "short" | "long";
+  day?: "2-digit" | "numeric";
+  hour?: "2-digit" | "numeric";
+  minute?: "2-digit" | "numeric";
+  second?: "2-digit" | "numeric";
   hourCycle?: HourCycle;
 }
 
 export function formatDate(
   date: Date,
   locales?: string | string[],
-  options?: DateTimeFormatOptions,
+  options?: DateTimeFormatOptions
 ): string {
   return new Intl.DateTimeFormat(locales, options).format(date);
 }
@@ -223,7 +223,7 @@ export function formatRelative(
   value: number,
   unit: Intl.RelativeTimeFormatUnit,
   locales?: string | string[],
-  options?: Intl.RelativeTimeFormatOptions,
+  options?: Intl.RelativeTimeFormatOptions
 ): string {
   return new Intl.RelativeTimeFormat(locales, options).format(value, unit);
 }
@@ -232,7 +232,7 @@ export type ISODate = string;
 
 export function formatISODate(
   date: Date,
-  representation: 'complete' | 'date' | 'time' = 'date',
+  representation: "complete" | "date" | "time" = "date"
 ): ISODate {
   return dateFnsFormatISO(date, { representation });
 }
@@ -242,7 +242,7 @@ export function parseISODate(isoDate: ISODate): Date {
 }
 
 export function parseISODateInterval(
-  isoDateInterval: ISODateInterval,
+  isoDateInterval: ISODateInterval
 ): DateInterval {
   return {
     start: parseISODate(isoDateInterval.start),
@@ -250,8 +250,8 @@ export function parseISODateInterval(
   };
 }
 
-export type DayInputFormat = 'm/d/y' | 'y/m/d' | 'd/m/y';
-export type HourCycle = 'h12' | 'h24';
+export type DayInputFormat = "m/d/y" | "y/m/d" | "d/m/y";
+export type HourCycle = "h12" | "h24";
 export type DateInputFormat = DayInputFormat | `${DayInputFormat} ${HourCycle}`;
 
 export interface ISODateInterval {
@@ -265,12 +265,12 @@ export interface ISODateInterval {
  */
 export function parseString(
   value: string,
-  format: DateInputFormat,
+  format: DateInputFormat
 ): Date | Error {
   const params = value.split(/[.\-/]/);
   if (params.length !== 3) {
     return new Error(
-      'Invalid date string. There should be 3 delimiters "-", "/" or "."',
+      'Invalid date string. There should be 3 delimiters "-", "/" or "."'
     );
   }
 
@@ -278,32 +278,32 @@ export function parseString(
   let month: number;
   let year: number;
 
-  if (format === 'd/m/y') {
+  if (format === "d/m/y") {
     day = parseInt(params[0], 10);
     month = parseInt(params[1], 10);
     year = parseInt(params[2], 10);
-  } else if (format === 'm/d/y') {
+  } else if (format === "m/d/y") {
     day = parseInt(params[1], 10);
     month = parseInt(params[0], 10);
     year = parseInt(params[2], 10);
-  } else if (format === 'y/m/d') {
+  } else if (format === "y/m/d") {
     day = parseInt(params[2], 10);
     month = parseInt(params[1], 10);
     year = parseInt(params[0], 10);
   } else {
     return new Error(
-      'Invalid date input format. It has to be one of "m/d/y", "y/m/d" or "d/m/y"',
+      'Invalid date input format. It has to be one of "m/d/y", "y/m/d" or "d/m/y"'
     );
   }
 
   if (isNaN(day) || day < 1) {
-    return new Error('Day is not valid. Ensure only numeric input for day.');
+    return new Error("Day is not valid. Ensure only numeric input for day.");
   } else if (isNaN(month) || month < 1) {
     return new Error(
-      'Month is not valid. Ensure only numeric input for month.',
+      "Month is not valid. Ensure only numeric input for month."
     );
   } else if (isNaN(year) || year < 1) {
-    return new Error('Year is not valid. Ensure only numeric input for year.');
+    return new Error("Year is not valid. Ensure only numeric input for year.");
   }
 
   if (year < 100) {
@@ -313,14 +313,14 @@ export function parseString(
   const date = new Date(`${year}-${month}-${day}`);
 
   if (isValidDate(date) === false) {
-    return new Error('Date is not valid.');
+    return new Error("Date is not valid.");
   }
 
   return date;
 }
 
 export function isISODate(value: unknown): value is ISODate {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return false;
   }
 
@@ -330,7 +330,7 @@ export function isISODate(value: unknown): value is ISODate {
 }
 
 export function isISODateInterval(value: unknown): value is ISODateInterval {
-  if (typeof value !== 'object' || value === null) {
+  if (typeof value !== "object" || value === null) {
     return false;
   }
 
@@ -346,7 +346,7 @@ export function isStartOfMonth(date: Date): boolean {
 
 export function getFirstDateOfWeek(
   date: Date,
-  firstDayOfWeek: DayOfWeek,
+  firstDayOfWeek: DayOfWeek
 ): Date {
   const day = getDay(date);
   const diffDays = day - firstDayOfWeek;
@@ -385,10 +385,10 @@ export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 // eslint-disable-next-line
 export enum Frequency {
-  Yearly = 'YEARLY',
-  Monthly = 'MONTHLY',
-  Weekly = 'WEEKLY',
-  Daily = 'DAILY',
+  Yearly = "YEARLY",
+  Monthly = "MONTHLY",
+  Weekly = "WEEKLY",
+  Daily = "DAILY",
 }
 
 export interface Recurrence {

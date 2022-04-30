@@ -5,30 +5,30 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
+} from "react";
 import {
   GestureResponderEvent,
   Platform,
   Pressable,
   StyleSheet,
   View,
-} from 'react-native';
-import { atom, useRecoilState } from 'recoil';
+} from "react-native";
+import { atom, useRecoilState } from "recoil";
 
-import { ContextMenuView } from '../../components/context_menu_view';
-import { ContextMenuItem, ContextMenu } from '../../components/context_menu';
-import { Hoverable } from '../../components/hoverable';
-import { Icon } from '../../components/icon';
-import { Row } from '../../components/row';
-import { Text } from '../../components/text';
-import { useThemeStyles } from '../../components/theme';
-import { FieldID } from '../../../models/fields';
-import { useFieldQuery } from '../../store/queries';
-import { getFieldIcon } from '../views/icon_helpers';
-import { useListViewViewContext } from './list_view_view';
-import { useUpdateListViewFieldConfigMutation } from '../../store/mutations';
-import { PressableHighlight } from '../../components/pressable_highlight';
-import { Popover } from '../../components/popover';
+import { ContextMenuView } from "../../components/context_menu_view";
+import { ContextMenuItem, ContextMenu } from "../../components/context_menu";
+import { Hoverable } from "../../components/hoverable";
+import { Icon } from "../../components/icon";
+import { Row } from "../../components/row";
+import { Text } from "../../components/text";
+import { useThemeStyles } from "../../components/theme";
+import { FieldID } from "../../../models/fields";
+import { useFieldQuery } from "../../store/queries";
+import { getFieldIcon } from "../views/icon_helpers";
+import { useListViewViewContext } from "./list_view_view";
+import { useUpdateListViewFieldConfigMutation } from "../../store/mutations";
+import { PressableHighlight } from "../../components/pressable_highlight";
+import { Popover } from "../../components/popover";
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -44,7 +44,7 @@ export function Header(props: HeaderProps): JSX.Element {
 }
 
 const resizeFieldIDState = atom<FieldID | null>({
-  key: 'ResizeFieldID',
+  key: "ResizeFieldID",
   default: null,
 });
 
@@ -55,7 +55,7 @@ interface HeaderCellProps {
 }
 
 export const HeaderCell = memo(function HeaderCell(
-  props: HeaderCellProps,
+  props: HeaderCellProps
 ): JSX.Element {
   const { fieldID, primary, width } = props;
   const { viewID } = useListViewViewContext();
@@ -89,7 +89,7 @@ export const HeaderCell = memo(function HeaderCell(
 
       await updateListViewFieldConfig(viewID, fieldID, { width: nextWidth });
     },
-    [updateListViewFieldConfig, viewID, fieldID, widthRef],
+    [updateListViewFieldConfig, viewID, fieldID, widthRef]
   );
 
   const handlePressIn = useCallback(
@@ -98,7 +98,7 @@ export const HeaderCell = memo(function HeaderCell(
       widthRef.current = width;
       setResizeFieldID(fieldID);
     },
-    [width, setResizeFieldID, fieldID],
+    [width, setResizeFieldID, fieldID]
   );
 
   const handlePressOut = useCallback(() => {
@@ -157,21 +157,21 @@ export const HeaderCell = memo(function HeaderCell(
 function useHeaderCellContextMenuItems() {
   return useMemo(
     (): ContextMenuItem[] => [
-      { label: 'Edit field type' },
-      { label: 'Rename' },
-      { label: 'Edit description' },
-      { label: 'Edit permissions' },
-      { label: 'Move left' },
-      { label: 'Move right' },
-      { label: 'Sort ascending' },
-      { label: 'Sort descending' },
-      { label: 'Add filter' },
-      { label: 'Group by this field' },
-      { label: 'Duplicate' },
-      { label: 'Hide' },
-      { label: 'Delete' },
+      { label: "Edit field type" },
+      { label: "Rename" },
+      { label: "Edit description" },
+      { label: "Edit permissions" },
+      { label: "Move left" },
+      { label: "Move right" },
+      { label: "Sort ascending" },
+      { label: "Sort descending" },
+      { label: "Add filter" },
+      { label: "Group by this field" },
+      { label: "Duplicate" },
+      { label: "Hide" },
+      { label: "Delete" },
     ],
-    [],
+    []
   );
 }
 
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
 
   headerCell: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     borderBottomWidth: 1,
   },
   menuView: {
@@ -200,13 +200,13 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
   },
   resizeHandler: {
-    position: 'absolute',
+    position: "absolute",
     right: 2,
     borderRadius: 999,
     borderWidth: 1,
     ...Platform.select({
       web: {
-        cursor: 'grab',
+        cursor: "grab",
       },
     }),
   },

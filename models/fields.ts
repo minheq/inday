@@ -1,6 +1,6 @@
-import { formatDecimal, formatUnit, Unit } from '../lib/unit';
-import { generateID, validateID } from '../lib/id';
-import { hasAllOf, keyedBy } from '../lib/array_utils';
+import { formatDecimal, formatUnit, Unit } from "../lib/unit";
+import { generateID, validateID } from "../lib/id";
+import { hasAllOf, keyedBy } from "../lib/array_utils";
 import {
   DateTimeFormatOptions,
   formatDate,
@@ -9,14 +9,14 @@ import {
   ISODate,
   isSameDay,
   parseISODate,
-} from '../lib/date_utils';
-import { CollaboratorID } from './collaborators';
-import { CollectionID } from './collections';
-import { DocumentFieldValues, DocumentID } from './documents';
-import { assertUnreached, map } from '../lib/lang_utils';
-import { getSystemLocale } from '../app/lib/locale';
+} from "../lib/date_utils";
+import { CollaboratorID } from "./collaborators";
+import { CollectionID } from "./collections";
+import { DocumentFieldValues, DocumentID } from "./documents";
+import { assertUnreached, map } from "../lib/lang_utils";
+import { getSystemLocale } from "../app/lib/locale";
 
-export const fieldIDPrefix = 'fld' as const;
+export const fieldIDPrefix = "fld" as const;
 export type FieldID = `${typeof fieldIDPrefix}${string}`;
 
 export function generateFieldID(): FieldID {
@@ -29,21 +29,21 @@ export function validateFieldID(id: string): void {
 
 // eslint-disable-next-line
 export enum FieldType {
-  Checkbox = 'Checkbox',
-  Currency = 'Currency',
-  Date = 'Date',
-  Email = 'Email',
-  MultiCollaborator = 'MultiCollaborator',
-  MultiLineText = 'MultiLineText',
-  MultiSelect = 'MultiSelect',
-  MultiDocumentLink = 'MultiDocumentLink',
-  Number = 'Number',
-  PhoneNumber = 'PhoneNumber',
-  SingleCollaborator = 'SingleCollaborator',
-  SingleLineText = 'SingleLineText',
-  SingleSelect = 'SingleSelect',
-  SingleDocumentLink = 'SingleDocumentLink',
-  URL = 'URL',
+  Checkbox = "Checkbox",
+  Currency = "Currency",
+  Date = "Date",
+  Email = "Email",
+  MultiCollaborator = "MultiCollaborator",
+  MultiLineText = "MultiLineText",
+  MultiSelect = "MultiSelect",
+  MultiDocumentLink = "MultiDocumentLink",
+  Number = "Number",
+  PhoneNumber = "PhoneNumber",
+  SingleCollaborator = "SingleCollaborator",
+  SingleLineText = "SingleLineText",
+  SingleSelect = "SingleSelect",
+  SingleDocumentLink = "SingleDocumentLink",
+  URL = "URL",
 }
 
 export interface BaseField {
@@ -71,7 +71,7 @@ export interface MultiLineTextField
   extends BaseField,
     MultiLineTextFieldConfig {}
 
-export const selectOptionIDPrefix = 'opt' as const;
+export const selectOptionIDPrefix = "opt" as const;
 export type SelectOptionID = `${typeof selectOptionIDPrefix}${string}`;
 
 export function generateSelectOptionID(): SelectOptionID {
@@ -166,20 +166,20 @@ export interface URLField extends BaseField, URLFieldConfig {}
 export interface UnitFieldConfig {
   type: FieldType.Number;
   default: number;
-  style: 'unit';
+  style: "unit";
   unit: Unit;
 }
 export interface DecimalFieldConfig {
   type: FieldType.Number;
   default: number | null;
-  style: 'decimal';
+  style: "decimal";
   minimumFractionDigits: number;
   maximumFractionDigits: number;
 }
 export interface IntegerFieldConfig {
   type: FieldType.Number;
   default: number | null;
-  style: 'integer';
+  style: "integer";
 }
 export type NumberFieldConfig =
   | DecimalFieldConfig
@@ -324,7 +324,7 @@ export interface FieldTypeToFieldValue {
 export function stringifyFieldValue(
   field: Field,
   value: FieldValue,
-  locales?: string | string[],
+  locales?: string | string[]
 ): string {
   switch (field.type) {
     case FieldType.SingleLineText:
@@ -338,7 +338,7 @@ export function stringifyFieldValue(
     case FieldType.Currency:
       assertNumberFieldKindValue(value);
       if (value === null) {
-        return '';
+        return "";
       }
 
       return value.toString();
@@ -347,34 +347,34 @@ export function stringifyFieldValue(
       return value
         .map((selectOptionID) => {
           const selected = field.options.find(
-            (opt) => opt.id === selectOptionID,
+            (opt) => opt.id === selectOptionID
           );
 
           if (selected === undefined) {
-            return '';
+            return "";
           }
 
           return selected.label;
         })
-        .join(', ');
+        .join(", ");
     }
     case FieldType.SingleSelect: {
       assertSingleSelectFieldValue(value);
       const selected = field.options.find((opt) => opt.id === value);
 
       if (selected === undefined) {
-        return '';
+        return "";
       }
 
       return selected.label;
     }
     case FieldType.Checkbox:
       assertBooleanFieldKindValue(value);
-      return value === true ? 'true' : 'false';
+      return value === true ? "true" : "false";
     case FieldType.Date:
       assertDateFieldKindValue(value);
       if (value === null) {
-        return '';
+        return "";
       }
 
       if (!isISODate(value)) {
@@ -390,7 +390,7 @@ export function stringifyFieldValue(
 export function areFieldValuesEqual(
   field: Field,
   a: FieldValue,
-  b: FieldValue,
+  b: FieldValue
 ): boolean {
   switch (field.type) {
     case FieldType.SingleLineText:
@@ -433,21 +433,21 @@ export function areFieldValuesEqual(
 
 function areTextFieldKindValueEqual(
   a: TextFieldKindValue,
-  b: TextFieldKindValue,
+  b: TextFieldKindValue
 ): boolean {
   return a === b;
 }
 
 function areNumberFieldKindValueEqual(
   a: NumberFieldKindValue,
-  b: NumberFieldKindValue,
+  b: NumberFieldKindValue
 ): boolean {
   return a === b;
 }
 
 function areSingleOptionFieldKindValueEqual(
   a: SingleOptionFieldKindValue,
-  b: SingleOptionFieldKindValue,
+  b: SingleOptionFieldKindValue
 ): boolean {
   return a === b;
 }
@@ -458,14 +458,14 @@ function areMultiOptionFieldKindValueEqual(a: string[], b: string[]): boolean {
 
 function areBooleanFieldKindValueEqual(
   a: BooleanFieldKindValue,
-  b: BooleanFieldKindValue,
+  b: BooleanFieldKindValue
 ): boolean {
   return a === b;
 }
 
 function areDateFieldKindValueEqual(
   a: DateFieldKindValue,
-  b: DateFieldKindValue,
+  b: DateFieldKindValue
 ): boolean {
   if (isDate(a) && isDate(b)) {
     return isSameDay(a, b);
@@ -475,81 +475,81 @@ function areDateFieldKindValueEqual(
 }
 
 export function assertSingleLineTextField(
-  field: Field,
+  field: Field
 ): asserts field is SingleLineTextField {
   if (field.type !== FieldType.SingleLineText) {
     throw new Error(
-      `Expected field to be SingleLineTextField. Received ${field.type}`,
+      `Expected field to be SingleLineTextField. Received ${field.type}`
     );
   }
 }
 
 export function assertMultiLineTextField(
-  field: Field,
+  field: Field
 ): asserts field is MultiLineTextField {
   if (field.type !== FieldType.MultiLineText) {
     throw new Error(
-      `Expected field to be MultiLineTextField. Received ${field.type}`,
+      `Expected field to be MultiLineTextField. Received ${field.type}`
     );
   }
 }
 
 export function assertSingleSelectField(
-  field: Field,
+  field: Field
 ): asserts field is SingleSelectField {
   if (field.type !== FieldType.SingleSelect) {
     throw new Error(
-      `Expected field to be SingleSelectField. Received ${field.type}`,
+      `Expected field to be SingleSelectField. Received ${field.type}`
     );
   }
 }
 
 export function assertMultiSelectField(
-  field: Field,
+  field: Field
 ): asserts field is MultiSelectField {
   if (field.type !== FieldType.MultiSelect) {
     throw new Error(
-      `Expected field to be MultiSelectField. Received ${field.type}`,
+      `Expected field to be MultiSelectField. Received ${field.type}`
     );
   }
 }
 
 export function assertSingleCollaboratorField(
-  field: Field,
+  field: Field
 ): asserts field is SingleCollaboratorField {
   if (field.type !== FieldType.SingleCollaborator) {
     throw new Error(
-      `Expected field to be SingleCollaboratorField. Received ${field.type}`,
+      `Expected field to be SingleCollaboratorField. Received ${field.type}`
     );
   }
 }
 
 export function assertMultiCollaboratorField(
-  field: Field,
+  field: Field
 ): asserts field is MultiCollaboratorField {
   if (field.type !== FieldType.MultiCollaborator) {
     throw new Error(
-      `Expected field to be MultiCollaboratorField. Received ${field.type}`,
+      `Expected field to be MultiCollaboratorField. Received ${field.type}`
     );
   }
 }
 
 export function assertSingleDocumentLinkField(
-  field: Field,
+  field: Field
 ): asserts field is SingleDocumentLinkField {
   if (field.type !== FieldType.SingleDocumentLink) {
     throw new Error(
-      `Expected field to be SingleDocumentLinkField. Received ${field.type}`,
+      `Expected field to be SingleDocumentLinkField. Received ${field.type}`
     );
   }
 }
 
 export function assertMultiDocumentLinkField(
-  field: Field,
+  field: Field
 ): asserts field is MultiDocumentLinkField {
   if (field.type !== FieldType.MultiDocumentLink) {
     throw new Error(
-      `Expected field to be MultiDocumentLinkField. Received ${field.type}`,
+      `Expected field to be MultiDocumentLinkField. Received ${field.type}`
     );
   }
 }
@@ -561,11 +561,11 @@ export function assertDateField(field: Field): asserts field is DateField {
 }
 
 export function assertPhoneNumberField(
-  field: Field,
+  field: Field
 ): asserts field is PhoneNumberField {
   if (field.type !== FieldType.PhoneNumber) {
     throw new Error(
-      `Expected field to be PhoneNumberField. Received ${field.type}`,
+      `Expected field to be PhoneNumberField. Received ${field.type}`
     );
   }
 }
@@ -589,27 +589,27 @@ export function assertNumberField(field: Field): asserts field is NumberField {
 }
 
 export function assertCurrencyField(
-  field: Field,
+  field: Field
 ): asserts field is CurrencyField {
   if (field.type !== FieldType.Currency) {
     throw new Error(
-      `Expected field to be CurrencyField. Received ${field.type}`,
+      `Expected field to be CurrencyField. Received ${field.type}`
     );
   }
 }
 
 export function assertCheckboxField(
-  field: Field,
+  field: Field
 ): asserts field is CheckboxField {
   if (field.type !== FieldType.Checkbox) {
     throw new Error(
-      `Expected field to be CheckboxField. Received ${field.type}`,
+      `Expected field to be CheckboxField. Received ${field.type}`
     );
   }
 }
 
 export function assertPrimaryField(
-  field: Field,
+  field: Field
 ): asserts field is PrimaryField {
   if (
     field.type !== FieldType.Email &&
@@ -619,14 +619,14 @@ export function assertPrimaryField(
     field.type !== FieldType.URL
   ) {
     throw new Error(
-      `Expected field to be PrimaryField. Received ${field.type}`,
+      `Expected field to be PrimaryField. Received ${field.type}`
     );
   }
 }
 
 export function assertFieldValueType<T extends FieldType>(
   fieldType: T,
-  value: FieldTypeToFieldValue[T],
+  value: FieldTypeToFieldValue[T]
 ): asserts value is FieldTypeToFieldValue[T] {
   switch (fieldType) {
     case FieldType.Checkbox:
@@ -678,65 +678,65 @@ export function assertFieldValueType<T extends FieldType>(
 }
 
 export function assertCheckboxFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is CheckboxFieldValue {
-  if (typeof value !== 'boolean') {
+  if (typeof value !== "boolean") {
     throw new Error(
       `Expected CheckboxFieldValue to be boolean. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertCurrencyFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is CurrencyFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'number') {
+  if (typeof value !== "number") {
     throw new Error(
       `Expected CurrencyFieldValue to be number. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertDateFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is DateFieldValue {
   if (value === null) {
     return;
   }
 
-  if (!isDate(value) && typeof value !== 'string') {
+  if (!isDate(value) && typeof value !== "string") {
     throw new Error(
-      `Expected DateFieldValue to be  Received "${JSON.stringify(value)}"`,
+      `Expected DateFieldValue to be  Received "${JSON.stringify(value)}"`
     );
   }
 }
 
 export function assertEmailFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is EmailFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
       `Expected EmailFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertMultiCollaboratorFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is MultiCollaboratorFieldValue {
   if (value === null) {
     return;
@@ -745,14 +745,14 @@ export function assertMultiCollaboratorFieldValue(
   if (!Array.isArray(value)) {
     throw new Error(
       `Expected MultiCollaboratorFieldValue to be string[]. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertMultiDocumentLinkFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is MultiDocumentLinkFieldValue {
   if (value === null) {
     return;
@@ -761,30 +761,30 @@ export function assertMultiDocumentLinkFieldValue(
   if (!Array.isArray(value)) {
     throw new Error(
       `Expected MultiDocumentLinkFieldValue to be string[]. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertMultiLineTextFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is MultiLineTextFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
       `Expected MultiLineTextFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertMultiSelectFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is MultiSelectFieldValue {
   if (value === null) {
     return;
@@ -793,188 +793,186 @@ export function assertMultiSelectFieldValue(
   if (!Array.isArray(value)) {
     throw new Error(
       `Expected MultiSelectFieldValue to be string[]. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertNumberFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is NumberFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'number') {
+  if (typeof value !== "number") {
     throw new Error(
       `Expected NumberFieldValue to be number. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertPhoneNumberFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is PhoneNumberFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
       `Expected PhoneNumberFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertSingleCollaboratorFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is SingleCollaboratorFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
       `Expected SingleCollaboratorFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 export function assertSingleDocumentLinkFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is SingleDocumentLinkFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
       `Expected SingleDocumentLinkFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 export function assertSingleLineTextFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is SingleLineTextFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
       `Expected SingleLineTextFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertSingleSelectFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is SingleSelectFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
       `Expected SingleSelectFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+        value
+      )}"`
     );
   }
 }
 
 export function assertURLFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is URLFieldValue {
   if (value === null) {
     return;
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
-      `Expected URLFieldValue to be string. Received "${JSON.stringify(
-        value,
-      )}"`,
+      `Expected URLFieldValue to be string. Received "${JSON.stringify(value)}"`
     );
   }
 }
 
 export function assertBooleanFieldKindValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is BooleanFieldKindValue {
-  if (typeof value !== 'boolean') {
+  if (typeof value !== "boolean") {
     throw new Error(
-      `Expected BooleanFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected BooleanFieldKindValue. Received ${JSON.stringify(value)}`
     );
   }
 }
 
 export function assertDateFieldKindValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is DateFieldKindValue {
   if (value !== null && !isISODate(value)) {
     throw new Error(
-      `Expected DateFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected DateFieldKindValue. Received ${JSON.stringify(value)}`
     );
   }
 }
 
 export function assertMultiOptionFieldKindValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is MultiOptionFieldKindValue {
   if (Array.isArray(value) === false) {
     throw new Error(
-      `Expected MultiOptionFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected MultiOptionFieldKindValue. Received ${JSON.stringify(value)}`
     );
   }
 }
 
 export function assertNumberFieldKindValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is NumberFieldKindValue {
-  if (value !== null && typeof value !== 'number') {
+  if (value !== null && typeof value !== "number") {
     throw new Error(
-      `Expected NumberFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected NumberFieldKindValue. Received ${JSON.stringify(value)}`
     );
   }
 }
 
 export function assertSingleOptionFieldKindValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is SingleOptionFieldKindValue {
-  if (value !== null && typeof value !== 'string') {
+  if (value !== null && typeof value !== "string") {
     throw new Error(
-      `Expected SingleOptionFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected SingleOptionFieldKindValue. Received ${JSON.stringify(value)}`
     );
   }
 }
 
 export function assertTextFieldKindValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is TextFieldKindValue {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
-      `Expected TextFieldKindValue. Received ${JSON.stringify(value)}`,
+      `Expected TextFieldKindValue. Received ${JSON.stringify(value)}`
     );
   }
 }
 
 export function assertPrimaryFieldValue(
-  value: FieldValue,
+  value: FieldValue
 ): asserts value is PrimaryFieldValue {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     throw new Error(
-      `Expected PrimaryFieldValue. Received ${JSON.stringify(value)}`,
+      `Expected PrimaryFieldValue. Received ${JSON.stringify(value)}`
     );
   }
 }
@@ -995,7 +993,7 @@ export function getDefaultFieldValue(field: Field): FieldValue {
     case FieldType.Email:
     case FieldType.MultiLineText:
     case FieldType.SingleLineText:
-      return '';
+      return "";
     case FieldType.MultiCollaborator:
     case FieldType.MultiSelect:
     case FieldType.MultiDocumentLink:
@@ -1006,7 +1004,7 @@ export function getDefaultFieldValue(field: Field): FieldValue {
 }
 
 export function getDefaultDocumentFieldValues(
-  fields: Field[],
+  fields: Field[]
 ): DocumentFieldValues {
   const fieldsByID = keyedBy(fields, (field) => field.id);
 
@@ -1015,23 +1013,23 @@ export function getDefaultDocumentFieldValues(
 
 export function formatNumberFieldValue(
   value: NumberFieldValue,
-  field: NumberField,
+  field: NumberField
 ): string {
   if (value !== null) {
     switch (field.style) {
-      case 'decimal':
+      case "decimal":
         return formatDecimal(
           value,
           getSystemLocale(),
           field.minimumFractionDigits,
-          field.maximumFractionDigits,
+          field.maximumFractionDigits
         );
-      case 'unit':
+      case "unit":
         return formatUnit(value, getSystemLocale(), field.unit);
-      case 'integer':
+      case "integer":
         return `${value}`;
     }
   }
 
-  return '';
+  return "";
 }

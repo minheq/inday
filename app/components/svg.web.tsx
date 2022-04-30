@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React from 'react';
+import React from "react";
 
 export function Circle(props: React.SVGProps<SVGCircleElement>): JSX.Element {
   return <circle {...props} />;
 }
 
 export function ClipPath(
-  props: React.SVGProps<SVGClipPathElement>,
+  props: React.SVGProps<SVGClipPathElement>
 ): JSX.Element {
   return <clipPath {...props} />;
 }
@@ -32,7 +32,7 @@ export function Line(props: React.SVGProps<SVGLineElement>): JSX.Element {
 }
 
 export function LinearGradient(
-  props: React.SVGProps<SVGLinearGradientElement>,
+  props: React.SVGProps<SVGLinearGradientElement>
 ): JSX.Element {
   return <linearGradient {...props} />;
 }
@@ -46,13 +46,13 @@ export function Polygon(props: React.SVGProps<SVGPolygonElement>): JSX.Element {
 }
 
 export function Polyline(
-  props: React.SVGProps<SVGPolylineElement>,
+  props: React.SVGProps<SVGPolylineElement>
 ): JSX.Element {
   return <polyline {...props} />;
 }
 
 export function RadialGradient(
-  props: React.SVGProps<SVGRadialGradientElement>,
+  props: React.SVGProps<SVGRadialGradientElement>
 ): JSX.Element {
   return <radialGradient {...props} />;
 }
@@ -82,7 +82,7 @@ export function TSpan(props: React.SVGProps<SVGTSpanElement>): JSX.Element {
 }
 
 export function TextPath(
-  props: React.SVGProps<SVGTextPathElement>,
+  props: React.SVGProps<SVGTextPathElement>
 ): JSX.Element {
   return <textPath {...props} />;
 }
@@ -96,7 +96,7 @@ export function Mask(props: React.SVGProps<SVGMaskElement>): JSX.Element {
 }
 
 export function ForeignObject(
-  props: React.SVGProps<SVGForeignObjectElement>,
+  props: React.SVGProps<SVGForeignObjectElement>
 ): JSX.Element {
   return <foreignObject {...props} />;
 }

@@ -1,10 +1,10 @@
-import React, { Fragment } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { tokens } from './tokens';
-import { Icon, IconName } from './icon';
-import { Spacer } from './spacer';
-import { Text, TextColor } from './text';
-import { PressableHighlight } from './pressable_highlight';
+import React, { Fragment } from "react";
+import { StyleSheet, View } from "react-native";
+import { tokens } from "./tokens";
+import { Icon, IconName } from "./icon";
+import { Spacer } from "./spacer";
+import { Text, TextColor } from "./text";
+import { PressableHighlight } from "./pressable_highlight";
 
 interface FlatButtonProps {
   onPress?: () => void;
@@ -12,7 +12,7 @@ interface FlatButtonProps {
   title?: string;
   icon?: IconName;
   color?: TextColor;
-  weight?: 'bold' | 'normal';
+  weight?: "bold" | "normal";
 }
 
 export function FlatButton(props: FlatButtonProps): JSX.Element {
@@ -20,9 +20,9 @@ export function FlatButton(props: FlatButtonProps): JSX.Element {
     onPress,
     icon,
     disabled = false,
-    weight = 'normal',
+    weight = "normal",
     title,
-    color = 'default',
+    color = "default",
   } = props;
 
   return (
@@ -51,11 +51,11 @@ export function FlatButton(props: FlatButtonProps): JSX.Element {
 const styles = StyleSheet.create({
   root: {
     borderRadius: tokens.border.radius,
-    flexDirection: 'row',
+    flexDirection: "row",
     minWidth: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 8,
   },
   button: {

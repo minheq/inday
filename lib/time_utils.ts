@@ -13,7 +13,7 @@ import {
   setMilliseconds,
   format,
   isSameDay,
-} from 'date-fns';
+} from "date-fns";
 
 export interface TimeInterval {
   start: Time;
@@ -23,12 +23,12 @@ export interface TimeInterval {
 export type Minutes = number;
 export type Hours = number;
 
-export const TIME_HOUR_FORMAT = 'HH';
-export const TIME_MINUTE_FORMAT = 'mm';
+export const TIME_HOUR_FORMAT = "HH";
+export const TIME_MINUTE_FORMAT = "mm";
 export const TIME_FORMAT = `${TIME_HOUR_FORMAT}${TIME_MINUTE_FORMAT}`;
 
 export function formatTime(time: Time): string {
-  return format(parseTime(time), 'H:mm a');
+  return format(parseTime(time), "H:mm a");
 }
 
 export function parseTime(time: Time): Date {
@@ -66,16 +66,16 @@ export function isSameTime(timeLeft: Time, timeRight: Time): boolean {
 export function subMinutes(
   time: Time,
   amount: Minutes,
-  capAtStartOfDay = false,
+  capAtStartOfDay = false
 ): Time {
   const date = toDate(time);
   const newDate = dateFnsSubMinutes(date, amount);
 
   if (isSameDay(date, newDate) === false) {
     if (capAtStartOfDay === true) {
-      return '0000';
+      return "0000";
     }
-    throw new Error('Adding amount moved to previous day');
+    throw new Error("Adding amount moved to previous day");
   }
 
   return fromDate(newDate);
@@ -84,16 +84,16 @@ export function subMinutes(
 export function addMinutes(
   time: Time,
   amount: Minutes,
-  capAtEndOfDay = false,
+  capAtEndOfDay = false
 ): Time {
   const date = toDate(time);
   const newDate = dateFnsAddMinutes(date, amount);
 
   if (isSameDay(date, newDate) === false) {
     if (capAtEndOfDay === true) {
-      return '2359';
+      return "2359";
     }
-    throw new Error('addMinutes moved to next day');
+    throw new Error("addMinutes moved to next day");
   }
 
   return fromDate(newDate);
@@ -102,16 +102,16 @@ export function addMinutes(
 export function subHours(
   time: Time,
   amount: Hours,
-  capAtStartOfDay = false,
+  capAtStartOfDay = false
 ): Time {
   const date = toDate(time);
   const newDate = dateFnsSubHours(date, amount);
 
   if (isSameDay(date, newDate) === false) {
     if (capAtStartOfDay === true) {
-      return '0000';
+      return "0000";
     }
-    throw new Error('subHours moved to previous day');
+    throw new Error("subHours moved to previous day");
   }
 
   return fromDate(newDate);
@@ -120,16 +120,16 @@ export function subHours(
 export function addHours(
   time: Time,
   amount: Hours,
-  capAtEndOfDay = false,
+  capAtEndOfDay = false
 ): Time {
   const date = toDate(time);
   const newDate = dateFnsAddHours(date, amount);
 
   if (isSameDay(date, newDate) === false) {
     if (capAtEndOfDay === true) {
-      return '2359';
+      return "2359";
     }
-    throw new Error('addHours moved to next day');
+    throw new Error("addHours moved to next day");
   }
 
   return fromDate(newDate);
@@ -164,11 +164,11 @@ export function isAfter(timeLeft: Time, timeRight: Time): boolean {
 }
 
 export function startOfDay(): Time {
-  return '0000';
+  return "0000";
 }
 
 export function endOfDay(): Time {
-  return '2359';
+  return "2359";
 }
 
 function toDate(time: Time): Date {

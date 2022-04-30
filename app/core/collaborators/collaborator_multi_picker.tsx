@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
-import { CollaboratorID } from '../../../models/collaborators';
-import { ListMultiPicker } from '../../components/list_multi_picker';
-import { useCollaboratorsQuery } from '../../store/queries';
+import { CollaboratorID } from "../../../models/collaborators";
+import { ListMultiPicker } from "../../components/list_multi_picker";
+import { useCollaboratorsQuery } from "../../store/queries";
 import {
   useGetCollaboratorOptions,
   useRenderCollaborator,
-} from './collaborator_picker';
+} from "./collaborator_picker";
 
 interface CollaboratorMultiPickerProps {
   value: CollaboratorID[];
@@ -15,7 +15,7 @@ interface CollaboratorMultiPickerProps {
 }
 
 export function CollaboratorMultiPicker(
-  props: CollaboratorMultiPickerProps,
+  props: CollaboratorMultiPickerProps
 ): JSX.Element {
   const { value, onChange, onRequestClose } = props;
   const collaborators = useCollaboratorsQuery();

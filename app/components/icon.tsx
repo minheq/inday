@@ -1,9 +1,9 @@
-import React from 'react';
-import Svg, { G, Path, Defs, ClipPath } from './svg';
-import { TextColor } from './text';
-import { useTheme } from './theme';
+import React from "react";
+import Svg, { G, Path, Defs, ClipPath } from "./svg";
+import { TextColor } from "./text";
+import { useTheme } from "./theme";
 
-type IconSize = 'sm' | 'md' | 'lg';
+type IconSize = "sm" | "md" | "lg";
 interface IconProps {
   name: IconName;
   /**
@@ -16,7 +16,7 @@ interface IconProps {
 }
 
 export function Icon(props: IconProps): JSX.Element {
-  const { name, size = 'md', color = 'default', customColor } = props;
+  const { name, size = "md", color = "default", customColor } = props;
   const theme = useTheme();
   const TheIcon = iconMap[name];
 
@@ -26,59 +26,59 @@ export function Icon(props: IconProps): JSX.Element {
 }
 
 export type IconName =
-  | 'AlignLeft'
-  | 'Archive'
-  | 'ArrowBarLeft'
-  | 'ArrowHorizontal'
-  | 'Attachment'
-  | 'BarCode'
-  | 'Bell'
-  | 'Bolt'
-  | 'Calculator'
-  | 'Calendar'
-  | 'CalendarEvent'
-  | 'CalendarMinus'
-  | 'CaretDown'
-  | 'CaretRight'
-  | 'ChartBar'
-  | 'Check'
-  | 'CheckThick'
-  | 'Checkbox'
-  | 'ChevronLeft'
-  | 'ChevronRight'
-  | 'Clock'
-  | 'Command'
-  | 'Currency'
-  | 'Dashboard'
-  | 'Dots'
-  | 'DotsInCircle'
-  | 'Email'
-  | 'LinkToDocument'
-  | 'Form'
-  | 'Formula'
-  | 'Grid'
-  | 'Help'
-  | 'Number'
-  | 'Board'
-  | 'Link'
-  | 'LookUp'
-  | 'Maximize'
-  | 'MultiSelect'
-  | 'Organize'
-  | 'Percentage'
-  | 'Phone'
-  | 'Plus'
-  | 'Pointer'
-  | 'RollUp'
-  | 'Search'
-  | 'Select'
-  | 'Star'
-  | 'Table'
-  | 'Typography'
-  | 'User'
-  | 'UserCheck'
-  | 'Users'
-  | 'X';
+  | "AlignLeft"
+  | "Archive"
+  | "ArrowBarLeft"
+  | "ArrowHorizontal"
+  | "Attachment"
+  | "BarCode"
+  | "Bell"
+  | "Bolt"
+  | "Calculator"
+  | "Calendar"
+  | "CalendarEvent"
+  | "CalendarMinus"
+  | "CaretDown"
+  | "CaretRight"
+  | "ChartBar"
+  | "Check"
+  | "CheckThick"
+  | "Checkbox"
+  | "ChevronLeft"
+  | "ChevronRight"
+  | "Clock"
+  | "Command"
+  | "Currency"
+  | "Dashboard"
+  | "Dots"
+  | "DotsInCircle"
+  | "Email"
+  | "LinkToDocument"
+  | "Form"
+  | "Formula"
+  | "Grid"
+  | "Help"
+  | "Number"
+  | "Board"
+  | "Link"
+  | "LookUp"
+  | "Maximize"
+  | "MultiSelect"
+  | "Organize"
+  | "Percentage"
+  | "Phone"
+  | "Plus"
+  | "Pointer"
+  | "RollUp"
+  | "Search"
+  | "Select"
+  | "Star"
+  | "Table"
+  | "Typography"
+  | "User"
+  | "UserCheck"
+  | "Users"
+  | "X";
 
 interface TheIconProps {
   size: number;

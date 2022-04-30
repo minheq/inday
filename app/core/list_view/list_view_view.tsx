@@ -5,12 +5,12 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-} from 'react';
-import { StyleSheet, View } from 'react-native';
-import { atom, useRecoilState } from 'recoil';
+} from "react";
+import { StyleSheet, View } from "react-native";
+import { atom, useRecoilState } from "recoil";
 
-import { AutoSizer } from '../../lib/autosizer';
-import { ListView, ViewID } from '../../../models/views';
+import { AutoSizer } from "../../lib/autosizer";
+import { ListView, ViewID } from "../../../models/views";
 import {
   GridRenderer,
   GridRendererRef,
@@ -21,28 +21,28 @@ import {
   RenderHeaderProps,
   RenderFooterProps,
   RenderGroupRowCellProps,
-} from '../../components/grid_renderer';
-import { Document, DocumentID } from '../../../models/documents';
-import { StatefulLeafRowCell } from '../../components/grid_renderer.common';
-import { usePrevious } from '../../hooks/use_previous';
-import { LastLeafRowCell, LeafRowCell } from './leaf_row_cell';
-import { Header, HeaderCell, LastHeaderCell } from './header';
-import { Footer } from './footer';
-import { GroupRow } from './group_row';
-import { LastLeafRow, LeafRow } from './leaf_row';
-import { GroupRowCell } from './group_row_cell';
+} from "../../components/grid_renderer";
+import { Document, DocumentID } from "../../../models/documents";
+import { StatefulLeafRowCell } from "../../components/grid_renderer.common";
+import { usePrevious } from "../../hooks/use_previous";
+import { LastLeafRowCell, LeafRowCell } from "./leaf_row_cell";
+import { Header, HeaderCell, LastHeaderCell } from "./header";
+import { Footer } from "./footer";
+import { GroupRow } from "./group_row";
+import { LastLeafRow, LeafRow } from "./leaf_row";
+import { GroupRowCell } from "./group_row_cell";
 import {
   GROUP_ROW_HEIGHT,
   HEADER_HEIGHT,
   LEAF_ROW_HEIGHT,
   SPACER_ROW_HEIGHT,
-} from './list_view_constants';
+} from "./list_view_constants";
 import {
   useListViewGridColumns,
   useListViewGridGroups,
   useListViewGridSelectedRows,
-} from './list_view_grid';
-import { useListViewNodes, useToggleCollapseGroup } from './list_view_nodes';
+} from "./list_view_grid";
+import { useListViewNodes, useToggleCollapseGroup } from "./list_view_nodes";
 import {
   defaultListViewMap,
   getDocumentID,
@@ -51,10 +51,10 @@ import {
   isGrouped,
   ListViewMap,
   useListViewMap,
-} from './list_view_map';
-import { useSortedFieldsWithListViewConfigQuery } from '../../store/queries';
+} from "./list_view_map";
+import { useSortedFieldsWithListViewConfigQuery } from "../../store/queries";
 
-export type ViewMode = 'edit' | 'select';
+export type ViewMode = "edit" | "select";
 
 interface ListViewViewProps {
   view: ListView;
@@ -66,7 +66,7 @@ interface ListViewViewProps {
 }
 
 export const activeCellState = atom<StatefulLeafRowCell | null>({
-  key: 'ListViewView_ActiveCell',
+  key: "ListViewView_ActiveCell",
   default: null,
 });
 
@@ -90,7 +90,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const gridColumns = useListViewGridColumns(fields);
   const gridSelectedRows = useListViewGridSelectedRows(
     listViewMap,
-    selectedDocumentIDs,
+    selectedDocumentIDs
   );
   const prevActiveCell = usePrevious(activeCell);
   const gridRef = useRef<GridRendererRef>(null);
@@ -139,7 +139,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         />
       );
     },
-    [listViewMap, grouped],
+    [listViewMap, grouped]
   );
 
   const renderGroupRowCell = useCallback(
@@ -166,7 +166,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         />
       );
     },
-    [listViewMap, handleToggleCollapseGroup],
+    [listViewMap, handleToggleCollapseGroup]
   );
 
   const renderHeaderCell = useCallback(
@@ -182,13 +182,13 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         <HeaderCell fieldID={fieldID} primary={primary} width={_props.width} />
       );
     },
-    [listViewMap],
+    [listViewMap]
   );
 
   const renderLeafRow = useCallback(
     (row: RenderLeafRowProps) => {
       if (row.last) {
-        return row.pane === 'left' ? <LastLeafRow /> : null;
+        return row.pane === "left" ? <LastLeafRow /> : null;
       }
 
       const documentID = getDocumentID(listViewMap, row);
@@ -199,14 +199,14 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         </LeafRow>
       );
     },
-    [listViewMap],
+    [listViewMap]
   );
 
   const renderGroupRow = useCallback(
     ({ children, state }: RenderGroupRowProps) => {
       return <GroupRow state={state}>{children}</GroupRow>;
     },
-    [],
+    []
   );
 
   const renderHeader = useCallback(({ children }: RenderHeaderProps) => {
@@ -218,7 +218,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (mode === 'select' && activeCell) {
+    if (mode === "select" && activeCell) {
       setActiveCell(null);
     }
   }, [mode, activeCell, setActiveCell]);
@@ -270,9 +270,9 @@ interface ListViewViewContext {
 }
 
 export const ListViewViewContext = createContext<ListViewViewContext>({
-  viewID: 'viw',
+  viewID: "viw",
   listViewMap: defaultListViewMap,
-  mode: 'edit',
+  mode: "edit",
   onOpenDocument: () => {
     return;
   },

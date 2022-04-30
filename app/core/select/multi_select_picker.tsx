@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 import {
   SelectOptionID,
   MultiSelectFieldValue,
   MultiSelectField,
-} from '../../../models/fields';
-import { ListMultiPicker } from '../../components/list_multi_picker';
-import { useGetOptionOptions, useRenderOption } from './single_select_picker';
+} from "../../../models/fields";
+import { ListMultiPicker } from "../../components/list_multi_picker";
+import { useGetOptionOptions, useRenderOption } from "./single_select_picker";
 
 interface MultiSelectPickerProps {
   value: SelectOptionID[];

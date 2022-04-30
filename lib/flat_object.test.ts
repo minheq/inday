@@ -1,13 +1,13 @@
-import { test } from './testing';
+import { test } from "./testing";
 
-import { FlatObject } from './flat_object';
+import { FlatObject } from "./flat_object";
 
-test('happy', (t) => {
+test("happy", (t) => {
   const obj = FlatObject();
 
-  obj.set(['a', 'b', 'c'], 1);
+  obj.set(["a", "b", "c"], 1);
 
-  const result = obj.get(['a', 'b', 'c']);
+  const result = obj.get(["a", "b", "c"]);
 
   t.deepEqual(result, 1);
 });

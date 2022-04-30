@@ -1,28 +1,28 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
-import { ScrollView, View, StyleSheet } from 'react-native';
-import { DialogStories } from './dialog.stories';
-import { GridStories } from './grid_renderer.stories';
-import { DatePickerStories } from './date_picker.stories';
-import { TextInputStories } from './text_input.stories';
-import { Text } from './text';
-import { PressableHighlight } from './pressable_highlight';
-import { tokens } from './tokens';
-import { PickerStories } from './picker.stories';
-import { Spacer } from './spacer';
-import { Row } from './row';
-import { ContextMenuStories } from './context_menu_view.stories';
-import { FlatButton } from './flat_button';
-import { Content } from './content';
-import { useMediaQuery } from '../lib/media_query';
-import { Modal } from './modal';
-import { CloseButton } from './close_button';
-import { useThemeStyles } from './theme';
-import { PopoverStories } from './popover.stories';
-import { CheckboxStories } from './checkbox.stories';
-import { FlatButtonStories } from './flat_button.stories';
-import { BadgeStories } from './badge.stories';
-import { IconButtonStories } from './icon_button.stories';
-import { ListItemStories } from './list_item.stories';
+import React, { createContext, useCallback, useContext, useState } from "react";
+import { ScrollView, View, StyleSheet } from "react-native";
+import { DialogStories } from "./dialog.stories";
+import { GridStories } from "./grid_renderer.stories";
+import { DatePickerStories } from "./date_picker.stories";
+import { TextInputStories } from "./text_input.stories";
+import { Text } from "./text";
+import { PressableHighlight } from "./pressable_highlight";
+import { tokens } from "./tokens";
+import { PickerStories } from "./picker.stories";
+import { Spacer } from "./spacer";
+import { Row } from "./row";
+import { ContextMenuStories } from "./context_menu_view.stories";
+import { FlatButton } from "./flat_button";
+import { Content } from "./content";
+import { useMediaQuery } from "../lib/media_query";
+import { Modal } from "./modal";
+import { CloseButton } from "./close_button";
+import { useThemeStyles } from "./theme";
+import { PopoverStories } from "./popover.stories";
+import { CheckboxStories } from "./checkbox.stories";
+import { FlatButtonStories } from "./flat_button.stories";
+import { BadgeStories } from "./badge.stories";
+import { IconButtonStories } from "./icon_button.stories";
+import { ListItemStories } from "./list_item.stories";
 
 const MENU_WIDTH = 280;
 
@@ -33,7 +33,7 @@ interface PlaygroundContext {
 }
 
 const PlaygroundContext = createContext<PlaygroundContext>({
-  component: 'Intro',
+  component: "Intro",
   onCloseMenu: () => {
     return;
   },
@@ -43,7 +43,7 @@ const PlaygroundContext = createContext<PlaygroundContext>({
 });
 
 export function Playground(): JSX.Element {
-  const [component, setComponent] = useState('Intro');
+  const [component, setComponent] = useState("Intro");
   const mq = useMediaQuery();
   const themeStyles = useThemeStyles();
   const [open, setOpen] = useState(false);
@@ -57,43 +57,43 @@ export function Playground(): JSX.Element {
   let content: React.ReactNode = null;
 
   switch (component) {
-    case 'Intro':
+    case "Intro":
       content = <Intro />;
       break;
-    case 'FlatButton':
+    case "FlatButton":
       content = <FlatButtonStories />;
       break;
-    case 'IconButton':
+    case "IconButton":
       content = <IconButtonStories />;
       break;
-    case 'ListItem':
+    case "ListItem":
       content = <ListItemStories />;
       break;
-    case 'Badge':
+    case "Badge":
       content = <BadgeStories />;
       break;
-    case 'Dialog':
+    case "Dialog":
       content = <DialogStories />;
       break;
-    case 'Grid':
+    case "Grid":
       content = <GridStories />;
       break;
-    case 'Picker':
+    case "Picker":
       content = <PickerStories />;
       break;
-    case 'TextInput':
+    case "TextInput":
       content = <TextInputStories />;
       break;
-    case 'Checkbox':
+    case "Checkbox":
       content = <CheckboxStories />;
       break;
-    case 'DatePicker':
+    case "DatePicker":
       content = <DatePickerStories />;
       break;
-    case 'Popover':
+    case "Popover":
       content = <PopoverStories />;
       break;
-    case 'ContextMenu':
+    case "ContextMenu":
       content = <ContextMenuStories />;
       break;
 
@@ -210,8 +210,8 @@ function MenuItem(props: MenuItemProps) {
     <View style={styles.menuItem}>
       <PressableHighlight style={styles.menuButton} onPress={handlePress}>
         <Text
-          weight={active ? 'bold' : 'normal'}
-          color={active ? 'primary' : 'default'}
+          weight={active ? "bold" : "normal"}
+          color={active ? "primary" : "default"}
         >
           {component}
         </Text>
@@ -247,8 +247,8 @@ function Intro() {
 
 const styles = StyleSheet.create({
   base: {
-    flexDirection: 'row',
-    height: '100%',
+    flexDirection: "row",
+    height: "100%",
   },
   menuButton: {
     padding: 8,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     right: 16,
     bottom: 16,
-    position: 'absolute',
+    position: "absolute",
   },
   contentWrapper: {
     flex: 1,

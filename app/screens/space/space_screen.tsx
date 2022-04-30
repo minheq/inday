@@ -5,41 +5,41 @@ import React, {
   useMemo,
   memo,
   useEffect,
-} from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+} from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-import { ScreenName, ScreenProps, useNavigation } from '../../config/routes';
+import { ScreenName, ScreenProps, useNavigation } from "../../config/routes";
 import {
   useSpaceQuery,
   useViewQuery,
   useSpaceCollectionsQuery,
-} from '../../store/queries';
-import { useCreateDocumentMutation } from '../../store/mutations';
-import { Slide } from '../../components/slide';
-import { OrganizeView } from '../../core/organize/organize_view';
-import { ViewList } from '../../core/views/view_list';
-import { AutoSizer } from '../../lib/autosizer';
-import { ViewID, ViewType } from '../../../models/views';
-import { ListViewView } from '../../core/list_view/list_view_view';
-import { atom, useRecoilState, useRecoilValue } from 'recoil';
-import { Document, DocumentID } from '../../../models/documents';
-import { CollectionID } from '../../../models/collections';
-import { SpaceID } from '../../../models/spaces';
-import { useThemeStyles } from '../../components/theme';
-import { Screen } from '../../components/screen';
-import { Row } from '../../components/row';
-import { BackButton } from '../../components/back_button';
-import { Text } from '../../components/text';
-import { IconButton } from '../../components/icon_button';
-import { FlatButton } from '../../components/flat_button';
-import { tokens } from '../../components/tokens';
-import { isEmpty } from '../../../lib/lang_utils';
-import { CollectionsTabs } from '../../core/collections/collection_tabs';
-import { Delay } from '../../components/delay';
-import { Fade } from '../../components/fade';
-import { ViewButton } from '../../core/views/view_button';
-import { matchPathname } from '../../../lib/pathname';
-import { DocumentDetailsView } from './document_details_view';
+} from "../../store/queries";
+import { useCreateDocumentMutation } from "../../store/mutations";
+import { Slide } from "../../components/slide";
+import { OrganizeView } from "../../core/organize/organize_view";
+import { ViewList } from "../../core/views/view_list";
+import { AutoSizer } from "../../lib/autosizer";
+import { ViewID, ViewType } from "../../../models/views";
+import { ListViewView } from "../../core/list_view/list_view_view";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
+import { Document, DocumentID } from "../../../models/documents";
+import { CollectionID } from "../../../models/collections";
+import { SpaceID } from "../../../models/spaces";
+import { useThemeStyles } from "../../components/theme";
+import { Screen } from "../../components/screen";
+import { Row } from "../../components/row";
+import { BackButton } from "../../components/back_button";
+import { Text } from "../../components/text";
+import { IconButton } from "../../components/icon_button";
+import { FlatButton } from "../../components/flat_button";
+import { tokens } from "../../components/tokens";
+import { isEmpty } from "../../../lib/lang_utils";
+import { CollectionsTabs } from "../../core/collections/collection_tabs";
+import { Delay } from "../../components/delay";
+import { Fade } from "../../components/fade";
+import { ViewButton } from "../../core/views/view_button";
+import { matchPathname } from "../../../lib/pathname";
+import { DocumentDetailsView } from "./document_details_view";
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -52,9 +52,9 @@ const RECORD_VIEW_WIDTH = 360;
 const ORGANIZE_VIEW_WIDTH = 360;
 
 const SpaceScreenContext = createContext<SpaceScreenContext>({
-  spaceID: 'spc',
-  viewID: 'viw',
-  collectionID: 'col',
+  spaceID: "spc",
+  viewID: "viw",
+  collectionID: "col",
 });
 
 export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
@@ -66,8 +66,8 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
   // TODO: Remove from dev purposes
   useEffect(() => {
     const match = matchPathname(
-      '/s/:spaceID/:viewID',
-      window.location.pathname,
+      "/s/:spaceID/:viewID",
+      window.location.pathname
     );
 
     if (!match) {
@@ -77,7 +77,7 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
 
   const context = useMemo(
     () => ({ spaceID, viewID, collectionID: view.collectionID }),
-    [spaceID, viewID, view.collectionID],
+    [spaceID, viewID, view.collectionID]
   );
 
   return (
@@ -92,31 +92,31 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
   );
 }
 
-type SidePanelState = 'views' | 'organize' | null;
+type SidePanelState = "views" | "organize" | null;
 
 const sidePanelState = atom<SidePanelState>({
-  key: 'SpaceScreen_SidePanel',
+  key: "SpaceScreen_SidePanel",
   default: null,
 });
 
-type ModeState = 'edit' | 'select';
+type ModeState = "edit" | "select";
 
 const modeState = atom<ModeState>({
-  key: 'SpaceScreen_Mode',
-  default: 'edit',
+  key: "SpaceScreen_Mode",
+  default: "edit",
 });
 
 type SelectedDocumentsState = DocumentID[];
 
 const selectedDocumentsState = atom<SelectedDocumentsState>({
-  key: 'SpaceScreen_SelectedDocuments',
+  key: "SpaceScreen_SelectedDocuments",
   default: [],
 });
 
 type OpenDocumentState = DocumentID | null;
 
 const openDocumentState = atom<OpenDocumentState>({
-  key: 'SpaceScreen_OpenDocument',
+  key: "SpaceScreen_OpenDocument",
   default: null,
 });
 
@@ -164,13 +164,13 @@ function ViewSettings() {
   const [, setOpenDocument] = useRecoilState(openDocumentState);
 
   const handleToggleView = useCallback(() => {
-    if (sidePanel !== 'views') {
-      setSidePanel('views');
+    if (sidePanel !== "views") {
+      setSidePanel("views");
     } else {
       setSidePanel(null);
     }
 
-    setMode('edit');
+    setMode("edit");
     setOpenDocument(null);
   }, [sidePanel, setSidePanel, setMode, setOpenDocument]);
 
@@ -194,7 +194,7 @@ interface ViewSettingsViewProps {
 }
 
 const ViewSettingsView = memo(function ViewSettingsView(
-  props: ViewSettingsViewProps,
+  props: ViewSettingsViewProps
 ) {
   const { onToggleView, mode, viewID, name, type } = props;
   const themeStyles = useThemeStyles();
@@ -208,7 +208,7 @@ const ViewSettingsView = memo(function ViewSettingsView(
           type={type}
           onPress={onToggleView}
         />
-        {mode === 'edit' ? <ViewMenu /> : <SelectMenu />}
+        {mode === "edit" ? <ViewMenu /> : <SelectMenu />}
       </Row>
     </View>
   );
@@ -217,11 +217,11 @@ const ViewSettingsView = memo(function ViewSettingsView(
 function SelectMenu() {
   const [, setMode] = useRecoilState(modeState);
   const [selectedDocumentIDs, setSelectedDocuments] = useRecoilState(
-    selectedDocumentsState,
+    selectedDocumentsState
   );
 
   const handleToggleSelect = useCallback(() => {
-    setMode('edit');
+    setMode("edit");
     setSelectedDocuments([]);
   }, [setMode, setSelectedDocuments]);
 
@@ -251,8 +251,8 @@ function ViewMenu() {
   const [, setOpenDocument] = useRecoilState(openDocumentState);
 
   const handleToggleOrganize = useCallback(() => {
-    if (sidePanel !== 'organize') {
-      setSidePanel('organize');
+    if (sidePanel !== "organize") {
+      setSidePanel("organize");
     } else {
       setSidePanel(null);
     }
@@ -261,7 +261,7 @@ function ViewMenu() {
   }, [sidePanel, setSidePanel, setOpenDocument]);
 
   const handleToggleSelect = useCallback(() => {
-    setMode('select');
+    setMode("select");
     setOpenDocument(null);
   }, [setMode, setOpenDocument]);
 
@@ -288,7 +288,7 @@ function MainContent() {
   const view = useViewQuery(viewID);
   const mode = useRecoilValue(modeState);
   const [selectedDocumentIDs, setSelectedDocuments] = useRecoilState(
-    selectedDocumentsState,
+    selectedDocumentsState
   );
   const createDocument = useCreateDocumentMutation();
   const [openDocument, setOpenDocument] = useRecoilState(openDocumentState);
@@ -296,7 +296,7 @@ function MainContent() {
   const activeCollection = collections.find((c) => c.id === view.collectionID);
 
   if (activeCollection === undefined) {
-    throw new Error('Invalid collection');
+    throw new Error("Invalid collection");
   }
 
   const handleOpenDocument = useCallback(
@@ -308,22 +308,22 @@ function MainContent() {
 
       setOpenDocument(documentID);
     },
-    [openDocument, setOpenDocument],
+    [openDocument, setOpenDocument]
   );
 
   const handleSelectDocument = useCallback(
     (documentID: DocumentID, selected: boolean) => {
       if (selected === true) {
         setSelectedDocuments((prevSelectedDocuments) =>
-          prevSelectedDocuments.concat(documentID),
+          prevSelectedDocuments.concat(documentID)
         );
       } else {
         setSelectedDocuments((prevSelectedDocuments) =>
-          prevSelectedDocuments.filter((id) => id !== documentID),
+          prevSelectedDocuments.filter((id) => id !== documentID)
         );
       }
     },
-    [setSelectedDocuments],
+    [setSelectedDocuments]
   );
 
   const handleAddDocument = useCallback((): Document => {
@@ -332,7 +332,7 @@ function MainContent() {
 
   const renderView = useCallback((): React.ReactNode => {
     switch (view.type) {
-      case 'list':
+      case "list":
         return (
           <ListViewView
             mode={mode}
@@ -343,7 +343,7 @@ function MainContent() {
             onAddDocument={handleAddDocument}
           />
         );
-      case 'board':
+      case "board":
         return null;
     }
   }, [
@@ -357,13 +357,13 @@ function MainContent() {
 
   return (
     <View style={styles.mainContentRoot}>
-      <Slide width={VIEWS_MENU_WIDTH} visible={sidePanel === 'views'}>
-        {sidePanel === 'views' && (
+      <Slide width={VIEWS_MENU_WIDTH} visible={sidePanel === "views"}>
+        {sidePanel === "views" && (
           <ViewListContainer spaceID={spaceID} viewID={viewID} />
         )}
       </Slide>
       <View style={styles.viewContainer}>{renderView()}</View>
-      <Slide width={ORGANIZE_VIEW_WIDTH} visible={sidePanel === 'organize'}>
+      <Slide width={ORGANIZE_VIEW_WIDTH} visible={sidePanel === "organize"}>
         <OrganizeViewContainer
           spaceID={spaceID}
           viewID={viewID}
@@ -383,7 +383,7 @@ interface ViewListContainerProps {
 }
 
 const ViewListContainer = memo(function ViewListContainer(
-  props: ViewListContainerProps,
+  props: ViewListContainerProps
 ) {
   const { spaceID, viewID } = props;
   const navigation = useNavigation();
@@ -393,7 +393,7 @@ const ViewListContainer = memo(function ViewListContainer(
     (id: ViewID) => {
       navigation.setParams({ spaceID, viewID: id });
     },
-    [spaceID, navigation],
+    [spaceID, navigation]
   );
 
   return (
@@ -414,7 +414,7 @@ interface OrganizeViewContainerProps {
 }
 
 const OrganizeViewContainer = memo(function OrganizeViewContainer(
-  props: OrganizeViewContainerProps,
+  props: OrganizeViewContainerProps
 ) {
   const { spaceID, viewID, collectionID } = props;
   const themeStyles = useThemeStyles();
@@ -449,7 +449,7 @@ interface DocumentDetailsContainerProps {
 }
 
 const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
-  props: DocumentDetailsContainerProps,
+  props: DocumentDetailsContainerProps
 ) {
   const { documentID } = props;
   const themeStyles = useThemeStyles();
@@ -486,7 +486,7 @@ const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
 const styles = StyleSheet.create({
   mainContentRoot: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   leftPanel: {
     flex: 1,
