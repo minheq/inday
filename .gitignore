@@ -78,3 +78,4 @@ test/
 .env.*
 .nyc_output
 coverage
+/vendor
