@@ -11,14 +11,14 @@ import { PickerStories } from "./picker.stories";
 import { Spacer } from "./spacer";
 import { Row } from "./row";
 import { ContextMenuStories } from "./context_menu_view.stories";
-import { FlatButton } from "./flat_button";
+import { Button } from "./button";
 import { Content } from "./content";
 import { useMediaQuery } from "../lib/media_query";
 import { Modal } from "./modal";
 import { CloseButton } from "./close_button";
 import { PopoverStories } from "./popover.stories";
 import { CheckboxStories } from "./checkbox.stories";
-import { FlatButtonStories } from "./flat_button.stories";
+import { ButtonStories } from "./button.stories";
 import { BadgeStories } from "./badge.stories";
 import { IconButtonStories } from "./icon_button.stories";
 import { ListItemStories } from "./list_item.stories";
@@ -58,8 +58,8 @@ export function Playground(): JSX.Element {
     case "Intro":
       content = <Intro />;
       break;
-    case "FlatButton":
-      content = <FlatButtonStories />;
+    case "Button":
+      content = <ButtonStories />;
       break;
     case "IconButton":
       content = <IconButtonStories />;
@@ -128,7 +128,7 @@ export function Playground(): JSX.Element {
         )}
         {mq.sizeQuery.lgAndDown && (
           <View style={styles.mobileMenuButton}>
-            <FlatButton
+            <Button
               color="primary"
               title="MENU"
               onPress={() => setOpen(!open)}
@@ -165,7 +165,7 @@ function Menu() {
         <MenuSection title="COMPONENTS" />
         <MenuItem component="ContextMenu" />
         <MenuItem component="Checkbox" />
-        <MenuItem component="FlatButton" />
+        <MenuItem component="Button" />
         <MenuItem component="IconButton" />
         <MenuItem component="ListItem" />
         <MenuItem component="Badge" />

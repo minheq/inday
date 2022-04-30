@@ -14,7 +14,6 @@ export interface TextProps {
   testID?: string;
   numberOfLines?: number;
   decoration?: TextDecorationLine;
-  transform?: "none" | "uppercase" | "lowercase" | "capitalize";
 }
 
 type TextDecorationLine =
@@ -68,7 +67,6 @@ export function Text(props: TextProps): JSX.Element {
     testID,
     numberOfLines,
     decoration = "none",
-    transform = "none",
     weight = "normal",
   } = props;
 
@@ -79,13 +77,12 @@ export function Text(props: TextProps): JSX.Element {
         styles[align],
         styles[size],
         styles[color],
+        styles[weight],
+        styles[decoration],
         {
           ...(customColor !== undefined && {
             color: customColor,
           }),
-          fontWeight: weight,
-          textDecorationLine: decoration,
-          textTransform: transform,
         },
       ]}
       selectable={selectable}
@@ -138,6 +135,60 @@ const styles = StyleSheet.create({
   },
   // eslint-disable-next-line react-native/no-unused-styles
   error: {
-    color: theme.danger.default,
+    color: theme.error.default,
+  },
+
+  // eslint-disable-next-line react-native/no-unused-styles
+  normal: {
+    fontWeight: "normal",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  bold: {
+    fontWeight: "bold",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "300": {
+    fontWeight: "300",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "400": {
+    fontWeight: "400",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "500": {
+    fontWeight: "500",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "600": {
+    fontWeight: "600",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "700": {
+    fontWeight: "700",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "800": {
+    fontWeight: "800",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "900": {
+    fontWeight: "900",
+  },
+
+  // eslint-disable-next-line react-native/no-unused-styles
+  none: {
+    textDecorationLine: "none",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  underline: {
+    textDecorationLine: "underline",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "line-through": {
+    textDecorationLine: "line-through",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  "underline line-through": {
+    textDecorationLine: "underline line-through",
   },
 });

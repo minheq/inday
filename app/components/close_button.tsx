@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatButton } from "./flat_button";
+import { Button } from "./button";
 
 interface CloseButtonProps {
   onPress?: () => void;
@@ -8,5 +8,5 @@ interface CloseButtonProps {
 export function CloseButton(props: CloseButtonProps): JSX.Element {
   const { onPress } = props;
 
-  return <FlatButton onPress={onPress} icon="X" />;
+  return <Button onPress={onPress} icon="X" />;
 }

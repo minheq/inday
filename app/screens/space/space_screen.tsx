@@ -30,7 +30,7 @@ import { Row } from "../../components/row";
 import { BackButton } from "../../components/back_button";
 import { Text } from "../../components/text";
 import { IconButton } from "../../components/icon_button";
-import { FlatButton } from "../../components/flat_button";
+import { Button } from "../../components/button";
 import { tokens } from "../../components/tokens";
 import { isEmpty } from "../../../lib/lang_utils";
 import { CollectionsTabs } from "../../core/collections/collection_tabs";
@@ -40,6 +40,7 @@ import { ViewButton } from "../../core/views/view_button";
 import { matchPathname } from "../../../lib/pathname";
 import { DocumentDetailsView } from "./document_details_view";
 import { theme } from "../../components/theme";
+import { Dialog } from "../../components/dialog";
 
 interface SpaceScreenContext {
   spaceID: SpaceID;
@@ -48,7 +49,6 @@ interface SpaceScreenContext {
 }
 
 const VIEWS_MENU_WIDTH = 240;
-const RECORD_VIEW_WIDTH = 360;
 const ORGANIZE_VIEW_WIDTH = 360;
 
 const SpaceScreenContext = createContext<SpaceScreenContext>({
@@ -228,7 +228,7 @@ function SelectMenu() {
     return (
       <Row spacing={4} alignItems="center">
         <Text color="muted">Press on documents to select</Text>
-        <FlatButton onPress={handleToggleSelect} title="Cancel" />
+        <Button onPress={handleToggleSelect} title="Cancel" />
       </Row>
     );
   }
@@ -236,10 +236,10 @@ function SelectMenu() {
   return (
     <Row spacing={4} alignItems="center">
       <Text weight="bold">{`${selectedDocumentIDs.length} Selected`}</Text>
-      <FlatButton title="Share" />
-      <FlatButton title="Copy" />
-      <FlatButton title="Delete" color="error" />
-      <FlatButton onPress={handleToggleSelect} title="Cancel" />
+      <Button title="Share" />
+      <Button title="Copy" />
+      <Button title="Delete" color="error" />
+      <Button onPress={handleToggleSelect} title="Cancel" />
     </Row>
   );
 }
@@ -266,11 +266,22 @@ function ViewMenu() {
 
   return (
     <Row spacing={4}>
-      <FlatButton title="Search" />
-      <FlatButton onPress={handleToggleOrganize} title="Organize" />
-      <FlatButton onPress={handleToggleSelect} title="Select" />
-      <FlatButton
+      <Button icon="Search" title="Search" appearance="outline" />
+      <Button
+        icon="Organize"
+        onPress={handleToggleOrganize}
+        appearance="outline"
+        title="Organize"
+      />
+      <Button
+        icon="Select"
+        onPress={handleToggleSelect}
+        appearance="outline"
+        title="Select"
+      />
+      <Button
         weight="bold"
+        appearance="outline"
         color="primary"
         icon="Plus"
         title="Add document"
@@ -369,9 +380,13 @@ function MainContent() {
           collectionID={collectionID}
         />
       </Slide>
-      <Slide width={RECORD_VIEW_WIDTH} visible={openDocument !== null}>
-        <DocumentDetailsContainer documentID={openDocument} />
-      </Slide>
+      <Dialog visible={openDocument !== null}>
+        <View>
+          {openDocument && (
+            <DocumentDetailsDialogContent documentID={openDocument} />
+          )}
+        </View>
+      </Dialog>
     </View>
   );
 }
@@ -435,12 +450,12 @@ const OrganizeViewContainer = memo(function OrganizeViewContainer(
   );
 });
 
-interface DocumentDetailsContainerProps {
-  documentID: DocumentID | null;
+interface DocumentDetailsDialogContentProps {
+  documentID: DocumentID;
 }
 
-const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
-  props: DocumentDetailsContainerProps
+const DocumentDetailsDialogContent = memo(function DocumentDetailsDialogContent(
+  props: DocumentDetailsDialogContentProps
 ) {
   const { documentID } = props;
   const [, setOpenDocument] = useRecoilState(openDocumentState);
@@ -449,22 +464,7 @@ const DocumentDetailsContainer = memo(function DocumentDetailsContainer(
     setOpenDocument(null);
   }, [setOpenDocument]);
 
-  return (
-    <View style={styles.rightPanel}>
-      <AutoSizer>
-        {({ height }) => (
-          <View style={{ width: RECORD_VIEW_WIDTH, height }}>
-            {documentID && (
-              <DocumentDetailsView
-                onClose={handleClose}
-                documentID={documentID}
-              />
-            )}
-          </View>
-        )}
-      </AutoSizer>
-    </View>
-  );
+  return <DocumentDetailsView onClose={handleClose} documentID={documentID} />;
 });
 
 const styles = StyleSheet.create({

@@ -228,9 +228,7 @@ function GroupNew() {
     );
   }
 
-  return (
-    <FlatButton icon="Plus" onPress={handlePressAddGroup} title="Add group" />
-  );
+  return <Button icon="Plus" onPress={handlePressAddGroup} title="Add group" />;
 }
 
 interface GroupEditProps {

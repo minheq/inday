@@ -10,7 +10,7 @@ import React, {
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { ScrollView, Pressable } from "react-native";
 
-import { FlatButton } from "../../components/flat_button";
+import { Button } from "../../components/button";
 import { Row } from "../../components/row";
 import { Spacer } from "../../components/spacer";
 import { Text } from "../../components/text";
@@ -222,7 +222,7 @@ function SortNew() {
     );
   }
 
-  return <FlatButton onPress={handlePressAddSort} title="+ Add sort" />;
+  return <Button onPress={handlePressAddSort} title="+ Add sort" />;
 }
 
 interface SortEditProps {

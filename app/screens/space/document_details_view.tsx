@@ -87,7 +87,7 @@ import { Icon } from "../../components/icon";
 import { getFieldIcon } from "../../core/views/icon_helpers";
 import { TextInput } from "../../components/text_input";
 import { useUpdateDocumentFieldValueMutation } from "../../store/mutations";
-import { FlatButton } from "../../components/flat_button";
+import { Button } from "../../components/button";
 import { URLLink } from "../../components/url_link";
 import { EmailLink } from "../../components/email_link";
 import { PhoneNumberLink } from "../../components/phone_number_link";
@@ -799,7 +799,7 @@ function InputWrapper(props: InputWrapperProps) {
     <View>
       {children}
       <View style={styles.inputWrapper}>
-        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
+        <Button onPress={onStopEditing} title="Done" color="primary" />
       </View>
     </View>
   );
@@ -825,8 +825,8 @@ function PickerWrapper(props: PickerWrapperProps): JSX.Element {
       {children}
       <Spacer size={16} />
       <View style={styles.inputWrapper}>
-        <FlatButton onPress={handleClear} title="Clear all" />
-        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
+        <Button onPress={handleClear} title="Clear all" />
+        <Button onPress={onStopEditing} title="Done" color="primary" />
       </View>
     </View>
   );

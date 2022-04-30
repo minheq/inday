@@ -88,7 +88,7 @@ import { CheckboxView } from "../../components/checkbox";
 import { Spacer } from "../../components/spacer";
 import { LEAF_ROW_HEIGHT } from "./list_view_constants";
 import { useUpdateDocumentFieldValueMutation } from "../../store/mutations";
-import { FlatButton } from "../../components/flat_button";
+import { Button } from "../../components/button";
 import { Popover } from "../../components/popover";
 import {
   PressableHighlight,
@@ -1154,7 +1154,7 @@ function InputWrapper(props: InputWrapperProps) {
     <View>
       {children}
       <View style={styles.inputWrapper}>
-        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
+        <Button onPress={onStopEditing} title="Done" color="primary" />
       </View>
     </View>
   );
@@ -1181,8 +1181,8 @@ function PickerWrapper(props: PickerWrapperProps): JSX.Element {
       {children}
       <Spacer size={16} />
       <View style={styles.inputWrapper}>
-        <FlatButton onPress={handleClear} title="Clear all" />
-        <FlatButton onPress={onStopEditing} title="Done" color="primary" />
+        <Button onPress={handleClear} title="Clear all" />
+        <Button onPress={onStopEditing} title="Done" color="primary" />
       </View>
     </View>
   );

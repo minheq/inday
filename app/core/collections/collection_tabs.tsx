@@ -109,8 +109,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   collectionItem: {
-    borderTopLeftRadius: tokens.border.radius,
-    borderTopRightRadius: tokens.border.radius,
     minWidth: 40,
     height: 32,
     justifyContent: "center",

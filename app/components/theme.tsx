@@ -9,24 +9,32 @@ export interface Theme {
     default: string;
   };
   primary: {
+    darkest: string;
     dark: string;
     default: string;
     light: string;
+    lightest: string;
   };
   success: {
+    darkest: string;
     dark: string;
     default: string;
     light: string;
+    lightest: string;
   };
-  danger: {
+  error: {
+    darkest: string;
     dark: string;
     default: string;
     light: string;
+    lightest: string;
   };
   neutral: {
+    darkest: string;
     dark: string;
     default: string;
     light: string;
+    lightest: string;
   };
   elevation: {
     level1: {
@@ -46,24 +54,32 @@ export const theme: Theme = {
     default: palette.base.white,
   },
   primary: {
+    darkest: palette.blue[900],
     dark: palette.blue[800],
     default: palette.blue[600],
-    light: palette.blue[50],
+    light: palette.blue[300],
+    lightest: palette.blue[50],
   },
   success: {
+    darkest: palette.green[900],
     dark: palette.green[800],
     default: palette.green[600],
-    light: palette.green[50],
+    light: palette.green[300],
+    lightest: palette.green[50],
   },
-  danger: {
+  error: {
+    darkest: palette.red[900],
     dark: palette.red[800],
     default: palette.red[600],
-    light: palette.red[50],
+    light: palette.red[300],
+    lightest: palette.red[50],
   },
   neutral: {
-    dark: palette.gray[900],
+    darkest: palette.red[900],
+    dark: palette.gray[800],
     default: palette.gray[600],
     light: palette.gray[300],
+    lightest: palette.gray[50],
   },
   elevation: {
     level1: {

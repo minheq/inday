@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { StyleSheet, View } from "react-native";
 import { tokens } from "./tokens";
 import { Icon, IconName } from "./icon";
@@ -24,12 +24,8 @@ export function IconButton(props: IconButtonProps): JSX.Element {
     >
       <View style={styles.root}>
         {icon && <Icon name={icon} />}
-        {title && (
-          <Fragment>
-            <Spacer size={4} />
-            <Text size="xs">{title}</Text>
-          </Fragment>
-        )}
+        {icon && title && <Spacer size={4} />}
+        {title && <Text size="xs">{title}</Text>}
       </View>
     </PressableHighlight>
   );

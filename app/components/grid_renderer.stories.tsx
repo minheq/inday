@@ -14,7 +14,7 @@ import {
 } from "./grid_renderer";
 import { AutoSizer } from "../lib/autosizer";
 import { StyleSheet, View, Text, SafeAreaView } from "react-native";
-import { FlatButton } from "./flat_button";
+import { Button } from "./button";
 import { Picker } from "./picker";
 import { GridGroup, getRows, LeafRow } from "./grid_renderer.common";
 import { splitLast } from "../../lib/array_utils";
@@ -286,7 +286,7 @@ function ScrollToCell(props: ScrollToCellProps) {
         }))}
         onChange={setColumn}
       />
-      <FlatButton onPress={handlePress} title="Scroll" />
+      <Button onPress={handlePress} title="Scroll" />
     </View>
   );
 }

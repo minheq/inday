@@ -1,13 +1,13 @@
 import React from "react";
 import { View } from "react-native";
 
-import { FlatButton } from "./flat_button";
+import { Button } from "./button";
 import { Row } from "./row";
 
 function Basic(): JSX.Element {
   return (
     <Row>
-      <FlatButton
+      <Button
         onPress={() => {
           return;
         }}
@@ -18,7 +18,7 @@ function Basic(): JSX.Element {
   );
 }
 
-export function FlatButtonStories(): JSX.Element {
+export function ButtonStories(): JSX.Element {
   return (
     <View>
       <Basic />

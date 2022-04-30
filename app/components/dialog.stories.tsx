@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Dialog } from "./dialog";
-import { FlatButton } from "./flat_button";
+import { Button } from "./button";
 
 interface DialogBaseProps {
   animationType: "fade" | "slide" | "none";
@@ -21,7 +21,7 @@ function DialogBase(props: DialogBaseProps) {
       >
         <View style={styles.dialogContent} />
       </Dialog>
-      <FlatButton onPress={() => setVisible(true)} title="Open dialog" />
+      <Button onPress={() => setVisible(true)} title="Open dialog" />
     </View>
   );
 }
