@@ -42,7 +42,10 @@ import {
   useListViewGridGroups,
   useListViewGridSelectedRows,
 } from "./list_view_grid";
-import { useListViewNodes, useToggleCollapseGroup } from "./list_view_nodes";
+import {
+  useListViewNodes,
+  useToggleCollapseGroup,
+} from "./use_list_view_nodes";
 import {
   defaultListViewMap,
   getDocumentID,
@@ -123,7 +126,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
       const fieldID = getFieldID(listViewMap, _props);
       const documentID = getDocumentID(listViewMap, _props);
       const primary = _props.column === 1;
-      const level = grouped ? _props.level : 0;
+      const level = grouped ? _props.level - 1 : 0;
 
       return (
         <LeafRowCell
@@ -150,6 +153,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
 
       const fieldID = getFieldID(listViewMap, _props);
       const group = getGroupRowCellData(listViewMap, _props);
+      const level = grouped ? _props.level - 1 : 0;
       const primary = _props.column === 1;
 
       return (
@@ -160,6 +164,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           last={_props.last}
           collapsed={_props.collapsed}
           columnFieldID={fieldID}
+          level={level}
           field={group.field}
           value={group.value}
           onToggleCollapseGroup={handleToggleCollapseGroup}
