@@ -41,11 +41,13 @@ import { getSystemLocale } from "../../lib/locale";
 import { formatCurrency } from "../../../lib/currency";
 import { CheckboxAltView } from "../../components/checkbox_alt";
 import { theme } from "../../components/theme";
+import { Spacer } from "../../components/spacer";
 
 interface GroupRowCellProps {
   primary: boolean;
   path: number[];
   column: number;
+  level: number;
   last: boolean;
   collapsed: boolean;
   // Corresponding column
@@ -61,7 +63,8 @@ interface GroupRowCellProps {
 }
 
 export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
-  const { primary, collapsed, field, value, onToggleCollapseGroup } = props;
+  const { primary, collapsed, field, level, value, onToggleCollapseGroup } =
+    props;
 
   if (primary) {
     return (
@@ -69,6 +72,7 @@ export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
         collapsed={collapsed}
         field={field}
         value={value}
+        level={level}
         onToggleCollapseGroup={onToggleCollapseGroup}
       />
     );
@@ -80,6 +84,7 @@ export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
 interface PrimaryGroupRowCellViewProps {
   field: Field;
   value: FieldValue;
+  level: number;
   collapsed: boolean;
   onToggleCollapseGroup: (
     field: Field,
@@ -89,7 +94,7 @@ interface PrimaryGroupRowCellViewProps {
 }
 
 function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
-  const { field, value, collapsed, onToggleCollapseGroup } = props;
+  const { field, value, level, collapsed, onToggleCollapseGroup } = props;
   const { mode } = useListViewViewContext();
 
   const handlePressCollapseGroup = useCallback(() => {
@@ -170,6 +175,7 @@ function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
 
   return (
     <View style={styles.primaryCell}>
+      <Spacer direction="row" size={level * 32} />
       <CollapseToggle
         collapsed={collapsed}
         onToggle={handlePressCollapseGroup}

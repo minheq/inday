@@ -34,7 +34,9 @@ const collapsedGroupsState = atom<CollapsedGroupsByViewID>({
 });
 
 /**
- * Returns tree of document nodes sorted by groups and sorts.
+ * Returns tree of document nodes.
+ * If view is sorted by groups and sorts, return tree of `GroupedListViewDocumentNode`.
+ * If view is a flat list, return list of `FlatListViewDocumentNode`
  */
 export function useListViewNodes(
   viewID: ViewID
@@ -126,6 +128,9 @@ function getFlatDocumentNodes(
   return [{ type: "flat", children: documents }];
 }
 
+/**
+ * In a nested documents, leaf are the lowest groups
+ */
 interface LeafGroupedListViewDocumentNode {
   type: "leaf";
   collapsed: boolean;
@@ -134,6 +139,9 @@ interface LeafGroupedListViewDocumentNode {
   children: Document[];
 }
 
+/**
+ * In a nested documents, ancestor contains children leaf groups
+ */
 interface AncestorGroupedListViewDocumentNode {
   type: "ancestor";
   collapsed: boolean;

@@ -55,7 +55,7 @@ export function useListViewMap(
   }, [nodes]);
   const groupRows = useMemo((): ListViewGroupRow[] => {
     if (isGroupedListViewDocumentNodes(nodes)) {
-      return getGroupRowPaths(nodes, []);
+      return getListViewGroupRows(nodes, []);
     }
     return [];
   }, [nodes]);
@@ -208,7 +208,9 @@ interface GroupRowCellData {
 
 type GroupRowCellCache = FlatObject<number, GroupRowCellData>;
 
-function getGroupRowCellCache(rows: ListViewGroupRow[]): GroupRowCellCache {
+export function getGroupRowCellCache(
+  rows: ListViewGroupRow[]
+): GroupRowCellCache {
   const cache = FlatObject<number, GroupRowCellData>();
 
   if (isEmpty(rows)) {
@@ -261,7 +263,10 @@ interface ListViewGroupRow {
   collapsed: boolean;
 }
 
-function getGroupRowPaths(
+/**
+ * Gets grouped document tree node and transforms into grid rows data
+ */
+export function getListViewGroupRows(
   nodes: GroupedListViewDocumentNode[],
   prevPath: number[]
 ): ListViewGroupRow[] {
@@ -280,8 +285,14 @@ function getGroupRowPaths(
       });
     } else {
       const { children } = group;
-      const groupRows = getGroupRowPaths(children, path);
+      const groupRows = getListViewGroupRows(children, path);
 
+      rows = rows.concat({
+        path,
+        field: group.field,
+        value: group.value,
+        collapsed: group.collapsed,
+      });
       rows = rows.concat(groupRows);
     }
   }
