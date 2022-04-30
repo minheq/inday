@@ -35,11 +35,7 @@ export type CollapsedGroupsByFieldID = {
 export function isGroupedListViewDocumentNodes(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[]
 ): nodes is GroupedListViewDocumentNode[] {
-  if (nodes.length === 1 && nodes[0].type === "flat") {
-    return false;
-  }
-
-  return true;
+  return nodes.length === 1 && nodes[0].type === "flat" ? false : true;
 }
 
 /**

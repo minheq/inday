@@ -1,4 +1,6 @@
+import { isArray } from "./array_utils";
 // Value must be in lowercase separated by hyphen
+/* eslint-disable-next-line */
 export enum SupportedLocale {
   vi = "vi",
   viVN = "vi-vn",
@@ -11,11 +13,7 @@ export const defaultLocale = SupportedLocale.enUS;
 export function isSupportedLocale(
   language: string
 ): language is SupportedLocale {
-  if (Object.values<string>(SupportedLocale).includes(language)) {
-    return true;
-  }
-
-  return false;
+  return Object.values<string>(SupportedLocale).includes(language);
 }
 
 /**
@@ -31,7 +29,7 @@ function normalizeLanguage(language: string) {
 export function getSupportedLocale(
   languages: readonly string[] | string
 ): SupportedLocale {
-  if (Array.isArray(languages)) {
+  if (isArray<string>(languages)) {
     for (const language of languages) {
       const normalizedLanguage = normalizeLanguage(language);
       if (isSupportedLocale(normalizedLanguage)) {
