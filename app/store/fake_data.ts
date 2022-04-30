@@ -191,15 +191,15 @@ export const viewsByIDFixtures: { [viewID: string]: View } = {
 };
 
 export const fieldsByIDFixtures: { [fieldID: string]: Field } = {
-  ...keyedBy(col1Fields, (field) => field.id),
-  ...keyedBy(col2Fields, (field) => field.id),
+  ...keyedBy(col1Fields, field => field.id),
+  ...keyedBy(col2Fields, field => field.id),
 };
 
 export const documentsByIDFixtures: {
   [documentID: string]: Document;
 } = {
-  ...keyedBy(col1Documents, (field) => field.id),
-  ...keyedBy(col2Documents, (field) => field.id),
+  ...keyedBy(col1Documents, field => field.id),
+  ...keyedBy(col2Documents, field => field.id),
 };
 
 const col1View2Group1 = makeGroup(
