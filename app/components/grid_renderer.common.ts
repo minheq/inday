@@ -222,11 +222,7 @@ function getLeafRows(
 }
 
 function isLeafGroup(group: GridGroup): group is LeafGridGroup {
-  if (group.type === "leaf") {
-    return true;
-  }
-
-  return false;
+  return group.type === "leaf";
 }
 
 export function getRowsHeight(rows: GridRow[]): number {
@@ -640,19 +636,11 @@ export function useGetStatefulRows(
 }
 
 function isLeafRow(row: GridRow): row is GridLeafRow {
-  if (row.type === "leaf") {
-    return true;
-  }
-
-  return false;
+  return row.type === "leaf";
 }
 
 function isSpacerRow(row: GridRow): row is GridSpacerRow {
-  if (row.type === "spacer") {
-    return true;
-  }
-
-  return false;
+  return row.type === "spacer";
 }
 
 function getLeafRowCell(

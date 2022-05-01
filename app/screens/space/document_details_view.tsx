@@ -888,7 +888,7 @@ const styles = StyleSheet.create({
     paddingTop: 1,
     paddingHorizontal: 8,
     borderWidth: 1,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
     borderRadius: tokens.border.radius,
   },
   multiline: {
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
   },
   borderWrapper: {
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
     borderWidth: 1,
   },
   cellValueContainer: {

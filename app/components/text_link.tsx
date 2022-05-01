@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable } from "react-native";
+import { Pressable } from "./pressable";
 import { Text } from "./text";
 
 interface TextLinkProps {

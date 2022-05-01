@@ -15,6 +15,6 @@ export function Screen(props: ScreenProps): JSX.Element {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
 });

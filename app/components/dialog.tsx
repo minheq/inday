@@ -4,10 +4,10 @@ import {
   useWindowDimensions,
   ViewStyle,
   StyleProp,
-  Pressable,
   StyleSheet,
 } from "react-native";
 import { Modal, ModalProps } from "./modal";
+import { Pressable } from "./pressable";
 import { tokens } from "./tokens";
 
 const OFFSET_TOP = 64;

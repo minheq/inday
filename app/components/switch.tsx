@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { Pressable, Animated, StyleSheet } from "react-native";
+import { Animated, StyleSheet } from "react-native";
+import { Pressable } from "./pressable";
 import { theme } from "./theme";
 interface SwitchProps {
   value?: boolean;
@@ -33,7 +34,7 @@ export function Switch(props: SwitchProps): JSX.Element {
           {
             backgroundColor: checked.interpolate({
               inputRange: [0, 1],
-              outputRange: [theme.neutral.light, theme.primary.light],
+              outputRange: [theme.neutral[100], theme.primary[100]],
             }),
           },
         ]}
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
   },
   slider: {
     borderRadius: 999,
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
     ...theme.elevation.level1,
   },
 });

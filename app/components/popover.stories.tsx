@@ -1,7 +1,8 @@
 import React, { useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { Popover } from "./popover";
+import { Pressable } from "./pressable";
 import { Text } from "./text";
 
 function Basic(): JSX.Element {

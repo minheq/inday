@@ -14,6 +14,6 @@ export function Footer(props: FooterProps): JSX.Element {
 
 const styles = StyleSheet.create({
   row: {
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
 });

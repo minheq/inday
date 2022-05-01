@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     padding: 8,
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
 });

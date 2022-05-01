@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: tokens.border.radius,
     alignItems: "center",
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
   icon: {
     paddingHorizontal: 8,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     paddingRight: 40,
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
     flex: 1,
   },
 });

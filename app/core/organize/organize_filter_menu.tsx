@@ -7,7 +7,7 @@ import React, {
   createContext,
 } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
-import { Pressable, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import {
   NumberFieldKindFilterRule,
@@ -42,6 +42,7 @@ import {
 import { first } from "../../../lib/array_utils";
 import { FieldID, FieldType } from "../../../models/fields";
 import { FieldPicker } from "../fields/field_picker";
+import { Pressable } from "../../components/pressable";
 const filterEditIDState = atom<FilterID>({
   key: "FilterMenuFilterEditID",
   default: "",

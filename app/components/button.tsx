@@ -1,11 +1,12 @@
 import React from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { tokens } from "./tokens";
 import { Icon, IconName } from "./icon";
 import { Spacer } from "./spacer";
 import { Text, TextColor } from "./text";
 import { PressableStateCallback } from "./pressable_highlight";
 import { theme } from "./theme";
+import { Pressable } from "./pressable";
 
 type ButtonAppearance = "flat" | "outline" | "filled";
 type ButtonColor = "default" | "primary" | "error";
@@ -38,11 +39,7 @@ export function Button(props: ButtonProps): JSX.Element {
       onPress={onPress}
       disabled={disabled}
       style={(state) => {
-        const style = getButtonStyle(
-          appearance,
-          color,
-          state as PressableStateCallback
-        );
+        const style = getButtonStyle(appearance, color, state);
 
         return [styles.button, style];
       }}
@@ -70,7 +67,7 @@ function getButtonStyle(
     return style.hovered;
   }
 
-  return style.default;
+  return style;
 }
 
 function getTextColor(
@@ -101,102 +98,102 @@ const styles = StyleSheet.create({
   },
   flatDefaultDefault: {},
   flatDefaultHovered: {
-    backgroundColor: theme.neutral.lightest,
+    backgroundColor: theme.neutral[50],
   },
   flatDefaultPressed: {
-    backgroundColor: theme.neutral.lightest,
+    backgroundColor: theme.neutral[50],
   },
   flatErrorDefault: {},
   flatErrorHovered: {
-    backgroundColor: theme.error.lightest,
+    backgroundColor: theme.error[50],
   },
   flatErrorPressed: {
-    backgroundColor: theme.error.light,
+    backgroundColor: theme.error[100],
   },
   flatPrimaryDefault: {},
   flatPrimaryHovered: {
-    backgroundColor: theme.primary.lightest,
+    backgroundColor: theme.primary[50],
   },
   flatPrimaryPressed: {
-    backgroundColor: theme.primary.light,
+    backgroundColor: theme.primary[100],
   },
   outlineDefaultDefault: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
   },
   outlineDefaultHovered: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
-    backgroundColor: theme.neutral.lightest,
+    borderColor: theme.neutral[200],
+    backgroundColor: theme.neutral[50],
   },
   outlineDefaultPressed: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
-    backgroundColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
+    backgroundColor: theme.neutral[100],
   },
   outlineErrorDefault: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.error.light,
+    borderColor: theme.error[100],
   },
   outlineErrorHovered: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.error.light,
-    backgroundColor: theme.error.lightest,
+    borderColor: theme.error[100],
+    backgroundColor: theme.error[50],
   },
   outlineErrorPressed: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.error.light,
-    backgroundColor: theme.error.light,
+    borderColor: theme.error[100],
+    backgroundColor: theme.error[100],
   },
   outlinePrimaryDefault: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.primary.dark,
+    borderColor: theme.primary[600],
   },
   outlinePrimaryHovered: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.primary.dark,
-    backgroundColor: theme.primary.lightest,
+    borderColor: theme.primary[600],
+    backgroundColor: theme.primary[50],
   },
   outlinePrimaryPressed: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.primary.dark,
-    backgroundColor: theme.primary.light,
+    borderColor: theme.primary[600],
+    backgroundColor: theme.primary[100],
   },
   filledDefaultDefault: {
-    backgroundColor: theme.primary.default,
+    backgroundColor: theme.primary[700],
   },
   filledDefaultHovered: {
-    backgroundColor: theme.primary.dark,
+    backgroundColor: theme.primary[600],
   },
   filledDefaultPressed: {
-    backgroundColor: theme.primary.darkest,
+    backgroundColor: theme.primary[800],
   },
   filledErrorDefault: {
-    backgroundColor: theme.error.default,
+    backgroundColor: theme.error[700],
   },
   filledErrorHovered: {
-    backgroundColor: theme.error.dark,
+    backgroundColor: theme.error[600],
   },
   filledErrorPressed: {
-    backgroundColor: theme.error.darkest,
+    backgroundColor: theme.error[800],
   },
   filledPrimaryDefault: {
-    backgroundColor: theme.primary.default,
+    backgroundColor: theme.primary[700],
   },
   filledPrimaryHovered: {
-    backgroundColor: theme.primary.dark,
+    backgroundColor: theme.primary[600],
   },
   filledPrimaryPressed: {
-    backgroundColor: theme.primary.darkest,
+    backgroundColor: theme.primary[800],
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useMemo, useState } from "react";
-import { View, Pressable, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 import { Text } from "./text";
 import { Spacer } from "./spacer";
@@ -29,6 +29,7 @@ import {
 } from "../../lib/date_utils";
 import { subMonths } from "date-fns";
 import { theme } from "./theme";
+import { Pressable } from "./pressable";
 
 interface DatePickerProps {
   value?: Date | null;
@@ -260,7 +261,7 @@ function DayDisplay(props: DayDisplayProps) {
   return (
     <View style={[styles.dayRoot, withinSelected && styles.withinSelected]}>
       <Pressable onPress={() => onSelect(day)} style={styles.dayButton}>
-        {({ hovered }: { hovered: boolean }) => (
+        {({ hovered }) => (
           <Fragment>
             {selectedStart && !selectedEnd && (
               <View
@@ -407,7 +408,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     height: 32,
     width: 32,
-    backgroundColor: theme.neutral.light,
+    backgroundColor: theme.neutral[100],
   },
   todayWrapper: {},
   selectedEdge: {
@@ -441,10 +442,10 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   withinSelected: {
-    backgroundColor: theme.primary.light,
+    backgroundColor: theme.primary[100],
   },
   selected: {
-    backgroundColor: theme.primary.default,
+    backgroundColor: theme.primary[700],
   },
   weekDatesWrapper: {
     flexDirection: "row",

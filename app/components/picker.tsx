@@ -5,7 +5,6 @@ import {
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
   ScrollView,
-  Pressable,
   StyleSheet,
 } from "react-native";
 import { tokens } from "./tokens";
@@ -15,6 +14,7 @@ import { Popover } from "./popover";
 import { NavigationKey, UIKey, WhiteSpaceKey } from "../lib/keyboard";
 import { theme } from "./theme";
 import { TextField } from "./text_field";
+import { Pressable } from "./pressable";
 
 export interface PickerProps<T> {
   value?: T;
@@ -217,13 +217,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingLeft: 8,
     paddingRight: 24,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
   },
   popover: {
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.primary.light,
-    backgroundColor: theme.primary.light,
+    borderColor: theme.primary[600],
+    backgroundColor: theme.primary[100],
   },
   searchWrapper: {
     height: SEARCH_HEIGHT,
@@ -243,9 +243,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
   selectedOption: {
-    backgroundColor: theme.primary.light,
+    backgroundColor: theme.primary[100],
   },
 });

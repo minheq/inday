@@ -1,5 +1,6 @@
 import React from "react";
-import { StyleSheet, Pressable, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Pressable } from "./pressable";
 import { Text } from "./text";
 import { tokens } from "./tokens";
 

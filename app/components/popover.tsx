@@ -1,16 +1,11 @@
 import React, { useCallback, useEffect, useReducer, useRef } from "react";
-import {
-  View,
-  StyleSheet,
-  Pressable,
-  Dimensions,
-  Animated,
-} from "react-native";
+import { View, StyleSheet, Dimensions, Animated } from "react-native";
 import { tokens } from "./tokens";
 import { Modal } from "./modal";
 import { assertUnreached } from "../../lib/lang_utils";
 import { usePrevious } from "../hooks/use_previous";
 import { theme } from "./theme";
+import { Pressable } from "./pressable";
 
 export interface PopoverProps {
   visible: boolean;
@@ -298,8 +293,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 8,
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
-    backgroundColor: theme.base.default,
+    borderColor: theme.neutral[200],
+    backgroundColor: theme.base.white,
     ...theme.elevation.level1,
   },
   background: {

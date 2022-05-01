@@ -27,26 +27,26 @@ export function Icon(props: IconProps): JSX.Element {
 function getIconColor(color: TextColor): string {
   switch (color) {
     case "default":
-      return theme.neutral.dark;
+      return theme.neutral[700];
 
     // eslint-disable-next-line react-native/no-unused-styles
     case "success":
-      return theme.success.default;
+      return theme.success[700];
 
     // eslint-disable-next-line react-native/no-unused-styles
     case "primary":
-      return theme.primary.dark;
+      return theme.primary[800];
 
     // eslint-disable-next-line react-native/no-unused-styles
     case "muted":
-      return theme.neutral.default;
+      return theme.neutral[700];
 
     // eslint-disable-next-line react-native/no-unused-styles
     case "error":
-      return theme.danger.default;
+      return theme.error[700];
 
     default:
-      return theme.neutral.dark;
+      return theme.neutral[700];
   }
 }
 

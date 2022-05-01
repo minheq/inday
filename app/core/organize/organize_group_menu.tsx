@@ -8,7 +8,7 @@ import React, {
   useMemo,
 } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
-import { ScrollView, Pressable } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { Row } from "../../components/row";
 import { Spacer } from "../../components/spacer";
@@ -33,6 +33,7 @@ import { GroupID, Group } from "../../../models/groups";
 import { SegmentedControl } from "../../components/segmented_control";
 import { ViewID } from "../../../models/views";
 import { SortConfig, SortOrder } from "../../../models/sorts";
+import { Pressable } from "../../components/pressable";
 
 const groupEditIDState = atom<GroupID>({
   key: "GroupMenuGroupEditID",

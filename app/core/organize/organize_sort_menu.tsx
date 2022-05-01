@@ -8,7 +8,7 @@ import React, {
   useMemo,
 } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
-import { ScrollView, Pressable } from "react-native";
+import { ScrollView } from "react-native";
 
 import { Button } from "../../components/button";
 import { Row } from "../../components/row";
@@ -32,6 +32,7 @@ import { FieldID } from "../../../models/fields";
 import { FieldPicker } from "../fields/field_picker";
 import { SortID, Sort, SortConfig, SortOrder } from "../../../models/sorts";
 import { SegmentedControl } from "../../components/segmented_control";
+import { Pressable } from "../../components/pressable";
 
 const sortEditIDState = atom<SortID>({
   key: "SortMenuSortEditID",

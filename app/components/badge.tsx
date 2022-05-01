@@ -15,7 +15,7 @@ export function Badge(props: BadgeProps): JSX.Element {
 
   return (
     <View
-      style={[styles.base, { backgroundColor: color ?? theme.neutral.light }]}
+      style={[styles.base, { backgroundColor: color ?? theme.neutral[100] }]}
     >
       <Text customColor={textColor} numberOfLines={1}>
         {title}

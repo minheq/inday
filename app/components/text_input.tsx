@@ -74,7 +74,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
         onChangeText={onChange}
         onKeyPress={handleKeyPress}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.neutral.light}
+        placeholderTextColor={theme.neutral[100]}
         style={[{ height }, styles.input, style]}
       />
     );
@@ -84,6 +84,6 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
 const styles = StyleSheet.create({
   input: {
     ...tokens.text.size.md,
-    color: theme.neutral.default,
+    color: theme.neutral[700],
   },
 });

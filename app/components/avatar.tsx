@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: theme.neutral.light,
+    backgroundColor: theme.neutral[100],
   },
   // eslint-disable-next-line react-native/no-unused-styles
   sm: {

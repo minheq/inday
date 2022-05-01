@@ -9,7 +9,6 @@ import React, {
 import {
   GestureResponderEvent,
   Platform,
-  Pressable,
   StyleSheet,
   View,
 } from "react-native";
@@ -17,9 +16,7 @@ import { atom, useRecoilState } from "recoil";
 
 import { ContextMenuView } from "../../components/context_menu_view";
 import { ContextMenuItem, ContextMenu } from "../../components/context_menu";
-import { Hoverable } from "../../components/hoverable";
 import { Icon } from "../../components/icon";
-import { Row } from "../../components/row";
 import { Text } from "../../components/text";
 import { FieldID } from "../../../models/fields";
 import { useFieldQuery } from "../../store/queries";
@@ -30,6 +27,7 @@ import { PressableHighlight } from "../../components/pressable_highlight";
 import { Popover } from "../../components/popover";
 import { theme } from "../../components/theme";
 import { Spacer } from "../../components/spacer";
+import { Pressable } from "../../components/pressable";
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -64,6 +62,7 @@ export const HeaderCell = memo(function HeaderCell(
   const updateListViewFieldConfig = useUpdateListViewFieldConfigMutation();
   const menuItems = useHeaderCellContextMenuItems();
   const [visible, setVisible] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const targetRef = useRef<View>(null);
 
   const handlePress = useCallback(() => {
@@ -89,6 +88,17 @@ export const HeaderCell = memo(function HeaderCell(
     [updateListViewFieldConfig, viewID, fieldID, widthRef]
   );
 
+  const handleHoveredIn = useCallback(() => {
+    if (!hovered) {
+      setHovered(true);
+    }
+  }, [hovered]);
+  const handleHoveredOut = useCallback(() => {
+    if (hovered) {
+      setHovered(false);
+    }
+  }, [hovered]);
+
   const handlePressIn = useCallback(
     (e: GestureResponderEvent) => {
       anchorRef.current = e.nativeEvent.pageX;
@@ -105,37 +115,34 @@ export const HeaderCell = memo(function HeaderCell(
 
   return (
     <Fragment>
-      <Hoverable>
-        {(hovered) => (
-          <PressableHighlight
-            ref={targetRef}
-            onPress={handlePress}
-            style={[styles.headerCell, primary && styles.primaryCell]}
-          >
-            <ContextMenuView style={styles.menuView} menuItems={menuItems}>
-              <View style={styles.headerCellTitle}>
-                <Icon name={getFieldIcon(field.type)} />
-                <Spacer direction="row" size={4} />
-                <Text color="muted" size="sm">
-                  {field.name}
-                </Text>
-              </View>
-              {(resizeFieldID === fieldID ||
-                (resizeFieldID === null && hovered)) && (
-                <Pressable
-                  onPressIn={handlePressIn}
-                  // @ts-ignore: Available in react-native-web
-                  onPressMove={handlePressMove}
-                  onPressOut={handlePressOut}
-                  style={styles.resizeHandler}
-                >
-                  <Icon color="primary" size="sm" name="ArrowHorizontal" />
-                </Pressable>
-              )}
-            </ContextMenuView>
-          </PressableHighlight>
-        )}
-      </Hoverable>
+      <PressableHighlight
+        ref={targetRef}
+        onPress={handlePress}
+        onHoverIn={handleHoveredIn}
+        onHoverOut={handleHoveredOut}
+        style={[styles.headerCell, primary && styles.primaryCell]}
+      >
+        <ContextMenuView style={styles.menuView} menuItems={menuItems}>
+          <View style={styles.headerCellTitle}>
+            <Icon name={getFieldIcon(field.type)} />
+            <Spacer direction="row" size={4} />
+            <Text color="muted" size="sm">
+              {field.name}
+            </Text>
+          </View>
+          {(resizeFieldID === fieldID ||
+            (resizeFieldID === null && hovered)) && (
+            <Pressable
+              onPressIn={handlePressIn}
+              onPressMove={handlePressMove}
+              onPressOut={handlePressOut}
+              style={styles.resizeHandler}
+            >
+              <Icon color="primary" size="sm" name="ArrowHorizontal" />
+            </Pressable>
+          )}
+        </ContextMenuView>
+      </PressableHighlight>
       <Popover
         visible={visible}
         targetRef={targetRef}
@@ -177,15 +184,14 @@ export const LastHeaderCell = memo(function LastHeaderCell(): JSX.Element {
 
 const styles = StyleSheet.create({
   row: {
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
-
   headerCell: {
     flex: 1,
     justifyContent: "center",
     borderBottomWidth: 1,
-    borderColor: theme.neutral.light,
-    backgroundColor: theme.neutral.lightest,
+    borderColor: theme.neutral[200],
+    backgroundColor: theme.neutral[50],
   },
   menuView: {
     paddingHorizontal: 8,
@@ -202,8 +208,8 @@ const styles = StyleSheet.create({
     right: 2,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: theme.neutral.light,
-    ...theme.elevation.level1,
+    backgroundColor: theme.base.white,
+    borderColor: theme.neutral[200],
     ...Platform.select({
       web: {
         cursor: "grab",

@@ -280,8 +280,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     flexDirection: "row",
     alignItems: "center",
-    borderColor: theme.neutral.light,
-    backgroundColor: theme.base.default,
+    borderColor: theme.neutral[200],
+    backgroundColor: theme.base.white,
   },
   valueContainer: {
     flexDirection: "row",
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   bottomBorder: {
     borderBottomWidth: 1,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
     position: "absolute",
     bottom: 0,
     left: 0,

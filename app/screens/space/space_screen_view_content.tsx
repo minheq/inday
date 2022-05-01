@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   leftPanel: {
     flex: 1,
     borderRightWidth: 1,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
   },
   viewContainer: {
     flex: 1,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   rightPanel: {
     flex: 1,
     borderLeftWidth: 1,
-    borderColor: theme.neutral.light,
-    backgroundColor: theme.base.default,
+    borderColor: theme.neutral[200],
+    backgroundColor: theme.base.white,
   },
 });

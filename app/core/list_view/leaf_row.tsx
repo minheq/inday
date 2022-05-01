@@ -98,16 +98,16 @@ export function LastLeafRow(): JSX.Element {
 
 const styles = StyleSheet.create({
   row: {
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
   selected: {
-    backgroundColor: theme.primary.light,
+    backgroundColor: theme.primary[100],
   },
   addDocument: {
     height: 40,
     paddingHorizontal: 8,
     flexDirection: "row",
     alignItems: "center",
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
   },
 });

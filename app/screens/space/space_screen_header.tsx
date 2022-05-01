@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
   },
   addCollectionItem: {
     paddingHorizontal: 8,

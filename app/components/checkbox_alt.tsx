@@ -1,7 +1,8 @@
 import React, { memo, useCallback } from "react";
-import { View, Pressable, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 import { Icon, IconName } from "./icon";
+import { Pressable } from "./pressable";
 import { TextColor } from "./text";
 import { theme } from "./theme";
 import { tokens } from "./tokens";
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderWidth: 1,
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
     justifyContent: "center",
     alignItems: "center",
   },

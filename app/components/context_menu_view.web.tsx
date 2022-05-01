@@ -101,8 +101,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 8,
     borderRadius: tokens.border.radius,
-    borderColor: theme.neutral.light,
-    backgroundColor: theme.base.default,
+    borderColor: theme.neutral[200],
+    backgroundColor: theme.base.white,
     ...theme.elevation.level1,
   },
 });

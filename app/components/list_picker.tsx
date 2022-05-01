@@ -253,6 +253,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   activeListItem: {
-    backgroundColor: theme.primary.light,
+    backgroundColor: theme.primary[100],
   },
 });

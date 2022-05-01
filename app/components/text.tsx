@@ -119,23 +119,23 @@ const styles = StyleSheet.create({
 
   // eslint-disable-next-line react-native/no-unused-styles
   default: {
-    color: theme.neutral.dark,
+    color: theme.neutral[700],
   },
   // eslint-disable-next-line react-native/no-unused-styles
   success: {
-    color: theme.success.default,
+    color: theme.success[700],
   },
   // eslint-disable-next-line react-native/no-unused-styles
   primary: {
-    color: theme.primary.dark,
+    color: theme.primary[800],
   },
   // eslint-disable-next-line react-native/no-unused-styles
   muted: {
-    color: theme.neutral.default,
+    color: theme.neutral[700],
   },
   // eslint-disable-next-line react-native/no-unused-styles
   error: {
-    color: theme.error.default,
+    color: theme.error[700],
   },
 
   // eslint-disable-next-line react-native/no-unused-styles

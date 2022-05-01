@@ -1,11 +1,12 @@
 import React, { Fragment, useCallback } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 import { Spacer } from "./spacer";
 import { Row } from "./row";
 import { Text } from "./text";
 import { tokens } from "./tokens";
 import { theme } from "./theme";
+import { Pressable } from "./pressable";
 
 interface Option<T> {
   label: string;
@@ -78,6 +79,6 @@ const styles = StyleSheet.create({
     borderRadius: tokens.border.radius,
   },
   selected: {
-    backgroundColor: theme.primary.light,
+    backgroundColor: theme.primary[100],
   },
 });

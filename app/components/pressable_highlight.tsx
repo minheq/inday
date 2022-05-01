@@ -1,11 +1,12 @@
 import React, { forwardRef } from "react";
 import {
-  Pressable,
+  GestureResponderEvent,
   StyleProp,
   StyleSheet,
   View,
   ViewStyle,
 } from "react-native";
+import { Pressable } from "./pressable";
 import { theme } from "./theme";
 
 export interface PressableHighlightProps {
@@ -14,6 +15,11 @@ export interface PressableHighlightProps {
     | ((callback: PressableStateCallback) => React.ReactNode);
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  onPressIn?: (e: GestureResponderEvent) => void;
+  onPressMove?: (e: GestureResponderEvent) => void;
+  onPressOut?: (e: GestureResponderEvent) => void;
+  onHoverIn?: () => void;
+  onHoverOut?: () => void;
   disabled?: boolean;
 }
 
@@ -24,17 +30,19 @@ export interface PressableStateCallback {
 
 export const PressableHighlight = forwardRef<View, PressableHighlightProps>(
   function PressableHighlight(props, ref): JSX.Element {
-    const { children, style, onPress, disabled } = props;
+    const { children, style, onPress, disabled, onHoverIn, onHoverOut } = props;
 
     return (
       <Pressable
         ref={ref}
         style={(state) => {
-          const { hovered, pressed } = state as PressableStateCallback;
+          const { hovered, pressed } = state;
           return [style, hovered && styles.hovered, pressed && styles.pressed];
         }}
         onPress={onPress}
         disabled={disabled}
+        onHoverIn={onHoverIn}
+        onHoverOut={onHoverOut}
       >
         {children}
       </Pressable>
@@ -44,9 +52,9 @@ export const PressableHighlight = forwardRef<View, PressableHighlightProps>(
 
 const styles = StyleSheet.create({
   hovered: {
-    backgroundColor: theme.neutral.lightest,
+    backgroundColor: theme.neutral[100],
   },
   pressed: {
-    backgroundColor: theme.neutral.light,
+    backgroundColor: theme.neutral[200],
   },
 });

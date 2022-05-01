@@ -7,14 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  View,
-  Pressable,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, StyleProp, ViewStyle, Platform } from "react-native";
 import { Text } from "../../components/text";
 import { tokens } from "../../components/tokens";
 import { useFieldQuery, useDocumentFieldValueQuery } from "../../store/queries";
@@ -120,6 +113,7 @@ import { URLLink } from "../../components/url_link";
 import { getLeafRowCellBottom } from "./list_view_map";
 import { useCellKeyBindings } from "./use_cell_keybindings";
 import { theme } from "../../components/theme";
+import { Pressable } from "../../components/pressable";
 
 interface LeafRowCellProps {
   primary: boolean;
@@ -1221,7 +1215,7 @@ const styles = StyleSheet.create({
   leafRowCell: {
     flexDirection: "row",
     alignItems: "center",
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
     ...Platform.select({
       web: {
         outlineStyle: "none",
@@ -1231,7 +1225,7 @@ const styles = StyleSheet.create({
   bottomBorder: {
     borderBottomWidth: 1,
     position: "absolute",
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
     bottom: 0,
     left: 0,
     right: 0,
@@ -1239,7 +1233,7 @@ const styles = StyleSheet.create({
   },
   focused: {
     borderRadius: tokens.border.radius,
-    borderColor: theme.primary.default,
+    borderColor: theme.primary[700],
     position: "absolute",
     top: -1,
     left: 0,
@@ -1251,7 +1245,7 @@ const styles = StyleSheet.create({
   lastLeafRowCell: {
     height: LEAF_ROW_HEIGHT,
     borderLeftWidth: 1,
-    borderColor: theme.neutral.light,
+    borderColor: theme.neutral[200],
   },
   primaryCell: {
     borderRightWidth: 2,
@@ -1304,8 +1298,10 @@ const styles = StyleSheet.create({
   selectCheckboxWrapper: {
     paddingLeft: 8,
   },
-  hovered: {},
+  hovered: {
+    backgroundColor: theme.neutral[100],
+  },
   nonDefaultState: {
-    backgroundColor: theme.base.default,
+    backgroundColor: theme.base.white,
   },
 });
