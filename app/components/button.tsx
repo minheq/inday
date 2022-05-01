@@ -8,14 +8,15 @@ import { PressableStateCallback } from "./pressable_highlight";
 import { theme } from "./theme";
 import { Pressable } from "./pressable";
 
-type ButtonAppearance = "flat" | "outline" | "filled";
-type ButtonColor = "default" | "primary" | "error";
+export type ButtonAppearance = "flat" | "outline" | "filled";
+export type ButtonColor = "default" | "primary" | "error";
 
 interface ButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   title?: string;
   icon?: IconName;
+  iconColor?: string;
   appearance?: ButtonAppearance;
   color?: ButtonColor;
   weight?: "bold" | "normal";
@@ -27,6 +28,7 @@ export function Button(props: ButtonProps): JSX.Element {
     icon,
     disabled = false,
     weight = "normal",
+    iconColor,
     title,
     appearance = "flat",
     color = "default",
@@ -44,7 +46,7 @@ export function Button(props: ButtonProps): JSX.Element {
         return [styles.button, style];
       }}
     >
-      {icon && <Icon color={textColor} name={icon} />}
+      {icon && <Icon customColor={iconColor} color={textColor} name={icon} />}
       {icon && title && <Spacer size={4} />}
       {title && (
         <Text weight={weight} color={textColor}>
@@ -67,7 +69,7 @@ function getButtonStyle(
     return style.hovered;
   }
 
-  return style;
+  return style.default;
 }
 
 function getTextColor(
@@ -98,10 +100,10 @@ const styles = StyleSheet.create({
   },
   flatDefaultDefault: {},
   flatDefaultHovered: {
-    backgroundColor: theme.neutral[50],
+    backgroundColor: theme.neutral[100],
   },
   flatDefaultPressed: {
-    backgroundColor: theme.neutral[50],
+    backgroundColor: theme.neutral[200],
   },
   flatErrorDefault: {},
   flatErrorHovered: {

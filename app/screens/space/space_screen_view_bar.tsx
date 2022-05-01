@@ -38,41 +38,18 @@ export function SpaceScreenViewBar() {
   }, [sidePanel, setSidePanel, setMode, setOpenDocument]);
 
   return (
-    <ViewSettingsView
-      viewID={view.id}
-      name={view.name}
-      type={view.type}
-      onToggleView={handleToggleView}
-      mode={mode}
-    />
-  );
-}
-
-interface ViewSettingsViewProps {
-  onToggleView: () => void;
-  mode: ModeState;
-  viewID: ViewID;
-  name: string;
-  type: ViewType;
-}
-
-const ViewSettingsView = memo(function ViewSettingsView(
-  props: ViewSettingsViewProps
-) {
-  const { onToggleView, mode, viewID, name, type } = props;
-
-  return (
     <View style={styles.viewSettingsRoot}>
       <ViewButton
-        viewID={viewID}
-        name={name}
-        type={type}
-        onPress={onToggleView}
+        viewID={view.id}
+        name={view.name}
+        type={view.type}
+        appearance="outline"
+        onPress={handleToggleView}
       />
       {mode === "edit" ? <ViewMenu /> : <SelectMenu />}
     </View>
   );
-});
+}
 
 function SelectMenu() {
   const [, setMode] = useRecoilState(modeState);
@@ -137,7 +114,8 @@ function ViewMenu() {
 
 const styles = StyleSheet.create({
   viewSettingsRoot: {
-    paddingVertical: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     zIndex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
