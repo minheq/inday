@@ -23,6 +23,10 @@ export function isObject(o: unknown): o is Record<string, unknown> {
   return false;
 }
 
+export function shallowCloneObject<T extends object>(obj: T): T {
+  return { ...obj };
+}
+
 export function get<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   key: K

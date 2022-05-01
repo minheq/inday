@@ -297,3 +297,7 @@ export function isEqualBy<T>(
 export function isArray<T>(arg: unknown): arg is T[] {
   return Array.isArray(arg);
 }
+
+export function shallowCloneArray<T>(arr: T[]): T[] {
+  return arr.slice(0);
+}

@@ -1,11 +1,12 @@
-import { isObject } from "./object_utils";
+import { isArray, shallowCloneArray } from "./array_utils";
+import { isObject, shallowCloneObject } from "./object_utils";
 
 export function isEqual(a: unknown, b: unknown): boolean {
   if (a === b) {
     return true;
   }
 
-  if (Array.isArray(a) && Array.isArray(b)) {
+  if (isArray(a) && isArray(b)) {
     return isArrayEqual(a, b);
   }
 
@@ -78,7 +79,7 @@ function isObjectEqual(
 export function isEmpty<T extends Record<string, unknown>>(data: T): boolean;
 export function isEmpty<T>(data: T[]): boolean;
 export function isEmpty(data: unknown[] | Record<string, unknown>): boolean {
-  if (Array.isArray(data)) {
+  if (isArray(data)) {
     return data.length === 0;
   }
 
@@ -110,6 +111,15 @@ export function map<T, K>(
   return result;
 }
 
-export function clone<T extends object>(obj: T): T {
-  return { ...obj };
+export function shallowClone<T>(data: T[]): T[];
+export function shallowClone<T>(data: T): T;
+export function shallowClone<T>(obj: T | T[]): T | T[] {
+  if (isObject(obj)) {
+    return shallowCloneObject(obj);
+  }
+  if (isArray(obj)) {
+    return shallowCloneArray(obj);
+  }
+
+  return obj;
 }
