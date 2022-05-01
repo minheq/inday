@@ -12,7 +12,7 @@ import { Text } from "../../components/text";
 import { FieldID } from "../../../models/fields";
 import { useFieldQuery } from "../../store/queries";
 import { getFieldIcon } from "../views/icon_helpers";
-import { useListViewViewContext } from "./list_view_view";
+import { useListViewContext } from "./list_view";
 import { useUpdateListViewFieldConfigMutation } from "../../store/mutations";
 import { PressableHighlight } from "../../components/pressable_highlight";
 import { Popover } from "../../components/popover";
@@ -40,7 +40,7 @@ export const HeaderCell = memo(function HeaderCell(
   props: HeaderCellProps
 ): JSX.Element {
   const { fieldID, primary, width } = props;
-  const { viewID } = useListViewViewContext();
+  const { viewID } = useListViewContext();
   const field = useFieldQuery(fieldID);
   const widthRef = useRef(width);
   const anchorRef = useRef(0);

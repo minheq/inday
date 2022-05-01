@@ -8,15 +8,15 @@ import {
   SortGetters,
 } from "../../../models/sorts";
 
-export type ListViewNodes =
+export type ListViewDocumentNodes =
   | GroupedListViewDocumentNode[]
   | FlatListViewDocumentNode[];
 
-export function getListViewNodes(
+export function getListViewDocumentNodes(
   documents: Document[],
   groups: Group[],
   sortGetters: SortGetters
-): ListViewNodes {
+): ListViewDocumentNodes {
   return isNotEmpty(groups)
     ? getGroupedDocumentNodes(documents, groups, sortGetters)
     : getFlatDocumentNodes(documents);
@@ -51,6 +51,7 @@ function getFlatDocumentNodes(
  */
 interface LeafGroupedListViewDocumentNode {
   type: "leaf";
+  collapsed: boolean;
   field: Field;
   value: FieldValue;
   children: Document[];
@@ -61,6 +62,7 @@ interface LeafGroupedListViewDocumentNode {
  */
 interface AncestorGroupedListViewDocumentNode {
   type: "ancestor";
+  collapsed: boolean;
   field: Field;
   value: FieldValue;
   children: GroupedListViewDocumentNode[];
@@ -92,6 +94,7 @@ function toGroupedDocumentNode(
     if (node.type === "leaf") {
       groups = groups.concat({
         type: "leaf",
+        collapsed: false,
         field: node.field,
         value: node.value,
         children: node.children,
@@ -99,6 +102,7 @@ function toGroupedDocumentNode(
     } else {
       groups = groups.concat({
         type: "ancestor",
+        collapsed: false,
         field: node.field,
         value: node.value,
         children: toGroupedDocumentNode(node.children),

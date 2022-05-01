@@ -12,7 +12,7 @@ import { Slide } from "../../components/slide";
 import { OrganizeView } from "../../core/organize/organize_view";
 import { AutoSizer } from "../../lib/autosizer";
 import { ViewID } from "../../../models/views";
-import { ListViewView } from "../../core/list_view/list_view_view";
+import { ListView } from "../../core/list_view/list_view";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Document, DocumentID } from "../../../models/documents";
 import { CollectionID } from "../../../models/collections";
@@ -87,7 +87,7 @@ export function SpaceScreenViewContent() {
     switch (view.type) {
       case "list":
         return (
-          <ListViewView
+          <ListView
             mode={mode}
             view={view}
             selectedDocumentIDs={selectedDocumentIDs}

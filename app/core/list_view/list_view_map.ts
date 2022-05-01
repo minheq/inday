@@ -16,7 +16,6 @@ import {
   GroupedListViewDocumentNode,
   isGroupedListViewDocumentNodes,
 } from "./list_view_nodes";
-import { CollapsedGroups } from "./list_view_view";
 
 export interface ListViewMap {
   grouped: boolean;
@@ -49,18 +48,17 @@ export const defaultListViewMap: ListViewMap = {
  */
 export function useListViewMap(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
-  fields: FieldWithListViewConfig[],
-  collapsedGroups?: CollapsedGroups
+  fields: FieldWithListViewConfig[]
 ): ListViewMap {
   const grouped = useMemo((): boolean => {
     return isGroupedListViewDocumentNodes(nodes);
   }, [nodes]);
   const groupRows = useMemo((): ListViewGroupRow[] => {
     if (isGroupedListViewDocumentNodes(nodes)) {
-      return getListViewGroupRows(nodes, [], collapsedGroups);
+      return getListViewGroupRows(nodes, []);
     }
     return [];
-  }, [nodes, collapsedGroups]);
+  }, [nodes]);
   const groupRowCache = useMemo((): GroupRowCache => {
     return getGroupRowCache(groupRows);
   }, [groupRows]);
@@ -68,8 +66,8 @@ export function useListViewMap(
     return getGroupRowCellCache(groupRows);
   }, [groupRows]);
   const leafRows = useMemo(
-    (): ListViewLeafRow[] => getListViewLeafRows(nodes, [], 0, collapsedGroups),
-    [nodes, collapsedGroups]
+    (): ListViewLeafRow[] => getListViewLeafRows(nodes, [], 0),
+    [nodes]
   );
   const leafRowCache = useMemo(
     (): LeafRowCache => getLeafRowCache(leafRows),
@@ -137,8 +135,7 @@ interface ListViewLeafRow extends LeafRow {
 export function getListViewLeafRows(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
   prevPath: number[],
-  prevIndex: number,
-  collapsedGroups?: CollapsedGroups
+  prevIndex: number
 ): ListViewLeafRow[] {
   let rows: ListViewLeafRow[] = [];
   let currentIndex = prevIndex;
@@ -147,11 +144,10 @@ export function getListViewLeafRows(
     const group = nodes[i];
     const path = [...prevPath, i];
 
-    const collapsed = !!(collapsedGroups ? collapsedGroups.get(path) : false);
-
-    if (collapsed) {
+    if (group.type !== "flat" && group.collapsed) {
       continue;
     }
+
     if (group.type === "leaf" || group.type === "flat") {
       for (let j = 0; j < group.children.length; j++) {
         const document = group.children[j];
@@ -167,12 +163,7 @@ export function getListViewLeafRows(
       }
     } else {
       const { children } = group;
-      const groupRows = getListViewLeafRows(
-        children,
-        path,
-        currentIndex,
-        collapsedGroups
-      );
+      const groupRows = getListViewLeafRows(children, path, currentIndex);
 
       if (last(groupRows)) {
         currentIndex = last(groupRows).index + 1;
@@ -281,32 +272,30 @@ interface ListViewGroupRow {
  */
 export function getListViewGroupRows(
   nodes: GroupedListViewDocumentNode[],
-  prevPath: number[],
-  collapsedGroups?: CollapsedGroups
+  prevPath: number[]
 ): ListViewGroupRow[] {
   let rows: ListViewGroupRow[] = [];
 
   for (let i = 0; i < nodes.length; i++) {
     const group = nodes[i];
     const path = [...prevPath, i];
-    const collapsed = !!(collapsedGroups ? collapsedGroups.get(path) : false);
 
     if (group.type === "leaf") {
       rows = rows.concat({
         path,
         field: group.field,
         value: group.value,
-        collapsed,
+        collapsed: group.collapsed,
       });
     } else {
       const { children } = group;
-      const groupRows = getListViewGroupRows(children, path, collapsedGroups);
+      const groupRows = getListViewGroupRows(children, path);
 
       rows = rows.concat({
         path,
         field: group.field,
         value: group.value,
-        collapsed,
+        collapsed: group.collapsed,
       });
       rows = rows.concat(groupRows);
     }

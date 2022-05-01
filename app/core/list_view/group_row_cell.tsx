@@ -28,7 +28,7 @@ import {
   FieldValue,
   formatNumberFieldValue,
 } from "../../../models/fields";
-import { useListViewViewContext } from "./list_view_view";
+import { useListViewContext } from "./list_view";
 import { Popover } from "../../components/popover";
 import { CollaboratorBadgeList } from "../collaborators/collaborator_badge_list";
 import { DocumentLinkBadgeList } from "../document_link/document_link_badge_list";
@@ -94,7 +94,7 @@ interface PrimaryGroupRowCellViewProps {
 
 function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
   const { field, value, level, collapsed, path, onToggleCollapseGroup } = props;
-  const { mode } = useListViewViewContext();
+  const { mode } = useListViewContext();
 
   const handlePressCollapseGroup = useCallback(() => {
     onToggleCollapseGroup(path, !collapsed);

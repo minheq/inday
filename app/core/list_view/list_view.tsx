@@ -61,12 +61,15 @@ import {
 } from "../../store/queries";
 import { FlatObject } from "../../../lib/flat_object";
 import { useMemoCompare } from "../../hooks/use_memo_compare";
-import { getListViewNodes, ListViewNodes } from "./list_view_nodes";
+import {
+  getListViewDocumentNodes,
+  ListViewDocumentNodes,
+} from "./list_view_nodes";
 import { Field } from "../../../models/fields";
 
 export type ViewMode = "edit" | "select";
 
-interface ListViewViewProps {
+interface ListViewProps {
   view: ListView;
   mode: ViewMode;
   selectedDocumentIDs: DocumentID[];
@@ -82,17 +85,17 @@ type CollapsedGroupsByViewID = {
 };
 
 export const collapsedGroupsState = atom<CollapsedGroupsByViewID>({
-  key: "ListViewView_CollapsedGroups",
+  key: "ListView_CollapsedGroups",
   default: {},
 });
 
 export const activeCellState = atom<StatefulLeafRowCell | null>({
-  key: "ListViewView_ActiveCell",
+  key: "ListView_ActiveCell",
   default: null,
 });
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export function ListViewView(props: ListViewViewProps): JSX.Element {
+export function ListView(props: ListViewProps): JSX.Element {
   const {
     view,
     mode,
@@ -105,13 +108,13 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const [activeCell, setActiveCell] = useRecoilState(activeCellState);
   const fixedFieldCount = view.fixedFieldCount;
   const fields = useSortedFieldsWithListViewConfigQuery(viewID);
-  const nodes = useListViewNodes(viewID);
+  const nodes = useListViewDocumentNodes(viewID);
   const collapsedGroupsByViewID = useRecoilValue(collapsedGroupsState);
   const collapsedGroups = collapsedGroupsByViewID[viewID];
 
   // Ensure these 2 functions get collapsedGroups
-  const listViewMap = useListViewMap(nodes, fields, collapsedGroups);
-  const gridGroups = useListViewGridGroups(nodes, collapsedGroups);
+  const listViewMap = useListViewMap(nodes, fields);
+  const gridGroups = useListViewGridGroups(nodes);
 
   const gridColumns = useListViewGridColumns(fields);
   const gridSelectedRows = useListViewGridSelectedRows(
@@ -122,7 +125,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   const gridRef = useRef<GridRendererRef>(null);
   const handleToggleCollapseGroup = useToggleCollapseGroup(viewID);
   const grouped = useMemo(() => isGrouped(listViewMap), [listViewMap]);
-  const context = useMemo((): ListViewViewContext => {
+  const context = useMemo((): ListViewContext => {
     return {
       viewID,
       listViewMap,
@@ -254,7 +257,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
   }
 
   return (
-    <ListViewViewContext.Provider value={context}>
+    <ListViewContext.Provider value={context}>
       <View style={styles.root}>
         <AutoSizer resizeGreaterWidthOnly>
           {({ height, width }) => (
@@ -282,11 +285,11 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           )}
         </AutoSizer>
       </View>
-    </ListViewViewContext.Provider>
+    </ListViewContext.Provider>
   );
 }
 
-interface ListViewViewContext {
+interface ListViewContext {
   viewID: ViewID;
   listViewMap: ListViewMap;
   mode: ViewMode;
@@ -295,7 +298,7 @@ interface ListViewViewContext {
   onAddDocument: () => void;
 }
 
-export const ListViewViewContext = createContext<ListViewViewContext>({
+export const ListViewContext = createContext<ListViewContext>({
   viewID: "viw",
   listViewMap: defaultListViewMap,
   mode: "edit",
@@ -310,8 +313,8 @@ export const ListViewViewContext = createContext<ListViewViewContext>({
   },
 });
 
-export function useListViewViewContext(): ListViewViewContext {
-  return useContext(ListViewViewContext);
+export function useListViewContext(): ListViewContext {
+  return useContext(ListViewContext);
 }
 
 export function useToggleCollapseGroup(
@@ -322,6 +325,7 @@ export function useToggleCollapseGroup(
 
   return useCallback(
     (path: number[], collapsed: boolean) => {
+      // TODO: convert path to collapseObject...?
       const nextCollapsedGroupsByViewID: CollapsedGroupsByViewID = {
         ...collapsedGroupsByViewID,
       };
@@ -348,14 +352,16 @@ export function useToggleCollapseGroup(
  * If view is sorted by groups and sorts, return tree of `GroupedListViewDocumentNode`.
  * If view is a flat list, return list of `FlatListViewDocumentNode`
  */
-export function useListViewNodes(viewID: ViewID): ListViewNodes {
+export function useListViewDocumentNodes(
+  viewID: ViewID
+): ListViewDocumentNodes {
   const documents = useViewDocumentsQuery(viewID);
   const groups = useViewGroupsQuery(viewID);
   const sortGetters = useSortGettersQuery();
   const documentsOrderChanged = useDocumentsOrderChanged(viewID, documents);
 
   return useMemoCompare(
-    () => getListViewNodes(documents, groups, sortGetters),
+    () => getListViewDocumentNodes(documents, groups, sortGetters),
     documentsOrderChanged
   );
 }

@@ -70,7 +70,7 @@ import { useSetRecoilState } from "recoil";
 
 import { LeafRowCellState } from "../../components/grid_renderer.common";
 import { isNumberString, toNumber } from "../../../lib/number_utils";
-import { activeCellState, useListViewViewContext } from "./list_view_view";
+import { activeCellState, useListViewContext } from "./list_view";
 import { useLeafRowContext, useLeafRowContextMenuItems } from "./leaf_row";
 import { SingleSelectPicker } from "../select/single_select_picker";
 import { MultiSelectPicker } from "../select/multi_select_picker";
@@ -152,7 +152,7 @@ export const LeafRowCell = memo(function LeafRowCell(props: LeafRowCellProps) {
   );
   const field = useFieldQuery(fieldID);
   const value = useDocumentFieldValueQuery(documentID, fieldID);
-  const { mode, onSelectDocument, listViewMap } = useListViewViewContext();
+  const { mode, onSelectDocument, listViewMap } = useListViewContext();
   const setActiveCell = useSetRecoilState(activeCellState);
   const { selected } = useLeafRowContext();
 
@@ -284,7 +284,7 @@ const LeafRowCellView = memo(function LeafRowCellView(
   props: LeafRowCellViewProps
 ) {
   const { field, value, level } = props;
-  const { mode } = useListViewViewContext();
+  const { mode } = useListViewContext();
   const { selected } = useLeafRowContext();
   const { cell, onPress } = useLeafRowCellContext();
 

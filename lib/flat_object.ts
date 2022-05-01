@@ -50,6 +50,10 @@ export function FlatObject<K extends string | number, T>(
         return;
       }
 
+      // TODO: return a new object instead
+      // const cloned = clone(obj)
+      // cloned[makeKey(arr)] = value;
+      // return cloned
       obj[makeKey(arr)] = value;
     },
     keysOf: (): K[][] => {

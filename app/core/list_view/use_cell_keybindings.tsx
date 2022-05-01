@@ -19,7 +19,7 @@ import {
   getLeafRowCellRightMost,
   getLeafRowCellTopMost,
 } from "./list_view_map";
-import { activeCellState, useListViewViewContext } from "./list_view_view";
+import { activeCellState, useListViewContext } from "./list_view";
 import { useLeafRowCellContext } from "./leaf_row_cell";
 
 interface UseCellKeyBindingsProps {
@@ -34,7 +34,7 @@ export function useCellKeyBindings(props: UseCellKeyBindingsProps = {}): void {
     onPrintableKey: onPrintableKeyOverride,
     onDelete: onDeleteOverride,
   } = props;
-  const { listViewMap, onOpenDocument } = useListViewViewContext();
+  const { listViewMap, onOpenDocument } = useListViewContext();
   const { cell } = useLeafRowCellContext();
   const setActiveCell = useSetRecoilState(activeCellState);
 

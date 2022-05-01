@@ -7,11 +7,6 @@ import {
 import { canUseDOM } from "./execution_environment";
 
 export function getSystemLocale(): SupportedLocale {
-  // TODO: Remove this
-  if (process.env.NODE_ENV !== "production") {
-    return SupportedLocale.viVN;
-  }
-
   if (Platform.OS === "ios") {
     return getSystemLocaleIOS();
   } else if (Platform.OS === "android" && NativeModules.I18nManager) {

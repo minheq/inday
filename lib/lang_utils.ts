@@ -1,6 +1,5 @@
 import { isObject } from "./object_utils";
 
-// TODO: Has bugs
 export function isEqual(a: unknown, b: unknown): boolean {
   if (a === b) {
     return true;
@@ -68,11 +67,7 @@ function isObjectEqual(
     const subA = a[key];
     const subB = b[key];
 
-    if (isObject(subA) && isObject(subB) && !!isObjectEqual(subA, subB)) {
-      return false;
-    }
-
-    if (subA !== subB) {
+    if (!isEqual(subA, subB)) {
       return false;
     }
   }
@@ -113,4 +108,8 @@ export function map<T, K>(
   }
 
   return result;
+}
+
+export function clone<T extends object>(obj: T): T {
+  return { ...obj };
 }

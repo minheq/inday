@@ -8,9 +8,9 @@ import {
 } from "../../../models/factory";
 import { FieldType } from "../../../models/fields";
 import { SortGetters } from "../../../models/sorts";
-import { getListViewNodes } from "./list_view_nodes";
+import { getListViewDocumentNodes } from "./list_view_nodes";
 
-describe("getListViewNodes", () => {
+describe("getListViewDocumentNodes", () => {
   const collection = makeCollection({});
   const numberField = makeField({
     type: FieldType.Number,
@@ -69,7 +69,7 @@ describe("getListViewNodes", () => {
   };
 
   test("flat", () => {
-    const result = getListViewNodes(
+    const result = getListViewDocumentNodes(
       [document1, document2, document3, document4],
       [],
       getters
@@ -87,7 +87,7 @@ describe("getListViewNodes", () => {
       { fieldID: numberField.id, order: "ascending" }
     );
 
-    const result = getListViewNodes(
+    const result = getListViewDocumentNodes(
       [document1, document2, document3, document4],
       [group],
       getters
@@ -111,7 +111,7 @@ describe("getListViewNodes", () => {
       { fieldID: numberField.id, order: "ascending" }
     );
 
-    const result = getListViewNodes(
+    const result = getListViewDocumentNodes(
       [document1, document2, document3, document4],
       [group],
       getters
@@ -136,7 +136,16 @@ describe("getListViewNodes", () => {
     );
     const group2 = makeGroup({}, { fieldID: textField.id, order: "ascending" });
 
-    const result = getListViewNodes(
+    // const collapsedGroups = {
+    //   [numberField.id]: {
+    //     values: [1],
+    //     fields: {
+    //       [textField.id]: ["AWord"],
+    //     },
+    //   },
+    // };
+
+    const result = getListViewDocumentNodes(
       [document1, document2, document3, document4],
       [group1, group2],
       getters
@@ -158,6 +167,7 @@ describe("getListViewNodes", () => {
         },
       ],
     });
+
     expect(result[1]).toMatchObject({
       type: "ancestor",
       value: 2,

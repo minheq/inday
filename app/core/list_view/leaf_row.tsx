@@ -7,7 +7,7 @@ import { LeafRowState } from "../../components/grid_renderer.common";
 import { PressableHighlight } from "../../components/pressable_highlight";
 import { Text } from "../../components/text";
 import { DocumentID } from "../../../models/documents";
-import { useListViewViewContext } from "./list_view_view";
+import { useListViewContext } from "./list_view";
 import { theme } from "../../components/theme";
 
 interface LeafRowProps {
@@ -66,7 +66,7 @@ function LeafRowView(props: LeafRowViewProps) {
 }
 
 export function useLeafRowContextMenuItems(): ContextMenuItem[] {
-  const { onOpenDocument } = useListViewViewContext();
+  const { onOpenDocument } = useListViewContext();
   const { documentID } = useLeafRowContext();
 
   const handleOpen = useCallback(() => {
@@ -87,7 +87,7 @@ export function useLeafRowContextMenuItems(): ContextMenuItem[] {
 }
 
 export function LastLeafRow(): JSX.Element {
-  const { onAddDocument } = useListViewViewContext();
+  const { onAddDocument } = useListViewContext();
 
   return (
     <PressableHighlight style={styles.addDocument} onPress={onAddDocument}>
