@@ -9,6 +9,7 @@ import { theme } from "./theme";
 import { Pressable } from "./pressable";
 
 export type ButtonAppearance = "flat" | "outline" | "filled";
+export type ButtonAlign = "left" | "center" | "right";
 export type ButtonColor = "default" | "primary" | "error";
 
 interface ButtonProps {
@@ -17,6 +18,7 @@ interface ButtonProps {
   title?: string;
   icon?: IconName;
   iconColor?: string;
+  align?: ButtonAlign;
   appearance?: ButtonAppearance;
   color?: ButtonColor;
   weight?: "bold" | "normal";
@@ -28,6 +30,7 @@ export function Button(props: ButtonProps): JSX.Element {
     icon,
     disabled = false,
     weight = "normal",
+    align = "center",
     iconColor,
     title,
     appearance = "flat",
@@ -43,11 +46,11 @@ export function Button(props: ButtonProps): JSX.Element {
       style={(state) => {
         const style = getButtonStyle(appearance, color, state);
 
-        return [styles.button, style];
+        return [styles.button, styles[align], style];
       }}
     >
       {icon && <Icon customColor={iconColor} color={textColor} name={icon} />}
-      {icon && title && <Spacer size={4} />}
+      {icon && title && <Spacer direction="row" size={4} />}
       {title && (
         <Text weight={weight} color={textColor}>
           {title}
@@ -97,6 +100,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 8,
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  left: {
+    justifyContent: "flex-start",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  center: {
+    justifyContent: "center",
+  },
+  // eslint-disable-next-line react-native/no-unused-styles
+  right: {
+    justifyContent: "flex-end",
   },
   flatDefaultDefault: {},
   flatDefaultHovered: {

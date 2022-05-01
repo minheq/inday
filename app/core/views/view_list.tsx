@@ -32,6 +32,7 @@ export function ViewList(props: ViewListProps): JSX.Element {
           <ViewButton
             key={view.id}
             viewID={view.id}
+            align="left"
             name={view.name}
             type={view.type}
             onPress={onSelect}

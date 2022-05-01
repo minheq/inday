@@ -1,19 +1,10 @@
-import React, {
-  Fragment,
-  memo,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   GestureResponderEvent,
   Platform,
   StyleSheet,
   View,
 } from "react-native";
-import { atom, useRecoilState } from "recoil";
-
 import { ContextMenuView } from "../../components/context_menu_view";
 import { ContextMenuItem, ContextMenu } from "../../components/context_menu";
 import { Icon } from "../../components/icon";
@@ -39,11 +30,6 @@ export function Header(props: HeaderProps): JSX.Element {
   return <View style={styles.row}>{children}</View>;
 }
 
-const resizeFieldIDState = atom<FieldID | null>({
-  key: "ResizeFieldID",
-  default: null,
-});
-
 interface HeaderCellProps {
   fieldID: FieldID;
   primary: boolean;
@@ -55,14 +41,12 @@ export const HeaderCell = memo(function HeaderCell(
 ): JSX.Element {
   const { fieldID, primary, width } = props;
   const { viewID } = useListViewViewContext();
-  const [resizeFieldID, setResizeFieldID] = useRecoilState(resizeFieldIDState);
   const field = useFieldQuery(fieldID);
   const widthRef = useRef(width);
   const anchorRef = useRef(0);
   const updateListViewFieldConfig = useUpdateListViewFieldConfigMutation();
   const menuItems = useHeaderCellContextMenuItems();
   const [visible, setVisible] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const targetRef = useRef<View>(null);
 
   const handlePress = useCallback(() => {
@@ -88,39 +72,24 @@ export const HeaderCell = memo(function HeaderCell(
     [updateListViewFieldConfig, viewID, fieldID, widthRef]
   );
 
-  const handleHoveredIn = useCallback(() => {
-    if (!hovered) {
-      setHovered(true);
-    }
-  }, [hovered]);
-  const handleHoveredOut = useCallback(() => {
-    if (hovered) {
-      setHovered(false);
-    }
-  }, [hovered]);
-
   const handlePressIn = useCallback(
     (e: GestureResponderEvent) => {
       anchorRef.current = e.nativeEvent.pageX;
       widthRef.current = width;
-      setResizeFieldID(fieldID);
     },
-    [width, setResizeFieldID, fieldID]
+    [width]
   );
 
   const handlePressOut = useCallback(() => {
     anchorRef.current = 0;
-    setResizeFieldID(null);
-  }, [setResizeFieldID]);
+  }, []);
 
   return (
-    <Fragment>
+    <View style={[styles.headerCell, primary && styles.primaryCell]}>
       <PressableHighlight
         ref={targetRef}
         onPress={handlePress}
-        onHoverIn={handleHoveredIn}
-        onHoverOut={handleHoveredOut}
-        style={[styles.headerCell, primary && styles.primaryCell]}
+        style={styles.headerButton}
       >
         <ContextMenuView style={styles.menuView} menuItems={menuItems}>
           <View style={styles.headerCellTitle}>
@@ -130,26 +99,28 @@ export const HeaderCell = memo(function HeaderCell(
               {field.name}
             </Text>
           </View>
-          {(resizeFieldID === fieldID ||
-            (resizeFieldID === null && hovered)) && (
-            <Pressable
-              onPressIn={handlePressIn}
-              onPressMove={handlePressMove}
-              onPressOut={handlePressOut}
-              style={styles.resizeHandler}
-            >
-              <Icon color="primary" size="sm" name="ArrowHorizontal" />
-            </Pressable>
-          )}
         </ContextMenuView>
       </PressableHighlight>
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressMove={handlePressMove}
+        onPressOut={handlePressOut}
+        style={({ hovered }) => {
+          return [
+            styles.resizeHandler,
+            hovered ? styles.visibleResizeHandler : styles.hiddenResizeHandler,
+          ];
+        }}
+      >
+        <Icon color="primary" size="sm" name="ArrowHorizontal" />
+      </Pressable>
       <Popover
         visible={visible}
         targetRef={targetRef}
         content={<ContextMenu menuItems={menuItems} />}
         onRequestClose={handleRequestClose}
       />
-    </Fragment>
+    </View>
   );
 });
 
@@ -196,12 +167,23 @@ const styles = StyleSheet.create({
   menuView: {
     paddingHorizontal: 8,
   },
+  headerButton: {
+    flex: 1,
+    justifyContent: "center",
+  },
   primaryCell: {
     borderRightWidth: 2,
+    borderColor: theme.neutral[200],
   },
   headerCellTitle: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  hiddenResizeHandler: {
+    opacity: 0,
+  },
+  visibleResizeHandler: {
+    opacity: 1,
   },
   resizeHandler: {
     position: "absolute",

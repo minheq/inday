@@ -77,7 +77,7 @@ function SelectMenu() {
       <Button title="Share" />
       <Button title="Copy" />
       <Button title="Delete" color="error" />
-      <Button onPress={handleToggleSelect} title="Cancel" />
+      <Button color="error" onPress={handleToggleSelect} title="Cancel" />
     </Row>
   );
 }

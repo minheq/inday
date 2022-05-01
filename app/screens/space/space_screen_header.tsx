@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   activeCollectionItem: {
     borderBottomWidth: 2,
-    borderColor: theme.primary.default,
+    borderColor: theme.primary[800],
   },
   collectionTabsRoot: {
     zIndex: 2,
