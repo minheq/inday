@@ -1,6 +1,6 @@
 import { isNotEmpty } from "../../../lib/array_utils";
 import { Document } from "../../../models/documents";
-import { areFieldValuesEqual, Field, FieldValue } from "../../../models/fields";
+import { Field, FieldValue } from "../../../models/fields";
 import { Group } from "../../../models/groups";
 import {
   DocumentNode,
@@ -15,16 +15,10 @@ export type ListViewNodes =
 export function getListViewNodes(
   documents: Document[],
   groups: Group[],
-  sortGetters: SortGetters,
-  collapsedGroupsByFieldID?: CollapsedGroupsByFieldID
+  sortGetters: SortGetters
 ): ListViewNodes {
   return isNotEmpty(groups)
-    ? getGroupedDocumentNodes(
-        documents,
-        groups,
-        sortGetters,
-        collapsedGroupsByFieldID
-      )
+    ? getGroupedDocumentNodes(documents, groups, sortGetters)
     : getFlatDocumentNodes(documents);
 }
 
@@ -57,7 +51,6 @@ function getFlatDocumentNodes(
  */
 interface LeafGroupedListViewDocumentNode {
   type: "leaf";
-  collapsed: boolean;
   field: Field;
   value: FieldValue;
   children: Document[];
@@ -68,7 +61,6 @@ interface LeafGroupedListViewDocumentNode {
  */
 interface AncestorGroupedListViewDocumentNode {
   type: "ancestor";
-  collapsed: boolean;
   field: Field;
   value: FieldValue;
   children: GroupedListViewDocumentNode[];
@@ -84,33 +76,22 @@ export type GroupedListViewDocumentNode =
 function getGroupedDocumentNodes(
   documents: Document[],
   groups: Group[],
-  sortGetters: SortGetters,
-  collapsedGroups?: CollapsedGroupsByFieldID
+  sortGetters: SortGetters
 ): GroupedListViewDocumentNode[] {
   const nodes = makeDocumentNodes(groups, documents, sortGetters);
 
-  return toGroupedDocumentNode(nodes, collapsedGroups);
+  return toGroupedDocumentNode(nodes);
 }
 
 function toGroupedDocumentNode(
-  nodes: DocumentNode[],
-  collapsedGroups?: CollapsedGroupsByFieldID
+  nodes: DocumentNode[]
 ): GroupedListViewDocumentNode[] {
   let groups: GroupedListViewDocumentNode[] = [];
 
   for (const node of nodes) {
-    const collapsedValues = collapsedGroups && collapsedGroups[node.field.id];
-    const collapsed = !!(
-      collapsedValues &&
-      collapsedValues.some((v) =>
-        areFieldValuesEqual(node.field, v, node.value)
-      )
-    );
-
     if (node.type === "leaf") {
       groups = groups.concat({
         type: "leaf",
-        collapsed,
         field: node.field,
         value: node.value,
         children: node.children,
@@ -118,10 +99,9 @@ function toGroupedDocumentNode(
     } else {
       groups = groups.concat({
         type: "ancestor",
-        collapsed,
         field: node.field,
         value: node.value,
-        children: toGroupedDocumentNode(node.children, collapsedGroups),
+        children: toGroupedDocumentNode(node.children),
       });
     }
   }

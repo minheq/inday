@@ -81,7 +81,7 @@ describe("getListViewNodes", () => {
     expect(result[0].children[3]).toEqual(document4);
   });
 
-  test("grouped 1 level - expanded", () => {
+  test("grouped 1 level", () => {
     const group = makeGroup(
       {},
       { fieldID: numberField.id, order: "ascending" }
@@ -96,18 +96,16 @@ describe("getListViewNodes", () => {
     expect(result[0]).toMatchObject({
       type: "leaf",
       value: 1,
-      collapsed: false,
       children: [document3, document4],
     });
     expect(result[1]).toMatchObject({
       type: "leaf",
       value: 2,
-      collapsed: false,
       children: [document1, document2],
     });
   });
 
-  test("grouped 1 level - first group collapsed", () => {
+  test("grouped 1 level", () => {
     const group = makeGroup(
       {},
       { fieldID: numberField.id, order: "ascending" }
@@ -116,25 +114,22 @@ describe("getListViewNodes", () => {
     const result = getListViewNodes(
       [document1, document2, document3, document4],
       [group],
-      getters,
-      { [numberField.id]: [1] }
+      getters
     );
 
     expect(result[0]).toMatchObject({
       type: "leaf",
       value: 1,
-      collapsed: true,
       children: [document3, document4],
     });
     expect(result[1]).toMatchObject({
       type: "leaf",
       value: 2,
-      collapsed: false,
       children: [document1, document2],
     });
   });
 
-  test("grouped 2 level - expanded", () => {
+  test("grouped 2 level", () => {
     const group1 = makeGroup(
       {},
       { fieldID: numberField.id, order: "ascending" }
@@ -150,18 +145,15 @@ describe("getListViewNodes", () => {
     expect(result[0]).toMatchObject({
       type: "ancestor",
       value: 1,
-      collapsed: false,
       children: [
         {
           type: "leaf",
           value: "AWord",
-          collapsed: false,
           children: [document4],
         },
         {
           type: "leaf",
           value: "BWord",
-          collapsed: false,
           children: [document3],
         },
       ],
@@ -169,18 +161,15 @@ describe("getListViewNodes", () => {
     expect(result[1]).toMatchObject({
       type: "ancestor",
       value: 2,
-      collapsed: false,
       children: [
         {
           type: "leaf",
           value: "AWord",
-          collapsed: false,
           children: [document1],
         },
         {
           type: "leaf",
           value: "BWord",
-          collapsed: false,
           children: [document2],
         },
       ],

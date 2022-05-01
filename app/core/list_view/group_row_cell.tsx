@@ -53,16 +53,19 @@ interface GroupRowCellProps {
   // Field of the group
   field: Field;
   value: FieldValue;
-  onToggleCollapseGroup: (
-    field: Field,
-    value: FieldValue,
-    collapsed: boolean
-  ) => void;
+  onToggleCollapseGroup: (path: number[], collapsed: boolean) => void;
 }
 
 export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
-  const { primary, collapsed, field, level, value, onToggleCollapseGroup } =
-    props;
+  const {
+    primary,
+    path,
+    collapsed,
+    field,
+    level,
+    value,
+    onToggleCollapseGroup,
+  } = props;
 
   if (primary) {
     return (
@@ -71,6 +74,7 @@ export function GroupRowCell(props: GroupRowCellProps): JSX.Element {
         field={field}
         value={value}
         level={level}
+        path={path}
         onToggleCollapseGroup={onToggleCollapseGroup}
       />
     );
@@ -84,20 +88,17 @@ interface PrimaryGroupRowCellViewProps {
   value: FieldValue;
   level: number;
   collapsed: boolean;
-  onToggleCollapseGroup: (
-    field: Field,
-    value: FieldValue,
-    collapsed: boolean
-  ) => void;
+  path: number[];
+  onToggleCollapseGroup: (path: number[], collapsed: boolean) => void;
 }
 
 function PrimaryGroupRowCellView(props: PrimaryGroupRowCellViewProps) {
-  const { field, value, level, collapsed, onToggleCollapseGroup } = props;
+  const { field, value, level, collapsed, path, onToggleCollapseGroup } = props;
   const { mode } = useListViewViewContext();
 
   const handlePressCollapseGroup = useCallback(() => {
-    onToggleCollapseGroup(field, value, !collapsed);
-  }, [onToggleCollapseGroup, field, value, collapsed]);
+    onToggleCollapseGroup(path, !collapsed);
+  }, [onToggleCollapseGroup, path, collapsed]);
 
   const renderValue = useCallback((): JSX.Element | null => {
     switch (field.type) {

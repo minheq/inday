@@ -10,40 +10,48 @@ import {
   FlatListViewDocumentNode,
   GroupedListViewDocumentNode,
 } from "./list_view_nodes";
+import { CollapsedGroups } from "./list_view_view";
 
 /**
  * Transforms nodes to grid groups
  * @param nodes
  */
 export function useListViewGridGroups(
-  nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[]
+  nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
+  collapsedGroups?: CollapsedGroups
 ): GridGroup[] {
   return useMemo((): GridGroup[] => {
     if (isGroupedListViewDocumentNodes(nodes)) {
-      return toGroupedGridGroups(nodes);
+      return toGroupedGridGroups(nodes, [], collapsedGroups);
     }
 
     return toFlatGridGroups(nodes);
-  }, [nodes]);
+  }, [nodes, collapsedGroups]);
 }
 
 function toGroupedGridGroups(
-  nodes: GroupedListViewDocumentNode[]
+  nodes: GroupedListViewDocumentNode[],
+  prevPath: number[],
+  collapsedGroups?: CollapsedGroups
 ): GridGroup[] {
   let groups: GridGroup[] = [];
 
-  for (const node of nodes) {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    const path = [...prevPath, i];
+    const collapsed = !!(collapsedGroups ? collapsedGroups.get(path) : false);
+
     if (node.type === "leaf") {
       groups = groups.concat({
         type: "leaf",
-        collapsed: node.collapsed,
+        collapsed,
         rowCount: node.children.length + 1, // + 1 adds a row for `Add document`
       });
     } else {
       groups = groups.concat({
         type: "ancestor",
-        collapsed: node.collapsed,
-        children: toGroupedGridGroups(node.children),
+        collapsed,
+        children: toGroupedGridGroups(node.children, path, collapsedGroups),
       });
     }
   }
