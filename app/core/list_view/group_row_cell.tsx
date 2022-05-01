@@ -50,8 +50,6 @@ interface GroupRowCellProps {
   level: number;
   last: boolean;
   collapsed: boolean;
-  // Corresponding column
-  columnFieldID: FieldID;
   // Field of the group
   field: Field;
   value: FieldValue;

@@ -3,7 +3,7 @@ import { FieldType } from "../../../models/fields";
 import { getListViewGroupRows, getListViewLeafRows } from "./list_view_map";
 
 describe("getListViewGroupRows", () => {
-  test("1 level nested nodes", () => {
+  test("grouped 1 level", () => {
     const result = getListViewGroupRows(
       [
         {
@@ -30,7 +30,7 @@ describe("getListViewGroupRows", () => {
     expect(result[1].value).toEqual("group2");
   });
 
-  test("2 level nested nodes", () => {
+  test("grouped 2 level", () => {
     const result = getListViewGroupRows(
       [
         {
@@ -97,7 +97,7 @@ describe("getListViewLeafRows", () => {
     expect(result[1].index).toEqual(1);
   });
 
-  test("1 level nested nodes", () => {
+  test("grouped 1 level", () => {
     const result = getListViewLeafRows(
       [
         {
@@ -129,7 +129,7 @@ describe("getListViewLeafRows", () => {
     expect(result[3].index).toEqual(3);
   });
 
-  test("2 level nested nodes", () => {
+  test("grouped 2 level", () => {
     const result = getListViewLeafRows(
       [
         {

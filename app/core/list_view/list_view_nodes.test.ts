@@ -1,0 +1,189 @@
+import {
+  addFieldsToCollection,
+  makeCollaborator,
+  makeCollection,
+  makeDocument,
+  makeField,
+  makeGroup,
+} from "../../../models/factory";
+import { FieldType } from "../../../models/fields";
+import { SortGetters } from "../../../models/sorts";
+import { getListViewNodes } from "./list_view_nodes";
+
+describe("getListViewNodes", () => {
+  const collection = makeCollection({});
+  const numberField = makeField({
+    type: FieldType.Number,
+    collectionID: collection.id,
+  });
+  const textField = makeField({
+    type: FieldType.SingleLineText,
+    collectionID: collection.id,
+  });
+  const collectionWithFields = addFieldsToCollection(collection, [
+    numberField,
+    textField,
+  ]);
+
+  const document1 = makeDocument(
+    { fields: { [numberField.id]: 2, [textField.id]: "AWord" } },
+    collectionWithFields
+  );
+  const document2 = makeDocument(
+    { fields: { [numberField.id]: 2, [textField.id]: "BWord" } },
+    collectionWithFields
+  );
+  const document3 = makeDocument(
+    { fields: { [numberField.id]: 1, [textField.id]: "BWord" } },
+    collectionWithFields
+  );
+  const document4 = makeDocument(
+    { fields: { [numberField.id]: 1, [textField.id]: "AWord" } },
+    collectionWithFields
+  );
+  const fields = [numberField, textField];
+  const documents = [document1, document2, document3, document4];
+  const collaborator = makeCollaborator({});
+
+  const getters: SortGetters = {
+    getField: (fieldID) => {
+      const field = fields.find((d) => d.id === fieldID);
+
+      if (field === undefined) {
+        throw new Error("Document not found");
+      }
+
+      return field;
+    },
+    getDocument: (documentID) => {
+      const document = documents.find((d) => d.id === documentID);
+
+      if (document === undefined) {
+        throw new Error("Document not found");
+      }
+
+      return document;
+    },
+    getCollection: () => collection,
+    getCollaborator: () => collaborator,
+  };
+
+  test("flat", () => {
+    const result = getListViewNodes(
+      [document1, document2, document3, document4],
+      [],
+      getters
+    );
+
+    expect(result[0].children[0]).toEqual(document1);
+    expect(result[0].children[1]).toEqual(document2);
+    expect(result[0].children[2]).toEqual(document3);
+    expect(result[0].children[3]).toEqual(document4);
+  });
+
+  test("grouped 1 level - expanded", () => {
+    const group = makeGroup(
+      {},
+      { fieldID: numberField.id, order: "ascending" }
+    );
+
+    const result = getListViewNodes(
+      [document1, document2, document3, document4],
+      [group],
+      getters
+    );
+
+    expect(result[0]).toMatchObject({
+      type: "leaf",
+      value: 1,
+      collapsed: false,
+      children: [document3, document4],
+    });
+    expect(result[1]).toMatchObject({
+      type: "leaf",
+      value: 2,
+      collapsed: false,
+      children: [document1, document2],
+    });
+  });
+
+  test("grouped 1 level - first group collapsed", () => {
+    const group = makeGroup(
+      {},
+      { fieldID: numberField.id, order: "ascending" }
+    );
+
+    const result = getListViewNodes(
+      [document1, document2, document3, document4],
+      [group],
+      getters,
+      { [numberField.id]: [1] }
+    );
+
+    expect(result[0]).toMatchObject({
+      type: "leaf",
+      value: 1,
+      collapsed: true,
+      children: [document3, document4],
+    });
+    expect(result[1]).toMatchObject({
+      type: "leaf",
+      value: 2,
+      collapsed: false,
+      children: [document1, document2],
+    });
+  });
+
+  test("grouped 2 level - expanded", () => {
+    const group1 = makeGroup(
+      {},
+      { fieldID: numberField.id, order: "ascending" }
+    );
+    const group2 = makeGroup({}, { fieldID: textField.id, order: "ascending" });
+
+    const result = getListViewNodes(
+      [document1, document2, document3, document4],
+      [group1, group2],
+      getters
+    );
+
+    expect(result[0]).toMatchObject({
+      type: "ancestor",
+      value: 1,
+      collapsed: false,
+      children: [
+        {
+          type: "leaf",
+          value: "AWord",
+          collapsed: false,
+          children: [document4],
+        },
+        {
+          type: "leaf",
+          value: "BWord",
+          collapsed: false,
+          children: [document3],
+        },
+      ],
+    });
+    expect(result[1]).toMatchObject({
+      type: "ancestor",
+      value: 2,
+      collapsed: false,
+      children: [
+        {
+          type: "leaf",
+          value: "AWord",
+          collapsed: false,
+          children: [document1],
+        },
+        {
+          type: "leaf",
+          value: "BWord",
+          collapsed: false,
+          children: [document2],
+        },
+      ],
+    });
+  });
+});

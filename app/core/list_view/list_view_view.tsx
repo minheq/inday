@@ -151,7 +151,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         return <LastLeafRowCell />;
       }
 
-      const fieldID = getFieldID(listViewMap, _props);
       const group = getGroupRowCellData(listViewMap, _props);
       const level = grouped ? _props.level - 1 : 0;
       const primary = _props.column === 1;
@@ -163,7 +162,6 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
           column={_props.column}
           last={_props.last}
           collapsed={_props.collapsed}
-          columnFieldID={fieldID}
           level={level}
           field={group.field}
           value={group.value}
