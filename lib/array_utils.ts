@@ -23,17 +23,19 @@ export function range(arg0: number, arg1?: number, arg2?: number): number[] {
 
 /**
  * Get first item in the array.
- * IMPORTANT: Make sure to check that the array is not empty first.
+ *
+ * NOTE: Make sure to check that the array is not empty first or that element exists
  */
-export function first<T>(arr: T[]): T | undefined {
+export function first<T>(arr: T[]): T {
   return arr[0];
 }
 
 /**
  * Get last item in the array.
- * IMPORTANT: Make sure to check that the array is not empty first.
+ *
+ * NOTE: Make sure to check that the array is not empty first or that element exists
  */
-export function last<T>(arr: T[]): T | undefined {
+export function last<T>(arr: T[]): T {
   return arr[arr.length - 1];
 }
 

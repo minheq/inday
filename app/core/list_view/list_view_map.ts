@@ -132,7 +132,7 @@ interface ListViewLeafRow extends LeafRow {
   index: number;
 }
 
-function getListViewLeafRows(
+export function getListViewLeafRows(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
   prevPath: number[],
   prevIndex: number
@@ -164,6 +164,10 @@ function getListViewLeafRows(
     } else {
       const { children } = group;
       const groupRows = getListViewLeafRows(children, path, currentIndex);
+
+      if (last(groupRows)) {
+        currentIndex = last(groupRows).index + 1;
+      }
 
       rows = rows.concat(groupRows);
     }
