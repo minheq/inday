@@ -171,7 +171,7 @@ export function ListViewView(props: ListViewViewProps): JSX.Element {
         />
       );
     },
-    [listViewMap, handleToggleCollapseGroup]
+    [listViewMap, grouped, handleToggleCollapseGroup]
   );
 
   const renderHeaderCell = useCallback(

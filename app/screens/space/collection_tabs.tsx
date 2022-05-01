@@ -5,40 +5,26 @@ import { PressableHighlight } from "../../components/pressable_highlight";
 import { Icon } from "../../components/icon";
 import { Row } from "../../components/row";
 import { Text } from "../../components/text";
-import { tokens } from "../../components/tokens";
 import { Collection, CollectionID } from "../../../models/collections";
 
-import {
-  useSpaceQuery,
-  useSpaceCollectionsQuery,
-  useViewQuery,
-} from "../../store/queries";
-import { ViewID } from "../../../models/views";
+import { useSpaceQuery, useSpaceCollectionsQuery } from "../../store/queries";
 import { SpaceID } from "../../../models/spaces";
 import { theme } from "../../components/theme";
 
 interface CollectionsTabsProps {
   spaceID: SpaceID;
-  viewID: ViewID;
+  activeCollectionID: CollectionID;
 }
 
 export function CollectionsTabs(props: CollectionsTabsProps): JSX.Element {
-  const { spaceID, viewID } = props;
+  const { spaceID, activeCollectionID } = props;
   const space = useSpaceQuery(spaceID);
-  const view = useViewQuery(viewID);
   const collections = useSpaceCollectionsQuery(space.id);
-  const activeCollection = collections.find((c) => c.id === view.collectionID);
-
-  if (activeCollection === undefined) {
-    throw new Error(
-      `Active collection not found. Expected to find collectionID=${view.collectionID} in viewID=${view.id}`
-    );
-  }
 
   return (
     <CollectionTabsView
       collections={collections}
-      activeCollectionID={activeCollection.id}
+      activeCollectionID={activeCollectionID}
     />
   );
 }
@@ -56,11 +42,6 @@ const CollectionTabsView = memo(function CollectionTabsView(
   return (
     <View style={styles.collectionTabsRoot}>
       <Row spacing={2}>
-        <PressableHighlight
-          style={[styles.collectionItem, styles.addCollectionItem]}
-        >
-          <Icon name="Plus" color="muted" />
-        </PressableHighlight>
         {collections.map((collection) => (
           <CollectionItem
             active={collection.id === activeCollectionID}
@@ -71,6 +52,11 @@ const CollectionTabsView = memo(function CollectionTabsView(
             }}
           />
         ))}
+        <PressableHighlight
+          style={[styles.collectionItem, styles.addCollectionItem]}
+        >
+          <Icon name="Plus" color="muted" />
+        </PressableHighlight>
       </Row>
     </View>
   );

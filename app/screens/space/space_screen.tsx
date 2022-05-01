@@ -1,6 +1,5 @@
 import React, {
   useCallback,
-  createContext,
   useContext,
   useMemo,
   memo,
@@ -17,45 +16,32 @@ import {
 import { useCreateDocumentMutation } from "../../store/mutations";
 import { Slide } from "../../components/slide";
 import { OrganizeView } from "../../core/organize/organize_view";
-import { ViewList } from "../../core/views/view_list";
 import { AutoSizer } from "../../lib/autosizer";
-import { ViewID, ViewType } from "../../../models/views";
+import { ViewID } from "../../../models/views";
 import { ListViewView } from "../../core/list_view/list_view_view";
-import { atom, useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Document, DocumentID } from "../../../models/documents";
 import { CollectionID } from "../../../models/collections";
 import { SpaceID } from "../../../models/spaces";
 import { Screen } from "../../components/screen";
-import { Row } from "../../components/row";
-import { BackButton } from "../../components/back_button";
-import { Text } from "../../components/text";
-import { IconButton } from "../../components/icon_button";
-import { Button } from "../../components/button";
+import { matchPathname } from "../../../lib/pathname";
+import { theme } from "../../components/theme";
+import { SpaceScreenContext } from "./space_screen_context";
+import { SpaceScreenHeader } from "./space_screen_header";
+import { SpaceScreenViewBar } from "./space_screen_view_bar";
+import {
+  modeState,
+  openDocumentState,
+  selectedDocumentsState,
+  sidePanelState,
+} from "./space_screen_state";
 import { tokens } from "../../components/tokens";
-import { isEmpty } from "../../../lib/lang_utils";
-import { CollectionsTabs } from "../../core/collections/collection_tabs";
 import { Delay } from "../../components/delay";
 import { Fade } from "../../components/fade";
-import { ViewButton } from "../../core/views/view_button";
-import { matchPathname } from "../../../lib/pathname";
-import { DocumentDetailsView } from "./document_details_view";
-import { theme } from "../../components/theme";
-import { Dialog } from "../../components/dialog";
-
-interface SpaceScreenContext {
-  spaceID: SpaceID;
-  viewID: ViewID;
-  collectionID: CollectionID;
-}
+import { ViewList } from "../../core/views/view_list";
 
 const VIEWS_MENU_WIDTH = 240;
 const ORGANIZE_VIEW_WIDTH = 360;
-
-const SpaceScreenContext = createContext<SpaceScreenContext>({
-  spaceID: "spc",
-  viewID: "viw",
-  collectionID: "col",
-});
 
 export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
   const { params } = props;
@@ -84,209 +70,10 @@ export function SpaceScreen(props: ScreenProps<ScreenName.Space>): JSX.Element {
     <SpaceScreenContext.Provider value={context}>
       <Screen>
         <SpaceScreenHeader />
-        <CollectionsTabs viewID={viewID} spaceID={spaceID} />
-        <ViewSettings />
+        <SpaceScreenViewBar />
         <MainContent />
       </Screen>
     </SpaceScreenContext.Provider>
-  );
-}
-
-type SidePanelState = "views" | "organize" | null;
-
-const sidePanelState = atom<SidePanelState>({
-  key: "SpaceScreen_SidePanel",
-  default: null,
-});
-
-type ModeState = "edit" | "select";
-
-const modeState = atom<ModeState>({
-  key: "SpaceScreen_Mode",
-  default: "edit",
-});
-
-type SelectedDocumentsState = DocumentID[];
-
-const selectedDocumentsState = atom<SelectedDocumentsState>({
-  key: "SpaceScreen_SelectedDocuments",
-  default: [],
-});
-
-type OpenDocumentState = DocumentID | null;
-
-const openDocumentState = atom<OpenDocumentState>({
-  key: "SpaceScreen_OpenDocument",
-  default: null,
-});
-
-const SpaceScreenHeader = memo(function SpaceScreenHeader(): JSX.Element {
-  const navigation = useNavigation();
-  const context = useContext(SpaceScreenContext);
-  const { spaceID } = context;
-  const space = useSpaceQuery(spaceID);
-
-  const handlePressBack = useCallback(() => {
-    navigation.back();
-  }, [navigation]);
-
-  return (
-    <View style={styles.header}>
-      <Row justifyContent="space-between">
-        <Row spacing={8} alignItems="center">
-          <BackButton onPress={handlePressBack} />
-          <Text size="lg" weight="bold">
-            {space.name}
-          </Text>
-        </Row>
-        <TopMenu />
-      </Row>
-    </View>
-  );
-});
-
-function TopMenu() {
-  return (
-    <Row spacing={4}>
-      <IconButton icon="Users" title="Share" />
-      <IconButton icon="Bolt" title="Automate" />
-      <IconButton icon="Help" title="Help" />
-      <IconButton icon="DotsInCircle" title="More" />
-    </Row>
-  );
-}
-
-function ViewSettings() {
-  const { viewID } = useContext(SpaceScreenContext);
-  const view = useViewQuery(viewID);
-  const [mode, setMode] = useRecoilState(modeState);
-  const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
-  const [, setOpenDocument] = useRecoilState(openDocumentState);
-
-  const handleToggleView = useCallback(() => {
-    if (sidePanel !== "views") {
-      setSidePanel("views");
-    } else {
-      setSidePanel(null);
-    }
-
-    setMode("edit");
-    setOpenDocument(null);
-  }, [sidePanel, setSidePanel, setMode, setOpenDocument]);
-
-  return (
-    <ViewSettingsView
-      viewID={view.id}
-      name={view.name}
-      type={view.type}
-      onToggleView={handleToggleView}
-      mode={mode}
-    />
-  );
-}
-
-interface ViewSettingsViewProps {
-  onToggleView: () => void;
-  mode: ModeState;
-  viewID: ViewID;
-  name: string;
-  type: ViewType;
-}
-
-const ViewSettingsView = memo(function ViewSettingsView(
-  props: ViewSettingsViewProps
-) {
-  const { onToggleView, mode, viewID, name, type } = props;
-
-  return (
-    <View style={styles.viewSettingsRoot}>
-      <Row justifyContent="space-between">
-        <ViewButton
-          viewID={viewID}
-          name={name}
-          type={type}
-          onPress={onToggleView}
-        />
-        {mode === "edit" ? <ViewMenu /> : <SelectMenu />}
-      </Row>
-    </View>
-  );
-});
-
-function SelectMenu() {
-  const [, setMode] = useRecoilState(modeState);
-  const [selectedDocumentIDs, setSelectedDocuments] = useRecoilState(
-    selectedDocumentsState
-  );
-
-  const handleToggleSelect = useCallback(() => {
-    setMode("edit");
-    setSelectedDocuments([]);
-  }, [setMode, setSelectedDocuments]);
-
-  if (isEmpty(selectedDocumentIDs)) {
-    return (
-      <Row spacing={4} alignItems="center">
-        <Text color="muted">Press on documents to select</Text>
-        <Button onPress={handleToggleSelect} title="Cancel" />
-      </Row>
-    );
-  }
-
-  return (
-    <Row spacing={4} alignItems="center">
-      <Text weight="bold">{`${selectedDocumentIDs.length} Selected`}</Text>
-      <Button title="Share" />
-      <Button title="Copy" />
-      <Button title="Delete" color="error" />
-      <Button onPress={handleToggleSelect} title="Cancel" />
-    </Row>
-  );
-}
-
-function ViewMenu() {
-  const [sidePanel, setSidePanel] = useRecoilState(sidePanelState);
-  const [, setMode] = useRecoilState(modeState);
-  const [, setOpenDocument] = useRecoilState(openDocumentState);
-
-  const handleToggleOrganize = useCallback(() => {
-    if (sidePanel !== "organize") {
-      setSidePanel("organize");
-    } else {
-      setSidePanel(null);
-    }
-
-    setOpenDocument(null);
-  }, [sidePanel, setSidePanel, setOpenDocument]);
-
-  const handleToggleSelect = useCallback(() => {
-    setMode("select");
-    setOpenDocument(null);
-  }, [setMode, setOpenDocument]);
-
-  return (
-    <Row spacing={4}>
-      <Button icon="Search" title="Search" appearance="outline" />
-      <Button
-        icon="Organize"
-        onPress={handleToggleOrganize}
-        appearance="outline"
-        title="Organize"
-      />
-      <Button
-        icon="Select"
-        onPress={handleToggleSelect}
-        appearance="outline"
-        title="Select"
-      />
-      <Button
-        weight="bold"
-        appearance="outline"
-        color="primary"
-        icon="Plus"
-        title="Add document"
-      />
-    </Row>
   );
 }
 
@@ -380,13 +167,6 @@ function MainContent() {
           collectionID={collectionID}
         />
       </Slide>
-      <Dialog visible={openDocument !== null}>
-        <View>
-          {openDocument && (
-            <DocumentDetailsDialogContent documentID={openDocument} />
-          )}
-        </View>
-      </Dialog>
     </View>
   );
 }
@@ -396,7 +176,7 @@ interface ViewListContainerProps {
   viewID: ViewID;
 }
 
-const ViewListContainer = memo(function ViewListContainer(
+export const ViewListContainer = memo(function ViewListContainer(
   props: ViewListContainerProps
 ) {
   const { spaceID, viewID } = props;
@@ -450,23 +230,6 @@ const OrganizeViewContainer = memo(function OrganizeViewContainer(
   );
 });
 
-interface DocumentDetailsDialogContentProps {
-  documentID: DocumentID;
-}
-
-const DocumentDetailsDialogContent = memo(function DocumentDetailsDialogContent(
-  props: DocumentDetailsDialogContentProps
-) {
-  const { documentID } = props;
-  const [, setOpenDocument] = useRecoilState(openDocumentState);
-
-  const handleClose = useCallback(() => {
-    setOpenDocument(null);
-  }, [setOpenDocument]);
-
-  return <DocumentDetailsView onClose={handleClose} documentID={documentID} />;
-});
-
 const styles = StyleSheet.create({
   mainContentRoot: {
     flex: 1,
@@ -478,7 +241,6 @@ const styles = StyleSheet.create({
     borderColor: theme.neutral.light,
   },
   viewContainer: {
-    paddingTop: 16,
     flex: 1,
   },
   rightPanel: {
@@ -486,15 +248,5 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderColor: theme.neutral.light,
     backgroundColor: theme.base.default,
-  },
-  header: {
-    height: 56,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  viewSettingsRoot: {
-    paddingVertical: 4,
-    zIndex: 1,
-    ...theme.elevation.level1,
   },
 });

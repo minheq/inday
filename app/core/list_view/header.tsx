@@ -29,6 +29,7 @@ import { useUpdateListViewFieldConfigMutation } from "../../store/mutations";
 import { PressableHighlight } from "../../components/pressable_highlight";
 import { Popover } from "../../components/popover";
 import { theme } from "../../components/theme";
+import { Spacer } from "../../components/spacer";
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -112,10 +113,13 @@ export const HeaderCell = memo(function HeaderCell(
             style={[styles.headerCell, primary && styles.primaryCell]}
           >
             <ContextMenuView style={styles.menuView} menuItems={menuItems}>
-              <Row spacing={4}>
+              <View style={styles.headerCellTitle}>
                 <Icon name={getFieldIcon(field.type)} />
-                <Text weight="bold">{field.name}</Text>
-              </Row>
+                <Spacer direction="row" size={4} />
+                <Text color="muted" size="sm">
+                  {field.name}
+                </Text>
+              </View>
               {(resizeFieldID === fieldID ||
                 (resizeFieldID === null && hovered)) && (
                 <Pressable
@@ -181,12 +185,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderBottomWidth: 1,
     borderColor: theme.neutral.light,
+    backgroundColor: theme.neutral.lightest,
   },
   menuView: {
     paddingHorizontal: 8,
   },
   primaryCell: {
     borderRightWidth: 2,
+  },
+  headerCellTitle: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   resizeHandler: {
     position: "absolute",

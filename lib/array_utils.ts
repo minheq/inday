@@ -292,6 +292,6 @@ export function isEqualBy<T>(
   return intersection.length === a.length;
 }
 
-export function isArray<T>(arg: any): arg is T[] {
+export function isArray<T>(arg: unknown): arg is T[] {
   return Array.isArray(arg);
 }
