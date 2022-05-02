@@ -1,23 +1,23 @@
 import { mergeObjects } from "../../../lib/object_utils";
 import { Field, FieldValue, stringifyFieldValue } from "../../../models/fields";
 
-type CollapseGroupNode = [
+export interface CollapsedGroupsCache {
+  set: (node: CollapsedGroupNode[]) => CollapsedGroupsCache;
+  get: (field: Field, value: FieldValue) => CollapsedGroupsNode;
+}
+
+type CollapsedGroupNode = [
   field: Field,
   value: FieldValue,
   collapsed: boolean,
-  children?: CollapseGroupNode[] | undefined
+  children?: CollapsedGroupNode[] | undefined
 ];
 
-export interface CollapsedGroupsCache {
-  set: (node: CollapseGroupNode[]) => CollapsedGroupsCache;
-  get: (field: Field, value: FieldValue) => CollapsedGroupNode;
-}
-
-interface CollapsedGroupNode {
+interface CollapsedGroupsNode {
   collapsed: boolean;
   children: CollapsedGroupsCache | undefined;
   /** Gets child collapse groups */
-  get: (field: Field, value: FieldValue) => CollapsedGroupNode;
+  get: (field: Field, value: FieldValue) => CollapsedGroupsNode;
 }
 
 /**
@@ -25,7 +25,7 @@ interface CollapsedGroupNode {
  * Map/objects in creating tree because field values vary in types.
  */
 export function CollapsedGroupsCache(
-  nodes: CollapseGroupNode[]
+  nodes: CollapsedGroupNode[]
 ): CollapsedGroupsCache {
   const tree: CollapsedFieldValueTree = buildCollapsedFieldValuesTree(nodes);
 
@@ -36,7 +36,7 @@ function buildCollapseGroupObject(
   tree: CollapsedFieldValueTree
 ): CollapsedGroupsCache {
   return {
-    set: (nodes: CollapseGroupNode[]) => {
+    set: (nodes: CollapsedGroupNode[]) => {
       const nextTree = updateCollapsedFieldValueTree(tree, nodes);
 
       return buildCollapseGroupObject(nextTree);
@@ -45,14 +45,14 @@ function buildCollapseGroupObject(
       const key = stringifyFieldValue(field, value);
       const node = tree[key];
 
-      return buildCollapseGroupNodeFromNode(node);
+      return buildCollapsedGroupsNode(node);
     },
   };
 }
 
-function buildCollapseGroupNodeFromNode(
+function buildCollapsedGroupsNode(
   node: CollapsedFieldValueNode
-): CollapsedGroupNode {
+): CollapsedGroupsNode {
   const children = node.children;
   return {
     collapsed: node.collapsed,
@@ -61,9 +61,10 @@ function buildCollapseGroupNodeFromNode(
       if (!children) {
         throw new Error("Failed to build a group tree");
       }
+
       const key = stringifyFieldValue(field, value);
       const n = children[key];
-      return buildCollapseGroupNodeFromNode(n);
+      return buildCollapsedGroupsNode(n);
     },
   };
 }
@@ -79,7 +80,7 @@ interface CollapsedFieldValueNode {
 
 export function updateCollapsedFieldValueTree(
   prevTree: CollapsedFieldValueTree,
-  nodes: CollapseGroupNode[]
+  nodes: CollapsedGroupNode[]
 ): CollapsedFieldValueTree {
   const nextTree = buildCollapsedFieldValuesTree(nodes);
 
@@ -88,10 +89,10 @@ export function updateCollapsedFieldValueTree(
 
 export function buildCollapsedFieldValuesTree(nodes: undefined): undefined;
 export function buildCollapsedFieldValuesTree(
-  nodes: CollapseGroupNode[]
+  nodes: CollapsedGroupNode[]
 ): CollapsedFieldValueTree;
 export function buildCollapsedFieldValuesTree(
-  nodes: CollapseGroupNode[] | undefined
+  nodes: CollapsedGroupNode[] | undefined
 ): CollapsedFieldValueTree | undefined {
   const obj: CollapsedFieldValueTree = {};
 
