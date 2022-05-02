@@ -7,7 +7,7 @@ import {
   makeDocumentNodes,
   SortGetters,
 } from "../../../models/sorts";
-import { CollapsedGroups } from "./list_view_collapsed_groups";
+import { CollapsedGroupsCache } from "./collapsed_groups_cache";
 
 export type ListViewDocumentNodes =
   | GroupedListViewDocumentNode[]
@@ -17,7 +17,7 @@ export function getListViewDocumentNodes(
   documents: Document[],
   groups: Group[],
   sortGetters: SortGetters,
-  collapsedGroups?: CollapsedGroups
+  collapsedGroups?: CollapsedGroupsCache
 ): ListViewDocumentNodes {
   return isNotEmpty(groups)
     ? getGroupedDocumentNodes(documents, groups, sortGetters, collapsedGroups)
@@ -84,7 +84,7 @@ function getGroupedDocumentNodes(
   documents: Document[],
   groups: Group[],
   sortGetters: SortGetters,
-  collapsedGroups: CollapsedGroups | undefined
+  collapsedGroups: CollapsedGroupsCache | undefined
 ): GroupedListViewDocumentNode[] {
   const nodes = makeDocumentNodes(groups, documents, sortGetters);
 
@@ -94,7 +94,7 @@ function getGroupedDocumentNodes(
 function toGroupedDocumentNode(
   nodes: DocumentNode[],
   prevPath: number[],
-  collapsedGroups: CollapsedGroups | undefined
+  collapsedGroups: CollapsedGroupsCache | undefined
 ): GroupedListViewDocumentNode[] {
   let groups: GroupedListViewDocumentNode[] = [];
 

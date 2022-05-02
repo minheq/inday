@@ -1,17 +1,17 @@
 import { makeField } from "../../../models/factory";
 import { FieldType } from "../../../models/fields";
 import {
-  buildCollapseObjectTree,
-  CollapsedGroups,
-} from "./list_view_collapsed_groups";
+  buildCollapsedFieldValuesTree,
+  CollapsedGroupsCache,
+} from "./collapsed_groups_cache";
 
-describe("CollapsedGroups", () => {
+describe("CollapsedGroupsCache", () => {
   const textField = makeField({ type: FieldType.SingleLineText });
   const numberField = makeField({ type: FieldType.Number });
 
-  describe("buildCollapseObjectTree", () => {
+  describe("buildCollapsedFieldValuesTree", () => {
     test("should build correct tree", () => {
-      const tree = buildCollapseObjectTree([
+      const tree = buildCollapsedFieldValuesTree([
         [textField, "a", true, [[numberField, 2, true]]],
         [textField, "b", false, [[numberField, 1, true]]],
         [
@@ -58,19 +58,11 @@ describe("CollapsedGroups", () => {
   });
 
   describe("using set", () => {
-    const cg = CollapsedGroups([
-      [textField, "a", true, [[numberField, 2, true]]],
-      [textField, "b", false, [[numberField, 1, true]]],
-      [
-        textField,
-        "c",
-        false,
-        [
-          [numberField, 1, false],
-          [numberField, 2, true],
-        ],
-      ],
-    ]);
+    let cg = CollapsedGroupsCache([]);
+    cg = cg.set([[textField, "a", true, [[numberField, 2, true]]]]);
+    cg = cg.set([[textField, "b", false, [[numberField, 1, true]]]]);
+    cg = cg.set([[textField, "c", false, [[numberField, 1, false]]]]);
+    cg = cg.set([[textField, "c", false, [[numberField, 2, true]]]]);
 
     test("a", () => {
       const collapsedGroup = cg.get(textField, "a");
