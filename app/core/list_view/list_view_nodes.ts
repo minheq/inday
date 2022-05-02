@@ -7,6 +7,7 @@ import {
   makeDocumentNodes,
   SortGetters,
 } from "../../../models/sorts";
+import { CollapsedGroups } from "./list_view_collapsed_groups";
 
 export type ListViewDocumentNodes =
   | GroupedListViewDocumentNode[]
@@ -15,10 +16,11 @@ export type ListViewDocumentNodes =
 export function getListViewDocumentNodes(
   documents: Document[],
   groups: Group[],
-  sortGetters: SortGetters
+  sortGetters: SortGetters,
+  collapsedGroups?: CollapsedGroups
 ): ListViewDocumentNodes {
   return isNotEmpty(groups)
-    ? getGroupedDocumentNodes(documents, groups, sortGetters)
+    ? getGroupedDocumentNodes(documents, groups, sortGetters, collapsedGroups)
     : getFlatDocumentNodes(documents);
 }
 
@@ -81,28 +83,32 @@ export type GroupedListViewDocumentNode =
 function getGroupedDocumentNodes(
   documents: Document[],
   groups: Group[],
-  sortGetters: SortGetters
+  sortGetters: SortGetters,
+  collapsedGroups: CollapsedGroups | undefined
 ): GroupedListViewDocumentNode[] {
   const nodes = makeDocumentNodes(groups, documents, sortGetters);
 
-  return toGroupedDocumentNode(nodes, []);
+  return toGroupedDocumentNode(nodes, [], collapsedGroups);
 }
 
 function toGroupedDocumentNode(
   nodes: DocumentNode[],
-  prevPath: number[]
+  prevPath: number[],
+  collapsedGroups: CollapsedGroups | undefined
 ): GroupedListViewDocumentNode[] {
   let groups: GroupedListViewDocumentNode[] = [];
 
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     const path = [...prevPath, i];
+    const collapsibleGroup =
+      collapsedGroups && collapsedGroups.get(node.field, node.value);
 
     if (node.type === "leaf") {
       groups = groups.concat({
         type: "leaf",
         path,
-        collapsed: false,
+        collapsed: !!collapsibleGroup?.collapsed,
         field: node.field,
         value: node.value,
         children: node.children,
@@ -111,10 +117,14 @@ function toGroupedDocumentNode(
       groups = groups.concat({
         type: "ancestor",
         path,
-        collapsed: false,
+        collapsed: !!collapsibleGroup?.collapsed,
         field: node.field,
         value: node.value,
-        children: toGroupedDocumentNode(node.children, path),
+        children: toGroupedDocumentNode(
+          node.children,
+          path,
+          collapsibleGroup?.children
+        ),
       });
     }
   }

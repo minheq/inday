@@ -13,7 +13,6 @@ import {
 
 /**
  * Transforms nodes to grid groups
- * @param nodes
  */
 export function useListViewGridGroups(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[]

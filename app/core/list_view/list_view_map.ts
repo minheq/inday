@@ -267,6 +267,8 @@ interface ListViewGroupRow {
 
 /**
  * Gets grouped document tree node and transforms into grid rows data
+ *
+ * REVIEW: is this function necessary? Might as well use nodes
  */
 export function getListViewGroupRows(
   nodes: GroupedListViewDocumentNode[]
