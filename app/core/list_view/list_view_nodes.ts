@@ -37,13 +37,14 @@ export function isGroupedListViewDocumentNodes(
  */
 export interface FlatListViewDocumentNode {
   type: "flat";
+  path: number[];
   children: Document[];
 }
 
 function getFlatDocumentNodes(
   documents: Document[]
 ): FlatListViewDocumentNode[] {
-  return [{ type: "flat", children: documents }];
+  return [{ type: "flat", path: [0], children: documents }];
 }
 
 /**
@@ -52,6 +53,7 @@ function getFlatDocumentNodes(
 interface LeafGroupedListViewDocumentNode {
   type: "leaf";
   collapsed: boolean;
+  path: number[];
   field: Field;
   value: FieldValue;
   children: Document[];
@@ -63,6 +65,7 @@ interface LeafGroupedListViewDocumentNode {
 interface AncestorGroupedListViewDocumentNode {
   type: "ancestor";
   collapsed: boolean;
+  path: number[];
   field: Field;
   value: FieldValue;
   children: GroupedListViewDocumentNode[];
@@ -82,18 +85,23 @@ function getGroupedDocumentNodes(
 ): GroupedListViewDocumentNode[] {
   const nodes = makeDocumentNodes(groups, documents, sortGetters);
 
-  return toGroupedDocumentNode(nodes);
+  return toGroupedDocumentNode(nodes, []);
 }
 
 function toGroupedDocumentNode(
-  nodes: DocumentNode[]
+  nodes: DocumentNode[],
+  prevPath: number[]
 ): GroupedListViewDocumentNode[] {
   let groups: GroupedListViewDocumentNode[] = [];
 
-  for (const node of nodes) {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    const path = [...prevPath, i];
+
     if (node.type === "leaf") {
       groups = groups.concat({
         type: "leaf",
+        path,
         collapsed: false,
         field: node.field,
         value: node.value,
@@ -102,10 +110,11 @@ function toGroupedDocumentNode(
     } else {
       groups = groups.concat({
         type: "ancestor",
+        path,
         collapsed: false,
         field: node.field,
         value: node.value,
-        children: toGroupedDocumentNode(node.children),
+        children: toGroupedDocumentNode(node.children, path),
       });
     }
   }

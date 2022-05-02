@@ -8,6 +8,7 @@ describe("getListViewGroupRows", () => {
     test("expanded", () => {
       const nodes: ListViewDocumentNodes = [
         {
+          path: [0],
           type: "leaf",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group1",
@@ -15,6 +16,7 @@ describe("getListViewGroupRows", () => {
           children: [makeDocument({}), makeDocument({})],
         },
         {
+          path: [1],
           type: "leaf",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group2",
@@ -23,7 +25,7 @@ describe("getListViewGroupRows", () => {
         },
       ];
 
-      const result = getListViewGroupRows(nodes, []);
+      const result = getListViewGroupRows(nodes);
 
       expect(result[0].path).toEqual([0]);
       expect(result[0].collapsed).toEqual(false);
@@ -36,6 +38,7 @@ describe("getListViewGroupRows", () => {
     test("1 group collapsed", () => {
       const nodes: ListViewDocumentNodes = [
         {
+          path: [0],
           type: "leaf",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group1",
@@ -43,6 +46,7 @@ describe("getListViewGroupRows", () => {
           children: [makeDocument({}), makeDocument({})],
         },
         {
+          path: [1],
           type: "leaf",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group2",
@@ -51,7 +55,7 @@ describe("getListViewGroupRows", () => {
         },
       ];
 
-      const result = getListViewGroupRows(nodes, []);
+      const result = getListViewGroupRows(nodes);
 
       expect(result[0].path).toEqual([0]);
       expect(result[0].collapsed).toEqual(true);
@@ -66,12 +70,14 @@ describe("getListViewGroupRows", () => {
     test("expanded", () => {
       const nodes: ListViewDocumentNodes = [
         {
+          path: [0],
           type: "ancestor",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group1",
           collapsed: false,
           children: [
             {
+              path: [0, 0],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -81,12 +87,14 @@ describe("getListViewGroupRows", () => {
           ],
         },
         {
+          path: [1],
           type: "ancestor",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group2",
           collapsed: false,
           children: [
             {
+              path: [1, 0],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -96,7 +104,7 @@ describe("getListViewGroupRows", () => {
           ],
         },
       ];
-      const result = getListViewGroupRows(nodes, []);
+      const result = getListViewGroupRows(nodes);
 
       expect(result[0].path).toEqual([0]);
       expect(result[0].collapsed).toEqual(false);
@@ -115,12 +123,14 @@ describe("getListViewGroupRows", () => {
     test("parent and child group collapsed", () => {
       const nodes: ListViewDocumentNodes = [
         {
+          path: [0],
           type: "ancestor",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group1",
           collapsed: true,
           children: [
             {
+              path: [0, 0],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -130,12 +140,14 @@ describe("getListViewGroupRows", () => {
           ],
         },
         {
+          path: [1],
           type: "ancestor",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group2",
           collapsed: false,
           children: [
             {
+              path: [1, 0],
               type: "leaf",
               collapsed: true,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -145,7 +157,7 @@ describe("getListViewGroupRows", () => {
           ],
         },
       ];
-      const result = getListViewGroupRows(nodes, []);
+      const result = getListViewGroupRows(nodes);
 
       expect(result[0].path).toEqual([0]);
       expect(result[0].collapsed).toEqual(true);
@@ -171,11 +183,11 @@ describe("getListViewLeafRows", () => {
     const result = getListViewLeafRows(
       [
         {
+          path: [0],
           type: "flat",
           children: [makeDocument({}), makeDocument({})],
         },
       ],
-      [],
       0
     );
 
@@ -188,6 +200,7 @@ describe("getListViewLeafRows", () => {
   describe("grouped 1 level", () => {
     const nodes: ListViewDocumentNodes = [
       {
+        path: [0],
         type: "leaf",
         field: makeField({ type: FieldType.SingleLineText }),
         value: "group1",
@@ -195,6 +208,7 @@ describe("getListViewLeafRows", () => {
         children: [makeDocument({}), makeDocument({})],
       },
       {
+        path: [1],
         type: "leaf",
         field: makeField({ type: FieldType.SingleLineText }),
         value: "group2",
@@ -204,7 +218,7 @@ describe("getListViewLeafRows", () => {
     ];
 
     test("expanded", () => {
-      const result = getListViewLeafRows(nodes, [], 0);
+      const result = getListViewLeafRows(nodes, 0);
 
       expect(result[0].path).toEqual([0]);
       expect(result[0].index).toEqual(0);
@@ -221,12 +235,14 @@ describe("getListViewLeafRows", () => {
     test("expanded", () => {
       const nodes: ListViewDocumentNodes = [
         {
+          path: [0],
           type: "ancestor",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group1",
           collapsed: false,
           children: [
             {
+              path: [0, 0],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -236,12 +252,14 @@ describe("getListViewLeafRows", () => {
           ],
         },
         {
+          path: [1],
           type: "ancestor",
           collapsed: false,
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group2",
           children: [
             {
+              path: [1, 0],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -249,6 +267,7 @@ describe("getListViewLeafRows", () => {
               children: [makeDocument({}), makeDocument({})],
             },
             {
+              path: [1, 1],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -258,7 +277,7 @@ describe("getListViewLeafRows", () => {
           ],
         },
       ];
-      const result = getListViewLeafRows(nodes, [], 0);
+      const result = getListViewLeafRows(nodes, 0);
 
       expect(result[0].path).toEqual([0, 0]);
       expect(result[0].index).toEqual(0);
@@ -277,12 +296,14 @@ describe("getListViewLeafRows", () => {
     test("parent and child group collapsed", () => {
       const nodes: ListViewDocumentNodes = [
         {
+          path: [0],
           type: "ancestor",
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group1",
           collapsed: true,
           children: [
             {
+              path: [0, 1],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -292,12 +313,14 @@ describe("getListViewLeafRows", () => {
           ],
         },
         {
+          path: [1],
           type: "ancestor",
           collapsed: false,
           field: makeField({ type: FieldType.SingleLineText }),
           value: "group2",
           children: [
             {
+              path: [1, 0],
               type: "leaf",
               collapsed: true,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -305,6 +328,7 @@ describe("getListViewLeafRows", () => {
               children: [makeDocument({}), makeDocument({})],
             },
             {
+              path: [1, 1],
               type: "leaf",
               collapsed: false,
               field: makeField({ type: FieldType.SingleLineText }),
@@ -314,7 +338,7 @@ describe("getListViewLeafRows", () => {
           ],
         },
       ];
-      const result = getListViewLeafRows(nodes, [], 0);
+      const result = getListViewLeafRows(nodes, 0);
 
       expect(result[0].path).toEqual([1, 1]);
       expect(result[0].index).toEqual(0);

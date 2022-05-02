@@ -118,11 +118,13 @@ describe("getListViewDocumentNodes", () => {
     );
 
     expect(result[0]).toMatchObject({
+      path: [0],
       type: "leaf",
       value: 1,
       children: [document3, document4],
     });
     expect(result[1]).toMatchObject({
+      path: [1],
       type: "leaf",
       value: 2,
       children: [document1, document2],
@@ -136,15 +138,6 @@ describe("getListViewDocumentNodes", () => {
     );
     const group2 = makeGroup({}, { fieldID: textField.id, order: "ascending" });
 
-    // const collapsedGroups = {
-    //   [numberField.id]: {
-    //     values: [1],
-    //     fields: {
-    //       [textField.id]: ["AWord"],
-    //     },
-    //   },
-    // };
-
     const result = getListViewDocumentNodes(
       [document1, document2, document3, document4],
       [group1, group2],
@@ -154,13 +147,16 @@ describe("getListViewDocumentNodes", () => {
     expect(result[0]).toMatchObject({
       type: "ancestor",
       value: 1,
+      path: [0],
       children: [
         {
+          path: [0, 0],
           type: "leaf",
           value: "AWord",
           children: [document4],
         },
         {
+          path: [0, 1],
           type: "leaf",
           value: "BWord",
           children: [document3],
@@ -171,13 +167,16 @@ describe("getListViewDocumentNodes", () => {
     expect(result[1]).toMatchObject({
       type: "ancestor",
       value: 2,
+      path: [1],
       children: [
         {
+          path: [1, 0],
           type: "leaf",
           value: "AWord",
           children: [document1],
         },
         {
+          path: [1, 1],
           type: "leaf",
           value: "BWord",
           children: [document2],

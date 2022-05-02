@@ -166,6 +166,9 @@ interface LeafDocumentNode {
 
 export type DocumentNode = AncestorDocumentNode | LeafDocumentNode;
 
+/**
+ * Creates a tree of documents based on sorts.
+ */
 export function makeDocumentNodes(
   sorts: SortConfig[],
   documents: Document[],

@@ -55,7 +55,7 @@ export function useListViewMap(
   }, [nodes]);
   const groupRows = useMemo((): ListViewGroupRow[] => {
     if (isGroupedListViewDocumentNodes(nodes)) {
-      return getListViewGroupRows(nodes, []);
+      return getListViewGroupRows(nodes);
     }
     return [];
   }, [nodes]);
@@ -66,7 +66,7 @@ export function useListViewMap(
     return getGroupRowCellCache(groupRows);
   }, [groupRows]);
   const leafRows = useMemo(
-    (): ListViewLeafRow[] => getListViewLeafRows(nodes, [], 0),
+    (): ListViewLeafRow[] => getListViewLeafRows(nodes, 0),
     [nodes]
   );
   const leafRowCache = useMemo(
@@ -134,26 +134,24 @@ interface ListViewLeafRow extends LeafRow {
 
 export function getListViewLeafRows(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[],
-  prevPath: number[],
   prevIndex: number
 ): ListViewLeafRow[] {
   let rows: ListViewLeafRow[] = [];
   let currentIndex = prevIndex;
 
   for (let i = 0; i < nodes.length; i++) {
-    const group = nodes[i];
-    const path = [...prevPath, i];
+    const node = nodes[i];
 
-    if (group.type !== "flat" && group.collapsed) {
+    if (node.type !== "flat" && node.collapsed) {
       continue;
     }
 
-    if (group.type === "leaf" || group.type === "flat") {
-      for (let j = 0; j < group.children.length; j++) {
-        const document = group.children[j];
+    if (node.type === "leaf" || node.type === "flat") {
+      for (let j = 0; j < node.children.length; j++) {
+        const document = node.children[j];
 
         rows = rows.concat({
-          path,
+          path: node.path,
           row: j + 1,
           documentID: document.id,
           index: currentIndex,
@@ -162,8 +160,8 @@ export function getListViewLeafRows(
         currentIndex++;
       }
     } else {
-      const { children } = group;
-      const groupRows = getListViewLeafRows(children, path, currentIndex);
+      const { children } = node;
+      const groupRows = getListViewLeafRows(children, currentIndex);
 
       if (last(groupRows)) {
         currentIndex = last(groupRows).index + 1;
@@ -271,31 +269,29 @@ interface ListViewGroupRow {
  * Gets grouped document tree node and transforms into grid rows data
  */
 export function getListViewGroupRows(
-  nodes: GroupedListViewDocumentNode[],
-  prevPath: number[]
+  nodes: GroupedListViewDocumentNode[]
 ): ListViewGroupRow[] {
   let rows: ListViewGroupRow[] = [];
 
   for (let i = 0; i < nodes.length; i++) {
-    const group = nodes[i];
-    const path = [...prevPath, i];
+    const node = nodes[i];
 
-    if (group.type === "leaf") {
+    if (node.type === "leaf") {
       rows = rows.concat({
-        path,
-        field: group.field,
-        value: group.value,
-        collapsed: group.collapsed,
+        path: node.path,
+        field: node.field,
+        value: node.value,
+        collapsed: node.collapsed,
       });
     } else {
-      const { children } = group;
-      const groupRows = getListViewGroupRows(children, path);
+      const { children } = node;
+      const groupRows = getListViewGroupRows(children);
 
       rows = rows.concat({
-        path,
-        field: group.field,
-        value: group.value,
-        collapsed: group.collapsed,
+        path: node.path,
+        field: node.field,
+        value: node.value,
+        collapsed: node.collapsed,
       });
       rows = rows.concat(groupRows);
     }
