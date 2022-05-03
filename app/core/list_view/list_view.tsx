@@ -59,13 +59,18 @@ import {
   useViewGroupsQuery,
   useViewSortsQuery,
 } from "../../store/queries";
-import { FlatObject } from "../../../lib/flat_object";
 import { useMemoCompare } from "../../hooks/use_memo_compare";
 import {
   getListViewDocumentNodes,
   ListViewDocumentNodes,
 } from "./list_view_nodes";
 import { Field } from "../../../models/fields";
+import {
+  CollapsedGroupNode,
+  CollapsedGroupsCache,
+} from "./collapsed_groups_cache";
+import { splitFirst } from "../../../lib/array_utils";
+import { isEmpty } from "../../../lib/lang_utils";
 
 export type ViewMode = "edit" | "select";
 
@@ -78,10 +83,8 @@ interface ListViewProps {
   onAddDocument: () => Document;
 }
 
-export type CollapsedGroups = FlatObject<number, boolean>;
-
 type CollapsedGroupsByViewID = {
-  [viewID: string]: CollapsedGroups;
+  [viewID: string]: CollapsedGroupsCache;
 };
 
 export const collapsedGroupsState = atom<CollapsedGroupsByViewID>({
@@ -109,8 +112,6 @@ export function ListView(props: ListViewProps): JSX.Element {
   const fixedFieldCount = view.fixedFieldCount;
   const fields = useSortedFieldsWithListViewConfigQuery(viewID);
   const nodes = useListViewDocumentNodes(viewID);
-  const collapsedGroupsByViewID = useRecoilValue(collapsedGroupsState);
-  const collapsedGroups = collapsedGroupsByViewID[viewID];
 
   // Ensure these 2 functions get collapsedGroups
   const listViewMap = useListViewMap(nodes, fields);
@@ -123,7 +124,7 @@ export function ListView(props: ListViewProps): JSX.Element {
   );
   const prevActiveCell = usePrevious(activeCell);
   const gridRef = useRef<GridRendererRef>(null);
-  const handleToggleCollapseGroup = useToggleCollapseGroup(viewID);
+  const handleToggleCollapseGroup = useToggleCollapseGroup(viewID, nodes);
   const grouped = useMemo(() => isGrouped(listViewMap), [listViewMap]);
   const context = useMemo((): ListViewContext => {
     return {
@@ -318,33 +319,52 @@ export function useListViewContext(): ListViewContext {
 }
 
 export function useToggleCollapseGroup(
-  viewID: ViewID
+  viewID: ViewID,
+  nodes: ListViewDocumentNodes
 ): (path: number[], collapsed: boolean) => void {
-  const [collapsedGroupsByViewID, setCollapsedGroupsByViewID] =
+  const [collapsedGroupsCacheByViewID, setCollapsedGroupsByViewID] =
     useRecoilState(collapsedGroupsState);
 
   return useCallback(
     (path: number[], collapsed: boolean) => {
-      // TODO: convert path to collapseObject...?
       const nextCollapsedGroupsByViewID: CollapsedGroupsByViewID = {
-        ...collapsedGroupsByViewID,
+        ...collapsedGroupsCacheByViewID,
       };
 
-      const collapsedGroupsByFieldID: CollapsedGroups =
-        nextCollapsedGroupsByViewID[viewID]
-          ? {
-              ...nextCollapsedGroupsByViewID[viewID],
-            }
-          : FlatObject();
+      const collapsedGroupsCache =
+        nextCollapsedGroupsByViewID[viewID] ?? CollapsedGroupsCache([]);
 
-      collapsedGroupsByFieldID.set(path, collapsed);
+      const node = buildCollapsedGroupNode(path, nodes, collapsed);
 
-      nextCollapsedGroupsByViewID[viewID] = collapsedGroupsByFieldID;
+      nextCollapsedGroupsByViewID[viewID] = collapsedGroupsCache.set([node]);
 
       setCollapsedGroupsByViewID(nextCollapsedGroupsByViewID);
     },
-    [setCollapsedGroupsByViewID, collapsedGroupsByViewID, viewID]
+    [setCollapsedGroupsByViewID, collapsedGroupsCacheByViewID, nodes, viewID]
   );
+}
+
+function buildCollapsedGroupNode(
+  path: number[],
+  nodes: ListViewDocumentNodes,
+  collapsed: boolean
+): CollapsedGroupNode {
+  const [index, restPath] = splitFirst(path);
+  const node = nodes[index];
+
+  if (node.type === "flat") {
+    throw new Error("CollapsedGroupNode is not used for flat list");
+  }
+  if (isEmpty(restPath) || node.type === "leaf") {
+    return [node.field, node.value, collapsed];
+  }
+
+  return [
+    node.field,
+    node.value,
+    false,
+    [buildCollapsedGroupNode(restPath, node.children, collapsed)],
+  ];
 }
 
 /**
@@ -357,11 +377,19 @@ export function useListViewDocumentNodes(
 ): ListViewDocumentNodes {
   const documents = useViewDocumentsQuery(viewID);
   const groups = useViewGroupsQuery(viewID);
+  const collapsedGroupsCacheByViewID = useRecoilValue(collapsedGroupsState);
+  const collapsedGroupsCache = collapsedGroupsCacheByViewID[viewID];
   const sortGetters = useSortGettersQuery();
   const documentsOrderChanged = useDocumentsOrderChanged(viewID, documents);
 
   return useMemoCompare(
-    () => getListViewDocumentNodes(documents, groups, sortGetters),
+    () =>
+      getListViewDocumentNodes(
+        documents,
+        groups,
+        sortGetters,
+        collapsedGroupsCache
+      ),
     documentsOrderChanged
   );
 }
@@ -370,10 +398,10 @@ function useDocumentsOrderChanged(
   viewID: ViewID,
   documents: Document[]
 ): boolean {
-  const collapsedGroupsByViewID = useRecoilValue(collapsedGroupsState);
+  const collapsedGroupsCacheByViewID = useRecoilValue(collapsedGroupsState);
   const collapsedGroups = useMemo(
-    () => collapsedGroupsByViewID[viewID],
-    [collapsedGroupsByViewID, viewID]
+    () => collapsedGroupsCacheByViewID[viewID],
+    [collapsedGroupsCacheByViewID, viewID]
   );
   const documentsLength = documents.length;
   const filters = useViewFiltersQuery(viewID);

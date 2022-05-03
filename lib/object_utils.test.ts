@@ -12,4 +12,10 @@ describe("mergeObjects", () => {
 
     expect(result).toEqual({ a: 1, b: { c: 2, e: 4 }, d: 3 });
   });
+
+  test("next objects being undefined should be merged", () => {
+    const result = mergeObjects({ a: 1, b: { c: 2 } }, { d: 3, b: undefined });
+
+    expect(result).toEqual({ a: 1, b: { c: 2 }, d: 3 });
+  });
 });

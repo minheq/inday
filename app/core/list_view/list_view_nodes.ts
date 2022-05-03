@@ -17,16 +17,17 @@ export function getListViewDocumentNodes(
   documents: Document[],
   groups: Group[],
   sortGetters: SortGetters,
-  collapsedGroups?: CollapsedGroupsCache
+  collapsedGroupsCache?: CollapsedGroupsCache
 ): ListViewDocumentNodes {
   return isNotEmpty(groups)
-    ? getGroupedDocumentNodes(documents, groups, sortGetters, collapsedGroups)
+    ? getGroupedDocumentNodes(
+        documents,
+        groups,
+        sortGetters,
+        collapsedGroupsCache
+      )
     : getFlatDocumentNodes(documents);
 }
-
-export type CollapsedGroupsByFieldID = {
-  [fieldID: string]: FieldValue[] | undefined;
-};
 
 export function isGroupedListViewDocumentNodes(
   nodes: GroupedListViewDocumentNode[] | FlatListViewDocumentNode[]
@@ -84,17 +85,17 @@ function getGroupedDocumentNodes(
   documents: Document[],
   groups: Group[],
   sortGetters: SortGetters,
-  collapsedGroups: CollapsedGroupsCache | undefined
+  collapsedGroupsCache: CollapsedGroupsCache | undefined
 ): GroupedListViewDocumentNode[] {
   const nodes = makeDocumentNodes(groups, documents, sortGetters);
 
-  return toGroupedDocumentNode(nodes, [], collapsedGroups);
+  return toGroupedDocumentNode(nodes, [], collapsedGroupsCache);
 }
 
 function toGroupedDocumentNode(
   nodes: DocumentNode[],
   prevPath: number[],
-  collapsedGroups: CollapsedGroupsCache | undefined
+  collapsedGroupsCache: CollapsedGroupsCache | undefined
 ): GroupedListViewDocumentNode[] {
   let groups: GroupedListViewDocumentNode[] = [];
 
@@ -102,7 +103,7 @@ function toGroupedDocumentNode(
     const node = nodes[i];
     const path = [...prevPath, i];
     const collapsibleGroup =
-      collapsedGroups && collapsedGroups.get(node.field, node.value);
+      collapsedGroupsCache && collapsedGroupsCache.get(node.field, node.value);
 
     if (node.type === "leaf") {
       groups = groups.concat({

@@ -321,6 +321,9 @@ export interface FieldTypeToFieldValue {
   [FieldType.URL]: URLFieldValue;
 }
 
+/**
+ * TODO: Support all field types
+ */
 export function stringifyFieldValue(
   field: Field,
   value: FieldValue,
@@ -356,7 +359,7 @@ export function stringifyFieldValue(
 
           return selected.label;
         })
-        .join(", ");
+        .join(",");
     }
     case FieldType.SingleSelect: {
       assertSingleSelectFieldValue(value);
@@ -382,8 +385,28 @@ export function stringifyFieldValue(
       }
 
       return formatDate(parseISODate(value), locales);
+    case FieldType.MultiDocumentLink:
+      assertMultiDocumentLinkFieldValue(value);
+
+      return value.join(",");
+    case FieldType.SingleDocumentLink:
+      assertSingleDocumentLinkFieldValue(value);
+      if (value === null) {
+        return "";
+      }
+      return value;
+    case FieldType.MultiCollaborator:
+      assertMultiCollaboratorFieldValue(value);
+
+      return value.join(",");
+    case FieldType.SingleCollaborator:
+      assertSingleCollaboratorFieldValue(value);
+      if (value === null) {
+        return "";
+      }
+      return value;
     default:
-      throw new Error(`Field type ${field.type} cannot be stringified.`);
+      assertUnreached(field, `Cannot stringify field value`);
   }
 }
 

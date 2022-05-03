@@ -228,7 +228,19 @@ export function keyedBy<T>(
  * ```
  */
 export function splitLast<T>(items: T[]): [T[], T] {
-  return [items.slice(0, items.length - 1), items[items.length - 1]];
+  return [items.slice(0, items.length - 1), last(items)];
+}
+
+/**
+ *
+ * Example:
+ * ```
+ * splitFirst([1, 2, 3])
+ * // => [1, [2, 3]]
+ * ```
+ */
+export function splitFirst<T>(items: T[]): [T, T[]] {
+  return [first(items), items.slice(1)];
 }
 
 /**

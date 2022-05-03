@@ -54,7 +54,7 @@ export function mergeObjects<T extends Record<string, unknown>>(
       } else if (isObject(a) && isObject(b)) {
         // @ts-ignore fix this
         result[key] = mergeObjects(a, b);
-      } else {
+      } else if (b !== undefined) {
         // @ts-ignore fix this
         result[key] = current[key];
       }

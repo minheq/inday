@@ -67,6 +67,7 @@ module.exports = {
         '@typescript-eslint/no-floating-promises': 0,
         'sonarjs/no-duplicate-string': 0,
         'sonarjs/no-identical-functions': 0,
+        'sonarjs/cognitive-complexity': 0
       },
       "env": {
         "jest/globals": true

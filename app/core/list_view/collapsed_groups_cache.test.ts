@@ -57,45 +57,61 @@ describe("CollapsedGroupsCache", () => {
     });
   });
 
-  describe("using set", () => {
-    let cg = CollapsedGroupsCache([]);
-    cg = cg.set([[textField, "a", true, [[numberField, 2, true]]]]);
-    cg = cg.set([[textField, "b", false, [[numberField, 1, true]]]]);
-    cg = cg.set([[textField, "c", false, [[numberField, 1, false]]]]);
-    cg = cg.set([[textField, "c", false, [[numberField, 2, true]]]]);
-
+  describe("CollapsedGroupsCache object", () => {
     test("a", () => {
+      let cg = CollapsedGroupsCache([]);
+      cg = cg.set([[textField, "a", true]]);
+
       const collapsedGroup = cg.get(textField, "a");
-      expect(collapsedGroup.collapsed).toBeTruthy();
-      if (collapsedGroup.children === undefined) {
-        fail("Expected collapsed group to have children");
+      if (collapsedGroup === undefined) {
+        throw new Error("Expected collapsed group to exist");
       }
-      const collapsedGroupChild = collapsedGroup.children.get(numberField, 2);
-      expect(collapsedGroupChild.collapsed).toBeTruthy();
+      expect(collapsedGroup.collapsed).toBeTruthy();
+      expect(collapsedGroup.children).toBeFalsy();
     });
 
     test("b", () => {
+      let cg = CollapsedGroupsCache([]);
+      cg = cg.set([[textField, "b", false, [[numberField, 1, true]]]]);
+
       const collapsedGroup = cg.get(textField, "b");
+      if (collapsedGroup === undefined) {
+        throw new Error("Expected collapsed group to exist");
+      }
       expect(collapsedGroup.collapsed).toBeFalsy();
       if (collapsedGroup.children === undefined) {
-        fail("Expected collapsed group to have children");
+        throw new Error("Expected collapsed group to have children");
       }
       const collapsedGroupChild = collapsedGroup.children.get(numberField, 1);
+      if (collapsedGroupChild === undefined) {
+        throw new Error("Expected collapsed group to exist");
+      }
       expect(collapsedGroupChild.collapsed).toBeTruthy();
     });
 
-    test("c", () => {
+    test("complex", () => {
+      let cg = CollapsedGroupsCache([]);
+      cg = cg.set([[textField, "c", false, [[numberField, 1, true]]]]);
+      cg = cg.set([[textField, "c", false, [[numberField, 2, true]]]]);
+      cg = cg.set([[textField, "c", true]]);
       const collapsedGroup = cg.get(textField, "c");
-      expect(collapsedGroup.collapsed).toBeFalsy();
+      if (collapsedGroup === undefined) {
+        throw new Error("Expected collapsed group to exist");
+      }
+
+      expect(collapsedGroup.collapsed).toBeTruthy();
       if (collapsedGroup.children === undefined) {
-        fail("Expected collapsed group to have children");
+        throw new Error("Expected collapsed group to have children");
       }
       const collapsedGroupChild1 = collapsedGroup.children.get(numberField, 1);
-      expect(collapsedGroupChild1.collapsed).toBeFalsy();
-      if (collapsedGroup.children === undefined) {
-        fail("Expected collapsed group to have children");
+      if (collapsedGroupChild1 === undefined) {
+        throw new Error("Expected collapsed group to exist");
       }
+      expect(collapsedGroupChild1.collapsed).toBeTruthy();
       const collapsedGroupChild2 = collapsedGroup.children.get(numberField, 2);
+      if (collapsedGroupChild2 === undefined) {
+        throw new Error("Expected collapsed group to exist");
+      }
       expect(collapsedGroupChild2.collapsed).toBeTruthy();
     });
   });
