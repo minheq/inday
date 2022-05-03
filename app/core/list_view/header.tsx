@@ -187,14 +187,14 @@ const styles = StyleSheet.create({
   },
   resizeHandler: {
     position: "absolute",
-    right: 2,
+    right: 0,
     borderRadius: 999,
     borderWidth: 1,
     backgroundColor: theme.base.white,
     borderColor: theme.neutral[200],
     ...Platform.select({
       web: {
-        cursor: "grab",
+        cursor: "col-resize",
       },
     }),
   },
