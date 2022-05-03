@@ -51,7 +51,6 @@ function getIconColor(color: TextColor): string {
 }
 
 export type IconName =
-  | "AlignLeft"
   | "Archive"
   | "ArrowBarLeft"
   | "ArrowHorizontal"
@@ -61,48 +60,53 @@ export type IconName =
   | "Bolt"
   | "Calculator"
   | "Calendar"
-  | "CalendarEvent"
   | "CalendarMinus"
   | "CaretDown"
   | "CaretRight"
   | "ChartBar"
   | "Check"
   | "CheckThick"
-  | "Checkbox"
   | "ChevronLeft"
   | "ChevronRight"
   | "Clock"
   | "Command"
-  | "Currency"
   | "Dashboard"
   | "Dots"
   | "DotsInCircle"
-  | "Email"
-  | "LinkToDocument"
   | "Form"
   | "Formula"
   | "Grid"
   | "Help"
-  | "Number"
   | "Board"
-  | "Link"
   | "LookUp"
   | "Maximize"
-  | "MultiSelect"
   | "Organize"
   | "Percentage"
-  | "Phone"
   | "Plus"
   | "Pointer"
   | "RollUp"
   | "Search"
-  | "Select"
+  | "FieldDate"
+  | "FieldCheckbox"
+  | "FieldCurrency"
+  | "FieldEmail"
+  | "FieldMultiLineText"
+  | "FieldMultiSelect"
+  | "FieldNumber"
+  | "FieldPhoneNumber"
+  | "FieldSingleDocumentLink"
+  | "FieldSingleSelect"
+  | "FieldSingleLineText"
+  | "FieldSingleDocumentLink"
+  | "FieldMultiDocumentLink"
+  | "FieldURL"
+  | "FieldSingleCollaborator"
+  | "FieldMultiCollaborator"
   | "Star"
   | "Table"
-  | "Typography"
-  | "User"
+  | "CircleCheck"
   | "UserCheck"
-  | "Users"
+  | "Share"
   | "X";
 
 interface TheIconProps {
@@ -121,7 +125,6 @@ const sizeMap: {
 const iconMap: {
   [name in IconName]: (props: TheIconProps) => JSX.Element;
 } = {
-  AlignLeft,
   Archive,
   ArrowBarLeft,
   ArrowHorizontal,
@@ -131,52 +134,58 @@ const iconMap: {
   Bolt,
   Calculator,
   Calendar,
-  CalendarEvent,
   CalendarMinus,
   CaretDown,
   CaretRight,
   ChartBar,
   Check,
   CheckThick,
-  Checkbox,
   ChevronLeft,
   ChevronRight,
   Clock,
   Command,
-  Currency,
   Dashboard,
   Dots,
   DotsInCircle,
-  Email,
-  LinkToDocument,
+
+  // Fields
+  FieldDate,
+  FieldCheckbox,
+  FieldCurrency,
+  FieldEmail,
+  FieldMultiLineText,
+  FieldMultiSelect,
+  FieldNumber,
+  FieldPhoneNumber,
+  FieldSingleDocumentLink,
+  FieldSingleSelect,
+  FieldSingleLineText,
+  FieldMultiDocumentLink: FieldSingleDocumentLink,
+  FieldURL,
+  FieldSingleCollaborator,
+  FieldMultiCollaborator,
   Form,
   Formula,
   Grid,
   Help,
-  Number,
   Board,
-  Link,
   LookUp,
   Maximize,
-  MultiSelect,
   Organize,
   Percentage,
-  Phone,
   Plus,
   Pointer,
   RollUp,
   Search,
-  Select,
   Star,
   Table,
-  Typography,
-  User,
+  Share,
   UserCheck,
-  Users,
+  CircleCheck,
   X,
 };
 
-function AlignLeft(props: TheIconProps) {
+function FieldMultiLineText(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -354,7 +363,7 @@ function Calendar(props: TheIconProps) {
   );
 }
 
-function CalendarEvent(props: TheIconProps) {
+function FieldDate(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -489,7 +498,7 @@ function CheckThick(props: TheIconProps) {
   );
 }
 
-function Checkbox(props: TheIconProps) {
+function FieldCheckbox(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -587,7 +596,7 @@ function Command(props: TheIconProps) {
   );
 }
 
-function Currency(props: TheIconProps) {
+function FieldCurrency(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -652,7 +661,7 @@ function DotsInCircle(props: TheIconProps) {
   );
 }
 
-function Email(props: TheIconProps) {
+function FieldEmail(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -675,7 +684,7 @@ function Email(props: TheIconProps) {
   );
 }
 
-function LinkToDocument(props: TheIconProps) {
+function FieldSingleDocumentLink(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -783,7 +792,7 @@ function Help(props: TheIconProps) {
   );
 }
 
-function Number(props: TheIconProps) {
+function FieldNumber(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -815,7 +824,7 @@ function Board(props: TheIconProps) {
   );
 }
 
-function Link(props: TheIconProps) {
+function FieldURL(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -870,7 +879,7 @@ function Maximize(props: TheIconProps) {
   );
 }
 
-function MultiSelect(props: TheIconProps) {
+function FieldMultiSelect(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -918,7 +927,7 @@ function Percentage(props: TheIconProps) {
   );
 }
 
-function Phone(props: TheIconProps) {
+function FieldPhoneNumber(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -998,7 +1007,7 @@ function Search(props: TheIconProps) {
   );
 }
 
-function Select(props: TheIconProps) {
+function FieldSingleSelect(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -1053,7 +1062,7 @@ function Table(props: TheIconProps) {
   );
 }
 
-function Typography(props: TheIconProps) {
+function FieldSingleLineText(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -1069,7 +1078,7 @@ function Typography(props: TheIconProps) {
   );
 }
 
-function User(props: TheIconProps) {
+function FieldSingleCollaborator(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -1101,7 +1110,7 @@ function UserCheck(props: TheIconProps) {
   );
 }
 
-function Users(props: TheIconProps) {
+function FieldMultiCollaborator(props: TheIconProps) {
   const { size, color } = props;
 
   return (
@@ -1110,6 +1119,36 @@ function Users(props: TheIconProps) {
         d="M9 11a4 4 0 100-8 4 4 0 000 8zM3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.85"
         stroke={color}
         strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+function Share(props: TheIconProps) {
+  const { size, color } = props;
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M16 6L12 2L8 6"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12 2V15"
+        stroke={color}
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -1126,6 +1165,29 @@ function X(props: TheIconProps) {
         d="M18 6L6 18M6 6l12 12"
         stroke={color}
         strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+function CircleCheck(props: TheIconProps) {
+  const { size, color } = props;
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M9 12L11 14L15 10"
+        stroke={color}
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

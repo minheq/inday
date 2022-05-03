@@ -138,7 +138,7 @@ function CollectionItem(props: CollectionItemProps) {
 export function TopMenu() {
   return (
     <Row spacing={4}>
-      <IconButton icon="Users" title="Share" />
+      <IconButton icon="Share" title="Share" />
       <IconButton icon="Bolt" title="Automate" />
       <IconButton icon="Help" title="Help" />
       <IconButton icon="DotsInCircle" title="More" />

@@ -22,21 +22,21 @@ export function getViewIconColor(viewType: ViewType): string {
 }
 
 const fieldIconMap: { [fieldType in FieldType]: IconName } = {
-  [FieldType.Checkbox]: "Checkbox",
-  [FieldType.Currency]: "Currency",
-  [FieldType.Date]: "CalendarEvent",
-  [FieldType.Email]: "Email",
-  [FieldType.MultiCollaborator]: "User",
-  [FieldType.MultiLineText]: "AlignLeft",
-  [FieldType.MultiSelect]: "MultiSelect",
-  [FieldType.MultiDocumentLink]: "LinkToDocument",
-  [FieldType.Number]: "Number",
-  [FieldType.PhoneNumber]: "Phone",
-  [FieldType.SingleCollaborator]: "User",
-  [FieldType.SingleLineText]: "Typography",
-  [FieldType.SingleSelect]: "Select",
-  [FieldType.SingleDocumentLink]: "LinkToDocument",
-  [FieldType.URL]: "Link",
+  [FieldType.Checkbox]: "FieldCheckbox",
+  [FieldType.Currency]: "FieldCurrency",
+  [FieldType.Date]: "FieldDate",
+  [FieldType.Email]: "FieldEmail",
+  [FieldType.MultiCollaborator]: "FieldMultiCollaborator",
+  [FieldType.MultiLineText]: "FieldMultiLineText",
+  [FieldType.MultiSelect]: "FieldMultiSelect",
+  [FieldType.MultiDocumentLink]: "FieldMultiDocumentLink",
+  [FieldType.Number]: "FieldNumber",
+  [FieldType.PhoneNumber]: "FieldPhoneNumber",
+  [FieldType.SingleCollaborator]: "FieldSingleCollaborator",
+  [FieldType.SingleLineText]: "FieldSingleLineText",
+  [FieldType.SingleSelect]: "FieldSingleSelect",
+  [FieldType.SingleDocumentLink]: "FieldSingleDocumentLink",
+  [FieldType.URL]: "FieldURL",
 };
 
 export function getFieldIcon(fieldType: FieldType): IconName {

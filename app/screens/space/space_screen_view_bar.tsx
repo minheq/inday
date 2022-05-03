@@ -1,8 +1,7 @@
-import React, { useCallback, useContext, memo } from "react";
+import React, { useCallback, useContext } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { useViewQuery } from "../../store/queries";
-import { ViewID, ViewType } from "../../../models/views";
 import { useRecoilState } from "recoil";
 import { Row } from "../../components/row";
 import { Text } from "../../components/text";
@@ -12,7 +11,6 @@ import { ViewButton } from "../../core/views/view_button";
 
 import { SpaceScreenContext } from "./space_screen_context";
 import {
-  ModeState,
   modeState,
   openDocumentState,
   selectedDocumentsState,
@@ -105,8 +103,8 @@ function ViewMenu() {
   return (
     <Row spacing={4}>
       <Button icon="Search" title="Search" />
+      <Button icon="CircleCheck" onPress={handleToggleSelect} title="Select" />
       <Button icon="Organize" onPress={handleToggleOrganize} title="Organize" />
-      <Button icon="Select" onPress={handleToggleSelect} title="Select" />
       <Button weight="bold" color="primary" icon="Plus" title="Add document" />
     </Row>
   );
