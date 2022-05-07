@@ -94,30 +94,6 @@ describe("getListViewDocumentNodes", () => {
     );
 
     expect(result[0]).toMatchObject({
-      type: "leaf",
-      value: 1,
-      children: [document3, document4],
-    });
-    expect(result[1]).toMatchObject({
-      type: "leaf",
-      value: 2,
-      children: [document1, document2],
-    });
-  });
-
-  test("grouped 1 level", () => {
-    const group = makeGroup(
-      {},
-      { fieldID: numberField.id, order: "ascending" }
-    );
-
-    const result = getListViewDocumentNodes(
-      [document1, document2, document3, document4],
-      [group],
-      getters
-    );
-
-    expect(result[0]).toMatchObject({
       path: [0],
       type: "leaf",
       value: 1,

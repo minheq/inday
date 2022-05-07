@@ -62,16 +62,10 @@ module.exports = {
     },
     {
       files: ['**/*.test.ts'],
-      rules: {
-        '@typescript-eslint/require-await': 0,
-        '@typescript-eslint/no-floating-promises': 0,
-        'sonarjs/no-duplicate-string': 0,
-        'sonarjs/no-identical-functions': 0,
-        'sonarjs/cognitive-complexity': 0
-      },
       "env": {
         "jest/globals": true
       },
+      "extends": ["plugin:jest/recommended"],
       "plugins": ["jest"]
     },
     {
