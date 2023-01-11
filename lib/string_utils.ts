@@ -10,10 +10,10 @@ export function isEmail(string: string): boolean {
   return rEmail.test(string);
 }
 
-export function isURL(string: string): boolean {
+export function isUrl(string: string): boolean {
   return rURL.test(string);
 }
 
-export function isUUID(string: string): boolean {
+export function isUuid(string: string): boolean {
   return rUUID.test(string);
 }

@@ -41,26 +41,6 @@ module.exports = {
       },
     },
     {
-      files: ['server/**/*.ts', 'lib/**/*.ts', 'models/**/*.ts'],
-      env: { node: true },
-      extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/recommended',
-        'plugin:@typescript-eslint/recommended-requiring-type-checking',
-        'plugin:sonarjs/recommended',
-        'prettier',
-      ],
-      parserOptions: {
-        project: `./tsconfig.json`,
-      },
-      parser: '@typescript-eslint/parser',
-      plugins: ['@typescript-eslint', 'sonarjs'],
-      rules: {
-        'no-shadow': 2,
-        '@typescript-eslint/ban-ts-comment': 1,
-      },
-    },
-    {
       files: ['**/*.test.ts'],
       "env": {
         "jest/globals": true

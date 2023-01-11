@@ -6,6 +6,18 @@
 npm install
 ```
 
+### Setup
+
+- `index.js` is entry point for mobile (Android and iOS)
+- `index.web.tsx` is entry point for web
+-
+
+For iOS
+
+```
+pod install
+```
+
 ### Run Web app
 
 ```shell
@@ -29,10 +41,4 @@ npm run ios
 
 ```shell
 npm run android
-```
-
-### Run server
-
-```shell
-DATABASE_HOST=127.0.0.1 DATABASE_NAME=inday DATABASE_USERNAME=postgres DATABASE_PASSWORD=DATABASE_PORT=5432 LOGGER_LEVEL=debug PORT=4000 npm run server
 ```
