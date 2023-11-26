@@ -6,7 +6,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "desktop": "electron index.desktop.js",
-    "web": "esbuild index.web.tsx --servedir=www --outdir=www/js --bundle --sourcemap --target=chrome58,firefox57,safari11,edge18 --jsx=automatic",
+    "web": "esbuild index.web.tsx --servedir=www --outdir=www/js --bundle --sourcemap --target=chrome58,firefox57,safari11,edge18 --jsx=automatic --resolve-extensions=.web.tsx,.tsx,.web.ts,.ts,.web.jsx,.jsx,.web.js,.js,.css,.json",
     "test": "jest",
     "lint": "eslint .",
     "format": "prettier --write ."
